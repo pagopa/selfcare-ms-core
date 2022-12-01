@@ -1,0 +1,6 @@
+it\pagopa\selfcare\mscore\connector\dao\config\StringToOffsetDateTimeConverter.class
+it\pagopa\selfcare\mscore\connector\dao\model\NameEntity.class
+it\pagopa\selfcare\mscore\connector\dao\NameRepository.class
+it\pagopa\selfcare\mscore\connector\dao\config\OffsetDateTimeToStringConverter.class
+it\pagopa\selfcare\mscore\connector\dao\NameConnectorImpl.class
+it\pagopa\selfcare\mscore\connector\dao\config\DaoConfig.class
