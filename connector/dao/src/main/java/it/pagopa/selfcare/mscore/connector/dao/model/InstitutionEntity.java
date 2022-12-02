@@ -1,13 +1,26 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
+import it.pagopa.selfcare.mscore.model.institutions.Institution;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
-@Document("Institution")
 @Data
+@NoArgsConstructor
+@Document("Institution")
 public class InstitutionEntity {
-    private String id;
+
+    @MongoId
+    private ObjectId id;
+
     private String externalId;
+
+    public InstitutionEntity(Institution institution) {
+        if (institution.getId() != null) {
+            id = new ObjectId(institution.getId());
+        }
+        externalId = institution.getExternalId();
+    }
 }
-
-

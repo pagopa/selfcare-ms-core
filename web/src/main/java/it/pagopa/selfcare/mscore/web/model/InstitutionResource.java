@@ -1,9 +1,9 @@
-package it.pagopa.selfcare.mscore.model.institutions;
+package it.pagopa.selfcare.mscore.web.model;
 
 import lombok.Data;
 
 @Data
-public class Institution {
+public class InstitutionResource {
     private String id;
     private String externalId;
 }

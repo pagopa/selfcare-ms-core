@@ -27,6 +27,14 @@ info:
 
 logging:
   level:
-    it.pagopa.selfcare: ${APP_LOG_LEVEL:DEBUG}
+    it:
+      pagopa:
+        selfcare: ${APP_LOG_LEVEL:DEBUG}
+    org:
+      springframework:
+        data:
+          mongodb:
+            core:
+              MongoTemplate: DEBUG
   pattern:
     additional-info: ",%X{X-Client-Ip:-}]"
