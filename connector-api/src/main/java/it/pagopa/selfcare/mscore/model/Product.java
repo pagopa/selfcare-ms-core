@@ -1,7 +1,7 @@
-package it.pagopa.selfcare.mscore.core.model;
+package it.pagopa.selfcare.mscore.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import wiremock.com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 
@@ -18,5 +18,5 @@ public class Product {
     private String contract;
 
     @JsonProperty("roles")
-    private ArrayList<String> roles; //ENUM
+    private ArrayList<PartyRole> roles; //ENUM
 }

@@ -2,7 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institutions.Institution;
+import it.pagopa.selfcare.mscore.model.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +10,11 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class ProcessServiceImpl implements ProcessService {
+public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionConnector institutionConnector;
 
-    public ProcessServiceImpl(InstitutionConnector institutionConnector) {
+    public InstitutionServiceImpl(InstitutionConnector institutionConnector) {
         this.institutionConnector = institutionConnector;
     }
 

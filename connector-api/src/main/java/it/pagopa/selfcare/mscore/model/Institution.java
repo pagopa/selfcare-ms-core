@@ -1,8 +1,7 @@
-package it.pagopa.selfcare.mscore.core.model;
+package it.pagopa.selfcare.mscore.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import wiremock.com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 
 @Data
@@ -21,7 +20,7 @@ public class Institution {
     private String ipaCode;
 
     @JsonProperty("istitutionType")
-    private String istitutionType;  //ENUM
+    private InstitutionType istitutionType;
 
     @JsonProperty("digitalAddress")
     private String digitalAddress;

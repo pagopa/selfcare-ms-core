@@ -1,10 +1,10 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.model.institutions.Institution;
+import it.pagopa.selfcare.mscore.model.Institution;
 
 import java.util.List;
 
-public interface ProcessService {
+public interface InstitutionService {
 
     Institution createInstitution(Institution institution);
 

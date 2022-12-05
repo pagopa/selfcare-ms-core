@@ -1,7 +1,7 @@
-package it.pagopa.selfcare.mscore.core.model;
+package it.pagopa.selfcare.mscore.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import wiremock.com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 public class Premium {

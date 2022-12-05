@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.institutions.Institution;
+import it.pagopa.selfcare.mscore.model.Institution;
 import it.pagopa.selfcare.mscore.web.model.CreateInstitutionDto;
 import it.pagopa.selfcare.mscore.web.model.InstitutionResource;
 import lombok.AccessLevel;
