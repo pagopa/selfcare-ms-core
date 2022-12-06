@@ -15,26 +15,20 @@
             <groupId>it.pagopa.selfcare</groupId>
             <artifactId>selc-ms-core-web</artifactId>
         </dependency>
-                <dependency>
+        <dependency>
             <groupId>it.pagopa.selfcare</groupId>
             <artifactId>selc-ms-core-connector-dao</artifactId>
             <scope>runtime</scope>
         </dependency>
-                        <dependency>
+        <dependency>
             <groupId>it.pagopa.selfcare</groupId>
             <artifactId>selc-ms-core-connector-azure-storage</artifactId>
             <scope>runtime</scope>
         </dependency>
-                        <dependency>
+        <dependency>
             <groupId>it.pagopa.selfcare</groupId>
             <artifactId>selc-ms-core-connector-rest</artifactId>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>5.3.14</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

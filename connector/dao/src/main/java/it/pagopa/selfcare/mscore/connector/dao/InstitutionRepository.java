@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface InstitutionRepository extends MongoRepository<InstitutionEntity, ObjectId> {
+public interface InstitutionRepository extends MongoRepository<InstitutionEntity, ObjectId>, MongoCustomConnector {
 
     List<InstitutionEntity> findByExternalId(String externalId);
 
