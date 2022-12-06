@@ -15,6 +15,8 @@ public interface InstitutionConnector {
 
     Optional<Institution> findById(String id);
 
+    Optional<Institution> findByExternalId(String externalId);
+
     boolean existsById(String id);
 
     void deleteById(String id);
