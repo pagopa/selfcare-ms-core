@@ -10,11 +10,11 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class InstitutionServiceImpl implements InstitutionService {
+public class ExternalServiceImpl implements ExternalService {
 
     private final InstitutionConnector institutionConnector;
 
-    public InstitutionServiceImpl(InstitutionConnector institutionConnector) {
+    public ExternalServiceImpl(InstitutionConnector institutionConnector) {
         this.institutionConnector = institutionConnector;
     }
 
@@ -46,7 +46,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         List<Institution> list = institutionConnector.findAll(institution);
         if (list == null || list.isEmpty()) {
-            throw new ResourceNotFoundException("institution not found");
+            throw new ResourceNotFoundException("Institution not found");
         }
         // TODO cosa fare se sono più di uno?
         return list.get(0);

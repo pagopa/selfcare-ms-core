@@ -3,7 +3,7 @@ package it.pagopa.selfcare.mscore.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class Product {
@@ -12,11 +12,11 @@ public class Product {
     private String productId;
 
     @JsonProperty("status")
-    private String status;
+    private RelationshipState status;
 
     @JsonProperty("contract")
     private String contract;
 
     @JsonProperty("roles")
-    private ArrayList<PartyRole> roles; //ENUM
+    private List<PartyRole> roles;
 }

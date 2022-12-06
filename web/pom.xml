@@ -23,11 +23,25 @@
         </dependency>
         <dependency>
             <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-commons-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-commons-base</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
             <artifactId>selc-ms-core-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-ms-core-core</artifactId>
         </dependency>
     </dependencies>
 

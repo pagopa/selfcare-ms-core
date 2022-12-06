@@ -3,7 +3,8 @@ package it.pagopa.selfcare.mscore.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.List;
+
 
 @Data
 public class User {
@@ -15,5 +16,5 @@ public class User {
     private String institutionId;
 
     @JsonProperty("products")
-    private ArrayList<Product> products;
+    private List<Product> products;
 }

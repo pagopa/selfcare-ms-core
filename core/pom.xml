@@ -16,10 +16,9 @@
             <artifactId>selc-ms-core-connector-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>it.pagopa.selfcare</groupId>
-            <artifactId>selc-ms-core-connector-api</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>9.0.65</version>
         </dependency>
     </dependencies>
 

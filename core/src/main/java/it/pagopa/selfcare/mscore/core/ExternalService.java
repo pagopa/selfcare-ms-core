@@ -4,7 +4,7 @@ import it.pagopa.selfcare.mscore.model.Institution;
 
 import java.util.List;
 
-public interface InstitutionService {
+public interface ExternalService {
 
     Institution createInstitution(Institution institution);
 
