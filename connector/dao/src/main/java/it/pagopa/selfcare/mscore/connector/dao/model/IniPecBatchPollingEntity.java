@@ -1,0 +1,33 @@
+package it.pagopa.selfcare.mscore.connector.dao.model;
+
+import it.pagopa.selfcare.mscore.model.inipec.IniPecBatchPolling;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@Document("IniPecBatchPolling")
+public class IniPecBatchPollingEntity {
+
+    @MongoId
+    private ObjectId id;
+    private String batchId;
+    private String pollingId;
+    private String status;
+    private LocalDateTime timeStamp;
+
+    public IniPecBatchPollingEntity(IniPecBatchPolling iniPecBatchPolling) {
+        if (iniPecBatchPolling.getId() != null) {
+            id = new ObjectId(iniPecBatchPolling.getId());
+        }
+        batchId = iniPecBatchPolling.getBatchId();
+        pollingId = iniPecBatchPolling.getPollingId();
+        status = iniPecBatchPolling.getStatus();
+        timeStamp = iniPecBatchPolling.getTimeStamp();
+    }
+}
