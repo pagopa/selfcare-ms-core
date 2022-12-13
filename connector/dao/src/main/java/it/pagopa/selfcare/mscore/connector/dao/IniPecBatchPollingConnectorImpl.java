@@ -56,7 +56,7 @@ public class IniPecBatchPollingConnectorImpl implements IniPecBatchPollingConnec
         return iniPecBatchPolling;
     }
 
-    private IniPecBatchPollingEntity convertToIniPecBatchPollingEntity(IniPecBatchPolling iniPecBatchPolling) {
+    public IniPecBatchPollingEntity convertToIniPecBatchPollingEntity(IniPecBatchPolling iniPecBatchPolling) {
         IniPecBatchPollingEntity entity = new IniPecBatchPollingEntity();
         if (iniPecBatchPolling.getId() != null) {
             entity.setId(new ObjectId(iniPecBatchPolling.getId()));

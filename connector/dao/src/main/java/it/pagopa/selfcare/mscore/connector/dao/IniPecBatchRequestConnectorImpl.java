@@ -2,7 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.IniPecBatchRequestConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.IniPecBatchRequestEntity;
-import it.pagopa.selfcare.mscore.model.BatchStatus;
+import it.pagopa.selfcare.mscore.model.inipec.BatchStatus;
 import it.pagopa.selfcare.mscore.model.inipec.IniPecBatchRequest;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,16 +88,14 @@ public class IniPecBatchRequestConnectorImpl implements IniPecBatchRequestConnec
         iniPecBatchRequest.setRetry(entity.getRetry());
         iniPecBatchRequest.setTtl(entity.getTtl());
         iniPecBatchRequest.setLastReserved(entity.getLastReserved());
-        iniPecBatchRequest.setCorrelationId(entity.getCorrelationId().toString());
         return iniPecBatchRequest;
     }
 
-    private IniPecBatchRequestEntity convertToIniPecBatchRequestEntity(IniPecBatchRequest iniPecBatchRequest) {
+    public IniPecBatchRequestEntity convertToIniPecBatchRequestEntity(IniPecBatchRequest iniPecBatchRequest) {
         IniPecBatchRequestEntity entity = new IniPecBatchRequestEntity();
         if (iniPecBatchRequest.getId() != null) {
             entity.setId(new ObjectId(iniPecBatchRequest.getId()));
         }
-        entity.setCorrelationId(iniPecBatchRequest.getCorrelationId());
         entity.setBatchId(iniPecBatchRequest.getBatchId());
         entity.setTimeStamp(iniPecBatchRequest.getTimeStamp());
         entity.setTtl(iniPecBatchRequest.getTtl());

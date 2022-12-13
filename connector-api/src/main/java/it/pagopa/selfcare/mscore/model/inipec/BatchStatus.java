@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.model;
+package it.pagopa.selfcare.mscore.model.inipec;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

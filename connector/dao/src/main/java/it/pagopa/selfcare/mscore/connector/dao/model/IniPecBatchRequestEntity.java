@@ -16,7 +16,6 @@ public class IniPecBatchRequestEntity {
 
     @MongoId
     private ObjectId id;
-    private String correlationId;
     private String batchId;
     private String cf;
     private Integer retry;
@@ -29,7 +28,6 @@ public class IniPecBatchRequestEntity {
         if (iniPecBatchRequest.getId() != null) {
             id = new ObjectId(iniPecBatchRequest.getId());
         }
-        correlationId = iniPecBatchRequest.getCorrelationId();
         batchId = iniPecBatchRequest.getBatchId();
         cf = iniPecBatchRequest.getCf();
         retry = iniPecBatchRequest.getRetry();

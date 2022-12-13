@@ -9,7 +9,8 @@ public class GetDigitalAddressIniPECRequestBodyFilterDto {
     @JsonProperty("taxId")
     private String taxId;
 
+    /*
     @JsonProperty("correlationId")
     private String correlationId;
-
+    */
 }

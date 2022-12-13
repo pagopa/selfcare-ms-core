@@ -3,7 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.IniPecBatchPollingConnector;
 import it.pagopa.selfcare.mscore.api.IniPecBatchRequestConnector;
 import it.pagopa.selfcare.mscore.api.IniPecConnector;
-import it.pagopa.selfcare.mscore.model.BatchStatus;
+import it.pagopa.selfcare.mscore.model.inipec.BatchStatus;
 import it.pagopa.selfcare.mscore.model.inipec.IniPecBatchPolling;
 import it.pagopa.selfcare.mscore.model.inipec.IniPecBatchRequest;
 import it.pagopa.selfcare.mscore.model.inipec.IniPecPec;
@@ -46,7 +46,7 @@ public class IniPecBatchPollingServiceImpl implements IniPecBatchPollingService 
 
     private void callService(IniPecBatchPolling iniPecBatchPolling){
         IniPecPec iniPecPec = iniPecConnector.callEServiceRequestPec(iniPecBatchPolling.getPollingId());
-        //Coda sqs?
+        //Invio email per firma contratto
         setWorkedBatchPolling(iniPecBatchPolling);
     }
 

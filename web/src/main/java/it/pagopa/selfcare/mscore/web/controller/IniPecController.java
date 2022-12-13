@@ -29,8 +29,7 @@ public class IniPecController {
     @PostMapping("/digital-address")
     public ResponseEntity<GetDigitalAddressIniPECOKDto> createBatchRequest(@RequestBody @Valid GetDigitalAddressIniPECRequestBodyDto dto) {
         String cf = dto.getFilter().getTaxId();
-        String correlationId = dto.getFilter().getCorrelationId();
-        IniPecBatchRequest iniPecBatchRequest = iniPecService.createBatchRequestByCfAndCorrelationId(cf,correlationId);
+        IniPecBatchRequest iniPecBatchRequest = iniPecService.createBatchRequestByCf(cf);
         return ResponseEntity.ok(GetDigitalAddressIniPecMapper.toResource(iniPecBatchRequest));
     }
 

@@ -5,6 +5,6 @@ import it.pagopa.selfcare.mscore.model.inipec.IniPecBatchRequest;
 
 public interface IniPecService {
 
-    IniPecBatchRequest createBatchRequestByCfAndCorrelationId(String cf, String correlationId);
+    IniPecBatchRequest createBatchRequestByCf(String cf);
 
 }
