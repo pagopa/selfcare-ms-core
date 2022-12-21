@@ -1,20 +1,20 @@
 package it.pagopa.selfcare.mscore.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
-import java.util.List;
-
+import java.util.Map;
 
 @Data
+@FieldNameConstants(asEnum = true)
 public class User {
 
-    @JsonProperty("user")
-    private String user;
+    @FieldNameConstants.Exclude
+    private String id;
+    private String fiscalCode;
+    private CertifiedField<String> name;
+    private CertifiedField<String> familyName;
+    private CertifiedField<String> email;
+    private Map<String, WorkContact> workContacts;
 
-    @JsonProperty("institutionId")
-    private String institutionId;
-
-    @JsonProperty("products")
-    private List<Product> products;
 }

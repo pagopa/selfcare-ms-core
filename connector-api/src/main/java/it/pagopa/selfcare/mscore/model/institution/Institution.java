@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.model;
+package it.pagopa.selfcare.mscore.model.institution;
 
 import lombok.Data;
 import java.util.List;
@@ -16,4 +16,5 @@ public class Institution {
     private String taxCode;
     private Billing billing;
     private List<Onboarding> onboarding;
+    private List<GeographicTaxonomies> geographicTaxonomies;
 }

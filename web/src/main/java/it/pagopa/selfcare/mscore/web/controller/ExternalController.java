@@ -1,9 +1,11 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
 import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.model.Institution;
-import it.pagopa.selfcare.mscore.web.model.CreateInstitutionDto;
-import it.pagopa.selfcare.mscore.web.model.InstitutionResource;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.web.model.institution.CreateInstitutionDto;
+import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResource;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -33,7 +35,7 @@ public class ExternalController {
         return ResponseEntity.ok(resources);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}") //party-process
     public ResponseEntity<InstitutionResource> getById(@PathVariable("id") String id) {
         Institution institution = externalService.getInstitutionById(id);
         return ResponseEntity.ok().body(InstitutionMapper.toResource(institution));
@@ -55,5 +57,13 @@ public class ExternalController {
     public ResponseEntity<Void> deleteInstitution(@PathVariable("id") String id) {
         externalService.deleteInstitution(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping(value = "/institutions/{externalId}/geotaxonomies", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<GeoTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId){
+        List<GeographicTaxonomies> list = externalService.getGeoTaxonomies(externalId);
+        return ResponseEntity.ok(list.stream().map(InstitutionMapper::toResource)
+                .collect(Collectors.toList()));
     }
 }

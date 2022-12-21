@@ -1,8 +1,10 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.Institution;
-import it.pagopa.selfcare.mscore.web.model.CreateInstitutionDto;
-import it.pagopa.selfcare.mscore.web.model.InstitutionResource;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.web.model.institution.CreateInstitutionDto;
+import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResource;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +21,23 @@ public class InstitutionMapper {
         return resource;
     }
 
+    public static GeoTaxonomies toResource(GeographicTaxonomies geographicTaxonomies) {
+        GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
+
+        geoTaxonomies.setDesc(geographicTaxonomies.getDesc());
+        geoTaxonomies.setCode(geographicTaxonomies.getCode());
+        geoTaxonomies.setEnable(geographicTaxonomies.isEnable());
+        geoTaxonomies.setRegion(geographicTaxonomies.getRegion());
+        geoTaxonomies.setProvince(geographicTaxonomies.getProvince());
+        geoTaxonomies.setProvinceAbbreviation(geographicTaxonomies.getProvinceAbbreviation());
+        geoTaxonomies.setCountry(geographicTaxonomies.getCountry());
+        geoTaxonomies.setCountryAbbreviation(geographicTaxonomies.getCountryAbbreviation());
+        geoTaxonomies.setStartDate(geographicTaxonomies.getStartDate());
+        geoTaxonomies.setEndDate(geographicTaxonomies.getEndDate());
+
+        return geoTaxonomies;
+    }
+
     public static Institution fromDto(CreateInstitutionDto dto) {
         if (dto == null) {
             return null;
@@ -28,5 +47,4 @@ public class InstitutionMapper {
         institution.setExternalId(dto.getExternalId());
         return institution;
     }
-
 }

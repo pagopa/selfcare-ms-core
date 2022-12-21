@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.model;
+package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 
 public interface PartyRegistryProxyConnector {
 

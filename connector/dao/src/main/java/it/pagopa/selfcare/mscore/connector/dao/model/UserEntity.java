@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import it.pagopa.selfcare.mscore.model.User;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
@@ -19,7 +19,7 @@ public class UserEntity {
 
     private ProductEntity[] products;
 
-    public UserEntity(User user) {
+    public UserEntity(OnboardedUser user) {
         if (user.getUser() != null) {
             id = new ObjectId(user.getUser());
         }

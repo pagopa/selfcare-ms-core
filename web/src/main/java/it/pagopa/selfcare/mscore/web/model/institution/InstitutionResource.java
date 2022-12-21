@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.web.model;
+package it.pagopa.selfcare.mscore.web.model.institution;
 
 import lombok.Data;
 

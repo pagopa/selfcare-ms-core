@@ -5,7 +5,7 @@ import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestCli
 import it.pagopa.selfcare.mscore.connector.rest.model.ProxyCategoryResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.ProxyInstitutionResponse;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

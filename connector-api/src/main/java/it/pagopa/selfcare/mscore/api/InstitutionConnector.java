@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.api;
 
-import it.pagopa.selfcare.mscore.model.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 
 import java.util.List;
 import java.util.Optional;

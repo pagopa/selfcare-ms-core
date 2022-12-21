@@ -1,22 +1,22 @@
 package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.User;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserConnector {
 
-    List<User> find(User user, List<RelationshipState> validRelationshipStates, String productId);
+    List<OnboardedUser> find(OnboardedUser user, List<RelationshipState> validRelationshipStates, String productId);
 
-    User save(User example);
+    OnboardedUser save(OnboardedUser example);
 
-    List<User> findAll();
+    List<OnboardedUser> findAll();
 
-    List<User> findAll(User example);
+    List<OnboardedUser> findAll(OnboardedUser example);
 
-    Optional<User> findById(String id);
+    Optional<OnboardedUser> findById(String id);
 
     boolean existsById(String id);
 
