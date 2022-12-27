@@ -19,11 +19,8 @@ public class OnboardingData {
     private String productName;
     private List<OnboardedUser> users;
     private String contractPath;
-    private String contractVersion;
     private Billing billing;
     private InstitutionUpdate institutionUpdate;
-    private InstitutionType institutionType;
-    private String origin;
     private String pricingPlan;
 
     public List<OnboardedUser> getUsers() {

@@ -39,7 +39,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(externalId);
-        newInstitution.setIpaCode(institutionProxyInfo.getOriginId());
+        newInstitution.setOriginId(institutionProxyInfo.getOriginId());
         newInstitution.setDescription(institutionProxyInfo.getDescription());
         newInstitution.setDigitalAddress(institutionProxyInfo.getDigitalAddress());
         newInstitution.setTaxCode(institutionProxyInfo.getTaxCode());

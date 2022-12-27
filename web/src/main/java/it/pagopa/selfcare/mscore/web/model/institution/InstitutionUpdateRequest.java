@@ -2,8 +2,11 @@ package it.pagopa.selfcare.mscore.web.model.institution;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
-public class InstitutionUpdate {
+public class InstitutionUpdateRequest {
+
     private InstitutionType institutionType;
     private String description;
     private String digitalAddress;
@@ -12,4 +15,6 @@ public class InstitutionUpdate {
     private String zipCode;
     private PaymentServiceProvider paymentServiceProvider;
     private DataProtectionOfficer dataProtectionOfficer;
+    private List<String> geographicTaxonomyCodes;
+
 }

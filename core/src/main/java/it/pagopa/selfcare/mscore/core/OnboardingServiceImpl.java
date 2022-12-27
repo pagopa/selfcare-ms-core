@@ -44,10 +44,11 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void verifyOnboardingInfo(String externalId, String productId) {
+        log.info("Verifying onboarding for institution having externalId {} on product {}", externalId, productId);
         Institution institution = externalService.getInstitutionByExternalId(externalId);
         List<OnboardedUser> response = retrieveUser(institution.getId(), productId, validRelationshipStates);
         if (response.isEmpty())
-            throw new ResourceNotFoundException("Relationship not found");
+            throw new ResourceNotFoundException(String.format("Institution having externalId %s is not onboarded for product %s",externalId,productId), "");
     }
 
     @Override
@@ -57,7 +58,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<RelationshipState> states = Arrays.asList(RelationshipState.values());
         List<OnboardedUser> onboardedUser = retrieveUser(institution.getId(), null, states);
         OnboardedUser manager = checkIfManagerExists(onboardedUser, onboardingData.getProductId());
-        if (onboardingData.getInstitutionType().equals(InstitutionType.PA)) {
+        if (onboardingData.getInstitutionUpdate().getInstitutionType().equals(InstitutionType.PA)) {
             performOnboardingWithSignatureForPA(onboardingData, institution, user, manager);
         } else {
             performOnboardingWithSignature(onboardingData, institution, user, manager);

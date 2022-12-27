@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
         if(opt.isPresent())
             return opt.get();
         else
-            throw new ResourceNotFoundException("Person not found");
+            throw new ResourceNotFoundException("Person not found","");
     }
 
     @Override

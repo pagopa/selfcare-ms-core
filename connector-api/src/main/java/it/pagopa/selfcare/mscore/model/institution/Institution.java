@@ -8,7 +8,6 @@ public class Institution {
     private String id;
     private String externalId;
     private String description;
-    private String ipaCode;
     private InstitutionType institutionType;
     private String digitalAddress;
     private String address;
@@ -17,4 +16,7 @@ public class Institution {
     private Billing billing;
     private List<Onboarding> onboarding;
     private List<GeographicTaxonomies> geographicTaxonomies;
+    private String origin;
+    private String originId;
+    private String pricingPlan;
 }

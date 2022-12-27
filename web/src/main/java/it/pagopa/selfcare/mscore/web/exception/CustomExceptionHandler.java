@@ -1,9 +1,11 @@
 package it.pagopa.selfcare.mscore.web.exception;
 
-import it.pagopa.selfcare.mscore.core.model.Problem;
-import it.pagopa.selfcare.mscore.core.model.ProblemError;
+import it.pagopa.selfcare.mscore.model.Problem;
+import it.pagopa.selfcare.mscore.model.ProblemError;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.web.util.ExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.annotation.Around;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,29 +27,34 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("ResourceNotFoundException Occured --> URL:{}, MESSAGE:{}",request.getRequestURL(),ex.getMessage(),ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), "NOT_FOUND", ex.getMessage(), 400);
+        Problem problem = createProblem(request.getRequestURL().toString(), "NOT_FOUND", ex.getMessage(), 400, ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.NOT_FOUND);
     }
 
+    @Around(value = "@annotation(exceptionMessage)")
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Problem> handleException(HttpServletRequest request, Exception ex) {
-        log.error("ResourceNotFoundException Occured --> URL:{}, MESSAGE:{}" + request.getRequestURL(),ex.getMessage(),ex);
+    public ResponseEntity<Problem> handleException(HttpServletRequest request, Exception ex, ExceptionMessage exceptionMessage) {
+        log.error("{} Occured --> URL:{}, MESSAGE:{}",ex.getCause(), request.getRequestURL(),exceptionMessage.message().getMessage(),ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(createProblem(request.getRequestURL().toString(), "BAD_REQUEST", ex.getMessage(), 404));
+                .body(createProblem(request.getRequestURL().toString(), "BAD_REQUEST", exceptionMessage.message().getMessage(), 404, exceptionMessage.message().getCode()));
     }
 
-    private Problem createProblem(String url, String title, String message, Integer status) {
+    private Problem createProblem(String url, String title, String message, Integer status, String code) {
         Problem problem = new Problem();
         problem.setType(url);
         problem.setTitle(title);
         problem.setStatus(status);
         problem.setDetail(message);
-        problem.setErrors(createProblemError());
+        problem.setErrors(createProblemError(message,code));
         return problem;
     }
 
-    private List<ProblemError> createProblemError() {
-        //List<ProblemError> list = new ArrayList<>();
-        return new ArrayList<>();
+    private List<ProblemError> createProblemError(String message, String code) {
+        List<ProblemError> list = new ArrayList<>();
+        list.add(ProblemError.builder()
+                .code(code)
+                .detail(message)
+                .build());
+        return list;
     }
 }
