@@ -12,9 +12,6 @@ public class OnboardedUser {
     @JsonProperty("user")
     private String user;
 
-    @JsonProperty("institutionId")
-    private String institutionId;
+    private List<UserInstitution> institutions;
 
-    @JsonProperty("products")
-    private List<Product> products;
 }

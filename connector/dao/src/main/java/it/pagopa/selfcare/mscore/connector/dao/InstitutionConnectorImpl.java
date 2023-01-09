@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.BillingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.OnboardingPremiumEntity;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -85,7 +86,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         institution.setExternalId(entity.getExternalId());
         institution.setDescription(entity.getDescription());
         institution.setInstitutionType(entity.getInstitutionType());
-        institution.setIpaCode(entity.getIpaCode());
+        institution.setOriginId(entity.getIpaCode());
         institution.setDigitalAddress(entity.getDigitalAddress());
         institution.setAddress(entity.getAddress());
         institution.setZipCode(entity.getZipCode());
@@ -137,7 +138,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         }
         entity.setExternalId(institution.getExternalId());
         entity.setDescription(institution.getDescription());
-        entity.setIpaCode(institution.getIpaCode());
+        entity.setIpaCode(institution.getOriginId());
         entity.setInstitutionType(institution.getInstitutionType());
         entity.setDigitalAddress(institution.getDigitalAddress());
         entity.setAddress(institution.getAddress());

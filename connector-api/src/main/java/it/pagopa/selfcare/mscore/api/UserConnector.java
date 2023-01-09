@@ -4,11 +4,12 @@ import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserConnector {
 
-    List<OnboardedUser> find(OnboardedUser user, List<RelationshipState> validRelationshipStates, String productId);
+    List<OnboardedUser> findForVerifyOnboardingInfo(String institutionId, List<RelationshipState> validRelationshipStates, String productId);
+
+    List<OnboardedUser> findForGetOnboardingInfo(String userId, String institutionId, List<RelationshipState> validRelationshipStates);
 
     OnboardedUser save(OnboardedUser example);
 
@@ -16,7 +17,7 @@ public interface UserConnector {
 
     List<OnboardedUser> findAll(OnboardedUser example);
 
-    Optional<OnboardedUser> findById(String id);
+    OnboardedUser findById(String id);
 
     boolean existsById(String id);
 

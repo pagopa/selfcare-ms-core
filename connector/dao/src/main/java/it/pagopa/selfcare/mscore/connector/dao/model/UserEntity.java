@@ -7,6 +7,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @Document("User")
@@ -15,14 +17,11 @@ public class UserEntity {
     @MongoId
     private ObjectId id;
 
-    private String institutionId;
-
-    private ProductEntity[] products;
+    private List<UserInstitutionEntity> institutions;
 
     public UserEntity(OnboardedUser user) {
         if (user.getUser() != null) {
             id = new ObjectId(user.getUser());
         }
-        institutionId = user.getInstitutionId();
     }
 }

@@ -1,10 +1,8 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.web.model.institution.CreateInstitutionDto;
-import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResource;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -21,7 +19,36 @@ public class InstitutionMapper {
         return resource;
     }
 
-    public static GeoTaxonomies toResource(GeographicTaxonomies geographicTaxonomies) {
+    public static InstitutionBillingResponse toResponse(Institution institution) {
+        if (institution == null) {
+            return null;
+        }
+        InstitutionBillingResponse response = new InstitutionBillingResponse();
+
+        response.setInstitutionId(institution.getId());
+        response.setExternalId(institution.getExternalId());
+        response.setOrigin(institution.getOrigin());
+        response.setOriginId(institution.getOriginId());
+        response.setDescription(institution.getDescription());
+        response.setInstitutionType(institution.getInstitutionType());
+        response.setDigitalAddress(institution.getDigitalAddress());
+        response.setAddress(institution.getAddress());
+        response.setZipCode(institution.getZipCode());
+        response.setTaxCode(institution.getTaxCode());
+        response.setPricingPlan(institution.getPricingPlan());
+        response.setBilling(institution.getBilling());
+
+        return response;
+    }
+
+    public static InstitutionProduct toResource(Onboarding onboarding) {
+        InstitutionProduct institutionProduct = new InstitutionProduct();
+        institutionProduct.setState(onboarding.getStatus().name());
+        institutionProduct.setId(onboarding.getProductId());
+        return institutionProduct;
+    }
+
+       /* public static GeoTaxonomies toResource(GeographicTaxonomies geographicTaxonomies) {
         GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
 
         geoTaxonomies.setDesc(geographicTaxonomies.getDesc());
@@ -46,5 +73,5 @@ public class InstitutionMapper {
         institution.setId(dto.getId());
         institution.setExternalId(dto.getExternalId());
         return institution;
-    }
+    }*/
 }

@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.selfcare.mscore.model.Premium;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import lombok.Data;
 
 @Data
@@ -11,7 +12,7 @@ public class Onboarding {
     private String productId;
 
     @JsonProperty("status")
-    private String status;
+    private RelationshipState status;
 
     @JsonProperty("contract")
     private String contract;

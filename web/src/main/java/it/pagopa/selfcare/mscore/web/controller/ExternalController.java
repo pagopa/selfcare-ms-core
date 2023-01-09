@@ -3,11 +3,9 @@ package it.pagopa.selfcare.mscore.web.controller;
 import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.constant.ErrorEnum;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResource;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.util.ExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -36,14 +32,6 @@ public class ExternalController {
         return ResponseEntity.ok().body(InstitutionMapper.toResource(institution));
     }
 
-    @ExceptionMessage(message = ErrorEnum.GEO_TAXONOMY_CODE_ERROR)
-    @GetMapping(value = "/institutions/{externalId}/geotaxonomies", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<GeoTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId) {
-        List<GeographicTaxonomies> list = externalService.getGeoTaxonomies(externalId);
-        return ResponseEntity.ok(list.stream().map(InstitutionMapper::toResource)
-                .collect(Collectors.toList()));
-    }
-
     @ExceptionMessage(message = ErrorEnum.GET_INSTITUTION_MANAGER_ERROR)
     @GetMapping(value = "/external/institutions/{externalId}/products/{productId}/manager", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardedUser> getManagerInstitutionByExternalId(@PathVariable("externalId") String externalId,
@@ -54,9 +42,9 @@ public class ExternalController {
 
     @ExceptionMessage(message = ErrorEnum.GET_INSTITUTION_BILLING_ERROR)
     @GetMapping(value = "/external/institutions/{externalId}/products/{productId}/billing", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<InstitutionResponse> getBillingInstitutionByExternalId(@PathVariable("externalId") String externalId,
-                                                                                 @PathVariable("productId") String productId) {
+    public ResponseEntity<InstitutionBillingResponse> getBillingInstitutionByExternalId(@PathVariable("externalId") String externalId,
+                                                                                        @PathVariable("productId") String productId) {
         Institution institution = externalService.getBillingByExternalId(externalId, productId);
-        return ResponseEntity.ok().body(new InstitutionResponse());
+        return ResponseEntity.ok().body(InstitutionMapper.toResponse(institution));
     }
 }

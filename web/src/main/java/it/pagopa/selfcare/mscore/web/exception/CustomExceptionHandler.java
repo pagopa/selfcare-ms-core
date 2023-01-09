@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.exception;
 
+import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.Problem;
 import it.pagopa.selfcare.mscore.model.ProblemError;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -29,6 +30,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         headers.setContentType(MediaType.APPLICATION_JSON);
         Problem problem = createProblem(request.getRequestURL().toString(), "NOT_FOUND", ex.getMessage(), 400, ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ResourceConflictException.class)
+    public ResponseEntity<Problem> handleResourceConflictException(HttpServletRequest request, ResourceConflictException ex) {
+        log.error("ResourceNotFoundException Occured --> URL:{}, MESSAGE:{}",request.getRequestURL(),ex.getMessage(),ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Problem problem = createProblem(request.getRequestURL().toString(), "CONFLICT", ex.getMessage(), 409, ex.getCode());
+        return new ResponseEntity<>(problem, headers, HttpStatus.CONFLICT);
     }
 
     @Around(value = "@annotation(exceptionMessage)")

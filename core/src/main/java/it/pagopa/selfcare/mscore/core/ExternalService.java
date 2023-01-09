@@ -8,17 +8,7 @@ import java.util.List;
 
 public interface ExternalService {
 
-    Institution createInstitution(Institution institution);
-
-    List<Institution> getAllInstitution();
-
-    Institution getInstitutionById(String id);
-
     Institution getInstitutionByExternalId(String externalId);
-
-    void deleteInstitution(String id);
-
-    List<GeographicTaxonomies> getGeoTaxonomies(String externalId);
 
     Institution getBillingByExternalId(String externalId, String productId);
 

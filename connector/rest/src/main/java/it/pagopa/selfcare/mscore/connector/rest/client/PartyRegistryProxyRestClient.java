@@ -20,4 +20,7 @@ public interface PartyRegistryProxyRestClient {
     @ResponseBody
     ProxyCategoryResponse getCategory(@PathVariable("origin") String origin, @PathVariable("code") String code);
 
+    @GetMapping(value = "${rest-client.party-registry-proxy.getInstitutionFromInfoCamere.path}", consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    ProxyInstitutionResponse getInstitutionFromInfoCamereById(String externalId);
 }

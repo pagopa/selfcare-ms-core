@@ -3,10 +3,9 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.ProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.model.PartyRole;
-import it.pagopa.selfcare.mscore.model.Product;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.connector.dao.model.UserInstitutionEntity;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Example;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -28,11 +27,11 @@ public class UserConnectorImpl implements UserConnector {
         this.repository = userRepository;
     }
 
-    public List<OnboardedUser> find(OnboardedUser user, List<RelationshipState> validRelationshipStates, String productId) {
+    public List<OnboardedUser> findForVerifyOnboardingInfo(String institutionId, List<RelationshipState> validRelationshipStates, String productId) {
         Query query = new Query();
         query.addCriteria(
                 new Criteria().andOperator(
-                        Criteria.where("institutionId").is(user.getInstitutionId()),
+                        Criteria.where("institutionId").is(institutionId),
                         Criteria.where("products").exists(true),
                         Criteria.where("products")
                                 .elemMatch(Criteria.where("status").in(validRelationshipStates)
@@ -44,6 +43,35 @@ public class UserConnectorImpl implements UserConnector {
                 .map(this::convertToUser)
                 .collect(Collectors.toList());
 
+    }
+
+    @Override
+    public List<OnboardedUser> findForGetOnboardingInfo(String userId, String institutionId, List<RelationshipState> validRelationshipStates) {
+        Query query = new Query();
+        query.addCriteria(
+                new Criteria().andOperator(
+                        Criteria.where("id").is(new ObjectId(userId)),
+                        Criteria.where("institutions").exists(true),
+                        Criteria.where("institutions")
+                                .elemMatch(Criteria.where("products").exists(true)
+                                        .and("products")
+                                        .elemMatch(Criteria.where("status").in(validRelationshipStates))),
+                        buildCriteriaForInstitution(institutionId)
+                )
+
+        );
+
+        return repository.find(query, UserEntity.class).stream()
+                .map(this::convertToUser)
+                .collect(Collectors.toList());
+    }
+
+    private Criteria buildCriteriaForInstitution(String institutionId) {
+        if (institutionId != null) {
+            return Criteria.where("institutionId").is(institutionId);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -73,8 +101,12 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public Optional<OnboardedUser> findById(String id) {
-        return repository.findById(new ObjectId(id)).map(this::convertToUser);
+    public OnboardedUser findById(String id) {
+        Optional<UserEntity> opt = repository.findById(new ObjectId(id));
+        if (opt.isPresent())
+            return convertToUser(opt.get());
+        else
+            throw new ResourceNotFoundException("", "");
     }
 
     @Override
@@ -85,9 +117,19 @@ public class UserConnectorImpl implements UserConnector {
     private OnboardedUser convertToUser(UserEntity entity) {
         OnboardedUser user = new OnboardedUser();
         user.setUser(entity.getId().toString());
-        user.setInstitutionId(entity.getInstitutionId());
-        user.setProducts(convertToProduct(entity.getProducts()));
+        user.setInstitutions(convertToUserInstitution(entity.getInstitutions()));
         return user;
+    }
+
+    private List<UserInstitution> convertToUserInstitution(List<UserInstitutionEntity> institutions) {
+        List<UserInstitution> userInstitutions = new ArrayList<>();
+        for(UserInstitutionEntity u : institutions){
+            UserInstitution userInstitution = new UserInstitution();
+            userInstitution.setInstitutionId(u.getInstitutionId());
+            userInstitution.setProducts(convertToProduct(u.getProducts()));
+            userInstitutions.add(userInstitution);
+        }
+        return userInstitutions;
     }
 
     private List<Product> convertToProduct(ProductEntity[] products) {
@@ -105,9 +147,20 @@ public class UserConnectorImpl implements UserConnector {
 
     private UserEntity convertToUserEntity(OnboardedUser user) {
         UserEntity entity = new UserEntity();
-        entity.setInstitutionId(user.getInstitutionId());
-        entity.setProducts(convertToProductEntity(user.getProducts()).toArray(ProductEntity[]::new));
+        entity.setId(new ObjectId(user.getUser()));
+        entity.setInstitutions(convertToUserInstitutionEntity(user.getInstitutions()));
         return entity;
+    }
+
+    private List<UserInstitutionEntity> convertToUserInstitutionEntity(List<UserInstitution> institutions) {
+        List<UserInstitutionEntity> list = new ArrayList<>();
+        for(UserInstitution u: institutions){
+            UserInstitutionEntity userInstitution = new UserInstitutionEntity();
+            userInstitution.setInstitutionId(u.getInstitutionId());
+            userInstitution.setProducts(convertToProductEntity(u.getProducts()).toArray(ProductEntity[]::new));
+            list.add(userInstitution);
+        }
+        return list;
     }
 
     private List<ProductEntity> convertToProductEntity(List<Product> products) {
