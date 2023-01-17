@@ -4,8 +4,9 @@ import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.constant.ErrorEnum;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResource;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.util.ExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -27,24 +28,29 @@ public class ExternalController {
 
     @ExceptionMessage(message = ErrorEnum.GET_INSTITUTION_BY_EXTERNAL_ID_ERROR)
     @GetMapping("/{externalId}")
-    public ResponseEntity<InstitutionResource> getByExternalId(@PathVariable("externalId") String id) {
+    public ResponseEntity<InstitutionResponse> getByExternalId(@PathVariable("externalId") String id) {
         Institution institution = externalService.getInstitutionByExternalId(id);
-        return ResponseEntity.ok().body(InstitutionMapper.toResource(institution));
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
     }
 
     @ExceptionMessage(message = ErrorEnum.GET_INSTITUTION_MANAGER_ERROR)
-    @GetMapping(value = "/external/institutions/{externalId}/products/{productId}/manager", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OnboardedUser> getManagerInstitutionByExternalId(@PathVariable("externalId") String externalId,
-                                                                           @PathVariable("productId") String productId) {
-        OnboardedUser manager = externalService.getManagerByExternalId(externalId, productId);
-        return ResponseEntity.ok(manager);
+    @GetMapping(value = "/{externalId}/products/{productId}/manager")
+    public ResponseEntity<InstitutionManagerResponse> getManagerInstitutionByExternalId(@PathVariable("externalId") String externalId,
+                                                                                        @PathVariable("productId") String productId) {
+        log.info("Getting manager for institution having externalId {}",externalId);
+        Institution institution = externalService.getInstitutionByExternalId(externalId);
+        OnboardedUser manager = externalService.getInstitutionManager(institution, productId);
+        String contractId = externalService.getRelationShipToken(institution.getId(),manager.getUser(), productId);
+        return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(institution, manager, productId, contractId));
     }
 
     @ExceptionMessage(message = ErrorEnum.GET_INSTITUTION_BILLING_ERROR)
-    @GetMapping(value = "/external/institutions/{externalId}/products/{productId}/billing", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{externalId}/products/{productId}/billing")
     public ResponseEntity<InstitutionBillingResponse> getBillingInstitutionByExternalId(@PathVariable("externalId") String externalId,
                                                                                         @PathVariable("productId") String productId) {
-        Institution institution = externalService.getBillingByExternalId(externalId, productId);
-        return ResponseEntity.ok().body(InstitutionMapper.toResponse(institution));
+        log.info("Retrieving billing data for institution having externalId {} and productId {}", externalId, productId);
+        Institution institution = externalService.getInstitutionByExternalId(externalId);
+        institution = externalService.getBillingByExternalId(institution, productId);
+        return ResponseEntity.ok().body(InstitutionMapper.toBillingResponse(institution, productId));
     }
 }

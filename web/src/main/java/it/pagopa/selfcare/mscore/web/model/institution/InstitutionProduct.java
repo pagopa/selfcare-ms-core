@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class InstitutionProduct {
     private String id;
-    private String state;
+    private ProductState state;
 }

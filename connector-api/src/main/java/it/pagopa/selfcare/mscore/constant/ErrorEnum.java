@@ -39,7 +39,7 @@ public enum ErrorEnum {
     INSTITUTION_NOT_FOUND("0036", "Cannot find Institution using institutionId %s and externalInstitutionId %s"),
     CREATE_INSTITUTION_ERROR("0037", "Error while creating requested institution"),
     CREATE_INSTITUTION_CONFLICT("0038", "Institution already exists"),
-    CREATE_INSTITUTION_NOT_FOUND("0039", "Institution doesn't exist in party-registry"),
+    CREATE_INSTITUTION_NOT_FOUND("0039", "Institution having externalId %s not exists in registry"),
     GET_INSTITUTION_ERROR("0040", "Error while retrieving institution having id %s"),
     GET_INSTITUTION_BY_EXTERNAL_ID_ERROR("0041", "Error while retrieving institution having externalId %s"),
     GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s"),

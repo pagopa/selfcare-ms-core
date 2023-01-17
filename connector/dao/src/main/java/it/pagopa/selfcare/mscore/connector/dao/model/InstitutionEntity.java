@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.Data;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,5 +22,9 @@ public class InstitutionEntity {
     private String zipCode;
     private String taxCode;
     private BillingEntity billing;
-    private List<OnboardingEntity> onboarding;
+    private List<Onboarding> onboarding;
+    private List<GeographicTaxonomies> geographicTaxonomies;
+    private List<Attributes> attributes;
+    private PaymentServiceProvider paymentServiceProvider;
+    private DataProtectionOfficer dataProtectionOfficer;
 }

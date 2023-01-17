@@ -7,7 +7,7 @@ import lombok.Data;
 public class Premium {
 
     @JsonProperty("status")
-    private String status;
+    private RelationshipState status;
 
     @JsonProperty("contract")
     private String contract;

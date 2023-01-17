@@ -13,5 +13,5 @@ public class Billing {
     private String recipientCode;
 
     @JsonProperty("publicServer")
-    private String publicServer;
+    private boolean publicServices;
 }

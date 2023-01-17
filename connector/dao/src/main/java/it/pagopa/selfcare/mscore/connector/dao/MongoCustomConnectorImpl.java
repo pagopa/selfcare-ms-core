@@ -21,13 +21,4 @@ public class MongoCustomConnectorImpl implements MongoCustomConnector {
         return mongoOperations.find(query, outputType);
     }
 
-    @Override
-    public <O> Page<O> find(Query query, Pageable pageable, Class<O> outputType) {
-        long count = mongoOperations.count(query, outputType);
-        List<O> list = new ArrayList<>();
-        if (count > 0) {
-            list = mongoOperations.find(query.with(pageable), outputType);
-        }
-        return new PageImpl<>(list, pageable, count);
-    }
 }

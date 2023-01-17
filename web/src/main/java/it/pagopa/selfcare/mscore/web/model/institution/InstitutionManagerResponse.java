@@ -1,21 +1,22 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import it.pagopa.selfcare.mscore.model.Product;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
 
 @Data
 public class InstitutionManagerResponse {
     private String id;
     private String from;
     private String to;
-    private Product product;
-    private String state;
-    private String pricingPlan;
-    private BillingRequest billingRequest;
     private String role;
-    private String createdAt;
-    private String updatedAt;
-    private InstitutionUpdateRequest institutionUpdateRequest;
-
+    private ProductInfo product;
+    private RelationshipState state;
+    private String pricingPlan;
+    private InstitutionUpdate institutionUpdate;
+    private BillingResponse billingResponse;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

@@ -5,6 +5,8 @@ import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
+
 @Data
 public class Onboarding {
 
@@ -22,4 +24,8 @@ public class Onboarding {
 
     @JsonProperty("premium")
     private Premium premium;
+
+    private Billing billing;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }
