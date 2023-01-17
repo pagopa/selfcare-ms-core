@@ -40,7 +40,7 @@ public class TokenConnectorImpl implements TokenConnector {
 
     private Token convertToToken(TokenEntity tokenEntity) {
         Token token = new Token();
-        token.setId(tokenEntity.getId());
+        token.setId(tokenEntity.getId().toString());
         token.setContract(tokenEntity.getContract());
         token.setChecksum(tokenEntity.getChecksum());
         token.setInstitutionId(tokenEntity.getInstitutionId());

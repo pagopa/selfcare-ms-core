@@ -1,16 +1,15 @@
 package it.pagopa.selfcare.mscore.web.config;
 
 import com.fasterxml.classmate.TypeResolver;
-import it.pagopa.selfcare.commons.web.model.Problem;
 import it.pagopa.selfcare.commons.web.swagger.EmailAnnotationSwaggerPluginConfig;
 import it.pagopa.selfcare.commons.web.swagger.ServerSwaggerConfig;
+import it.pagopa.selfcare.mscore.model.Problem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.builders.ResponseBuilder;
@@ -105,7 +104,7 @@ class SwaggerConfig {
                         .version(environment.getProperty("swagger.version", environment.getProperty("spring.application.version")))
                         .build())
                 .select().apis(RequestHandlerSelectors.basePackage("it.pagopa.selfcare.mscore.web.controller")).build()
-                .tags(new Tag("name", environment.getProperty("swagger.name.api.description")))//TODO change Name
+                //.tags(new Tag("name", environment.getProperty("swagger.name.api.description")))//TODO change Name
                 .directModelSubstitute(LocalTime.class, String.class)
                 .forCodeGeneration(true)
                 .useDefaultResponseMessages(false)
