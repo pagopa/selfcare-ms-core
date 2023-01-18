@@ -11,6 +11,7 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +36,7 @@ public class ExternalServiceImpl implements ExternalService {
     @Override
     public Institution getBillingByExternalId(Institution institution, String productId) {
 
-        List<Onboarding> list = institution.getOnboarding();
+        List<Onboarding> list = Optional.ofNullable(institution.getOnboarding()).orElse(new ArrayList<>());
         Optional<Onboarding> optInstitutionProduct = list.stream().filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(productId))
                 .findAny();
         if (optInstitutionProduct.isPresent())

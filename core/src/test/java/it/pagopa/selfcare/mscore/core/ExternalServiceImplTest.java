@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
@@ -9,11 +10,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -43,6 +46,9 @@ class ExternalServiceImplTest {
     @MockBean
     private UserConnector userConnector;
 
+    @MockBean
+    private TokenConnector tokenConnector;
+
     /**
      * Method under test: {@link ExternalServiceImpl#getBillingByExternalId(Institution, String)}
      */
@@ -71,8 +77,7 @@ class ExternalServiceImplTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -129,8 +134,7 @@ class ExternalServiceImplTest {
         doNothing().when(institution).setId(any());
         doNothing().when(institution).setInstitutionType(any());
         doNothing().when(institution).setOnboarding(any());
-        doNothing().when(institution).setOrigin(any());
-        doNothing().when(institution).setOriginId(any());
+        doNothing().when(institution).setIpaCode(any());
         doNothing().when(institution).setPaymentServiceProvider(any());
         doNothing().when(institution).setTaxCode(any());
         doNothing().when(institution).setZipCode(any());
@@ -144,8 +148,7 @@ class ExternalServiceImplTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -161,8 +164,7 @@ class ExternalServiceImplTest {
         verify(institution).setId(any());
         verify(institution).setInstitutionType(any());
         verify(institution).setOnboarding(any());
-        verify(institution).setOrigin(any());
-        verify(institution).setOriginId(any());
+        verify(institution).setIpaCode(any());
         verify(institution).setPaymentServiceProvider(any());
         verify(institution).setTaxCode(any());
         verify(institution).setZipCode(any());
@@ -199,8 +201,7 @@ class ExternalServiceImplTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -244,8 +245,7 @@ class ExternalServiceImplTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -284,13 +284,56 @@ class ExternalServiceImplTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
         assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getInstitutionManager(institution, "42"));
         verify(userConnector).findOnboardedManager(any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getRelationShipToken(String, String, String)}
+     */
+    @Test
+    void testGetRelationShipToken() {
+        when(tokenConnector.findActiveContract(any(), any(), any()))
+                .thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getRelationShipToken("42", "42", "42"));
+        verify(tokenConnector).findActiveContract(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getRelationShipToken(String, String, String)}
+     */
+    @Test
+    void testGetRelationShipToken2() {
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setContract("Contract");
+        token.setExpiringDate("2020-03-01");
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setUsers(new ArrayList<>());
+
+        ArrayList<Token> tokenList = new ArrayList<>();
+        tokenList.add(token);
+        when(tokenConnector.findActiveContract(any(), any(), any())).thenReturn(tokenList);
+        assertEquals("42", externalServiceImpl.getRelationShipToken("42", "42", "42"));
+        verify(tokenConnector).findActiveContract(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getRelationShipToken(String, String, String)}
+     */
+    @Test
+    void testGetRelationShipToken3() {
+        when(tokenConnector.findActiveContract(any(), any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getRelationShipToken("42", "42", "42"));
+        verify(tokenConnector).findActiveContract(any(), any(), any());
     }
 
     /**
@@ -321,8 +364,7 @@ class ExternalServiceImplTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");

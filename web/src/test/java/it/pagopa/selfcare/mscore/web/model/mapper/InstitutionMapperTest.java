@@ -64,8 +64,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -73,12 +72,11 @@ class InstitutionMapperTest {
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResponseResult.getTaxCode());
-        assertEquals("42", actualToInstitutionResponseResult.getOriginId());
+        assertEquals("42", actualToInstitutionResponseResult.getIpaCode());
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42", actualToInstitutionResponseResult.getId());
         assertEquals(InstitutionType.PA, actualToInstitutionResponseResult.getInstitutionType());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
-        assertEquals("Origin", actualToInstitutionResponseResult.getOrigin());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         DataProtectionOfficerResponse dataProtectionOfficer1 = actualToInstitutionResponseResult.getDataProtectionOfficer();
         assertEquals("jane.doe@example.org", dataProtectionOfficer1.getEmail());
@@ -136,8 +134,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -145,14 +142,13 @@ class InstitutionMapperTest {
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResponseResult.getTaxCode());
-        assertEquals("42", actualToInstitutionResponseResult.getOriginId());
+        assertEquals("42", actualToInstitutionResponseResult.getIpaCode());
         List<AttributesResponse> attributes1 = actualToInstitutionResponseResult.getAttributes();
         assertEquals(1, attributes1.size());
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42", actualToInstitutionResponseResult.getId());
         assertEquals(InstitutionType.PA, actualToInstitutionResponseResult.getInstitutionType());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
-        assertEquals("Origin", actualToInstitutionResponseResult.getOrigin());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         DataProtectionOfficerResponse dataProtectionOfficer1 = actualToInstitutionResponseResult
                 .getDataProtectionOfficer();
@@ -222,8 +218,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -231,12 +226,11 @@ class InstitutionMapperTest {
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResponseResult.getTaxCode());
-        assertEquals("42", actualToInstitutionResponseResult.getOriginId());
+        assertEquals("42", actualToInstitutionResponseResult.getIpaCode());
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42", actualToInstitutionResponseResult.getId());
         assertEquals(InstitutionType.PA, actualToInstitutionResponseResult.getInstitutionType());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
-        assertEquals("Origin", actualToInstitutionResponseResult.getOrigin());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         List<GeoTaxonomies> geographicTaxonomies1 = actualToInstitutionResponseResult.getGeographicTaxonomies();
         assertEquals(1, geographicTaxonomies1.size());
@@ -308,8 +302,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -317,12 +310,11 @@ class InstitutionMapperTest {
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResponseResult.getTaxCode());
-        assertEquals("42", actualToInstitutionResponseResult.getOriginId());
+        assertEquals("42", actualToInstitutionResponseResult.getIpaCode());
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42", actualToInstitutionResponseResult.getId());
         assertEquals(InstitutionType.PA, actualToInstitutionResponseResult.getInstitutionType());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
-        assertEquals("Origin", actualToInstitutionResponseResult.getOrigin());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         List<GeoTaxonomies> geographicTaxonomies1 = actualToInstitutionResponseResult.getGeographicTaxonomies();
         assertEquals(1, geographicTaxonomies1.size());
@@ -378,8 +370,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -387,8 +378,7 @@ class InstitutionMapperTest {
         assertEquals("42 Main St", actualToBillingResponseResult.getAddress());
         assertEquals("21654", actualToBillingResponseResult.getZipCode());
         assertEquals("Tax Code", actualToBillingResponseResult.getTaxCode());
-        assertEquals("42", actualToBillingResponseResult.getOriginId());
-        assertEquals("Origin", actualToBillingResponseResult.getOrigin());
+        assertEquals("42", actualToBillingResponseResult.getIpaCode());
         assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.PA,
                 actualToBillingResponseResult.getInstitutionType());
         assertEquals("42", actualToBillingResponseResult.getInstitutionId());
@@ -439,8 +429,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -448,8 +437,7 @@ class InstitutionMapperTest {
         assertEquals("Address", actualToBillingResponseResult.getAddress());
         assertEquals("21654", actualToBillingResponseResult.getZipCode());
         assertEquals("Tax Code", actualToBillingResponseResult.getTaxCode());
-        assertEquals("42", actualToBillingResponseResult.getOriginId());
-        assertEquals("Origin", actualToBillingResponseResult.getOrigin());
+        assertEquals("42", actualToBillingResponseResult.getIpaCode());
         assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.PA,
                 actualToBillingResponseResult.getInstitutionType());
         assertEquals("42", actualToBillingResponseResult.getInstitutionId());
@@ -514,8 +502,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.PA);
         institution.setOnboarding(onboardingList);
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -524,8 +511,7 @@ class InstitutionMapperTest {
         assertEquals("21654", actualToBillingResponseResult.getZipCode());
         assertEquals("Tax Code", actualToBillingResponseResult.getTaxCode());
         assertEquals("Pricing Plan", actualToBillingResponseResult.getPricingPlan());
-        assertEquals("42", actualToBillingResponseResult.getOriginId());
-        assertEquals("Origin", actualToBillingResponseResult.getOrigin());
+        assertEquals("42", actualToBillingResponseResult.getIpaCode());
         assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.PA,
                 actualToBillingResponseResult.getInstitutionType());
         assertEquals("42", actualToBillingResponseResult.getInstitutionId());
@@ -594,8 +580,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.PA);
         institution.setOnboarding(onboardingList);
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -604,8 +589,7 @@ class InstitutionMapperTest {
         assertEquals("21654", actualToBillingResponseResult.getZipCode());
         assertEquals("Tax Code", actualToBillingResponseResult.getTaxCode());
         assertEquals("Pricing Plan", actualToBillingResponseResult.getPricingPlan());
-        assertEquals("42", actualToBillingResponseResult.getOriginId());
-        assertEquals("Origin", actualToBillingResponseResult.getOrigin());
+        assertEquals("42", actualToBillingResponseResult.getIpaCode());
         assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.PA,
                 actualToBillingResponseResult.getInstitutionType());
         assertEquals("42", actualToBillingResponseResult.getInstitutionId());
@@ -674,8 +658,7 @@ class InstitutionMapperTest {
         institution.setId("42");
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.PA);
         institution.setOnboarding(onboardingList);
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -683,8 +666,7 @@ class InstitutionMapperTest {
         assertEquals("42 Main St", actualToBillingResponseResult.getAddress());
         assertEquals("21654", actualToBillingResponseResult.getZipCode());
         assertEquals("Tax Code", actualToBillingResponseResult.getTaxCode());
-        assertEquals("42", actualToBillingResponseResult.getOriginId());
-        assertEquals("Origin", actualToBillingResponseResult.getOrigin());
+        assertEquals("42", actualToBillingResponseResult.getIpaCode());
         assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.PA,
                 actualToBillingResponseResult.getInstitutionType());
         assertEquals("42", actualToBillingResponseResult.getInstitutionId());

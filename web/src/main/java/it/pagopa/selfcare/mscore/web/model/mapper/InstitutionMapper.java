@@ -151,9 +151,11 @@ public class InstitutionMapper {
 
     private static BillingResponse convertToBillingResponse(Billing billing) {
         BillingResponse billingResponse = new BillingResponse();
-        billingResponse.setVatNumber(billing.getVatNumber());
-        billingResponse.setRecipientCode(billing.getRecipientCode());
-        billingResponse.setPublicServices(billing.isPublicServices());
+        if(billing!=null) {
+            billingResponse.setVatNumber(billing.getVatNumber());
+            billingResponse.setRecipientCode(billing.getRecipientCode());
+            billingResponse.setPublicServices(billing.isPublicServices());
+        }
         return billingResponse;
     }
 

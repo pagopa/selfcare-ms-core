@@ -75,8 +75,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -110,8 +109,7 @@ class ExternalControllerTest {
         institution1.setId("42");
         institution1.setInstitutionType(InstitutionType.PA);
         institution1.setOnboarding(new ArrayList<>());
-        institution1.setOrigin("Origin");
-        institution1.setOriginId("42");
+        institution1.setIpaCode("42");
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
@@ -126,7 +124,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"institutionId\":\"42\",\"externalId\":\"42\",\"origin\":\"Origin\",\"originId\":\"42\",\"description\":\"The characteristics"
+                                "{\"institutionId\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics"
                                         + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":null,\"billing\":null}"));
     }
@@ -187,8 +185,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(onboardingList);
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -222,8 +219,7 @@ class ExternalControllerTest {
         institution1.setId("42");
         institution1.setInstitutionType(InstitutionType.PA);
         institution1.setOnboarding(new ArrayList<>());
-        institution1.setOrigin("Origin");
-        institution1.setOriginId("42");
+        institution1.setIpaCode("42");
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
@@ -238,7 +234,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"institutionId\":\"42\",\"externalId\":\"42\",\"origin\":\"Origin\",\"originId\":\"42\",\"description\":\"The characteristics"
+                                "{\"institutionId\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics"
                                         + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":\"?\",\"billing\":{\"vatNumber\":\"42\",\"recipientCode"
                                         + "\":\"?\",\"publicServices\":true}}"));
@@ -278,8 +274,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -293,7 +288,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"Origin\",\"originId\":\"42\",\"description\":\"The characteristics of"
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics of"
                                         + " someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServic"
                                         + "eProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
@@ -343,8 +338,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -358,7 +352,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"Origin\",\"originId\":\"42\",\"description\":\"The characteristics of"
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics of"
                                         + " someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[{\"origin\":\"?\","
                                         + "\"code\":\"?\",\"description\":\"The characteristics of someone or something\"}],\"paymentServiceProviderResponse"
@@ -416,8 +410,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -431,7 +424,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"Origin\",\"originId\":\"42\",\"description\":\"The characteristics of"
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics of"
                                         + " someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[{\"code\":\"?\",\"desc\":\"The characteristics"
                                         + " of someone or something\",\"enable\":true}],\"attributes\":[],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi"
@@ -474,8 +467,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -526,8 +518,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin("Origin");
-        institution.setOriginId("42");
+        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
