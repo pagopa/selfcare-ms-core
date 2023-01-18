@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,16 +29,22 @@ public class UserConnectorImpl implements UserConnector {
         query.addCriteria(
                 new Criteria().andOperator(
                         Criteria.where(BINDINGS).exists(true),
-                        Criteria.where(BINDINGS + "." + institutionId).exists(true)
-                               /* .elemMatch(Criteria.where(BINDINGS+"."+institutionId + "." + productId).exists(true)
-                                        .and(BINDINGS+"."+institutionId + "." + productId+".roles").in(List.of(PartyRole.MANAGER))
-                                        .and(BINDINGS+"."+institutionId + "." + productId+".status").is(RelationshipState.ACTIVE))*/
-                )
+                        Criteria.where(constructQuery(institutionId)).exists(true),
+                        Criteria.where(constructQuery(institutionId,productId)).exists(true)
+                                .and(constructQuery(institutionId,productId,"roles")).in(PartyRole.MANAGER)
+                                .and(constructQuery(institutionId,productId,"status")).is(RelationshipState.ACTIVE))
         );
         return repository.find(query, UserEntity.class).stream()
                 .map(this::convertToUser)
                 .collect(Collectors.toList());
 
+    }
+
+    private String constructQuery(String... variables){
+        StringBuilder builder = new StringBuilder();
+        builder.append(BINDINGS);
+        Arrays.stream(variables).forEach(s -> builder.append(".").append(s));
+        return builder.toString();
     }
 
     private OnboardedUser convertToUser(UserEntity entity) {
