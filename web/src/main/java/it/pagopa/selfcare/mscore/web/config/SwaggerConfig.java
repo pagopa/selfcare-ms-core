@@ -104,11 +104,11 @@ class SwaggerConfig {
                         .version(environment.getProperty("swagger.version", environment.getProperty("spring.application.version")))
                         .build())
                 .select().apis(RequestHandlerSelectors.basePackage("it.pagopa.selfcare.mscore.web.controller")).build()
-                //.tags(new Tag("name", environment.getProperty("swagger.name.api.description")))//TODO change Name
+                .tags(new Tag("External", environment.getProperty("swagger.name.api.external.description")))
                 .directModelSubstitute(LocalTime.class, String.class)
                 .forCodeGeneration(true)
                 .useDefaultResponseMessages(false)
-                .globalResponses(HttpMethod.GET, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE))
+                .globalResponses(HttpMethod.GET, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE))
                 .globalResponses(HttpMethod.DELETE, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE))
                 .globalResponses(HttpMethod.POST, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE))
                 .globalResponses(HttpMethod.PUT, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE))

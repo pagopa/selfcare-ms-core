@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping(value = "/external/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
-@Api(tags="External")
+@Api(tags = "External")
 public class ExternalController {
 
     private final ExternalService externalService;
@@ -45,7 +45,7 @@ public class ExternalController {
     @ExceptionMessage(message = ErrorEnum.GET_INSTITUTION_MANAGER_ERROR)
     @GetMapping(value = "/{externalId}/products/{productId}/manager")
     public ResponseEntity<InstitutionManagerResponse> getManagerInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                                                            @PathVariable("externalId") String externalId,
+                                                                                        @PathVariable("externalId") String externalId,
                                                                                         @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                                                         @PathVariable("productId") String productId) {
         log.info("Getting manager for institution having externalId {}", externalId);
@@ -60,7 +60,7 @@ public class ExternalController {
     @ExceptionMessage(message = ErrorEnum.GET_INSTITUTION_BILLING_ERROR)
     @GetMapping(value = "/{externalId}/products/{productId}/billing")
     public ResponseEntity<InstitutionBillingResponse> getBillingInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                                                            @PathVariable("externalId") String externalId,
+                                                                                        @PathVariable("externalId") String externalId,
                                                                                         @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                                                         @PathVariable("productId") String productId) {
         log.info("Retrieving billing data for institution having externalId {} and productId {}", externalId, productId);
