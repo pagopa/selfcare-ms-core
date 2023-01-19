@@ -6,9 +6,8 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -16,14 +15,13 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = TokenConnectorImpl.class)
 @ExtendWith(SpringExtension.class)
 class TokenConnectorImplTest {
 
-    @Autowired
+    @InjectMocks
     TokenConnectorImpl tokenConnectorImpl;
 
-    @MockBean
+    @Mock
     TokenRepository tokenRepository;
 
     @Test
@@ -34,5 +32,16 @@ class TokenConnectorImplTest {
         List<Token> tokenList = tokenConnectorImpl.findActiveContract("42","42","42");
         Assertions.assertEquals(1,tokenList.size());
         Assertions.assertEquals("507f1f77bcf86cd799439011",tokenList.get(0).getId());
+    }
+
+    @Test
+    void save(){
+        Token token = new Token();
+        token.setId("507f1f77bcf86cd799439011");
+        TokenEntity tokenEntity = new TokenEntity();
+        tokenEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        when(tokenRepository.save(any())).thenReturn(tokenEntity);
+        Token response = tokenConnectorImpl.save(token);
+        Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
     }
 }

@@ -1,8 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
@@ -28,6 +26,26 @@ class InstitutionConnectorImplTest {
 
     @MockBean
     InstitutionRepository institutionRepository;
+
+    @Test
+    void findById() {
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        Optional<Institution> response = institutionConnectionImpl.findById("ext");
+        Assertions.assertTrue(response.isEmpty());
+    }
+
+    @Test
+    void save(){
+        Institution institution = new Institution();
+        institution.setExternalId("ext");
+        institution.setId("507f1f77bcf86cd799439011");
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        when(institutionRepository.save(any())).thenReturn(institutionEntity);
+        Institution response = institutionConnectionImpl.save(institution);
+        Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
+    }
 
     @Test
     void findAllTest() {

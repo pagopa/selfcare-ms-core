@@ -26,7 +26,7 @@ public class OnboardingController {
     }
 
     @ExceptionMessage(message = ErrorEnum.ONBOARDING_OPERATION_ERROR)
-    @GetMapping(value = "/institution")
+    @PostMapping(value = "/institution")
     public ResponseEntity<Void> onboardingInstitution(@RequestBody OnboardingInstitutionRequest onboardingInstitutionRequest,
                                                       Authentication authentication) {
 
