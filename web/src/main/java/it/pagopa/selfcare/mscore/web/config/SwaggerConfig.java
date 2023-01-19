@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.web.model.config;
+package it.pagopa.selfcare.mscore.web.config;
 
 import com.fasterxml.classmate.TypeResolver;
 import it.pagopa.selfcare.commons.web.swagger.EmailAnnotationSwaggerPluginConfig;

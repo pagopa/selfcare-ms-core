@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.Data;

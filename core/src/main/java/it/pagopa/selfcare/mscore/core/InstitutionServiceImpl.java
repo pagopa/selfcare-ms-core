@@ -1,11 +1,13 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.NationalRegistriesConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.nationalregistries.NationalRegistriesAddressResponse;
+import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -68,17 +70,24 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createPgInstitution(String taxId) {
+    public Institution createPgInstitution(String taxId, SelfCareUser selfCareUser) {
         checkAlreadyExists(taxId);
 
         Institution newInstitution = new Institution();
-        NationalRegistriesAddressResponse response = nationalRegistriesConnector.getLegalAddress(taxId);
+
+        //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA SEGUENTE CHIAMATA
+        List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
+        institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
+                .findFirst().ifPresent(in -> newInstitution.setDescription(in.getBusinessName()));
+
+        //TODO: TESTARE QUANDO NATIONAL REGISTRIES E INFO CAMERE SARANNO FUNZIONANTI
+        NationalRegistriesProfessionalAddress response = nationalRegistriesConnector.getLegalAddress(taxId);
 
         newInstitution.setExternalId(taxId);
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
-        newInstitution.setAddress(response.getProfessionalAddress().getAddress());
-        newInstitution.setZipCode(response.getProfessionalAddress().getZip());
+        newInstitution.setAddress(response.getAddress());
+        newInstitution.setZipCode(response.getZip());
 
         return saveInstitution(newInstitution);
     }

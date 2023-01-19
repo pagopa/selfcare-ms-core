@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.connector.rest.config;
 
 import it.pagopa.selfcare.commons.connector.rest.config.RestClientBaseConfig;
 import it.pagopa.selfcare.mscore.connector.rest.client.GeoTaxonomiesRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.client.UserRegistryRestClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.web.model.config;
+package it.pagopa.selfcare.mscore.web.config;
 
 import it.pagopa.selfcare.commons.web.config.SecurityConfig;
 import lombok.extern.slf4j.Slf4j;

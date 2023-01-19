@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.api;
 
-import it.pagopa.selfcare.mscore.model.nationalregistries.NationalRegistriesAddressResponse;
+import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 
 public interface NationalRegistriesConnector {
 
-    NationalRegistriesAddressResponse getLegalAddress(String taxCode);
+    NationalRegistriesProfessionalAddress getLegalAddress(String taxCode);
 }

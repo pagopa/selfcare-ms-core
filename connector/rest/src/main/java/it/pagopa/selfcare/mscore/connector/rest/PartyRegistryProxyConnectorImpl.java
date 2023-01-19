@@ -2,14 +2,16 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.model.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionInfoCamere;
+import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.ErrorEnum.CREATE_INSTITUTION_NOT_FOUND;
 
@@ -36,6 +38,32 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     public CategoryProxyInfo getCategory(String origin, String code) {
         ProxyCategoryResponse response = restClient.getCategory(origin, code);
         return convertCategoryProxyInfo(response);
+    }
+
+    @Override
+    public List<InstitutionByLegal> getInstitutionsByLegal(String taxId) {
+        InstitutionsByLegalResponse response = restClient.getInstitutionsByLegal(toInstitutionsByLegalRequest(taxId));
+        return toInstitutionsByLegalResponse(response);
+    }
+
+    private List<InstitutionByLegal> toInstitutionsByLegalResponse(InstitutionsByLegalResponse response) {
+        List<InstitutionByLegal> list = new ArrayList<>();
+        if(response.getBusinesses()!=null && !response.getBusinesses().isEmpty())
+            response.getBusinesses().forEach(institutions -> {
+                InstitutionByLegal institutionByLegal = new InstitutionByLegal();
+                institutionByLegal.setBusinessName(institutions.getBusinessName());
+                institutionByLegal.setBusinessTaxId(institutions.getBusinessTaxId());
+                list.add(institutionByLegal);
+            });
+        return list;
+    }
+
+    private InstitutionsByLegalRequest toInstitutionsByLegalRequest(String taxId) {
+        InstitutionsByLegalRequest institutions = new InstitutionsByLegalRequest();
+        LegalFilter legalFilter = new LegalFilter();
+        legalFilter.setLegalTaxId(taxId);
+        institutions.setFilter(legalFilter);
+        return institutions;
     }
 
     private InstitutionProxyInfo convertInstitutionProxyInfo(ProxyInstitutionResponse response) {

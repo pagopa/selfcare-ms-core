@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
-import it.pagopa.selfcare.mscore.model.nationalregistries.NationalRegistriesAddressRequest;
-import it.pagopa.selfcare.mscore.model.nationalregistries.NationalRegistriesAddressResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesAddressRequest;
+import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesAddressResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -62,110 +63,35 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         validateOverridingData(request.getInstitutionUpdate(), institution.get());
 
+        List<GeographicTaxonomies> geographicTaxonomies = getGeographicTaxonomy(request);
+
+        verifyUsers(request.getUsers());
+
+        persist(request, institution.get(), geographicTaxonomies);
+    }
+
+    private void validateOverridingData(InstitutionUpdate institutionUpdate, Institution institution) {
+        if ((InstitutionType.PG.equals(institutionUpdate.getInstitutionType())
+                || InstitutionType.PA.equals(institutionUpdate.getInstitutionType()))
+                && (!institutionUpdate.getDescription().equalsIgnoreCase(institution.getDescription())
+                || !institutionUpdate.getTaxCode().equalsIgnoreCase(institution.getTaxCode())
+                || !institutionUpdate.getDigitalAddress().equalsIgnoreCase(institution.getDigitalAddress())
+                || !institutionUpdate.getZipCode().equalsIgnoreCase(institution.getZipCode())
+                || !institutionUpdate.getAddress().equalsIgnoreCase(institution.getAddress()))) {
+            throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
+        }
+    }
+
+    private List<GeographicTaxonomies> getGeographicTaxonomy(OnboardingRequest request) {
         List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         if (request.getInstitutionUpdate().getGeographicTaxonomyCodes() != null) {
             geographicTaxonomies = request.getInstitutionUpdate().getGeographicTaxonomyCodes().stream
                     ().map(geoTaxonomiesConnector::getExtByCode).collect(Collectors.toList());
-            if(geographicTaxonomies.isEmpty())
-                throw new ResourceNotFoundException(String.format(GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(),request.getInstitutionUpdate().getGeographicTaxonomyCodes()),
+            if (geographicTaxonomies.isEmpty())
+                throw new ResourceNotFoundException(String.format(GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), request.getInstitutionUpdate().getGeographicTaxonomyCodes()),
                         GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
         }
-
-        verifyUsers(request.getUsers());
-
-        List<String> usersList = createUsers(request);
-
-        try {
-            createToken(request, institution.get().getId(), usersList);
-        } catch (Exception e) {
-            usersList.forEach(userConnector::deleteById);
-            throw new InvalidRequestException("", "");
-        }
-
-        updateInstitution(request, institution.get(), geographicTaxonomies);
-    }
-
-
-    private void updateInstitution(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies) {
-        institution.getOnboarding().add(constructOnboarding(request));
-        institution.setGeographicTaxonomies(geographicTaxonomies);
-        institutionConnector.save(institution);
-    }
-
-    private Onboarding constructOnboarding(OnboardingRequest request) {
-        Onboarding onboarding = new Onboarding();
-        onboarding.setProductId(request.getProductId());
-
-        if (request.getContract() != null)
-            onboarding.setContract(request.getContract().getPath());
-
-        //onboarding.setPremium();
-
-        onboarding.setBilling(request.getBillingRequest());
-        onboarding.setPricingPlan(request.getPricingPlan());
-        onboarding.setCreatedAt(OffsetDateTime.now());
-        onboarding.setUpdatedAt(OffsetDateTime.now());
-
-        if (request.getInstitutionUpdate() != null)
-            setOnboardingStatus(onboarding, request.getInstitutionUpdate().getInstitutionType());
-
-        return onboarding;
-    }
-
-    private void createToken(OnboardingRequest request, String institutionId, List<String> usersList) {
-        tokenConnector.save(convertToToken(request, institutionId, usersList));
-    }
-
-    private Token convertToToken(OnboardingRequest request, String institutionId, List<String> users) {
-        Token token = new Token();
-        if (request.getContract() != null)
-            token.setContract(request.getContract().getPath());
-        token.setInstitutionId(institutionId);
-        token.setUsers(users);
-        token.setProductId(request.getProductId());
-
-        //token.setExpiringDate();
-        // token.setCheckSum();
-
-        if (request.getInstitutionUpdate() != null)
-            setTokenStatus(token, request.getInstitutionUpdate().getInstitutionType());
-
-        return token;
-    }
-
-    private void setTokenStatus(Token token, InstitutionType institutionType) {
-        switch (institutionType) {
-            case PA:
-                token.setStatus(RelationshipState.PENDING);
-                break;
-            case PG:
-                token.setStatus(RelationshipState.ACTIVE);
-                break;
-            default:
-                token.setStatus(RelationshipState.TOBEVALIDATED);
-                break;
-        }
-    }
-
-    private void setOnboardingStatus(Onboarding onboarding, InstitutionType institutionType) {
-        switch (institutionType) {
-            case PA:
-                onboarding.setStatus(RelationshipState.PENDING);
-                break;
-            case PG:
-                onboarding.setStatus(RelationshipState.ACTIVE);
-                break;
-            default:
-                onboarding.setStatus(RelationshipState.TOBEVALIDATED);
-                break;
-        }
-    }
-
-    private List<String> createUsers(OnboardingRequest request) {
-        return request.getUsers()
-                .stream()
-                .map(onboardedUser -> userConnector.save(onboardedUser).getUser())
-                .collect(Collectors.toList());
+        return geographicTaxonomies;
     }
 
     private void verifyUsers(List<OnboardedUser> users) {
@@ -175,16 +101,75 @@ public class OnboardingServiceImpl implements OnboardingService {
         });
     }
 
-    private boolean validateOverridingData(InstitutionUpdate institutionUpdate, Institution institution) {
-        if (InstitutionType.PG.equals(institutionUpdate.getInstitutionType())
-                || InstitutionType.PA.equals(institutionUpdate.getInstitutionType())) {
-            return institutionUpdate.getDescription().equalsIgnoreCase(institution.getDescription())
-                    && institutionUpdate.getTaxCode().equalsIgnoreCase(institution.getTaxCode())
-                    && institutionUpdate.getDigitalAddress().equalsIgnoreCase(institution.getDigitalAddress())
-                    && institutionUpdate.getZipCode().equalsIgnoreCase(institution.getZipCode())
-                    && institutionUpdate.getAddress().equalsIgnoreCase(institution.getAddress());
-        } else {
-            throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
+    @Transactional
+    private void persist(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies) {
+        createUsers(request);
+        createToken(request, institution);
+        updateInstitution(request, institution, geographicTaxonomies);
+    }
+
+    private List<String> createUsers(OnboardingRequest request) {
+        return request.getUsers()
+                .stream()
+                .map(onboardedUser -> userConnector.save(onboardedUser).getUser())
+                .collect(Collectors.toList());
+    }
+
+    private void createToken(OnboardingRequest request, Institution institution) {
+        tokenConnector.save(convertToToken(request, institution));
+    }
+
+    private Token convertToToken(OnboardingRequest request, Institution institution) {
+        Token token = new Token();
+        if (request.getContract() != null)
+            token.setContract(request.getContract().getPath());
+        token.setInstitutionId(institution.getId());
+        token.setUsers(request.getUsers().stream().map(OnboardedUser::getUser).collect(Collectors.toList()));
+        token.setProductId(request.getProductId());
+
+        if (request.getInstitutionUpdate() != null)
+            token.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+
+        // token.setExpiringDate();
+        // token.setCheckSum();
+
+        return token;
+    }
+
+    private void updateInstitution(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies) {
+        institution.getOnboarding().add(constructOnboarding(request));
+        institution.setGeographicTaxonomies(geographicTaxonomies);
+        institutionConnector.save(institution);
+    }
+
+    private Onboarding constructOnboarding(OnboardingRequest request) {
+        Onboarding onboarding = new Onboarding();
+
+        onboarding.setProductId(request.getProductId());
+        onboarding.setBilling(request.getBillingRequest());
+        onboarding.setPricingPlan(request.getPricingPlan());
+        onboarding.setCreatedAt(OffsetDateTime.now());
+        onboarding.setUpdatedAt(OffsetDateTime.now());
+
+        if (request.getContract() != null)
+            onboarding.setContract(request.getContract().getPath());
+
+        if (request.getInstitutionUpdate() != null)
+            onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+
+        //onboarding.setPremium();
+
+        return onboarding;
+    }
+
+    private RelationshipState getStatus(InstitutionType institutionType) {
+        switch (institutionType) {
+            case PA:
+                return RelationshipState.PENDING;
+            case PG:
+                return RelationshipState.ACTIVE;
+            default:
+                return RelationshipState.TOBEVALIDATED;
         }
     }
 }

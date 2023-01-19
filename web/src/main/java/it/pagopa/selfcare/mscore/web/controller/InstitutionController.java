@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.ErrorEnum;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -13,6 +14,7 @@ import it.pagopa.selfcare.mscore.web.util.ExceptionMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -52,8 +54,9 @@ public class InstitutionController {
     @ApiOperation(value = "", notes = "${swagger.mscore.institution.PG.create}")
     @PostMapping(value = "/pg/{externalId}")
     public ResponseEntity<InstitutionResource> createPgInstitution(@ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                                   @PathVariable("externalId") String externalId) {
-        Institution saved = institutionService.createPgInstitution(externalId);
+                                                                   @PathVariable("externalId") String externalId,
+                                                                   Authentication authentication) {
+        Institution saved = institutionService.createPgInstitution(externalId, (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toResource(saved));
     }
 }

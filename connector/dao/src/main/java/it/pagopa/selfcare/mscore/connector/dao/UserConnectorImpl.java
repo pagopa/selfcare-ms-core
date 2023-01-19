@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.model.*;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -41,38 +42,23 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findForGetOnboardingInfo(String userId, String institutionId, List<RelationshipState> validRelationshipStates) {
-        return null;
-    }
-
-    @Override
     public OnboardedUser save(OnboardedUser example) {
-        return null;
+        final UserEntity entity = convertToUserEntity(example);
+        return convertToOnboardeUser(repository.save(entity));
     }
 
-    @Override
-    public List<OnboardedUser> findAll() {
-        return null;
+    private UserEntity convertToUserEntity(OnboardedUser example) {
+        UserEntity user = new UserEntity();
+        user.setId(new ObjectId(example.getUser()));
+        user.setBindings(example.getBindings());
+        return user;
     }
 
-    @Override
-    public List<OnboardedUser> findAll(OnboardedUser example) {
-        return null;
-    }
-
-    @Override
-    public OnboardedUser findById(String id) {
-        return null;
-    }
-
-    @Override
-    public boolean existsById(String id) {
-        return false;
-    }
-
-    @Override
-    public void deleteById(String id) {
-
+    private OnboardedUser convertToOnboardeUser(UserEntity save) {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setUser(save.getId().toString());
+        onboardedUser.setBindings(save.getBindings());
+        return onboardedUser;
     }
 
     private String constructQuery(String... variables){

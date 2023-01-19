@@ -1,11 +1,11 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
-import it.pagopa.selfcare.mscore.connector.rest.model.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -20,7 +20,7 @@ public interface PartyRegistryProxyRestClient {
     @ResponseBody
     ProxyCategoryResponse getCategory(@PathVariable("origin") String origin, @PathVariable("code") String code);
 
-    @GetMapping(value = "${rest-client.party-registry-proxy.getInstitutionFromInfoCamere.path}", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "${rest-client.party-registry-proxy.getInstitutionsByLegal.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    ProxyInstitutionResponse getInstitutionFromInfoCamereById(String externalId);
+    InstitutionsByLegalResponse getInstitutionsByLegal(@RequestBody InstitutionsByLegalRequest institutions);
 }

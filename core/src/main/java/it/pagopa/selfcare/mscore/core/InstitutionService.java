@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 
 public interface InstitutionService {
@@ -8,6 +9,6 @@ public interface InstitutionService {
 
     Institution createInstitutionRaw(Institution institution, String externalId);
 
-    Institution createPgInstitution(String taxId);
+    Institution createPgInstitution(String taxId, SelfCareUser selfCareUser);
 
 }

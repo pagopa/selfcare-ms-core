@@ -1,16 +1,17 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
+import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@FeignClient(name = "${rest-client.geo-taxonomies.serviceCode}", url = "${rest-client.geo-taxonomies.base-url}")
 public interface GeoTaxonomiesRestClient {
 
-    //TODO: CAPIRE LA STRUTTURA DEL CLIENT E APPORTARE LE OPPORTUNE MODIFICHE
     @GetMapping(value = "${rest-client.geo-taxonomies.getExtByCode.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    GeographicTaxonomies getExtByCode(@RequestParam (value = "code") String code);
+    GeographicTaxonomiesResponse getExtByCode(@PathVariable(value = "code") String code);
 }
