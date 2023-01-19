@@ -11,7 +11,7 @@ public interface InstitutionConnector {
 
     List<Institution> findAll(Institution example);
 
-    Optional<Institution> findById(String id);
+    void deleteById(String id);
 
     Optional<Institution> findByExternalId(String externalId);
 }

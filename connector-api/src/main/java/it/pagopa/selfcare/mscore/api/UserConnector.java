@@ -8,6 +8,7 @@ public interface UserConnector {
 
     List<OnboardedUser> findOnboardedManager(String institutionId, String productId);
 
+    void deleteById(String id);
     OnboardedUser save(OnboardedUser example);
 
 }

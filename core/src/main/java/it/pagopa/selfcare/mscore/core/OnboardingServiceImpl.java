@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -54,17 +53,17 @@ public class OnboardingServiceImpl implements OnboardingService {
         if (institution.isEmpty())
             throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), null, request.getInstitutionExternalId()), INSTITUTION_NOT_FOUND.getCode());
 
-        Optional<Onboarding> optionalOnboarding = institution.get().getOnboarding().stream()
-                .filter(onboarding -> request.getProductId().equalsIgnoreCase(onboarding.getProductId()))
-                .findAny();
+        if(institution.get().getOnboarding()!=null) {
+            Optional<Onboarding> optionalOnboarding = institution.get().getOnboarding().stream()
+                    .filter(onboarding -> request.getProductId().equalsIgnoreCase(onboarding.getProductId()))
+                    .findAny();
+            if (optionalOnboarding.isPresent() && !productRelationshipStates.contains(optionalOnboarding.get().getStatus()))
+                throw new InvalidRequestException(MANAGER_FOUND_ERROR.getMessage(), MANAGER_FOUND_ERROR.getCode());
 
-        if (optionalOnboarding.isPresent() && !productRelationshipStates.contains(optionalOnboarding.get().getStatus()))
-            throw new InvalidRequestException(MANAGER_FOUND_ERROR.getMessage(), MANAGER_FOUND_ERROR.getCode());
+        }
 
         validateOverridingData(request.getInstitutionUpdate(), institution.get());
-
         List<GeographicTaxonomies> geographicTaxonomies = getGeographicTaxonomy(request);
-
         verifyUsers(request.getUsers());
 
         persist(request, institution.get(), geographicTaxonomies);
@@ -73,11 +72,11 @@ public class OnboardingServiceImpl implements OnboardingService {
     private void validateOverridingData(InstitutionUpdate institutionUpdate, Institution institution) {
         if ((InstitutionType.PG.equals(institutionUpdate.getInstitutionType())
                 || InstitutionType.PA.equals(institutionUpdate.getInstitutionType()))
-                && (!institutionUpdate.getDescription().equalsIgnoreCase(institution.getDescription())
-                || !institutionUpdate.getTaxCode().equalsIgnoreCase(institution.getTaxCode())
-                || !institutionUpdate.getDigitalAddress().equalsIgnoreCase(institution.getDigitalAddress())
-                || !institutionUpdate.getZipCode().equalsIgnoreCase(institution.getZipCode())
-                || !institutionUpdate.getAddress().equalsIgnoreCase(institution.getAddress()))) {
+                && (!institution.getDescription().equalsIgnoreCase(institutionUpdate.getDescription())
+                || !institution.getTaxCode().equalsIgnoreCase(institutionUpdate.getTaxCode())
+                || !institution.getDigitalAddress().equalsIgnoreCase(institutionUpdate.getDigitalAddress())
+                || !institution.getZipCode().equalsIgnoreCase(institutionUpdate.getZipCode())
+                || !institution.getAddress().equalsIgnoreCase(institutionUpdate.getAddress()))) {
             throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
         }
     }
@@ -101,28 +100,33 @@ public class OnboardingServiceImpl implements OnboardingService {
         });
     }
 
-    @Transactional
     private void persist(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies) {
-        createUsers(request);
         createToken(request, institution);
+        createUsers(request);
         updateInstitution(request, institution, geographicTaxonomies);
+        //TODO: ADD TRY CATCH CON ROLLBACK PER STEP
     }
 
     private List<String> createUsers(OnboardingRequest request) {
         return request.getUsers()
                 .stream()
-                .map(onboardedUser -> userConnector.save(onboardedUser).getUser())
+                .map(onboardedUser -> {
+                    onboardedUser.setCreatedAt(OffsetDateTime.now());
+                    return userConnector.save(onboardedUser).getId();
+                })
                 .collect(Collectors.toList());
     }
 
-    private void createToken(OnboardingRequest request, Institution institution) {
-        tokenConnector.save(convertToToken(request, institution));
+    private String createToken(OnboardingRequest request, Institution institution) {
+        return tokenConnector.save(convertToToken(request, institution)).getId();
     }
 
     private Token convertToToken(OnboardingRequest request, Institution institution) {
         Token token = new Token();
         if (request.getContract() != null)
             token.setContract(request.getContract().getPath());
+
+        token.setCreatedAt(OffsetDateTime.now());
         token.setInstitutionId(institution.getId());
         token.setUsers(request.getUsers().stream().map(OnboardedUser::getUser).collect(Collectors.toList()));
         token.setProductId(request.getProductId());
@@ -136,10 +140,11 @@ public class OnboardingServiceImpl implements OnboardingService {
         return token;
     }
 
-    private void updateInstitution(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies) {
+    private String updateInstitution(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies) {
         institution.getOnboarding().add(constructOnboarding(request));
+        institution.setUpdatedAt(OffsetDateTime.now());
         institution.setGeographicTaxonomies(geographicTaxonomies);
-        institutionConnector.save(institution);
+        return institutionConnector.save(institution).getId();
     }
 
     private Onboarding constructOnboarding(OnboardingRequest request) {

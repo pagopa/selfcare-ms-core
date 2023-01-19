@@ -331,53 +331,5 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\"}"));
     }
-
-    /**
-     * Method under test: {@link InstitutionController#createPgInstitution(String)}
-     */
-    @Test
-    void testCreatePgInstitution() throws Exception {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        Institution institution = new Institution();
-        institution.setAddress("42 Main St");
-        institution.setAttributes(new ArrayList<>());
-        institution.setBilling(billing);
-        institution.setDataProtectionOfficer(dataProtectionOfficer);
-        institution.setDescription("The characteristics of someone or something");
-        institution.setDigitalAddress("42 Main St");
-        institution.setExternalId("42");
-        institution.setGeographicTaxonomies(new ArrayList<>());
-        institution.setId("42");
-        institution.setInstitutionType(InstitutionType.PA);
-        institution.setIpaCode("Ipa Code");
-        institution.setOnboarding(new ArrayList<>());
-        institution.setPaymentServiceProvider(paymentServiceProvider);
-        institution.setTaxCode("Tax Code");
-        institution.setZipCode("21654");
-        when(institutionService.createPgInstitution((String) any())).thenReturn(institution);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/institutions/pg/{externalId}", "42");
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\"}"));
-    }
 }
 

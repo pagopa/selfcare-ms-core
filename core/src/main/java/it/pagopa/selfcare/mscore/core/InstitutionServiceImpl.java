@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,6 +61,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setDescription(institutionProxyInfo.getDescription());
         newInstitution.setDigitalAddress(institutionProxyInfo.getDigitalAddress());
 
+        newInstitution.setCreatedAt(OffsetDateTime.now());
+
         Attributes attributes = new Attributes();
         attributes.setOrigin(categoryProxyInfo.getOrigin());
         attributes.setCode(categoryProxyInfo.getCode());
@@ -88,6 +91,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setTaxCode(taxId);
         newInstitution.setAddress(response.getAddress());
         newInstitution.setZipCode(response.getZip());
+        newInstitution.setCreatedAt(OffsetDateTime.now());
 
         return saveInstitution(newInstitution);
     }
@@ -96,9 +100,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkAlreadyExists(externalId);
-        institution.setIpaCode(Optional.ofNullable(institution.getInstitutionType().toString())
-                .orElse("SELC_" + externalId));
-
+        if(institution.getInstitutionType()!=null) {
+            institution.setIpaCode(institution.getInstitutionType().toString());
+        }else{
+            institution.setIpaCode("SELC_" + externalId);
+        }
+        institution.setCreatedAt(OffsetDateTime.now());
         return saveInstitution(institution);
     }
 

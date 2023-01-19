@@ -11,7 +11,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @FeignClient(name = "${rest-client.geo-taxonomies.serviceCode}", url = "${rest-client.geo-taxonomies.base-url}")
 public interface GeoTaxonomiesRestClient {
 
-    @GetMapping(value = "${rest-client.geo-taxonomies.getExtByCode.path}", consumes = APPLICATION_JSON_VALUE)
+    @GetMapping(value = "${rest-client.geo-taxonomies.getByCode.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     GeographicTaxonomiesResponse getExtByCode(@PathVariable(value = "code") String code);
 }

@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 @Data
@@ -16,5 +17,8 @@ public class UserEntity {
 
     @MongoId
     private ObjectId id;
+
+    private String user;
     private Map<String,Map<String, Product>> bindings;
+    private OffsetDateTime createdAt;
 }

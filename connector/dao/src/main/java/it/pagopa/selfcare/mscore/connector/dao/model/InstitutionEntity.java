@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -34,5 +35,8 @@ public class InstitutionEntity {
     private PaymentServiceProvider paymentServiceProvider; //optional
 
     private DataProtectionOfficer dataProtectionOfficer; //optional
+
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
 }

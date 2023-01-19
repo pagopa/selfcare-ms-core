@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -22,5 +23,7 @@ public class TokenEntity {
     private String checksum;
     private String contract;
     private List<String> users;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }
 

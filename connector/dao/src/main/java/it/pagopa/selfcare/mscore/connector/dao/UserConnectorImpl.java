@@ -25,6 +25,10 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
+    public void deleteById(String id) {
+        repository.deleteById(new ObjectId(id));
+    }
+    @Override
     public List<OnboardedUser> findOnboardedManager(String institutionId, String productId) {
         Query query = new Query();
         query.addCriteria(
@@ -49,7 +53,8 @@ public class UserConnectorImpl implements UserConnector {
 
     private UserEntity convertToUserEntity(OnboardedUser example) {
         UserEntity user = new UserEntity();
-        user.setId(new ObjectId(example.getUser()));
+        user.setUser(example.getUser());
+        user.setCreatedAt(example.getCreatedAt());
         user.setBindings(example.getBindings());
         return user;
     }
@@ -57,6 +62,7 @@ public class UserConnectorImpl implements UserConnector {
     private OnboardedUser convertToOnboardeUser(UserEntity save) {
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setUser(save.getId().toString());
+        onboardedUser.setCreatedAt(save.getCreatedAt());
         onboardedUser.setBindings(save.getBindings());
         return onboardedUser;
     }

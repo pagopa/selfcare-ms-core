@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -193,6 +194,8 @@ public class InstitutionMapper {
 
     public static Institution toInstitution(InstitutionRequest request, String externalId) {
         Institution institution = new Institution();
+        institution.setCreatedAt(OffsetDateTime.now());
+        institution.setUpdatedAt(OffsetDateTime.now());
         institution.setExternalId(externalId);
         institution.setInstitutionType(request.getInstitutionType());
         institution.setDescription(request.getDescription());

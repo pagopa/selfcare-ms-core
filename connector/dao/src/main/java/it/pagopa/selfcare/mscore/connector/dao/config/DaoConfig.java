@@ -21,9 +21,4 @@ class DaoConfig{
         ));
     }
 
-    @Bean
-    MongoTransactionManager transactionManager(MongoDatabaseFactory dbFactory) {
-        return new MongoTransactionManager(dbFactory);
-    }
-
 }
