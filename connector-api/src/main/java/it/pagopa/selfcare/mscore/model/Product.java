@@ -11,7 +11,7 @@ public class Product {
 
     private RelationshipState status;
     private String contract;
-    private List<PartyRole> roles;
+    private List<String> roles;
 
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

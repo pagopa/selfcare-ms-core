@@ -1,5 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.Data;
 import org.bson.types.ObjectId;
@@ -21,10 +23,17 @@ public class InstitutionEntity {
     private String address;
     private String zipCode;
     private String taxCode;
-    private BillingEntity billing;
+    private BillingEntity billing; //required
+
     private List<Onboarding> onboarding;
+
+    @JsonProperty("geographicTaxonomyCodes")
     private List<GeographicTaxonomies> geographicTaxonomies;
+
     private List<Attributes> attributes;
-    private PaymentServiceProvider paymentServiceProvider;
-    private DataProtectionOfficer dataProtectionOfficer;
+
+    private PaymentServiceProvider paymentServiceProvider; //optional
+
+    private DataProtectionOfficer dataProtectionOfficer; //optional
+
 }

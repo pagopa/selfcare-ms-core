@@ -13,6 +13,7 @@ import com.fasterxml.classmate.types.TypePlaceHolder;
 
 import java.lang.reflect.Type;
 
+import it.pagopa.selfcare.mscore.web.model.config.SwaggerConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

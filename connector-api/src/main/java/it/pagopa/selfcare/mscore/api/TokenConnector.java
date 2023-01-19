@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface TokenConnector {
     List<Token> findActiveContract(String institutionId, String userId, String productId);
+
+    Token save(Token token);
 }

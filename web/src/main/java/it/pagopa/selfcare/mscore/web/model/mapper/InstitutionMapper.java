@@ -183,4 +183,74 @@ public class InstitutionMapper {
         productInfo.setId(productId);
         return productInfo;
     }
+
+    public static InstitutionResource toResource(Institution institution) {
+        InstitutionResource resource = new InstitutionResource();
+        resource.setId(institution.getId());
+        resource.setExternalId(institution.getExternalId());
+        return resource;
+    }
+
+    public static Institution toInstitution(InstitutionRequest request, String externalId) {
+        Institution institution = new Institution();
+        institution.setExternalId(externalId);
+        institution.setInstitutionType(request.getInstitutionType());
+        institution.setDescription(request.getDescription());
+        institution.setAddress(request.getAddress());
+        institution.setDigitalAddress(request.getDigitalAddress());
+        institution.setTaxCode(request.getTaxCode());
+        institution.setZipCode(request.getZipCode());
+        institution.setGeographicTaxonomies(convertToGeographicTaxonomies(request.getGeographicTaxonomies()));
+        institution.setAttributes(convertToAttributes(request.getAttributes()));
+        if(request.getPaymentServiceProvider()!=null)
+            institution.setPaymentServiceProvider(convertToPaymentServiceProvider(request.getPaymentServiceProvider()));
+        if(request.getDataProtectionOfficer()!=null)
+            institution.setDataProtectionOfficer(convertToDataProtectionOfficer(request.getDataProtectionOfficer()));
+        return institution;
+    }
+
+    private static DataProtectionOfficer convertToDataProtectionOfficer(DataProtectionOfficerRequest request) {
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress(request.getAddress());
+        dataProtectionOfficer.setEmail(request.getEmail());
+        dataProtectionOfficer.setPec(request.getPec());
+        return dataProtectionOfficer;
+    }
+
+    private static PaymentServiceProvider convertToPaymentServiceProvider(PaymentServiceProviderRequest request) {
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode(request.getAbiCode());
+        paymentServiceProvider.setVatNumberGroup(request.isVatNumberGroup());
+        paymentServiceProvider.setBusinessRegisterNumber(request.getBusinessRegisterNumber());
+        paymentServiceProvider.setLegalRegisterNumber(request.getLegalRegisterNumber());
+        paymentServiceProvider.setLegalRegisterName(request.getLegalRegisterName());
+        return paymentServiceProvider;
+    }
+
+    private static List<Attributes> convertToAttributes(List<AttributesRequest> attributes) {
+        List<Attributes> response = new ArrayList<>();
+        if(attributes!=null) {
+            for (AttributesRequest a : attributes) {
+                Attributes attribute = new Attributes();
+                attribute.setCode(a.getCode());
+                attribute.setDescription(a.getDescription());
+                attribute.setOrigin(a.getOrigin());
+                response.add(attribute);
+            }
+        }
+        return response;
+    }
+
+    private static List<GeographicTaxonomies> convertToGeographicTaxonomies(List<GeoTaxonomies> request) {
+        List<GeographicTaxonomies> response = new ArrayList<>();
+        if(request!=null) {
+            for (GeoTaxonomies g : request) {
+                GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+                geographicTaxonomies.setCode(g.getCode());
+                geographicTaxonomies.setDesc(g.getDesc());
+                response.add(geographicTaxonomies);
+            }
+        }
+        return response;
+    }
 }

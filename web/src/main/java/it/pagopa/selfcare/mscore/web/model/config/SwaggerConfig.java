@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.web.config;
+package it.pagopa.selfcare.mscore.web.model.config;
 
 import com.fasterxml.classmate.TypeResolver;
 import it.pagopa.selfcare.commons.web.swagger.EmailAnnotationSwaggerPluginConfig;
@@ -26,7 +26,7 @@ import java.util.List;
  * The Class SwaggerConfig.
  */
 @Configuration
-class SwaggerConfig {
+public class SwaggerConfig {
 
     private static final String AUTH_SCHEMA_NAME = "bearerAuth";
     private static final Response INTERNAL_SERVER_ERROR_RESPONSE = new ResponseBuilder()
@@ -90,7 +90,7 @@ class SwaggerConfig {
 
 
     @Autowired
-    SwaggerConfig(Environment environment) {
+    public SwaggerConfig(Environment environment) {
         this.environment = environment;
     }
 

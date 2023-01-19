@@ -1,9 +1,11 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -36,6 +38,24 @@ public class TokenConnectorImpl implements TokenConnector {
         return tokenRepository.find(query, TokenEntity.class).stream()
                 .map(this::convertToToken)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Token save(Token token) {
+        final TokenEntity entity = convertToTokenEntity(token);
+        return convertToToken(tokenRepository.save(entity));
+    }
+
+    private TokenEntity convertToTokenEntity(Token token) {
+        TokenEntity entity = new TokenEntity();
+        entity.setContract(token.getContract());
+        entity.setChecksum(token.getChecksum());
+        entity.setInstitutionId(token.getInstitutionId());
+        entity.setStatus(token.getStatus());
+        entity.setUsers(token.getUsers());
+        entity.setExpiringDate(token.getExpiringDate());
+        entity.setProductId(token.getProductId());
+        return entity;
     }
 
     private Token convertToToken(TokenEntity tokenEntity) {

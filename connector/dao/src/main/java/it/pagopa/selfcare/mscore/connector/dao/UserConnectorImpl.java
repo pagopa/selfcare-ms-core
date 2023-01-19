@@ -40,6 +40,41 @@ public class UserConnectorImpl implements UserConnector {
 
     }
 
+    @Override
+    public List<OnboardedUser> findForGetOnboardingInfo(String userId, String institutionId, List<RelationshipState> validRelationshipStates) {
+        return null;
+    }
+
+    @Override
+    public OnboardedUser save(OnboardedUser example) {
+        return null;
+    }
+
+    @Override
+    public List<OnboardedUser> findAll() {
+        return null;
+    }
+
+    @Override
+    public List<OnboardedUser> findAll(OnboardedUser example) {
+        return null;
+    }
+
+    @Override
+    public OnboardedUser findById(String id) {
+        return null;
+    }
+
+    @Override
+    public boolean existsById(String id) {
+        return false;
+    }
+
+    @Override
+    public void deleteById(String id) {
+
+    }
+
     private String constructQuery(String... variables){
         StringBuilder builder = new StringBuilder();
         builder.append(BINDINGS);

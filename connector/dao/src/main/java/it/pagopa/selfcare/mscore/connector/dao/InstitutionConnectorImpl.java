@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.*;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
@@ -25,11 +26,22 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
+    public Institution save(Institution institution) {
+        final InstitutionEntity entity = convertToInstitutionEntity(institution);
+        return convertToInstitution(repository.save(entity));
+    }
+
+    @Override
     public List<Institution> findAll(Institution institution) {
         Example<InstitutionEntity> example = Example.of(convertToInstitutionEntity(institution), UntypedExampleMatcher.matching());
         return repository.findAll(example).stream()
                 .map(this::convertToInstitution)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Institution> findById(String id) {
+        return Optional.empty();
     }
 
     @Override

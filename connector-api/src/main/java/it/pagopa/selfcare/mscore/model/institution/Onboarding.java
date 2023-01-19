@@ -25,7 +25,7 @@ public class Onboarding {
     @JsonProperty("premium")
     private Premium premium;
 
-    private Billing billing;
+    private Billing billing; //optional
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }
