@@ -2,25 +2,32 @@ package it.pagopa.selfcare.mscore.connector.dao.config;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {DaoConfig.class})
+import static org.mockito.Mockito.mock;
+
 @ExtendWith(SpringExtension.class)
 class DaoConfigTest {
-    @Autowired
+    @InjectMocks
     private DaoConfig daoConfig;
 
-    /**
-     * Method under test: {@link DaoConfig#customConversions()}
-     */
+    @Mock
+    private MongoDatabaseFactory mongoDatabaseFactory;
+
+
     @Test
     void testCustomConversions() {
-        // TODO: Complete this test.
-        //   Diffblue AI was unable to find a test
-
         daoConfig.customConversions();
     }
+
+    @Test
+    void testTransactionManager() {
+        MongoDatabaseFactory mongoDatabaseFactory = mock(MongoDatabaseFactory.class);
+        daoConfig.transactionManager(mongoDatabaseFactory);
+    }
+
 }
 

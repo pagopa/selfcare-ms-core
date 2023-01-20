@@ -1,8 +1,5 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
@@ -10,11 +7,7 @@ import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 
 import java.util.ArrayList;
 
@@ -23,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
@@ -30,6 +25,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {InstitutionController.class})
 @ExtendWith(SpringExtension.class)
@@ -78,7 +75,7 @@ class InstitutionControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionService.createInstitutionByExternalId((String) any())).thenReturn(institution);
+        when(institutionService.createInstitutionByExternalId(any())).thenReturn(institution);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/institutions/{externalId}", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
@@ -126,7 +123,7 @@ class InstitutionControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionService.createInstitutionRaw((Institution) any(), (String) any())).thenReturn(institution);
+        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(institution);
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -202,7 +199,7 @@ class InstitutionControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionService.createInstitutionRaw((Institution) any(), (String) any())).thenReturn(institution);
+        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(institution);
 
         AttributesRequest attributesRequest = new AttributesRequest();
         attributesRequest.setCode("?");
@@ -286,7 +283,7 @@ class InstitutionControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionService.createInstitutionRaw((Institution) any(), (String) any())).thenReturn(institution);
+        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(institution);
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -330,6 +327,19 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\"}"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#createPgInstitution(String, Authentication)}
+     */
+    @Test
+    void testCreatePgInstitution() throws Exception {
+        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
+                .formLogin();
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 }
 

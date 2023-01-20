@@ -27,10 +27,10 @@ public class OnboardingController {
 
     @ExceptionMessage(message = ErrorEnum.ONBOARDING_OPERATION_ERROR)
     @PostMapping(value = "/institution")
-    public ResponseEntity<Void> onboardingInstitution(@RequestBody OnboardingInstitutionRequest onboardingInstitutionRequest
-                                                      /*Authentication authentication*/) {
+    public ResponseEntity<Void> onboardingInstitution(@RequestBody OnboardingInstitutionRequest onboardingInstitutionRequest,
+                                                      Authentication authentication) {
 
-        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest), SelfCareUser.builder("3fa85f64-5717-4562-b3fc-2c963f66afa6").build());
+        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -4,29 +4,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.NationalRegistriesConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import it.pagopa.selfcare.mscore.model.nationalregistries.NationalRegistriesAddressResponse;
-import it.pagopa.selfcare.mscore.model.nationalregistries.NationalRegistriesProfessionalResponse;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -90,9 +86,9 @@ class InstitutionServiceImplTest {
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
         assertThrows(ResourceConflictException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
     }
 
     /**
@@ -133,8 +129,8 @@ class InstitutionServiceImplTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionConnector.save((Institution) any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.empty());
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId( any())).thenReturn(Optional.empty());
 
         InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
         institutionProxyInfo.setAddress("42 Main St");
@@ -155,13 +151,13 @@ class InstitutionServiceImplTest {
         categoryProxyInfo.setKind("Kind");
         categoryProxyInfo.setName("Name");
         categoryProxyInfo.setOrigin("Origin");
-        when(partyRegistryProxyConnector.getCategory((String) any(), (String) any())).thenReturn(categoryProxyInfo);
-        when(partyRegistryProxyConnector.getInstitutionById((String) any())).thenReturn(institutionProxyInfo);
+        when(partyRegistryProxyConnector.getCategory( any(), any())).thenReturn(categoryProxyInfo);
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
         assertSame(institution, institutionServiceImpl.createInstitutionByExternalId("42"));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
-        verify(partyRegistryProxyConnector).getCategory((String) any(), (String) any());
-        verify(partyRegistryProxyConnector).getInstitutionById((String) any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
+        verify(partyRegistryProxyConnector).getCategory(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
     }
 
     /**
@@ -169,9 +165,9 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testCreateInstitutionByExternalId3() {
-        when(institutionConnector.save((Institution) any()))
+        when(institutionConnector.save(any()))
                 .thenThrow(new ResourceConflictException("An error occurred", "Creating institution having external id {}"));
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.empty());
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
         institutionProxyInfo.setAddress("42 Main St");
@@ -192,17 +188,17 @@ class InstitutionServiceImplTest {
         categoryProxyInfo.setKind("Kind");
         categoryProxyInfo.setName("Name");
         categoryProxyInfo.setOrigin("Origin");
-        when(partyRegistryProxyConnector.getCategory((String) any(), (String) any())).thenReturn(categoryProxyInfo);
-        when(partyRegistryProxyConnector.getInstitutionById((String) any())).thenReturn(institutionProxyInfo);
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(categoryProxyInfo);
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
         assertThrows(ResourceConflictException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
-        verify(partyRegistryProxyConnector).getCategory((String) any(), (String) any());
-        verify(partyRegistryProxyConnector).getInstitutionById((String) any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
+        verify(partyRegistryProxyConnector).getCategory(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String)}
+     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, SelfCareUser)}
      */
     @Test
     void testCreatePgInstitution() {
@@ -240,13 +236,14 @@ class InstitutionServiceImplTest {
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
-        assertThrows(ResourceConflictException.class, () -> institutionServiceImpl.createPgInstitution("42"));
-        verify(institutionConnector).findByExternalId((String) any());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
+        assertThrows(ResourceConflictException.class,
+                () -> institutionServiceImpl.createPgInstitution("42", mock(SelfCareUser.class)));
+        verify(institutionConnector).findByExternalId(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String)}
+     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, SelfCareUser)}
      */
     @Test
     void testCreatePgInstitution2() {
@@ -283,57 +280,28 @@ class InstitutionServiceImplTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionConnector.save((Institution) any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.empty());
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
-        NationalRegistriesProfessionalResponse nationalRegistriesProfessionalResponse = new NationalRegistriesProfessionalResponse();
-        nationalRegistriesProfessionalResponse.setAddress("42 Main St");
-        nationalRegistriesProfessionalResponse.setDescription("The characteristics of someone or something");
-        nationalRegistriesProfessionalResponse.setMunicipality("Municipality");
-        nationalRegistriesProfessionalResponse.setProvince("Province");
-        nationalRegistriesProfessionalResponse.setZip("21654");
-
-        NationalRegistriesAddressResponse nationalRegistriesAddressResponse = new NationalRegistriesAddressResponse();
-        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
-        nationalRegistriesAddressResponse
-                .setDateTimeExtraction(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
-        nationalRegistriesAddressResponse.setProfessionalAddress(nationalRegistriesProfessionalResponse);
-        nationalRegistriesAddressResponse.setTaxId("42");
-        when(nationalRegistriesConnector.getLegalAddress((String) any())).thenReturn(nationalRegistriesAddressResponse);
-        assertSame(institution, institutionServiceImpl.createPgInstitution("42"));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
-        verify(nationalRegistriesConnector).getLegalAddress((String) any());
+        NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
+        nationalRegistriesProfessionalAddress.setAddress("42 Main St");
+        nationalRegistriesProfessionalAddress.setDescription("The characteristics of someone or something");
+        nationalRegistriesProfessionalAddress.setMunicipality("Municipality");
+        nationalRegistriesProfessionalAddress.setProvince("Province");
+        nationalRegistriesProfessionalAddress.setZip("21654");
+        when(nationalRegistriesConnector.getLegalAddress(any()))
+                .thenReturn(nationalRegistriesProfessionalAddress);
+        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(new ArrayList<>());
+        SelfCareUser selfCareUser = mock(SelfCareUser.class);
+        when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
+        assertSame(institution, institutionServiceImpl.createPgInstitution("42", selfCareUser));
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
+        verify(nationalRegistriesConnector).getLegalAddress(any());
+        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
+        verify(selfCareUser).getFiscalCode();
     }
 
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String)}
-     */
-    @Test
-    void testCreatePgInstitution3() {
-        when(institutionConnector.save((Institution) any()))
-                .thenThrow(new ResourceConflictException("An error occurred", "institution created {}"));
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.empty());
-
-        NationalRegistriesProfessionalResponse nationalRegistriesProfessionalResponse = new NationalRegistriesProfessionalResponse();
-        nationalRegistriesProfessionalResponse.setAddress("42 Main St");
-        nationalRegistriesProfessionalResponse.setDescription("The characteristics of someone or something");
-        nationalRegistriesProfessionalResponse.setMunicipality("Municipality");
-        nationalRegistriesProfessionalResponse.setProvince("Province");
-        nationalRegistriesProfessionalResponse.setZip("21654");
-
-        NationalRegistriesAddressResponse nationalRegistriesAddressResponse = new NationalRegistriesAddressResponse();
-        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
-        nationalRegistriesAddressResponse
-                .setDateTimeExtraction(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
-        nationalRegistriesAddressResponse.setProfessionalAddress(nationalRegistriesProfessionalResponse);
-        nationalRegistriesAddressResponse.setTaxId("42");
-        when(nationalRegistriesConnector.getLegalAddress((String) any())).thenReturn(nationalRegistriesAddressResponse);
-        assertThrows(ResourceConflictException.class, () -> institutionServiceImpl.createPgInstitution("42"));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
-        verify(nationalRegistriesConnector).getLegalAddress((String) any());
-    }
 
     /**
      * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
@@ -408,8 +376,8 @@ class InstitutionServiceImplTest {
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
         Optional<Institution> ofResult = Optional.of(institution1);
-        when(institutionConnector.save((Institution) any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Billing billing2 = new Billing();
         billing2.setPublicServices(true);
@@ -446,7 +414,7 @@ class InstitutionServiceImplTest {
         institution2.setZipCode("21654");
         assertThrows(ResourceConflictException.class,
                 () -> institutionServiceImpl.createInstitutionRaw(institution2, "42"));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
     }
 
     /**
@@ -487,8 +455,8 @@ class InstitutionServiceImplTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionConnector.save((Institution) any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.empty());
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -524,8 +492,8 @@ class InstitutionServiceImplTest {
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
         assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
         assertEquals("PA", institution1.getIpaCode());
     }
 }

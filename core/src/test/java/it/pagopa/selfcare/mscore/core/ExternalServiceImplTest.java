@@ -29,24 +29,22 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {ExternalServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class ExternalServiceImplTest {
-    @Autowired
+    @InjectMocks
     private ExternalServiceImpl externalServiceImpl;
 
-    @MockBean
+    @Mock
     private InstitutionConnector institutionConnector;
 
-    @MockBean
+    @Mock
     private UserConnector userConnector;
 
-    @MockBean
+    @Mock
     private TokenConnector tokenConnector;
 
     /**

@@ -6,9 +6,8 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.HashMap;
@@ -17,14 +16,13 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = UserConnectorImpl.class)
 @ExtendWith(SpringExtension.class)
 class UserConnectorImplTest {
 
-    @Autowired
+    @InjectMocks
     UserConnectorImpl userConnectorImpl;
 
-    @MockBean
+    @Mock
     UserRepository userRepository;
 
     @Test
@@ -36,5 +34,19 @@ class UserConnectorImplTest {
         List<OnboardedUser> response = userConnectorImpl.findOnboardedManager("42","2");
         Assertions.assertEquals(1,response.size());
         Assertions.assertEquals("507f1f77bcf86cd799439011",response.get(0).getUser());
+    }
+
+
+    @Test
+    void save(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(new HashMap<>());
+        onboardedUser.setUser("507f1f77bcf86cd799439011");
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        userEntity.setBindings(new HashMap<>());
+        when(userRepository.save(any())).thenReturn(userEntity);
+        OnboardedUser response = userConnectorImpl.save(onboardedUser);
+        Assertions.assertEquals("507f1f77bcf86cd799439011",response.getUser());
     }
 }
