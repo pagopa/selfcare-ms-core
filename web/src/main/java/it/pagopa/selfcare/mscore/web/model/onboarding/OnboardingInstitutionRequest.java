@@ -4,7 +4,6 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.Data;
-import lombok.NonNull;
 
 import java.util.List;
 

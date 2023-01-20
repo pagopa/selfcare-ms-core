@@ -31,7 +31,7 @@ class InstitutionConnectorImplTest {
     void findById() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
         institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
-        Optional<Institution> response = institutionConnectionImpl.findById("ext");
+        Optional<Institution> response = institutionConnectionImpl.findByExternalId("id");
         Assertions.assertTrue(response.isEmpty());
     }
 

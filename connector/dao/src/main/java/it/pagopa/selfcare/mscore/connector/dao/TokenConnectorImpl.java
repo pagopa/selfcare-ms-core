@@ -58,6 +58,8 @@ public class TokenConnectorImpl implements TokenConnector {
         entity.setUsers(token.getUsers());
         entity.setExpiringDate(token.getExpiringDate());
         entity.setProductId(token.getProductId());
+        entity.setCreatedAt(token.getCreatedAt());
+        entity.setUpdatedAt(token.getUpdatedAt());
         return entity;
     }
 

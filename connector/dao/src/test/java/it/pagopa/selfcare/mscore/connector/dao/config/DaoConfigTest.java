@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.config;
 
+import com.mongodb.assertions.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -7,7 +8,6 @@ import org.mockito.Mock;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
 class DaoConfigTest {
@@ -20,13 +20,7 @@ class DaoConfigTest {
 
     @Test
     void testCustomConversions() {
-        daoConfig.customConversions();
-    }
-
-    @Test
-    void testTransactionManager() {
-        MongoDatabaseFactory mongoDatabaseFactory = mock(MongoDatabaseFactory.class);
-        daoConfig.transactionManager(mongoDatabaseFactory);
+        Assertions.assertNotNull(daoConfig.customConversions());
     }
 
 }

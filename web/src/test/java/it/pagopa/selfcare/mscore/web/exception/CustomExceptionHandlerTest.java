@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import it.pagopa.selfcare.mscore.constant.ErrorEnum;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Problem;
@@ -68,14 +69,14 @@ class CustomExceptionHandlerTest {
     }
 
     /**
-     * Method under test: {@link CustomExceptionHandler#handleInvalidRequestException(HttpServletRequest, ResourceConflictException)}
+     * Method under test: {@link CustomExceptionHandler#handleInvalidRequestException(HttpServletRequest, InvalidRequestException)}
      */
     @Test
     void testHandleInvalidRequestException() {
         CustomExceptionHandler customExceptionHandler = new CustomExceptionHandler();
         MockHttpServletRequest request = new MockHttpServletRequest();
         ResponseEntity<Problem> actualHandleInvalidRequestExceptionResult = customExceptionHandler
-                .handleInvalidRequestException(request, new ResourceConflictException("An error occurred", "Code"));
+                .handleInvalidRequestException(request, new InvalidRequestException("An error occurred", "Code"));
         assertTrue(actualHandleInvalidRequestExceptionResult.hasBody());
         assertEquals(1, actualHandleInvalidRequestExceptionResult.getHeaders().size());
         assertEquals(HttpStatus.BAD_REQUEST, actualHandleInvalidRequestExceptionResult.getStatusCode());

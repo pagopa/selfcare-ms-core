@@ -2,12 +2,10 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.NationalRegistriesConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,15 +21,14 @@ import static it.pagopa.selfcare.mscore.constant.ErrorEnum.*;
 public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionConnector institutionConnector;
-    private final NationalRegistriesConnector nationalRegistriesConnector;
+
+    //TODO: ADD private final NationalRegistriesConnector nationalRegistriesConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     private static final String INSTITUTION_CREATED_LOG = "institution created {}";
 
-    public InstitutionServiceImpl(InstitutionConnector institutionConnector,
-                                  NationalRegistriesConnector nationalRegistriesConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
+    public InstitutionServiceImpl(InstitutionConnector institutionConnector,PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.institutionConnector = institutionConnector;
-        this.nationalRegistriesConnector = nationalRegistriesConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
     }
 
@@ -83,14 +80,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
                 .findFirst().ifPresent(in -> newInstitution.setDescription(in.getBusinessName()));
 
-        //TODO: TESTARE QUANDO NATIONAL REGISTRIES E INFO CAMERE SARANNO FUNZIONANTI
-        NationalRegistriesProfessionalAddress response = nationalRegistriesConnector.getLegalAddress(taxId);
+        //TODO: ADD QUANDO NATIONAL REGISTRIES E INFO CAMERE SARANNO FUNZIONANTI
+        //NationalRegistriesProfessionalAddress response = nationalRegistriesConnector.getLegalAddress(taxId);
 
         newInstitution.setExternalId(taxId);
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
-        newInstitution.setAddress(response.getAddress());
-        newInstitution.setZipCode(response.getZip());
+        //newInstitution.setAddress(response.getAddress());
+        //newInstitution.setZipCode(response.getZip());
         newInstitution.setCreatedAt(OffsetDateTime.now());
 
         return saveInstitution(newInstitution);

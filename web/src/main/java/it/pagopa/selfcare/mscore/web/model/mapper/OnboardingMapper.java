@@ -8,15 +8,10 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import java.time.OffsetDateTime;
 import java.util.*;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
-
-    private static final List<RelationshipState> defaultRelationshipStates =
-            List.of(RelationshipState.ACTIVE,
-                    RelationshipState.PENDING);
 
     public static OnboardingRequest toOnboardingRequest(OnboardingInstitutionRequest onboardingInstitutionRequest) {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
@@ -51,43 +46,11 @@ public class OnboardingMapper {
                 OnboardedUser onboardedUser = new OnboardedUser();
                 onboardedUser.setUser(p.getId());
                 onboardedUser.setRole(PartyRole.valueOf(p.getRole()));
-                onboardedUser.setBindings(constructMap(p, onboardingInstitutionRequest));
+                onboardedUser.setProductRole(List.of(p.getRole(),p.getProductRole()));
                 onboardedUsers.add(onboardedUser);
             }
         }
         return onboardedUsers;
-    }
-
-    private static Map<String, Map<String, Product>> constructMap(Person p, OnboardingInstitutionRequest onboardingInstitutionRequest) {
-        Map<String, Map<String,Product>> map = new HashMap<>();
-        map.put(onboardingInstitutionRequest.getInstitutionExternalId(),constructProductMap(onboardingInstitutionRequest,p));
-        return map;
-    }
-
-    private static Map<String, Product> constructProductMap(OnboardingInstitutionRequest onboardingInstitutionRequest, Person p) {
-        Map<String,Product> productMap = new HashMap<>();
-        productMap.put(onboardingInstitutionRequest.getProductId(),constructProduct(p, onboardingInstitutionRequest.getInstitutionUpdate().getInstitutionType()));
-        return productMap;
-    }
-
-    private static Product constructProduct(Person p, InstitutionType institutionType) {
-        Product product = new Product();
-        product.setRoles(List.of(p.getRole(),p.getProductRole()));
-        product.setStatus(retrieveStatusFromInstitutionType(institutionType));
-        product.setCreatedAt(OffsetDateTime.now());
-        product.setUpdatedAt(OffsetDateTime.now());
-        return product;
-    }
-
-    private static RelationshipState retrieveStatusFromInstitutionType(InstitutionType institutionType) {
-        switch (institutionType) {
-            case PA:
-                return RelationshipState.PENDING;
-            case PG:
-                return RelationshipState.ACTIVE;
-            default:
-                return RelationshipState.TOBEVALIDATED;
-        }
     }
 
     private static Billing convertToBilling(BillingRequest billingRequest) {

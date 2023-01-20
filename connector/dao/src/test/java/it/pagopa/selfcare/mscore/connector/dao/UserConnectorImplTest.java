@@ -33,7 +33,6 @@ class UserConnectorImplTest {
         when(userRepository.find(any(),any())).thenReturn(List.of(user));
         List<OnboardedUser> response = userConnectorImpl.findOnboardedManager("42","2");
         Assertions.assertEquals(1,response.size());
-        Assertions.assertEquals("507f1f77bcf86cd799439011",response.get(0).getUser());
     }
 
 

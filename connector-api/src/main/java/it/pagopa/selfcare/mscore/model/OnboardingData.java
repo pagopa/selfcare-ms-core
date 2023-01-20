@@ -2,11 +2,8 @@ package it.pagopa.selfcare.mscore.model;
 
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.Data;
-import org.codehaus.commons.nullanalysis.NotNull;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Data
 public class OnboardingData {

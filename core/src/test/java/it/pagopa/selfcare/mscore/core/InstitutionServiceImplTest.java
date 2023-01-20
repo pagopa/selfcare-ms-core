@@ -297,9 +297,6 @@ class InstitutionServiceImplTest {
         assertSame(institution, institutionServiceImpl.createPgInstitution("42", selfCareUser));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
-        verify(nationalRegistriesConnector).getLegalAddress(any());
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(selfCareUser).getFiscalCode();
     }
 
 

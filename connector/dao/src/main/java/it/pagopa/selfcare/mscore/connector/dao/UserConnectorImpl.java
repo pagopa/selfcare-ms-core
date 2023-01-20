@@ -6,8 +6,10 @@ import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Example;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.UntypedExampleMatcher;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -51,11 +53,25 @@ public class UserConnectorImpl implements UserConnector {
         return convertToOnboardeUser(repository.save(entity));
     }
 
+    @Override
+    public List<OnboardedUser> getByUser(String user) {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setUser(user);
+        Example<UserEntity> example = Example.of(convertToUserEntity(onboardedUser), UntypedExampleMatcher.matching());
+        return repository.findAll(example).stream()
+                .map(this::convertToUser)
+                .collect(Collectors.toList());
+    }
+
     private UserEntity convertToUserEntity(OnboardedUser example) {
         UserEntity user = new UserEntity();
+
         user.setUser(example.getUser());
         user.setCreatedAt(example.getCreatedAt());
         user.setBindings(example.getBindings());
+        if(example.getId()!=null)
+            user.setId(new ObjectId(example.getId()));
+
         return user;
     }
 
@@ -76,7 +92,9 @@ public class UserConnectorImpl implements UserConnector {
 
     private OnboardedUser convertToUser(UserEntity entity) {
         OnboardedUser user = new OnboardedUser();
-        user.setUser(entity.getId().toString());
+        user.setId(entity.getId().toString());
+        user.setUser(entity.getUser());
+        user.setCreatedAt(entity.getCreatedAt());
         user.setBindings(entity.getBindings());
         return user;
     }

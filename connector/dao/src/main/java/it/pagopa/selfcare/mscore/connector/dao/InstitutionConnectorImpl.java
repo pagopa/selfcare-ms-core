@@ -10,7 +10,6 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.mongodb.core.query.UntypedExampleMatcher;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,6 +47,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     public Optional<Institution> findByExternalId(String externalId) {
         Institution institution = new Institution();
         institution.setExternalId(externalId);
+        institution.setOnboarding(null);
         List<Institution> result = findAll(institution);
         if (result.isEmpty()) {
             return Optional.empty();
@@ -72,6 +72,8 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         institution.setPaymentServiceProvider(entity.getPaymentServiceProvider());
         institution.setAttributes(entity.getAttributes());
         institution.setGeographicTaxonomies(entity.getGeographicTaxonomies());
+        institution.setCreatedAt(entity.getCreatedAt());
+        institution.setUpdatedAt(entity.getUpdatedAt());
         return institution;
     }
 
@@ -89,11 +91,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         entity.setAddress(institution.getAddress());
         entity.setZipCode(institution.getZipCode());
         entity.setTaxCode(institution.getTaxCode());
-        if(institution.getOnboarding()!=null){
-            institution.setOnboarding(institution.getOnboarding());
-        }else {
-            institution.setOnboarding(new ArrayList<>());
-        }
+        entity.setOnboarding(institution.getOnboarding());
         entity.setUpdatedAt(institution.getUpdatedAt());
 
         return entity;

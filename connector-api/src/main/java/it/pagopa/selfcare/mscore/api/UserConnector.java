@@ -11,4 +11,5 @@ public interface UserConnector {
     void deleteById(String id);
     OnboardedUser save(OnboardedUser example);
 
+    List<OnboardedUser> getByUser(String user);
 }
