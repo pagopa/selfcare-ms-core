@@ -1,6 +1,9 @@
 package it.pagopa.selfcare.mscore.model;
 
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.Attributes;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import lombok.Data;
 
 import java.util.List;

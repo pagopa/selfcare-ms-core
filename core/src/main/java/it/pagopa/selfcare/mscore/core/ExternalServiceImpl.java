@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static it.pagopa.selfcare.mscore.constant.ErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 
 @Service
 @Slf4j
@@ -39,19 +39,20 @@ public class ExternalServiceImpl implements ExternalService {
         List<Onboarding> list = Optional.ofNullable(institution.getOnboarding()).orElse(new ArrayList<>());
         Optional<Onboarding> optInstitutionProduct = list.stream().filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(productId))
                 .findAny();
-        if (optInstitutionProduct.isPresent())
+        if (optInstitutionProduct.isPresent()) {
             return institution;
-        else
+        }else {
             throw new ResourceNotFoundException(String.format(GET_INSTITUTION_BILLING_NOT_FOUND.getMessage(), institution.getExternalId(), productId),
                     GET_INSTITUTION_BILLING_NOT_FOUND.getCode());
+        }
     }
 
     @Override
     public OnboardedUser getInstitutionManager(Institution institution, String productId) {
         List<OnboardedUser> list = userConnector.findOnboardedManager(institution.getId(), productId);
-        if (list != null && !list.isEmpty())
+        if (list != null && !list.isEmpty()) {
             return list.get(0);
-
+        }
         throw new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institution.getExternalId(), productId),
                 GET_INSTITUTION_MANAGER_NOT_FOUND.getCode());
     }

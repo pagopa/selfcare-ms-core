@@ -177,7 +177,7 @@ public class InstitutionMapper {
         ProductInfo productInfo = new ProductInfo();
         productInfo.setRole(List.of(PartyRole.MANAGER.name()));
         for (Onboarding o : onboarding) {
-            if (productId.equalsIgnoreCase(o.getProductId()) && RelationshipState.ACTIVE.equals(o.getStatus()))
+            if (productId.equalsIgnoreCase(o.getProductId()) && RelationshipState.ACTIVE == o.getStatus())
                 productInfo.setCreatedAt(o.getCreatedAt());
         }
         productInfo.setId(productId);

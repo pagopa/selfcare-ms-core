@@ -3,7 +3,8 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Example;
@@ -69,9 +70,9 @@ public class UserConnectorImpl implements UserConnector {
         user.setUser(example.getUser());
         user.setCreatedAt(example.getCreatedAt());
         user.setBindings(example.getBindings());
-        if(example.getId()!=null)
+        if(example.getId()!=null) {
             user.setId(new ObjectId(example.getId()));
-
+        }
         return user;
     }
 

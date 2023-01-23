@@ -19,7 +19,6 @@
 
   <modules>
     <module>dao</module>
-    <module>azure-storage</module>
     <module>rest</module>
   </modules>
 

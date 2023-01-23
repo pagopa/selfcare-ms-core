@@ -10,7 +10,7 @@ import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import static it.pagopa.selfcare.mscore.constant.ErrorEnum.CREATE_INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.CREATE_INSTITUTION_NOT_FOUND;
 
 @Slf4j
 @Service

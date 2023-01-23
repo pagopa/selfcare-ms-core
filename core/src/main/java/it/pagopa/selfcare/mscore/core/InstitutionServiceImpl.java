@@ -5,7 +5,6 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static it.pagopa.selfcare.mscore.constant.ErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 
 @Slf4j
 @Service
@@ -27,7 +26,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private static final String INSTITUTION_CREATED_LOG = "institution created {}";
 
-    public InstitutionServiceImpl(InstitutionConnector institutionConnector,PartyRegistryProxyConnector partyRegistryProxyConnector) {
+    public InstitutionServiceImpl(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.institutionConnector = institutionConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
     }
@@ -76,18 +75,18 @@ public class InstitutionServiceImpl implements InstitutionService {
         Institution newInstitution = new Institution();
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA SEGUENTE CHIAMATA
-        List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
-        institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
-                .findFirst().ifPresent(in -> newInstitution.setDescription(in.getBusinessName()));
+        // List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
+        // institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
+        //       .findFirst().ifPresent(in -> newInstitution.setDescription(in.getBusinessName()));
 
         //TODO: ADD QUANDO NATIONAL REGISTRIES E INFO CAMERE SARANNO FUNZIONANTI
-        //NationalRegistriesProfessionalAddress response = nationalRegistriesConnector.getLegalAddress(taxId);
+        // NationalRegistriesProfessionalAddress response = nationalRegistriesConnector.getLegalAddress(taxId);
+        // newInstitution.setAddress(response.getAddress());
+        // newInstitution.setZipCode(response.getZip());
 
         newInstitution.setExternalId(taxId);
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
-        //newInstitution.setAddress(response.getAddress());
-        //newInstitution.setZipCode(response.getZip());
         newInstitution.setCreatedAt(OffsetDateTime.now());
 
         return saveInstitution(newInstitution);
@@ -100,6 +99,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         if(institution.getInstitutionType()!=null) {
             institution.setIpaCode(institution.getInstitutionType().toString());
         }else{
+            institution.setInstitutionType(InstitutionType.UNKNOWN);
             institution.setIpaCode("SELC_" + externalId);
         }
         institution.setCreatedAt(OffsetDateTime.now());

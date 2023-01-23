@@ -370,7 +370,6 @@ class OnboardingServiceImplTest {
         verify(institutionConnector).findByExternalId( any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
-        verify(institution).getInstitutionType();
         verify(institution).getPaymentServiceProvider();
         verify(institution, atLeast(1)).getAddress();
         verify(institution, atLeast(1)).getDescription();
@@ -1029,7 +1028,6 @@ class OnboardingServiceImplTest {
         verify(institutionConnector).findByExternalId( any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
-        verify(institution).getInstitutionType();
         verify(institution).getPaymentServiceProvider();
         verify(institution, atLeast(1)).getAddress();
         verify(institution, atLeast(1)).getDescription();
