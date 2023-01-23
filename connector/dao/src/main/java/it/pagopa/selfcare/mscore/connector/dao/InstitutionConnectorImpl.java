@@ -93,6 +93,15 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         entity.setTaxCode(institution.getTaxCode());
         entity.setOnboarding(institution.getOnboarding());
         entity.setUpdatedAt(institution.getUpdatedAt());
+        if(institution.getGeographicTaxonomies() != null) {
+            entity.setGeographicTaxonomies(institution.getGeographicTaxonomies());
+        }
+        if(institution.getDataProtectionOfficer() != null) {
+            entity.setDataProtectionOfficer(institution.getDataProtectionOfficer());
+        }
+        if(institution.getPaymentServiceProvider() != null) {
+            entity.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        }
 
         return entity;
     }
