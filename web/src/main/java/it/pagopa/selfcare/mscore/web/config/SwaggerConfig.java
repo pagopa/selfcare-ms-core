@@ -74,6 +74,30 @@ public class SwaggerConfig {
                                                             .name(Problem.class.getSimpleName()))))))
             .build();
 
+    private static final Response CONFLICT_RESPONSE = new ResponseBuilder()
+            .code(String.valueOf(HttpStatus.CONFLICT.value()))
+            .description(HttpStatus.CONFLICT.getReasonPhrase())
+            .representation(MediaType.APPLICATION_PROBLEM_JSON).apply(repBuilder ->
+                    repBuilder.model(modelSpecBuilder ->
+                            modelSpecBuilder.referenceModel(refModelSpecBuilder ->
+                                    refModelSpecBuilder.key(modelKeyBuilder ->
+                                            modelKeyBuilder.qualifiedModelName(qualifiedModelNameBuilder ->
+                                                    qualifiedModelNameBuilder.namespace(Problem.class.getPackageName())
+                                                            .name(Problem.class.getSimpleName()))))))
+            .build();
+
+    private static final Response FORBIDDEN_RESPONSE = new ResponseBuilder()
+            .code(String.valueOf(HttpStatus.FORBIDDEN.value()))
+            .description(HttpStatus.FORBIDDEN.getReasonPhrase())
+            .representation(MediaType.APPLICATION_PROBLEM_JSON).apply(repBuilder ->
+                    repBuilder.model(modelSpecBuilder ->
+                            modelSpecBuilder.referenceModel(refModelSpecBuilder ->
+                                    refModelSpecBuilder.key(modelKeyBuilder ->
+                                            modelKeyBuilder.qualifiedModelName(qualifiedModelNameBuilder ->
+                                                    qualifiedModelNameBuilder.namespace(Problem.class.getPackageName())
+                                                            .name(Problem.class.getSimpleName()))))))
+            .build();
+
     @Configuration
     @Profile("swaggerIT")
     @PropertySource("classpath:/swagger/swagger_it.properties")
@@ -90,7 +114,7 @@ public class SwaggerConfig {
 
 
     @Autowired
-    public SwaggerConfig(Environment environment) {
+    SwaggerConfig(Environment environment) {
         this.environment = environment;
     }
 
@@ -105,14 +129,16 @@ public class SwaggerConfig {
                         .build())
                 .select().apis(RequestHandlerSelectors.basePackage("it.pagopa.selfcare.mscore.web.controller")).build()
                 .tags(new Tag("External", environment.getProperty("swagger.name.api.external.description")))
+                .tags(new Tag("Institution", environment.getProperty("swagger.name.api.institution.description")))
+                .tags(new Tag("Onboarding", environment.getProperty("swagger.name.api.onboarding.description")))
                 .directModelSubstitute(LocalTime.class, String.class)
                 .forCodeGeneration(true)
                 .useDefaultResponseMessages(false)
-                .globalResponses(HttpMethod.GET, List.of(INTERNAL_SERVER_ERROR_RESPONSE, BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE))
-                .globalResponses(HttpMethod.DELETE, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE))
-                .globalResponses(HttpMethod.POST, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE))
-                .globalResponses(HttpMethod.PUT, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE))
-                .globalResponses(HttpMethod.PATCH, List.of(INTERNAL_SERVER_ERROR_RESPONSE, UNAUTHORIZED_RESPONSE, BAD_REQUEST_RESPONSE))
+                .globalResponses(HttpMethod.GET, List.of(BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE))
+                .globalResponses(HttpMethod.DELETE, List.of(BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE, CONFLICT_RESPONSE))
+                .globalResponses(HttpMethod.POST, List.of(BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE, CONFLICT_RESPONSE))
+                .globalResponses(HttpMethod.PUT, List.of(BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE, FORBIDDEN_RESPONSE))
+                .globalResponses(HttpMethod.HEAD, List.of(BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE))
                 .additionalModels(typeResolver.resolve(Problem.class))
                 .securityContexts(Collections.singletonList(SecurityContext.builder()
                         .securityReferences(defaultAuth())
