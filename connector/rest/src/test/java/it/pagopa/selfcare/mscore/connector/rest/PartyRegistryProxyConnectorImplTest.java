@@ -191,5 +191,12 @@ class PartyRegistryProxyConnectorImplTest {
         assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getInstitutionsByLegal("42"));
         verify(partyRegistryProxyRestClient).getInstitutionsByLegal(any());
     }
+
+    @Test
+    void testGetInstitutionByIdThrow() {
+        when(partyRegistryProxyRestClient.getInstitutionById(any())).thenReturn(null);
+        assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getInstitutionById("id"));
+        verify(partyRegistryProxyRestClient).getInstitutionById(any());
+    }
 }
 
