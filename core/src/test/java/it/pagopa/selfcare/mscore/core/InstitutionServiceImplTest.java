@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,17 +13,23 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.NationalRegistriesConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.institution.Attributes;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -35,6 +42,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(classes = {InstitutionServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class InstitutionServiceImplTest {
+    @MockBean
+    private UserConnector userConnector;
+
     @MockBean
     private InstitutionConnector institutionConnector;
 
@@ -130,7 +140,7 @@ class InstitutionServiceImplTest {
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
         when(institutionConnector.save(any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId( any())).thenReturn(Optional.empty());
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
         institutionProxyInfo.setAddress("42 Main St");
@@ -151,7 +161,7 @@ class InstitutionServiceImplTest {
         categoryProxyInfo.setKind("Kind");
         categoryProxyInfo.setName("Name");
         categoryProxyInfo.setOrigin("Origin");
-        when(partyRegistryProxyConnector.getCategory( any(), any())).thenReturn(categoryProxyInfo);
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(categoryProxyInfo);
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
         assertSame(institution, institutionServiceImpl.createInstitutionByExternalId("42"));
         verify(institutionConnector).save(any());
@@ -573,6 +583,58 @@ class InstitutionServiceImplTest {
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
         assertEquals("SELC_42", institution1.getIpaCode());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProducts() {
+        when(institutionConnector.findById(any())).thenReturn(Optional.of(new Institution()));
+        List<String> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> institutionServiceImpl.retrieveInstitutionProducts("42", list));
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProducts2() {
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        when(institutionConnector.findById(any()))
+                .thenReturn(Optional.of(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
+                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null)));
+        assertTrue(institutionServiceImpl.retrieveInstitutionProducts("42", new ArrayList<>()).isEmpty());
+        verify(institutionConnector).findById(any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProducts4() {
+        when(institutionConnector.findById(any())).thenReturn(Optional.empty());
+        List<String> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> institutionServiceImpl.retrieveInstitutionProducts("42", list));
+        verify(institutionConnector).findById(any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void estRetrieveInstitutionProducts() {
+        when(institutionConnector.findById(any())).thenReturn(Optional.of(new Institution()));
+        List<String> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> institutionServiceImpl.retrieveInstitutionProducts("42", list));
     }
 }
 

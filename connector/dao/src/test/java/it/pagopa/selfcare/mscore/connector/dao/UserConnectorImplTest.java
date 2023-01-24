@@ -68,7 +68,7 @@ class UserConnectorImplTest {
     @Test
     void deleteById(){
         doNothing().when(userRepository).deleteById(any());
-        userConnectorImpl.deleteById("507f1f77bcf86cd799439011");
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.deleteById("507f1f77bcf86cd799439011"));
     }
 
     @Test

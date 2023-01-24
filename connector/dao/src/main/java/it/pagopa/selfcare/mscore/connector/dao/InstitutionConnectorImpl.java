@@ -2,14 +2,18 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UntypedExampleMatcher;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,6 +21,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class InstitutionConnectorImpl implements InstitutionConnector {
+
+    private static final String ONBOARDING = "onboarding";
     private final InstitutionRepository repository;
 
     @Autowired
@@ -56,6 +62,35 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         }
     }
 
+    @Override
+    public List<Institution> findWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates) {
+        Query query = new Query();
+        query.addCriteria(
+                new Criteria().andOperator(
+                        Criteria.where("externalId").is(externalId),
+                        Criteria.where(ONBOARDING).exists(true),
+                        Criteria.where(constructQuery("productId")).is(productId)
+                                .and(constructQuery("status")).in(validRelationshipStates)
+                )
+        );
+        return repository.find(query, InstitutionEntity.class).stream()
+                .map(this::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Institution> findById(String id) {
+        return repository.findById(new ObjectId(id))
+                .map(this::convertToInstitution);
+    }
+
+    private String constructQuery(String... variables) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(ONBOARDING);
+        Arrays.stream(variables).forEach(s -> builder.append(".").append(s));
+        return builder.toString();
+    }
+
     private Institution convertToInstitution(InstitutionEntity entity) {
         Institution institution = new Institution();
         institution.setId(entity.getId().toString());
@@ -93,13 +128,13 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         entity.setTaxCode(institution.getTaxCode());
         entity.setOnboarding(institution.getOnboarding());
         entity.setUpdatedAt(institution.getUpdatedAt());
-        if(institution.getGeographicTaxonomies() != null) {
+        if (institution.getGeographicTaxonomies() != null) {
             entity.setGeographicTaxonomies(institution.getGeographicTaxonomies());
         }
-        if(institution.getDataProtectionOfficer() != null) {
+        if (institution.getDataProtectionOfficer() != null) {
             entity.setDataProtectionOfficer(institution.getDataProtectionOfficer());
         }
-        if(institution.getPaymentServiceProvider() != null) {
+        if (institution.getPaymentServiceProvider() != null) {
             entity.setPaymentServiceProvider(institution.getPaymentServiceProvider());
         }
 

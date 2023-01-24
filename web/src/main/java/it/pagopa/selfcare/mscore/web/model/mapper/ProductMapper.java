@@ -1,7 +1,9 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionProduct;
+import it.pagopa.selfcare.mscore.web.model.institution.ProductState;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -19,7 +21,8 @@ public class ProductMapper {
 
     public static InstitutionProduct toResource(Onboarding onboarding) {
         InstitutionProduct products = new InstitutionProduct();
-
+        products.setId(onboarding.getProductId());
+        products.setState(ProductState.valueOf(onboarding.getStatus().name()));
         return products;
     }
 }

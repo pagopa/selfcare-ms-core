@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,6 +50,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 class OnboardingServiceImplTest {
     @MockBean
+    private ExternalService externalService;
+
+    @MockBean
     private GeoTaxonomiesConnector geoTaxonomiesConnector;
 
     @MockBean
@@ -63,6 +67,28 @@ class OnboardingServiceImplTest {
     @MockBean
     private UserConnector userConnector;
 
+    /**
+     * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
+     */
+    @Test
+    void testVerifyOnboardingInfo() {
+        doNothing().when(externalService)
+                .getInstitutionWithFilter(any(), any(),any());
+        onboardingServiceImpl.verifyOnboardingInfo("42", "42");
+        verify(externalService).getInstitutionWithFilter(any(), any(),any());
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
+     */
+    @Test
+    void testVerifyOnboardingInfo2() {
+        doThrow(new ResourceNotFoundException("An error occurred", "Code")).when(externalService)
+                .getInstitutionWithFilter(any(), any(),any());
+        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfo("42", "42"));
+        verify(externalService).getInstitutionWithFilter(any(), any(),any());
+    }
+
     @Test
     void testOnboardingInstitution1() {
         Institution institution = new Institution();
@@ -72,7 +98,7 @@ class OnboardingServiceImplTest {
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
 
-        when(institutionConnector.findByExternalId( any())).thenReturn(Optional.of(institution));
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(institution));
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -158,7 +184,7 @@ class OnboardingServiceImplTest {
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
 
-        when(institutionConnector.findByExternalId( any())).thenReturn(Optional.of(institution));
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(institution));
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -218,7 +244,7 @@ class OnboardingServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionConnector.findByExternalId( any()))
+        when(institutionConnector.findByExternalId(any()))
                 .thenReturn(Optional.of(new Institution("42", "42", "Onboarding institution having externalId {}",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Onboarding institution having externalId {}", billing, onboarding, geographicTaxonomies, attributes,
@@ -267,7 +293,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).findByExternalId(any());
     }
 
     /**
@@ -308,8 +334,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -366,8 +392,8 @@ class OnboardingServiceImplTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setUsers(new ArrayList<>());
         onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class));
-        verify(institutionConnector).save( any());
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
         verify(institution).getPaymentServiceProvider();
@@ -423,8 +449,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -482,7 +508,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getAddress();
         verify(institution).getDescription();
         verify(institution).getDigitalAddress();
@@ -530,8 +556,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -589,7 +615,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getDescription();
         verify(institution).getDigitalAddress();
         verify(institution).getExternalId();
@@ -636,8 +662,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -695,7 +721,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getDescription();
         verify(institution).getDigitalAddress();
         verify(institution).getExternalId();
@@ -743,8 +769,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -841,8 +867,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("Onboarding institution having externalId {}");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -900,7 +926,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getDescription();
         verify(institution).getExternalId();
         verify(institution, atLeast(1)).getOnboarding();
@@ -966,8 +992,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(onboardingList);
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -1024,8 +1050,8 @@ class OnboardingServiceImplTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setUsers(new ArrayList<>());
         onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class));
-        verify(institutionConnector).save( any());
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
         verify(institution).getPaymentServiceProvider();
@@ -1049,8 +1075,8 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingInstitution14() {
 
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(Optional.empty());
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -1115,8 +1141,8 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testOnboardingInstitution15() {
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(Optional.empty());
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -1174,7 +1200,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(ResourceNotFoundException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId( any());
+        verify(institutionConnector).findByExternalId(any());
     }
 
     /**
@@ -1216,8 +1242,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save( any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId( any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -1300,13 +1326,13 @@ class OnboardingServiceImplTest {
         when(onboardingRequest.getInstitutionUpdate()).thenReturn(institutionUpdate1);
         when(onboardingRequest.getInstitutionExternalId()).thenReturn("42");
         doNothing().when(onboardingRequest).setBillingRequest(any());
-        doNothing().when(onboardingRequest).setContract( any());
-        doNothing().when(onboardingRequest).setInstitutionExternalId( any());
-        doNothing().when(onboardingRequest).setInstitutionUpdate( any());
-        doNothing().when(onboardingRequest).setPricingPlan( any());
-        doNothing().when(onboardingRequest).setProductId( any());
-        doNothing().when(onboardingRequest).setProductName( any());
-        doNothing().when(onboardingRequest).setUsers( any());
+        doNothing().when(onboardingRequest).setContract(any());
+        doNothing().when(onboardingRequest).setInstitutionExternalId(any());
+        doNothing().when(onboardingRequest).setInstitutionUpdate(any());
+        doNothing().when(onboardingRequest).setPricingPlan(any());
+        doNothing().when(onboardingRequest).setProductId(any());
+        doNothing().when(onboardingRequest).setProductName(any());
+        doNothing().when(onboardingRequest).setUsers(any());
         onboardingRequest.setBillingRequest(billing1);
         onboardingRequest.setContract(contract);
         onboardingRequest.setInstitutionExternalId("42");

@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
@@ -29,7 +30,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {OnboardingController.class})
 @ExtendWith(SpringExtension.class)
@@ -117,6 +117,49 @@ class OnboardingControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
+     */
+    @Test
+    void testVerifyOnboardingInfo() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
+     */
+    @Test
+    void testVerifyOnboardingInfo2() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
+        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
+                .formLogin();
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
+     */
+    @Test
+    void testVerifyOnboardingInfo3() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
+        MockHttpServletRequestBuilder headResult = MockMvcRequestBuilders
+                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
+        headResult.characterEncoding("Encoding");
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(headResult)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }
 

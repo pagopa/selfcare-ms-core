@@ -84,7 +84,7 @@ class InstitutionConnectorImplTest {
     @Test
     void deleteById(){
         doNothing().when(institutionRepository).deleteById(any());
-        institutionConnectionImpl.deleteById("507f1f77bcf86cd799439011");
+        Assertions.assertDoesNotThrow(() -> institutionConnectionImpl.deleteById("507f1f77bcf86cd799439011"));
     }
 
     @Test

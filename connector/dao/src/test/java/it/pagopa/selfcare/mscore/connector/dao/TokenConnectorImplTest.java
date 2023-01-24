@@ -28,7 +28,7 @@ class TokenConnectorImplTest {
     @Test
     void deleteById(){
         doNothing().when(tokenRepository).deleteById(any());
-        tokenConnectorImpl.deleteById("507f1f77bcf86cd799439011");
+        Assertions.assertDoesNotThrow(() -> tokenConnectorImpl.deleteById("507f1f77bcf86cd799439011"));
     }
 
     @Test

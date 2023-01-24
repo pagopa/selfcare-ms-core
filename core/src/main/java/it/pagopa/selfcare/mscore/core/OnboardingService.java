@@ -14,8 +14,4 @@ public interface OnboardingService {
 
     void verifyOnboardingInfo(String externalId, String productId);
 
-    List<Institution> getOnboardingInfo(List<RelationshipState> states, OnboardedUser onboardedUser);
-
-    OnboardedUser findUser(SelfCareUser selfCareUser, String institutionId, String institutionExternalId, List<RelationshipState> states);
-
 }

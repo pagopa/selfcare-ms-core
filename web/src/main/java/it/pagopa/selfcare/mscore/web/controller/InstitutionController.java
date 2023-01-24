@@ -72,6 +72,7 @@ public class InstitutionController {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.products}")
     @GetMapping(value = "/{id}/products")
     public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@PathVariable("id") String id,
                                                                          @RequestParam(value = "states") String[] states) {

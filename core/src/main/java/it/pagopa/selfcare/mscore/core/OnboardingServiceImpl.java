@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -29,6 +28,11 @@ public class OnboardingServiceImpl implements OnboardingService {
             List.of(RelationshipState.PENDING,
                     RelationshipState.REJECTED,
                     RelationshipState.TOBEVALIDATED);
+
+    private final List<RelationshipState> validRelationshipStates =
+            List.of(RelationshipState.ACTIVE,
+                    RelationshipState.DELETED,
+                    RelationshipState.SUSPENDED);
 
     private final List<PartyRole> verifyUsersRole =
             List.of(PartyRole.MANAGER,
@@ -51,29 +55,8 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void verifyOnboardingInfo(String externalId, String productId) {
-        Institution institution = externalService.getInstitutionByExternalId(externalId);
-        List<OnboardedUser> response = retrieveUser(institution.getId(), productId);
-        if(response.isEmpty())
-            throw new ResourceNotFoundException("","");
+        externalService.getInstitutionWithFilter(externalId,productId,validRelationshipStates);
     }
-
-    private List<OnboardedUser> retrieveUser(String to, String productId) {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public List<Institution> getOnboardingInfo(List<RelationshipState> states, OnboardedUser onboardedUser) {
-        List<Institution> institutions = new ArrayList<>();
-        return institutions;
-    }
-
-    @Override
-    public OnboardedUser findUser(SelfCareUser selfCareUser, String institutionId, String institutionExternalId, List<RelationshipState> states) {
-       return new OnboardedUser();
-    }
-
-
-
 
     @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {

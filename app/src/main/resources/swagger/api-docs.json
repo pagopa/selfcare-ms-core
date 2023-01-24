@@ -210,7 +210,7 @@
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "createInstitutionRaw",
-        "description" : "${swagger.mscore.institution.create}",
+        "description" : "The service create an institution using external institution id without fetching data from party-registry or info-camere",
         "operationId" : "createInstitutionRawUsingPOST",
         "parameters" : [ {
           "name" : "externalId",
@@ -282,7 +282,7 @@
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "createPgInstitution",
-        "description" : "${swagger.mscore.institution.PG.create}",
+        "description" : "The service create an institution (PG) using external institution id fetching data from info-camere",
         "operationId" : "createPgInstitutionUsingPOST",
         "parameters" : [ {
           "name" : "authenticated",
@@ -385,7 +385,7 @@
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "createInstitutionByExternalId",
-        "description" : "${swagger.mscore.institution.PA.create}",
+        "description" : "The service create an institution (PA) using external institution id fetching data from party-registry",
         "operationId" : "createInstitutionByExternalIdUsingPOST",
         "parameters" : [ {
           "name" : "externalId",
@@ -444,10 +444,186 @@
         } ]
       }
     },
+    "/institutions/{id}/products" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "retrieveInstitutionProducts",
+        "description" : "The service retrieves the insistitution's related products.",
+        "operationId" : "retrieveInstitutionProductsUsingGET",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "states",
+          "in" : "query",
+          "description" : "states",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardedProducts"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/onboarding/info" : {
+      "get" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "onboardingInfo",
+        "description" : "The service returns onboarding info related to logged user",
+        "operationId" : "onboardingInfoUsingGET",
+        "parameters" : [ {
+          "name" : "authenticated",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "authorities[0].authority",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "credentials",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "details",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "institutionId",
+          "in" : "query",
+          "description" : "institutionId",
+          "required" : true,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "principal",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "institutionExternalId",
+          "in" : "query",
+          "description" : "institutionExternalId",
+          "required" : true,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "states",
+          "in" : "query",
+          "description" : "states",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardingInfoResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/onboarding/institution" : {
       "post" : {
         "tags" : [ "Onboarding" ],
         "summary" : "onboardingInstitution",
+        "description" : "The service create a new Token (contract), and update institution and users data",
         "operationId" : "onboardingInstitutionUsingPOST",
         "parameters" : [ {
           "name" : "authenticated",
@@ -500,8 +676,8 @@
           }
         },
         "responses" : {
-          "200" : {
-            "description" : "OK"
+          "204" : {
+            "description" : "No Content"
           },
           "400" : {
             "description" : "Bad Request",
@@ -525,6 +701,61 @@
           },
           "409" : {
             "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/onboarding/institution/{externalId}/products/{productId}" : {
+      "head" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "verifyOnboardingInfo",
+        "description" : "The service verify if product is already onboarded for institution",
+        "operationId" : "verifyOnboardingInfoUsingHEAD",
+        "parameters" : [ {
+          "name" : "externalId",
+          "in" : "path",
+          "description" : "externalId",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "path",
+          "description" : "productId",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -568,6 +799,21 @@
             "type" : "string"
           },
           "origin" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Billing" : {
+        "title" : "Billing",
+        "type" : "object",
+        "properties" : {
+          "publicServer" : {
+            "type" : "boolean"
+          },
+          "recipientCode" : {
+            "type" : "string"
+          },
+          "vatNumber" : {
             "type" : "string"
           }
         }
@@ -756,6 +1002,19 @@
           }
         }
       },
+      "InstitutionProduct" : {
+        "title" : "InstitutionProduct",
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          }
+        }
+      },
       "InstitutionRequest" : {
         "title" : "InstitutionRequest",
         "type" : "object",
@@ -887,6 +1146,97 @@
             "type" : "string"
           },
           "zipCode" : {
+            "type" : "string"
+          }
+        }
+      },
+      "OnboardedInstitutionResponse" : {
+        "title" : "OnboardedInstitutionResponse",
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "attributes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AttributesResponse"
+            }
+          },
+          "billing" : {
+            "$ref" : "#/components/schemas/Billing"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "digitalAddress" : {
+            "type" : "string"
+          },
+          "externalId" : {
+            "type" : "string"
+          },
+          "geographicTaxonomies" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GeoTaxonomies"
+            }
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "institutionType" : {
+            "type" : "string",
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP", "UNKNOWN" ]
+          },
+          "origin" : {
+            "type" : "string"
+          },
+          "originId" : {
+            "type" : "string"
+          },
+          "pricingPlan" : {
+            "type" : "string"
+          },
+          "productInfo" : {
+            "$ref" : "#/components/schemas/ProductInfo"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string"
+          },
+          "taxCode" : {
+            "type" : "string"
+          },
+          "zipCode" : {
+            "type" : "string"
+          }
+        }
+      },
+      "OnboardedProducts" : {
+        "title" : "OnboardedProducts",
+        "type" : "object",
+        "properties" : {
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InstitutionProduct"
+            }
+          }
+        }
+      },
+      "OnboardingInfoResponse" : {
+        "title" : "OnboardingInfoResponse",
+        "type" : "object",
+        "properties" : {
+          "institutions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OnboardedInstitutionResponse"
+            }
+          },
+          "userId" : {
             "type" : "string"
           }
         }

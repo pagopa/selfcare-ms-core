@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_OPERATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_VERIFICATION_ERROR;
 import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
 
 @Slf4j
@@ -35,6 +36,8 @@ public class OnboardingController {
     @RequestMapping(method = {RequestMethod.HEAD}, value = "/institution/{externalId}/products/{productId}")
     public ResponseEntity<Void> verifyOnboardingInfo(@PathVariable(value = "externalId") String externalId,
                                                      @PathVariable(value = "productId") String productId) {
+
+        setCustomMessage(ONBOARDING_VERIFICATION_ERROR);
         onboardingService.verifyOnboardingInfo(externalId, productId);
         return ResponseEntity.ok().build();
     }

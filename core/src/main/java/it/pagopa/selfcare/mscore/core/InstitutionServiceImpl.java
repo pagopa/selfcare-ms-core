@@ -3,8 +3,11 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 
@@ -21,14 +25,16 @@ import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionConnector institutionConnector;
+    private final UserConnector userConnector;
 
     //TODO: ADD private final NationalRegistriesConnector nationalRegistriesConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     private static final String INSTITUTION_CREATED_LOG = "institution created {}";
 
-    public InstitutionServiceImpl(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
+    public InstitutionServiceImpl(InstitutionConnector institutionConnector, UserConnector userConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.institutionConnector = institutionConnector;
+        this.userConnector = userConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
     }
 
@@ -97,9 +103,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkAlreadyExists(externalId);
-        if(institution.getInstitutionType()!=null) {
+        if (institution.getInstitutionType() != null) {
             institution.setIpaCode(institution.getInstitutionType().toString());
-        }else{
+        } else {
             institution.setInstitutionType(InstitutionType.UNKNOWN);
             institution.setIpaCode("SELC_" + externalId);
         }
@@ -121,16 +127,17 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<Onboarding> retrieveInstitutionProducts(String id, List<String> states) {
-     /*   Optional<Institution> optionalInstitution = institutionConnector.findById(id);
-        if (optionalInstitution.isPresent() && optionalInstitution.get().getOnboarding() != null
-                && !optionalInstitution.get().getOnboarding().isEmpty())
-            return optionalInstitution.get().getOnboarding().stream()
-                    .filter(onboarding -> states.contains(onboarding.getStatus().name()))
-                    .collect(Collectors.toList());
-        else
-            throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND_ERROR.getMessage(), PRODUCTS_NOT_FOUND_ERROR.getCode());
-   */
-        return new ArrayList<>();
+        Optional<Institution> optionalInstitution = institutionConnector.findById(id);
+        if (optionalInstitution.isPresent() && optionalInstitution.get().getOnboarding() != null) {
+            if (states != null && !states.isEmpty()) {
+                return optionalInstitution.get().getOnboarding().stream()
+                        .filter(onboarding -> states.contains(onboarding.getStatus().name()))
+                        .collect(Collectors.toList());
+            } else {
+                return new ArrayList<>(optionalInstitution.get().getOnboarding());
+            }
+        } else {
+            throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), id), PRODUCTS_NOT_FOUND_ERROR.getCode());
+        }
     }
-
 }
