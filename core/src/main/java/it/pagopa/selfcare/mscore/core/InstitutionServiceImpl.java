@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,4 +118,19 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.info(INSTITUTION_CREATED_LOG, saved.getExternalId());
         return saved;
     }
+
+    @Override
+    public List<Onboarding> retrieveInstitutionProducts(String id, List<String> states) {
+     /*   Optional<Institution> optionalInstitution = institutionConnector.findById(id);
+        if (optionalInstitution.isPresent() && optionalInstitution.get().getOnboarding() != null
+                && !optionalInstitution.get().getOnboarding().isEmpty())
+            return optionalInstitution.get().getOnboarding().stream()
+                    .filter(onboarding -> states.contains(onboarding.getStatus().name()))
+                    .collect(Collectors.toList());
+        else
+            throw new ResourceNotFoundException(PRODUCTS_NOT_FOUND_ERROR.getMessage(), PRODUCTS_NOT_FOUND_ERROR.getCode());
+   */
+        return new ArrayList<>();
+    }
+
 }

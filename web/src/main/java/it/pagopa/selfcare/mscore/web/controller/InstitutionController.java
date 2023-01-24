@@ -6,9 +6,12 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.ProductMapper;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +20,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.CREATE_INSTITUTION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_PRODUCTS_ERROR;
 import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
 
 @RestController
@@ -62,5 +69,17 @@ public class InstitutionController {
         setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createPgInstitution(externalId, (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/{id}/products")
+    public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@PathVariable("id") String id,
+                                                                         @RequestParam(value = "states") String[] states) {
+
+        setCustomMessage(GET_PRODUCTS_ERROR);
+        List<Onboarding> list = institutionService.retrieveInstitutionProducts(id, List.of(states));
+        return ResponseEntity.ok(ProductMapper.toOnboardedProducts(list.stream()
+                .map(ProductMapper::toResource)
+                .collect(Collectors.toList())));
     }
 }

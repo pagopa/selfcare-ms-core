@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -38,12 +39,40 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
 
-    public OnboardingServiceImpl(InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector, TokenConnector tokenConnector, UserConnector userConnector) {
+    private final ExternalService externalService;
+
+    public OnboardingServiceImpl(InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector, TokenConnector tokenConnector, UserConnector userConnector, ExternalService externalService) {
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
         this.tokenConnector = tokenConnector;
         this.userConnector = userConnector;
+        this.externalService = externalService;
     }
+
+    @Override
+    public void verifyOnboardingInfo(String externalId, String productId) {
+        Institution institution = externalService.getInstitutionByExternalId(externalId);
+        List<OnboardedUser> response = retrieveUser(institution.getId(), productId);
+        if(response.isEmpty())
+            throw new ResourceNotFoundException("","");
+    }
+
+    private List<OnboardedUser> retrieveUser(String to, String productId) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<Institution> getOnboardingInfo(List<RelationshipState> states, OnboardedUser onboardedUser) {
+        List<Institution> institutions = new ArrayList<>();
+        return institutions;
+    }
+
+    @Override
+    public OnboardedUser findUser(SelfCareUser selfCareUser, String institutionId, String institutionExternalId, List<RelationshipState> states) {
+       return new OnboardedUser();
+    }
+
+
 
 
     @Override

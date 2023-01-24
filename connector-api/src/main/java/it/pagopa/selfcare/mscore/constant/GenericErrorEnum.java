@@ -8,6 +8,8 @@ public enum GenericErrorEnum {
     CREATE_INSTITUTION_ERROR("0037", "Error while creating requested institution"),
     ONBOARDING_OPERATION_ERROR("0017", "Error while performing onboarding operation"),
 
+    GET_PRODUCTS_ERROR("0031", "Error while getting products"),
+
     GENERIC_ERROR("0000","Generic Error");
     private final String code;
     private final String detail;
