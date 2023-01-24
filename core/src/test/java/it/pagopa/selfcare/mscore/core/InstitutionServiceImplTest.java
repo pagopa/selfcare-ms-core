@@ -493,5 +493,86 @@ class InstitutionServiceImplTest {
         verify(institutionConnector).findByExternalId(any());
         assertEquals("PA", institution1.getIpaCode());
     }
+
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
+     */
+    @Test
+    void testCreateInstitutionRaw3() {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(new ArrayList<>());
+        institution.setBilling(billing);
+        institution.setDataProtectionOfficer(dataProtectionOfficer);
+        institution.setDescription("The characteristics of someone or something");
+        institution.setDigitalAddress("42 Main St");
+        institution.setExternalId("42");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setId("42");
+        institution.setInstitutionType(null);
+        institution.setIpaCode("Ipa Code");
+        institution.setOnboarding(new ArrayList<>());
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
+
+        Billing billing1 = new Billing();
+        billing1.setPublicServices(true);
+        billing1.setRecipientCode("Recipient Code");
+        billing1.setVatNumber("42");
+
+        DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
+        dataProtectionOfficer1.setAddress("42 Main St");
+        dataProtectionOfficer1.setEmail("jane.doe@example.org");
+        dataProtectionOfficer1.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
+        paymentServiceProvider1.setAbiCode("Abi Code");
+        paymentServiceProvider1.setBusinessRegisterNumber("42");
+        paymentServiceProvider1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider1.setLegalRegisterNumber("42");
+        paymentServiceProvider1.setVatNumberGroup(true);
+
+        Institution institution1 = new Institution();
+        institution1.setAddress("42 Main St");
+        institution1.setAttributes(new ArrayList<>());
+        institution1.setBilling(billing1);
+        institution1.setDataProtectionOfficer(dataProtectionOfficer1);
+        institution1.setDescription("The characteristics of someone or something");
+        institution1.setDigitalAddress("42 Main St");
+        institution1.setExternalId("42");
+        institution1.setGeographicTaxonomies(new ArrayList<>());
+        institution1.setId("42");
+        institution1.setInstitutionType(null);
+        institution1.setIpaCode("Ipa Code");
+        institution1.setOnboarding(new ArrayList<>());
+        institution1.setPaymentServiceProvider(paymentServiceProvider1);
+        institution1.setTaxCode("Tax Code");
+        institution1.setZipCode("21654");
+        assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
+        assertEquals("SELC_42", institution1.getIpaCode());
+    }
 }
 
