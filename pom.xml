@@ -17,7 +17,7 @@
     <description>Microservice to manage Self Care NAME</description>
 
     <properties>
-        <selc-commons.version>2.3.0</selc-commons.version>
+        <selc-commons.version>2.4.3</selc-commons.version>
     </properties>
 
     <dependencyManagement>

@@ -39,7 +39,7 @@ public class OnboardingController {
 
         setCustomMessage(ONBOARDING_VERIFICATION_ERROR);
         onboardingService.verifyOnboardingInfo(externalId, productId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @ResponseStatus(HttpStatus.OK)
