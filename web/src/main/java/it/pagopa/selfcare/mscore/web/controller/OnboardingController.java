@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
+import it.pagopa.selfcare.mscore.model.OnboardingInfo;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
@@ -14,6 +15,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.util.*;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
@@ -45,9 +48,11 @@ public class OnboardingController {
     public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@RequestParam(value = "institutionId") String institutionId,
                                                                  @RequestParam(value = "institutionExternalId") String institutionExternalId,
                                                                  @RequestParam(value = "states") String[] states,
-                                                                 Authentication authentication) {
-
-      return ResponseEntity.ok().body(new OnboardingInfoResponse());
+                                                                 @RequestParam(value = "userId") String userId
+                                                                 /*Authentication authentication*/) {
+        //String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
+        List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, institutionExternalId, states, userId);
+        return ResponseEntity.ok().body(OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList));
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -52,6 +53,11 @@ public class UserConnectorImpl implements UserConnector {
     public OnboardedUser save(OnboardedUser example) {
         final UserEntity entity = convertToUserEntity(example);
         return convertToOnboardeUser(repository.save(entity));
+    }
+    @Override
+    public OnboardedUser getById(String userId) {
+        Optional<UserEntity> entityOpt = repository.findById(new ObjectId(userId));
+        return entityOpt.map(this::convertToOnboardeUser).orElse(null);
     }
 
     @Override

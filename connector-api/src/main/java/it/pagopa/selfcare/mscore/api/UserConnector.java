@@ -12,4 +12,6 @@ public interface UserConnector {
     OnboardedUser save(OnboardedUser example);
 
     List<OnboardedUser> getByUser(String user);
+
+    OnboardedUser getById(String userId);
 }

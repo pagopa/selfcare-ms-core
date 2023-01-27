@@ -24,5 +24,5 @@ public class InstitutionResponse {
     private List<AttributesResponse> attributes;
     private PaymentServiceProviderResponse paymentServiceProviderResponse;
     private DataProtectionOfficerResponse dataProtectionOfficer;
-
+    private BillingResponse billing;
 }

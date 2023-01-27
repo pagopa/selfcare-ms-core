@@ -10,8 +10,11 @@ public enum CustomErrorEnum {
     CREATE_INSTITUTION_NOT_FOUND("0039", "Institution having externalId %s not exists in registry"),
     GET_INSTITUTION_BILLING_NOT_FOUND("0045", "Cannot find billing data for institution having externalId %s and product %s"),
     ONBOARDING_INVALID_UPDATES("0046", "Cannot perform data overrides on institution having external id %s"),
-    GEO_TAXONOMY_CODE_NOT_FOUND("0049", "Error on retrieve geographic taxonomy code %s: %s");
+    GEO_TAXONOMY_CODE_NOT_FOUND("0049", "Error on retrieve geographic taxonomy code %s: %s"),
 
+    ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
+
+    ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info");
     private final String code;
     private final String detail;
 
