@@ -143,15 +143,22 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     private Optional<Institution> findInstitutionByOptionalId(String institutionId, String institutionExternalId) {
+        Optional<Institution> found = Optional.empty();
         if(institutionId != null && !"".equalsIgnoreCase(institutionId)) {
-            return Optional.of(institutionConnector.findById(institutionId));
+            found = institutionConnector.findById(institutionId);
+            if(found.isEmpty()) {
+                throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), "institutionId : " + institutionId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
+            }
         }
 
         if(institutionExternalId != null && !"".equalsIgnoreCase(institutionExternalId)) {
-            return institutionConnector.findByExternalId(institutionExternalId);
+            found = institutionConnector.findByExternalId(institutionExternalId);
+            if(found.isEmpty()) {
+                throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), "institutionExternalId : " + institutionExternalId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
+            }
         }
 
-        return Optional.empty();
+        return found;
     }
 
     private void checkIfUserHasInstitution(Map<String, Map<String, Product>> userInstitutionsMap, Institution institution) {

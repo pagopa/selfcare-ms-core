@@ -51,9 +51,8 @@ public class OnboardingController {
     public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@RequestParam(value = "institutionId") String institutionId,
                                                                  @RequestParam(value = "institutionExternalId") String institutionExternalId,
                                                                  @RequestParam(value = "states") String[] states,
-                                                                 @RequestParam(value = "userId") String userId
-                                                                 /*Authentication authentication*/) {
-        //String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
+                                                                 Authentication authentication) {
+        String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
         List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, institutionExternalId, states, userId);
         return ResponseEntity.ok().body(OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList));
     }

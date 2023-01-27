@@ -140,9 +140,4 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
         return entity;
     }
-
-    public Institution findById(String id) {
-        Optional<InstitutionEntity> entity = this.repository.findById(new ObjectId(id));
-        return this.convertToInstitution(entity.get());
-    }
 }
