@@ -72,12 +72,13 @@ public class InstitutionController {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.products}")
     @GetMapping(value = "/{id}/products")
     public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@PathVariable("id") String id,
-                                                                         @RequestParam(value = "states") String[] states) {
+                                                                         @RequestParam(value = "states", required = false) List<String> states) {
 
         setCustomMessage(GET_PRODUCTS_ERROR);
-        List<Onboarding> list = institutionService.retrieveInstitutionProducts(id, List.of(states));
+        List<Onboarding> list = institutionService.retrieveInstitutionProducts(id, states);
         return ResponseEntity.ok(ProductMapper.toOnboardedProducts(list.stream()
                 .map(ProductMapper::toResource)
                 .collect(Collectors.toList())));

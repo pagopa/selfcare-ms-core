@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,17 +13,23 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.NationalRegistriesConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.institution.Attributes;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -35,6 +42,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(classes = {InstitutionServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class InstitutionServiceImplTest {
+    @MockBean
+    private UserConnector userConnector;
+
     @MockBean
     private InstitutionConnector institutionConnector;
 
@@ -130,7 +140,7 @@ class InstitutionServiceImplTest {
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
         when(institutionConnector.save(any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId( any())).thenReturn(Optional.empty());
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
         institutionProxyInfo.setAddress("42 Main St");
@@ -151,7 +161,7 @@ class InstitutionServiceImplTest {
         categoryProxyInfo.setKind("Kind");
         categoryProxyInfo.setName("Name");
         categoryProxyInfo.setOrigin("Origin");
-        when(partyRegistryProxyConnector.getCategory( any(), any())).thenReturn(categoryProxyInfo);
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(categoryProxyInfo);
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
         assertSame(institution, institutionServiceImpl.createInstitutionByExternalId("42"));
         verify(institutionConnector).save(any());
@@ -492,6 +502,139 @@ class InstitutionServiceImplTest {
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
         assertEquals("PA", institution1.getIpaCode());
+    }
+
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
+     */
+    @Test
+    void testCreateInstitutionRaw3() {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(new ArrayList<>());
+        institution.setBilling(billing);
+        institution.setDataProtectionOfficer(dataProtectionOfficer);
+        institution.setDescription("The characteristics of someone or something");
+        institution.setDigitalAddress("42 Main St");
+        institution.setExternalId("42");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setId("42");
+        institution.setInstitutionType(null);
+        institution.setIpaCode("Ipa Code");
+        institution.setOnboarding(new ArrayList<>());
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
+
+        Billing billing1 = new Billing();
+        billing1.setPublicServices(true);
+        billing1.setRecipientCode("Recipient Code");
+        billing1.setVatNumber("42");
+
+        DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
+        dataProtectionOfficer1.setAddress("42 Main St");
+        dataProtectionOfficer1.setEmail("jane.doe@example.org");
+        dataProtectionOfficer1.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
+        paymentServiceProvider1.setAbiCode("Abi Code");
+        paymentServiceProvider1.setBusinessRegisterNumber("42");
+        paymentServiceProvider1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider1.setLegalRegisterNumber("42");
+        paymentServiceProvider1.setVatNumberGroup(true);
+
+        Institution institution1 = new Institution();
+        institution1.setAddress("42 Main St");
+        institution1.setAttributes(new ArrayList<>());
+        institution1.setBilling(billing1);
+        institution1.setDataProtectionOfficer(dataProtectionOfficer1);
+        institution1.setDescription("The characteristics of someone or something");
+        institution1.setDigitalAddress("42 Main St");
+        institution1.setExternalId("42");
+        institution1.setGeographicTaxonomies(new ArrayList<>());
+        institution1.setId("42");
+        institution1.setInstitutionType(null);
+        institution1.setIpaCode("Ipa Code");
+        institution1.setOnboarding(new ArrayList<>());
+        institution1.setPaymentServiceProvider(paymentServiceProvider1);
+        institution1.setTaxCode("Tax Code");
+        institution1.setZipCode("21654");
+        assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
+        assertEquals("SELC_42", institution1.getIpaCode());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProducts() {
+        when(institutionConnector.findById(any())).thenReturn(Optional.of(new Institution()));
+        List<String> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> institutionServiceImpl.retrieveInstitutionProducts("42", list));
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProducts2() {
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        when(institutionConnector.findById(any()))
+                .thenReturn(Optional.of(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
+                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null)));
+        assertTrue(institutionServiceImpl.retrieveInstitutionProducts("42", new ArrayList<>()).isEmpty());
+        verify(institutionConnector).findById(any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProducts4() {
+        when(institutionConnector.findById(any())).thenReturn(Optional.empty());
+        List<String> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> institutionServiceImpl.retrieveInstitutionProducts("42", list));
+        verify(institutionConnector).findById(any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     */
+    @Test
+    void estRetrieveInstitutionProducts() {
+        when(institutionConnector.findById(any())).thenReturn(Optional.of(new Institution()));
+        List<String> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> institutionServiceImpl.retrieveInstitutionProducts("42", list));
     }
 }
 

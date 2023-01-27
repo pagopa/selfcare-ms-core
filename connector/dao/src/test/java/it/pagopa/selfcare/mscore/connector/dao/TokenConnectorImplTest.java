@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -23,6 +24,12 @@ class TokenConnectorImplTest {
 
     @Mock
     TokenRepository tokenRepository;
+
+    @Test
+    void deleteById(){
+        doNothing().when(tokenRepository).deleteById(any());
+        Assertions.assertDoesNotThrow(() -> tokenConnectorImpl.deleteById("507f1f77bcf86cd799439011"));
+    }
 
     @Test
     void findActiveContractTest(){

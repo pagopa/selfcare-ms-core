@@ -25,26 +25,29 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+@ContextConfiguration(classes = {ExternalServiceImpl.class})
 @ExtendWith(SpringExtension.class)
 class ExternalServiceImplTest {
-    @InjectMocks
+    @Autowired
     private ExternalServiceImpl externalServiceImpl;
 
-    @Mock
+    @MockBean
     private InstitutionConnector institutionConnector;
 
-    @Mock
+    @MockBean
     private UserConnector userConnector;
 
-    @Mock
+    @MockBean
     private TokenConnector tokenConnector;
 
     /**
@@ -332,6 +335,44 @@ class ExternalServiceImplTest {
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getRelationShipToken("42", "42", "42"));
         verify(tokenConnector).findActiveContract(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionWithFilter(String, String, List)}
+     */
+    @Test
+    void testGetInstitutionWithFilter() {
+        when(institutionConnector.findWithFilter(any(), any(), any()))
+                .thenReturn(new ArrayList<>());
+        List<RelationshipState> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getInstitutionWithFilter("42", "42", list));
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionWithFilter(String, String, List)}
+     */
+    @Test
+    void testGetInstitutionWithFilter2() {
+        ArrayList<Institution> institutionList = new ArrayList<>();
+        institutionList.add(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any()))
+                .thenReturn(institutionList);
+        externalServiceImpl.getInstitutionWithFilter("42", "42", new ArrayList<>());
+        verify(institutionConnector).findWithFilter(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionWithFilter(String, String, List)}
+     */
+    @Test
+    void testGetInstitutionWithFilter3() {
+        when(institutionConnector.findWithFilter(any(), any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred",
+                        "Verifying onboarding for institution having externalId {} on product {}"));
+        List<RelationshipState> list = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getInstitutionWithFilter("42", "42", list));
     }
 
     /**

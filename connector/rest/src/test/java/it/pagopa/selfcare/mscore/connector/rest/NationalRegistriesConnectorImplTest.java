@@ -66,8 +66,21 @@ class NationalRegistriesConnectorImplTest {
      */
     @Test
     void testGetLegalAddress2() {
-        when(nationalRegistriesRestClient.getLegalAddress(any()))
-                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        NationalRegistriesAddressResponse nationalRegistriesAddressResponse = new NationalRegistriesAddressResponse();
+        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        nationalRegistriesAddressResponse
+                .setDateTimeExtraction(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
+        nationalRegistriesAddressResponse.setProfessionalAddress(null);
+        nationalRegistriesAddressResponse.setTaxId("42");
+
+        when(nationalRegistriesRestClient.getLegalAddress(any())).thenReturn(nationalRegistriesAddressResponse);
+        assertThrows(ResourceNotFoundException.class, () -> nationalRegistriesConnectorImpl.getLegalAddress("Tax Code"));
+        verify(nationalRegistriesRestClient).getLegalAddress(any());
+    }
+
+    @Test
+    void testGetLegalAddress3() {
+        when(nationalRegistriesRestClient.getLegalAddress(any())).thenReturn(null);
         assertThrows(ResourceNotFoundException.class, () -> nationalRegistriesConnectorImpl.getLegalAddress("Tax Code"));
         verify(nationalRegistriesRestClient).getLegalAddress(any());
     }

@@ -1,7 +1,9 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
+import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = InstitutionConnectorImpl.class)
@@ -76,5 +79,30 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.findAll((Example<InstitutionEntity>) any())).thenReturn(Collections.emptyList());
         Optional<Institution> response = institutionConnectionImpl.findByExternalId("ext");
         Assertions.assertTrue(response.isEmpty());
+    }
+
+    @Test
+    void deleteById(){
+        doNothing().when(institutionRepository).deleteById(any());
+        Assertions.assertDoesNotThrow(() -> institutionConnectionImpl.deleteById("507f1f77bcf86cd799439011"));
+    }
+
+    @Test
+    void save2(){
+        Institution institution = new Institution();
+        institution.setExternalId("ext");
+        institution.setId("507f1f77bcf86cd799439011");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setDataProtectionOfficer(new DataProtectionOfficer());
+        institution.setPaymentServiceProvider(new PaymentServiceProvider());
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficer());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProvider());
+        when(institutionRepository.save(any())).thenReturn(institutionEntity);
+        Institution response = institutionConnectionImpl.save(institution);
+        Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
     }
 }

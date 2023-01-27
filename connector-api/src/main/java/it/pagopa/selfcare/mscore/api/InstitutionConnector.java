@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.api;
 
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 
 import java.util.List;
@@ -15,5 +16,8 @@ public interface InstitutionConnector {
 
     Optional<Institution> findByExternalId(String externalId);
 
-    Institution findById(String id);
+    List<Institution> findWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
+
+    Optional<Institution> findById(String id);
+
 }

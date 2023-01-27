@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -64,6 +65,18 @@ public class ExternalServiceImpl implements ExternalService {
             return tokenList.get(0).getId();
         }else{
             throw new ResourceNotFoundException("","");
+        }
+    }
+
+    @Override
+    public void getInstitutionWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates) {
+        log.info("Verifying onboarding for institution having externalId {} on product {}", externalId, productId);
+
+       List<Institution> list = institutionConnector.findWithFilter(externalId, productId, validRelationshipStates);
+        if (list==null || list.isEmpty()) {
+            log.info(String.format(INSTITUTION_NOT_ONBOARDED.getMessage(), externalId, productId));
+            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_ONBOARDED.getMessage(), externalId, productId),
+                    INSTITUTION_NOT_ONBOARDED.getCode());
         }
     }
 

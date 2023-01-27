@@ -29,6 +29,11 @@ public class OnboardingServiceImpl implements OnboardingService {
                     RelationshipState.REJECTED,
                     RelationshipState.TOBEVALIDATED);
 
+    private final List<RelationshipState> validRelationshipStates =
+            List.of(RelationshipState.ACTIVE,
+                    RelationshipState.DELETED,
+                    RelationshipState.SUSPENDED);
+
     private final List<PartyRole> verifyUsersRole =
             List.of(PartyRole.MANAGER,
                     PartyRole.DELEGATE);
@@ -50,14 +55,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void verifyOnboardingInfo(String externalId, String productId) {
-        Institution institution = externalService.getInstitutionByExternalId(externalId);
-        List<OnboardedUser> response = retrieveUser(institution.getId(), productId);
-        if(response.isEmpty())
-            throw new ResourceNotFoundException("","");
-    }
-
-    private List<OnboardedUser> retrieveUser(String to, String productId) {
-        return new ArrayList<>();
+        externalService.getInstitutionWithFilter(externalId,productId,validRelationshipStates);
     }
 
     @Override
