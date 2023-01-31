@@ -14,9 +14,11 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.NationalRegistriesConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
 import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.Attributes;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,9 @@ class InstitutionServiceImplTest {
     private UserConnector userConnector;
 
     @MockBean
+    private PartyRegistryProxyConnector partyRegistryProxyConnector;
+
+    @MockBean
     private InstitutionConnector institutionConnector;
 
     @Autowired
@@ -54,8 +60,6 @@ class InstitutionServiceImplTest {
     @MockBean
     private NationalRegistriesConnector nationalRegistriesConnector;
 
-    @MockBean
-    private PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     /**
      * Method under test: {@link InstitutionServiceImpl#createInstitutionByExternalId(String)}
@@ -256,7 +260,7 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, SelfCareUser)}
      */
     @Test
-    void testCreatePgInstitution2() {
+    void testCreatePgInstitution3() {
         Billing billing = new Billing();
         billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
@@ -304,9 +308,8 @@ class InstitutionServiceImplTest {
         when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(new ArrayList<>());
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
-        assertSame(institution, institutionServiceImpl.createPgInstitution("42", selfCareUser));
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
+        Assertions.assertThrows(InvalidRequestException.class,
+                ()-> institutionServiceImpl.createPgInstitution("42",selfCareUser));
     }
 
 
@@ -635,6 +638,66 @@ class InstitutionServiceImplTest {
         List<String> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
                 () -> institutionServiceImpl.retrieveInstitutionProducts("42", list));
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, SelfCareUser)}
+     */
+    @Test
+    void testCreatePgInstitution2() {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(new ArrayList<>());
+        institution.setBilling(billing);
+        institution.setDataProtectionOfficer(dataProtectionOfficer);
+        institution.setDescription("businessName");
+        institution.setDigitalAddress("42 Main St");
+        institution.setExternalId("42");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setId("42");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setIpaCode("Ipa Code");
+        institution.setOnboarding(new ArrayList<>());
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
+
+        NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
+        nationalRegistriesProfessionalAddress.setAddress("42 Main St");
+        nationalRegistriesProfessionalAddress.setDescription("The characteristics of someone or something");
+        nationalRegistriesProfessionalAddress.setMunicipality("Municipality");
+        nationalRegistriesProfessionalAddress.setProvince("Province");
+        nationalRegistriesProfessionalAddress.setZip("21654");
+        when(nationalRegistriesConnector.getLegalAddress(any()))
+                .thenReturn(nationalRegistriesProfessionalAddress);
+        List<InstitutionByLegal> list = new ArrayList<>();
+        InstitutionByLegal institutionByLegal = new InstitutionByLegal();
+        institutionByLegal.setBusinessName("businessName");
+        institutionByLegal.setBusinessTaxId("42");
+        list.add(institutionByLegal);
+        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(list);
+        SelfCareUser selfCareUser = mock(SelfCareUser.class);
+        when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
+        Assertions.assertDoesNotThrow(() -> institutionServiceImpl.createPgInstitution("42", selfCareUser));
     }
 }
 

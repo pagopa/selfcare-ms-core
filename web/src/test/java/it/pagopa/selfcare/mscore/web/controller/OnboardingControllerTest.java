@@ -130,7 +130,7 @@ class OnboardingControllerTest {
         MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is(204));
     }
 
     /**
@@ -159,7 +159,7 @@ class OnboardingControllerTest {
         MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
                 .perform(headResult)
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().is(204));
     }
 }
 

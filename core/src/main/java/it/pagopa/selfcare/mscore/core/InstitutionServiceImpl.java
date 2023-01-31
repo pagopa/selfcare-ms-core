@@ -3,11 +3,11 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,16 +25,14 @@ import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionConnector institutionConnector;
-    private final UserConnector userConnector;
 
     //TODO: ADD private final NationalRegistriesConnector nationalRegistriesConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     private static final String INSTITUTION_CREATED_LOG = "institution created {}";
 
-    public InstitutionServiceImpl(InstitutionConnector institutionConnector, UserConnector userConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
+    public InstitutionServiceImpl(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.institutionConnector = institutionConnector;
-        this.userConnector = userConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
     }
 
@@ -81,20 +79,25 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         Institution newInstitution = new Institution();
 
-        //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA SEGUENTE CHIAMATA
-        // List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
-        // institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
-        //       .findFirst().ifPresent(in -> newInstitution.setDescription(in.getBusinessName()));
+        newInstitution.setExternalId(taxId);
+        newInstitution.setInstitutionType(InstitutionType.PG);
+        newInstitution.setTaxCode(taxId);
+        newInstitution.setCreatedAt(OffsetDateTime.now());
+
+        //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
+        List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
+        institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
+                .findFirst().ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
+                        () -> {
+                            throw new InvalidRequestException(String.format(INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId),
+                                    INSTITUTION_LEGAL_NOT_FOUND.getCode());
+                        });
+
 
         //TODO: ADD QUANDO NATIONAL REGISTRIES E INFO CAMERE SARANNO FUNZIONANTI
         // NationalRegistriesProfessionalAddress response = nationalRegistriesConnector.getLegalAddress(taxId);
         // newInstitution.setAddress(response.getAddress());
         // newInstitution.setZipCode(response.getZip());
-
-        newInstitution.setExternalId(taxId);
-        newInstitution.setInstitutionType(InstitutionType.PG);
-        newInstitution.setTaxCode(taxId);
-        newInstitution.setCreatedAt(OffsetDateTime.now());
 
         return saveInstitution(newInstitution);
     }

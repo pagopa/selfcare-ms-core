@@ -7,6 +7,8 @@ public enum CustomErrorEnum {
     ROLES_NOT_ADMITTED_ERROR("0034","Roles %s are not admitted for this operation"),
     INSTITUTION_NOT_ONBOARDED("0004", "Institution having externalId %s is not onboarded for product %s"),
     INSTITUTION_NOT_FOUND("0036", "Cannot find Institution using institutionId %s and externalInstitutionId %s"),
+    INSTITUTION_LEGAL_NOT_FOUND("0037", "Institution with externalInstitutionId %s is not related to user"),
+
     CREATE_INSTITUTION_CONFLICT("0038", "Institution having externalId %s already exists"),
     CREATE_INSTITUTION_NOT_FOUND("0039", "Institution having externalId %s not exists in registry"),
     GET_INSTITUTION_BILLING_NOT_FOUND("0045", "Cannot find billing data for institution having externalId %s and product %s"),
