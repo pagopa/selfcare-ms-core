@@ -4,19 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import it.pagopa.selfcare.mscore.model.Contract;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 
-import java.util.ArrayList;
+import java.time.OffsetDateTime;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
@@ -240,6 +237,115 @@ class OnboardingMapperTest {
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
         assertEquals("Product Name", actualToOnboardingRequestResult.getProductName());
 
+    }
+
+
+    /**
+     * Method under test: {@link OnboardingMapper#toOnboardingInfoResponse(String, List)}
+     */
+    @Test
+    void testToOnboardingInfoResponse() {
+        ArrayList<OnboardingInfo> onboardingInfoList = new ArrayList<>();
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> institutionOnboardingList = new ArrayList<>();
+        institutionOnboardingList.add(onboarding);
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        Attributes attribute = new Attributes();
+        attribute.setCode("code");
+        attribute.setOrigin("origin");
+        attribute.setDescription("description");
+
+        ArrayList<Attributes> attributesList = new ArrayList<>();
+        attributesList.add(attribute);
+
+        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        geographicTaxonomies.setCode("code");
+        geographicTaxonomies.setCountry("country");
+        geographicTaxonomies.setDesc("desc");
+        geographicTaxonomies.setEnable(true);
+        List<GeographicTaxonomies> geographixTaxonomiesList = new ArrayList<>();
+        geographixTaxonomiesList.add(geographicTaxonomies);
+
+
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(attributesList);
+        institution.setBilling(billing);
+        institution.setDataProtectionOfficer(dataProtectionOfficer);
+        institution.setDescription("The characteristics of someone or something");
+        institution.setDigitalAddress("42 Main St");
+        institution.setExternalId("42");
+        institution.setGeographicTaxonomies(geographixTaxonomiesList);
+        institution.setId("42");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setIpaCode("42");
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        institution.setOnboarding(institutionOnboardingList);
+
+
+        ArrayList<Onboarding> filteredOnboardingList = new ArrayList<>();
+        Onboarding onboarding2 = new Onboarding();
+        onboarding2.setBilling(billing);
+        onboarding2.setContract("Contract");
+        onboarding2.setCreatedAt(null);
+        onboarding2.setPremium(premium);
+        onboarding2.setPricingPlan("Pricing Plan");
+        onboarding2.setProductId("42");
+        onboarding2.setStatus(RelationshipState.PENDING);
+        onboarding2.setUpdatedAt(null);
+        filteredOnboardingList.add(onboarding);
+        institution.setOnboarding(filteredOnboardingList);
+
+        Map<String, Product> filteredProductsMap = new HashMap<>();
+        Product product = new Product();
+        product.setStatus(RelationshipState.PENDING);
+        product.setContract("contract");
+        product.setRoles(List.of("roles"));
+        product.setCreatedAt(OffsetDateTime.now());
+        filteredProductsMap.put("42", product);
+
+        onboardingInfoList.add(new OnboardingInfo(institution, filteredProductsMap));
+        OnboardingInfoResponse actualToOnboardingInfoResponseResult = OnboardingMapper.toOnboardingInfoResponse("42",
+                onboardingInfoList);
+
+
+
+        //assertEquals(onboardingList, actualToOnboardingInfoResponseResult.getInstitutions());
+        assertEquals("42", actualToOnboardingInfoResponseResult.getUserId());
+        assertEquals("Pricing Plan", actualToOnboardingInfoResponseResult.getInstitutions().get(0).getPricingPlan());
     }
 }
 

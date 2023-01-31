@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
@@ -17,12 +18,7 @@ import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.Contract;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.Premium;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Attributes;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
@@ -35,7 +31,9 @@ import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -87,6 +85,213 @@ class OnboardingServiceImplTest {
                 .getInstitutionWithFilter(any(), any(), any());
         assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfo("42", "42"));
         verify(externalService).getInstitutionWithFilter(any(), any(), any());
+    }
+
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfoUserWithouthInstitutions() {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(new HashMap<>());
+        onboardedUser.setCreatedAt(null);
+        onboardedUser.setId("42");
+        onboardedUser.setProductRole(new ArrayList<>());
+        onboardedUser.setRole(PartyRole.MANAGER);
+        onboardedUser.setUser("User");
+        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        assertThrows(ResourceNotFoundException.class,
+                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
+        verify(userConnector).getById((String) any());
+    }
+
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfoWhenUserIsNotFound() {
+        when(userConnector.getById((String) any())).thenThrow(new ResourceNotFoundException("An error occurred",
+                "Getting onboarding info for institution having institutionId {} institutionExternalId {} and"
+                        + " states {}"));
+        assertThrows(ResourceNotFoundException.class,
+                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
+        verify(userConnector).getById((String) any());
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfoWithInstitutionNotLinkedToUser() {
+        Product product = new Product();
+        product.setContract("contract");
+        product.setCreatedAt(null);
+        product.setRoles(new ArrayList<>());
+        product.setStatus(RelationshipState.PENDING);
+        product.setUpdatedAt(null);
+
+        HashMap<String, Product> productMap = new HashMap<>();
+        productMap.put("product42", product);
+
+        HashMap<String, Map<String, Product>> institutionMap = new HashMap<>();
+        institutionMap.put("institution1", productMap);
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(institutionMap);
+        onboardedUser.setCreatedAt(null);
+        onboardedUser.setId("42");
+        onboardedUser.setProductRole(new ArrayList<>());
+        onboardedUser.setRole(PartyRole.MANAGER);
+        onboardedUser.setUser("User");
+
+        Institution onboardedInstitution = new Institution();
+        onboardedInstitution.setId("institution2");
+
+        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
+
+        assertThrows(InvalidRequestException.class,
+                () -> onboardingServiceImpl.getOnboardingInfo("42", "", new String[]{}, "42"));
+        verify(institutionConnector).findById((String) any());
+        verify(userConnector).getById((String) any());
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfoWhenUserLooksForInstitutionId() {
+        Product product = new Product();
+        product.setContract("contract");
+        product.setCreatedAt(null);
+        product.setRoles(new ArrayList<>());
+        product.setStatus(RelationshipState.PENDING);
+        product.setUpdatedAt(null);
+
+        HashMap<String, Product> productMap = new HashMap<>();
+        productMap.put("product42", product);
+
+        HashMap<String, Map<String, Product>> institutionMap = new HashMap<>();
+        institutionMap.put("institution1", productMap);
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(institutionMap);
+        onboardedUser.setCreatedAt(null);
+        onboardedUser.setId("42");
+        onboardedUser.setProductRole(new ArrayList<>());
+        onboardedUser.setRole(PartyRole.MANAGER);
+        onboardedUser.setUser("User");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("product42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        List<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution onboardedInstitution = new Institution();
+        onboardedInstitution.setId("institution1");
+        onboardedInstitution.setOnboarding(onboardingList);
+
+        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
+
+        List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("42", "", new String[]{ "PENDING" }, "42");
+
+        assertEquals(response.size(), 1);
+        verify(institutionConnector).findById((String) any());
+        verify(userConnector).getById((String) any());
+    }
+
+    @Test
+    void testGetOnboardingInfoWhenUserLooksForInstitutionExternalId() {
+        Product product = new Product();
+        product.setContract("contract");
+        product.setCreatedAt(null);
+        product.setRoles(new ArrayList<>());
+        product.setStatus(RelationshipState.PENDING);
+        product.setUpdatedAt(null);
+
+        HashMap<String, Product> productMap = new HashMap<>();
+        productMap.put("product42", product);
+
+        HashMap<String, Map<String, Product>> institutionMap = new HashMap<>();
+        institutionMap.put("institution1", productMap);
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(institutionMap);
+        onboardedUser.setCreatedAt(null);
+        onboardedUser.setId("42");
+        onboardedUser.setProductRole(new ArrayList<>());
+        onboardedUser.setRole(PartyRole.MANAGER);
+        onboardedUser.setUser("User");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("product42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        List<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution onboardedInstitution = new Institution();
+        onboardedInstitution.setId("institution1");
+        onboardedInstitution.setExternalId("external1");
+        onboardedInstitution.setOnboarding(onboardingList);
+
+        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.of(onboardedInstitution));
+
+        List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("", "external1", new String[]{ "PENDING" }, "42");
+
+        assertEquals(response.size(), 1);
+        verify(institutionConnector).findByExternalId((String) any());
+        verify(userConnector).getById((String) any());
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfoWhenUserLooksForStates() {
+        Product product = new Product();
+        product.setContract("contract");
+        product.setCreatedAt(null);
+        product.setRoles(new ArrayList<>());
+        product.setStatus(RelationshipState.PENDING);
+        product.setUpdatedAt(null);
+
+        HashMap<String, Product> productMap = new HashMap<>();
+        productMap.put("product42", product);
+
+        HashMap<String, Map<String, Product>> institutionMap = new HashMap<>();
+        institutionMap.put("institution1", productMap);
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(institutionMap);
+        onboardedUser.setCreatedAt(null);
+        onboardedUser.setId("42");
+        onboardedUser.setProductRole(new ArrayList<>());
+        onboardedUser.setRole(PartyRole.MANAGER);
+        onboardedUser.setUser("User");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("product42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        List<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution onboardedInstitution = new Institution();
+        onboardedInstitution.setId("institution1");
+        onboardedInstitution.setOnboarding(onboardingList);
+
+        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
+
+        List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("", "", new String[]{ "PENDING" }, "42");
+
+        assertEquals(response.size(), 1);
+        verify(institutionConnector).findById((String) any());
+        verify(userConnector).getById((String) any());
     }
 
     @Test

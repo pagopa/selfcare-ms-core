@@ -34,6 +34,10 @@ public class OnboardingServiceImpl implements OnboardingService {
                     RelationshipState.DELETED,
                     RelationshipState.SUSPENDED);
 
+    private final List<RelationshipState> onboardingInfoDefaultRelationshipStates =
+            List.of(RelationshipState.ACTIVE,
+                    RelationshipState.PENDING);
+
     private final List<PartyRole> verifyUsersRole =
             List.of(PartyRole.MANAGER,
                     PartyRole.DELEGATE);
@@ -62,8 +66,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId) {
         log.info("Getting onboarding info for institution having institutionId {} institutionExternalId {} and states {}", institutionId, institutionExternalId, states);
 
-        final List<RelationshipState> defaultRelationshipsStateList = Arrays.asList(RelationshipState.ACTIVE, RelationshipState.PENDING);
-        List<RelationshipState> relationshipStateList = states.length == 0 ? defaultRelationshipsStateList : convertStatesToRelationshipsState(states);
+        List<RelationshipState> relationshipStateList = states.length == 0 ? onboardingInfoDefaultRelationshipStates : convertStatesToRelationshipsState(states);
 
         List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
 
@@ -72,30 +75,38 @@ public class OnboardingServiceImpl implements OnboardingService {
         Map<String, Map<String,Product>> userInstitutionsMap = getUserInstitutionsWithProductStatusIn(user.getBindings(), relationshipStateList);
         if(userInstitutionsMap.isEmpty()) {
             //Non ci sono institutions con prodotti aventi status = status di input
+            log.info("No onboarding information found for states {}", relationshipStateList);
             throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), "states : " + relationshipStateList.toString()), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
         }
 
         Optional<Institution> onboardedInstitutionOpt = findInstitutionByOptionalId(institutionId, institutionExternalId);
         if(onboardedInstitutionOpt.isPresent()) {
             Institution onboardedInstitution = onboardedInstitutionOpt.get();
-            checkIfUserHasInstitution(userInstitutionsMap, onboardedInstitution);
+            if(!userInstitutionsMap.containsKey(onboardedInstitution.getId())) {
+                //L'utente non è collegato all'institution trovata
+                log.info("Error getting onboarding info");
+                throw new InvalidRequestException(ONBOARDING_INFO_ERROR.getMessage(), ONBOARDING_INFO_ERROR.getCode());
+            }
 
             Map<String, Product> institutionProductsMap = userInstitutionsMap.get(onboardedInstitution.getId());
+            List<Onboarding> onboardingList = findOnboardingLinkedToProductWithStateIn(institutionProductsMap, onboardedInstitution, relationshipStateList);
 
-            List<Onboarding> onboardingList = findOnboardingListForEachProduct(institutionProductsMap, onboardedInstitution, relationshipStateList);
-
-            if(!onboardingList.isEmpty())
-                onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, onboardingList, institutionProductsMap));
+            if(!onboardingList.isEmpty()) {
+                onboardedInstitution.setOnboarding(onboardingList);
+                onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, institutionProductsMap));
+            }
 
         } else {
             userInstitutionsMap.forEach((idInstitution, institutionProductsMap) -> {
-                Optional<Institution> optInstitution = findInstitutionByOptionalId(idInstitution, null);
+                Optional<Institution> optInstitution = findInstitutionById(idInstitution);
                 if(optInstitution.isPresent()) {
                     Institution institutionFound = optInstitution.get();
-                    List<Onboarding> onboardingList = findOnboardingListForEachProduct(institutionProductsMap, institutionFound, relationshipStateList);
+                    List<Onboarding> onboardingList = findOnboardingLinkedToProductWithStateIn(institutionProductsMap, institutionFound, relationshipStateList);
 
-                    if(!onboardingList.isEmpty())
-                        onboardingInfoList.add(new OnboardingInfo(institutionFound, onboardingList, institutionProductsMap));
+                    if(!onboardingList.isEmpty()) {
+                        institutionFound.setOnboarding(onboardingList);
+                        onboardingInfoList.add(new OnboardingInfo(institutionFound, institutionProductsMap));
+                    }
                 }
             });
         }
@@ -120,17 +131,17 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         userInstitutionToBeFiltered.forEach((institutionId, productMap) -> {
             Map<String, Product> filteredProductsMap = filterProductsMapByStates(productMap, relationshipStateList);
-            if(filteredProductsMap != null && !filteredProductsMap.isEmpty()) {
+            if(!filteredProductsMap.isEmpty()) {
                 filteredUserInstitutionMap.put(institutionId, filteredProductsMap);
             }
         });
 
-        return  filteredUserInstitutionMap;
+        return filteredUserInstitutionMap;
     }
 
     private Map<String, Product> filterProductsMapByStates(Map<String, Product> productsMap, List<RelationshipState> states) {
         if(productsMap == null)
-            return null;
+            return new HashMap<>();
 
         return productsMap.entrySet()
                 .stream()
@@ -143,39 +154,34 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     private Optional<Institution> findInstitutionByOptionalId(String institutionId, String institutionExternalId) {
-        Optional<Institution> found = Optional.empty();
         if(institutionId != null && !"".equalsIgnoreCase(institutionId)) {
-            found = institutionConnector.findById(institutionId);
+            Optional<Institution> found = institutionConnector.findById(institutionId);
             if(found.isEmpty()) {
                 throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), "institutionId : " + institutionId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
             }
+            return found;
         }
 
         if(institutionExternalId != null && !"".equalsIgnoreCase(institutionExternalId)) {
-            found = institutionConnector.findByExternalId(institutionExternalId);
+            Optional<Institution> found = institutionConnector.findByExternalId(institutionExternalId);
             if(found.isEmpty()) {
                 throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), "institutionExternalId : " + institutionExternalId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
             }
+            return found;
         }
 
-        return found;
+        return Optional.empty();
     }
 
-    private void checkIfUserHasInstitution(Map<String, Map<String, Product>> userInstitutionsMap, Institution institution) {
-        if(!userInstitutionsMap.containsKey(institution.getId())) {
-            //L'utente non è collegato all'institution trovata
-            log.info("Error getting onboarding info");
-            throw new InvalidRequestException(ONBOARDING_INFO_ERROR.getMessage(), ONBOARDING_INFO_ERROR.getCode());
-        }
+    private Optional<Institution> findInstitutionById(String idInstitution) {
+        return institutionConnector.findById(idInstitution);
     }
 
-
-
-    private List<Onboarding> findOnboardingListForEachProduct(Map<String, Product> institutionProductsMap, Institution onboardedInstitution, List<RelationshipState> relationshipStateList) {
+    private List<Onboarding> findOnboardingLinkedToProductWithStateIn(Map<String, Product> productsMap, Institution onboardedInstitution, List<RelationshipState> relationshipStateList) {
         List<Onboarding> onboardingList = new ArrayList<>();
-        institutionProductsMap.forEach((productId, Product) -> {
-            Optional<Onboarding> institutionOnboarding = getOnboardingFromInstitutionByProductIdAndState(onboardedInstitution, productId, relationshipStateList);
-            institutionOnboarding.ifPresent(onboardingList::add);
+        productsMap.forEach((productId, Product) -> {
+            Optional<Onboarding> onboarding = getOnboardingFromInstitutionByProductIdAndState(onboardedInstitution, productId, relationshipStateList);
+            onboarding.ifPresent(onboardingList::add);
         });
 
         return onboardingList;

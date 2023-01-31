@@ -71,7 +71,7 @@ public class OnboardingMapper {
         for(OnboardingInfo onboardingInfo : onboardingInfos) {
             Institution institution = onboardingInfo.getInstitution();
             Map<String, Product> productMap = onboardingInfo.getProductMap();
-            List<Onboarding> onboardingList = onboardingInfo.getOnboardingList();
+            List<Onboarding> onboardingList = institution.getOnboarding();
 
             onboardingList.forEach((onboarding) -> {
                 String productId = onboarding.getProductId();
