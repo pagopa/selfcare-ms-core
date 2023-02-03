@@ -48,9 +48,9 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.info}")
     @GetMapping(value = "/info")
-    public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@RequestParam(value = "institutionId") String institutionId,
-                                                                 @RequestParam(value = "institutionExternalId") String institutionExternalId,
-                                                                 @RequestParam(value = "states") String[] states,
+    public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@RequestParam(value = "institutionId", required = false) String institutionId,
+                                                                 @RequestParam(value = "institutionExternalId", required = false) String institutionExternalId,
+                                                                 @RequestParam(value = "states", required = false) String[] states,
                                                                  Authentication authentication) {
         String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
         List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, institutionExternalId, states, userId);
