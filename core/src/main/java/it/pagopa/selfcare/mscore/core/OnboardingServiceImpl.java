@@ -66,7 +66,12 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId) {
         log.info("Getting onboarding info for institution having institutionId {} institutionExternalId {} and states {}", institutionId, institutionExternalId, states);
 
-        List<RelationshipState> relationshipStateList = states.length == 0 ? onboardingInfoDefaultRelationshipStates : convertStatesToRelationshipsState(states);
+        List<RelationshipState> relationshipStateList;
+        if(states == null || states.length == 0){
+            relationshipStateList = onboardingInfoDefaultRelationshipStates;
+        }else{
+            relationshipStateList = convertStatesToRelationshipsState(states);
+        }
 
         List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
 
