@@ -190,7 +190,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private List<Onboarding> findOnboardingLinkedToProductWithStateIn(Map<String, Product> productsMap, Institution onboardedInstitution, List<RelationshipState> relationshipStateList) {
         List<Onboarding> onboardingList = new ArrayList<>();
-        productsMap.forEach((productId, Product) -> {
+        productsMap.forEach((productId, product) -> {
             Optional<Onboarding> onboarding = getOnboardingFromInstitutionByProductIdAndState(onboardedInstitution, productId, relationshipStateList);
             onboarding.ifPresent(onboardingList::add);
         });

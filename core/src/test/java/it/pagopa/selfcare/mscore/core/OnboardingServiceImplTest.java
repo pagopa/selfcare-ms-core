@@ -100,10 +100,9 @@ class OnboardingServiceImplTest {
         onboardedUser.setProductRole(new ArrayList<>());
         onboardedUser.setRole(PartyRole.MANAGER);
         onboardedUser.setUser("User");
-        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
         assertThrows(ResourceNotFoundException.class,
                 () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
-        verify(userConnector).getById((String) any());
     }
 
 
@@ -112,12 +111,11 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testGetOnboardingInfoWhenUserIsNotFound() {
-        when(userConnector.getById((String) any())).thenThrow(new ResourceNotFoundException("An error occurred",
+        when(userConnector.getByUser((String) any())).thenThrow(new ResourceNotFoundException("An error occurred",
                 "Getting onboarding info for institution having institutionId {} institutionExternalId {} and"
                         + " states {}"));
         assertThrows(ResourceNotFoundException.class,
                 () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
-        verify(userConnector).getById((String) any());
     }
 
     /**
@@ -149,13 +147,12 @@ class OnboardingServiceImplTest {
         Institution onboardedInstitution = new Institution();
         onboardedInstitution.setId("institution2");
 
-        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
         when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
 
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.getOnboardingInfo("42", "", new String[]{}, "42"));
         verify(institutionConnector).findById((String) any());
-        verify(userConnector).getById((String) any());
     }
 
     /**
@@ -194,14 +191,13 @@ class OnboardingServiceImplTest {
         onboardedInstitution.setId("institution1");
         onboardedInstitution.setOnboarding(onboardingList);
 
-        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
         when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
 
         List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("42", "", new String[]{ "PENDING" }, "42");
 
         assertEquals(response.size(), 1);
         verify(institutionConnector).findById((String) any());
-        verify(userConnector).getById((String) any());
     }
 
     @Test
@@ -238,14 +234,13 @@ class OnboardingServiceImplTest {
         onboardedInstitution.setExternalId("external1");
         onboardedInstitution.setOnboarding(onboardingList);
 
-        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
         when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.of(onboardedInstitution));
 
         List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("", "external1", new String[]{ "PENDING" }, "42");
 
         assertEquals(response.size(), 1);
         verify(institutionConnector).findByExternalId((String) any());
-        verify(userConnector).getById((String) any());
     }
 
     /**
@@ -284,14 +279,13 @@ class OnboardingServiceImplTest {
         onboardedInstitution.setId("institution1");
         onboardedInstitution.setOnboarding(onboardingList);
 
-        when(userConnector.getById((String) any())).thenReturn(onboardedUser);
+        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
         when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
 
         List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("", "", new String[]{ "PENDING" }, "42");
 
         assertEquals(response.size(), 1);
         verify(institutionConnector).findById((String) any());
-        verify(userConnector).getById((String) any());
     }
 
     @Test
