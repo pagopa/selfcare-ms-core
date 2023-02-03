@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.constant;
 public enum CustomErrorEnum {
 
     GET_INSTITUTION_MANAGER_NOT_FOUND("0043", "Cannot find active manager for institution having externalId %s and product %s"),
+    USER_NOT_FOUND_ERROR("0031", "User having userId %s not found"),
     MANAGER_FOUND_ERROR("0032", "Onboarded managers found for this institution"),
     ROLES_NOT_ADMITTED_ERROR("0034","Roles %s are not admitted for this operation"),
     INSTITUTION_NOT_ONBOARDED("0004", "Institution having externalId %s is not onboarded for product %s"),
