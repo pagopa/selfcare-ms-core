@@ -57,7 +57,7 @@ public class EmailConnectorImpl implements EmailConnector {
             message.setText(html, true);
             message.addAttachment(productName + "_accordo_adesione.pdf", pdf);
             mailSender.send(mimeMessage);
-
+            log.info("END - sendMail to {}, with file {}, for product {}", destinationMail, pdf.getName(), productName);
         } catch (Exception e) {
             throw new MailException(e);
         }

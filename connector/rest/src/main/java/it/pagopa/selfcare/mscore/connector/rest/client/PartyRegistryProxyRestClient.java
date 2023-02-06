@@ -2,8 +2,8 @@ package it.pagopa.selfcare.mscore.connector.rest.client;
 
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
