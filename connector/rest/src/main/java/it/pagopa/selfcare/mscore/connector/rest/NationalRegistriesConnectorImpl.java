@@ -2,10 +2,10 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import it.pagopa.selfcare.mscore.api.NationalRegistriesConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.NationalRegistriesRestClient;
+import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesAddressResponse;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesAddressFilter;
 import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesAddressRequest;
-import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesAddressResponse;
 import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

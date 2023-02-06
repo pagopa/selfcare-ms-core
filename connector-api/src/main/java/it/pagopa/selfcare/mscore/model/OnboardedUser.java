@@ -16,6 +16,10 @@ public class OnboardedUser {
 
     @JsonProperty("user")
     private String user;
+    private String taxCode;
+    private String name;
+    private String surname;
+    private String email;
 
     private PartyRole role;
 

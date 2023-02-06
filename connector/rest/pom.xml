@@ -26,10 +26,6 @@
             <artifactId>spring-cloud-contract-wiremock</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>it.pagopa.selfcare</groupId>
-            <artifactId>selc-commons-connector-rest</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

@@ -2,7 +2,11 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
+import it.pagopa.selfcare.mscore.connector.rest.model.ProxyCategoryResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.LegalFilter;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;

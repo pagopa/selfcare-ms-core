@@ -6,6 +6,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import it.pagopa.selfcare.mscore.connector.rest.NationalRegistriesConnectorImpl;
 import it.pagopa.selfcare.mscore.connector.rest.client.NationalRegistriesRestClient;
 import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesAddressResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.nationalregistries.NationalRegistriesProfessionalResponse;

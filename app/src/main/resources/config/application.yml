@@ -10,6 +10,7 @@ spring:
     include:
       # TO enable specific-language documentations
       - swaggerEN
+      - AzureStorage
   zipkin:
     enabled: false
   sleuth:

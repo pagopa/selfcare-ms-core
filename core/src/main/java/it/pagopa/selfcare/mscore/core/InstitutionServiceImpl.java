@@ -107,10 +107,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkAlreadyExists(externalId);
         if (institution.getInstitutionType() != null) {
-            institution.setIpaCode(institution.getInstitutionType().toString());
+            institution.setInstitutionType(institution.getInstitutionType());
         } else {
             institution.setInstitutionType(InstitutionType.UNKNOWN);
-            institution.setIpaCode("SELC_" + externalId);
         }
         institution.setCreatedAt(OffsetDateTime.now());
         return saveInstitution(institution);

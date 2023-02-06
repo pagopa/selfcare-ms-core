@@ -9,6 +9,9 @@ public enum GenericErrorEnum {
     ONBOARDING_OPERATION_ERROR("0017", "Error while performing onboarding operation"),
     GET_PRODUCTS_ERROR("0031", "Error while getting products"),
     ONBOARDING_VERIFICATION_ERROR("0015", "Error while verifying onboarding"),
+
+    CONTRACT_PATH_ERROR("0100","Contract Path is required"),
+    MANAGER_EMAIL_NOT_FOUND("0101", "Manager email not found"),
     GENERIC_ERROR("0000","Generic Error");
     private final String code;
     private final String detail;

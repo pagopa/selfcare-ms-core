@@ -9,17 +9,21 @@
 
   <artifactId>selc-ms-core-connector</artifactId>
   <packaging>pom</packaging>
+  <modules>
+    <module>dao</module>
+    <module>rest</module>
+    <module>azure-storage</module>
+    <module>email</module>
+  </modules>
 
   <dependencies>
     <dependency>
       <groupId>it.pagopa.selfcare</groupId>
       <artifactId>selc-ms-core-connector-api</artifactId>
     </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.core</groupId>
+          <artifactId>jackson-databind</artifactId>
+      </dependency>
   </dependencies>
-
-  <modules>
-    <module>dao</module>
-    <module>rest</module>
-  </modules>
-
 </project>

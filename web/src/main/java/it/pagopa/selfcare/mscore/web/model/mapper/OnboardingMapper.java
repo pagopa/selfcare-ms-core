@@ -47,6 +47,10 @@ public class OnboardingMapper {
         if(!onboardingInstitutionRequest.getUsers().isEmpty()){
             for(Person p: onboardingInstitutionRequest.getUsers()) {
                 OnboardedUser onboardedUser = new OnboardedUser();
+                onboardedUser.setName(p.getName());
+                onboardedUser.setSurname(p.getSurname());
+                onboardedUser.setTaxCode(p.getTaxCode());
+                onboardedUser.setEmail(p.getEmail());
                 onboardedUser.setUser(p.getId());
                 onboardedUser.setRole(PartyRole.valueOf(p.getRole()));
                 onboardedUser.setProductRole(List.of(p.getRole(),p.getProductRole()));

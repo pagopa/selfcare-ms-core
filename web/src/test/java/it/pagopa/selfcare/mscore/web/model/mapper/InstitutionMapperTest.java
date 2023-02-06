@@ -1985,7 +1985,7 @@ class InstitutionMapperTest {
         assertEquals("42", actualToInstitutionResult.getExternalId());
         PaymentServiceProvider paymentServiceProvider = actualToInstitutionResult.getPaymentServiceProvider();
         assertEquals("42", paymentServiceProvider.getLegalRegisterNumber());
-        assertTrue(paymentServiceProvider.getVatNumberGroup());
+        assertTrue(paymentServiceProvider.isVatNumberGroup());
         DataProtectionOfficer dataProtectionOfficer = actualToInstitutionResult.getDataProtectionOfficer();
         assertEquals("jane.doe@example.org", dataProtectionOfficer.getEmail());
         assertEquals("Abi Code", paymentServiceProvider.getAbiCode());
@@ -2046,7 +2046,7 @@ class InstitutionMapperTest {
         assertEquals("Pec", dataProtectionOfficer.getPec());
         PaymentServiceProvider paymentServiceProvider = actualToInstitutionResult.getPaymentServiceProvider();
         assertEquals("42", paymentServiceProvider.getLegalRegisterNumber());
-        assertTrue(paymentServiceProvider.getVatNumberGroup());
+        assertTrue(paymentServiceProvider.isVatNumberGroup());
         assertEquals("Abi Code", paymentServiceProvider.getAbiCode());
         assertEquals("42", paymentServiceProvider.getBusinessRegisterNumber());
         assertEquals("42 Main St", dataProtectionOfficer.getAddress());
@@ -2106,7 +2106,7 @@ class InstitutionMapperTest {
         assertEquals("42", actualToInstitutionResult.getExternalId());
         PaymentServiceProvider paymentServiceProvider = actualToInstitutionResult.getPaymentServiceProvider();
         assertEquals("42", paymentServiceProvider.getLegalRegisterNumber());
-        assertTrue(paymentServiceProvider.getVatNumberGroup());
+        assertTrue(paymentServiceProvider.isVatNumberGroup());
         DataProtectionOfficer dataProtectionOfficer = actualToInstitutionResult.getDataProtectionOfficer();
         assertEquals("jane.doe@example.org", dataProtectionOfficer.getEmail());
         assertEquals("Abi Code", paymentServiceProvider.getAbiCode());
@@ -2155,7 +2155,7 @@ class InstitutionMapperTest {
         assertEquals("42", actualToInstitutionResult.getExternalId());
         PaymentServiceProvider paymentServiceProvider = actualToInstitutionResult.getPaymentServiceProvider();
         assertEquals("42", paymentServiceProvider.getLegalRegisterNumber());
-        assertFalse(paymentServiceProvider.getVatNumberGroup());
+        assertFalse(paymentServiceProvider.isVatNumberGroup());
         DataProtectionOfficer dataProtectionOfficer = actualToInstitutionResult.getDataProtectionOfficer();
         assertEquals("jane.doe@example.org", dataProtectionOfficer.getEmail());
         assertEquals("Abi Code", paymentServiceProvider.getAbiCode());

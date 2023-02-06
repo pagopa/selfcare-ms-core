@@ -9,6 +9,6 @@ public class PaymentServiceProvider {
     private String businessRegisterNumber;
     private String legalRegisterName;
     private String legalRegisterNumber;
-    private Boolean vatNumberGroup;
+    private boolean vatNumberGroup;
 
 }

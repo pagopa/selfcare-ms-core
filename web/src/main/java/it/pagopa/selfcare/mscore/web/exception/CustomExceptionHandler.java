@@ -38,9 +38,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers,
-            HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         log.error("InvalidRequestException Occured --> MESSAGE:{}",ex.getMessage(),ex);
         headers.setContentType(MediaType.APPLICATION_JSON);
         List<String> errors = ex.getBindingResult()

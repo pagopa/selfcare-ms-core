@@ -504,7 +504,7 @@ class InstitutionServiceImplTest {
         assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
-        assertEquals("PA", institution1.getIpaCode());
+        assertEquals("Ipa Code", institution1.getIpaCode());
     }
 
 
@@ -585,7 +585,7 @@ class InstitutionServiceImplTest {
         assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
-        assertEquals("SELC_42", institution1.getIpaCode());
+        assertEquals("Ipa Code", institution1.getIpaCode());
     }
 
     /**

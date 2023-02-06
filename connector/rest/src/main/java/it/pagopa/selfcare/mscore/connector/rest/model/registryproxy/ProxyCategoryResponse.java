@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.connector.rest.model.registryproxy;
+package it.pagopa.selfcare.mscore.connector.rest.model;
 
 import lombok.Data;
 

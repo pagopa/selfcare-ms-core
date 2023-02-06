@@ -1,15 +1,29 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
+import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
+import it.pagopa.selfcare.mscore.api.EmailConnector;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
+import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
+import it.pagopa.selfcare.mscore.core.ContractService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
+import it.pagopa.selfcare.mscore.core.OnboardingServiceImpl;
+import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 
+import java.security.Principal;
 import java.util.ArrayList;
 
 import it.pagopa.selfcare.mscore.web.model.user.Person;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -29,7 +43,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {OnboardingController.class})
 @ExtendWith(SpringExtension.class)
@@ -160,6 +174,30 @@ class OnboardingControllerTest {
                 .build()
                 .perform(headResult)
                 .andExpect(MockMvcResultMatchers.status().is(204));
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#onboardingInfo(String, String, String[], Authentication)}
+     */
+    @Test
+    void testOnboardingInfo() throws Exception {
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/onboarding/info")
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        onboardingController.onboardingInfo("42", "42", new String[]{"MD"}, new JwtAuthenticationToken("ABC123"));
     }
 }
 

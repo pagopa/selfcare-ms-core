@@ -25,6 +25,16 @@
             <artifactId>selc-ms-core-connector-rest</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-ms-core-connector-azure-storage</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-ms-core-connector-email</artifactId>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <build>

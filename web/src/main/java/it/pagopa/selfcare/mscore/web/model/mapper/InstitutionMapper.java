@@ -107,7 +107,7 @@ public class InstitutionMapper {
         response.setAbiCode(paymentServiceProvider.getAbiCode());
         response.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());
         response.setBusinessRegisterNumber(paymentServiceProvider.getBusinessRegisterNumber());
-        response.setVatNumberGroup(paymentServiceProvider.getVatNumberGroup());
+        response.setVatNumberGroup(paymentServiceProvider.isVatNumberGroup());
         response.setLegalRegisterNumber(paymentServiceProvider.getLegalRegisterNumber());
         return response;
     }

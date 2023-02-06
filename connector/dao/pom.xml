@@ -20,14 +20,6 @@
             <artifactId>de.flapdoodle.embed.mongo</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>it.pagopa.selfcare</groupId>
-            <artifactId>selc-ms-core-connector-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>it.pagopa.selfcare</groupId>
-            <artifactId>selc-commons-base</artifactId>
-        </dependency>
     </dependencies>
 
 </project>
