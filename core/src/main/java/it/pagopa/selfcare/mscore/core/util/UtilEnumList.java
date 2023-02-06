@@ -7,6 +7,8 @@ import java.util.List;
 
 public class UtilEnumList {
 
+    private UtilEnumList() {}
+
     public static final List<RelationshipState> productRelationshipStates =
             List.of(RelationshipState.PENDING,
                     RelationshipState.REJECTED,

@@ -42,8 +42,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(fileStorageConnector).getTemplateFile(any());
     }
 
@@ -60,8 +61,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(fileStorageConnector).getTemplateFile(any());
     }
 
@@ -79,8 +81,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(fileStorageConnector).getTemplateFile(any());
     }
 
@@ -98,8 +101,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(fileStorageConnector).getTemplateFile(any());
     }
 
@@ -122,8 +126,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(fileStorageConnector).getTemplateFile(any());
         verify(objectMapper).readValue((String) any(), (Class<MailTemplate>) any());
     }
@@ -150,8 +155,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(fileStorageConnector).getTemplateFile(any());
         verify(objectMapper).readValue((String) any(), (Class<MailTemplate>) any());
         verify(mailTemplate).getBody();
@@ -183,8 +189,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(javaMailSender).createMimeMessage();
         verify(fileStorageConnector).getTemplateFile(any());
         verify(objectMapper).readValue((String) any(), (Class<MailTemplate>) any());
@@ -217,8 +224,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(javaMailSender).createMimeMessage();
         verify(fileStorageConnector).getTemplateFile(any());
         verify(objectMapper).readValue((String) any(), (Class<MailTemplate>) any());
@@ -251,8 +259,9 @@ class EmailConnectorImplTest {
                 new CoreConfig());
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+        Map<String, String> map = new HashMap<>();
         assertThrows(MailException.class,
-                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>()));
+                () -> emailConnectorImpl.sendMail("Template Name", destinationMail, pdf, "Product Name", map));
         verify(javaMailSender).createMimeMessage();
         verify(fileStorageConnector).getTemplateFile(any());
         verify(objectMapper).readValue((String) any(), (Class<MailTemplate>) any());

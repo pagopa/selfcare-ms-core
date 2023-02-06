@@ -28,13 +28,7 @@ import it.pagopa.selfcare.mscore.model.Product;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.User;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.institution.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -805,8 +799,9 @@ class OnboardingServiceImplTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Institution institution = new Institution();
+        List<GeographicTaxonomies> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingServiceImpl.persist(onboardingRequest, institution, new ArrayList<>(), "Digest"));
+                () -> onboardingServiceImpl.persist(onboardingRequest, institution,list, "Digest"));
         verify(institutionConnector).save(any());
         verify(tokenConnector).save(any());
         verify(tokenConnector).deleteById(any());
@@ -884,8 +879,9 @@ class OnboardingServiceImplTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Institution institution = new Institution();
+        List<GeographicTaxonomies> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> onboardingServiceImpl.persist(onboardingRequest, institution, new ArrayList<>(), "Digest"));
+                () -> onboardingServiceImpl.persist(onboardingRequest, institution, list, "Digest"));
         verify(institutionConnector).save(any());
         verify(tokenConnector).save(any());
         verify(tokenConnector).deleteById(any());

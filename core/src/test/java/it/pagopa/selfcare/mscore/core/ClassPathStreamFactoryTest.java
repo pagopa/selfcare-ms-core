@@ -12,8 +12,9 @@ class ClassPathStreamFactoryTest {
     @Test
     void testGetUrl() {
         assertNull((new ClassPathStreamFactory()).getUrl("https://example.org/example").getStream());
+        ClassPathStreamFactory classPathStreamFactory = new ClassPathStreamFactory();
         assertThrows(RuntimeException.class,
-                () -> (new ClassPathStreamFactory()).getUrl("42https://example.org/example"));
+                () -> classPathStreamFactory.getUrl("42https://example.org/example"));
     }
 }
 

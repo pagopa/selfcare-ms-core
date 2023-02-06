@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 import it.pagopa.selfcare.mscore.model.User;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -37,7 +38,7 @@ class UserRegistryConnectorImplTest {
         Mockito.when(userRegistryRestClient.getUserByInternalId(any(),any()))
                         .thenReturn(user);
         EnumSet<User.Fields> enumSet = EnumSet.allOf(User.Fields.class);
-        userRegistryConnectorImpl.getUserByInternalId(uuid.toString(),enumSet);
+        Assertions.assertDoesNotThrow(() -> userRegistryConnectorImpl.getUserByInternalId(uuid.toString(),enumSet));
     }
 }
 

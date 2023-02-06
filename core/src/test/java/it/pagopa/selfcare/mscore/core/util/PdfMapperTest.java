@@ -162,8 +162,9 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
+        List<GeographicTaxonomies> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> PdfMapper.setUpCommonData(onboardedUser, users, institution, onboardingRequest, new ArrayList<>()));
+                () -> PdfMapper.setUpCommonData(onboardedUser, users, institution, onboardingRequest,list));
     }
 
     /**

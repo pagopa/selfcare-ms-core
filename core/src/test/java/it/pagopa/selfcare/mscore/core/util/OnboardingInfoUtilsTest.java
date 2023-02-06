@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.Product;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 
@@ -36,8 +37,10 @@ class OnboardingInfoUtilsTest {
     @Test
     void testGetUserInstitutionsWithProductStatusIn() {
         HashMap<String, Map<String, Product>> userInstitutionToBeFiltered = new HashMap<>();
+
+        List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class, () -> OnboardingInfoUtils
-                .getUserInstitutionsWithProductStatusIn(userInstitutionToBeFiltered, new ArrayList<>()));
+                .getUserInstitutionsWithProductStatusIn(userInstitutionToBeFiltered, list));
     }
 
     /**
@@ -47,8 +50,9 @@ class OnboardingInfoUtilsTest {
     void testGetUserInstitutionsWithProductStatusIn2() {
         HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
         stringMapMap.put("No onboarding information found for states {}", new HashMap<>());
+        List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, new ArrayList<>()));
+                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, list));
     }
 
     /**
@@ -59,8 +63,9 @@ class OnboardingInfoUtilsTest {
         HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
         stringMapMap.put("Key", new HashMap<>());
         stringMapMap.put("No onboarding information found for states {}", new HashMap<>());
+        List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, new ArrayList<>()));
+                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, list));
     }
 
     /**
@@ -80,8 +85,9 @@ class OnboardingInfoUtilsTest {
 
         HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
         stringMapMap.put("No onboarding information found for states {}", stringProductMap);
+        List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, new ArrayList<>()));
+                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, list));
     }
 
     /**
@@ -109,8 +115,9 @@ class OnboardingInfoUtilsTest {
 
         HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
         stringMapMap.put("No onboarding information found for states {}", stringProductMap);
+        List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, new ArrayList<>()));
+                () -> OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(stringMapMap, list));
     }
 
     /**

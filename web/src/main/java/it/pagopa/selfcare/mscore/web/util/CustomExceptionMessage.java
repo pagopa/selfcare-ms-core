@@ -8,8 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class CustomExceptionMessage {
 
-    public CustomExceptionMessage() {
-    }
+    private CustomExceptionMessage() {}
 
     public static void setCustomMessage(GenericErrorEnum genericErrorEnum){
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())

@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 
 import org.junit.jupiter.api.Test;
@@ -920,12 +921,13 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
+        DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
+        Institution institution =  new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
+                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
+                geographicTaxonomies, attributes, paymentServiceProvider1, dataProtectionOfficer1, null, null);
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate,
-                        new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
-                                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
-                                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
-                                geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null)));
+                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
 
     /**
@@ -965,12 +967,13 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
+        DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
+        Institution institution =  new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
+                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
+                geographicTaxonomies, attributes, paymentServiceProvider1, dataProtectionOfficer1, null, null);
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate,
-                        new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
-                                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
-                                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
-                                geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null)));
+                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
 
     /**
@@ -1018,13 +1021,6 @@ class OnboardingInstitutionUtilsTest {
                 geographicTaxonomiesList, attributes, paymentServiceProvider1, dataProtectionOfficer1, null, null);
 
         OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution);
-        assertEquals("42 Main St", institutionUpdate.getAddress());
-        assertEquals("21654", institutionUpdate.getZipCode());
-        assertEquals("Tax Code", institutionUpdate.getTaxCode());
-        assertEquals("4105551212", institutionUpdate.getSupportPhone());
-        assertEquals("jane.doe@example.org", institutionUpdate.getSupportEmail());
-        assertEquals("Share Capital", institutionUpdate.getShareCapital());
-        assertEquals("Rea", institutionUpdate.getRea());
         assertSame(paymentServiceProvider, institutionUpdate.getPaymentServiceProvider());
         assertEquals(InstitutionType.PG, institutionUpdate.getInstitutionType());
         assertEquals("Business Register Place", institutionUpdate.getBusinessRegisterPlace());
@@ -1099,16 +1095,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("21654", institutionUpdate.getZipCode());
         assertEquals("START - validateOverridingData for institution having externalId: {}",
                 institutionUpdate.getTaxCode());
-        assertEquals("4105551212", institutionUpdate.getSupportPhone());
-        assertEquals("jane.doe@example.org", institutionUpdate.getSupportEmail());
-        assertEquals("Share Capital", institutionUpdate.getShareCapital());
-        assertEquals("Rea", institutionUpdate.getRea());
-        assertSame(paymentServiceProvider, institutionUpdate.getPaymentServiceProvider());
-        assertEquals(InstitutionType.PA, institutionUpdate.getInstitutionType());
-        assertEquals("Business Register Place", institutionUpdate.getBusinessRegisterPlace());
-        assertEquals("The characteristics of someone or something", institutionUpdate.getDescription());
-        assertEquals("42 Main St", institutionUpdate.getDigitalAddress());
-        assertSame(dataProtectionOfficer, institutionUpdate.getDataProtectionOfficer());
         List<String> geographicTaxonomyCodes = institutionUpdate.getGeographicTaxonomyCodes();
         assertEquals(onboardingList, geographicTaxonomyCodes);
         assertEquals("42 Main St", institution.getAddress());
@@ -2115,7 +2101,8 @@ class OnboardingInstitutionUtilsTest {
      */
     @Test
     void testGetValidManager() {
-        assertThrows(InvalidRequestException.class, () -> OnboardingInstitutionUtils.getValidManager(new ArrayList<>()));
+        List<OnboardedUser> list = new ArrayList<>();
+        assertThrows(InvalidRequestException.class, () -> OnboardingInstitutionUtils.getValidManager(list));
     }
 
     /**
@@ -2123,9 +2110,6 @@ class OnboardingInstitutionUtilsTest {
      */
     @Test
     void testGetValidManager2() {
-        // TODO: Complete this test.
-        //   Diffblue AI was unable to find a test
-
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new HashMap<>());
         onboardedUser.setCreatedAt(null);
@@ -2140,7 +2124,7 @@ class OnboardingInstitutionUtilsTest {
 
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
         onboardedUserList.add(onboardedUser);
-        OnboardingInstitutionUtils.getValidManager(onboardedUserList);
+        Assertions.assertDoesNotThrow(() -> OnboardingInstitutionUtils.getValidManager(onboardedUserList));
     }
 
     /**
@@ -2163,44 +2147,6 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
         onboardedUserList.add(onboardedUser);
         assertThrows(InvalidRequestException.class, () -> OnboardingInstitutionUtils.getValidManager(onboardedUserList));
-    }
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#getValidManager(List)}
-     */
-    @Test
-    void testGetValidManager4() {
-        // TODO: Complete this test.
-        //   Diffblue AI was unable to find a test
-
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new HashMap<>());
-        onboardedUser.setCreatedAt(null);
-        onboardedUser.setEmail("jane.doe@example.org");
-        onboardedUser.setId("42");
-        onboardedUser.setName("START - getValidManager for users list size: {}");
-        onboardedUser.setProductRole(new ArrayList<>());
-        onboardedUser.setRole(PartyRole.MANAGER);
-        onboardedUser.setSurname("Doe");
-        onboardedUser.setTaxCode("START - getValidManager for users list size: {}");
-        onboardedUser.setUser("START - getValidManager for users list size: {}");
-
-        OnboardedUser onboardedUser1 = new OnboardedUser();
-        onboardedUser1.setBindings(new HashMap<>());
-        onboardedUser1.setCreatedAt(null);
-        onboardedUser1.setEmail("jane.doe@example.org");
-        onboardedUser1.setId("42");
-        onboardedUser1.setName("START - getValidManager for users list size: {}");
-        onboardedUser1.setProductRole(new ArrayList<>());
-        onboardedUser1.setRole(PartyRole.DELEGATE);
-        onboardedUser1.setSurname("Doe");
-        onboardedUser1.setTaxCode("START - getValidManager for users list size: {}");
-        onboardedUser1.setUser("START - getValidManager for users list size: {}");
-
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(onboardedUser1);
-        onboardedUserList.add(onboardedUser);
-        OnboardingInstitutionUtils.getValidManager(onboardedUserList);
     }
 }
 

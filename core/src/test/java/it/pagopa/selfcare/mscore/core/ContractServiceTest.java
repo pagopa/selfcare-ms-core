@@ -127,8 +127,10 @@ class ContractServiceTest {
             onboardingRequest.setProductName("Product Name");
             onboardingRequest.setSignContract(true);
             onboardingRequest.setUsers(new ArrayList<>());
+
+            List<GeographicTaxonomies> list = new ArrayList<>();
             assertThrows(InvalidRequestException.class, () -> contractService.createContractPDF("Contract Template",
-                    onboardedUser, users, institution, onboardingRequest, new ArrayList<>()));
+                    onboardedUser, users, institution, onboardingRequest,list));
             mockFiles.verify(() -> Files.createTempFile(any(), any(),any()));
         }
     }

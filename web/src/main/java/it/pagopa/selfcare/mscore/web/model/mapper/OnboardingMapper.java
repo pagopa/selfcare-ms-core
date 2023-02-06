@@ -77,7 +77,7 @@ public class OnboardingMapper {
             Map<String, Product> productMap = onboardingInfo.getProductMap();
             List<Onboarding> onboardingList = institution.getOnboarding();
 
-            onboardingList.forEach((onboarding) -> {
+            onboardingList.forEach(onboarding -> {
                 String productId = onboarding.getProductId();
                 Product product = productMap.get(productId);
                 ProductInfo productInfo = convertToProductInfo(product, productId);
@@ -122,7 +122,7 @@ public class OnboardingMapper {
 
     private static List<AttributesResponse> convertToAttributesResponse(List<Attributes> attributesList) {
         if(attributesList == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         return attributesList.stream()
@@ -138,15 +138,15 @@ public class OnboardingMapper {
 
     private static List<GeoTaxonomies> convertToGeoTaxonomies(List<GeographicTaxonomies> geographicTaxonomies) {
         if(geographicTaxonomies == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         return geographicTaxonomies.stream()
-                .map((geo) -> {
+                .map(geo -> {
                     GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
                     geoTaxonomies.setCode(geo.getCode());
                     geoTaxonomies.setDesc(geo.getDesc());
-                    //geoTaxonomies.setEnable(geo.getEnable());
+                    geoTaxonomies.setEnable(geo.isEnable());
                     return geoTaxonomies;
                 }).collect(Collectors.toList());
     }
