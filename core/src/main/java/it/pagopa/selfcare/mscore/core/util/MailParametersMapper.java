@@ -6,11 +6,7 @@ import it.pagopa.selfcare.mscore.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class MailParametersMapper {
@@ -44,7 +40,6 @@ public class MailParametersMapper {
     }
 
     public List<String> getOnboardingNotificationAdminEmail() {
-        return List.of(new String(Base64.getDecoder()
-                        .decode(mailTemplateConfig.getNotificationAdminEmail()), StandardCharsets.UTF_8));
+        return List.of(mailTemplateConfig.getNotificationAdminEmail());
     }
 }

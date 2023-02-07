@@ -8,7 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:config/core-config.properties")
-@ConfigurationProperties(prefix = "party-process.pagopa-signature")
+@ConfigurationProperties(prefix = "mscore.pagopa-signature")
 @Data
 @ToString
 public class PagoPaSignatureConfig {

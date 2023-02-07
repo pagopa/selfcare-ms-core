@@ -10,7 +10,7 @@ import java.util.List;
 
 @Configuration
 @PropertySource("classpath:config/core-config.properties")
-@ConfigurationProperties(prefix = "party-process")
+@ConfigurationProperties(prefix = "mscore")
 @Data
 @ToString
 public class CoreConfig {
@@ -18,4 +18,5 @@ public class CoreConfig {
     private String logoPath;
     private String senderMail;
     private List<String> destinationMails;
+    private List<String> notificationAdminEmail;
 }

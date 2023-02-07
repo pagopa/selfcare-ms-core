@@ -16,12 +16,6 @@
             <artifactId>selc-ms-core-connector-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>jakarta.xml.soap</groupId>
-            <artifactId>jakarta.xml.soap-api</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.openhtmltopdf/openhtmltopdf-core -->
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
@@ -40,6 +34,16 @@
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-svg-support</artifactId>
             <version>1.0.10</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xalan</groupId>
+                    <artifactId>serializer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xalan</groupId>
+                    <artifactId>xalan</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.openhtmltopdf/openhtmltopdf-slf4j -->
