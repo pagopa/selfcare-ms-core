@@ -1,8 +1,10 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
@@ -14,9 +16,11 @@ import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -32,10 +36,56 @@ class InstitutionConnectorImplTest {
 
     @Test
     void findById() {
-        InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
-        Optional<Institution> response = institutionConnectionImpl.findByExternalId("id");
-        Assertions.assertTrue(response.isEmpty());
+        InstitutionEntity institution = new InstitutionEntity();
+        institution.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institution.setExternalId("externalId");
+        institution.setDescription("description");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setIpaCode("ipaCode");
+        institution.setDigitalAddress("digitalAddress");
+        institution.setAddress("address");
+        institution.setZipCode("zipCode");
+        institution.setTaxCode("taxCode");
+        institution.setOnboarding(new ArrayList<>());
+        institution.setDataProtectionOfficer(new DataProtectionOfficer());
+        institution.setPaymentServiceProvider(new PaymentServiceProvider());
+        institution.setAttributes(new ArrayList<>());
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setCreatedAt(OffsetDateTime.now());
+        institution.setUpdatedAt(OffsetDateTime.now());
+
+        when(institutionRepository.findById(any())).thenReturn(Optional.of(institution));
+
+        Optional<Institution> response = institutionConnectionImpl.findById("507f1f77bcf86cd799439011");
+        Assertions.assertTrue(response.isPresent());
+    }
+
+    @Test
+    void findWithFilter() {
+        InstitutionEntity institution = new InstitutionEntity();
+        institution.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institution.setExternalId("externalId");
+        institution.setDescription("description");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setIpaCode("ipaCode");
+        institution.setDigitalAddress("digitalAddress");
+        institution.setAddress("address");
+        institution.setZipCode("zipCode");
+        institution.setTaxCode("taxCode");
+        institution.setOnboarding(new ArrayList<>());
+        institution.setDataProtectionOfficer(new DataProtectionOfficer());
+        institution.setPaymentServiceProvider(new PaymentServiceProvider());
+        institution.setAttributes(new ArrayList<>());
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setCreatedAt(OffsetDateTime.now());
+        institution.setUpdatedAt(OffsetDateTime.now());
+
+        List<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institution);
+        when(institutionRepository.find(any(), eq(InstitutionEntity.class))).thenReturn(institutionEntityList);
+
+        List<Institution> response = institutionConnectionImpl.findWithFilter("externalId", "productId", List.of(RelationshipState.ACTIVE));
+        Assertions.assertFalse(response.isEmpty());
     }
 
     @Test
