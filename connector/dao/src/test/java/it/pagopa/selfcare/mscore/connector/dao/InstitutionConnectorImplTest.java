@@ -125,7 +125,7 @@ class InstitutionConnectorImplTest {
     @Test
     void findByExternalIdNotFoundTest() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439012"));
         when(institutionRepository.findAll((Example<InstitutionEntity>) any())).thenReturn(Collections.emptyList());
         Optional<Institution> response = institutionConnectionImpl.findByExternalId("ext");
         Assertions.assertTrue(response.isEmpty());
