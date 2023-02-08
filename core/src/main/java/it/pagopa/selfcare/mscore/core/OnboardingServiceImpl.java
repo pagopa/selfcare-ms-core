@@ -151,8 +151,9 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     private Map<String, Product> filterProductsMapByStates(Map<String, Product> productsMap, List<RelationshipState> states) {
-        if (productsMap == null)
+        if (productsMap == null) {
             return new HashMap<>();
+        }
 
         return productsMap.entrySet()
                 .stream()

@@ -100,7 +100,7 @@ class OnboardingServiceImplTest {
         onboardedUser.setProductRole(new ArrayList<>());
         onboardedUser.setRole(PartyRole.MANAGER);
         onboardedUser.setUser("User");
-        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
+        when(userConnector.getByUser(any())).thenReturn(List.of(onboardedUser));
         assertThrows(ResourceNotFoundException.class,
                 () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
     }
@@ -111,7 +111,7 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testGetOnboardingInfoWhenUserIsNotFound() {
-        when(userConnector.getByUser((String) any())).thenThrow(new ResourceNotFoundException("An error occurred",
+        when(userConnector.getByUser(any())).thenThrow(new ResourceNotFoundException("An error occurred",
                 "Getting onboarding info for institution having institutionId {} institutionExternalId {} and"
                         + " states {}"));
         assertThrows(ResourceNotFoundException.class,
@@ -147,12 +147,12 @@ class OnboardingServiceImplTest {
         Institution onboardedInstitution = new Institution();
         onboardedInstitution.setId("institution2");
 
-        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
-        when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
+        when(userConnector.getByUser(any())).thenReturn(List.of(onboardedUser));
+        when(institutionConnector.findById(any())).thenReturn(Optional.of(onboardedInstitution));
 
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.getOnboardingInfo("42", "", new String[]{}, "42"));
-        verify(institutionConnector).findById((String) any());
+        verify(institutionConnector).findById(any());
     }
 
     /**
@@ -191,13 +191,13 @@ class OnboardingServiceImplTest {
         onboardedInstitution.setId("institution1");
         onboardedInstitution.setOnboarding(onboardingList);
 
-        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
-        when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
+        when(userConnector.getByUser(any())).thenReturn(List.of(onboardedUser));
+        when(institutionConnector.findById(any())).thenReturn(Optional.of(onboardedInstitution));
 
         List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("42", "", new String[]{ "PENDING" }, "42");
 
-        assertEquals(response.size(), 1);
-        verify(institutionConnector).findById((String) any());
+        assertEquals(1, response.size());
+        verify(institutionConnector).findById(any());
     }
 
     @Test
@@ -234,13 +234,13 @@ class OnboardingServiceImplTest {
         onboardedInstitution.setExternalId("external1");
         onboardedInstitution.setOnboarding(onboardingList);
 
-        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.of(onboardedInstitution));
+        when(userConnector.getByUser(any())).thenReturn(List.of(onboardedUser));
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(onboardedInstitution));
 
         List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("", "external1", new String[]{ "PENDING" }, "42");
 
-        assertEquals(response.size(), 1);
-        verify(institutionConnector).findByExternalId((String) any());
+        assertEquals(1, response.size());
+        verify(institutionConnector).findByExternalId(any());
     }
 
     /**
@@ -279,13 +279,13 @@ class OnboardingServiceImplTest {
         onboardedInstitution.setId("institution1");
         onboardedInstitution.setOnboarding(onboardingList);
 
-        when(userConnector.getByUser((String) any())).thenReturn(List.of(onboardedUser));
-        when(institutionConnector.findById((String) any())).thenReturn(Optional.of(onboardedInstitution));
+        when(userConnector.getByUser(any())).thenReturn(List.of(onboardedUser));
+        when(institutionConnector.findById(any())).thenReturn(Optional.of(onboardedInstitution));
 
         List<OnboardingInfo> response = onboardingServiceImpl.getOnboardingInfo("", "", new String[]{ "PENDING" }, "42");
 
-        assertEquals(response.size(), 1);
-        verify(institutionConnector).findById((String) any());
+        assertEquals(1, response.size());
+        verify(institutionConnector).findById(any());
     }
 
     @Test
@@ -727,7 +727,7 @@ class OnboardingServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionConnector.findByExternalId((String) any()))
+        when(institutionConnector.findByExternalId(any()))
                 .thenReturn(Optional.of(new Institution("42", "42", "Onboarding institution having externalId {}",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Onboarding institution having externalId {}", billing, onboarding, geographicTaxonomies, attributes,
@@ -776,7 +776,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
     }
 
     /**
@@ -923,8 +923,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -937,7 +937,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -981,8 +981,8 @@ class OnboardingServiceImplTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setUsers(new ArrayList<>());
         onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
         verify(institution, atLeast(1)).getInstitutionType();
@@ -998,7 +998,7 @@ class OnboardingServiceImplTest {
         verify(institution).getAttributes();
         verify(institution).getGeographicTaxonomies();
         verify(institution, atLeast(1)).getOnboarding();
-        verify(tokenConnector).save((Token) any());
+        verify(tokenConnector).save(any());
     }
 
     /**
@@ -1759,8 +1759,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -1773,7 +1773,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -1817,8 +1817,8 @@ class OnboardingServiceImplTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setUsers(new ArrayList<>());
         onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
         verify(institution, atLeast(1)).getInstitutionType();
@@ -1834,7 +1834,7 @@ class OnboardingServiceImplTest {
         verify(institution).getAttributes();
         verify(institution).getGeographicTaxonomies();
         verify(institution, atLeast(1)).getOnboarding();
-        verify(tokenConnector).save((Token) any());
+        verify(tokenConnector).save(any());
     }
 
     /**
@@ -1875,8 +1875,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -1889,7 +1889,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -1933,8 +1933,8 @@ class OnboardingServiceImplTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setUsers(new ArrayList<>());
         onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
         verify(institution, atLeast(1)).getInstitutionType();
@@ -1950,7 +1950,7 @@ class OnboardingServiceImplTest {
         verify(institution).getAttributes();
         verify(institution).getGeographicTaxonomies();
         verify(institution, atLeast(1)).getOnboarding();
-        verify(tokenConnector).save((Token) any());
+        verify(tokenConnector).save(any());
     }
 
     /**
@@ -1991,8 +1991,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -2005,7 +2005,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -2050,7 +2050,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getAddress();
         verify(institution).getDescription();
         verify(institution).getDigitalAddress();
@@ -2098,8 +2098,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -2112,7 +2112,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -2157,7 +2157,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getDescription();
         verify(institution).getDigitalAddress();
         verify(institution).getExternalId();
@@ -2204,8 +2204,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -2218,7 +2218,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -2263,7 +2263,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getDescription();
         verify(institution).getDigitalAddress();
         verify(institution).getExternalId();
@@ -2309,8 +2309,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("Onboarding institution having externalId {}");
         when(institution.getOnboarding()).thenReturn(new ArrayList<>());
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -2323,7 +2323,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -2368,7 +2368,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getDescription();
         verify(institution).getExternalId();
         verify(institution, atLeast(1)).getOnboarding();
@@ -2434,8 +2434,8 @@ class OnboardingServiceImplTest {
         when(institution.getDescription()).thenReturn("The characteristics of someone or something");
         when(institution.getOnboarding()).thenReturn(onboardingList);
         Optional<Institution> ofResult = Optional.of(institution);
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(ofResult);
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(ofResult);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -2448,7 +2448,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing2 = new Billing();
         billing2.setPublicServices(true);
@@ -2492,8 +2492,8 @@ class OnboardingServiceImplTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setUsers(new ArrayList<>());
         onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class));
-        verify(institutionConnector).save((Institution) any());
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByExternalId(any());
         verify(institution).getBilling();
         verify(institution).getDataProtectionOfficer();
         verify(institution, atLeast(1)).getInstitutionType();
@@ -2509,7 +2509,7 @@ class OnboardingServiceImplTest {
         verify(institution).getAttributes();
         verify(institution).getGeographicTaxonomies();
         verify(institution, atLeast(1)).getOnboarding();
-        verify(tokenConnector).save((Token) any());
+        verify(tokenConnector).save(any());
     }
 
     /**
@@ -2517,8 +2517,8 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testOnboardingInstitution29() {
-        when(institutionConnector.save((Institution) any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId((String) any())).thenReturn(Optional.empty());
+        when(institutionConnector.save(any())).thenReturn(new Institution());
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -2531,7 +2531,7 @@ class OnboardingServiceImplTest {
         token.setStatus(RelationshipState.PENDING);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any())).thenReturn(token);
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -2576,7 +2576,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(ResourceNotFoundException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-        verify(institutionConnector).findByExternalId((String) any());
+        verify(institutionConnector).findByExternalId(any());
     }
 }
 

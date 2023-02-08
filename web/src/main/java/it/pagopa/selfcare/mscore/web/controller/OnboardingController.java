@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import java.util.*;
+import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_VERIFICATION_ERROR;
