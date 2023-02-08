@@ -105,11 +105,11 @@ class InstitutionConnectorImplTest {
         Institution institution = new Institution();
         institution.setExternalId("ext");
         InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439015"));
         when(institutionRepository.findAll((Example<InstitutionEntity>) any())).thenReturn(List.of(institutionEntity));
         List<Institution> response = institutionConnectionImpl.findAll(institution);
         Assertions.assertEquals(1, response.size());
-        Assertions.assertEquals("507f1f77bcf86cd799439011", response.get(0).getId());
+        Assertions.assertEquals("507f1f77bcf86cd799439015", response.get(0).getId());
     }
 
     @Test
