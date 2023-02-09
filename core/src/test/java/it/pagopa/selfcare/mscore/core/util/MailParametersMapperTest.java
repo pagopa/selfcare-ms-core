@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -31,7 +32,7 @@ class MailParametersMapperTest {
     @Autowired
     private MailParametersMapper mailParametersMapper;
 
-    @Autowired
+    @MockBean
     private MailTemplateConfig mailTemplateConfig;
 
     /**
@@ -218,7 +219,7 @@ class MailParametersMapperTest {
      */
     @Test
     void testGetOnboardingNotificationAdminEmail() {
-        when(mailTemplateConfig.getNotificationAdminEmail()).thenReturn("admin");
+        when(mailTemplateConfig.getNotificationAdminEmail()).thenReturn("YWRtaW4="); // admin in Base64
         Assertions.assertEquals(List.of("admin"), mailParametersMapper.getOnboardingNotificationAdminEmail());
     }
 }

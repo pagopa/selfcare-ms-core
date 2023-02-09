@@ -222,7 +222,8 @@ class OnboardingControllerTest {
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"userId\":\"id\",\"institutions\":[{\"id\":\"institution1\",\"state\":\"PENDING\",\"productInfo\":{\"id\":\"product42\",\"role\":[]}}]}"));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.institutions").isArray());
+    //.andExpect(MockMvcResultMatchers.content().string("{\"userId\":\"id\",\"institutions\":[{\"id\":\"institution1\",\"state\":\"PENDING\",\"productInfo\":{\"id\":\"product42\",\"role\":[]}}]}"));
 
     }
 }

@@ -25,8 +25,6 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
-import java.io.File;
-import java.nio.file.Paths;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,32 +32,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 
 import org.junit.jupiter.api.Test;
 
 class OnboardingInstitutionUtilsTest {
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#verifyPgUsers(List)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testVerifyPgUsers() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.IndexOutOfBoundsException: Index 0 out of bounds for length 0
-        //       at jdk.internal.util.Preconditions.outOfBounds(Preconditions.java:64)
-        //       at jdk.internal.util.Preconditions.outOfBoundsCheckIndex(Preconditions.java:70)
-        //       at jdk.internal.util.Preconditions.checkIndex(Preconditions.java:248)
-        //       at java.util.Objects.checkIndex(Objects.java:372)
-        //       at java.util.ArrayList.get(ArrayList.java:458)
-        //       at it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.verifyPgUsers(OnboardingInstitutionUtils.java:36)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        OnboardingInstitutionUtils.verifyPgUsers(new ArrayList<>());
-    }
 
     /**
      * Method under test: {@link OnboardingInstitutionUtils#verifyPgUsers(List)}
