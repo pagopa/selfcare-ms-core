@@ -2,28 +2,21 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
-import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
-import it.pagopa.selfcare.mscore.api.EmailConnector;
-import it.pagopa.selfcare.mscore.api.FileStorageConnector;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
-import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.core.ContractService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.core.OnboardingServiceImpl;
-import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
+import it.pagopa.selfcare.mscore.model.OnboardingInfo;
+import it.pagopa.selfcare.mscore.model.Product;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 
-import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import it.pagopa.selfcare.mscore.web.model.user.Person;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -43,7 +36,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @ContextConfiguration(classes = {OnboardingController.class})
 @ExtendWith(SpringExtension.class)
@@ -62,7 +57,7 @@ class OnboardingControllerTest {
 
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
         BillingRequest billingRequest = new BillingRequest();
@@ -181,23 +176,54 @@ class OnboardingControllerTest {
      */
     @Test
     void testOnboardingInfo() throws Exception {
+        Product product = new Product();
+        product.setContract("contract");
+        product.setCreatedAt(null);
+        product.setRoles(new ArrayList<>());
+        product.setStatus(RelationshipState.PENDING);
+        product.setUpdatedAt(null);
+
+        Map<String, Product> productMap = new HashMap<>();
+        productMap.put("product42", product);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("product42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        List<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution onboardedInstitution = new Institution();
+        onboardedInstitution.setId("institution1");
+        onboardedInstitution.setOnboarding(onboardingList);
+
+        OnboardingInfo onboardingInfo = new OnboardingInfo(onboardedInstitution, productMap);
+        List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
+        onboardingInfoList.add(onboardingInfo);
+
+        when(onboardingService.getOnboardingInfo(any(), any(), any(), any())).thenReturn(onboardingInfoList);
 
         Authentication authentication = Mockito.mock(Authentication.class);
-        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/onboarding/info")
-                .principal(authentication)
-                .contentType(MediaType.APPLICATION_JSON);
+        SelfCareUser user = SelfCareUser.builder("id").build();
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/onboarding/info")
+                .param("institutionId", "42")
+                .param("institutionExternalId", "44")
+                .param("states", "PENDING")
+                .principal(authentication);
 
         MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"userId\":\"id\",\"institutions\":[{\"id\":\"institution1\",\"state\":\"PENDING\",\"productInfo\":{\"id\":\"product42\",\"role\":[]}}]}"));
 
-        onboardingController.onboardingInfo("42", "42", new String[]{"MD"}, new JwtAuthenticationToken("ABC123"));
     }
 }
 

@@ -117,8 +117,9 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private void checkAlreadyExists(String externalId) {
         Optional<Institution> opt = institutionConnector.findByExternalId(externalId);
-        if (opt.isPresent())
+        if (opt.isPresent()) {
             throw new ResourceConflictException(String.format(CREATE_INSTITUTION_CONFLICT.getMessage(), externalId), CREATE_INSTITUTION_CONFLICT.getCode());
+        }
     }
 
     private Institution saveInstitution(Institution institution) {
