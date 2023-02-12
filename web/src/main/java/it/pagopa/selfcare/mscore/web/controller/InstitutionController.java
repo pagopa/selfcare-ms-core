@@ -41,9 +41,17 @@ public class InstitutionController {
     }
 
     /**
-     * Code: 201, Message: successful operation, DataType: Institution
-     * Code: 404, Message: Invalid externalId supplied, DataType: Problem
-     * Code: 409, Message: institution having externalId already exists, DataType: Problem
+     * The function persist PA institution
+     *
+     * @param externalId String
+     *
+     * @return InstitutionResponse
+     *
+     * * Code: 201, Message: successful operation, DataType: TokenId
+     * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     *
+     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "", notes = "${swagger.mscore.institution.PA.create}")
@@ -57,6 +65,19 @@ public class InstitutionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
+    /**
+     * The function persist institution manually
+     *
+     * @param externalId String
+     * @param institution InstitutionRequest
+     *
+     * @return InstitutionResponse
+     *
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.institution.create}")
     @PostMapping(value = "/insert/{externalId}")
@@ -69,6 +90,20 @@ public class InstitutionController {
         return ResponseEntity.ok(InstitutionMapper.toInstitutionResponse(saved));
     }
 
+    /**
+     * The function persist PG institution
+     *
+     * @param externalId String
+     * @param existsInRegistry boolean
+     *
+     * @return InstitutionResponse
+     *
+     * * Code: 201, Message: successful operation, DataType: TokenId
+     * * Code: 404, Message: Institution data not found on InfoCamere, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "", notes = "${swagger.mscore.institution.PG.create}")
     @PostMapping(value = "/pg/{externalId}")
@@ -83,6 +118,19 @@ public class InstitutionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
+    /**
+     * The function return products related to institution
+     *
+     * @param id String
+     * @param states List<String
+     *
+     * @return OnboardedProducts
+     *
+     * * Code: 200, Message: successful operation, DataType: OnboardedProducts
+     * * Code: 404, Message: Products not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.institution.products}")
     @GetMapping(value = "/{id}/products")

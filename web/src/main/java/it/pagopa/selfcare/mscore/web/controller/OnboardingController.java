@@ -38,11 +38,19 @@ public class OnboardingController {
         this.tokenService = tokenService;
     }
 
-
     /**
-     * Code: 204, Message: successful operation
-     * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * Code: 404, Message: Not found, DataType: Problem
+     * The function verify onboarding status of given product and institution
+     *
+     * @param externalId String
+     * @param productId String
+     *
+     * @return no content
+     *
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     *
+     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.verify}")
@@ -57,9 +65,19 @@ public class OnboardingController {
     }
 
     /**
-     * Code: 200, Message: successful operation, DataType: OnboardingInfo
-     * Code: 404, Message: Not found, DataType: Problem
-     * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * The function return onboardingInfo
+     *
+     * @param institutionId String
+     * @param institutionExternalId String
+     * @param states String[]
+     *
+     * @return onboardingInfoResponse
+     *
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     *
+     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.info}")
@@ -77,22 +95,43 @@ public class OnboardingController {
 
 
     /**
-     * Code: 204, Message: successful operation
-     * Code: 404, Message: Not found, DataType: Problem
-     * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * The function persist onboarding data
+     *
+     * @param onboardingInstitutionRequest OnboardingInstitutionRequest
+     *
+     * @return no content
+     *
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     *
+     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.institution}")
     @PostMapping(value = "/institution")
-    public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest onboardingInstitutionRequest
-                                                      /*Authentication authentication*/) {
-        SelfCareUser selfCareUser = SelfCareUser.builder("3fa85f64-5717-4562-b3fc-2c963f66afa6").build();
+    public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest onboardingInstitutionRequest,
+                                                      Authentication authentication) {
         log.info("Onboarding institution having externalId {}", onboardingInstitutionRequest.getInstitutionExternalId());
         setCustomMessage(ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest), selfCareUser);
+        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * The function complete onboarding request
+     *
+     * @param tokenId String
+     * @param file MultipartFile
+     *
+     * @return no content
+     *
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.complete}")
     @PostMapping(value = "/complete/{tokenId}")
@@ -105,20 +144,43 @@ public class OnboardingController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-
+    /**
+     * The function approve onboarding request (review of an operator)
+     *
+     * @param tokenId String
+     *
+     * @return no content
+     *
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.complete}")
+    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.approve}")
     @PostMapping(value = "/approve/{tokenId}")
-    public ResponseEntity<Void> approveOnboarding(@PathVariable(value = "tokenId") String tokenId/*,
-                                                  Authentication authentication*/) {
+    public ResponseEntity<Void> approveOnboarding(@PathVariable(value = "tokenId") String tokenId,
+                                                  Authentication authentication) {
         setCustomMessage(CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
-        SelfCareUser selfCareUser = SelfCareUser.builder("3fa85f64-5717-4562-b3fc-2c963f66afa6").build();
-        onboardingService.approveOnboarding(token, selfCareUser);
+        onboardingService.approveOnboarding(token, (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-
+    /**
+     * The function invalidate onboarding request
+     *
+     * @param tokenId String
+     *
+     * @return no content
+     *
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.invalidate}")
     @DeleteMapping(value = "/complete/{tokenId}")
@@ -130,6 +192,19 @@ public class OnboardingController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * The function invalidate onboarding request (review of an operator)
+     *
+     * @param tokenId String
+     *
+     * @return no content
+     *
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.reject}")
     @DeleteMapping(value = "/reject/{tokenId}")
