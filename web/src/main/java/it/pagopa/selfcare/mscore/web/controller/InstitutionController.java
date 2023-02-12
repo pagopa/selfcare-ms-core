@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.ProductMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCusto
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "Institution")
+@Slf4j
 public class InstitutionController {
 
     private final InstitutionService institutionService;
@@ -38,11 +40,18 @@ public class InstitutionController {
         this.institutionService = institutionService;
     }
 
+    /**
+     * Code: 201, Message: successful operation, DataType: Institution
+     * Code: 404, Message: Invalid externalId supplied, DataType: Problem
+     * Code: 409, Message: institution having externalId already exists, DataType: Problem
+     */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "", notes = "${swagger.mscore.institution.PA.create}")
     @PostMapping(value = "/{externalId}")
     public ResponseEntity<InstitutionResponse> createInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                              @PathVariable("externalId") String externalId) {
+
+        log.info("Creating institution having external id {}", externalId);
         setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionByExternalId(externalId);
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
@@ -54,6 +63,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> createInstitutionRaw(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                     @PathVariable("externalId") String externalId,
                                                                     @RequestBody @Valid InstitutionRequest institution) {
+        log.info("Creating institution having external id {}", externalId);
         setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionRaw(InstitutionMapper.toInstitution(institution, externalId), externalId);
         return ResponseEntity.ok(InstitutionMapper.toInstitutionResponse(saved));
@@ -64,10 +74,12 @@ public class InstitutionController {
     @PostMapping(value = "/pg/{externalId}")
     public ResponseEntity<InstitutionResponse> createPgInstitution(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                    @PathVariable("externalId") String externalId,
+                                                                   @RequestParam(value = "manual") boolean existsInRegistry,
                                                                    Authentication authentication) {
 
+        log.info("Creating institution having external id {}", externalId);
         setCustomMessage(CREATE_INSTITUTION_ERROR);
-        Institution saved = institutionService.createPgInstitution(externalId, (SelfCareUser) authentication.getPrincipal());
+        Institution saved = institutionService.createPgInstitution(externalId, existsInRegistry, (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

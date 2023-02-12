@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,9 +50,20 @@ public class TokenConnectorImpl implements TokenConnector {
         final TokenEntity entity = convertToTokenEntity(token);
         return convertToToken(tokenRepository.save(entity));
     }
+    @Override
+    public Optional<Token> findById(String tokenId) {
+        try{
+            return tokenRepository.findById(new ObjectId(tokenId)).map(this::convertToToken);
+        }catch (IllegalArgumentException e){
+            throw new InvalidRequestException(String.format("Invalid token %s", tokenId), "0000");
+        }
+    }
 
     private TokenEntity convertToTokenEntity(Token token) {
         TokenEntity entity = new TokenEntity();
+        if(token.getId()!=null){
+            entity.setId(new ObjectId(token.getId()));
+        }
         entity.setContract(token.getContract());
         entity.setChecksum(token.getChecksum());
         entity.setInstitutionId(token.getInstitutionId());
@@ -71,8 +84,10 @@ public class TokenConnectorImpl implements TokenConnector {
         token.setInstitutionId(tokenEntity.getInstitutionId());
         token.setStatus(tokenEntity.getStatus());
         token.setUsers(tokenEntity.getUsers());
-        token.setExpiringDate(token.getExpiringDate());
-        token.setProductId(token.getProductId());
+        token.setExpiringDate(tokenEntity.getExpiringDate());
+        token.setCreatedAt(tokenEntity.getCreatedAt());
+        token.setUpdatedAt(tokenEntity.getUpdatedAt());
+        token.setProductId(tokenEntity.getProductId());
         return token;
     }
 }

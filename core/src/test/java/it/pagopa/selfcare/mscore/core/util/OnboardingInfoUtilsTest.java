@@ -6,11 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.Premium;
-import it.pagopa.selfcare.mscore.model.Product;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 
@@ -36,7 +35,7 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testGetUserInstitutionsWithProductStatusIn() {
-        HashMap<String, Map<String, Product>> userInstitutionToBeFiltered = new HashMap<>();
+        HashMap<String, Map<String, OnboardedProduct>> userInstitutionToBeFiltered = new HashMap<>();
 
         List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class, () -> OnboardingInfoUtils
@@ -48,7 +47,7 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testGetUserInstitutionsWithProductStatusIn2() {
-        HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
+        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
         stringMapMap.put("No onboarding information found for states {}", new HashMap<>());
         List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
@@ -60,7 +59,7 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testGetUserInstitutionsWithProductStatusIn3() {
-        HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
+        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
         stringMapMap.put("Key", new HashMap<>());
         stringMapMap.put("No onboarding information found for states {}", new HashMap<>());
         List<RelationshipState> list = new ArrayList<>();
@@ -73,17 +72,17 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testGetUserInstitutionsWithProductStatusIn4() {
-        Product product = new Product();
-        product.setContract("No onboarding information found for states {}");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("No onboarding information found for states {}");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("No onboarding information found for states {}", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("No onboarding information found for states {}", onboardedProduct);
 
-        HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
+        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
         stringMapMap.put("No onboarding information found for states {}", stringProductMap);
         List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
@@ -95,25 +94,25 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testGetUserInstitutionsWithProductStatusIn6() {
-        Product product = new Product();
-        product.setContract("No onboarding information found for states {}");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("No onboarding information found for states {}");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        Product product1 = new Product();
-        product1.setContract("No onboarding information found for states {}");
-        product1.setCreatedAt(null);
-        product1.setRoles(new ArrayList<>());
-        product1.setStatus(RelationshipState.PENDING);
-        product1.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct1 = new OnboardedProduct();
+        onboardedProduct1.setContract("No onboarding information found for states {}");
+        onboardedProduct1.setCreatedAt(null);
+        onboardedProduct1.setRoles(new ArrayList<>());
+        onboardedProduct1.setStatus(RelationshipState.PENDING);
+        onboardedProduct1.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("Key", product1);
-        stringProductMap.put("No onboarding information found for states {}", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("Key", onboardedProduct1);
+        stringProductMap.put("No onboarding information found for states {}", onboardedProduct);
 
-        HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
+        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
         stringMapMap.put("No onboarding information found for states {}", stringProductMap);
         List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
@@ -125,17 +124,17 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testGetUserInstitutionsWithProductStatusIn7() {
-        Product product = new Product();
-        product.setContract("No onboarding information found for states {}");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("No onboarding information found for states {}");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("No onboarding information found for states {}", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("No onboarding information found for states {}", onboardedProduct);
 
-        HashMap<String, Map<String, Product>> stringMapMap = new HashMap<>();
+        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
         stringMapMap.put("No onboarding information found for states {}", stringProductMap);
 
         ArrayList<RelationshipState> relationshipStateList = new ArrayList<>();
@@ -172,7 +171,7 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testFindOnboardingLinkedToProductWithStateIn() {
-        HashMap<String, Product> productsMap = new HashMap<>();
+        HashMap<String, OnboardedProduct> productsMap = new HashMap<>();
         Institution onboardedInstitution = new Institution();
         assertTrue(OnboardingInfoUtils
                 .findOnboardingLinkedToProductWithStateIn(productsMap, onboardedInstitution, new ArrayList<>())
@@ -184,15 +183,15 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testFindOnboardingLinkedToProductWithStateIn3() {
-        Product product = new Product();
-        product.setContract("Contract");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("Key", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("Key", onboardedProduct);
 
         Institution institution = new Institution();
         institution.setOnboarding(new ArrayList<>());
@@ -206,23 +205,23 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testFindOnboardingLinkedToProductWithStateIn5() {
-        Product product = new Product();
-        product.setContract("Contract");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        Product product1 = new Product();
-        product1.setContract("Contract");
-        product1.setCreatedAt(null);
-        product1.setRoles(new ArrayList<>());
-        product1.setStatus(RelationshipState.PENDING);
-        product1.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct1 = new OnboardedProduct();
+        onboardedProduct1.setContract("Contract");
+        onboardedProduct1.setCreatedAt(null);
+        onboardedProduct1.setRoles(new ArrayList<>());
+        onboardedProduct1.setStatus(RelationshipState.PENDING);
+        onboardedProduct1.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("42", product1);
-        stringProductMap.put("Key", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("42", onboardedProduct1);
+        stringProductMap.put("Key", onboardedProduct);
 
         Institution institution = new Institution();
         institution.setOnboarding(new ArrayList<>());
@@ -236,15 +235,15 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testFindOnboardingLinkedToProductWithStateIn6() {
-        Product product = new Product();
-        product.setContract("Contract");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("Key", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("Key", onboardedProduct);
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -280,15 +279,15 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testFindOnboardingLinkedToProductWithStateIn7() {
-        Product product = new Product();
-        product.setContract("Contract");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("Key", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("Key", onboardedProduct);
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -344,23 +343,23 @@ class OnboardingInfoUtilsTest {
      */
     @Test
     void testFindOnboardingLinkedToProductWithStateIn8() {
-        Product product = new Product();
-        product.setContract("Contract");
-        product.setCreatedAt(null);
-        product.setRoles(new ArrayList<>());
-        product.setStatus(RelationshipState.PENDING);
-        product.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setRoles(new ArrayList<>());
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
 
-        Product product1 = new Product();
-        product1.setContract("Contract");
-        product1.setCreatedAt(null);
-        product1.setRoles(new ArrayList<>());
-        product1.setStatus(RelationshipState.PENDING);
-        product1.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct1 = new OnboardedProduct();
+        onboardedProduct1.setContract("Contract");
+        onboardedProduct1.setCreatedAt(null);
+        onboardedProduct1.setRoles(new ArrayList<>());
+        onboardedProduct1.setStatus(RelationshipState.PENDING);
+        onboardedProduct1.setUpdatedAt(null);
 
-        HashMap<String, Product> stringProductMap = new HashMap<>();
-        stringProductMap.put("42", product1);
-        stringProductMap.put("Key", product);
+        HashMap<String, OnboardedProduct> stringProductMap = new HashMap<>();
+        stringProductMap.put("42", onboardedProduct1);
+        stringProductMap.put("Key", onboardedProduct);
 
         Billing billing = new Billing();
         billing.setPublicServices(true);

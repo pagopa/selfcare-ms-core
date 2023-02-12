@@ -52,12 +52,12 @@ public class UserConnectorImpl implements UserConnector {
     @Override
     public OnboardedUser save(OnboardedUser example) {
         final UserEntity entity = convertToUserEntity(example);
-        return convertToOnboardeUser(repository.save(entity));
+        return convertToUser(repository.save(entity));
     }
     @Override
     public OnboardedUser getById(String userId) {
         Optional<UserEntity> entityOpt = repository.findById(new ObjectId(userId));
-        return entityOpt.map(this::convertToOnboardeUser).orElse(null);
+        return entityOpt.map(this::convertToUser).orElse(null);
     }
 
     @Override
@@ -72,22 +72,14 @@ public class UserConnectorImpl implements UserConnector {
 
     private UserEntity convertToUserEntity(OnboardedUser example) {
         UserEntity user = new UserEntity();
-
         user.setUser(example.getUser());
+        user.setUpdatedAt(example.getUpdatedAt());
         user.setCreatedAt(example.getCreatedAt());
         user.setBindings(example.getBindings());
         if(example.getId()!=null) {
             user.setId(new ObjectId(example.getId()));
         }
         return user;
-    }
-
-    private OnboardedUser convertToOnboardeUser(UserEntity save) {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setUser(save.getId().toString());
-        onboardedUser.setCreatedAt(save.getCreatedAt());
-        onboardedUser.setBindings(save.getBindings());
-        return onboardedUser;
     }
 
     private String constructQuery(String... variables){
@@ -101,6 +93,7 @@ public class UserConnectorImpl implements UserConnector {
         OnboardedUser user = new OnboardedUser();
         user.setId(entity.getId().toString());
         user.setUser(entity.getUser());
+        user.setUpdatedAt(entity.getUpdatedAt());
         user.setCreatedAt(entity.getCreatedAt());
         user.setBindings(entity.getBindings());
         return user;

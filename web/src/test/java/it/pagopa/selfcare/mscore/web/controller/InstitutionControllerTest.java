@@ -718,11 +718,11 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createPgInstitution(String, Authentication)}
+     * Method under test: {@link InstitutionController#createPgInstitution(String, boolean, Authentication)}
      */
     @Test
     void testCreatePgInstitution() throws Exception {
-        when(institutionService.createPgInstitution(any(), any())).thenReturn(new Institution());
+        when(institutionService.createPgInstitution(any(), any(), any())).thenReturn(new Institution());
 
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);

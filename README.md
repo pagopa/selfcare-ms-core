@@ -32,8 +32,8 @@ Microservice for reengineering of interop-be-party-process and interop-be-party-
 
 | **Property**                 | **Enviroment Variable**   | **Default**                                                                                                                                                                      | **Required**   |
 |------------------------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------:|
-| spring.data.mongodb.uri      | MONGODB_CONNECTION_URI    | <a name= "default property"></a>[default_property](https://github.com/pagopa/selfcare-ms-product/blob/release-dev/connector/dao/src/main/resources/config/dao-config.properties) |      yes       |
-| spring.data.mongodb.database | MONGODB_NAME              | <a name= "default property"></a>[default_property](https://github.com/pagopa/selfcare-ms-product/blob/release-dev/connector/dao/src/main/resources/config/dao-config.properties) |      yes       |
+| spring.data.mongodb.uri      | MONGODB_CONNECTION_URI    | <a name= "default property"></a>[default_property](https://github.com/pagopa/selfcare-ms-onboardedProduct/blob/release-dev/connector/dao/src/main/resources/config/dao-config.properties) |      yes       |
+| spring.data.mongodb.database | MONGODB_NAME              | <a name= "default property"></a>[default_property](https://github.com/pagopa/selfcare-ms-onboardedProduct/blob/release-dev/connector/dao/src/main/resources/config/dao-config.properties) |      yes       |
 
 
 

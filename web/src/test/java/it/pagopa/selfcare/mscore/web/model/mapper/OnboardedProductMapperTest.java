@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class ProductMapperTest {
+class OnboardedProductMapperTest {
     /**
      * Method under test: {@link ProductMapper#toOnboardedProducts(List)}
      */

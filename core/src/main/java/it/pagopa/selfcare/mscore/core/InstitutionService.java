@@ -12,7 +12,7 @@ public interface InstitutionService {
 
     Institution createInstitutionRaw(Institution institution, String externalId);
 
-    Institution createPgInstitution(String taxId, SelfCareUser selfCareUser);
+    Institution createPgInstitution(String taxId, boolean existsInRegistry, SelfCareUser selfCareUser);
 
     List<Onboarding> retrieveInstitutionProducts(String id, List<String> states);
 

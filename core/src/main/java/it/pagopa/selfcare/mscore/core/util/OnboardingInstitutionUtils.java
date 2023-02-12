@@ -4,6 +4,7 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -11,13 +12,11 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
@@ -31,22 +30,27 @@ public class OnboardingInstitutionUtils {
     private OnboardingInstitutionUtils() {
     }
 
-    public static void verifyPgUsers(List<OnboardedUser> users) {
-        if(users.size() != 1){
+    public static void verifyPgUsers(List<UserToOnboard> users) {
+        if (users.size() == 1) {
             if (PartyRole.MANAGER != users.get(0).getRole()) {
                 throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), users.get(0).getRole()), ROLES_NOT_ADMITTED_ERROR.getCode());
             }
-        }else{
+        } else {
             throw new InvalidRequestException(USERS_SIZE_NOT_ADMITTED.getMessage(), USERS_SIZE_NOT_ADMITTED.getCode());
         }
     }
 
-    public static void verifyUsers(List<OnboardedUser> users) {
+    public static void verifyUsers(List<UserToOnboard> users) {
+        List<UserToOnboard> userList = new ArrayList<>();
         users.forEach(onboardedUser -> {
             if (!verifyUsersRole.contains(onboardedUser.getRole())) {
-                throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), onboardedUser.getRole()), ROLES_NOT_ADMITTED_ERROR.getCode());
+                userList.add(onboardedUser);
             }
         });
+        if (!userList.isEmpty()) {
+            List<String> userIdList = userList.stream().map(UserToOnboard::getId).collect(Collectors.toList());
+            throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userIdList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
+        }
     }
 
     public static String createDigest(File pdf) {
@@ -62,7 +66,7 @@ public class OnboardingInstitutionUtils {
                     .filter(onboarding -> request.getProductId().equalsIgnoreCase(onboarding.getProductId()))
                     .findAny();
             if (optionalOnboarding.isPresent() && !productRelationshipStates.contains(optionalOnboarding.get().getStatus())) {
-                throw new InvalidRequestException(String.format(PRODUCT_ALREADY_ONBOARDED.getMessage(),request.getProductId(), institution.getExternalId()), PRODUCT_ALREADY_ONBOARDED.getCode());
+                throw new InvalidRequestException(String.format(PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), PRODUCT_ALREADY_ONBOARDED.getCode());
             }
         }
         log.info("END - checkIfProductAlreadyOnboarded without error");
@@ -90,7 +94,6 @@ public class OnboardingInstitutionUtils {
         }
         token.setCreatedAt(OffsetDateTime.now());
         token.setInstitutionId(institution.getId());
-        token.setUsers(request.getUsers().stream().map(OnboardedUser::getUser).collect(Collectors.toList()));
         token.setProductId(request.getProductId());
         token.setChecksum(digest);
 
@@ -103,18 +106,18 @@ public class OnboardingInstitutionUtils {
         return token;
     }
 
-    public static Map<String, Map<String, Product>> constructMap(OnboardedUser p, OnboardingRequest request, String institutionId) {
-        Map<String, Map<String, Product>> map = new HashMap<>();
+    public static Map<String, Map<String, OnboardedProduct>> constructMap(UserToOnboard p, OnboardingRequest request, String institutionId) {
+        Map<String, Map<String, OnboardedProduct>> map = new HashMap<>();
         map.put(institutionId, constructProductMap(request, p));
         return map;
     }
 
-    public static Product constructProduct(OnboardedUser p, InstitutionType institutionType) {
-        Product product = new Product();
-        product.setRoles(List.of(p.getRole().name()));
-        product.setStatus(retrieveStatusFromInstitutionType(institutionType));
-        product.setCreatedAt(OffsetDateTime.now());
-        return product;
+    public static OnboardedProduct constructProduct(UserToOnboard p, InstitutionType institutionType) {
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRoles(List.of(p.getRole().name()));
+        onboardedProduct.setStatus(retrieveStatusFromInstitutionType(institutionType));
+        onboardedProduct.setCreatedAt(OffsetDateTime.now());
+        return onboardedProduct;
     }
 
     public static RelationshipState retrieveStatusFromInstitutionType(InstitutionType institutionType) {
@@ -128,9 +131,9 @@ public class OnboardingInstitutionUtils {
         }
     }
 
-    public static Map<String, Product> constructProductMap(OnboardingRequest onboardingInstitutionRequest, OnboardedUser p) {
-        Map<String, Product> productMap = new HashMap<>();
-        productMap.put(onboardingInstitutionRequest.getProductId(), constructProduct(p, onboardingInstitutionRequest.getInstitutionUpdate().getInstitutionType()));
+    public static Map<String, OnboardedProduct> constructProductMap(OnboardingRequest onboardingInstitutionRequest, UserToOnboard userToOnboard) {
+        Map<String, OnboardedProduct> productMap = new HashMap<>();
+        productMap.put(onboardingInstitutionRequest.getProductId(), constructProduct(userToOnboard, onboardingInstitutionRequest.getInstitutionUpdate().getInstitutionType()));
         return productMap;
     }
 
@@ -164,10 +167,51 @@ public class OnboardingInstitutionUtils {
         }
     }
 
-    public static OnboardedUser getValidManager(List<OnboardedUser> users) {
+    public static List<String> getOnboardingValidManager(List<UserToOnboard> users) {
+        log.info("START - getOnboardingValidManager for users list size: {}", users.size());
+        List<String> response = new ArrayList<>();
+        users.forEach(user -> {
+            if (PartyRole.MANAGER == user.getRole()) {
+                response.add(user.getId());
+            }
+        });
+        if (response.isEmpty()) {
+            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+        }
+        return response;
+    }
+
+    public static List<String> getValidManager(List<OnboardedUser> users, String institutionId, String productId) {
         log.info("START - getValidManager for users list size: {}", users.size());
-        return users.stream()
-                .filter(onboardedUser -> PartyRole.MANAGER == onboardedUser.getRole())
-                .findFirst().orElseThrow(() -> new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode()));
+        List<String> response = new ArrayList<>();
+        for (OnboardedUser onboardedUser : users) {
+            if (onboardedUser.getBindings() != null
+                    && onboardedUser.getBindings().get(institutionId) != null
+                    && onboardedUser.getBindings().get(institutionId).get(productId) != null) {
+                OnboardedProduct product = onboardedUser.getBindings().get(institutionId).get(productId);
+                if (!product.getRoles().contains("MANAGER")) {
+                    response.add(onboardedUser.getUser());
+                }
+            }
+        }
+        if (response.isEmpty()) {
+            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+        }
+        return response;
+    }
+
+    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution) {
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(token.getProductId());
+        onboardingRequest.setProductName(token.getProductId());
+        Contract contract = new Contract();
+        contract.setPath(token.getContract());
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription(institution.getDescription());
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setSignContract(true);
+
+        return onboardingRequest;
     }
 }

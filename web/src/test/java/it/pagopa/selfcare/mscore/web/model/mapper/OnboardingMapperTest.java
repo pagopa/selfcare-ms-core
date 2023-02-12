@@ -329,13 +329,13 @@ class OnboardingMapperTest {
         filteredOnboardingList.add(onboarding);
         institution.setOnboarding(filteredOnboardingList);
 
-        Map<String, Product> filteredProductsMap = new HashMap<>();
-        Product product = new Product();
-        product.setStatus(RelationshipState.PENDING);
-        product.setContract("contract");
-        product.setRoles(List.of("roles"));
-        product.setCreatedAt(OffsetDateTime.now());
-        filteredProductsMap.put("42", product);
+        Map<String, OnboardedProduct> filteredProductsMap = new HashMap<>();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setContract("contract");
+        onboardedProduct.setRoles(List.of("roles"));
+        onboardedProduct.setCreatedAt(OffsetDateTime.now());
+        filteredProductsMap.put("42", onboardedProduct);
 
         onboardingInfoList.add(new OnboardingInfo(institution, filteredProductsMap));
         OnboardingInfoResponse actualToOnboardingInfoResponseResult = OnboardingMapper.toOnboardingInfoResponse("42",
