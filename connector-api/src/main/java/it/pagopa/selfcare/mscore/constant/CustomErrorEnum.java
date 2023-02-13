@@ -4,7 +4,7 @@ public enum CustomErrorEnum {
 
     GET_INSTITUTION_MANAGER_NOT_FOUND("0043", "Cannot find active manager for institution having externalId %s and product %s"),
     USER_NOT_FOUND_ERROR("0031", "User having userId %s not found"),
-
+    USER_ALREADY_EXIST_ERROR("0033", "Person already exists"),
     USERS_SIZE_NOT_ADMITTED("0030","At least one user for onboarding PG"),
     PRODUCT_ALREADY_ONBOARDED("0032", "Product %s already onboarded for institution having externalId %s"),
     MANAGER_NOT_FOUND_ERROR("0033", "Manager not found"),
