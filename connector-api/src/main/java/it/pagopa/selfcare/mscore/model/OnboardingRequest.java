@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.model;
 
-import it.pagopa.selfcare.mscore.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;

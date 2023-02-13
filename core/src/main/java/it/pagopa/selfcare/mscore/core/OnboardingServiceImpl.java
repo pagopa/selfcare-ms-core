@@ -129,7 +129,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         Institution institution = onboardingDao.findInstitutionById(token.getInstitutionId());
         Product product = onboardingDao.getProductById(token.getProductId());
-      //  contractService.verifySignature(contract, token, managersData);
+        contractService.verifySignature(contract, token, managersData);
         File logoFile = contractService.getLogoFile();
         emailService.sendCompletedEmail(contract, token, managersData, institution, product, logoFile);
         onboardingDao.persistForUpdate(token, institution, onboardedUsers, RelationshipState.ACTIVE);

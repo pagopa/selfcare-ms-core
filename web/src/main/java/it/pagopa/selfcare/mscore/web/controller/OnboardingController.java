@@ -45,7 +45,6 @@ public class OnboardingController {
      * @param productId String
      *
      * @return no content
-     *
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
@@ -100,7 +99,7 @@ public class OnboardingController {
      * @param onboardingInstitutionRequest OnboardingInstitutionRequest
      *
      * @return no content
-     *
+
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
@@ -125,7 +124,6 @@ public class OnboardingController {
      * @param file MultipartFile
      *
      * @return no content
-     *
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
@@ -136,7 +134,7 @@ public class OnboardingController {
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.complete}")
     @PostMapping(value = "/complete/{tokenId}")
     public ResponseEntity<Void> completeOnboarding(@PathVariable(value = "tokenId") String tokenId,
-                                                  @RequestParam("contract") MultipartFile file) {
+                                                  @RequestBody MultipartFile file) {
         log.info("Confirm onboarding of token identified with {}", tokenId);
         setCustomMessage(CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
@@ -150,7 +148,6 @@ public class OnboardingController {
      * @param tokenId String
      *
      * @return no content
-     *
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
@@ -174,7 +171,6 @@ public class OnboardingController {
      * @param tokenId String
      *
      * @return no content
-     *
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
@@ -198,7 +194,6 @@ public class OnboardingController {
      * @param tokenId String
      *
      * @return no content
-     *
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem

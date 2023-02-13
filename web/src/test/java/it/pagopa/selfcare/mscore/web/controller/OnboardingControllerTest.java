@@ -2,28 +2,16 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
-import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
-import it.pagopa.selfcare.mscore.api.EmailConnector;
-import it.pagopa.selfcare.mscore.api.FileStorageConnector;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
-import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.core.ContractService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.core.OnboardingServiceImpl;
-import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
+import it.pagopa.selfcare.mscore.core.TokenService;
+import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
-
-import java.security.Principal;
 import java.util.ArrayList;
 
 import it.pagopa.selfcare.mscore.web.model.user.Person;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -41,9 +29,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {OnboardingController.class})
 @ExtendWith(SpringExtension.class)
@@ -53,6 +44,9 @@ class OnboardingControllerTest {
 
     @MockBean
     private OnboardingService onboardingService;
+
+    @MockBean
+    private TokenService tokenService;
 
     /**
      * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
@@ -177,6 +171,113 @@ class OnboardingControllerTest {
     }
 
     /**
+     * Method under test: {@link OnboardingController#approveOnboarding(String, Authentication)}
+     */
+    @Test
+    void testApproveOnboarding() throws Exception {
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/onboarding/approve/123")
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#completeOnboarding(String, MultipartFile)}
+     */
+    @Test
+    void testCompleteOnboarding() throws Exception {
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        MultipartFile file = mock(MultipartFile.class);
+        String content = (new ObjectMapper()).writeValueAsString(file);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/onboarding/complete/123")
+                .principal(authentication)
+                .content(content)
+                .contentType(MediaType.MULTIPART_FORM_DATA);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#invalidateOnboarding(String)}
+     */
+    @Test
+    void testInvalidateOnboarding() throws Exception {
+        doNothing().when(onboardingService).invalidateOnboarding(org.mockito.Mockito.any());
+        when(tokenService.verifyToken(org.mockito.Mockito.any())).thenReturn(new Token());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/onboarding/complete/{tokenId}",
+                "42");
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#invalidateOnboarding(String)}
+     */
+    @Test
+    void testInvalidateOnboarding2() throws Exception {
+        doNothing().when(onboardingService).invalidateOnboarding(org.mockito.Mockito.any());
+        when(tokenService.verifyToken(org.mockito.Mockito.any())).thenReturn(new Token());
+        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
+                .formLogin();
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#onboardingReject(String)}
+     */
+    @Test
+    void testOnboardingReject() throws Exception {
+        doNothing().when(onboardingService).onboardingReject(org.mockito.Mockito.any());
+        when(tokenService.verifyToken(org.mockito.Mockito.any())).thenReturn(new Token());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/onboarding/reject/{tokenId}",
+                "42");
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#onboardingReject(String)}
+     */
+    @Test
+    void testOnboardingReject2() throws Exception {
+        doNothing().when(onboardingService).onboardingReject(org.mockito.Mockito.any());
+        when(tokenService.verifyToken(org.mockito.Mockito.any())).thenReturn(new Token());
+        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
+                .formLogin();
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    /**
      * Method under test: {@link OnboardingController#onboardingInfo(String, String, String[], Authentication)}
      */
     @Test
@@ -196,8 +297,6 @@ class OnboardingControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk());
-
-        onboardingController.onboardingInfo("42", "42", new String[]{"MD"}, new JwtAuthenticationToken("ABC123"));
     }
 }
 

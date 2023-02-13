@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.UserToOnboard;
+import it.pagopa.selfcare.mscore.model.UserToOnboard;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
