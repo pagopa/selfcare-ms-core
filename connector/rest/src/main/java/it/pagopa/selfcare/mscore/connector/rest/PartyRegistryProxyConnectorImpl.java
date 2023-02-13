@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.LegalFilter;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,11 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     public List<InstitutionByLegal> getInstitutionsByLegal(String taxId) {
         InstitutionsByLegalResponse response = restClient.getInstitutionsByLegal(toInstitutionsByLegalRequest(taxId));
         return toInstitutionsByLegalResponse(response);
+    }
+
+    @Override
+    public NationalRegistriesProfessionalAddress getLegalAddress(String taxId) {
+        return restClient.getLegalAddress(taxId);
     }
 
     private List<InstitutionByLegal> toInstitutionsByLegalResponse(InstitutionsByLegalResponse response) {

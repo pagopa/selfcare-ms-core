@@ -13,7 +13,7 @@ public class UserInstitution {
     private String institutionId;
 
     @JsonProperty("products")
-    private List<Product> products;
+    private List<OnboardedProduct> onboardedProducts;
 
     private OffsetDateTime createdAt;
     private PartyRole role;

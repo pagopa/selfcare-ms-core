@@ -1,9 +1,11 @@
 package it.pagopa.selfcare.mscore.api;
 
-import it.pagopa.selfcare.mscore.exception.FileDownloadException;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface FileStorageConnector {
 
-    String getTemplateFile(String templateName) throws FileDownloadException;
+    String getTemplateFile(String templateName);
+
+    void uploadContract(String id, MultipartFile contract);
 
 }

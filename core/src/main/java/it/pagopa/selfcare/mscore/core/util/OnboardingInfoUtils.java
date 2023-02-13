@@ -1,11 +1,12 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.Product;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,23 +26,21 @@ public class OnboardingInfoUtils {
                 .collect(Collectors.toList());
     }
 
-    public static Map<String, Map<String, Product>> getUserInstitutionsWithProductStatusIn(Map<String, Map<String, Product>> userInstitutionToBeFiltered, List<RelationshipState> relationshipStateList) {
-        Map<String, Map<String, Product>> filteredUserInstitutionMap = new HashMap<>();
+    public static Map<String, Map<String, OnboardedProduct>> getUserInstitutionsWithProductStatusIn(Map<String, Map<String, OnboardedProduct>> userInstitutionToBeFiltered, List<RelationshipState> relationshipStateList) {
+        Map<String, Map<String, OnboardedProduct>> filteredUserInstitutionMap = new HashMap<>();
         userInstitutionToBeFiltered.forEach((institutionId, productMap) -> {
-            Map<String, Product> filteredProductsMap = filterProductsMapByStates(productMap, relationshipStateList);
+            Map<String, OnboardedProduct> filteredProductsMap = filterProductsMapByStates(productMap, relationshipStateList);
             if (!filteredProductsMap.isEmpty()) {
                 filteredUserInstitutionMap.put(institutionId, filteredProductsMap);
             }
         });
         if (filteredUserInstitutionMap.isEmpty()) {
-            //Non ci sono institutions con prodotti aventi status = status di input
-            log.info("No onboarding information found for states {}", relationshipStateList);
-            throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), "states : " + relationshipStateList.toString()), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
+            throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), "states : " + StringUtils.join(relationshipStateList, ", ")), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
         }
         return filteredUserInstitutionMap;
     }
 
-    private static Map<String, Product> filterProductsMapByStates(Map<String, Product> productsMap, List<RelationshipState> states) {
+    private static Map<String, OnboardedProduct> filterProductsMapByStates(Map<String, OnboardedProduct> productsMap, List<RelationshipState> states) {
         if (productsMap == null)
             return new HashMap<>();
 
@@ -55,7 +54,7 @@ public class OnboardingInfoUtils {
         return states.stream().anyMatch(status::equals);
     }
 
-    public static List<Onboarding> findOnboardingLinkedToProductWithStateIn(Map<String, Product> productsMap, Institution onboardedInstitution, List<RelationshipState> relationshipStateList) {
+    public static List<Onboarding> findOnboardingLinkedToProductWithStateIn(Map<String, OnboardedProduct> productsMap, Institution onboardedInstitution, List<RelationshipState> relationshipStateList) {
         List<Onboarding> onboardingList = new ArrayList<>();
         productsMap.forEach((productId, product) -> {
             Optional<Onboarding> onboarding = getOnboardingFromInstitutionByProductIdAndState(onboardedInstitution, productId, relationshipStateList);

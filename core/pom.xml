@@ -64,11 +64,35 @@
             <version>5.11.1</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-utils -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-utils</artifactId>
+            <version>5.11.1</version>
+        </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-model</artifactId>
             <version>5.11.1</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-service -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-service</artifactId>
+            <version>5.11.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-tsl-validation -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-tsl-validation</artifactId>
+            <version>5.11.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-utils-google-guava -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-utils-google-guava</artifactId>
+            <version>5.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

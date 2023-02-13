@@ -11,16 +11,24 @@ public class InstitutionRequest {
 
     private String description;
     private InstitutionType institutionType;
+
     private String digitalAddress;
     private String address;
     private String zipCode;
 
-    @NotNull
+    @NotNull(message = "TaxCode is required")
     private String taxCode;
 
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesRequest> attributes;
     private PaymentServiceProviderRequest paymentServiceProvider;
     private DataProtectionOfficerRequest dataProtectionOfficer;
+
+    private String rea;
+    private String shareCapital;
+    private String businessRegisterPlace;
+    private String supportEmail;
+    private String supportPhone;
+    private boolean imported;
 
 }

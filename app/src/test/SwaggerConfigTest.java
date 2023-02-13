@@ -1,9 +1,8 @@
-package it.pagopa.selfcare.party.registry_proxy.web.config;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
+import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.web.config.SwaggerConfig;
 import it.pagopa.selfcare.mscore.web.config.WebConfig;
 import org.junit.jupiter.api.Test;
@@ -46,6 +45,9 @@ class SwaggerConfigTest {
     @MockBean
     OnboardingService onboardingService;
 
+    @MockBean
+    TokenService tokenService;
+
     @Autowired
     WebApplicationContext context;
 
@@ -69,3 +71,4 @@ class SwaggerConfigTest {
                 });
     }
 }
+

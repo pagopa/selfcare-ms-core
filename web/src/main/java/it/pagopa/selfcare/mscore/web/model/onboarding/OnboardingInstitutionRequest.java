@@ -30,6 +30,6 @@ public class OnboardingInstitutionRequest {
     private BillingRequest billingRequest;
     private ContractRequest contract;
 
-    private boolean signContract;
+    private boolean signContract ;
 
 }

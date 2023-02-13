@@ -12,7 +12,6 @@ public class InstitutionResponse {
 
     private String id;
     private String externalId;
-    private String origin;
     private String ipaCode;
     private String description;
     private InstitutionType institutionType;
@@ -24,5 +23,13 @@ public class InstitutionResponse {
     private List<AttributesResponse> attributes;
     private PaymentServiceProviderResponse paymentServiceProviderResponse;
     private DataProtectionOfficerResponse dataProtectionOfficer;
+
     private BillingResponse billing;
+
+    private String rea;
+    private String shareCapital;
+    private String businessRegisterPlace;
+    private String supportEmail;
+    private String supportPhone;
+    private boolean imported;
 }

@@ -21,6 +21,10 @@ public class UtilEnumList {
             List.of(RelationshipState.ACTIVE,
                     RelationshipState.PENDING);
 
+    public static final List<RelationshipState> verifyTokenRelationshipStates =
+            List.of(RelationshipState.TOBEVALIDATED,
+                    RelationshipState.PENDING);
+
     public static final List<PartyRole> verifyUsersRole =
             List.of(PartyRole.MANAGER,
                     PartyRole.DELEGATE);

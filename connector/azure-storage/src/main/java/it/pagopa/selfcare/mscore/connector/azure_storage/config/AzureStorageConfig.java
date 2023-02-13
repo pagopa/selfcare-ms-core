@@ -21,6 +21,8 @@ class AzureStorageConfig {
     private String connectionString;
     private String contractsTemplateContainer;
 
+    private String contractPath;
+
     public String getConnectionString() {
         return new String(Base64.getDecoder().decode(connectionString), StandardCharsets.UTF_8);
     }
