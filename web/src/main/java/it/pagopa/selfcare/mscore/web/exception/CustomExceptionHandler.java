@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.exception;
 
 import it.pagopa.selfcare.mscore.constant.GenericErrorEnum;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.Problem;
 import it.pagopa.selfcare.mscore.model.ProblemError;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
 @ControllerAdvice
 @Slf4j
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
@@ -38,9 +41,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers,
-            HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         log.error("InvalidRequestException Occured --> MESSAGE:{}",ex.getMessage(),ex);
         headers.setContentType(MediaType.APPLICATION_JSON);
         List<String> errors = ex.getBindingResult()
@@ -77,6 +78,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         headers.setContentType(MediaType.APPLICATION_JSON);
         Problem problem = createProblem(request.getRequestURL().toString(), BAD_REQUEST, ex.getMessage(), HttpStatus.BAD_REQUEST.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MsCoreException.class)
+    public ResponseEntity<Problem> handleMsCoreException(HttpServletRequest request, MsCoreException ex) {
+        log.error("InvalidRequestException Occured --> URL:{}, MESSAGE:{}",request.getRequestURL(),ex.getMessage(),ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Problem problem = createProblem(request.getRequestURL().toString(), "FATAL_ERROR", ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getCode());
+        return new ResponseEntity<>(problem, headers, INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(RuntimeException.class)

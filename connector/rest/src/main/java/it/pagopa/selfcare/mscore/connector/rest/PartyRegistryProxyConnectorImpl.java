@@ -2,10 +2,15 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.LegalFilter;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +49,11 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     public List<InstitutionByLegal> getInstitutionsByLegal(String taxId) {
         InstitutionsByLegalResponse response = restClient.getInstitutionsByLegal(toInstitutionsByLegalRequest(taxId));
         return toInstitutionsByLegalResponse(response);
+    }
+
+    @Override
+    public NationalRegistriesProfessionalAddress getLegalAddress(String taxId) {
+        return restClient.getLegalAddress(taxId);
     }
 
     private List<InstitutionByLegal> toInstitutionsByLegalResponse(InstitutionsByLegalResponse response) {

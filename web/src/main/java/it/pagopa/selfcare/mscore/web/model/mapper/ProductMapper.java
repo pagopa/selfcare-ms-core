@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionProduct;
 import it.pagopa.selfcare.mscore.web.model.institution.ProductState;

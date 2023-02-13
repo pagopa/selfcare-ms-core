@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface PartyRegistryProxyConnector {
 
     List<InstitutionByLegal> getInstitutionsByLegal(String taxId);
 
+    NationalRegistriesProfessionalAddress getLegalAddress(String taxId);
 }

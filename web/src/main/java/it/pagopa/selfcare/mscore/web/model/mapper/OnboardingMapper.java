@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.UserToOnboard;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
@@ -42,12 +43,16 @@ public class OnboardingMapper {
         return contract;
     }
 
-    private static List<OnboardedUser> convertToOnboarderUser(OnboardingInstitutionRequest onboardingInstitutionRequest) {
-        List<OnboardedUser> onboardedUsers = new ArrayList<>();
+    private static List<UserToOnboard> convertToOnboarderUser(OnboardingInstitutionRequest onboardingInstitutionRequest) {
+        List<UserToOnboard> onboardedUsers = new ArrayList<>();
         if(!onboardingInstitutionRequest.getUsers().isEmpty()){
             for(Person p: onboardingInstitutionRequest.getUsers()) {
-                OnboardedUser onboardedUser = new OnboardedUser();
-                onboardedUser.setUser(p.getId());
+                UserToOnboard onboardedUser = new UserToOnboard();
+                onboardedUser.setId(p.getId());
+                onboardedUser.setName(p.getName());
+                onboardedUser.setSurname(p.getSurname());
+                onboardedUser.setTaxCode(p.getTaxCode());
+                onboardedUser.setEmail(p.getEmail());
                 onboardedUser.setRole(PartyRole.valueOf(p.getRole()));
                 onboardedUser.setProductRole(List.of(p.getRole(),p.getProductRole()));
                 onboardedUsers.add(onboardedUser);
@@ -70,13 +75,13 @@ public class OnboardingMapper {
         List<OnboardedInstitutionResponse> institutionResponseList = new ArrayList<>();
         for(OnboardingInfo onboardingInfo : onboardingInfos) {
             Institution institution = onboardingInfo.getInstitution();
-            Map<String, Product> productMap = onboardingInfo.getProductMap();
+            Map<String, OnboardedProduct> productMap = onboardingInfo.getProductMap();
             List<Onboarding> onboardingList = institution.getOnboarding();
 
-            onboardingList.forEach((onboarding) -> {
+            onboardingList.forEach(onboarding -> {
                 String productId = onboarding.getProductId();
-                Product product = productMap.get(productId);
-                ProductInfo productInfo = convertToProductInfo(product, productId);
+                OnboardedProduct onboardedProduct = productMap.get(productId);
+                ProductInfo productInfo = convertToProductInfo(onboardedProduct, productId);
 
                 Billing billing = getBillingFromOnboarding(onboarding, institution);
                 OnboardedInstitutionResponse institutionResponse = new OnboardedInstitutionResponse();
@@ -108,17 +113,17 @@ public class OnboardingMapper {
         return onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling();
     }
 
-    private static ProductInfo convertToProductInfo(Product product, String productId) {
+    private static ProductInfo convertToProductInfo(OnboardedProduct onboardedProduct, String productId) {
         ProductInfo productInfo = new ProductInfo();
         productInfo.setId(productId);
-        productInfo.setRole(product.getRoles());
-        productInfo.setCreatedAt(product.getCreatedAt());
+        productInfo.setRole(onboardedProduct.getRoles());
+        productInfo.setCreatedAt(onboardedProduct.getCreatedAt());
         return productInfo;
     }
 
     private static List<AttributesResponse> convertToAttributesResponse(List<Attributes> attributesList) {
         if(attributesList == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         return attributesList.stream()
@@ -134,15 +139,15 @@ public class OnboardingMapper {
 
     private static List<GeoTaxonomies> convertToGeoTaxonomies(List<GeographicTaxonomies> geographicTaxonomies) {
         if(geographicTaxonomies == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         return geographicTaxonomies.stream()
-                .map((geo) -> {
+                .map(geo -> {
                     GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
                     geoTaxonomies.setCode(geo.getCode());
                     geoTaxonomies.setDesc(geo.getDesc());
-                    //geoTaxonomies.setEnable(geo.getEnable());
+                    geoTaxonomies.setEnable(geo.isEnable());
                     return geoTaxonomies;
                 }).collect(Collectors.toList());
     }

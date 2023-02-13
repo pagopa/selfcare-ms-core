@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UntypedExampleMatcher;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -37,29 +38,17 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findAll(Institution institution) {
-        Example<InstitutionEntity> example = Example.of(convertToInstitutionEntity(institution), UntypedExampleMatcher.matching());
-        return repository.findAll(example).stream()
-                .map(this::convertToInstitution)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void deleteById(String id) {
         repository.deleteById(new ObjectId(id));
     }
 
     @Override
     public Optional<Institution> findByExternalId(String externalId) {
-        Institution institution = new Institution();
-        institution.setExternalId(externalId);
-        institution.setOnboarding(null);
-        List<Institution> result = findAll(institution);
-        if (result.isEmpty()) {
-            return Optional.empty();
-        } else {
-            return Optional.of(result.get(0));
-        }
+        log.info("START - find institution by ExternalId");
+        return repository.find(Query.query(Criteria.where("externalId").is(externalId)),
+                        InstitutionEntity.class).stream()
+                .map(this::convertToInstitution)
+                .findFirst();
     }
 
     @Override
@@ -109,6 +98,13 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         institution.setGeographicTaxonomies(entity.getGeographicTaxonomies());
         institution.setCreatedAt(entity.getCreatedAt());
         institution.setUpdatedAt(entity.getUpdatedAt());
+
+        institution.setRea(entity.getRea());
+        institution.setShareCapital(entity.getShareCapital());
+        institution.setBusinessRegisterPlace(entity.getBusinessRegisterPlace());
+        institution.setSupportEmail(entity.getSupportEmail());
+        institution.setSupportPhone(entity.getSupportPhone());
+        institution.setImported(entity.isImported());
         return institution;
     }
 
@@ -127,7 +123,14 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         entity.setZipCode(institution.getZipCode());
         entity.setTaxCode(institution.getTaxCode());
         entity.setOnboarding(institution.getOnboarding());
-        entity.setUpdatedAt(institution.getUpdatedAt());
+
+        entity.setRea(institution.getRea());
+        entity.setShareCapital(institution.getShareCapital());
+        entity.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        entity.setSupportEmail(institution.getSupportEmail());
+        entity.setSupportPhone(institution.getSupportPhone());
+        entity.setImported(institution.isImported());
+
         if (institution.getGeographicTaxonomies() != null) {
             entity.setGeographicTaxonomies(institution.getGeographicTaxonomies());
         }
@@ -137,7 +140,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         if (institution.getPaymentServiceProvider() != null) {
             entity.setPaymentServiceProvider(institution.getPaymentServiceProvider());
         }
-
+        entity.setUpdatedAt(OffsetDateTime.now());
         return entity;
     }
 }

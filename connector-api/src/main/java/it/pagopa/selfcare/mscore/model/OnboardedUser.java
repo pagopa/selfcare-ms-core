@@ -1,15 +1,15 @@
 package it.pagopa.selfcare.mscore.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Map;
 
 
 @Data
+@NoArgsConstructor
 public class OnboardedUser {
 
     private String id;
@@ -17,11 +17,15 @@ public class OnboardedUser {
     @JsonProperty("user")
     private String user;
 
-    private PartyRole role;
+    private Map<String, Map<String, OnboardedProduct>> bindings;
 
-    private List<String> productRole;
-
-    private Map<String, Map<String,Product>> bindings;
     private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
+    public OnboardedUser(OnboardedUser user) {
+        this.id = user.getId();
+        this.user = user.getUser();
+        this.bindings = user.getBindings();
+        this.createdAt = user.getCreatedAt();
+    }
 }

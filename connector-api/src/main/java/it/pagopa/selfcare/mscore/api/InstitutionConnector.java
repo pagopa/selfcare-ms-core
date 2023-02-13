@@ -10,8 +10,6 @@ public interface InstitutionConnector {
 
     Institution save(Institution example);
 
-    List<Institution> findAll(Institution example);
-
     void deleteById(String id);
 
     Optional<Institution> findByExternalId(String externalId);

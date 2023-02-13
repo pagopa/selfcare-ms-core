@@ -31,6 +31,19 @@ public class ExternalController {
         this.externalService = externalService;
     }
 
+    /**
+     * The function return institutionData from its externalId
+     *
+     * @param  id externalId
+     *
+     * @return InstitutionResponse
+     *
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Institution not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.external.institution}")
     @GetMapping("/{externalId}")
@@ -41,6 +54,21 @@ public class ExternalController {
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
     }
 
+
+    /**
+     * The function return institutionData from its externalId
+     *
+     * @param externalId String
+     * @param productId String
+     *
+     * @return InstitutionManagerResponse
+     *
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Institution Manager not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.manager}")
     @GetMapping(value = "/{externalId}/products/{productId}/manager")
@@ -56,6 +84,21 @@ public class ExternalController {
         return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(institution, manager, productId, contractId));
     }
 
+
+    /**
+     * The function return institutionData from its externalId
+     *
+     * @param externalId String
+     * @param productId String
+     *
+     * @return InstitutionBillingResponse
+     *
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Institution Billing not found, DataType: Problem
+     *
+     * @docauthor Trelent
+     */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.billing}")
     @GetMapping(value = "/{externalId}/products/{productId}/billing")

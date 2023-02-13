@@ -39,4 +39,11 @@ public class InstitutionEntity {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
+    private String rea;
+    private String shareCapital;
+    private String businessRegisterPlace;
+    private String supportEmail;
+    private String supportPhone;
+    private boolean imported;
+
 }

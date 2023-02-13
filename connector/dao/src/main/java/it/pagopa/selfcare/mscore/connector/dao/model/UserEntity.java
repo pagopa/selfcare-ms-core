@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import it.pagopa.selfcare.mscore.model.Product;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
@@ -19,6 +19,7 @@ public class UserEntity {
     private ObjectId id;
 
     private String user;
-    private Map<String,Map<String, Product>> bindings;
+    private Map<String,Map<String, OnboardedProduct>> bindings;
     private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

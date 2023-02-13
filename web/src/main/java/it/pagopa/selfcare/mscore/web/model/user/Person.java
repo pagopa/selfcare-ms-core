@@ -9,6 +9,7 @@ public class Person {
     private String taxCode;
     private String name;
     private String surname;
+    private String email;
     private String role;
     private String productRole;
 
