@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface InstitutionService {
 
+    Institution retrieveInstitutionById(String id);
     Institution createInstitutionByExternalId(String externalId);
 
     Institution createInstitutionRaw(Institution institution, String externalId);
@@ -15,5 +16,6 @@ public interface InstitutionService {
     Institution createPgInstitution(String taxId, boolean existsInRegistry, SelfCareUser selfCareUser);
 
     List<Onboarding> retrieveInstitutionProducts(String id, List<String> states);
+
 
 }

@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.constant;
 
 public enum GenericErrorEnum {
-
+    GET_INSTITUTION_BY_ID_ERROR("0040", "Error while retrieving institution having id %s"),
     GET_INSTITUTION_BY_EXTERNAL_ID_ERROR("0041", "Error while retrieving institution having externalId %s"),
     GET_INSTITUTION_MANAGER_ERROR("0042", "Error while retrieving institution having externalId %s"),
     GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s"),

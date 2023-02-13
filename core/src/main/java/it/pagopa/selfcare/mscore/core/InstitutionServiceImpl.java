@@ -37,6 +37,14 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution retrieveInstitutionById(String id){
+        Optional<Institution> optionalInstitution = institutionConnector.findById(id);
+        if(optionalInstitution.isPresent())
+            return optionalInstitution.get();
+        throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), id), INSTITUTION_NOT_FOUND.getCode());
+    }
+
+    @Override
     public Institution createInstitutionByExternalId(String externalId) {
 
         checkAlreadyExists(externalId);

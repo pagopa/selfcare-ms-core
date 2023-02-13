@@ -24,8 +24,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.CREATE_INSTITUTION_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_PRODUCTS_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
 
 @RestController
@@ -143,4 +142,14 @@ public class InstitutionController {
                 .map(ProductMapper::toResource)
                 .collect(Collectors.toList())));
     }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.find}")
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<InstitutionResponse> retrieveInstitutionById(@PathVariable("id") String id) {
+        setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        Institution institution = institutionService.retrieveInstitutionById(id);
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
+    }
+
 }
