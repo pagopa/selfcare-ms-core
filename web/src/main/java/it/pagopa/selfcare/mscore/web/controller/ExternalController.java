@@ -8,13 +8,17 @@ import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionProduct;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.ProductMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
@@ -111,5 +115,15 @@ public class ExternalController {
         Institution institution = externalService.getInstitutionByExternalId(externalId);
         institution = externalService.getBillingByExternalId(institution, productId);
         return ResponseEntity.ok().body(InstitutionMapper.toBillingResponse(institution, productId));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.products}")
+    @GetMapping(value = "/{externalId}/products")
+    public ResponseEntity<List<InstitutionProduct>> retrieveInstitutionProductsByExternalId(@PathVariable("externalId") String externalId, @RequestParam(value = "states", required = false) List<String> states) {
+        log.info("Retrieving products for institution having externalId {}", externalId);
+        setCustomMessage(GET_INSTITUTION_BY_EXTERNAL_ID_ERROR);
+        Institution institution = externalService.getInstitutionByExternalId(externalId);
+        return ResponseEntity.ok().body(ProductMapper.toInstitutionProducts(institution.getOnboarding(),states));
     }
 }
