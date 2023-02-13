@@ -48,7 +48,7 @@ class UserConnectorImplTest {
         userEntity.setBindings(new HashMap<>());
         when(userRepository.save(any())).thenReturn(userEntity);
         OnboardedUser response = userConnectorImpl.save(onboardedUser);
-        Assertions.assertEquals("507f1f77bcf86cd799439011",response.getUser());
+        Assertions.assertEquals("507f1f77bcf86cd799439011",response.getId());
     }
 
     @Test
@@ -62,7 +62,7 @@ class UserConnectorImplTest {
         userEntity.setBindings(new HashMap<>());
         when(userRepository.save(any())).thenReturn(userEntity);
         OnboardedUser response = userConnectorImpl.save(onboardedUser);
-        Assertions.assertEquals("507f1f77bcf86cd799439011",response.getUser());
+        Assertions.assertEquals("507f1f77bcf86cd799439011",response.getId());
     }
 
     @Test

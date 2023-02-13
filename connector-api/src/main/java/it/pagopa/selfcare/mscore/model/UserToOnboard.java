@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore;
+package it.pagopa.selfcare.mscore.model;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import lombok.Data;
