@@ -38,7 +38,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution createInstitutionByExternalId(String externalId) {
-        log.info("Creating institution having external id {}", externalId);
 
         checkAlreadyExists(externalId);
 
@@ -74,28 +73,29 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createPgInstitution(String taxId, SelfCareUser selfCareUser) {
+    public Institution createPgInstitution(String taxId, boolean existsInRegistry, SelfCareUser selfCareUser) {
+
         checkAlreadyExists(taxId);
 
         Institution newInstitution = new Institution();
-
         newInstitution.setExternalId(taxId);
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
-        List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
-        institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
-                .findFirst().ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
-                        () -> {
-                            throw new InvalidRequestException(String.format(INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId),
-                                    INSTITUTION_LEGAL_NOT_FOUND.getCode());
-                        });
+        if(existsInRegistry) {
+            List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
+            institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
+                    .findFirst().ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
+                            () -> {
+                                throw new InvalidRequestException(String.format(INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId), INSTITUTION_LEGAL_NOT_FOUND.getCode());
+                            });
+        }
 
 
         //TODO: ADD QUANDO NATIONAL REGISTRIES E INFO CAMERE SARANNO FUNZIONANTI
-        // NationalRegistriesProfessionalAddress response = nationalRegistriesConnector.getLegalAddress(taxId);
+        // NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = partyRegistryProxyConnector.getLegalAddress(taxId);
         // newInstitution.setAddress(response.getAddress());
         // newInstitution.setZipCode(response.getZip());
 
@@ -106,9 +106,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkAlreadyExists(externalId);
-        if (institution.getInstitutionType() != null) {
-            institution.setInstitutionType(institution.getInstitutionType());
-        } else {
+        if (institution.getInstitutionType() == null) {
             institution.setInstitutionType(InstitutionType.UNKNOWN);
         }
         institution.setCreatedAt(OffsetDateTime.now());
@@ -116,6 +114,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     private void checkAlreadyExists(String externalId) {
+        log.info("START - check institution {} already exists", externalId);
         Optional<Institution> opt = institutionConnector.findByExternalId(externalId);
         if (opt.isPresent()) {
             throw new ResourceConflictException(String.format(CREATE_INSTITUTION_CONFLICT.getMessage(), externalId), CREATE_INSTITUTION_CONFLICT.getCode());

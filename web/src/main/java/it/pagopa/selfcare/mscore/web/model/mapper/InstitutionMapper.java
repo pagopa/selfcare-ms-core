@@ -2,7 +2,7 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.Product;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
@@ -31,6 +31,12 @@ public class InstitutionMapper {
         institutionResponse.setAddress(institution.getAddress());
         institutionResponse.setZipCode(institution.getZipCode());
         institutionResponse.setTaxCode(institution.getTaxCode());
+        institutionResponse.setRea(institution.getRea());
+        institutionResponse.setShareCapital(institution.getShareCapital());
+        institutionResponse.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        institutionResponse.setSupportEmail(institution.getSupportEmail());
+        institutionResponse.setSupportPhone(institution.getSupportPhone());
+        institutionResponse.setImported(institution.isImported());
         if(institution.getGeographicTaxonomies()!=null)
             institutionResponse.setGeographicTaxonomies(convertToGeoResponse(institution.getGeographicTaxonomies()));
         if(institution.getAttributes()!=null)
@@ -62,13 +68,13 @@ public class InstitutionMapper {
 
         institutionManagerResponse.setInstitutionUpdate(convertToInstitutionUpdate(institution));
 
-        Map<String, Map<String, Product>> map = manager.getBindings();
+        Map<String, Map<String, OnboardedProduct>> map = manager.getBindings();
 
         if (map.get(institution.getId()) != null) {
-            Product product = map.get(institution.getId()).get(productId);
-            institutionManagerResponse.setCreatedAt(product.getCreatedAt());
-            institutionManagerResponse.setUpdatedAt(product.getUpdatedAt());
-            institutionManagerResponse.setState(product.getStatus());
+            OnboardedProduct onboardedProduct = map.get(institution.getId()).get(productId);
+            institutionManagerResponse.setCreatedAt(onboardedProduct.getCreatedAt());
+            institutionManagerResponse.setUpdatedAt(onboardedProduct.getUpdatedAt());
+            institutionManagerResponse.setState(onboardedProduct.getStatus());
         }
 
         return institutionManagerResponse;
@@ -202,6 +208,12 @@ public class InstitutionMapper {
         institution.setZipCode(request.getZipCode());
         institution.setGeographicTaxonomies(convertToGeographicTaxonomies(request.getGeographicTaxonomies()));
         institution.setAttributes(convertToAttributes(request.getAttributes()));
+        institution.setRea(request.getRea());
+        institution.setShareCapital(request.getShareCapital());
+        institution.setBusinessRegisterPlace(request.getBusinessRegisterPlace());
+        institution.setSupportEmail(request.getSupportEmail());
+        institution.setSupportPhone(request.getSupportPhone());
+        institution.setImported(request.isImported());
         if(request.getPaymentServiceProvider()!=null)
             institution.setPaymentServiceProvider(convertToPaymentServiceProvider(request.getPaymentServiceProvider()));
         if(request.getDataProtectionOfficer()!=null)

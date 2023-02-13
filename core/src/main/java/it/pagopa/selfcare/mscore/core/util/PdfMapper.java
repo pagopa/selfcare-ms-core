@@ -1,9 +1,8 @@
 package it.pagopa.selfcare.mscore.core.util;
 
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.User;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
@@ -19,9 +18,10 @@ import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.MANAGER_EMAIL_
 @Slf4j
 public class PdfMapper {
 
-    private PdfMapper() {}
+    private PdfMapper() {
+    }
 
-    public static Map<String, Object> setUpCommonData(OnboardedUser validManager, List<OnboardedUser> users, Institution institution, OnboardingRequest request, List<GeographicTaxonomies> geographicTaxonomies) {
+    public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<GeographicTaxonomies> geographicTaxonomies) {
         log.info("START - setupCommonData");
         if (validManager.getEmail() != null) {
             Map<String, Object> map = new HashMap<>();
@@ -29,12 +29,12 @@ public class PdfMapper {
             map.put("address", institution.getAddress());
             map.put("institutionTaxCode", institution.getTaxCode());
             map.put("zipCode", institution.getZipCode());
-            map.put("managerName", validManager.getName());
-            map.put("managerSurname", validManager.getSurname());
-            map.put("originId", institution.getIpaCode());
+            map.put("managerName", validManager.getName()!=null ? validManager.getName().getValue():"");
+            map.put("managerSurname", validManager.getFamilyName()!=null ? validManager.getFamilyName().getValue():"");
+            map.put("originId", institution.getIpaCode()!=null ? institution.getIpaCode():"");
             map.put("institutionMail", institution.getDigitalAddress());
-            map.put("managerTaxCode", validManager.getTaxCode());
-            map.put("managerEmail", validManager.getEmail());
+            map.put("managerTaxCode", validManager.getFiscalCode());
+            map.put("managerEmail", validManager.getEmail()!=null ? validManager.getEmail().getValue():"");
             map.put("delegates", delegatesToText(users));
             map.put("institutionType", decodeInstitutionType(retrieveInstitutionType(institution, request)));
             if (request.getBillingRequest() != null) {
@@ -42,14 +42,16 @@ public class PdfMapper {
             } else {
                 map.put("institutionVatNumber", "");
             }
-            map.put("institutionGeoTaxonomies", geographicTaxonomies.stream().map(GeographicTaxonomies::getDesc).collect(Collectors.toList()));
+            if (geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
+                map.put("institutionGeoTaxonomies", geographicTaxonomies.stream().map(GeographicTaxonomies::getDesc).collect(Collectors.toList()));
+            }
             return map;
         } else {
             throw new InvalidRequestException(MANAGER_EMAIL_NOT_FOUND.getMessage(), MANAGER_EMAIL_NOT_FOUND.getCode());
         }
     }
 
-    public static void setupPSPData(Map<String, Object> map, OnboardedUser validManager, Institution institution) {
+    public static void setupPSPData(Map<String, Object> map, User validManager, Institution institution) {
         log.info("START - setupPSPData");
         if (institution.getPaymentServiceProvider() != null) {
             map.put("legalRegisterNumber", institution.getPaymentServiceProvider().getLegalRegisterNumber());
@@ -64,28 +66,28 @@ public class PdfMapper {
         map.put("managerPEC", validManager.getEmail());
     }
 
-    public static void setupProdIOData(Map<String, Object> map, OnboardedUser validManager, Institution institution, OnboardingRequest request) {
+    public static void setupProdIOData(Map<String, Object> map, User validManager, Institution institution, OnboardingRequest request) {
         log.info("START - setupProdIOData");
         map.put("institutionTypeCode", retrieveInstitutionType(institution, request).name());
         map.put("pricingPlan", decodePricingPlan(request.getPricingPlan(), request.getProductId()));
-        map.put("originIdLabelValue", institution.getIpaCode() != null ?
+        map.put("originIdLabelValue", InstitutionType.PA == institution.getInstitutionType() ?
                 "|<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${institution.originId}</span> </span><span class=\"c1\"></span></li>|"
                 : ""); //solo se è IPA
-        if (institution.getPaymentServiceProvider() != null && institution.getPaymentServiceProvider().getBusinessRegisterNumber() != null) {
-            map.put("institutionRegisterLabelValue", "|<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">$number</span> </span><span class=\"c1\"></span></li>\n|");
+        if (InstitutionType.PA == institution.getInstitutionType()) {
+            map.put("institutionRegisterLabelValue", "<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">$number</span> </span><span class=\"c1\"></span></li>\n");
         } else {
             map.put("institutionRegisterLabelValue", "");
         }
 
-        if(request.getBillingRequest()!=null) {
+        if (request.getBillingRequest() != null) {
             map.put("institutionRecipientCode", request.getBillingRequest().getRecipientCode());
         }
 
         String underscore = "_______________";
         map.put("GPSinstitutionName", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? institution.getDescription() : underscore);
         map.put("GPSmanagerName", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getName() : underscore);
-        map.put("GPSmanagerSurname", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getSurname() : underscore);
-        map.put("GPSmanagerTaxCode", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getTaxCode() : underscore);
+        map.put("GPSmanagerSurname", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getFamilyName() : underscore);
+        map.put("GPSmanagerTaxCode", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getFiscalCode() : underscore);
     }
 
     private static String decodePricingPlan(String pricingPlan, String productId) {
@@ -101,9 +103,7 @@ public class PdfMapper {
 
     private static InstitutionType retrieveInstitutionType(Institution institution, OnboardingRequest request) {
         InstitutionType institutionType = InstitutionType.UNKNOWN;
-        if (request.getInstitutionUpdate().getInstitutionType() != null) {
-            institutionType = request.getInstitutionUpdate().getInstitutionType();
-        } else if (institution.getInstitutionType() != null) {
+        if (institution.getInstitutionType() != null) {
             institutionType = institution.getInstitutionType();
         }
         return institutionType;
@@ -127,24 +127,23 @@ public class PdfMapper {
         }
     }
 
-    private static String delegatesToText(List<OnboardedUser> users) {
+    private static String delegatesToText(List<User> users) {
         StringBuilder builder = new StringBuilder();
-        users.stream().filter(onboardedUser -> PartyRole.DELEGATE == onboardedUser.getRole())
-                .forEach(onboardedUser -> builder
+        users.forEach(user -> builder
                         .append("|<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
-                        .append(onboardedUser.getName()).append(" ")
-                        .append(onboardedUser.getSurname())
+                        .append(user.getName()!=null ? user.getName().getValue():"").append(" ")
+                        .append(user.getFamilyName()!=null ? user.getFamilyName().getValue():"")
                         .append("&nbsp;</span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
-                        .append(onboardedUser.getTaxCode())
+                        .append(user.getFiscalCode())
                         .append("</span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">e-mail: ")
-                        .append(onboardedUser.getEmail())
+                        .append(user.getEmail()!=null ? user.getEmail().getValue():"")
                         .append("&nbsp;</span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
-                        .append("|"));
+                        .append("|</br>"));
 
         return builder.toString();
     }

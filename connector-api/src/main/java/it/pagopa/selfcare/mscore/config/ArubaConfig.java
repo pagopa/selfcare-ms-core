@@ -8,7 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource("classpath:config/core-config.properties")
-@ConfigurationProperties(prefix = "party-process.aruba")
+@ConfigurationProperties(prefix = "mscore.aruba")
 @Data
 @ToString
 public class ArubaConfig {

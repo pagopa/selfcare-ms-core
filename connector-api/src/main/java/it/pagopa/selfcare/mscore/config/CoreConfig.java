@@ -6,11 +6,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @Configuration
 @PropertySource("classpath:config/core-config.properties")
-@ConfigurationProperties(prefix = "party-process")
+@ConfigurationProperties(prefix = "mscore")
 @Data
 @ToString
 public class CoreConfig {
@@ -18,4 +20,10 @@ public class CoreConfig {
     private String logoPath;
     private String senderMail;
     private List<String> destinationMails;
+    private String institutionAlternativeEmail;
+    private boolean sendEmailToInstitution;
+
+    public String getInstitutionAlternativeEmail() {
+        return new String(Base64.getDecoder().decode(institutionAlternativeEmail), StandardCharsets.UTF_8);
+    }
 }

@@ -32,6 +32,13 @@ public class Institution {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
+    private String rea;
+    private String shareCapital;
+    private String businessRegisterPlace;
+    private String supportEmail;
+    private String supportPhone;
+    private boolean imported;
+
     public Institution(Institution institution) {
         id = institution.getId();
         externalId = institution.getExternalId();
@@ -51,5 +58,12 @@ public class Institution {
         attributes = institution.getAttributes();
         paymentServiceProvider = institution.getPaymentServiceProvider();
         dataProtectionOfficer = institution.getDataProtectionOfficer();
+        rea = institution.getRea();
+        createdAt = institution.getCreatedAt();
+        shareCapital = institution.getShareCapital();
+        businessRegisterPlace = institution.getBusinessRegisterPlace();
+        supportEmail = institution.getSupportEmail();
+        supportPhone = institution.getSupportPhone();
+        imported = institution.isImported();
     }
 }

@@ -16,12 +16,6 @@
             <artifactId>selc-ms-core-connector-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>jakarta.xml.soap</groupId>
-            <artifactId>jakarta.xml.soap-api</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.openhtmltopdf/openhtmltopdf-core -->
         <dependency>
             <groupId>com.openhtmltopdf</groupId>
@@ -40,6 +34,16 @@
             <groupId>com.openhtmltopdf</groupId>
             <artifactId>openhtmltopdf-svg-support</artifactId>
             <version>1.0.10</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>xalan</groupId>
+                    <artifactId>serializer</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xalan</groupId>
+                    <artifactId>xalan</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.openhtmltopdf/openhtmltopdf-slf4j -->
@@ -60,11 +64,35 @@
             <version>5.11.1</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-utils -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-utils</artifactId>
+            <version>5.11.1</version>
+        </dependency>
         <dependency>
             <groupId>eu.europa.ec.joinup.sd-dss</groupId>
             <artifactId>dss-model</artifactId>
             <version>5.11.1</version>
             <scope>compile</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-service -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-service</artifactId>
+            <version>5.11.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-tsl-validation -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-tsl-validation</artifactId>
+            <version>5.11.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/eu.europa.ec.joinup.sd-dss/dss-utils-google-guava -->
+        <dependency>
+            <groupId>eu.europa.ec.joinup.sd-dss</groupId>
+            <artifactId>dss-utils-google-guava</artifactId>
+            <version>5.11.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

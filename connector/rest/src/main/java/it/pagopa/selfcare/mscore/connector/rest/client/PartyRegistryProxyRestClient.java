@@ -4,6 +4,7 @@ import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.Institutions
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,4 +24,8 @@ public interface PartyRegistryProxyRestClient {
     @PostMapping(value = "${rest-client.party-registry-proxy.getInstitutionsByLegal.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     InstitutionsByLegalResponse getInstitutionsByLegal(@RequestBody InstitutionsByLegalRequest institutions);
+
+    @GetMapping(value = "${rest-client.party-registry-proxy.getLegalAddress.path}", consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    NationalRegistriesProfessionalAddress getLegalAddress(String taxId);
 }

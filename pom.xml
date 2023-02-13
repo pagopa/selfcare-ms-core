@@ -26,41 +26,105 @@
     </properties>
 
     <dependencyManagement>
-        <dependencies>
+       <dependencies>
+           <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+           <dependency>
+               <groupId>javax.xml.bind</groupId>
+               <artifactId>jaxb-api</artifactId>
+               <version>2.3.0</version>
+           </dependency>
+
+           <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-core -->
+           <dependency>
+               <groupId>com.sun.xml.bind</groupId>
+               <artifactId>jaxb-core</artifactId>
+               <version>2.3.0</version>
+           </dependency>
+
+           <dependency>
+               <groupId>org.glassfish.jaxb</groupId>
+               <artifactId>jaxb-runtime</artifactId>
+               <version>2.3.0</version>
+           </dependency>
+           <dependency>
+               <groupId>jakarta.xml.soap</groupId>
+               <artifactId>jakarta.xml.soap-api</artifactId>
+               <version>3.0.0</version>
+           </dependency>
+           <dependency>
+               <groupId>jakarta.xml.ws</groupId>
+               <artifactId>jakarta.xml.ws-api</artifactId>
+               <version>4.0.0</version>
+           </dependency>
+           <dependency>
+               <groupId>com.sun.xml.ws</groupId>
+               <artifactId>jaxws-rt</artifactId>
+               <version>4.0.0</version>
+           </dependency>
+           <dependency>
+               <groupId>jakarta.activation</groupId>
+               <artifactId>jakarta.activation-api</artifactId>
+               <version>2.1.0</version>
+           </dependency>
+           <dependency>
+               <groupId>jakarta.xml.bind</groupId>
+               <artifactId>jakarta.xml.bind-api</artifactId>
+               <version>4.0.0</version>
+           </dependency>
+           <dependency>
+               <groupId>com.sun.xml.bind</groupId>
+               <artifactId>jaxb-impl</artifactId>
+               <version>4.0.1</version>
+           </dependency>
+           <dependency>
+               <groupId>com.sun.xml.messaging.saaj</groupId>
+               <artifactId>saaj-impl</artifactId>
+               <version>3.0.0</version>
+           </dependency>
             <dependency>
-                <groupId>jakarta.xml.soap</groupId>
-                <artifactId>jakarta.xml.soap-api</artifactId>
-                <version>3.0.0</version>
+                <groupId>it.pagopa.selfcare</groupId>
+                <artifactId>selc-commons-base</artifactId>
+                <version>${selc-commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>jakarta.xml.ws</groupId>
-                <artifactId>jakarta.xml.ws-api</artifactId>
-                <version>4.0.0</version>
+                <groupId>it.pagopa.selfcare</groupId>
+                <artifactId>selc-commons-base</artifactId>
+                <version>${selc-commons.version}</version>
+                <type>test-jar</type>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.ws</groupId>
-                <artifactId>jaxws-rt</artifactId>
-                <version>4.0.0</version>
+                <groupId>it.pagopa.selfcare</groupId>
+                <artifactId>selc-commons-web</artifactId>
+                <version>${selc-commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>jakarta.activation</groupId>
-                <artifactId>jakarta.activation-api</artifactId>
-                <version>2.1.0</version>
+                <groupId>it.pagopa.selfcare</groupId>
+                <artifactId>selc-commons-web</artifactId>
+                <version>${selc-commons.version}</version>
+                <type>test-jar</type>
             </dependency>
             <dependency>
-                <groupId>jakarta.xml.bind</groupId>
-                <artifactId>jakarta.xml.bind-api</artifactId>
-                <version>4.0.0</version>
+                <groupId>it.pagopa.selfcare.utils</groupId>
+                <artifactId>selc-commons-crypto</artifactId>
+                <version>${selc-commons.version}</version>
+                <scope>compile</scope>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>4.0.1</version>
+                <groupId>it.pagopa.selfcare</groupId>
+                <artifactId>selc-common-utils</artifactId>
+                <version>${selc-commons.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.sun.xml.messaging.saaj</groupId>
-                <artifactId>saaj-impl</artifactId>
-                <version>3.0.0</version>
+                <groupId>it.pagopa.selfcare</groupId>
+                <artifactId>selc-commons-connector-rest</artifactId>
+                <version>${selc-commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>it.pagopa.selfcare</groupId>
+                <artifactId>selc-commons-connector-rest</artifactId>
+                <version>${selc-commons.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>it.pagopa.selfcare</groupId>
@@ -79,42 +143,8 @@
             </dependency>
             <dependency>
                 <groupId>it.pagopa.selfcare</groupId>
-                <artifactId>selc-commons-base</artifactId>
-                <version>${selc-commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare</groupId>
-                <artifactId>selc-commons-base</artifactId>
-                <version>${selc-commons.version}</version>
-                <type>test-jar</type>
-            </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare</groupId>
-                <artifactId>selc-commons-web</artifactId>
-                <version>${selc-commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare</groupId>
-                <artifactId>selc-commons-web</artifactId>
-                <version>${selc-commons.version}</version>
-                <type>test-jar</type>
-            </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare</groupId>
                 <artifactId>selc-ms-core-connector-rest</artifactId>
                 <version>1.0-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare</groupId>
-                <artifactId>selc-commons-connector-rest</artifactId>
-                <version>${selc-commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare</groupId>
-                <artifactId>selc-commons-connector-rest</artifactId>
-                <version>${selc-commons.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>it.pagopa.selfcare</groupId>
@@ -131,25 +161,13 @@
                 <artifactId>selc-ms-core-connector-azure-storage</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare.utils</groupId>
-                <artifactId>selc-commons-crypto</artifactId>
-                <version>2.4.3</version>
-                <scope>compile</scope>
-            </dependency>
-            <dependency>
-                <groupId>it.pagopa.selfcare</groupId>
-                <artifactId>selc-common-utils</artifactId>
-                <version>2.4.3</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>it.pagopa.selfcare.soap</groupId>
             <artifactId>selc-commons-connector-soap-aruba-sign</artifactId>
-            <version>2.4.3</version>
+            <version>${selc-commons.version}</version>
         </dependency>
     </dependencies>
 </project>

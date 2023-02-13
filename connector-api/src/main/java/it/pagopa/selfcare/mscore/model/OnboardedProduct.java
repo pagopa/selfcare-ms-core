@@ -6,8 +6,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
-public class Product {
+public class OnboardedProduct {
 
+    private String id;
+    private String name;
     private RelationshipState status;
     private String contract;
     private List<String> roles;

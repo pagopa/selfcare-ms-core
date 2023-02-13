@@ -6,9 +6,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 @Configuration
 @PropertySource("classpath:config/core-config.properties")
-@ConfigurationProperties(prefix = "party-process.mail-template.placeholders.onboarding")
+@ConfigurationProperties(prefix = "mscore.mail-template.placeholders.onboarding")
 @Data
 @ToString
 public class MailTemplateConfig {
@@ -39,4 +42,8 @@ public class MailTemplateConfig {
     private String rejectProductName;
     private String rejectOnboardingUrlPlaceholder;
     private String rejectOnboardingUrlValue;
+
+    public String getNotificationAdminEmail() {
+        return new String(Base64.getDecoder().decode(notificationAdminEmail), StandardCharsets.UTF_8);
+    }
 }
