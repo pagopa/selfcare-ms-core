@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 
@@ -32,6 +33,22 @@ public class ExternalServiceImpl implements ExternalService {
         this.institutionConnector = institutionConnector;
         this.userConnector = userConnector;
         this.tokenConnector = tokenConnector;
+    }
+
+    @Override
+    public List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<String> states){
+        Optional<Institution> optionalInstitution = institutionConnector.findByExternalId(externalId);
+        if (optionalInstitution.isPresent() && optionalInstitution.get().getOnboarding() != null) {
+            if (states != null && !states.isEmpty()) {
+                return optionalInstitution.get().getOnboarding().stream()
+                        .filter(onboarding -> states.contains(onboarding.getStatus().name()))
+                        .collect(Collectors.toList());
+            } else {
+                return new ArrayList<>(optionalInstitution.get().getOnboarding());
+            }
+        } else {
+            throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), externalId), PRODUCTS_NOT_FOUND_ERROR.getCode());
+        }
     }
 
     @Override

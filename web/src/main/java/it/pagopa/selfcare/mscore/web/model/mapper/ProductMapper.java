@@ -8,7 +8,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class ProductMapper {
@@ -26,10 +25,4 @@ public class ProductMapper {
         return products;
     }
 
-    public static List<InstitutionProduct> toInstitutionProducts(List<Onboarding> onboardings, List<String> states){
-        List<InstitutionProduct> institutionProducts = onboardings.stream().map(ProductMapper::toResource).collect(Collectors.toList());
-        if(states!=null && !states.isEmpty())
-            institutionProducts = institutionProducts.stream().filter(institutionProduct -> states.contains(institutionProduct.getState().name())).collect(Collectors.toList());
-        return institutionProducts;
-    }
 }

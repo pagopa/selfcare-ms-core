@@ -518,9 +518,7 @@ class ExternalControllerTest {
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId() throws Exception {
-        Institution institution = new Institution();
-        institution.setOnboarding(new ArrayList<>());
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(institution);
+        when(externalService.retrieveInstitutionProductsByExternalId(any(),any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "42");
         MockMvcBuilders.standaloneSetup(externalController)

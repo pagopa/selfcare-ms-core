@@ -6,12 +6,13 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionProduct;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.ProductMapper;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
@@ -120,10 +122,12 @@ public class ExternalController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.products}")
     @GetMapping(value = "/{externalId}/products")
-    public ResponseEntity<List<InstitutionProduct>> retrieveInstitutionProductsByExternalId(@PathVariable("externalId") String externalId, @RequestParam(value = "states", required = false) List<String> states) {
+    public ResponseEntity<OnboardedProducts> retrieveInstitutionProductsByExternalId(@PathVariable("externalId") String externalId,
+                                                                                     @RequestParam(value = "states", required = false) List<String> states) {
         log.info("Retrieving products for institution having externalId {}", externalId);
-        setCustomMessage(GET_INSTITUTION_BY_EXTERNAL_ID_ERROR);
-        Institution institution = externalService.getInstitutionByExternalId(externalId);
-        return ResponseEntity.ok().body(ProductMapper.toInstitutionProducts(institution.getOnboarding(),states));
-    }
+        setCustomMessage(GET_PRODUCTS_ERROR);
+        List<Onboarding> onboardings = externalService.retrieveInstitutionProductsByExternalId(externalId, states);
+        return ResponseEntity.ok(ProductMapper.toOnboardedProducts(onboardings.stream()
+                .map(ProductMapper::toResource)
+                .collect(Collectors.toList())));    }
 }
