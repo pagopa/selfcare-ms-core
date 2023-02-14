@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
@@ -172,6 +173,62 @@ class ExternalServiceImplTest {
     }
 
     /**
+     * Method under test: {@link ExternalServiceImpl#getBillingByExternalId(Institution, String)}
+     */
+    @Test
+    void testGetBillingByExternalId3() {
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getBillingByExternalId(new Institution(), "42"));
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getBillingByExternalId(Institution, String)}
+     */
+    @Test
+    void testGetBillingByExternalId5() {
+        Institution institution = mock(Institution.class);
+        when(institution.getExternalId()).thenReturn("42");
+        when(institution.getOnboarding()).thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getBillingByExternalId(institution, "42"));
+        verify(institution).getExternalId();
+        verify(institution).getOnboarding();
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getBillingByExternalId(Institution, String)}
+     */
+    @Test
+    void testGetBillingByExternalId6() {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+        Institution institution = mock(Institution.class);
+        when(institution.getExternalId()).thenReturn("42");
+        when(institution.getOnboarding()).thenReturn(onboardingList);
+        externalServiceImpl.getBillingByExternalId(institution, "42");
+        verify(institution).getOnboarding();
+    }
+
+    /**
      * Method under test: {@link ExternalServiceImpl#getInstitutionManager(Institution, String)}
      */
     @Test
@@ -294,6 +351,42 @@ class ExternalServiceImplTest {
     }
 
     /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionManager(Institution, String)}
+     */
+    @Test
+    void testGetInstitutionManager4() {
+        when(userConnector.findOnboardedManager(any(), any())).thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getInstitutionManager(new Institution(), "42"));
+        verify(userConnector).findOnboardedManager(any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionManager(Institution, String)}
+     */
+    @Test
+    void testGetInstitutionManager5() {
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUserList.add(onboardedUser);
+        when(userConnector.findOnboardedManager(any(), any())).thenReturn(onboardedUserList);
+        assertSame(onboardedUser, externalServiceImpl.getInstitutionManager(new Institution(), "42"));
+        verify(userConnector).findOnboardedManager(any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionManager(Institution, String)}
+     */
+    @Test
+    void testGetInstitutionManager7() {
+        when(userConnector.findOnboardedManager(any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getInstitutionManager(new Institution(), "42"));
+        verify(userConnector).findOnboardedManager(any(), any());
+    }
+
+    /**
      * Method under test: {@link ExternalServiceImpl#getRelationShipToken(String, String, String)}
      */
     @Test
@@ -338,6 +431,40 @@ class ExternalServiceImplTest {
     }
 
     /**
+     * Method under test: {@link ExternalServiceImpl#getRelationShipToken(String, String, String)}
+     */
+    @Test
+    void testGetRelationShipToken4() {
+        when(tokenConnector.findActiveContract(any(), any(), any()))
+                .thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getRelationShipToken("42", "42", "42"));
+        verify(tokenConnector).findActiveContract(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getRelationShipToken(String, String, String)}
+     */
+    @Test
+    void testGetRelationShipToken5() {
+        ArrayList<Token> tokenList = new ArrayList<>();
+        tokenList.add(new Token());
+        when(tokenConnector.findActiveContract(any(), any(), any())).thenReturn(tokenList);
+        assertNull(externalServiceImpl.getRelationShipToken("42", "42", "42"));
+        verify(tokenConnector).findActiveContract(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getRelationShipToken(String, String, String)}
+     */
+    @Test
+    void testGetRelationShipToken6() {
+        when(tokenConnector.findActiveContract(any(), any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getRelationShipToken("42", "42", "42"));
+        verify(tokenConnector).findActiveContract(any(), any(), any());
+    }
+
+    /**
      * Method under test: {@link ExternalServiceImpl#getInstitutionWithFilter(String, String, List)}
      */
     @Test
@@ -373,6 +500,44 @@ class ExternalServiceImplTest {
         List<RelationshipState> list = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
                 () -> externalServiceImpl.getInstitutionWithFilter("42", "42", list));
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionWithFilter(String, String, List)}
+     */
+    @Test
+    void testGetInstitutionWithFilter4() {
+        when(institutionConnector.findWithFilter(any(), any(), any()))
+                .thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getInstitutionWithFilter("42", "42", new ArrayList<>()));
+        verify(institutionConnector).findWithFilter(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionWithFilter(String, String, List)}
+     */
+    @Test
+    void testGetInstitutionWithFilter5() {
+        ArrayList<Institution> institutionList = new ArrayList<>();
+        institutionList.add(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any()))
+                .thenReturn(institutionList);
+        externalServiceImpl.getInstitutionWithFilter("42", "42", new ArrayList<>());
+        verify(institutionConnector).findWithFilter(any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionWithFilter(String, String, List)}
+     */
+    @Test
+    void testGetInstitutionWithFilter6() {
+        when(institutionConnector.findWithFilter(any(), any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred",
+                        "Verifying onboarding for institution having externalId {} on product {}"));
+        assertThrows(ResourceNotFoundException.class,
+                () -> externalServiceImpl.getInstitutionWithFilter("42", "42", new ArrayList<>()));
+        verify(institutionConnector).findWithFilter(any(), any(), any());
     }
 
     /**
@@ -428,6 +593,38 @@ class ExternalServiceImplTest {
      */
     @Test
     void testGetInstitutionByExternalId3() {
+        when(institutionConnector.findByExternalId(any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "Retrieving institution for externalId {}"));
+        assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getInstitutionByExternalId("42"));
+        verify(institutionConnector).findByExternalId(any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionByExternalId(String)}
+     */
+    @Test
+    void testGetInstitutionByExternalId4() {
+        Institution institution = new Institution();
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(institution));
+        assertSame(institution, externalServiceImpl.getInstitutionByExternalId("42"));
+        verify(institutionConnector).findByExternalId(any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionByExternalId(String)}
+     */
+    @Test
+    void testGetInstitutionByExternalId5() {
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getInstitutionByExternalId("42"));
+        verify(institutionConnector).findByExternalId(any());
+    }
+
+    /**
+     * Method under test: {@link ExternalServiceImpl#getInstitutionByExternalId(String)}
+     */
+    @Test
+    void testGetInstitutionByExternalId6() {
         when(institutionConnector.findByExternalId(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Retrieving institution for externalId {}"));
         assertThrows(ResourceNotFoundException.class, () -> externalServiceImpl.getInstitutionByExternalId("42"));

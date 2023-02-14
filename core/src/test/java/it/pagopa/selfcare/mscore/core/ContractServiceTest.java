@@ -1,49 +1,72 @@
-package it.pagopa.selfcare.mscore.core.util;
+package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import eu.europa.esig.dss.validation.SignedDocumentValidator;
+import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
+import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.Contract;
 import it.pagopa.selfcare.mscore.model.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.User;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
+
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
-import static org.mockito.Mockito.when;
-
-@ContextConfiguration(classes = {MailParametersMapper.class})
+@ContextConfiguration(classes = {ContractService.class})
 @ExtendWith(SpringExtension.class)
-class MailParametersMapperTest {
+class ContractServiceTest {
     @Autowired
-    private MailParametersMapper mailParametersMapper;
+    private ContractService contractService;
 
     @MockBean
-    private MailTemplateConfig mailTemplateConfig;
+    private CoreConfig coreConfig;
+
+    @MockBean
+    private FileStorageConnector fileStorageConnector;
+
+    @MockBean
+    private PagoPaSignatureConfig pagoPaSignatureConfig;
+
+    @MockBean
+    private Pkcs7HashSignService pkcs7HashSignService;
+
+    @MockBean
+    private SignatureService signatureService;
+
+    @MockBean
+    private PadesSignService padesSignService;
 
     /**
-     * Method under test: {@link MailParametersMapper#getOnboardingMailParameter(User, OnboardingRequest)}
+     * Method under test: {@link ContractService#createContractPDF(String, User, List, Institution, OnboardingRequest, List)}
      */
     @Test
-    void testGetOnboardingMailParameter() {
-
-        when(mailTemplateConfig.getProductName()).thenReturn("");
-        when(mailTemplateConfig.getUserSurname()).thenReturn("");
-        when(mailTemplateConfig.getUserName()).thenReturn("");
+    void testCreateContractPDFWithoutSign() {
 
         User user = new User();
 
@@ -64,6 +87,8 @@ class MailParametersMapperTest {
         certifiedField2.setValue("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
+        ArrayList<User> users = new ArrayList<>();
+
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
 
@@ -108,23 +133,25 @@ class MailParametersMapperTest {
         institutionUpdate.setZipCode("21654");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductId("prod-pagopa");
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        Assertions.assertDoesNotThrow(() -> mailParametersMapper.getOnboardingMailParameter(user, onboardingRequest));
+
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PSP);
+
+        when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
+
+        contractService.createContractPDF("Contract Template", user, users, institution, onboardingRequest,
+                new ArrayList<>());
     }
 
     /**
-     * Method under test: {@link MailParametersMapper#getOnboardingMailNotificationParameter(User, OnboardingRequest)}
+     * Method under test: {@link ContractService#createContractPDF(String, User, List, Institution, OnboardingRequest, List)}
      */
     @Test
-    void testGetOnboardingMailNotificationParameter() {
-
-        when(mailTemplateConfig.getNotificationProductName()).thenReturn("");
-        when(mailTemplateConfig.getNotificationRequesterName()).thenReturn("");
-        when(mailTemplateConfig.getNotificationRequesterSurname()).thenReturn("");
-        when(mailTemplateConfig.getInstitutionDescription()).thenReturn("");
+    void testCreateContractPDFWithSign() {
 
         User user = new User();
 
@@ -145,6 +172,8 @@ class MailParametersMapperTest {
         certifiedField2.setValue("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
+        ArrayList<User> users = new ArrayList<>();
+
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
 
@@ -189,38 +218,90 @@ class MailParametersMapperTest {
         institutionUpdate.setZipCode("21654");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductId("prod-pagopa");
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        Assertions.assertDoesNotThrow(() -> mailParametersMapper.getOnboardingMailNotificationParameter(user, onboardingRequest));
+
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PSP);
+        institution.setDescription("description");
+
+        when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName} ${productName}");
+        when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
+        when(pagoPaSignatureConfig.isEnabled()).thenReturn(false);
+
+        assertDoesNotThrow(() -> contractService.createContractPDF("Contract Template", user, users, institution, onboardingRequest,
+                new ArrayList<>()));
     }
 
     /**
-     * Method under test: {@link MailParametersMapper#getOnboardingPath()}
+     * Method under test: {@link ContractService#extractTemplate(String)}
      */
     @Test
-    void testGetOnboardingPath() {
-        when(mailTemplateConfig.getPath()).thenReturn("path");
-        Assertions.assertEquals("path", mailParametersMapper.getOnboardingPath());
+    void testExtractTemplate() {
+        when(fileStorageConnector.getTemplateFile(any())).thenReturn("template");
+        assertEquals(this.contractService.extractTemplate("Path"), "template");
     }
 
     /**
-     * Method under test: {@link MailParametersMapper#getOnboardingNotificationPath()}
+     * Method under test: {@link ContractService#getLogoFile()}
      */
     @Test
-    void testGetOnboardingNotificationPath() {
-        when(mailTemplateConfig.getNotificationPath()).thenReturn("not");
-        Assertions.assertEquals("not", mailParametersMapper.getOnboardingNotificationPath());
+    void testGetLogoFile() {
+        when(coreConfig.getLogoPath()).thenReturn("/logo");
+        when(fileStorageConnector.getTemplateFile(any())).thenReturn("<html></html>");
+
+        assertDoesNotThrow(() -> contractService.getLogoFile());
     }
 
     /**
-     * Method under test: {@link MailParametersMapper#getOnboardingNotificationAdminEmail()}
+     * Method under test: {@link ContractService#verifySignature(MultipartFile, Token, List)}
      */
     @Test
-    void testGetOnboardingNotificationAdminEmail() {
-        when(mailTemplateConfig.getNotificationAdminEmail()).thenReturn("admin"); // admin in Base64
-        Assertions.assertEquals(List.of("admin"), mailParametersMapper.getOnboardingNotificationAdminEmail());
+    void testVerifySignature() {
+
+
+        MockMultipartFile contract = new MockMultipartFile("Name", "AAAAAAAA".getBytes(StandardCharsets.UTF_8));
+
+        Token token = new Token();
+        token.setChecksum("checksum");
+        SignedDocumentValidator mockValidator = mock(SignedDocumentValidator.class);
+        when(signatureService.createDocumentValidator(any())).thenReturn(mockValidator);
+        doNothing().when(signatureService).isDocumentSigned(any());
+        doNothing().when(signatureService).verifyOriginalDocument(any());
+
+        when(signatureService.verifySignatureForm(any())).thenReturn("VALID");
+        when(signatureService.verifySignature(any())).thenReturn("VALID");
+        when(signatureService.verifyDigest(any(), any())).thenReturn("VALID");
+        when(signatureService.verifyManagerTaxCode(any(), any())).thenReturn("VALID");
+
+        assertDoesNotThrow(() -> contractService.verifySignature(contract, token, new ArrayList<>()));
     }
+
+    /**
+     * Method under test: {@link ContractService#verifySignature(MultipartFile, Token, List)}
+     */
+    @Test
+    void testVerifySignatureWithErrors() {
+
+
+        MockMultipartFile contract = new MockMultipartFile("Name", "AAAAAAAA".getBytes(StandardCharsets.UTF_8));
+
+        Token token = new Token();
+        token.setChecksum("checksum");
+        SignedDocumentValidator mockValidator = mock(SignedDocumentValidator.class);
+        when(signatureService.createDocumentValidator(any())).thenReturn(mockValidator);
+        doNothing().when(signatureService).isDocumentSigned(any());
+        doNothing().when(signatureService).verifyOriginalDocument(any());
+
+        when(signatureService.verifySignatureForm(any())).thenReturn("VALID");
+        when(signatureService.verifySignature(any())).thenReturn("NOT VALID");
+        when(signatureService.verifyDigest(any(), any())).thenReturn("VALID");
+        when(signatureService.verifyManagerTaxCode(any(), any())).thenReturn("VALID");
+
+        assertThrows(MsCoreException.class, () -> contractService.verifySignature(contract, token, new ArrayList<>()));
+    }
+
 }
 

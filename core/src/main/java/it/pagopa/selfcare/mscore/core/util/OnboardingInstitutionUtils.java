@@ -189,7 +189,7 @@ public class OnboardingInstitutionUtils {
                     && onboardedUser.getBindings().get(institutionId) != null
                     && onboardedUser.getBindings().get(institutionId).get(productId) != null) {
                 OnboardedProduct product = onboardedUser.getBindings().get(institutionId).get(productId);
-                if (!product.getRoles().contains("MANAGER")) {
+                if (product.getRoles().contains("MANAGER")) {
                     response.add(onboardedUser.getUser());
                 }
             }
