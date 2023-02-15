@@ -1,31 +1,16 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
-
 import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import it.pagopa.selfcare.mscore.model.institution.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -33,13 +18,18 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@ContextConfiguration(classes = {ExternalController.class})
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(SpringExtension.class)
 class ExternalControllerTest {
-    @Autowired
+    @InjectMocks
     private ExternalController externalController;
 
-    @MockBean
+    @Mock
     private ExternalService externalService;
 
     /**
@@ -510,6 +500,21 @@ class ExternalControllerTest {
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#getManagerInstitutionByExternalId(String, String)}
+     */
+    @Test
+    void testRetrieveInstitutionProductsByExternalId() throws Exception {
+        when(externalService.retrieveInstitutionProductsByExternalId(any(),any())).thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products", "42");
         MockMvcBuilders.standaloneSetup(externalController)
                 .build()
                 .perform(requestBuilder)

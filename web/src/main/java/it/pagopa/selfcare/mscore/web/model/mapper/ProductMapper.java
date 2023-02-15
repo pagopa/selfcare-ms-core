@@ -24,4 +24,5 @@ public class ProductMapper {
         products.setState(ProductState.valueOf(onboarding.getStatus().name()));
         return products;
     }
+
 }

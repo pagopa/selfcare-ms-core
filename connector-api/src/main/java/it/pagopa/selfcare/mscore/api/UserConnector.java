@@ -13,5 +13,5 @@ public interface UserConnector {
 
     List<OnboardedUser> getByUser(String user);
 
-    OnboardedUser getById(String userId);
+    OnboardedUser getById(String id);
 }
