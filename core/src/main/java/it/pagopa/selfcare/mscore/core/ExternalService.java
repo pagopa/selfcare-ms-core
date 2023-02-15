@@ -20,4 +20,6 @@ public interface ExternalService {
     void getInstitutionWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
 
     List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<String> states);
+    List<OnboardedUser> getUserInstitutionRelationships(Institution institution, String uuid, List<String> roles, List<String> states);
+
 }

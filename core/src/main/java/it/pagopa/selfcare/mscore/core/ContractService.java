@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +36,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
@@ -143,6 +147,10 @@ public class ContractService {
 
     public String extractTemplate(String path) {
         return fileStorageConnector.getTemplateFile(path);
+    }
+
+    public ByteArrayResource getFile(String path){
+        return new ByteArrayResource(fileStorageConnector.getFile(path));
     }
 
     public File getLogoFile() {

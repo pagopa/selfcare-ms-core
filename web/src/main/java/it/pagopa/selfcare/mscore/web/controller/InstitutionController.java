@@ -5,10 +5,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipsResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.ProductMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -20,7 +22,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,4 +153,20 @@ public class InstitutionController {
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
     }
 
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.relationships}")
+    @GetMapping(value = "/{id}/relationships")
+    public ResponseEntity<RelationshipsResponse> getUserInstitutionRelationships(@PathVariable("id") String institutionId,
+                                                                                 @RequestParam(value = "personId", required = false) String uuid,
+                                                                                 @RequestParam(value = "roles", required = false) List<String> roles,
+                                                                                 @RequestParam(value = "states", required = false) List<String> states,
+                                                                                 @RequestParam(value = "products", required = false) List<String> products,
+                                                                                 @RequestParam(value = "productRoles", required = false) List<String> productRoles) {
+        log.info("Getting relationship for institution {} and current user", institutionId);
+        setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        Institution institution = institutionService.retrieveInstitutionById(institutionId);
+        List<OnboardedUser> onboardedUsers = institutionService.getUserInstitutionRelationships(institution, uuid, roles, states);
+        return ResponseEntity.ok().body(InstitutionMapper.toRelationshipResponse(institution, onboardedUsers, products, productRoles));
+    }
 }

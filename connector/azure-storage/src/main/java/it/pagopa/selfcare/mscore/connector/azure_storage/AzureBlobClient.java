@@ -14,6 +14,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -43,6 +45,20 @@ class AzureBlobClient implements FileStorageConnector {
 
     }
 
+    public byte[] getFile(String fileName) {
+        log.info("START - getFile for path: {}", fileName);
+        try {
+            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContractsTemplateContainer());
+            final CloudBlockBlob blob = blobContainer.getBlockBlobReference(new File(fileName).getName());
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            blob.download(outputStream);
+            log.info("END - getFile - path {}", fileName);
+            return outputStream.toByteArray();
+        } catch (StorageException | URISyntaxException e) {
+            throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
+                    ERROR_DURING_DOWNLOAD_FILE.getCode());
+        }
+    }
 
     @Override
     public String getTemplateFile(String templateName){

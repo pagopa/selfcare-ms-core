@@ -3,11 +3,13 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,15 +27,17 @@ import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionConnector institutionConnector;
+    private final UserConnector userConnector;
 
     //TODO: ADD private final NationalRegistriesConnector nationalRegistriesConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     private static final String INSTITUTION_CREATED_LOG = "institution created {}";
 
-    public InstitutionServiceImpl(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
+    public InstitutionServiceImpl(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector, UserConnector userConnector) {
         this.institutionConnector = institutionConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
+        this.userConnector = userConnector;
     }
 
     @Override
@@ -151,5 +155,15 @@ public class InstitutionServiceImpl implements InstitutionService {
         } else {
             throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), id), PRODUCTS_NOT_FOUND_ERROR.getCode());
         }
+    }
+
+    @Override
+    public List<OnboardedUser> getUserInstitutionRelationships(Institution institution, String uuid, List<String> roles, List<String> states){
+        List<OnboardedUser> list = userConnector.findRelationship(institution.getId(),uuid,roles,states);
+        if (list != null && !list.isEmpty()) {
+            return list;
+        }
+        throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), institution.getId()),
+                INSTITUTION_NOT_FOUND.getCode());
     }
 }

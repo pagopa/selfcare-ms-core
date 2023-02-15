@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Token;
@@ -35,7 +34,17 @@ public class TokenServiceImpl implements TokenService {
         }
         log.info("END - verifyToken {}", token.get());
         return token.get();
-
     }
+
+    @Override
+    public Token getToken(String id){
+        Optional<Token> tokenOptional = tokenConnector.findById(id);
+        if(tokenOptional.isEmpty()){
+            log.info("Cannot find token having id {}", id);
+            throw new ResourceNotFoundException(String.format(TOKEN_NOT_FOUND.getMessage(), id), TOKEN_NOT_FOUND.getCode());
+        }
+        return tokenOptional.get();
+    }
+
 
 }

@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,11 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.userRegistryConnector = userRegistryConnector;
         this.contractService = contractService;
         this.emailService = emailService;
+    }
+
+    @Override
+    public Resource getResourceByPath(String path){
+        return contractService.getFile(path);
     }
 
     @Override

@@ -11,14 +11,16 @@ import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
@@ -214,5 +216,18 @@ public class OnboardingController {
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.onboardingReject(token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.relationship.document}")
+    @GetMapping(value = "/relationship/{relationshipId}/document")
+    public ResponseEntity<Resource> getOnboardingDocument(@PathVariable("relationshipId") String relationshipId) {
+        log.info("Getting onboarding document of relationship {}", relationshipId);
+        setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
+        Token token = tokenService.getToken(relationshipId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + token.getContract() + "\"")
+                .body(onboardingService.getResourceByPath(token.getContract()));
     }
 }

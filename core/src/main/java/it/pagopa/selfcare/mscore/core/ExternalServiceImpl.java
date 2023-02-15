@@ -111,4 +111,14 @@ public class ExternalServiceImpl implements ExternalService {
         }
         return opt.get();
     }
+
+    @Override
+    public List<OnboardedUser> getUserInstitutionRelationships(Institution institution, String uuid, List<String> roles, List<String> states){
+        List<OnboardedUser> list = userConnector.findRelationship(institution.getId(),uuid,roles,states);
+        if (list != null && !list.isEmpty()) {
+            return list;
+        }
+        throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), institution.getId()),
+                INSTITUTION_NOT_FOUND.getCode());
+    }
 }

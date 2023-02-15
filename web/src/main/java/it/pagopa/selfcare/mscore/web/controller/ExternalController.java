@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipsResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.ProductMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -40,14 +41,12 @@ public class ExternalController {
     /**
      * The function return institutionData from its externalId
      *
-     * @param  id externalId
-     *
+     * @param id externalId
      * @return InstitutionResponse
-     *
+     * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Institution not found, DataType: Problem
-     *
      * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.OK)
@@ -65,14 +64,12 @@ public class ExternalController {
      * The function return institutionData from its externalId
      *
      * @param externalId String
-     * @param productId String
-     *
+     * @param productId  String
      * @return InstitutionManagerResponse
-     *
+     * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Institution Manager not found, DataType: Problem
-     *
      * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.OK)
@@ -95,14 +92,12 @@ public class ExternalController {
      * The function return institutionData from its externalId
      *
      * @param externalId String
-     * @param productId String
-     *
+     * @param productId  String
      * @return InstitutionBillingResponse
-     *
+     * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Institution Billing not found, DataType: Problem
-     *
      * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.OK)
@@ -129,5 +124,23 @@ public class ExternalController {
         List<Onboarding> onboardings = externalService.retrieveInstitutionProductsByExternalId(externalId, states);
         return ResponseEntity.ok(ProductMapper.toOnboardedProducts(onboardings.stream()
                 .map(ProductMapper::toResource)
-                .collect(Collectors.toList())));    }
+                .collect(Collectors.toList())));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.relationships}")
+    @GetMapping(value = "/{externalId}/relationships")
+    public ResponseEntity<RelationshipsResponse> getUserInstitutionRelationshipsByExternalId(@PathVariable("externalId") String externalId,
+                                                                                 @RequestParam(value = "personId", required = false) String uuid,
+                                                                                 @RequestParam(value = "roles", required = false) List<String> roles,
+                                                                                 @RequestParam(value = "states", required = false) List<String> states,
+                                                                                 @RequestParam(value = "products", required = false) List<String> products,
+                                                                                 @RequestParam(value = "productRoles", required = false) List<String> productRoles) {
+        log.info("Getting relationship for institution {} and current user", externalId);
+        setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        Institution institution = externalService.getInstitutionByExternalId(externalId);
+        List<OnboardedUser> onboardedUsers = externalService.getUserInstitutionRelationships(institution, uuid, roles, states);
+        return ResponseEntity.ok().body(InstitutionMapper.toRelationshipResponse(institution, onboardedUsers, products, productRoles));
+    }
+
 }

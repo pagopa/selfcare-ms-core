@@ -1,14 +1,13 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,55 @@ import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
+
+    public static RelationshipsResponse toRelationshipResponse(Institution institution, List<OnboardedUser> onboardedUsers, List<String> products, List<String> productsRole){
+        RelationshipsResponse response = new RelationshipsResponse();
+        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+
+        List<Onboarding> onboardings = institution.getOnboarding();
+
+        for(OnboardedUser onboardedUser : onboardedUsers){
+
+            onboardedUser.getBindings().forEach((key, value) -> value.forEach((productId, onboardedProduct) -> {
+                boolean toAdd = products == null || products.isEmpty() || products.contains(productId);
+                if (productsRole != null && !productsRole.isEmpty() && !productsRole.contains(onboardedProduct.getRoles().get(0))) {
+                    toAdd = false;
+                }
+
+                RelationshipInfo relationshipInfo = new RelationshipInfo();
+                relationshipInfo.setFrom(key);
+                relationshipInfo.setTo(onboardedUser.getId());
+                relationshipInfo.setId(productId);
+                relationshipInfo.setRole(PartyRole.valueOf(onboardedProduct.getRoles().get(0)));
+
+                ProductInfo productInfo = new ProductInfo();
+                productInfo.setId(productId);
+                productInfo.setRole(onboardedProduct.getRoles());
+                productInfo.setCreatedAt(onboardedProduct.getCreatedAt());
+                relationshipInfo.setProductInfo(productInfo);
+
+                relationshipInfo.setState(onboardedProduct.getStatus().name());
+                relationshipInfo.setInstitutionUpdate(convertToInstitutionUpdate(institution));
+                relationshipInfo.setBillingResponse(convertToBillingResponse(institution.getBilling()));
+                relationshipInfo.setCreatedAt(onboardedProduct.getCreatedAt());
+                relationshipInfo.setUpdateAt(onboardedProduct.getUpdatedAt());
+
+                onboardings.forEach(onboarding -> {
+                    if (onboarding.getProductId().equals(productId)) {
+                        relationshipInfo.setPricingPlan(onboarding.getPricingPlan());
+                    }
+                });
+                if (toAdd) {
+                    relationshipInfoList.add(relationshipInfo);
+                }
+            }));
+
+        }
+
+
+        response.setRelationshipInfoList(relationshipInfoList);
+        return response;
+    }
 
     public static InstitutionResponse toInstitutionResponse(Institution institution) {
         InstitutionResponse institutionResponse = new InstitutionResponse();

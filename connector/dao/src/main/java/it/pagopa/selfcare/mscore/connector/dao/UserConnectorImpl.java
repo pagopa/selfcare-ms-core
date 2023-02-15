@@ -50,6 +50,23 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
+    public List<OnboardedUser> findRelationship(String institutionId, String userId, List<String> roles, List<String> states) {
+        Query query = new Query();
+        query.addCriteria(
+                new Criteria().andOperator(
+                        Criteria.where("user").is(userId),
+                        Criteria.where(BINDINGS).exists(true),
+                        Criteria.where(constructQuery(institutionId)).exists(true)
+                                .and(constructQuery(institutionId,"roles")).in(roles)
+                                .and(constructQuery(institutionId,"status")).in(states))
+        );
+        return repository.find(query, UserEntity.class).stream()
+                .map(this::convertToUser)
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
     public OnboardedUser save(OnboardedUser example) {
         final UserEntity entity = convertToUserEntity(example);
         return convertToUser(repository.save(entity));
