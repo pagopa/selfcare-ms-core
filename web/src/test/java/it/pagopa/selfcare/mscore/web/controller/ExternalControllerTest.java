@@ -516,6 +516,19 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
+
+    @Test
+    void retrieveInstitutionGeoTaxonomiesByExternalId() throws Exception {
+
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/geotaxonomies", "42", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
 }
 
 

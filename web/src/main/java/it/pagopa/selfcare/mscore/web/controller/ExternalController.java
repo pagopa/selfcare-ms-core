@@ -129,7 +129,7 @@ public class ExternalController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.external.geotaxonomies}")
-    @GetMapping(value = "/institutions/{externalId}/geotaxonomies")
+    @GetMapping(value = "/{externalId}/geotaxonomies")
     public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId) {
 
         setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
