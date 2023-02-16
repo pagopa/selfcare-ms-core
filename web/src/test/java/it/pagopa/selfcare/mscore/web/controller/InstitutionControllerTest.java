@@ -753,5 +753,20 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content().string("{\"imported\":false}"));
     }
+
+    @Test
+    void getUserInstitutionRelationships() throws Exception {
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any())).thenReturn(new ArrayList<>());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/{id}/relationships", "42");
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+
+    }
 }
 

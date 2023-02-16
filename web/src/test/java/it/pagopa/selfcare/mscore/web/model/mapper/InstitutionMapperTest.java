@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
@@ -12,10 +13,85 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class InstitutionMapperTest {
+    /**
+     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
+     */
+    @Test
+    void testToRelationshipResponse() {
+        Institution institution = new Institution();
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        ArrayList<String> products = new ArrayList<>();
+        assertEquals(onboardedUserList,
+                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, products, new ArrayList<>())
+                        .getRelationshipInfoList());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
+     */
+    @Test
+    void testToRelationshipResponse5() {
+        Institution institution = new Institution();
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(new HashMap<>());
+
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        onboardedUserList.add(onboardedUser);
+        ArrayList<String> stringList = new ArrayList<>();
+        assertEquals(stringList,
+                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, stringList, new ArrayList<>())
+                        .getRelationshipInfoList());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
+     */
+    @Test
+    void testToRelationshipResponse6() {
+        Institution institution = new Institution();
+
+        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
+        stringMapMap.put("Key", new HashMap<>());
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(stringMapMap);
+
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        onboardedUserList.add(onboardedUser);
+        ArrayList<String> stringList = new ArrayList<>();
+        assertEquals(stringList,
+                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, stringList, new ArrayList<>())
+                        .getRelationshipInfoList());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
+     */
+    @Test
+    void testToRelationshipResponse7() {
+        Institution institution = new Institution();
+
+        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
+        stringMapMap.put("42", new HashMap<>());
+        stringMapMap.put("Key", new HashMap<>());
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(stringMapMap);
+
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        onboardedUserList.add(onboardedUser);
+        ArrayList<String> stringList = new ArrayList<>();
+        assertEquals(stringList,
+                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, stringList, new ArrayList<>())
+                        .getRelationshipInfoList());
+    }
+
     /**
      * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
      */
@@ -38,7 +114,6 @@ class InstitutionMapperTest {
         assertNull(actualToInstitutionResponseResult.getDescription());
         assertNull(actualToInstitutionResponseResult.getBusinessRegisterPlace());
     }
-
 
 
     /**

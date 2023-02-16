@@ -527,6 +527,20 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
+
+    @Test
+    void getUserInstitutionRelationshipsByExternalId() throws Exception {
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
+        when(externalService.getUserInstitutionRelationships(any(), any(), any(), any())).thenReturn(new ArrayList<>());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/relationships", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
 }
 
 
