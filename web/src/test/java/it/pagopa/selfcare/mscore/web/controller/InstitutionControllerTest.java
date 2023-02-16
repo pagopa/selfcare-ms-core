@@ -4,21 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -36,7 +24,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ContextConfiguration(classes = {InstitutionController.class})
@@ -181,7 +173,7 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"}}"));
     }
 
     /**
@@ -346,7 +338,7 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"}}"));
     }
 
     /**
@@ -716,42 +708,65 @@ class InstitutionControllerTest {
                         .string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"},{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
     }
 
+    /**
+     * Method under test: {@link InstitutionController#createPgInstitution(String, boolean, Authentication)}
+     */
     @Test
     void testCreatePgInstitution() throws Exception {
+        when(institutionService.createPgInstitution(any(), any(), any())).thenReturn(new Institution());
 
         Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        Institution institution = new Institution();
-        when(institutionService.createPgInstitution(any(), anyBoolean(), any())).thenReturn(institution);
-
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/institutions/pg/123")
-                .param("manual", String.valueOf(true))
+                .post("/institutions/pg/{externalId}", "42")
                 .principal(authentication)
-                .contentType(MediaType.MULTIPART_FORM_DATA);
+                .contentType(MediaType.APPLICATION_JSON);
 
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
 
+    @Test
+    void testRetrieveInstitutionById() throws Exception {
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/{id}", "42")
+                .principal(authentication)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"imported\":false}"));
+    }
 
     @Test
-    void retrieveInstitutionGeoTaxonomies() throws Exception {
+    void getUserInstitutionRelationships() throws Exception {
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any())).thenReturn(new ArrayList<>());
 
-        when(institutionService.retrieveInstitutionGeoTaxonomies(any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/institutions/{id}/geotaxonomies", "42");
+                .get("/institutions/{id}/relationships", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
-    }
 
+    }
 }
 

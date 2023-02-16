@@ -3,6 +3,11 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.UserToOnboard;
 import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.UserToOnboard;
+import it.pagopa.selfcare.mscore.model.Contract;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.OnboardingInfo;
+import it.pagopa.selfcare.mscore.model.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
@@ -11,7 +16,11 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)

@@ -23,5 +23,6 @@ public interface ExternalService {
     List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId);
     List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<String> states);
 
+    List<OnboardedUser> getUserInstitutionRelationships(Institution institution, String uuid, List<String> roles, List<String> states);
 
 }

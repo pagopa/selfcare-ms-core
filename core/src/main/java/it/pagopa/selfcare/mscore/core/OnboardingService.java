@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.model.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.Token;
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -23,4 +24,6 @@ public interface OnboardingService {
     void approveOnboarding(Token token, SelfCareUser selfCareUser);
 
     void onboardingReject(Token token);
+
+    Resource getResourceByPath(String path);
 }

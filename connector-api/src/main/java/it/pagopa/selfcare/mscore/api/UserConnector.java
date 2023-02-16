@@ -7,7 +7,7 @@ import java.util.List;
 public interface UserConnector {
 
     List<OnboardedUser> findOnboardedManager(String institutionId, String productId);
-
+    List<OnboardedUser> findRelationship(String institutionId, String userId, List<String> roles, List<String> states);
     void deleteById(String id);
     OnboardedUser save(OnboardedUser example);
 
