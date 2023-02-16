@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
@@ -15,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
@@ -111,5 +114,26 @@ public class ExternalController {
         Institution institution = externalService.getInstitutionByExternalId(externalId);
         institution = externalService.getBillingByExternalId(institution, productId);
         return ResponseEntity.ok().body(InstitutionMapper.toBillingResponse(institution, productId));
+    }
+
+    /**
+     * The function return geographic taxonomies related to institution
+     *
+     * @param externalId String
+     *
+     * @return GeographicTaxonomies
+     *
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.external.geotaxonomies}")
+    @GetMapping(value = "/institutions/{externalId}/geotaxonomies")
+    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId) {
+
+        setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
+        List<GeographicTaxonomies> list = externalService.retrieveInstitutionGeoTaxonomiesByExternalId(externalId);
+        return ResponseEntity.ok(list);
     }
 }
