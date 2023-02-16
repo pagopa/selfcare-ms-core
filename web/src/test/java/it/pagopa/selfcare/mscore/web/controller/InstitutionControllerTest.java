@@ -739,5 +739,19 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
+
+    @Test
+    void retrieveInstitutionGeoTaxonomies() throws Exception {
+
+        when(institutionService.retrieveInstitutionGeoTaxonomies(any())).thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/{id}/geotaxonomies", "42");
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
 }
 

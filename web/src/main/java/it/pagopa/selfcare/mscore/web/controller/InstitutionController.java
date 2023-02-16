@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
@@ -141,6 +142,27 @@ public class InstitutionController {
         return ResponseEntity.ok(ProductMapper.toOnboardedProducts(list.stream()
                 .map(ProductMapper::toResource)
                 .collect(Collectors.toList())));
+    }
+
+    /**
+     * The function return geographic taxonomies related to institution
+     *
+     * @param id String
+     *
+     * @return GeographicTaxonomies
+     *
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.geotaxonomies}")
+    @GetMapping(value = "/{id}/geotaxonomies")
+    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomies(@PathVariable("id") String id) {
+
+        setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
+        List<GeographicTaxonomies> list = institutionService.retrieveInstitutionGeoTaxonomies(id);
+        return ResponseEntity.ok(list);
     }
 
     @ResponseStatus(HttpStatus.OK)

@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -28,12 +29,14 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     //TODO: ADD private final NationalRegistriesConnector nationalRegistriesConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
+    private final GeoTaxonomiesConnector geoTaxonomiesConnector;
 
     private static final String INSTITUTION_CREATED_LOG = "institution created {}";
 
-    public InstitutionServiceImpl(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
+    public InstitutionServiceImpl(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector, GeoTaxonomiesConnector geoTaxonomiesConnector) {
         this.institutionConnector = institutionConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
+        this.geoTaxonomiesConnector = geoTaxonomiesConnector;
     }
 
     @Override
@@ -151,5 +154,21 @@ public class InstitutionServiceImpl implements InstitutionService {
         } else {
             throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), id), PRODUCTS_NOT_FOUND_ERROR.getCode());
         }
+    }
+
+    @Override
+    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(String institutionId) {
+        log.info("Retrieving geographic taxonomies for institution {}", institutionId);
+        Optional<Institution> optionalInstitution = institutionConnector.findById(institutionId);
+        if(optionalInstitution.isEmpty()) {
+            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), institutionId, null), INSTITUTION_NOT_FOUND.getCode());
+        }
+
+        Institution institution = optionalInstitution.get();
+
+        return institution.getGeographicTaxonomies().stream()
+                .map(GeographicTaxonomies::getCode)
+                .map(geoTaxonomiesConnector::getExtByCode)
+                .collect(Collectors.toList());
     }
 }

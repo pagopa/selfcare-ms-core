@@ -42,6 +42,8 @@ public enum GenericErrorEnum {
     ERROR_DURING_UPLOAD_FILE("0000", "Error during upload file %s"),
     ERROR_DURING_DOWNLOAD_FILE("0000", "Error during download file %s"),
 
+    RETRIEVE_GEO_TAXONOMIES_ERROR("0050", "Error while retrieving institution geographic taxonomy"),
+
     GENERIC_ERROR("0000", "Generic Error");
 
     private final String code;
