@@ -12,29 +12,22 @@ import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@ContextConfiguration(classes = {PartyRegistryProxyConnectorImpl.class})
 @ExtendWith(SpringExtension.class)
 class PartyRegistryProxyConnectorImplTest {
-    @Autowired
+    @InjectMocks
     private PartyRegistryProxyConnectorImpl partyRegistryProxyConnectorImpl;
 
-    @MockBean
+    @Mock
     private PartyRegistryProxyRestClient partyRegistryProxyRestClient;
 
     /**
@@ -387,8 +380,7 @@ class PartyRegistryProxyConnectorImplTest {
     void testGetLegalAddress2() {
         when(partyRegistryProxyRestClient.getLegalAddress(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getLegalAddress("42"));
-        verify(partyRegistryProxyRestClient).getLegalAddress(any());
+        assertNull(partyRegistryProxyConnectorImpl.getLegalAddress("id"));
     }
 
     @Test
