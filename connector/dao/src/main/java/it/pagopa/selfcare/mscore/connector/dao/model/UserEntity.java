@@ -1,25 +1,25 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.UserBinding;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
+import lombok.experimental.FieldNameConstants;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.OffsetDateTime;
-import java.util.Map;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @Document("User")
+@FieldNameConstants(asEnum = true)
 public class UserEntity {
 
-    @MongoId
-    private ObjectId id;
-
-    private String user;
-    private Map<String,Map<String, OnboardedProduct>> bindings;
+    @Id
+    private String id;
+    private List<UserBinding> bindings;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+
 }

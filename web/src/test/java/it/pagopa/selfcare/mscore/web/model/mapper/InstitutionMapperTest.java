@@ -330,23 +330,23 @@ class InstitutionMapperTest {
 
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse2() {
-        assertNull(InstitutionMapper.toBillingResponse(null, "foo"));
+        assertNull(InstitutionMapper.toInstitutionBillingResponse(null, "foo"));
     }
 
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse6() {
         Institution institution = new Institution();
         institution.setOnboarding(new ArrayList<>());
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
-        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(institution, "42");
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
@@ -360,7 +360,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse7() {
@@ -389,7 +389,7 @@ class InstitutionMapperTest {
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
-        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(institution, "42");
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
@@ -408,7 +408,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse8() {
@@ -437,7 +437,7 @@ class InstitutionMapperTest {
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
         institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
-        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(institution,
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution,
                 "Product Id");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());

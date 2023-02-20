@@ -3,8 +3,10 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,5 +31,10 @@ public class MongoCustomConnectorImpl implements MongoCustomConnector {
             list = mongoOperations.find(query.with(pageable), outputType);
         }
         return new PageImpl<>(list, pageable, count);
+    }
+
+    @Override
+    public <O> O findAndModify(Query query, UpdateDefinition updateDefinition, FindAndModifyOptions findAndModifyOptions, Class<O> outputType) {
+            return mongoOperations.findAndModify(query, updateDefinition, findAndModifyOptions, outputType);
     }
 }

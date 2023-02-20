@@ -1,7 +1,9 @@
 package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +18,11 @@ public interface InstitutionConnector {
 
     List<Institution> findWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
 
-    Optional<Institution> findById(String id);
+    Institution findById(String id);
 
+    void findAndUpdateStatus(String id, String productId, RelationshipState state);
+
+    Institution findAndUpdate(String id, Onboarding onboarding, List<GeographicTaxonomies> geographicTaxonomies);
+
+    Institution findInstitutionProduct(String externalId, String productId);
 }

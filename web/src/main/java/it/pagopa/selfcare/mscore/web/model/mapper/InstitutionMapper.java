@@ -1,71 +1,81 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
 
-    public static RelationshipsResponse toRelationshipResponse(Institution institution, List<OnboardedUser> onboardedUsers, List<String> products, List<String> productsRole){
+    public static RelationshipsResponse toRelationshipResponse(List<RelationshipInfo> relationshipInfoList){
         RelationshipsResponse response = new RelationshipsResponse();
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipResult> relationshipResults = new ArrayList<>();
+        for(RelationshipInfo info : relationshipInfoList) {
+            info.getOnboardedProductsInfo().forEach((s, onboardedProduct) -> {
+                RelationshipResult relationshipResult = new RelationshipResult();
+                relationshipResult.setId(onboardedProduct.getTokenId());
+                relationshipResult.setFrom(info.getUserId());
+                relationshipResult.setTo(info.getInstitution().getId());
 
-        List<Onboarding> onboardings = institution.getOnboarding();
+                if(onboardedProduct.getOnboardedProduct()!=null) {
+                    relationshipResult.setState(onboardedProduct.getOnboardedProduct().getStatus().name());
+                    relationshipResult.setRole(onboardedProduct.getOnboardedProduct().getRole());
 
-        for(OnboardedUser onboardedUser : onboardedUsers){
+                    ProductInfo productInfo = new ProductInfo();
+                    productInfo.setId(onboardedProduct.getOnboardedProduct().getProductId());
+                    productInfo.setCreatedAt(onboardedProduct.getOnboardedProduct().getCreatedAt());
+                    productInfo.setRole(onboardedProduct.getOnboardedProduct().getProductRoles());
 
-            onboardedUser.getBindings().forEach((key, value) -> value.forEach((productId, onboardedProduct) -> {
-                boolean toAdd = products == null || products.isEmpty() || products.contains(productId);
-                if (productsRole != null && !productsRole.isEmpty() && !productsRole.contains(onboardedProduct.getRoles().get(0))) {
-                    toAdd = false;
+                    relationshipResult.setProductInfo(productInfo);
+                    relationshipResult.setInstitutionUpdate(constructInstitutionUpdate(info.getInstitution()));
+
+                    addInstitutionOnboardingData(info, onboardedProduct, relationshipResult);
                 }
-
-                RelationshipInfo relationshipInfo = new RelationshipInfo();
-                relationshipInfo.setFrom(key);
-                relationshipInfo.setTo(onboardedUser.getId());
-                relationshipInfo.setId(productId);
-                relationshipInfo.setRole(PartyRole.valueOf(onboardedProduct.getRoles().get(0)));
-
-                ProductInfo productInfo = new ProductInfo();
-                productInfo.setId(productId);
-                productInfo.setRole(onboardedProduct.getRoles());
-                productInfo.setCreatedAt(onboardedProduct.getCreatedAt());
-                relationshipInfo.setProductInfo(productInfo);
-
-                relationshipInfo.setState(onboardedProduct.getStatus().name());
-                relationshipInfo.setInstitutionUpdate(convertToInstitutionUpdate(institution));
-                relationshipInfo.setBillingResponse(convertToBillingResponse(institution.getBilling()));
-                relationshipInfo.setCreatedAt(onboardedProduct.getCreatedAt());
-                relationshipInfo.setUpdateAt(onboardedProduct.getUpdatedAt());
-
-                onboardings.forEach(onboarding -> {
-                    if (onboarding.getProductId().equals(productId)) {
-                        relationshipInfo.setPricingPlan(onboarding.getPricingPlan());
-                    }
-                });
-                if (toAdd) {
-                    relationshipInfoList.add(relationshipInfo);
-                }
-            }));
-
+                relationshipResults.add(relationshipResult);
+            });
         }
-
-
-        response.setRelationshipInfoList(relationshipInfoList);
+        response.setRelationshipInfoList(relationshipResults);
         return response;
+    }
+
+    private static void addInstitutionOnboardingData(RelationshipInfo info, OnboardedProductInfo onboardedProduct, RelationshipResult relationshipResult) {
+        for (Onboarding onboarding : info.getInstitution().getOnboarding()) {
+            if (onboarding.getProductId().equalsIgnoreCase(onboardedProduct.getOnboardedProduct().getProductId())) {
+                relationshipResult.setPricingPlan(onboarding.getPricingPlan());
+                relationshipResult.setBillingResponse(RelationshipMapper.toBillingResponse(onboarding, info.getInstitution()));
+            }
+        }
+    }
+
+    private static InstitutionUpdate constructInstitutionUpdate(Institution institution) {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setInstitutionType(institution.getInstitutionType());
+        institutionUpdate.setDescription(institution.getDescription());
+        institutionUpdate.setDigitalAddress(institution.getDigitalAddress());
+        institutionUpdate.setAddress(institution.getAddress());
+        institutionUpdate.setTaxCode(institution.getTaxCode());
+        institutionUpdate.setZipCode(institution.getZipCode());
+        institutionUpdate.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        institutionUpdate.setDataProtectionOfficer(institution.getDataProtectionOfficer());
+        institutionUpdate.setGeographicTaxonomyCodes(institution.getGeographicTaxonomies().stream().map(GeographicTaxonomies::getCode).collect(Collectors.toList()));
+        institutionUpdate.setRea(institution.getRea());
+        institutionUpdate.setShareCapital(institution.getShareCapital());
+        institutionUpdate.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        institutionUpdate.setSupportEmail(institution.getSupportEmail());
+        institutionUpdate.setSupportPhone(institution.getSupportPhone());
+        institutionUpdate.setImported(institution.isImported());
+        return institutionUpdate;
     }
 
     public static InstitutionResponse toInstitutionResponse(Institution institution) {
@@ -101,7 +111,7 @@ public class InstitutionMapper {
 
         institutionManagerResponse.setId(contractId);
 
-        institutionManagerResponse.setFrom(manager.getUser());
+        institutionManagerResponse.setFrom(manager.getId());
         institutionManagerResponse.setTo(institution.getId());
         if(institution.getOnboarding()!=null) {
             institutionManagerResponse.setProduct(convertToProductInfo(institution.getOnboarding(), productId));
@@ -109,27 +119,28 @@ public class InstitutionMapper {
                 if (productId.equalsIgnoreCase(onboarding.getProductId())) {
                     institutionManagerResponse.setPricingPlan(onboarding.getPricingPlan());
                     if (onboarding.getBilling() != null)
-                        institutionManagerResponse.setBillingResponse(convertToBillingResponse(onboarding.getBilling()));
+                        institutionManagerResponse.setBillingResponse(convertToBillingResponse(onboarding.getBilling(), institution));
                 }
             }
         }
 
         institutionManagerResponse.setInstitutionUpdate(convertToInstitutionUpdate(institution));
-
-        Map<String, Map<String, OnboardedProduct>> map = manager.getBindings();
-
-        if (map.get(institution.getId()) != null) {
-            OnboardedProduct onboardedProduct = map.get(institution.getId()).get(productId);
-            institutionManagerResponse.setCreatedAt(onboardedProduct.getCreatedAt());
-            institutionManagerResponse.setUpdatedAt(onboardedProduct.getUpdatedAt());
-            institutionManagerResponse.setState(onboardedProduct.getStatus());
-        }
+        List<UserBinding> userBindings = manager.getBindings();
+        /*for(UserBinding userBinding : userBindings){
+            if(institution.getId().equalsIgnoreCase(userBinding.getInstitutionId())
+                    && userBinding.getProduct() != null
+            && productId.equalsIgnoreCase(userBinding.getProduct().getProductId())){
+                institutionManagerResponse.setCreatedAt(userBinding.getProduct().getCreatedAt());
+                institutionManagerResponse.setUpdatedAt(userBinding.getProduct().getUpdatedAt());
+                institutionManagerResponse.setState(userBinding.getProduct().getStatus());
+            }
+        }*/
 
         return institutionManagerResponse;
     }
 
 
-    public static InstitutionBillingResponse toBillingResponse(Institution institution, String productId) {
+    public static InstitutionBillingResponse toInstitutionBillingResponse(Institution institution, String productId) {
         if (institution == null) {
             return null;
         }
@@ -147,7 +158,7 @@ public class InstitutionMapper {
 
         for (Onboarding onboarding : institution.getOnboarding()) {
             if (productId.equalsIgnoreCase(onboarding.getProductId())) {
-                response.setBilling(convertToBillingResponse(onboarding.getBilling()));
+                response.setBilling(convertToBillingResponse(onboarding.getBilling(), institution));
                 response.setPricingPlan(onboarding.getPricingPlan());
             }
         }
@@ -203,12 +214,18 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static BillingResponse convertToBillingResponse(Billing billing) {
+    private static BillingResponse convertToBillingResponse(Billing billing, Institution institution) {
         BillingResponse billingResponse = new BillingResponse();
         if(billing!=null) {
             billingResponse.setVatNumber(billing.getVatNumber());
             billingResponse.setRecipientCode(billing.getRecipientCode());
             billingResponse.setPublicServices(billing.isPublicServices());
+            return billingResponse;
+        }else if(institution.getBilling()!=null){
+            billingResponse.setVatNumber(institution.getBilling().getVatNumber());
+            billingResponse.setRecipientCode(institution.getBilling().getRecipientCode());
+            billingResponse.setPublicServices(institution.getBilling().isPublicServices());
+            return billingResponse;
         }
         return billingResponse;
     }
@@ -312,5 +329,26 @@ public class InstitutionMapper {
             }
         }
         return response;
+    }
+
+    public static it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate toInstitutionUpdate(InstitutionPut institutionPut) {
+        it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate institutionUpdate = new it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate();
+        institutionUpdate.setGeographicTaxonomyCodes(institutionPut.getGeographicTaxonomyCodes());
+        return institutionUpdate;
+    }
+
+    public static OnboardedProducts toOnboardedProducts(List<Onboarding> onboardings) {
+        OnboardedProducts onboardedProducts = new OnboardedProducts();
+        onboardedProducts.setProducts(toInstitutionProduct(onboardings));
+        return onboardedProducts;
+    }
+
+    public static List<InstitutionProduct> toInstitutionProduct(List<Onboarding> onboardings) {
+        return onboardings.stream().map(onboarding -> {
+            InstitutionProduct product = new InstitutionProduct();
+            product.setId(onboarding.getProductId());
+            product.setState(onboarding.getStatus());
+            return product;
+        }).collect(Collectors.toList());
     }
 }

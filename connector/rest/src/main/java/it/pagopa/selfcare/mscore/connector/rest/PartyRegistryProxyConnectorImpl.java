@@ -53,7 +53,13 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
 
     @Override
     public NationalRegistriesProfessionalAddress getLegalAddress(String taxId) {
-        return restClient.getLegalAddress(taxId);
+        try {
+            return restClient.getLegalAddress(taxId);
+        }catch (Exception e){
+            log.error("Error during getLegalAddress from partyRegistryProxy --> {}", e.getMessage(), e);
+            log.error("LegalAddress not found for taxId {}", taxId);
+            return null;
+        }
     }
 
     private List<InstitutionByLegal> toInstitutionsByLegalResponse(InstitutionsByLegalResponse response) {

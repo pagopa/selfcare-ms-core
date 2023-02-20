@@ -29,7 +29,7 @@ class UserMapperTest {
         person.setRole("Role");
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
-        assertEquals("42", UserMapper.fromDto(person).getUser());
+        assertEquals("42", UserMapper.fromDto(person).getId());
     }
 }
 

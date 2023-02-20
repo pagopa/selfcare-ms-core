@@ -8,10 +8,10 @@ import java.util.Map;
 @Data
 public class OnboardingInfo {
     Institution institution;
-    Map<String, OnboardedProduct> productMap;
+    Map<String, OnboardedProduct> onboardedProducts;
 
-    public OnboardingInfo(Institution onboardedInstitution, Map<String, OnboardedProduct> productMap) {
+    public OnboardingInfo(Institution onboardedInstitution, Map<String, OnboardedProduct> onboardedProducts) {
         this.institution = onboardedInstitution;
-        this.productMap = productMap;
+        this.onboardedProducts = onboardedProducts;
     }
 }

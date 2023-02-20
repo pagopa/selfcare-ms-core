@@ -28,4 +28,9 @@ public class UtilEnumList {
     public static final List<PartyRole> verifyUsersRole =
             List.of(PartyRole.MANAGER,
                     PartyRole.DELEGATE);
+
+    public static final List<String> adminPartyRole =
+            List.of(PartyRole.MANAGER.name(),
+                    PartyRole.SUB_DELEGATE.name(),
+                    PartyRole.DELEGATE.name());
 }

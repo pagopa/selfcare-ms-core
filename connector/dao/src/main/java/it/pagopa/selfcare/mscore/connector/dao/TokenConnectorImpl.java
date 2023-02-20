@@ -2,18 +2,23 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.TOKEN_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -27,17 +32,18 @@ public class TokenConnectorImpl implements TokenConnector {
 
     @Override
     public void deleteById(String id) {
-        tokenRepository.deleteById(new ObjectId(id));
+        tokenRepository.deleteById(id);
     }
+
     @Override
     public List<Token> findActiveContract(String institutionId, String userId, String productId) {
         Query query = new Query();
         query.addCriteria(
                 new Criteria().andOperator(
-                        Criteria.where("productId").is(productId),
-                        Criteria.where("institutionId").is(institutionId),
-                        Criteria.where("status").is(RelationshipState.ACTIVE),
-                        Criteria.where("users").in(userId)
+                        Criteria.where(TokenEntity.Fields.productId.name()).is(productId),
+                        Criteria.where(TokenEntity.Fields.institutionId.name()).is(institutionId),
+                        Criteria.where(TokenEntity.Fields.status.name()).is(RelationshipState.ACTIVE),
+                        Criteria.where(TokenEntity.Fields.users.name()).is(userId)
                 )
         );
         return tokenRepository.find(query, TokenEntity.class).stream()
@@ -48,21 +54,53 @@ public class TokenConnectorImpl implements TokenConnector {
     @Override
     public Token save(Token token) {
         final TokenEntity entity = convertToTokenEntity(token);
-        return convertToToken(tokenRepository.save(entity));
+        return convertToToken(tokenRepository.insert(entity));
     }
+
     @Override
-    public Optional<Token> findById(String tokenId) {
-        try{
-            return tokenRepository.findById(new ObjectId(tokenId)).map(this::convertToToken);
-        }catch (IllegalArgumentException e){
-            throw new InvalidRequestException(String.format("Invalid token %s", tokenId), "0000");
+    public Token findById(String tokenId) {
+        Optional<Token> opt = tokenRepository.findById(tokenId).map(this::convertToToken);
+        if (opt.isEmpty()) {
+            throw new ResourceNotFoundException(String.format(TOKEN_NOT_FOUND.getMessage(), tokenId), TOKEN_NOT_FOUND.getCode());
         }
+        return opt.get();
+    }
+
+    @Override
+    public Token findAndUpdateTokenState(String tokenId, RelationshipState status) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
+        UpdateDefinition updateDefinition = new Update()
+                .set(TokenEntity.Fields.status.name(), status)
+                .set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
+    }
+
+    @Override
+    public void findAndUpdateTokenUser(String tokenId, List<String> usersId) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
+        UpdateDefinition updateDefinition = new Update()
+                .addToSet(TokenEntity.Fields.users.name(), usersId) //chech se duplica o no
+                .set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class);
+    }
+
+    @Override
+    public List<Token> findWithFilter(String institutionId, String productId, List<RelationshipState> state) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.productId.name()).is(productId)
+                .and(TokenEntity.Fields.institutionId.name()).is(institutionId)
+                .and(TokenEntity.Fields.status.name()).nin(state));
+
+        return tokenRepository.find(query, TokenEntity.class).stream()
+                .map(this::convertToToken)
+                .collect(Collectors.toList());
     }
 
     private TokenEntity convertToTokenEntity(Token token) {
         TokenEntity entity = new TokenEntity();
-        if(token.getId()!=null){
-            entity.setId(new ObjectId(token.getId()));
+        if (token.getId() != null) {
+            entity.setId(token.getId());
         }
         entity.setContract(token.getContract());
         entity.setChecksum(token.getChecksum());
@@ -78,7 +116,7 @@ public class TokenConnectorImpl implements TokenConnector {
 
     private Token convertToToken(TokenEntity tokenEntity) {
         Token token = new Token();
-        token.setId(tokenEntity.getId().toString());
+        token.setId(tokenEntity.getId());
         token.setContract(tokenEntity.getContract());
         token.setChecksum(tokenEntity.getChecksum());
         token.setInstitutionId(tokenEntity.getInstitutionId());

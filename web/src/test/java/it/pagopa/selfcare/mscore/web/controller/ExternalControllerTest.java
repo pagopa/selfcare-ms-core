@@ -114,7 +114,7 @@ class ExternalControllerTest {
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
-        when(externalService.getBillingByExternalId(any(), any())).thenReturn(institution);
+        when(externalService.retrieveBillingByExternalId(any(), any())).thenReturn(institution);
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution1);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/billing", "42", "42");
@@ -224,7 +224,7 @@ class ExternalControllerTest {
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
-        when(externalService.getBillingByExternalId(any(), any())).thenReturn(institution);
+        when(externalService.retrieveBillingByExternalId(any(), any())).thenReturn(institution);
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution1);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/billing", "42", "42");
@@ -505,8 +505,8 @@ class ExternalControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(externalService.getRelationShipToken(any(), any(), any())).thenReturn("ABC123");
-        when(externalService.getInstitutionManager(any(), any())).thenReturn(onboardedUser);
+        when(externalService.retrieveRelationship(any(), any(), any())).thenReturn("ABC123");
+        when(externalService.retrieveInstitutionManager(any(), any())).thenReturn(onboardedUser);
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
@@ -523,20 +523,6 @@ class ExternalControllerTest {
         when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "42", "42");
-        MockMvcBuilders.standaloneSetup(externalController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
-    }
-
-    @Test
-    void getUserInstitutionRelationshipsByExternalId() throws Exception {
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
-        when(externalService.getUserInstitutionRelationships(any(), any(), any(), any())).thenReturn(new ArrayList<>());
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/external/institutions/{externalId}/relationships", "42");
         MockMvcBuilders.standaloneSetup(externalController)
                 .build()
                 .perform(requestBuilder)

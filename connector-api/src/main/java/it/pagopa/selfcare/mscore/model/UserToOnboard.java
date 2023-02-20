@@ -15,4 +15,5 @@ public class UserToOnboard {
     private String email;
     private PartyRole role;
     private List<String> productRole;
+    private EnvEnum env;
 }

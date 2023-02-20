@@ -1,9 +1,8 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.model.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.*;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,5 +24,8 @@ public interface OnboardingService {
 
     void onboardingReject(Token token);
 
+    Object onboardingOperators(OnboardingOperatorsRequest toOnboardingOperatorRequest, PartyRole role);
+
+    Object onboardingLegals(OnboardingLegalsRequest toOnboardingLegalsRequest, Token token, SelfCareUser selfCareUser);
     Resource getResourceByPath(String path);
 }

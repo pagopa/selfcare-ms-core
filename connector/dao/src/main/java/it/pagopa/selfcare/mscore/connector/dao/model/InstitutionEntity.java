@@ -3,18 +3,20 @@ package it.pagopa.selfcare.mscore.connector.dao.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.Data;
-import org.bson.types.ObjectId;
+import lombok.experimental.FieldNameConstants;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
 @Document("Institution")
+@FieldNameConstants(asEnum = true)
 public class InstitutionEntity {
-    @MongoId
-    private ObjectId id;
+
+    @Id
+    private String id;
     private String externalId;
     private String description;
     private String ipaCode;
@@ -23,22 +25,16 @@ public class InstitutionEntity {
     private String address;
     private String zipCode;
     private String taxCode;
-    private BillingEntity billing; //required
-
+    private Billing billing;
     private List<Onboarding> onboarding;
 
     @JsonProperty("geographicTaxonomyCodes")
     private List<GeographicTaxonomies> geographicTaxonomies;
-
     private List<Attributes> attributes;
-
-    private PaymentServiceProvider paymentServiceProvider; //optional
-
-    private DataProtectionOfficer dataProtectionOfficer; //optional
-
+    private PaymentServiceProvider paymentServiceProvider;
+    private DataProtectionOfficer dataProtectionOfficer;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-
     private String rea;
     private String shareCapital;
     private String businessRegisterPlace;

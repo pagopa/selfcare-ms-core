@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RelationshipInfo {
+public class RelationshipResult {
 
     private String id;
     private String from;

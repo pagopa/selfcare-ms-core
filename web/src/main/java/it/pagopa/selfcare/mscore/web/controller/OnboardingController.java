@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
@@ -10,6 +11,9 @@ import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
+import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +28,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
-import static it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage.setCustomMessage;
 
 @Slf4j
 @RestController
@@ -51,7 +54,6 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      *
-     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.verify}")
@@ -60,7 +62,7 @@ public class OnboardingController {
                                                      @PathVariable(value = "productId") String productId) {
 
         log.info("Verifying onboarding for institution having externalId {} on product {}", externalId, productId);
-        setCustomMessage(ONBOARDING_VERIFICATION_ERROR);
+        CustomExceptionMessage.setCustomMessage(ONBOARDING_VERIFICATION_ERROR);
         onboardingService.verifyOnboardingInfo(externalId, productId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -78,7 +80,6 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      *
-     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.info}")
@@ -88,7 +89,7 @@ public class OnboardingController {
                                                                  @RequestParam(value = "states", required = false) String[] states,
                                                                  Authentication authentication) {
         log.info("Getting onboarding info for institution having institutionId {} institutionExternalId {} and states {}", institutionId, institutionExternalId, states);
-        setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
+        CustomExceptionMessage.setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
         String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
         List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, institutionExternalId, states, userId);
         return ResponseEntity.ok().body(OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList));
@@ -106,7 +107,6 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      *
-     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.institution}")
@@ -114,8 +114,9 @@ public class OnboardingController {
     public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest onboardingInstitutionRequest,
                                                       Authentication authentication) {
         log.info("Onboarding institution having externalId {}", onboardingInstitutionRequest.getInstitutionExternalId());
-        setCustomMessage(ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest), (SelfCareUser) authentication.getPrincipal());
+        CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
+        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest),
+                (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -130,7 +131,6 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      *
-     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.complete}")
@@ -138,7 +138,7 @@ public class OnboardingController {
     public ResponseEntity<Void> completeOnboarding(@PathVariable(value = "tokenId") String tokenId,
                                                   @RequestBody MultipartFile file) {
         log.info("Confirm onboarding of token identified with {}", tokenId);
-        setCustomMessage(CONFIRM_ONBOARDING_ERROR);
+        CustomExceptionMessage.setCustomMessage(CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.completeOboarding(token, file);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -154,14 +154,14 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      *
-     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.approve}")
     @PostMapping(value = "/approve/{tokenId}")
     public ResponseEntity<Void> approveOnboarding(@PathVariable(value = "tokenId") String tokenId,
                                                   Authentication authentication) {
-        setCustomMessage(CONFIRM_ONBOARDING_ERROR);
+        log.info("Onboarding Approve having tokenId {}", tokenId);
+        CustomExceptionMessage.setCustomMessage(CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.approveOnboarding(token, (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -177,14 +177,13 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      *
-     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.invalidate}")
     @DeleteMapping(value = "/complete/{tokenId}")
     public ResponseEntity<Void> invalidateOnboarding(@PathVariable(value = "tokenId") String tokenId) {
         log.info("Invalidating onboarding for token identified with {}", tokenId);
-        setCustomMessage(INVALIDATE_ONBOARDING_ERROR);
+        CustomExceptionMessage.setCustomMessage(INVALIDATE_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.invalidateOnboarding(token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -200,29 +199,102 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      *
-     * @docauthor Trelent
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.reject}")
     @DeleteMapping(value = "/reject/{tokenId}")
     public ResponseEntity<OnboardingInfoResponse> onboardingReject(@PathVariable("tokenId") String tokenId) {
         log.info("Onboarding Reject having tokenId {}", tokenId);
-        setCustomMessage(ONBOARDING_OPERATION_ERROR);
+        CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.onboardingReject(token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * The function retrieve the document of specific onboarding
+     *
+     * @param tokenId String
+     *
+     * @return no content
+     * * Code: 200, Message: successful operation, DataType: Resource (signed onboarding document)
+     * * Code: 404, Message: Document Not found, DataType: Problem
+     *
+     */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.relationship.document}")
     @GetMapping(value = "/relationship/{relationshipId}/document")
-    public ResponseEntity<Resource> getOnboardingDocument(@PathVariable("relationshipId") String relationshipId) {
-        log.info("Getting onboarding document of relationship {}", relationshipId);
-        setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
-        Token token = tokenService.getToken(relationshipId);
+    public ResponseEntity<Resource> getOnboardingDocument(@PathVariable("relationshipId") String tokenId) {
+        log.info("Getting onboarding document of relationship {}", tokenId);
+        CustomExceptionMessage.setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
+        Token token = tokenService.getToken(tokenId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + token.getContract() + "\"")
                 .body(onboardingService.getResourceByPath(token.getContract()));
+    }
+
+    /**
+     * The function persist operators for given onboarding
+     *
+     * @param onboardingInstitutionOperatorsRequest OnboardingInstitutionOperatorsRequest
+     *
+     * @return no content
+     * * Code: 204, Message: successful operation
+     * * Code: 404, Message: Not found, DataType: Problem
+     * * Code: 400, Message: Invalid request, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.institution}")
+    @PostMapping(value = "/operators")
+    public ResponseEntity<Void> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
+        log.info("Onboarding operators on institution {}", onboardingInstitutionOperatorsRequest.getInstitutionId());
+        CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATORS_ERROR);
+        onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(onboardingInstitutionOperatorsRequest), PartyRole.OPERATOR);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * The function persist legals for given onboarding
+     *
+     * @param onboardingInstitutionLegalsRequest OnboardingInstitutionLegalsRequest
+     *
+     * @return no content
+     * * Code: 204, Message: successful operation
+     * * Code: 404, Message: Not found, DataType: Problem
+     * * Code: 400, Message: Invalid request, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.institution}")
+    @PostMapping(value = "/legals")
+    public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest, Authentication authentication) {
+        log.info("Onboarding Legals of institution {} and/or externalId {}", onboardingInstitutionLegalsRequest.getInstitutionId(), onboardingInstitutionLegalsRequest.getInstitutionExternalId());
+        CustomExceptionMessage.setCustomMessage(ONBOARDING_LEGALS_ERROR);
+        Token token = tokenService.retrieveToken(onboardingInstitutionLegalsRequest.getInstitutionId(), onboardingInstitutionLegalsRequest.getProductId());
+        onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(onboardingInstitutionLegalsRequest), token, (SelfCareUser) authentication.getPrincipal());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
+     * The function persist subDelegates for given onboarding
+     *
+     * @param onboardingInstitutionOperatorsRequest OnboardingInstitutionOperatorRequest
+     *
+     * @return no content
+     * * Code: 204, Message: successful operation
+     * * Code: 404, Message: Not found, DataType: Problem
+     * * Code: 400, Message: Invalid request, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.institution}")
+    @PostMapping(value = "/subdelegates")
+    public ResponseEntity<Void> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
+        log.info("Onboarding subdelegates on institution {}", onboardingInstitutionOperatorsRequest.getInstitutionId());
+        CustomExceptionMessage.setCustomMessage(ONBOARDING_SUBDELEGATES_ERROR);
+        onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(onboardingInstitutionOperatorsRequest), PartyRole.SUB_DELEGATE);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -33,6 +33,13 @@
                <artifactId>jaxb-api</artifactId>
                <version>2.3.0</version>
            </dependency>
+           <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-core -->
+           <dependency>
+               <groupId>org.glassfish.jaxb</groupId>
+               <artifactId>jaxb-core</artifactId>
+               <version>2.3.0</version>
+           </dependency>
+
 
            <!-- https://mvnrepository.com/artifact/com.sun.xml.bind/jaxb-core -->
            <dependency>

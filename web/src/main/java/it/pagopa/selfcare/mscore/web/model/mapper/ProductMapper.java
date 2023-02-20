@@ -8,21 +8,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class ProductMapper {
 
-    public static OnboardedProducts toOnboardedProducts(List<InstitutionProduct> list) {
-        OnboardedProducts onboardedProducts = new OnboardedProducts();
-        onboardedProducts.setProducts(list);
-        return onboardedProducts;
-    }
 
-    public static InstitutionProduct toResource(Onboarding onboarding) {
-        InstitutionProduct products = new InstitutionProduct();
-        products.setId(onboarding.getProductId());
-        products.setState(ProductState.valueOf(onboarding.getStatus().name()));
-        return products;
-    }
 
 }

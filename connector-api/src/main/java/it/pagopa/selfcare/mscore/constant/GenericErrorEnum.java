@@ -3,8 +3,8 @@ package it.pagopa.selfcare.mscore.constant;
 public enum GenericErrorEnum {
     GET_INSTITUTION_BY_ID_ERROR("0040", "Error while retrieving institution having id %s"),
     GET_INSTITUTION_BY_EXTERNAL_ID_ERROR("0041", "Error while retrieving institution having externalId %s"),
-    GET_INSTITUTION_MANAGER_ERROR("0042", "Error while retrieving institution having externalId %s"),
-    GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s"),
+    INSTITUTION_MANAGER_ERROR("0042", "Error while retrieving institution having externalId %s"),
+    INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s"),
     CREATE_INSTITUTION_ERROR("0037", "Error while creating requested institution"),
     ONBOARDING_OPERATION_ERROR("0017", "Error while performing onboarding operation"),
 
@@ -38,14 +38,19 @@ public enum GenericErrorEnum {
 
     INVALID_SIGNATURE("0005", "Signature not valid: %s"),
 
-    ERROR_DURING_SEND_MAIL("0000","Error during send mail to %s"),
+    ERROR_DURING_SEND_MAIL("0000", "Error during send mail to %s"),
     ERROR_DURING_UPLOAD_FILE("0000", "Error during upload file %s"),
     ERROR_DURING_DOWNLOAD_FILE("0000", "Error during download file %s"),
-
+    RETRIEVING_USER_RELATIONSHIP_ERROR("0023", "Error while retrieving user relationships"),
+    ACTIVATE_RELATIONSHIP_ERROR("0024", "Error while activating relationship"),
+    SUSPEND_RELATIONSHIP_ERROR("0025", "Error while suspending relationship"),
+    PUT_INSTITUTION_ERROR("0051", "Error while updating institution"),
+    ONBOARDING_SUBDELEGATES_ERROR("0019", "Error while onboarding subdelegates"),
+    ONBOARDING_OPERATORS_ERROR("0020", "Error while onboarding operators"),
+    ONBOARDING_LEGALS_ERROR("0018", "Error while onboarding legals"),
     RETRIEVE_GEO_TAXONOMIES_ERROR("0050", "Error while retrieving institution geographic taxonomy"),
-
+    GET_RELATIONSHIP_ERROR("0028", "Error while getting relationship"),
     GENERIC_ERROR("0000", "Generic Error");
-
     private final String code;
     private final String detail;
 

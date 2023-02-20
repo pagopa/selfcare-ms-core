@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.onboarding;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
@@ -28,7 +29,7 @@ public class OnboardedInstitutionResponse {
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesResponse> attributes;
     private String state;
-    private String role;
+    private PartyRole role;
     private ProductInfo productInfo;
 
 }
