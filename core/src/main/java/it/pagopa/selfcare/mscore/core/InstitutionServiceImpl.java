@@ -29,12 +29,13 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final GeoTaxonomiesConnector geoTaxonomiesConnector;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector) {
-         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
+        this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
     }
+
     @Override
-    public Institution retrieveInstitutionById(String id){
+    public Institution retrieveInstitutionById(String id) {
         return institutionConnector.findById(id);
     }
 
@@ -42,7 +43,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Institution retrieveInstitutionByExternalId(String institutionExternalId) {
         Optional<Institution> opt = institutionConnector.findByExternalId(institutionExternalId);
         if (opt.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), null,institutionExternalId), INSTITUTION_NOT_FOUND.getCode());
+            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), null, institutionExternalId), INSTITUTION_NOT_FOUND.getCode());
         }
         log.info("founded institution having externalId: {}", institutionExternalId);
         return opt.get();
@@ -132,6 +133,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), institutionId), PRODUCTS_NOT_FOUND_ERROR.getCode());
         }
     }
+
     @Override
     public Institution getInstitutionProduct(String externalId, String productId) {
         return institutionConnector.findInstitutionProduct(externalId, productId);

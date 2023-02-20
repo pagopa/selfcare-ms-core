@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -58,14 +57,18 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<GeographicTaxonomies> geographicTaxonomies) {
+    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<GeographicTaxonomies> geographicTaxonomiesList) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
-        UpdateDefinition updateDefinition = new Update()
-                .set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now())
-                .addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geographicTaxonomies)
-                .addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
+        Update update = new Update();
+        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
+
+        for(GeographicTaxonomies geo: geographicTaxonomiesList){
+            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geo);
+        }
+
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        return convertToInstitution(repository.findAndModify(query, updateDefinition, findAndModifyOptions, InstitutionEntity.class));
+        return convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
     @Override

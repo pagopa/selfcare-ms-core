@@ -1,8 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.UserToOnboard;
-import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.Contract;
 import it.pagopa.selfcare.mscore.model.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.OnboardingInfo;
@@ -16,12 +14,9 @@ import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
@@ -63,8 +58,8 @@ public class OnboardingMapper {
                 userToOnboard.setSurname(p.getSurname());
                 userToOnboard.setTaxCode(p.getTaxCode());
                 userToOnboard.setEmail(p.getEmail());
-              //  userToOnboard.setRole(PartyRole.valueOf(p.getRole()));
-             //   userToOnboard.setProductRole(List.of(p.getRole(), p.getProductRole()));
+                userToOnboard.setRole(p.getRole());
+                userToOnboard.setProductRole(p.getProductRole());
                 userToOnboard.setEnv(p.getEnv());
                 users.add(userToOnboard);
             }
@@ -128,14 +123,6 @@ public class OnboardingMapper {
         return onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling();
     }
 
-    private static ProductInfo convertToProductInfo(OnboardedProduct onboardedProduct, String productId) {
-        ProductInfo productInfo = new ProductInfo();
-        productInfo.setId(productId);
-        productInfo.setRole(onboardedProduct.getProductRoles());
-        productInfo.setCreatedAt(onboardedProduct.getCreatedAt());
-        return productInfo;
-    }
-
     private static List<AttributesResponse> convertToAttributesResponse(List<Attributes> attributesList) {
         if (attributesList == null) {
             return Collections.emptyList();
@@ -165,19 +152,5 @@ public class OnboardingMapper {
                     geoTaxonomies.setEnable(geo.isEnable());
                     return geoTaxonomies;
                 }).collect(Collectors.toList());
-    }
-
-    public static OnboardingOperatorsRequest toOnboardingOperatorRequest(OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
-        OnboardingOperatorsRequest request = new OnboardingOperatorsRequest();
-        request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());
-        request.setProductId(onboardingInstitutionOperatorsRequest.getProductId());
-        request.setUsers(convertToOnboarderUser(onboardingInstitutionOperatorsRequest.getUsers()));
-        return request;
-    }
-
-    public static OnboardingLegalsRequest toOnboardingLegalsRequest(OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest) {
-        OnboardingLegalsRequest request = new OnboardingLegalsRequest();
-
-        return request;
     }
 }
