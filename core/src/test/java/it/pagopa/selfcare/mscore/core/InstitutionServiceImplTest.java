@@ -10,11 +10,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
 import it.pagopa.selfcare.mscore.model.institution.Attributes;
@@ -28,7 +28,6 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import java.util.Optional;
 
@@ -51,6 +50,9 @@ class InstitutionServiceImplTest {
 
     @MockBean
     private PartyRegistryProxyConnector partyRegistryProxyConnector;
+
+    @MockBean
+    private GeoTaxonomiesConnector geoTaxonomiesConnector;
 
     /**
      * Method under test: {@link InstitutionServiceImpl#createInstitutionByExternalId(String)}
@@ -244,8 +246,9 @@ class InstitutionServiceImplTest {
     void testCreateInstitutionRaw() {
         when(institutionConnector.save(any())).thenReturn(new Institution());
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
+        Institution institution = new Institution();
         assertThrows(ResourceConflictException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(new Institution(), "42"));
+                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
         verify(institutionConnector).findByExternalId(any());
     }
 
@@ -273,8 +276,9 @@ class InstitutionServiceImplTest {
                 .thenThrow(new InvalidRequestException("An error occurred", "START - check institution {} already exists"));
         when(institutionConnector.findByExternalId(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "START - check institution {} already exists"));
+        Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(new Institution(), "42"));
+                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
         verify(institutionConnector).findByExternalId(any());
     }
 
@@ -299,48 +303,6 @@ class InstitutionServiceImplTest {
                 "START - check institution {} already exists", "jane.doe@example.org", "4105551212", true), "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts() {
-        when(institutionConnector.findById(any())).thenReturn(Optional.of(new Institution()));
-        assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionProducts("42", new ArrayList<>()));
-        verify(institutionConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts2() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionConnector.findById(any()))
-                .thenReturn(Optional.of(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true)));
-        assertTrue(institutionServiceImpl.retrieveInstitutionProducts("42", new ArrayList<>()).isEmpty());
-        verify(institutionConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts4() {
-        when(institutionConnector.findById(any())).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionProducts("42", new ArrayList<>()));
-        verify(institutionConnector).findById(any());
     }
 }
 

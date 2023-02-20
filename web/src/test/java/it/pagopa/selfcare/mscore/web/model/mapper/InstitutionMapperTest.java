@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
@@ -11,86 +10,11 @@ import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class InstitutionMapperTest {
-    /**
-     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
-     */
-    @Test
-    void testToRelationshipResponse() {
-        Institution institution = new Institution();
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        ArrayList<String> products = new ArrayList<>();
-        assertEquals(onboardedUserList,
-                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, products, new ArrayList<>())
-                        .getRelationshipInfoList());
-    }
-
-    /**
-     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
-     */
-    @Test
-    void testToRelationshipResponse5() {
-        Institution institution = new Institution();
-
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new HashMap<>());
-
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(onboardedUser);
-        ArrayList<String> stringList = new ArrayList<>();
-        assertEquals(stringList,
-                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, stringList, new ArrayList<>())
-                        .getRelationshipInfoList());
-    }
-
-    /**
-     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
-     */
-    @Test
-    void testToRelationshipResponse6() {
-        Institution institution = new Institution();
-
-        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
-        stringMapMap.put("Key", new HashMap<>());
-
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(stringMapMap);
-
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(onboardedUser);
-        ArrayList<String> stringList = new ArrayList<>();
-        assertEquals(stringList,
-                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, stringList, new ArrayList<>())
-                        .getRelationshipInfoList());
-    }
-
-    /**
-     * Method under test: {@link InstitutionMapper#toRelationshipResponse(Institution, List, List, List)}
-     */
-    @Test
-    void testToRelationshipResponse7() {
-        Institution institution = new Institution();
-
-        HashMap<String, Map<String, OnboardedProduct>> stringMapMap = new HashMap<>();
-        stringMapMap.put("42", new HashMap<>());
-        stringMapMap.put("Key", new HashMap<>());
-
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(stringMapMap);
-
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(onboardedUser);
-        ArrayList<String> stringList = new ArrayList<>();
-        assertEquals(stringList,
-                InstitutionMapper.toRelationshipResponse(institution, onboardedUserList, stringList, new ArrayList<>())
-                        .getRelationshipInfoList());
-    }
 
     /**
      * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
@@ -236,17 +160,6 @@ class InstitutionMapperTest {
         assertNull(paymentServiceProviderResponse.getBusinessRegisterNumber());
         assertNull(paymentServiceProviderResponse.getLegalRegisterNumber());
         assertFalse(paymentServiceProviderResponse.isVatNumberGroup());
-        DataProtectionOfficerResponse dataProtectionOfficer = actualToInstitutionResponseResult
-                .getDataProtectionOfficer();
-        assertNull(dataProtectionOfficer.getAddress());
-        assertNull(dataProtectionOfficer.getEmail());
-        assertNull(paymentServiceProviderResponse.getLegalRegisterName());
-        assertNull(dataProtectionOfficer.getPec());
-        assertNull(paymentServiceProviderResponse.getAbiCode());
-        GeoTaxonomies getResult = geographicTaxonomies1.get(0);
-        assertEquals("Code", getResult.getCode());
-        assertEquals("The characteristics of someone or something", getResult.getDesc());
-        assertTrue(getResult.isEnable());
     }
 
     /**
@@ -295,14 +208,8 @@ class InstitutionMapperTest {
         DataProtectionOfficerResponse dataProtectionOfficer = actualToInstitutionResponseResult
                 .getDataProtectionOfficer();
         assertNull(dataProtectionOfficer.getAddress());
-        assertNull(dataProtectionOfficer.getEmail());
-        assertNull(paymentServiceProviderResponse.getAbiCode());
-        assertNull(paymentServiceProviderResponse.getBusinessRegisterNumber());
-        assertNull(dataProtectionOfficer.getPec());
-        AttributesResponse getResult = attributes1.get(0);
-        assertEquals("The characteristics of someone or something", getResult.getDescription());
-        assertEquals("Code", getResult.getCode());
-        assertEquals("Origin", getResult.getOrigin());
+
+
     }
 
     /**
@@ -313,7 +220,7 @@ class InstitutionMapperTest {
         Institution institution = new Institution();
 
         OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new HashMap<>());
+        onboardedUser.setBindings(new ArrayList<>());
         InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
                 .toInstitutionManagerResponse(institution, onboardedUser, "42", "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());

@@ -4,7 +4,6 @@ import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,7 @@ class InstitutionConnectorImplTest {
     @Test
     void findById() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setId("507f1f77bcf86cd799439011");
         Optional<Institution> response = institutionConnectionImpl.findByExternalId("id");
         Assertions.assertTrue(response.isEmpty());
     }
@@ -44,7 +43,7 @@ class InstitutionConnectorImplTest {
         institution.setExternalId("ext");
         institution.setId("507f1f77bcf86cd799439011");
         InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setId("507f1f77bcf86cd799439011");
         when(institutionRepository.save(any())).thenReturn(institutionEntity);
         Institution response = institutionConnectionImpl.save(institution);
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
@@ -53,7 +52,7 @@ class InstitutionConnectorImplTest {
     @Test
     void findByExternalIdTest() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setId("507f1f77bcf86cd799439011");
         when(institutionRepository.findAll((Example<InstitutionEntity>) any())).thenReturn(List.of(institutionEntity));
         Optional<Institution> response = institutionConnectionImpl.findByExternalId("ext");
         Assertions.assertTrue(response.isPresent());
@@ -63,7 +62,7 @@ class InstitutionConnectorImplTest {
     @Test
     void findByExternalIdNotFoundTest() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setId("507f1f77bcf86cd799439011");
         when(institutionRepository.findAll((Example<InstitutionEntity>) any())).thenReturn(Collections.emptyList());
         Optional<Institution> response = institutionConnectionImpl.findByExternalId("ext");
         Assertions.assertTrue(response.isEmpty());
@@ -85,7 +84,7 @@ class InstitutionConnectorImplTest {
         institution.setPaymentServiceProvider(new PaymentServiceProvider());
 
         InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId(new ObjectId("507f1f77bcf86cd799439011"));
+        institutionEntity.setId("507f1f77bcf86cd799439011");
         institutionEntity.setGeographicTaxonomies(new ArrayList<>());
         institutionEntity.setDataProtectionOfficer(new DataProtectionOfficer());
         institutionEntity.setPaymentServiceProvider(new PaymentServiceProvider());

@@ -17,7 +17,6 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,7 +113,7 @@ class ExternalControllerTest {
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
-        when(externalService.retrieveBillingByExternalId(any(), any())).thenReturn(institution);
+        when(externalService.retrieveInstitutionProduct(any(), any())).thenReturn(institution);
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution1);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/billing", "42", "42");
@@ -224,7 +223,7 @@ class ExternalControllerTest {
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
-        when(externalService.retrieveBillingByExternalId(any(), any())).thenReturn(institution);
+        when(externalService.retrieveInstitutionProduct(any(), any())).thenReturn(institution);
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution1);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/billing", "42", "42");
@@ -469,8 +468,8 @@ class ExternalControllerTest {
     @Test
     void testGetManagerInstitutionByExternalId() throws Exception {
         OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new HashMap<>());
-        onboardedUser.setUser("User");
+        onboardedUser.setBindings(new ArrayList<>());
+        onboardedUser.setId("User");
 
         Billing billing = new Billing();
         billing.setPublicServices(true);

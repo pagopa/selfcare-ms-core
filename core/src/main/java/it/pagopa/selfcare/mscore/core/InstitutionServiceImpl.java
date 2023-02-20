@@ -10,16 +10,13 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
@@ -30,14 +27,11 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final InstitutionConnector institutionConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final GeoTaxonomiesConnector geoTaxonomiesConnector;
-    private final UserService userService;
 
-    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector, UserService userService) {
+    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector) {
          this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
-
-        this.userService = userService;
     }
     @Override
     public Institution retrieveInstitutionById(String id){
@@ -141,37 +135,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution getInstitutionProduct(String externalId, String productId) {
         return institutionConnector.findInstitutionProduct(externalId, productId);
-    }
-
-    @Override
-    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(String institutionId) {
-        log.info("Retrieving geographic taxonomies for institution {}", institutionId);
-        Institution institution = retrieveInstitutionById(institutionId);
-        return institution.getGeographicTaxonomies().stream()
-                .map(GeographicTaxonomies::getCode)
-                .map(this::getGeoTaxonomies)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<OnboardedUser> getUserInstitutionRelationships(Institution institution, String uuid, List<String> roles, List<String> states){
-        List<OnboardedUser> list = new ArrayList<>();
-        if (list != null && !list.isEmpty()) {
-            return list;
-        }
-        throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), institution.getId()),
-                INSTITUTION_NOT_FOUND.getCode());
-    }
-
-    @Override
-    public Institution updateInstitution(EnvEnum env, String institutionId, InstitutionUpdate institutionUpdate, String userId) {
-        if(userService.checkIfAdmin(env, userId, institutionId)) {
-            List<GeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomyCodes()
-                    .stream().map(this::getGeoTaxonomies).collect(Collectors.toList());
-            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
-        }else{
-            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), RELATIONSHIP_NOT_FOUND.getCode());
-        }
     }
 
     public void checkIfAlreadyExists(String externalId) {

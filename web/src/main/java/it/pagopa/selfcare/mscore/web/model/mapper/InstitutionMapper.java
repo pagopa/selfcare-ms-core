@@ -18,66 +18,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
 
-    public static RelationshipsResponse toRelationshipResponse(List<RelationshipInfo> relationshipInfoList){
-        RelationshipsResponse response = new RelationshipsResponse();
-        List<RelationshipResult> relationshipResults = new ArrayList<>();
-        for(RelationshipInfo info : relationshipInfoList) {
-            info.getOnboardedProductsInfo().forEach((s, onboardedProduct) -> {
-                RelationshipResult relationshipResult = new RelationshipResult();
-                relationshipResult.setId(onboardedProduct.getTokenId());
-                relationshipResult.setFrom(info.getUserId());
-                relationshipResult.setTo(info.getInstitution().getId());
-
-                if(onboardedProduct.getOnboardedProduct()!=null) {
-                    relationshipResult.setState(onboardedProduct.getOnboardedProduct().getStatus().name());
-                    relationshipResult.setRole(onboardedProduct.getOnboardedProduct().getRole());
-
-                    ProductInfo productInfo = new ProductInfo();
-                    productInfo.setId(onboardedProduct.getOnboardedProduct().getProductId());
-                    productInfo.setCreatedAt(onboardedProduct.getOnboardedProduct().getCreatedAt());
-                    productInfo.setRole(onboardedProduct.getOnboardedProduct().getProductRoles());
-
-                    relationshipResult.setProductInfo(productInfo);
-                    relationshipResult.setInstitutionUpdate(constructInstitutionUpdate(info.getInstitution()));
-
-                    addInstitutionOnboardingData(info, onboardedProduct, relationshipResult);
-                }
-                relationshipResults.add(relationshipResult);
-            });
-        }
-        response.setRelationshipInfoList(relationshipResults);
-        return response;
-    }
-
-    private static void addInstitutionOnboardingData(RelationshipInfo info, OnboardedProductInfo onboardedProduct, RelationshipResult relationshipResult) {
-        for (Onboarding onboarding : info.getInstitution().getOnboarding()) {
-            if (onboarding.getProductId().equalsIgnoreCase(onboardedProduct.getOnboardedProduct().getProductId())) {
-                relationshipResult.setPricingPlan(onboarding.getPricingPlan());
-                relationshipResult.setBillingResponse(RelationshipMapper.toBillingResponse(onboarding, info.getInstitution()));
-            }
-        }
-    }
-
-    private static InstitutionUpdate constructInstitutionUpdate(Institution institution) {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setInstitutionType(institution.getInstitutionType());
-        institutionUpdate.setDescription(institution.getDescription());
-        institutionUpdate.setDigitalAddress(institution.getDigitalAddress());
-        institutionUpdate.setAddress(institution.getAddress());
-        institutionUpdate.setTaxCode(institution.getTaxCode());
-        institutionUpdate.setZipCode(institution.getZipCode());
-        institutionUpdate.setPaymentServiceProvider(institution.getPaymentServiceProvider());
-        institutionUpdate.setDataProtectionOfficer(institution.getDataProtectionOfficer());
-        institutionUpdate.setGeographicTaxonomyCodes(institution.getGeographicTaxonomies().stream().map(GeographicTaxonomies::getCode).collect(Collectors.toList()));
-        institutionUpdate.setRea(institution.getRea());
-        institutionUpdate.setShareCapital(institution.getShareCapital());
-        institutionUpdate.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
-        institutionUpdate.setSupportEmail(institution.getSupportEmail());
-        institutionUpdate.setSupportPhone(institution.getSupportPhone());
-        institutionUpdate.setImported(institution.isImported());
-        return institutionUpdate;
-    }
-
     public static InstitutionResponse toInstitutionResponse(Institution institution) {
         InstitutionResponse institutionResponse = new InstitutionResponse();
         institutionResponse.setId(institution.getId());
@@ -255,13 +195,6 @@ public class InstitutionMapper {
         return productInfo;
     }
 
-    public static InstitutionResource toResource(Institution institution) {
-        InstitutionResource resource = new InstitutionResource();
-        resource.setId(institution.getId());
-        resource.setExternalId(institution.getExternalId());
-        return resource;
-    }
-
     public static Institution toInstitution(InstitutionRequest request, String externalId) {
         Institution institution = new Institution();
         institution.setExternalId(externalId);
@@ -329,12 +262,6 @@ public class InstitutionMapper {
             }
         }
         return response;
-    }
-
-    public static it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate toInstitutionUpdate(InstitutionPut institutionPut) {
-        it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate institutionUpdate = new it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate();
-        institutionUpdate.setGeographicTaxonomyCodes(institutionPut.getGeographicTaxonomyCodes());
-        return institutionUpdate;
     }
 
     public static OnboardedProducts toOnboardedProducts(List<Onboarding> onboardings) {

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.TOKEN_NOT_FOUND;
@@ -54,7 +55,7 @@ public class TokenConnectorImpl implements TokenConnector {
     @Override
     public Token save(Token token) {
         final TokenEntity entity = convertToTokenEntity(token);
-        return convertToToken(tokenRepository.insert(entity));
+        return convertToToken(tokenRepository.save(entity));
     }
 
     @Override
@@ -67,16 +68,6 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public Token findAndUpdateTokenState(String tokenId, RelationshipState status) {
-        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
-        UpdateDefinition updateDefinition = new Update()
-                .set(TokenEntity.Fields.status.name(), status)
-                .set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
-    }
-
-    @Override
     public void findAndUpdateTokenUser(String tokenId, List<String> usersId) {
         Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
         UpdateDefinition updateDefinition = new Update()
@@ -86,21 +77,12 @@ public class TokenConnectorImpl implements TokenConnector {
         tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class);
     }
 
-    @Override
-    public List<Token> findWithFilter(String institutionId, String productId, List<RelationshipState> state) {
-        Query query = Query.query(Criteria.where(TokenEntity.Fields.productId.name()).is(productId)
-                .and(TokenEntity.Fields.institutionId.name()).is(institutionId)
-                .and(TokenEntity.Fields.status.name()).nin(state));
-
-        return tokenRepository.find(query, TokenEntity.class).stream()
-                .map(this::convertToToken)
-                .collect(Collectors.toList());
-    }
-
     private TokenEntity convertToTokenEntity(Token token) {
         TokenEntity entity = new TokenEntity();
         if (token.getId() != null) {
             entity.setId(token.getId());
+        }else{
+            entity.setId(UUID.randomUUID().toString());
         }
         entity.setContract(token.getContract());
         entity.setChecksum(token.getChecksum());

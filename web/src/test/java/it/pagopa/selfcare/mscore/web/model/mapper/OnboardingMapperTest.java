@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.Contract;
 import it.pagopa.selfcare.mscore.model.OnboardingInfo;
@@ -77,8 +78,8 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole("Product Role");
-        person.setRole("MANAGER");
+        person.setProductRole(List.of("Product Role"));
+        person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
 
@@ -152,8 +153,8 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole("Product Role");
-        person.setRole("MANAGER");
+        person.setProductRole(List.of("Product Role"));
+        person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
 
@@ -220,16 +221,16 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole("DELEGATE");
-        person.setRole("DELEGATE");
+        person.setProductRole(List.of("Product Role"));
+        person.setRole(PartyRole.DELEGATE);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
 
         Person person1 = new Person();
         person1.setId("42");
         person1.setName("Name");
-        person1.setProductRole("Product Role");
-        person1.setRole("MANAGER");
+        person1.setProductRole(List.of("Product Role"));
+        person1.setRole(PartyRole.MANAGER);
         person1.setSurname("Doe");
         person1.setTaxCode("Tax Code");
 
@@ -444,7 +445,7 @@ class OnboardingMapperTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setContract("contract");
-        onboardedProduct.setRoles(List.of("roles"));
+        onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setCreatedAt(OffsetDateTime.now());
         filteredProductsMap.put("42", onboardedProduct);
 

@@ -20,8 +20,6 @@ public interface InstitutionConnector {
 
     Institution findById(String id);
 
-    void findAndUpdateStatus(String id, String productId, RelationshipState state);
-
     Institution findAndUpdate(String id, Onboarding onboarding, List<GeographicTaxonomies> geographicTaxonomies);
 
     Institution findInstitutionProduct(String externalId, String productId);
