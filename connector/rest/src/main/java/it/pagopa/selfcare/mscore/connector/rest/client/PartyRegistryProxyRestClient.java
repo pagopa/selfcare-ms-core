@@ -6,7 +6,11 @@ import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategor
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
 import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 

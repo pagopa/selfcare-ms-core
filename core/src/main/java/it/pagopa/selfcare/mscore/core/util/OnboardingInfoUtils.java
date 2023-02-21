@@ -9,11 +9,13 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.ONBOARDING_INFO_INSTITUTION_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.onboardingInfoDefaultRelationshipStates;
+import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
 @Slf4j
 public class OnboardingInfoUtils {
@@ -55,7 +57,7 @@ public class OnboardingInfoUtils {
 
     public static List<RelationshipState> getRelationShipStateList(String[] states) {
         if (states == null || states.length == 0) {
-            return onboardingInfoDefaultRelationshipStates;
+            return ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
         } else {
             return convertStatesToRelationshipsState(states);
         }

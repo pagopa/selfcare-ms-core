@@ -6,7 +6,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -40,7 +44,9 @@ public class LogFilter implements Filter {
     }
 
     private String getContentAsString(byte[] buf, String charsetName) {
-        if (buf == null || buf.length == 0) return "";
+        if (buf == null || buf.length == 0) {
+            return "";
+        }
         try {
             String content = new String(buf, charsetName);
             return content.substring(0, Math.min(MAX_LENGTH_CONTENT, content.length()));

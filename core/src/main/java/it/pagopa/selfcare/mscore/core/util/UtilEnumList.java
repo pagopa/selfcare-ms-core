@@ -6,17 +6,18 @@ import java.util.List;
 
 public class UtilEnumList {
 
-    private UtilEnumList() {}
 
-    public static final List<RelationshipState> productRelationshipStates =
+    public static final List<RelationshipState> PRODUCT_RELATIONSHIP_STATES =
             List.of(RelationshipState.PENDING,
                     RelationshipState.REJECTED,
                     RelationshipState.TOBEVALIDATED);
-    public static final List<RelationshipState> validRelationshipStates =
+    public static final List<RelationshipState> VALID_RELATIONSHIP_STATES =
             List.of(RelationshipState.ACTIVE,
                     RelationshipState.DELETED,
                     RelationshipState.SUSPENDED);
-    public static final List<RelationshipState> onboardingInfoDefaultRelationshipStates =
+    public static final List<RelationshipState> ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES =
             List.of(RelationshipState.ACTIVE,
                     RelationshipState.PENDING);
+    private UtilEnumList() {}
+
 }

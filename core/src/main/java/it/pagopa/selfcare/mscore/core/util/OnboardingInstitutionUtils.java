@@ -1,9 +1,12 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.UserToOnboard;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
@@ -12,12 +15,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.ONBOARDING_INVALID_UPDATES;
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.productRelationshipStates;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.PRODUCT_ALREADY_ONBOARDED;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.ROLES_NOT_ADMITTED_ERROR;
+import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.PRODUCT_RELATIONSHIP_STATES;
 
 @Slf4j
 public class OnboardingInstitutionUtils {
@@ -44,7 +50,7 @@ public class OnboardingInstitutionUtils {
             Optional<Onboarding> optionalOnboarding = institution.getOnboarding().stream()
                     .filter(onboarding -> request.getProductId().equalsIgnoreCase(onboarding.getProductId()))
                     .findAny();
-            if (optionalOnboarding.isPresent() && !productRelationshipStates.contains(optionalOnboarding.get().getStatus())) {
+            if (optionalOnboarding.isPresent() && !PRODUCT_RELATIONSHIP_STATES.contains(optionalOnboarding.get().getStatus())) {
                 throw new InvalidRequestException(String.format(PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), PRODUCT_ALREADY_ONBOARDED.getCode());
             }
         }

@@ -1,6 +1,10 @@
 package it.pagopa.selfcare.mscore.api;
 
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.UserBinding;
+
 import java.util.List;
 
 public interface UserConnector {

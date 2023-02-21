@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 

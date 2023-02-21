@@ -2,7 +2,10 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.UserBinding;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;

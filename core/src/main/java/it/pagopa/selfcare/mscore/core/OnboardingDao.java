@@ -1,9 +1,15 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.model.UserToOnboard;
-import it.pagopa.selfcare.mscore.api.*;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.UserBinding;
+import it.pagopa.selfcare.mscore.model.UserToOnboard;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -13,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
 

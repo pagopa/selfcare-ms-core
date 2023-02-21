@@ -1,7 +1,8 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.OnboardingInfo;
+import it.pagopa.selfcare.mscore.model.OnboardingRequest;
 
 import java.util.List;
 
