@@ -16,7 +16,7 @@ public class InstitutionManagerResponse {
     private RelationshipState state;
     private String pricingPlan;
     private InstitutionUpdate institutionUpdate;
-    private BillingResponse billingResponse;
+    private BillingResponse billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }

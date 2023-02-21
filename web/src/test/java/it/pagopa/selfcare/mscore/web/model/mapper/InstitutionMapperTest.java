@@ -256,7 +256,7 @@ class InstitutionMapperTest {
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
-        assertNull(actualToBillingResponseResult.getIpaCode());
+        assertNull(actualToBillingResponseResult.getOriginId());
         assertNull(actualToBillingResponseResult.getInstitutionId());
         assertNull(actualToBillingResponseResult.getExternalId());
         assertNull(actualToBillingResponseResult.getDigitalAddress());
@@ -298,7 +298,7 @@ class InstitutionMapperTest {
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
         assertEquals("Pricing Plan", actualToBillingResponseResult.getPricingPlan());
-        assertNull(actualToBillingResponseResult.getIpaCode());
+        assertNull(actualToBillingResponseResult.getOriginId());
         assertNull(actualToBillingResponseResult.getInstitutionId());
         assertNull(actualToBillingResponseResult.getExternalId());
         assertNull(actualToBillingResponseResult.getDigitalAddress());
@@ -344,7 +344,7 @@ class InstitutionMapperTest {
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
-        assertNull(actualToBillingResponseResult.getIpaCode());
+        assertNull(actualToBillingResponseResult.getOriginId());
         assertNull(actualToBillingResponseResult.getInstitutionId());
         assertNull(actualToBillingResponseResult.getExternalId());
         assertNull(actualToBillingResponseResult.getDigitalAddress());

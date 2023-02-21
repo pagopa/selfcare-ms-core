@@ -41,7 +41,7 @@ public class ExternalController {
      * @param  externalId externalId
      *
      * @return InstitutionResponse
-     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Institution not found, DataType: Problem
      */

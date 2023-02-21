@@ -81,7 +81,7 @@ public class InstitutionMapper {
             if (productId.equalsIgnoreCase(onboarding.getProductId())) {
                 institutionManagerResponse.setPricingPlan(onboarding.getPricingPlan());
                 if (onboarding.getBilling() != null)
-                    institutionManagerResponse.setBillingResponse(convertToBillingResponse(onboarding.getBilling(), manager.getInstitution()));
+                    institutionManagerResponse.setBilling(convertToBillingResponse(onboarding.getBilling(), manager.getInstitution()));
             }
         }
     }
@@ -92,7 +92,7 @@ public class InstitutionMapper {
                 ProductInfo productInfo = new ProductInfo();
                 productInfo.setId(productId);
                 productInfo.setCreatedAt(product.getCreatedAt());
-                productInfo.setRole(product.getProductRoles());
+                productInfo.setRoles(product.getProductRoles());
                 institutionManagerResponse.setProduct(productInfo);
                 institutionManagerResponse.setState(product.getStatus());
                 institutionManagerResponse.setCreatedAt(product.getCreatedAt());
@@ -133,7 +133,7 @@ public class InstitutionMapper {
 
         response.setInstitutionId(institution.getId());
         response.setExternalId(institution.getExternalId());
-        response.setIpaCode(institution.getIpaCode());
+        response.setOriginId(institution.getIpaCode());
         response.setDescription(institution.getDescription());
         response.setInstitutionType(institution.getInstitutionType());
         response.setDigitalAddress(institution.getDigitalAddress());

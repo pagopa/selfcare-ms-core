@@ -110,7 +110,7 @@ public class OnboardingMapper {
         Billing billing = getBillingFromOnboarding(onboarding, institution);
         institutionResponse.setBilling(billing);
         ProductInfo productInfo = new ProductInfo();
-        productInfo.setRole(product.getProductRoles());
+        productInfo.setRoles(product.getProductRoles());
         productInfo.setId(product.getProductId());
         productInfo.setCreatedAt(product.getCreatedAt());
         institutionResponse.setState(product.getStatus().name());

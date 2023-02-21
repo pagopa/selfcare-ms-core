@@ -7,7 +7,7 @@ import lombok.Data;
 public class InstitutionBillingResponse {
     private String institutionId;
     private String externalId;
-    private String ipaCode;
+    private String originId;
     private String description;
     private InstitutionType institutionType;
     private String digitalAddress;
