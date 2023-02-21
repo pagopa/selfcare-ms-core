@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -47,19 +46,30 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public void findAndUpdate(String id, String institutionId, OnboardedProduct product, UserBinding bindings) {
+    public void findAndUpdate(OnboardedUser onboardedUser, String id, String institutionId, OnboardedProduct product, UserBinding bindings) {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(id));
-        UpdateDefinition updateDefinition = new Update()
-                .set(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now())
-                .addToSet(constructQuery(UserBinding.Fields.institutionId.name()), institutionId)
-                .addToSet(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name()), product)
-                .filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId))
-                .setOnInsert(UserEntity.Fields.bindings.name(), bindings)
-                .setOnInsert(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now())
-                .setOnInsert(UserEntity.Fields.createdAt.name(), OffsetDateTime.now());
-
+        Update update = new Update();
+        Optional<UserBinding> opt = onboardedUser.getBindings().stream().filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
+                        .findFirst();
+        if(opt.isPresent()){
+            update.addToSet(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name()), product);
+            update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
+        }else{
+            update.addToSet(UserEntity.Fields.bindings.name(), bindings);
+        }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true).returnNew(true);
-        repository.findAndModify(query, updateDefinition, findAndModifyOptions, UserEntity.class);
+        repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+    }
+
+    @Override
+    public void findAndCreate(String id, String institutionId, OnboardedProduct product, UserBinding binding) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(id));
+        Update update = new Update();
+        update.set(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        update.addToSet(UserEntity.Fields.bindings.name(), binding);
+        update.set(UserEntity.Fields.createdAt.name(), OffsetDateTime.now());
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true).returnNew(true);
+        repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
     }
 
     @Override

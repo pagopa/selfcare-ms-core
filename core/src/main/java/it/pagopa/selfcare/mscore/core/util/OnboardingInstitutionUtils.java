@@ -1,8 +1,5 @@
 package it.pagopa.selfcare.mscore.core.util;
 
-import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -14,7 +11,6 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,12 +36,6 @@ public class OnboardingInstitutionUtils {
             List<String> userIdList = userList.stream().map(UserToOnboard::getId).collect(Collectors.toList());
             throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userIdList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
         }
-    }
-
-    public static String createDigest(File pdf) {
-        log.info("START- createDigest for pdf {}", pdf.getName());
-        DSSDocument document = new FileDocument(pdf);
-        return document.getDigest(DigestAlgorithm.SHA256);
     }
 
     public static void checkIfProductAlreadyOnboarded(Institution institution, OnboardingRequest request) {
@@ -95,18 +85,17 @@ public class OnboardingInstitutionUtils {
         return token;
     }
 
-    public static UserBinding constructBinding(UserToOnboard p, OnboardingRequest request, String institutionId) {
-        UserBinding userBinding = new UserBinding();
-        userBinding.setInstitutionId(institutionId);
-        userBinding.setProducts(List.of(constructProduct(p, request.getInstitutionUpdate().getInstitutionType())));
-        return userBinding;
-    }
-
-    public static OnboardedProduct constructProduct(UserToOnboard p, InstitutionType institutionType) {
+    public static OnboardedProduct constructProduct(UserToOnboard p, OnboardingRequest request) {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId(request.getProductId());
         onboardedProduct.setRole(p.getRole());
+        if (request.getContract() != null) {
+            onboardedProduct.setContract(request.getContract().getPath());
+        }
         onboardedProduct.setProductRoles(p.getProductRole());
-        onboardedProduct.setStatus(retrieveStatusFromInstitutionType(institutionType));
+        if (request.getInstitutionUpdate() != null) {
+            onboardedProduct.setStatus(retrieveStatusFromInstitutionType(request.getInstitutionUpdate().getInstitutionType()));
+        }
         onboardedProduct.setCreatedAt(OffsetDateTime.now());
         if (p.getEnv() != null) {
             onboardedProduct.setEnv(p.getEnv());
@@ -123,12 +112,6 @@ public class OnboardingInstitutionUtils {
             default:
                 return RelationshipState.TOBEVALIDATED;
         }
-    }
-
-    public static Map<String, OnboardedProduct> constructProductMap(OnboardingRequest onboardingInstitutionRequest, UserToOnboard userToOnboard) {
-        Map<String, OnboardedProduct> productMap = new HashMap<>();
-        productMap.put(onboardingInstitutionRequest.getProductId(), constructProduct(userToOnboard, onboardingInstitutionRequest.getInstitutionUpdate().getInstitutionType()));
-        return productMap;
     }
 
     public static Onboarding constructOnboarding(OnboardingRequest request) {
@@ -159,68 +142,5 @@ public class OnboardingInstitutionUtils {
             default:
                 return RelationshipState.TOBEVALIDATED;
         }
-    }
-
-    public static List<String> getOnboardingValidManager(List<UserToOnboard> users) {
-        log.info("START - getOnboardingValidManager for users list size: {}", users.size());
-        List<String> response = new ArrayList<>();
-        users.forEach(user -> {
-            if (PartyRole.MANAGER == user.getRole()) {
-                response.add(user.getId());
-            }
-        });
-        if (response.isEmpty()) {
-            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
-        }
-        return response;
-    }
-
-    public static List<String> getValidManager(List<OnboardedUser> users, String institutionId, String productId) {
-        log.info("START - getValidManager for users list size: {}", users.size());
-        List<String> response = new ArrayList<>();
-        for (OnboardedUser onboardedUser : users) {
-            if (onboardedUser.getBindings().stream().anyMatch(
-                    userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId())
-                            && userBinding.getProducts() != null
-                            //&& productId.equalsIgnoreCase(userBinding.getProduct().getProductId())
-                          //  && PartyRole.MANAGER == userBinding.getProduct().getRole())
-            )) {
-                response.add(onboardedUser.getId());
-            }
-        }
-        if (response.isEmpty()) {
-            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
-        }
-        return response;
-    }
-
-    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution) {
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(token.getProductId());
-        onboardingRequest.setProductName(token.getProductId());
-        Contract contract = new Contract();
-        contract.setPath(token.getContract());
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setDescription(institution.getDescription());
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setSignContract(true);
-
-        return onboardingRequest;
-    }
-
-    public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest request, Institution institution) {
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(request.getProductId());
-        onboardingRequest.setProductName(request.getProductId());
-        Contract contract = new Contract();
-        contract.setPath(request.getContract().getPath());
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setDescription(institution.getDescription());
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setSignContract(true);
-
-        return onboardingRequest;
     }
 }

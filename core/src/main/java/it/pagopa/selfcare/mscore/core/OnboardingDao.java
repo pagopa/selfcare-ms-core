@@ -9,6 +9,8 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_OPERATION_ERROR;
@@ -48,7 +50,7 @@ public class OnboardingDao {
             log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
             institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
         } catch (Exception e) {
-            rollbackFirstStep(tokenId);
+            rollbackFirstStep(tokenId, institution);
         }
     }
 
@@ -57,8 +59,12 @@ public class OnboardingDao {
         try {
             request.getUsers()
                     .forEach(userToOnboard -> {
-                        checkIfNewUser(toUpdate, userToOnboard.getId());
-                        persistUser(userToOnboard, institution.getId(), request);
+                        OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
+                        if(onboardedUser != null){
+                            updateUser(onboardedUser, userToOnboard, institution.getId(), request);
+                        }else{
+                            createNewUser(userToOnboard, institution.getId(), request);
+                        }
                     });
             log.debug("users to update: {}", toUpdate);
             tokenConnector.findAndUpdateTokenUser(token.getId(), usersId);
@@ -69,17 +75,24 @@ public class OnboardingDao {
         }
     }
 
-    private void persistUser(UserToOnboard user, String institutionId, OnboardingRequest request) {
-        OnboardedProduct product = constructProduct(user, request.getInstitutionUpdate().getInstitutionType());
-        UserBinding binding = constructBinding(user, request, institutionId);
-        userConnector.findAndUpdate(user.getId(), institutionId, product, binding);
+    private void createNewUser(UserToOnboard user, String institutionId, OnboardingRequest request) {
+        OnboardedProduct product = constructProduct(user, request);
+        UserBinding binding = new UserBinding(institutionId, List.of(product), OffsetDateTime.now());
+        userConnector.findAndCreate(user.getId(), institutionId, product, binding);
     }
 
-    private void checkIfNewUser(List<OnboardedUser> toUpdate, String userId) {
+    private void updateUser(OnboardedUser onboardedUser, UserToOnboard user, String institutionId, OnboardingRequest request) {
+        OnboardedProduct product = constructProduct(user, request);
+        UserBinding binding = new UserBinding(institutionId, List.of(product), OffsetDateTime.now());
+        userConnector.findAndUpdate(onboardedUser, user.getId(), institutionId, product, binding);
+    }
+
+    private OnboardedUser isNewUser(List<OnboardedUser> toUpdate, String userId) {
         OnboardedUser onboardedUser = userConnector.getById(userId);
         if (onboardedUser != null) {
             toUpdate.add(onboardedUser);
         }
+        return onboardedUser;
     }
 
     public void rollbackSecondStep(List<OnboardedUser> toUpdate, List<String> toDelete, Institution institution, String tokenId) {
@@ -90,8 +103,9 @@ public class OnboardingDao {
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
 
-    private void rollbackFirstStep(String tokenId) {
+    private void rollbackFirstStep(String tokenId, Institution institution) {
         tokenConnector.deleteById(tokenId);
+        institutionConnector.save(institution);
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
 }
