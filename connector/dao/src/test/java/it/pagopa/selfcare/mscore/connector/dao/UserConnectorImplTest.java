@@ -84,9 +84,6 @@ class UserConnectorImplTest {
         verify(userRepository).findById( any());
     }
 
-    /**
-     * Method under test: {@link UserConnectorImpl#findAndUpdate(String, String, OnboardedProduct, UserBinding)}
-     */
     @Test
     void testFindAndUpdate() {
         UserEntity userEntity = new UserEntity();
@@ -111,7 +108,9 @@ class UserConnectorImplTest {
         userBinding.setCreatedAt(null);
         userBinding.setInstitutionId("42");
         userBinding.setProducts(new ArrayList<>());
-        userConnectorImpl.findAndUpdate("42", "42", onboardedProduct, userBinding);
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(new ArrayList<>());
+        userConnectorImpl.findAndUpdate(onboardedUser,"42", "42", onboardedProduct, userBinding);
         verify(userRepository).findAndModify(any(),  any(),  any(), any());
     }
 

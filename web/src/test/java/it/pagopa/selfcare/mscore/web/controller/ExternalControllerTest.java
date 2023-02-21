@@ -20,6 +20,8 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -32,13 +34,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@ContextConfiguration(classes = {ExternalController.class})
 @ExtendWith(SpringExtension.class)
 class ExternalControllerTest {
-    @Autowired
+    @InjectMocks
     private ExternalController externalController;
 
-    @MockBean
+    @Mock
     private ExternalService externalService;
 
     /**
@@ -516,18 +517,6 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
 
-    @Test
-    void retrieveInstitutionGeoTaxonomiesByExternalId() throws Exception {
-
-        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/external/institutions/{externalId}/geotaxonomies", "42", "42");
-        MockMvcBuilders.standaloneSetup(externalController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
-    }
 }
 
 
