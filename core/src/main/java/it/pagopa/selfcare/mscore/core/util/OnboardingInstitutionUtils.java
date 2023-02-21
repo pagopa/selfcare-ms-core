@@ -39,8 +39,8 @@ public class OnboardingInstitutionUtils {
             }
         });
         if (!userList.isEmpty()) {
-            List<String> userIdList = userList.stream().map(UserToOnboard::getId).collect(Collectors.toList());
-            throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userIdList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
+            List<PartyRole> userRoleList = userList.stream().map(UserToOnboard::getRole).collect(Collectors.toList());
+            throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userRoleList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
         }
     }
 

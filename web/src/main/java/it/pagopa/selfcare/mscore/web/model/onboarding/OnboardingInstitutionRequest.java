@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.Data;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -24,6 +25,7 @@ public class OnboardingInstitutionRequest {
     private String institutionExternalId;
 
     @NotNull(message = "institutionData is required")
+    @Valid
     private InstitutionUpdate institutionUpdate;
 
     private String pricingPlan;
