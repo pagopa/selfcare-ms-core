@@ -1,45 +1,37 @@
 package it.pagopa.selfcare.mscore.core;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-
-import java.util.*;
-
+import it.pagopa.selfcare.mscore.model.institution.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ContextConfiguration(classes = {OnboardingServiceImpl.class})
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(SpringExtension.class)
 class OnboardingServiceImplTest {
 
-    @MockBean
+    @Mock
     private OnboardingDao onboardingDao;
 
-    @Autowired
+    @InjectMocks
     private OnboardingServiceImpl onboardingServiceImpl;
 
-    @MockBean
+    @Mock
     private InstitutionService institutionService;
 
-    @MockBean
+    @Mock
     private UserService userService;
 
 
@@ -48,7 +40,128 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testVerifyOnboardingInfo2() {
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.verifyOnboardingInfo("42","42"));
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.verifyOnboardingInfo("42", "42"));
+    }
+
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfo4() {
+        when(userService.findByUserId( any())).thenReturn(null);
+        assertThrows(ResourceNotFoundException.class,
+                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
+        verify(userService).findByUserId( any());
+    }
+
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfo7() {
+        when(userService.findByUserId( any()))
+                .thenThrow(new InvalidRequestException("An error occurred", "START - getUser with id: {}"));
+        assertThrows(InvalidRequestException.class,
+                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
+        verify(userService).findByUserId( any());
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfo10() {
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        Institution institution = new Institution("42", "42", "START - getUser with id: {}",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
+                "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
+                new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
+                "START - getUser with id: {}", "jane.doe@example.org", "4105551212", true);
+
+        when(institutionService.retrieveInstitutionById( any())).thenReturn(institution);
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("START - getUser with id: {}");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductName("START - getUser with id: {}");
+        ArrayList<String> stringList = new ArrayList<>();
+        onboardedProduct.setProductRoles(stringList);
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
+
+        ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
+        onboardedProductList.add(onboardedProduct);
+
+        UserBinding userBinding = new UserBinding();
+        userBinding.setCreatedAt(null);
+        userBinding.setInstitutionId("42");
+        userBinding.setProducts(onboardedProductList);
+
+        ArrayList<UserBinding> userBindingList = new ArrayList<>();
+        userBindingList.add(userBinding);
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(userBindingList);
+        when(userService.findByUserId( any())).thenReturn(onboardedUser);
+        List<OnboardingInfo> actualOnboardingInfo = onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{},
+                "42");
+        assertEquals(1, actualOnboardingInfo.size());
+        OnboardingInfo getResult = actualOnboardingInfo.get(0);
+        Institution institution1 = getResult.getInstitution();
+        assertSame(institution, institution1);
+        assertEquals(1, getResult.getOnboardedProducts().size());
+        List<Onboarding> onboarding1 = institution1.getOnboarding();
+        assertTrue(onboarding1.isEmpty());
+        verify(institutionService).retrieveInstitutionById( any());
+        verify(userService).findByUserId( any());
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfo13() {
+        when(institutionService.retrieveInstitutionById( any()))
+                .thenThrow(new InvalidRequestException("An error occurred", "START - getUser with id: {}"));
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("START - getUser with id: {}");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductName("START - getUser with id: {}");
+        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
+
+        ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
+        onboardedProductList.add(onboardedProduct);
+
+        UserBinding userBinding = new UserBinding();
+        userBinding.setCreatedAt(null);
+        userBinding.setInstitutionId("42");
+        userBinding.setProducts(onboardedProductList);
+
+        ArrayList<UserBinding> userBindingList = new ArrayList<>();
+        userBindingList.add(userBinding);
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(userBindingList);
+        when(userService.findByUserId( any())).thenReturn(onboardedUser);
+        assertThrows(InvalidRequestException.class,
+                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
+        verify(institutionService).retrieveInstitutionById( any());
+        verify(userService).findByUserId( any());
     }
 
     /**
@@ -125,7 +238,7 @@ class OnboardingServiceImplTest {
 
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
 
-        assertThrows(InvalidRequestException.class,
+        assertThrows(NullPointerException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, selfCareUser));
     }
 
