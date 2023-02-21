@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.Premium;
-import it.pagopa.selfcare.mscore.model.ProductRelationship;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -222,14 +221,5 @@ class RelationshipMapperTest {
                 institution);
         assertFalse(actualToBillingResponseResult.isPublicServices());
     }
-
-    /**
-     * Method under test: {@link RelationshipMapper#toRelationshipInfo(ProductRelationship)}
-     */
-    @Test
-    void testToRelationshipInfo() {
-        assertNotNull(RelationshipMapper.toRelationshipInfo(new ProductRelationship()));
-    }
-
 }
 

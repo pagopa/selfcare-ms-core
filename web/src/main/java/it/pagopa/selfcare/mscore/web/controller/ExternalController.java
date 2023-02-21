@@ -4,7 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
@@ -32,7 +32,7 @@ public class ExternalController {
     }
 
     /**
-     * The function returns institutionData from its externalId
+     * The function returns institution Data from its externalId
      *
      * @param  externalId externalId
      *
@@ -42,7 +42,7 @@ public class ExternalController {
      * * Code: 404, Message: Institution not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.external.institution}")
+    @ApiOperation(value ="${swagger.mscore.external.institution}", notes = "${swagger.mscore.external.institution}")
     @GetMapping("/{externalId}")
     public ResponseEntity<InstitutionResponse> getByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                @PathVariable("externalId") String externalId) {
@@ -54,7 +54,7 @@ public class ExternalController {
 
 
     /**
-     * The function returns institutionData from its externalId
+     * The function returns Manager institution Data from its externalId
      *
      * @param externalId String
      * @param productId  String
@@ -65,7 +65,7 @@ public class ExternalController {
      * * Code: 404, Message: Institution Manager not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.manager}")
+    @ApiOperation(value = "${swagger.mscore.external.institution.manager}", notes = "${swagger.mscore.external.institution.manager}")
     @GetMapping(value = "/{externalId}/products/{productId}/manager")
     public ResponseEntity<InstitutionManagerResponse> getManagerInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                                         @PathVariable("externalId") String externalId,
@@ -73,15 +73,14 @@ public class ExternalController {
                                                                                         @PathVariable("productId") String productId) {
         log.info("Getting manager for institution having externalId {}", externalId);
         CustomExceptionMessage.setCustomMessage(INSTITUTION_MANAGER_ERROR);
-        Institution institution = externalService.getInstitutionByExternalId(externalId);
-        OnboardedUser manager = externalService.retrieveInstitutionManager(institution, productId);
-        String contractId = externalService.retrieveRelationship(institution.getId(), manager.getId(), productId);
-        return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(institution, manager, productId, contractId));
+        ProductManagerInfo manager = externalService.retrieveInstitutionManager(externalId, productId);
+        String contractId = externalService.retrieveRelationship(manager, productId);
+        return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(manager, productId, contractId));
     }
 
 
     /**
-     * The function returns institutionData from its externalId
+     * The function returns billing institution Data from its externalId
      *
      * @param externalId String
      * @param productId  String
@@ -92,7 +91,7 @@ public class ExternalController {
      * * Code: 404, Message: Institution Billing not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.billing}")
+    @ApiOperation(value = "${swagger.mscore.external.institution.billing}", notes = "${swagger.mscore.external.institution.billing}")
     @GetMapping(value = "/{externalId}/products/{productId}/billing")
     public ResponseEntity<InstitutionBillingResponse> getBillingInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                                         @PathVariable("externalId") String externalId,

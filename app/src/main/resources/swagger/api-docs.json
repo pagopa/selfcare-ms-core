@@ -27,15 +27,12 @@
   }, {
     "name" : "Onboarding",
     "description" : "Onboarding Controller"
-  }, {
-    "name" : "Token",
-    "description" : "Token Controller"
   } ],
   "paths" : {
     "/external/institutions/{externalId}" : {
       "get" : {
         "tags" : [ "External" ],
-        "summary" : "getByExternalId",
+        "summary" : "The service retrieves the onboarded institution given its external id",
         "description" : "The service retrieves the onboarded institution given its external id",
         "operationId" : "getByExternalIdUsingGET",
         "parameters" : [ {
@@ -88,7 +85,7 @@
     "/external/institutions/{externalId}/products/{productId}/billing" : {
       "get" : {
         "tags" : [ "External" ],
-        "summary" : "getBillingInstitutionByExternalId",
+        "summary" : "The service returns the billing data related to the institution even if the current user is not related to the institution/onboardedProduct",
         "description" : "The service returns the billing data related to the institution even if the current user is not related to the institution/onboardedProduct",
         "operationId" : "getBillingInstitutionByExternalIdUsingGET",
         "parameters" : [ {
@@ -150,7 +147,7 @@
     "/external/institutions/{externalId}/products/{productId}/manager" : {
       "get" : {
         "tags" : [ "External" ],
-        "summary" : "getManagerInstitutionByExternalId",
+        "summary" : "The service returns the manager related to the institution even if the current user is not related to the institution/onboardedProduct",
         "description" : "The service returns the manager related to the institution even if the current user is not related to the institution/onboardedProduct",
         "operationId" : "getManagerInstitutionByExternalIdUsingGET",
         "parameters" : [ {
@@ -212,7 +209,7 @@
     "/institutions/insert/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
-        "summary" : "createInstitutionRaw",
+        "summary" : "The service create an institution using external institution id without fetching data from party-registry or info-camere",
         "description" : "The service create an institution using external institution id without fetching data from party-registry or info-camere",
         "operationId" : "createInstitutionRawUsingPOST",
         "parameters" : [ {
@@ -284,7 +281,7 @@
     "/institutions/pg/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
-        "summary" : "createPgInstitution",
+        "summary" : "The service create an institution (PG) using external institution id fetching data from info-camere",
         "description" : "The service create an institution (PG) using external institution id fetching data from info-camere",
         "operationId" : "createPgInstitutionUsingPOST",
         "parameters" : [ {
@@ -337,9 +334,9 @@
             "type" : "object"
           }
         }, {
-          "name" : "manual",
+          "name" : "existsInRegistry",
           "in" : "query",
-          "description" : "manual",
+          "description" : "boolean for PG persistence (institution exists in Info Camere or AdE registry",
           "required" : true,
           "style" : "form",
           "schema" : {
@@ -396,7 +393,7 @@
     "/institutions/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
-        "summary" : "createInstitutionByExternalId",
+        "summary" : "The service create an institution (PA) using external institution id fetching data from party-registry",
         "description" : "The service create an institution (PA) using external institution id fetching data from party-registry",
         "operationId" : "createInstitutionByExternalIdUsingPOST",
         "parameters" : [ {
@@ -459,13 +456,13 @@
     "/institutions/{id}/products" : {
       "get" : {
         "tags" : [ "Institution" ],
-        "summary" : "retrieveInstitutionProducts",
+        "summary" : "The service retrieves the insistitution's related products.",
         "description" : "The service retrieves the insistitution's related products.",
         "operationId" : "retrieveInstitutionProductsUsingGET",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
-          "description" : "id",
+          "description" : "The internal identifier of the institution",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -474,7 +471,7 @@
         }, {
           "name" : "states",
           "in" : "query",
-          "description" : "states",
+          "description" : "${swagger.mscore.institutions.model.relationshipState}",
           "required" : false,
           "style" : "form",
           "explode" : true,
@@ -519,232 +516,10 @@
         } ]
       }
     },
-    "/onboarding/approve/{tokenId}" : {
-      "post" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "approveOnboarding",
-        "description" : "The service approve an onboarding reuqest by an operator review",
-        "operationId" : "approveOnboardingUsingPOST",
-        "parameters" : [ {
-          "name" : "authenticated",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "name" : "authorities[0].authority",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "credentials",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "details",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "principal",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "tokenId",
-          "in" : "path",
-          "description" : "tokenId",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "No Content"
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/onboarding/complete/{tokenId}" : {
-      "post" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "completeOnboarding",
-        "description" : "The service complete an onboarding request",
-        "operationId" : "completeOnboardingUsingPOST",
-        "parameters" : [ {
-          "name" : "tokenId",
-          "in" : "path",
-          "description" : "tokenId",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "type" : "string",
-                "format" : "binary"
-              }
-            },
-            "application/octet-stream" : {
-              "schema" : {
-                "type" : "string",
-                "format" : "binary"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "204" : {
-            "description" : "No Content"
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      },
-      "delete" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "invalidateOnboarding",
-        "description" : "The service invalidate an onboarding request",
-        "operationId" : "invalidateOnboardingUsingDELETE",
-        "parameters" : [ {
-          "name" : "tokenId",
-          "in" : "path",
-          "description" : "tokenId",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "No Content"
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
     "/onboarding/info" : {
       "get" : {
         "tags" : [ "Onboarding" ],
-        "summary" : "onboardingInfo",
+        "summary" : "The service returns onboarding info related to logged user",
         "description" : "The service returns onboarding info related to logged user",
         "operationId" : "onboardingInfoUsingGET",
         "parameters" : [ {
@@ -782,7 +557,7 @@
         }, {
           "name" : "institutionId",
           "in" : "query",
-          "description" : "institutionId",
+          "description" : "The internal identifier of the institution",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -799,7 +574,7 @@
         }, {
           "name" : "institutionExternalId",
           "in" : "query",
-          "description" : "institutionExternalId",
+          "description" : "Institution's unique external identifier",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -808,7 +583,7 @@
         }, {
           "name" : "states",
           "in" : "query",
-          "description" : "states",
+          "description" : "${swagger.mscore.institutions.model.relationshipState}",
           "required" : false,
           "style" : "form",
           "explode" : true,
@@ -856,7 +631,7 @@
     "/onboarding/institution" : {
       "post" : {
         "tags" : [ "Onboarding" ],
-        "summary" : "onboardingInstitution",
+        "summary" : "The service create a new Token (contract), and update institution and users data",
         "description" : "The service create a new Token (contract), and update institution and users data",
         "operationId" : "onboardingInstitutionUsingPOST",
         "parameters" : [ {
@@ -952,13 +727,13 @@
     "/onboarding/institution/{externalId}/products/{productId}" : {
       "head" : {
         "tags" : [ "Onboarding" ],
-        "summary" : "verifyOnboardingInfo",
+        "summary" : "The service verify if onboardedProduct is already onboarded for institution",
         "description" : "The service verify if onboardedProduct is already onboarded for institution",
         "operationId" : "verifyOnboardingInfoUsingHEAD",
         "parameters" : [ {
           "name" : "externalId",
           "in" : "path",
-          "description" : "externalId",
+          "description" : "Institution's unique external identifier",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -967,7 +742,7 @@
         }, {
           "name" : "productId",
           "in" : "path",
-          "description" : "productId",
+          "description" : "Product's unique identifier",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -990,132 +765,6 @@
           },
           "404" : {
             "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/onboarding/reject/{tokenId}" : {
-      "delete" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "onboardingReject",
-        "description" : "The service invalidate an onboarding request by an operator review",
-        "operationId" : "onboardingRejectUsingDELETE",
-        "parameters" : [ {
-          "name" : "tokenId",
-          "in" : "path",
-          "description" : "tokenId",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "No Content",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/OnboardingInfoResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/tokens/{tokenId}/verify" : {
-      "post" : {
-        "tags" : [ "Token" ],
-        "summary" : "verifyToken",
-        "description" : "The service retrieves the onboarded institution given its external id",
-        "operationId" : "verifyTokenUsingPOST",
-        "parameters" : [ {
-          "name" : "tokenId",
-          "in" : "path",
-          "description" : "${swagger.mscore.token.tokenId}",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -1304,7 +953,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP", "UNKNOWN" ]
           },
           "ipaCode" : {
             "type" : "string"
@@ -1448,9 +1097,6 @@
             "items" : {
               "$ref" : "#/components/schemas/AttributesResponse"
             }
-          },
-          "billing" : {
-            "$ref" : "#/components/schemas/BillingResponse"
           },
           "businessRegisterPlace" : {
             "type" : "string"
@@ -1627,7 +1273,8 @@
             "$ref" : "#/components/schemas/ProductInfo"
           },
           "role" : {
-            "type" : "string"
+            "type" : "string",
+            "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
           },
           "state" : {
             "type" : "string"
@@ -1773,6 +1420,10 @@
           "email" : {
             "type" : "string"
           },
+          "env" : {
+            "type" : "string",
+            "enum" : [ "COLL", "DEV", "PROD", "ROOT" ]
+          },
           "id" : {
             "type" : "string"
           },
@@ -1780,10 +1431,14 @@
             "type" : "string"
           },
           "productRole" : {
-            "type" : "string"
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           },
           "role" : {
-            "type" : "string"
+            "type" : "string",
+            "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
           },
           "surname" : {
             "type" : "string"

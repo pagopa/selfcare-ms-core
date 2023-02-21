@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.rest;
 
+import feign.FeignException;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
@@ -7,6 +8,7 @@ import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitu
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.LegalFilter;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
@@ -32,39 +34,50 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
 
     @Override
     public InstitutionProxyInfo getInstitutionById(String id) {
-        ProxyInstitutionResponse response = restClient.getInstitutionById(id);
-        if(response == null){
-            throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), id),CREATE_INSTITUTION_NOT_FOUND.getCode());
+        try {
+            ProxyInstitutionResponse response = restClient.getInstitutionById(id);
+            if (response == null) {
+                throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), id), CREATE_INSTITUTION_NOT_FOUND.getCode());
+            }
+            return convertInstitutionProxyInfo(response);
+        } catch (FeignException e) {
+            throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
         }
-        return convertInstitutionProxyInfo(response);
     }
 
     @Override
     public CategoryProxyInfo getCategory(String origin, String code) {
-        ProxyCategoryResponse response = restClient.getCategory(origin, code);
-        return convertCategoryProxyInfo(response);
+        try {
+            ProxyCategoryResponse response = restClient.getCategory(origin, code);
+            return convertCategoryProxyInfo(response);
+        } catch (FeignException e) {
+            throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
+        }
     }
 
     @Override
     public List<InstitutionByLegal> getInstitutionsByLegal(String taxId) {
-        InstitutionsByLegalResponse response = restClient.getInstitutionsByLegal(toInstitutionsByLegalRequest(taxId));
-        return toInstitutionsByLegalResponse(response);
+        try {
+            InstitutionsByLegalResponse response = restClient.getInstitutionsByLegal(toInstitutionsByLegalRequest(taxId));
+            return toInstitutionsByLegalResponse(response);
+        } catch (FeignException e) {
+            throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
+        }
     }
 
     @Override
     public NationalRegistriesProfessionalAddress getLegalAddress(String taxId) {
         try {
             return restClient.getLegalAddress(taxId);
-        }catch (Exception e){
-            log.error("Error during getLegalAddress from partyRegistryProxy --> {}", e.getMessage(), e);
+        } catch (FeignException e) {
             log.error("LegalAddress not found for taxId {}", taxId);
-            return null;
+            throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
         }
     }
 
     private List<InstitutionByLegal> toInstitutionsByLegalResponse(InstitutionsByLegalResponse response) {
         List<InstitutionByLegal> list = new ArrayList<>();
-        if(response.getBusinesses()!=null && !response.getBusinesses().isEmpty()) {
+        if (response.getBusinesses() != null && !response.getBusinesses().isEmpty()) {
             response.getBusinesses().forEach(institutions -> {
                 InstitutionByLegal institutionByLegal = new InstitutionByLegal();
                 institutionByLegal.setBusinessName(institutions.getBusinessName());

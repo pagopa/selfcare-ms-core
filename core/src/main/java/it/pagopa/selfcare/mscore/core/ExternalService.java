@@ -10,9 +10,9 @@ public interface ExternalService {
 
     Institution getInstitutionByExternalId(String externalId);
 
-    OnboardedUser retrieveInstitutionManager(Institution institution, String productId);
+    ProductManagerInfo retrieveInstitutionManager(String externalId, String productId);
 
-    String retrieveRelationship(String institutionId, String userId, String productId);
+    String retrieveRelationship(ProductManagerInfo manager, String productId);
 
     Institution retrieveInstitutionProduct(String externalId, String productId);
 

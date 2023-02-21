@@ -4,8 +4,8 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
 import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.Premium;
+import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Attributes;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
@@ -22,11 +22,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -468,10 +465,6 @@ class ExternalControllerTest {
      */
     @Test
     void testGetManagerInstitutionByExternalId() throws Exception {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new ArrayList<>());
-        onboardedUser.setId("User");
-
         Billing billing = new Billing();
         billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
@@ -505,8 +498,14 @@ class ExternalControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(externalService.retrieveRelationship(any(), any(), any())).thenReturn("ABC123");
-        when(externalService.retrieveInstitutionManager(any(), any())).thenReturn(onboardedUser);
+
+        ProductManagerInfo productManagerInfo = new ProductManagerInfo();
+        productManagerInfo.setProducts(new ArrayList<>());
+        productManagerInfo.setUserId("User");
+        productManagerInfo.setInstitution(institution);
+
+        when(externalService.retrieveRelationship(any(), any())).thenReturn("ABC123");
+        when(externalService.retrieveInstitutionManager(any(), any())).thenReturn(productManagerInfo);
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
@@ -516,7 +515,6 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
-
 }
 
 

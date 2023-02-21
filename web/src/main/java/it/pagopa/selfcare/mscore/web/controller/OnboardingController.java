@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.model.OnboardingInfo;
@@ -36,20 +37,20 @@ public class OnboardingController {
      * The function verify onboarding status of given product and institution
      *
      * @param externalId String
-     * @param productId String
+     * @param productId  String
      *
      * @return no content
-     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 204, Message: successful operatioN
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
-     *
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.verify}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
     @RequestMapping(method = {RequestMethod.HEAD}, value = "/institution/{externalId}/products/{productId}")
-    public ResponseEntity<Void> verifyOnboardingInfo(@PathVariable(value = "externalId") String externalId,
+    public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.externalId}")
+                                                     @PathVariable(value = "externalId") String externalId,
+                                                            @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                      @PathVariable(value = "productId") String productId) {
-
         log.info("Verifying onboarding for institution having externalId {} on product {}", externalId, productId);
         CustomExceptionMessage.setCustomMessage(ONBOARDING_VERIFICATION_ERROR);
         onboardingService.verifyOnboardingInfo(externalId, productId);
@@ -59,22 +60,24 @@ public class OnboardingController {
     /**
      * The function return onboardingInfo
      *
-     * @param institutionId String
+     * @param institutionId         String
      * @param institutionExternalId String
-     * @param states String[]
+     * @param states                String[]
      *
      * @return onboardingInfoResponse
-     *
+     * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
-     *
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.info}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.info}", notes = "${swagger.mscore.onboarding.info}")
     @GetMapping(value = "/info")
-    public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@RequestParam(value = "institutionId", required = false) String institutionId,
+    public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                 @RequestParam(value = "institutionId", required = false) String institutionId,
+                                                                 @ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                  @RequestParam(value = "institutionExternalId", required = false) String institutionExternalId,
+                                                                 @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
                                                                  @RequestParam(value = "states", required = false) String[] states,
                                                                  Authentication authentication) {
         log.info("Getting onboarding info for institution having institutionId {} institutionExternalId {} and states {}", institutionId, institutionExternalId, states);
@@ -91,21 +94,19 @@ public class OnboardingController {
      * @param onboardingInstitutionRequest OnboardingInstitutionRequest
      *
      * @return no content
-
+     * <p>
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
-     *
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.institution}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.institution}", notes = "${swagger.mscore.onboarding.institution}")
     @PostMapping(value = "/institution")
     public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest onboardingInstitutionRequest,
                                                       Authentication authentication) {
         log.info("Onboarding institution having externalId {}", onboardingInstitutionRequest.getInstitutionExternalId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest),
-                (SelfCareUser) authentication.getPrincipal());
+        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -9,6 +9,6 @@ public interface UserConnector {
     OnboardedUser save(OnboardedUser example);
     OnboardedUser getById(String userId);
     void findAndUpdate(OnboardedUser onboardedUser, String id, String institutionId, OnboardedProduct product, UserBinding bindings);
-    List<OnboardedUser> findOnboardedManager(String institutionId, String productId, List<RelationshipState> state);
+    OnboardedUser findOnboardedManager(String institutionId, String productId, List<RelationshipState> state);
     void findAndCreate(String id, String institutionId, OnboardedProduct product, UserBinding binding);
 }

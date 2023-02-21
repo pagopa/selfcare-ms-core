@@ -380,7 +380,7 @@ class PartyRegistryProxyConnectorImplTest {
     void testGetLegalAddress2() {
         when(partyRegistryProxyRestClient.getLegalAddress(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertNull(partyRegistryProxyConnectorImpl.getLegalAddress("id"));
+        assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getLegalAddress("id"));
     }
 
     @Test

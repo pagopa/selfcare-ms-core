@@ -79,8 +79,6 @@ public class OnboardingInstitutionUtils {
         if (request.getInstitutionUpdate() != null) {
             token.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         }
-
-        // TODO: token.setExpiringDate();
         log.info("END - convertToToken");
         return token;
     }
@@ -128,8 +126,6 @@ public class OnboardingInstitutionUtils {
         if (request.getInstitutionUpdate() != null) {
             onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         }
-        //TODO: onboarding.setPremium();
-
         return onboarding;
     }
 

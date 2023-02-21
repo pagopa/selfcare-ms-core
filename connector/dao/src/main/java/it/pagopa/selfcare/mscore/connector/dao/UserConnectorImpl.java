@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -15,7 +16,8 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -50,11 +52,11 @@ public class UserConnectorImpl implements UserConnector {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(id));
         Update update = new Update();
         Optional<UserBinding> opt = onboardedUser.getBindings().stream().filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
-                        .findFirst();
-        if(opt.isPresent()){
+                .findFirst();
+        if (opt.isPresent()) {
             update.addToSet(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name()), product);
             update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
-        }else{
+        } else {
             update.addToSet(UserEntity.Fields.bindings.name(), bindings);
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true).returnNew(true);
@@ -73,17 +75,20 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findOnboardedManager(String institutionId, String productId, List<RelationshipState> state) {
-        Query query = Query.query(Criteria.where(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
+    public OnboardedUser findOnboardedManager(String institutionId, String productId, List<RelationshipState> state) {
 
-        query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
-                .elemMatch(Criteria.where(OnboardedProduct.Fields.productId.name()).is(productId)
-                        .and(OnboardedProduct.Fields.role.name()).is(PartyRole.MANAGER)
-                        .and(OnboardedProduct.Fields.status.name()).in(state)));
+        Query query = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
+                        .and(UserBinding.Fields.products.name())
+                                .elemMatch(Criteria.where(OnboardedProduct.Fields.productId.name()).is(productId)
+                                        .and(OnboardedProduct.Fields.role.name()).is(PartyRole.MANAGER)
+                                        .and(OnboardedProduct.Fields.status.name()).in(state))));
 
         return repository.find(query, UserEntity.class).stream()
+                .findFirst()
                 .map(this::convertToOnboardedUser)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
+                        GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
 
     private String constructQuery(String... variables) {

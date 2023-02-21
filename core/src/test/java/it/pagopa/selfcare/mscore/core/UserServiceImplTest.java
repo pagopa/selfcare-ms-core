@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,24 +29,10 @@ class UserServiceImplTest {
      * Method under test: {@link UserServiceImpl#findOnboardedManager(String, String, List)}
      */
     @Test
-    void testFindOnboardedManager() {
-        when(userConnector.findOnboardedManager( any(),  any(),any()))
-                .thenReturn(new ArrayList<>());
-        assertThrows(ResourceNotFoundException.class,
-                () -> userServiceImpl.findOnboardedManager("42", "42", new ArrayList<>()));
-        verify(userConnector).findOnboardedManager( any(),  any(),any());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findOnboardedManager(String, String, List)}
-     */
-    @Test
     void testFindOnboardedManager2() {
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
         OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUserList.add(onboardedUser);
         when(userConnector.findOnboardedManager( any(),  any(),any()))
-                .thenReturn(onboardedUserList);
+                .thenReturn(onboardedUser);
         assertSame(onboardedUser, userServiceImpl.findOnboardedManager("42", "42", new ArrayList<>()));
         verify(userConnector).findOnboardedManager( any(),  any(),any());
     }
@@ -57,8 +44,9 @@ class UserServiceImplTest {
     void testFindOnboardedManager3() {
         when(userConnector.findOnboardedManager( any(),  any(),any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        List<RelationshipState> states = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> userServiceImpl.findOnboardedManager("42", "42", new ArrayList<>()));
+                () -> userServiceImpl.findOnboardedManager("42", "42", states));
         verify(userConnector).findOnboardedManager( any(),  any(),any());
     }
 

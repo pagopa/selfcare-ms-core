@@ -41,14 +41,14 @@ public class InstitutionController {
      * The function persist PA institution
      *
      * @param externalId String
-     *
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: TokenId
      * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
      */
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.PA.create}")
+    @ApiOperation(value = "${swagger.mscore.institution.PA.create}", notes = "${swagger.mscore.institution.PA.create}")
     @PostMapping(value = "/{externalId}")
     public ResponseEntity<InstitutionResponse> createInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                              @PathVariable("externalId") String externalId) {
@@ -64,13 +64,13 @@ public class InstitutionController {
      *
      * @param externalId  String
      * @param institution InstitutionRequest
-     *
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.create}")
+    @ApiOperation(value = "${swagger.mscore.institution.create}", notes = "${swagger.mscore.institution.create}")
     @PostMapping(value = "/insert/{externalId}")
     public ResponseEntity<InstitutionResponse> createInstitutionRaw(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                     @PathVariable("externalId") String externalId,
@@ -84,22 +84,22 @@ public class InstitutionController {
     /**
      * The function persist PG institution
      *
-     * @param externalId String
+     * @param externalId       String
      * @param existsInRegistry boolean
-     *
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Institution data not found on InfoCamere, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
      */
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.PG.create}")
+    @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
     @PostMapping(value = "/pg/{externalId}")
     public ResponseEntity<InstitutionResponse> createPgInstitution(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                    @PathVariable("externalId") String externalId,
-                                                                   @RequestParam(value = "manual") boolean existsInRegistry,
+                                                                   @ApiParam("${swagger.mscore.institutions.existsInRegistry}")
+                                                                   @RequestParam(value = "existsInRegistry") boolean existsInRegistry,
                                                                    Authentication authentication) {
-
         log.info(ENTRY_LOG, externalId);
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createPgInstitution(externalId, existsInRegistry, (SelfCareUser) authentication.getPrincipal());
@@ -110,16 +110,18 @@ public class InstitutionController {
      * The function return products related to institution
      *
      * @param institutionId String
-     * @param states List<String
-     *
+     * @param states        List<String>
      * @return OnboardedProducts
      * * Code: 200, Message: successful operation, DataType: OnboardedProducts
+     * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.products}")
+    @ApiOperation(value = "${swagger.mscore.institution.products}", notes = "${swagger.mscore.institution.products}")
     @GetMapping(value = "/{id}/products")
-    public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@PathVariable("id") String institutionId,
+    public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                         @PathVariable("id") String institutionId,
+                                                                         @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
                                                                          @RequestParam(value = "states", required = false) List<String> states) {
 
         log.info("Retrieving products for institution {}", institutionId);

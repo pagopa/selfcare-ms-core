@@ -40,9 +40,8 @@ class TokenConnectorImplTest {
         TokenEntity token = new TokenEntity();
         token.setId("507f1f77bcf86cd799439011");
         when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
-        List<Token> tokenList = tokenConnectorImpl.findActiveContract("42", "42", "42");
-        Assertions.assertEquals(1, tokenList.size());
-        Assertions.assertEquals("507f1f77bcf86cd799439011", tokenList.get(0).getId());
+        Token tokenResp = tokenConnectorImpl.findActiveContract("42", "42", "42");
+        Assertions.assertEquals("507f1f77bcf86cd799439011", tokenResp.getId());
     }
 
     @Test

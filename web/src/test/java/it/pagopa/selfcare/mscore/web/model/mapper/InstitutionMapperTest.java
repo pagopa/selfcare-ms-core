@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.Premium;
+import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -213,19 +213,18 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(Institution, OnboardedUser, String, String)}
+     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String, String)}
      */
     @Test
     void testToInstitutionManagerResponse9() {
         Institution institution = new Institution();
+        institution.setOnboarding(new ArrayList<>());
 
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new ArrayList<>());
+        ProductManagerInfo productManagerInfo = new ProductManagerInfo("id", institution, new ArrayList<>());
         InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
-                .toInstitutionManagerResponse(institution, onboardedUser, "42", "42");
+                .toInstitutionManagerResponse(productManagerInfo, "42", "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertEquals("42", actualToInstitutionManagerResponseResult.getId());
-        assertNull(actualToInstitutionManagerResponseResult.getFrom());
         InstitutionUpdate institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
         assertNull(institutionUpdate.getInstitutionType());
         assertNull(institutionUpdate.getDigitalAddress());
@@ -258,8 +257,6 @@ class InstitutionMapperTest {
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
         assertNull(actualToBillingResponseResult.getIpaCode());
-        assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.GSP,
-                actualToBillingResponseResult.getInstitutionType());
         assertNull(actualToBillingResponseResult.getInstitutionId());
         assertNull(actualToBillingResponseResult.getExternalId());
         assertNull(actualToBillingResponseResult.getDigitalAddress());
@@ -302,8 +299,6 @@ class InstitutionMapperTest {
         assertNull(actualToBillingResponseResult.getTaxCode());
         assertEquals("Pricing Plan", actualToBillingResponseResult.getPricingPlan());
         assertNull(actualToBillingResponseResult.getIpaCode());
-        assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.GSP,
-                actualToBillingResponseResult.getInstitutionType());
         assertNull(actualToBillingResponseResult.getInstitutionId());
         assertNull(actualToBillingResponseResult.getExternalId());
         assertNull(actualToBillingResponseResult.getDigitalAddress());
@@ -350,8 +345,6 @@ class InstitutionMapperTest {
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
         assertNull(actualToBillingResponseResult.getIpaCode());
-        assertEquals(it.pagopa.selfcare.mscore.web.model.institution.InstitutionType.GSP,
-                actualToBillingResponseResult.getInstitutionType());
         assertNull(actualToBillingResponseResult.getInstitutionId());
         assertNull(actualToBillingResponseResult.getExternalId());
         assertNull(actualToBillingResponseResult.getDigitalAddress());

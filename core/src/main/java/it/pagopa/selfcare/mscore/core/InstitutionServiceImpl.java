@@ -43,7 +43,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Institution retrieveInstitutionByExternalId(String institutionExternalId) {
         Optional<Institution> opt = institutionConnector.findByExternalId(institutionExternalId);
         if (opt.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), null, institutionExternalId), INSTITUTION_NOT_FOUND.getCode());
+            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), "UNDEFINED", institutionExternalId), INSTITUTION_NOT_FOUND.getCode());
         }
         log.info("founded institution having externalId: {}", institutionExternalId);
         return opt.get();

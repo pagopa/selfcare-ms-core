@@ -29,31 +29,10 @@ import java.util.List;
 public class SwaggerConfig {
 
     private static final String AUTH_SCHEMA_NAME = "bearerAuth";
-    private static final Response INTERNAL_SERVER_ERROR_RESPONSE = new ResponseBuilder()
-            .code(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
-            .description(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-            .representation(MediaType.APPLICATION_PROBLEM_JSON).apply(repBuilder ->
-                    repBuilder.model(modelSpecBuilder ->
-                            modelSpecBuilder.referenceModel(refModelSpecBuilder ->
-                                    refModelSpecBuilder.key(modelKeyBuilder ->
-                                            modelKeyBuilder.qualifiedModelName(qualifiedModelNameBuilder ->
-                                                    qualifiedModelNameBuilder.namespace(Problem.class.getPackageName())
-                                                            .name(Problem.class.getSimpleName()))))))
-            .build();
+
     private static final Response BAD_REQUEST_RESPONSE = new ResponseBuilder()
             .code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
             .description(HttpStatus.BAD_REQUEST.getReasonPhrase())
-            .representation(MediaType.APPLICATION_PROBLEM_JSON).apply(repBuilder ->
-                    repBuilder.model(modelSpecBuilder ->
-                            modelSpecBuilder.referenceModel(refModelSpecBuilder ->
-                                    refModelSpecBuilder.key(modelKeyBuilder ->
-                                            modelKeyBuilder.qualifiedModelName(qualifiedModelNameBuilder ->
-                                                    qualifiedModelNameBuilder.namespace(Problem.class.getPackageName())
-                                                            .name(Problem.class.getSimpleName()))))))
-            .build();
-    private static final Response UNAUTHORIZED_RESPONSE = new ResponseBuilder()
-            .code(String.valueOf(HttpStatus.UNAUTHORIZED.value()))
-            .description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
             .representation(MediaType.APPLICATION_PROBLEM_JSON).apply(repBuilder ->
                     repBuilder.model(modelSpecBuilder ->
                             modelSpecBuilder.referenceModel(refModelSpecBuilder ->

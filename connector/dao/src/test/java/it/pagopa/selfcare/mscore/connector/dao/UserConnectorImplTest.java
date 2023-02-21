@@ -2,7 +2,9 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -108,9 +110,14 @@ class UserConnectorImplTest {
         userBinding.setCreatedAt(null);
         userBinding.setInstitutionId("42");
         userBinding.setProducts(new ArrayList<>());
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new ArrayList<>());
-        userConnectorImpl.findAndUpdate(onboardedUser,"42", "42", onboardedProduct, userBinding);
+
+        OnboardedUser user = new OnboardedUser();
+        List<UserBinding> bindings = new ArrayList<>();
+        UserBinding binding = new UserBinding();
+        binding.setInstitutionId("42");
+        bindings.add(binding);
+        user.setBindings(bindings);
+        userConnectorImpl.findAndUpdate(user, "42", "42", onboardedProduct, userBinding);
         verify(userRepository).findAndModify(any(),  any(),  any(), any());
     }
 
@@ -120,8 +127,8 @@ class UserConnectorImplTest {
     @Test
     void testFindOnboardedManager() {
         when(userRepository.find(any(),any())).thenReturn(new ArrayList<>());
-        assertTrue(userConnectorImpl.findOnboardedManager("42", "42", new ArrayList<>()).isEmpty());
-        verify(userRepository).find(any(), any());
+        List<RelationshipState> states = new ArrayList<>();
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findOnboardedManager("42", "42", states));
     }
 
 }

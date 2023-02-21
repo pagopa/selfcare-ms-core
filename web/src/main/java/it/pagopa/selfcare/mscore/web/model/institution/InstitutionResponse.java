@@ -23,7 +23,6 @@ public class InstitutionResponse {
     private List<AttributesResponse> attributes;
     private PaymentServiceProviderResponse paymentServiceProviderResponse;
     private DataProtectionOfficerResponse dataProtectionOfficer;
-    //private BillingResponse billing;
     private String rea;
     private String shareCapital;
     private String businessRegisterPlace;

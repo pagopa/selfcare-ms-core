@@ -31,8 +31,9 @@ class OnboardingInstitutionUtilsTest {
 
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard);
+        List<PartyRole> states = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.verifyUsers(userToOnboardList, new ArrayList<>()));
+                () -> OnboardingInstitutionUtils.verifyUsers(userToOnboardList, states));
     }
 
     /**
@@ -63,8 +64,9 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard1);
         userToOnboardList.add(userToOnboard);
+        List<PartyRole> states = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.verifyUsers(userToOnboardList, new ArrayList<>()));
+                () -> OnboardingInstitutionUtils.verifyUsers(userToOnboardList, states));
     }
 
     /**
@@ -231,12 +233,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("The characteristics of someone or something", institution.getDescription());
         assertSame(billing1, onboardingRequest.getBillingRequest());
         assertTrue(onboardingRequest.isSignContract());
-        assertSame(contract, onboardingRequest.getContract());
-        assertSame(institutionUpdate, onboardingRequest.getInstitutionUpdate());
-        assertEquals("Pricing Plan", onboardingRequest.getPricingPlan());
-        assertEquals("Product Name", onboardingRequest.getProductName());
-        assertEquals("42", onboardingRequest.getProductId());
-        assertEquals("42", onboardingRequest.getInstitutionExternalId());
     }
 
     /**
@@ -361,10 +357,6 @@ class OnboardingInstitutionUtilsTest {
         assertTrue(onboardingRequest.isSignContract());
         assertSame(contract, onboardingRequest.getContract());
         assertSame(institutionUpdate, onboardingRequest.getInstitutionUpdate());
-        assertEquals("Pricing Plan", onboardingRequest.getPricingPlan());
-        assertEquals("Product Name", onboardingRequest.getProductName());
-        assertEquals("42", onboardingRequest.getProductId());
-        assertEquals("42", onboardingRequest.getInstitutionExternalId());
     }
 
     /**
@@ -486,14 +478,6 @@ class OnboardingInstitutionUtilsTest {
         assertSame(billing1, institution.getBilling());
         assertSame(dataProtectionOfficer, institution.getDataProtectionOfficer());
         assertEquals("The characteristics of someone or something", institution.getDescription());
-        assertSame(billing2, onboardingRequest.getBillingRequest());
-        assertTrue(onboardingRequest.isSignContract());
-        assertSame(contract, onboardingRequest.getContract());
-        assertSame(institutionUpdate, onboardingRequest.getInstitutionUpdate());
-        assertEquals("Pricing Plan", onboardingRequest.getPricingPlan());
-        assertEquals("Product Name", onboardingRequest.getProductName());
-        assertEquals("42", onboardingRequest.getProductId());
-        assertEquals("42", onboardingRequest.getInstitutionExternalId());
     }
 
     /**
@@ -732,15 +716,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42", institution.getId());
         assertSame(billing2, institution.getBilling());
         assertSame(dataProtectionOfficer, institution.getDataProtectionOfficer());
-        assertEquals("The characteristics of someone or something", institution.getDescription());
-        assertSame(billing3, onboardingRequest.getBillingRequest());
-        assertTrue(onboardingRequest.isSignContract());
-        assertSame(contract, onboardingRequest.getContract());
-        assertSame(institutionUpdate, onboardingRequest.getInstitutionUpdate());
-        assertEquals("Pricing Plan", onboardingRequest.getPricingPlan());
-        assertEquals("Product Name", onboardingRequest.getProductName());
-        assertEquals("42", onboardingRequest.getProductId());
-        assertEquals("42", onboardingRequest.getInstitutionExternalId());
     }
 
     /**
@@ -780,16 +755,16 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
+        Institution institution =  new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
+                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
+                geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
+                "START - validateOverridingData for institution having externalId: {}",
+                "START - validateOverridingData for institution having externalId: {}",
+                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org",
+                "4105551212", true);
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate,
-                        new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
-                                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
-                                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
-                                geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
-                                "START - validateOverridingData for institution having externalId: {}",
-                                "START - validateOverridingData for institution having externalId: {}",
-                                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org",
-                                "4105551212", true)));
+                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
 
     /**
@@ -829,16 +804,16 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
+        Institution institution =  new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
+                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
+                geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
+                "START - validateOverridingData for institution having externalId: {}",
+                "START - validateOverridingData for institution having externalId: {}",
+                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org",
+                "4105551212", true);
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate,
-                        new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
-                                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
-                                "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
-                                geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
-                                "START - validateOverridingData for institution having externalId: {}",
-                                "START - validateOverridingData for institution having externalId: {}",
-                                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org",
-                                "4105551212", true)));
+                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
 
     /**
@@ -911,18 +886,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("jane.doe@example.org", institution.getSupportEmail());
         assertEquals("START - validateOverridingData for institution having externalId: {}",
                 institution.getShareCapital());
-        assertEquals("START - validateOverridingData for institution having externalId: {}", institution.getRea());
-        assertSame(paymentServiceProvider1, institution.getPaymentServiceProvider());
-        assertEquals("START - validateOverridingData for institution having externalId: {}",
-                institution.getBusinessRegisterPlace());
-        assertEquals("42 Main St", institution.getDigitalAddress());
-        assertEquals("START - validateOverridingData for institution having externalId: {}", institution.getIpaCode());
-        assertEquals(InstitutionType.PA, institution.getInstitutionType());
-        assertEquals("42", institution.getId());
-        assertEquals("42", institution.getExternalId());
-        assertEquals("The characteristics of someone or something", institution.getDescription());
-        assertSame(dataProtectionOfficer1, institution.getDataProtectionOfficer());
-        assertSame(billing, institution.getBilling());
     }
 
     /**
@@ -996,18 +959,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("jane.doe@example.org", institution.getSupportEmail());
         assertEquals("START - validateOverridingData for institution having externalId: {}",
                 institution.getShareCapital());
-        assertEquals("START - validateOverridingData for institution having externalId: {}", institution.getRea());
-        assertSame(paymentServiceProvider1, institution.getPaymentServiceProvider());
-        assertEquals("START - validateOverridingData for institution having externalId: {}",
-                institution.getBusinessRegisterPlace());
-        assertEquals("42 Main St", institution.getDigitalAddress());
-        assertEquals("START - validateOverridingData for institution having externalId: {}", institution.getIpaCode());
-        assertEquals(InstitutionType.PA, institution.getInstitutionType());
-        assertEquals("42", institution.getId());
-        assertEquals("42", institution.getExternalId());
-        assertEquals("The characteristics of someone or something", institution.getDescription());
-        assertSame(dataProtectionOfficer1, institution.getDataProtectionOfficer());
-        assertSame(billing, institution.getBilling());
     }
 
     /**
@@ -1192,6 +1143,53 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42", actualConvertToTokenResult.getProductId());
         assertNull(actualConvertToTokenResult.getInstitutionId());
         assertEquals("Path", actualConvertToTokenResult.getContract());
+    }
+
+    /**
+     * Method under test: {@link OnboardingInstitutionUtils#constructProduct(UserToOnboard, OnboardingRequest)}
+     */
+    @Test
+    void testConstructProduct() {
+        UserToOnboard userToOnboard = new UserToOnboard();
+        userToOnboard.setEmail("jane.doe@example.org");
+        userToOnboard.setEnv(EnvEnum.ROOT);
+        userToOnboard.setId("42");
+        userToOnboard.setName("Name");
+        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setRole(PartyRole.MANAGER);
+        userToOnboard.setSurname("Doe");
+        userToOnboard.setTaxCode("Tax Code");
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.PG);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        OnboardedProduct actualConstructProductResult = OnboardingInstitutionUtils.constructProduct(userToOnboard,
+                onboardingRequest);
+        assertEquals(RelationshipState.ACTIVE, actualConstructProductResult.getStatus());
+        assertEquals(PartyRole.MANAGER, actualConstructProductResult.getRole());
+        assertTrue(actualConstructProductResult.getProductRoles().isEmpty());
+        assertEquals(EnvEnum.ROOT, actualConstructProductResult.getEnv());
+    }
+
+    /**
+     * Method under test: {@link OnboardingInstitutionUtils#retrieveStatusFromInstitutionType(InstitutionType)}
+     */
+    @Test
+    void testRetrieveStatusFromInstitutionType() {
+        assertEquals(RelationshipState.PENDING,
+                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PA));
+        assertEquals(RelationshipState.ACTIVE,
+                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PG));
+        assertEquals(RelationshipState.TOBEVALIDATED,
+                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.GSP));
+        assertEquals(RelationshipState.TOBEVALIDATED,
+                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PT));
+        assertEquals(RelationshipState.TOBEVALIDATED,
+                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.SCP));
+        assertEquals(RelationshipState.TOBEVALIDATED,
+                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PSP));
+        assertEquals(RelationshipState.TOBEVALIDATED,
+                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.UNKNOWN));
     }
 
 

@@ -10,15 +10,14 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.TOKEN_NOT_FOUND;
 
 @Slf4j
@@ -37,7 +36,7 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public List<Token> findActiveContract(String institutionId, String userId, String productId) {
+    public Token findActiveContract(String institutionId, String userId, String productId) {
         Query query = new Query();
         query.addCriteria(
                 new Criteria().andOperator(
@@ -48,8 +47,10 @@ public class TokenConnectorImpl implements TokenConnector {
                 )
         );
         return tokenRepository.find(query, TokenEntity.class).stream()
+                .findFirst()
                 .map(this::convertToToken)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
+                        GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
 
     @Override
@@ -70,11 +71,11 @@ public class TokenConnectorImpl implements TokenConnector {
     @Override
     public void findAndUpdateTokenUser(String tokenId, List<String> usersId) {
         Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
-        UpdateDefinition updateDefinition = new Update()
-                .addToSet(TokenEntity.Fields.users.name(), usersId) //chech se duplica o no
-                .set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        Update update = new Update();
+        usersId.forEach(s -> update.addToSet(TokenEntity.Fields.users.name(), s));
+        update.set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class);
+        tokenRepository.findAndModify(query, update, findAndModifyOptions, TokenEntity.class);
     }
 
     private TokenEntity convertToTokenEntity(Token token) {

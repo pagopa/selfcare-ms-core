@@ -9,8 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -27,21 +25,8 @@ class TokenServiceImplTest {
      * Method under test: {@link TokenServiceImpl#findActiveContract(String, String, String)}
      */
     @Test
-    void testFindActiveContract() {
-        when(tokenConnector.findActiveContract( any(),  any(),  any()))
-                .thenReturn(new ArrayList<>());
-        assertThrows(ResourceNotFoundException.class, () -> tokenServiceImpl.findActiveContract("42", "42", "42"));
-        verify(tokenConnector).findActiveContract( any(),  any(),  any());
-    }
-
-    /**
-     * Method under test: {@link TokenServiceImpl#findActiveContract(String, String, String)}
-     */
-    @Test
     void testFindActiveContract2() {
-        ArrayList<Token> tokenList = new ArrayList<>();
-        tokenList.add(new Token());
-        when(tokenConnector.findActiveContract( any(),  any(),  any())).thenReturn(tokenList);
+        when(tokenConnector.findActiveContract( any(),  any(),  any())).thenReturn(new Token());
         assertNull(tokenServiceImpl.findActiveContract("42", "42", "42"));
         verify(tokenConnector).findActiveContract( any(),  any(),  any());
     }
