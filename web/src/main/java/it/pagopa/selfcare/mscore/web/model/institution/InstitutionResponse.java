@@ -12,7 +12,7 @@ public class InstitutionResponse {
 
     private String id;
     private String externalId;
-    private String ipaCode;
+    private String originId;
     private String description;
     private InstitutionType institutionType;
     private String digitalAddress;
@@ -21,7 +21,7 @@ public class InstitutionResponse {
     private String taxCode;
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesResponse> attributes;
-    private PaymentServiceProviderResponse paymentServiceProviderResponse;
+    private PaymentServiceProviderResponse paymentServiceProvider;
     private DataProtectionOfficerResponse dataProtectionOfficer;
     private String rea;
     private String shareCapital;

@@ -233,7 +233,6 @@ class InstitutionControllerTest {
         GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
         geoTaxonomies.setCode("?");
         geoTaxonomies.setDesc("The characteristics of someone or something");
-        geoTaxonomies.setEnable(true);
 
         ArrayList<GeoTaxonomies> geoTaxonomiesList = new ArrayList<>();
         geoTaxonomiesList.add(geoTaxonomies);
@@ -375,7 +374,6 @@ class InstitutionControllerTest {
         GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
         geoTaxonomies.setCode("?");
         geoTaxonomies.setDesc("The characteristics of someone or something");
-        geoTaxonomies.setEnable(true);
 
         ArrayList<GeoTaxonomies> geoTaxonomiesList = new ArrayList<>();
         geoTaxonomiesList.add(geoTaxonomies);

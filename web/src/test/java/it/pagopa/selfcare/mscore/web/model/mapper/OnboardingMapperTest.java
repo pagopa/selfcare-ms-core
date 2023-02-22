@@ -43,7 +43,7 @@ class OnboardingMapperTest {
     @Test
     void testToOnboardingRequest() {
         BillingRequest billingRequest = new BillingRequest();
-        billingRequest.setPublicServer("Public Server");
+        billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
         billingRequest.setVatNumber("42");
 
@@ -88,7 +88,7 @@ class OnboardingMapperTest {
 
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
         onboardingInstitutionRequest.setUsers(personList);
-        onboardingInstitutionRequest.setBillingRequest(billingRequest);
+        onboardingInstitutionRequest.setBilling(billingRequest);
         onboardingInstitutionRequest.setContract(contractRequest);
         onboardingInstitutionRequest.setInstitutionExternalId("42");
         onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdate);
@@ -119,7 +119,7 @@ class OnboardingMapperTest {
     void testToOnboardingRequest2() {
 
         BillingRequest billingRequest = new BillingRequest();
-        billingRequest.setPublicServer("Public Server");
+        billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
         billingRequest.setVatNumber("42");
 
@@ -162,7 +162,7 @@ class OnboardingMapperTest {
         personList.add(person);
 
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
-        onboardingInstitutionRequest.setBillingRequest(billingRequest);
+        onboardingInstitutionRequest.setBilling(billingRequest);
         onboardingInstitutionRequest.setContract(contractRequest);
         onboardingInstitutionRequest.setInstitutionExternalId("42");
         onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdate);
@@ -187,7 +187,7 @@ class OnboardingMapperTest {
     void testToOnboardingRequest3() {
 
         BillingRequest billingRequest = new BillingRequest();
-        billingRequest.setPublicServer("Public Server");
+        billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
         billingRequest.setVatNumber("42");
 
@@ -239,7 +239,7 @@ class OnboardingMapperTest {
         personList.add(person);
 
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
-        onboardingInstitutionRequest.setBillingRequest(billingRequest);
+        onboardingInstitutionRequest.setBilling(billingRequest);
         onboardingInstitutionRequest.setContract(contractRequest);
         onboardingInstitutionRequest.setInstitutionExternalId("42");
         onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdate);
@@ -263,7 +263,7 @@ class OnboardingMapperTest {
     @Test
     void testToOnboardingRequest4() {
         BillingRequest billingRequest = new BillingRequest();
-        billingRequest.setPublicServer("Public Server");
+        billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
         billingRequest.setVatNumber("42");
 
@@ -301,7 +301,7 @@ class OnboardingMapperTest {
         institutionUpdate.setZipCode("21654");
 
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
-        onboardingInstitutionRequest.setBillingRequest(billingRequest);
+        onboardingInstitutionRequest.setBilling(billingRequest);
         onboardingInstitutionRequest.setContract(contractRequest);
         onboardingInstitutionRequest.setInstitutionExternalId("42");
         onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdate);
@@ -340,7 +340,7 @@ class OnboardingMapperTest {
         onboardingInstitutionRequest.setSignContract(true);
         onboardingInstitutionRequest.setContract(null);
         onboardingInstitutionRequest.setInstitutionUpdate(null);
-        onboardingInstitutionRequest.setBillingRequest(null);
+        onboardingInstitutionRequest.setBilling(null);
         onboardingInstitutionRequest.setUsers(null);
         OnboardingRequest actualToOnboardingRequestResult = OnboardingMapper
                 .toOnboardingRequest(onboardingInstitutionRequest);

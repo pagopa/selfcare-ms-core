@@ -39,7 +39,7 @@ public class InstitutionMapper {
         InstitutionResponse institutionResponse = new InstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setIpaCode(institution.getIpaCode());
+        institutionResponse.setOriginId(institution.getIpaCode());
         institutionResponse.setDescription(institution.getDescription());
         institutionResponse.setInstitutionType(institution.getInstitutionType());
         institutionResponse.setDigitalAddress(institution.getDigitalAddress());
@@ -59,7 +59,7 @@ public class InstitutionMapper {
         if (institution.getDataProtectionOfficer() != null)
             institutionResponse.setDataProtectionOfficer(convertToDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
         if (institution.getPaymentServiceProvider() != null)
-            institutionResponse.setPaymentServiceProviderResponse(convertToPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
+            institutionResponse.setPaymentServiceProvider(convertToPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
         return institutionResponse;
     }
 
@@ -187,7 +187,6 @@ public class InstitutionMapper {
             GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
             geoTaxonomies.setCode(g.getCode());
             geoTaxonomies.setDesc(g.getDesc());
-            geoTaxonomies.setEnable(g.isEnable());
             list.add(geoTaxonomies);
         }
         return list;
@@ -231,7 +230,6 @@ public class InstitutionMapper {
         institution.setBusinessRegisterPlace(request.getBusinessRegisterPlace());
         institution.setSupportEmail(request.getSupportEmail());
         institution.setSupportPhone(request.getSupportPhone());
-        institution.setImported(request.isImported());
         if (request.getPaymentServiceProvider() != null)
             institution.setPaymentServiceProvider(convertToPaymentServiceProvider(request.getPaymentServiceProvider()));
         if (request.getDataProtectionOfficer() != null)

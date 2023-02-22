@@ -30,7 +30,7 @@ class InstitutionMapperTest {
         assertNull(actualToInstitutionResponseResult.getSupportEmail());
         assertNull(actualToInstitutionResponseResult.getShareCapital());
         assertNull(actualToInstitutionResponseResult.getRea());
-        assertNull(actualToInstitutionResponseResult.getIpaCode());
+        assertNull(actualToInstitutionResponseResult.getOriginId());
         assertNull(actualToInstitutionResponseResult.getInstitutionType());
         assertNull(actualToInstitutionResponseResult.getId());
         assertNull(actualToInstitutionResponseResult.getExternalId());
@@ -55,7 +55,7 @@ class InstitutionMapperTest {
         assertNull(actualToInstitutionResponseResult.getSupportEmail());
         assertNull(actualToInstitutionResponseResult.getShareCapital());
         assertNull(actualToInstitutionResponseResult.getRea());
-        assertNull(actualToInstitutionResponseResult.getIpaCode());
+        assertNull(actualToInstitutionResponseResult.getOriginId());
         assertNull(actualToInstitutionResponseResult.getInstitutionType());
         assertNull(actualToInstitutionResponseResult.getId());
         List<GeoTaxonomies> geographicTaxonomies = actualToInstitutionResponseResult.getGeographicTaxonomies();
@@ -89,7 +89,7 @@ class InstitutionMapperTest {
         assertEquals("jane.doe@example.org", actualToInstitutionResponseResult.getSupportEmail());
         assertEquals("Share Capital", actualToInstitutionResponseResult.getShareCapital());
         assertEquals("Rea", actualToInstitutionResponseResult.getRea());
-        assertEquals("Ipa Code", actualToInstitutionResponseResult.getIpaCode());
+        assertEquals("Ipa Code", actualToInstitutionResponseResult.getOriginId());
         assertEquals("Business Register Place", actualToInstitutionResponseResult.getBusinessRegisterPlace());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         assertEquals("42", actualToInstitutionResponseResult.getId());
@@ -97,7 +97,7 @@ class InstitutionMapperTest {
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
         PaymentServiceProviderResponse paymentServiceProviderResponse = actualToInstitutionResponseResult
-                .getPaymentServiceProviderResponse();
+                .getPaymentServiceProvider();
         assertNull(paymentServiceProviderResponse.getLegalRegisterNumber());
         assertFalse(paymentServiceProviderResponse.isVatNumberGroup());
         DataProtectionOfficerResponse dataProtectionOfficer = actualToInstitutionResponseResult
@@ -146,7 +146,7 @@ class InstitutionMapperTest {
         assertEquals("jane.doe@example.org", actualToInstitutionResponseResult.getSupportEmail());
         assertEquals("Share Capital", actualToInstitutionResponseResult.getShareCapital());
         assertEquals("Rea", actualToInstitutionResponseResult.getRea());
-        assertEquals("Ipa Code", actualToInstitutionResponseResult.getIpaCode());
+        assertEquals("Ipa Code", actualToInstitutionResponseResult.getOriginId());
         assertEquals("Business Register Place", actualToInstitutionResponseResult.getBusinessRegisterPlace());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         List<GeoTaxonomies> geographicTaxonomies1 = actualToInstitutionResponseResult.getGeographicTaxonomies();
@@ -156,7 +156,7 @@ class InstitutionMapperTest {
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
         PaymentServiceProviderResponse paymentServiceProviderResponse = actualToInstitutionResponseResult
-                .getPaymentServiceProviderResponse();
+                .getPaymentServiceProvider();
         assertNull(paymentServiceProviderResponse.getBusinessRegisterNumber());
         assertNull(paymentServiceProviderResponse.getLegalRegisterNumber());
         assertFalse(paymentServiceProviderResponse.isVatNumberGroup());
@@ -191,7 +191,7 @@ class InstitutionMapperTest {
         assertEquals("jane.doe@example.org", actualToInstitutionResponseResult.getSupportEmail());
         assertEquals("Share Capital", actualToInstitutionResponseResult.getShareCapital());
         assertEquals("Rea", actualToInstitutionResponseResult.getRea());
-        assertEquals("Ipa Code", actualToInstitutionResponseResult.getIpaCode());
+        assertEquals("Ipa Code", actualToInstitutionResponseResult.getOriginId());
         List<AttributesResponse> attributes1 = actualToInstitutionResponseResult.getAttributes();
         assertEquals(1, attributes1.size());
         assertEquals("Business Register Place", actualToInstitutionResponseResult.getBusinessRegisterPlace());
@@ -201,7 +201,7 @@ class InstitutionMapperTest {
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
         PaymentServiceProviderResponse paymentServiceProviderResponse = actualToInstitutionResponseResult
-                .getPaymentServiceProviderResponse();
+                .getPaymentServiceProvider();
         assertNull(paymentServiceProviderResponse.getLegalRegisterName());
         assertNull(paymentServiceProviderResponse.getLegalRegisterNumber());
         assertFalse(paymentServiceProviderResponse.isVatNumberGroup());
@@ -377,7 +377,6 @@ class InstitutionMapperTest {
         institutionRequest.setDescription("The characteristics of someone or something");
         institutionRequest.setDigitalAddress("42 Main St");
         institutionRequest.setGeographicTaxonomies(new ArrayList<>());
-        institutionRequest.setImported(true);
         institutionRequest.setInstitutionType(InstitutionType.PA);
         institutionRequest.setPaymentServiceProvider(paymentServiceProviderRequest);
         institutionRequest.setRea("Rea");
@@ -446,7 +445,6 @@ class InstitutionMapperTest {
         institutionRequest.setDigitalAddress("42 Main St");
         ArrayList<GeoTaxonomies> geoTaxonomiesList = new ArrayList<>();
         institutionRequest.setGeographicTaxonomies(geoTaxonomiesList);
-        institutionRequest.setImported(true);
         institutionRequest.setInstitutionType(InstitutionType.PA);
         institutionRequest.setPaymentServiceProvider(paymentServiceProviderRequest);
         institutionRequest.setRea("Rea");
@@ -500,7 +498,6 @@ class InstitutionMapperTest {
         GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
         geoTaxonomies.setCode("Code");
         geoTaxonomies.setDesc("The characteristics of someone or something");
-        geoTaxonomies.setEnable(true);
 
         ArrayList<GeoTaxonomies> geoTaxonomiesList = new ArrayList<>();
         geoTaxonomiesList.add(geoTaxonomies);
@@ -521,7 +518,6 @@ class InstitutionMapperTest {
         institutionRequest.setDescription("The characteristics of someone or something");
         institutionRequest.setDigitalAddress("42 Main St");
         institutionRequest.setGeographicTaxonomies(geoTaxonomiesList);
-        institutionRequest.setImported(true);
         institutionRequest.setInstitutionType(InstitutionType.PA);
         institutionRequest.setPaymentServiceProvider(paymentServiceProviderRequest);
         institutionRequest.setRea("Rea");
@@ -583,7 +579,6 @@ class InstitutionMapperTest {
         institutionRequest.setDescription("The characteristics of someone or something");
         institutionRequest.setDigitalAddress("42 Main St");
         institutionRequest.setGeographicTaxonomies(new ArrayList<>());
-        institutionRequest.setImported(false);
         institutionRequest.setInstitutionType(InstitutionType.PA);
         institutionRequest.setPaymentServiceProvider(paymentServiceProviderRequest);
         institutionRequest.setRea("Rea");

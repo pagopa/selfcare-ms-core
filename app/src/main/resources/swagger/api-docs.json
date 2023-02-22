@@ -6,8 +6,18 @@
   },
   "servers": [
     {
-      "url": "/ms-core/{{version}}",
-      "description": "This service is selfcare-ms-core"
+      "url": "{url}:{port}{basePath}",
+      "variables": {
+        "url": {
+          "default": "http://localhost"
+        },
+        "port": {
+          "default": "80"
+        },
+        "basePath": {
+          "default": ""
+        }
+      }
     }
   ],
   "tags": [
@@ -484,10 +494,19 @@
             "in": "query",
             "description": "List of Relationship state for filter products",
             "required": false,
-            "style": "form",
-            "explode": true,
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "enum": [
+                  "GSP",
+                  "PA",
+                  "PG",
+                  "PSP",
+                  "PT",
+                  "SCP",
+                  "UNKNOWN"
+                ]
+              }
             }
           }
         ],
@@ -566,10 +585,19 @@
             "in": "query",
             "description": "List of Relationship state for filter products",
             "required": false,
-            "style": "form",
-            "explode": true,
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "enum": [
+                  "GSP",
+                  "PA",
+                  "PG",
+                  "PSP",
+                  "PT",
+                  "SCP",
+                  "UNKNOWN"
+                ]
+              }
             }
           }
         ],
@@ -776,7 +804,7 @@
         "title": "Billing",
         "type": "object",
         "properties": {
-          "publicServer": {
+          "publicServices": {
             "type": "boolean"
           },
           "recipientCode": {
@@ -791,8 +819,8 @@
         "title": "BillingRequest",
         "type": "object",
         "properties": {
-          "publicServer": {
-            "type": "string"
+          "publicServices": {
+            "type": "boolean"
           },
           "recipientCode": {
             "type": "string"
@@ -883,9 +911,6 @@
           },
           "desc": {
             "type": "string"
-          },
-          "enable": {
-            "type": "boolean"
           }
         }
       },
@@ -1037,9 +1062,6 @@
               "$ref": "#/components/schemas/GeoTaxonomies"
             }
           },
-          "imported": {
-            "type": "boolean"
-          },
           "institutionType": {
             "type": "string",
             "enum": [
@@ -1127,10 +1149,10 @@
               "UNKNOWN"
             ]
           },
-          "ipaCode": {
+          "originId": {
             "type": "string"
           },
-          "paymentServiceProviderResponse": {
+          "paymentServiceProvider": {
             "$ref": "#/components/schemas/PaymentServiceProviderResponse"
           },
           "rea": {
@@ -1177,6 +1199,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "imported": {
+            "type": "boolean"
           },
           "institutionType": {
             "type": "string",
@@ -1229,6 +1254,9 @@
           "billing": {
             "$ref": "#/components/schemas/Billing"
           },
+          "businessRegisterPlace": {
+            "type": "string"
+          },
           "description": {
             "type": "string"
           },
@@ -1259,9 +1287,6 @@
               "UNKNOWN"
             ]
           },
-          "origin": {
-            "type": "string"
-          },
           "originId": {
             "type": "string"
           },
@@ -1270,6 +1295,9 @@
           },
           "productInfo": {
             "$ref": "#/components/schemas/ProductInfo"
+          },
+          "rea": {
+            "type": "string"
           },
           "role": {
             "type": "string",
@@ -1280,7 +1308,16 @@
               "SUB_DELEGATE"
             ]
           },
+          "shareCapital": {
+            "type": "string"
+          },
           "state": {
+            "type": "string"
+          },
+          "supportEmail": {
+            "type": "string"
+          },
+          "supportPhone": {
             "type": "string"
           },
           "taxCode": {
@@ -1322,7 +1359,7 @@
         "title": "OnboardingInstitutionRequest",
         "type": "object",
         "properties": {
-          "billingRequest": {
+          "billing": {
             "$ref": "#/components/schemas/BillingRequest"
           },
           "contract": {

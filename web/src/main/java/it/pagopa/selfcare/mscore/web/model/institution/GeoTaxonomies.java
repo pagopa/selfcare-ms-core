@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class GeoTaxonomies {
-    private String code; //REQUIRED
-    private String desc; //REQUIRED
-    private boolean enable; //REQUIRED
+    private String code;
+    private String desc;
 }

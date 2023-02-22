@@ -12,6 +12,6 @@ public class Billing {
     @JsonProperty("recipientCode")
     private String recipientCode;
 
-    @JsonProperty("publicServer")
+    @JsonProperty("publicServices")
     private boolean publicServices;
 }

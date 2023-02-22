@@ -29,7 +29,7 @@ public class OnboardingInstitutionRequest {
     private InstitutionUpdate institutionUpdate;
 
     private String pricingPlan;
-    private BillingRequest billingRequest;
+    private BillingRequest billing;
     private ContractRequest contract;
 
     private boolean signContract ;
