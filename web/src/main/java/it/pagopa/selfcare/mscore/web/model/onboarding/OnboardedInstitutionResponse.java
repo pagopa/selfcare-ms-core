@@ -16,7 +16,6 @@ public class OnboardedInstitutionResponse {
 
     private String id;
     private String externalId;
-    private String origin;
     private String originId;
     private String description;
     private InstitutionType institutionType;
@@ -31,5 +30,10 @@ public class OnboardedInstitutionResponse {
     private String state;
     private PartyRole role;
     private ProductInfo productInfo;
+    private String rea;
+    private String shareCapital;
+    private String businessRegisterPlace;
+    private String supportEmail;
+    private String supportPhone;
 
 }

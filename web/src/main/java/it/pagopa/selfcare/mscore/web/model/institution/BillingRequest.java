@@ -7,5 +7,5 @@ public class BillingRequest {
 
     private String vatNumber;
     private String recipientCode;
-    private String publicServer;
+    private boolean publicServices;
 }

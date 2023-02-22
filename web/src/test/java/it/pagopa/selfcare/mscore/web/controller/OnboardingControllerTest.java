@@ -59,7 +59,7 @@ class OnboardingControllerTest {
         SecurityContextHolder.setContext(securityContext);
 
         BillingRequest billingRequest = new BillingRequest();
-        billingRequest.setPublicServer("Public Server");
+        billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
         billingRequest.setVatNumber("42");
 
@@ -104,7 +104,7 @@ class OnboardingControllerTest {
 
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
         onboardingInstitutionRequest.setUsers(personList);
-        onboardingInstitutionRequest.setBillingRequest(billingRequest);
+        onboardingInstitutionRequest.setBilling(billingRequest);
         onboardingInstitutionRequest.setContract(contractRequest);
         onboardingInstitutionRequest.setInstitutionExternalId("42");
         onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdate);

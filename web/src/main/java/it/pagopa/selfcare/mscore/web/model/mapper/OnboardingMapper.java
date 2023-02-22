@@ -29,8 +29,8 @@ public class OnboardingMapper {
         onboardingRequest.setInstitutionExternalId(onboardingInstitutionRequest.getInstitutionExternalId());
         onboardingRequest.setPricingPlan(onboardingInstitutionRequest.getPricingPlan());
 
-        if (onboardingInstitutionRequest.getBillingRequest() != null)
-            onboardingRequest.setBillingRequest(convertToBilling(onboardingInstitutionRequest.getBillingRequest()));
+        if (onboardingInstitutionRequest.getBilling() != null)
+            onboardingRequest.setBillingRequest(convertToBilling(onboardingInstitutionRequest.getBilling()));
         if (onboardingInstitutionRequest.getContract() != null)
             onboardingRequest.setContract(convertToContract(onboardingInstitutionRequest.getContract()));
         if (onboardingInstitutionRequest.getUsers() != null)
@@ -116,6 +116,11 @@ public class OnboardingMapper {
         institutionResponse.setState(product.getStatus().name());
         institutionResponse.setRole(product.getRole());
         institutionResponse.setProductInfo(productInfo);
+        institutionResponse.setRea(institution.getRea());
+        institutionResponse.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        institutionResponse.setShareCapital(institution.getShareCapital());
+        institutionResponse.setSupportEmail(institution.getSupportEmail());
+        institutionResponse.setSupportPhone(institution.getSupportPhone());
         return institutionResponse;
     }
 
@@ -149,7 +154,6 @@ public class OnboardingMapper {
                     GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
                     geoTaxonomies.setCode(geo.getCode());
                     geoTaxonomies.setDesc(geo.getDesc());
-                    geoTaxonomies.setEnable(geo.isEnable());
                     return geoTaxonomies;
                 }).collect(Collectors.toList());
     }
