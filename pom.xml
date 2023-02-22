@@ -25,7 +25,7 @@
 
 
     <properties>
-        <selc-commons.version>2.4.3</selc-commons.version>
+        <selc-commons.version>2.4.4</selc-commons.version>
     </properties>
 
     <dependencyManagement>
@@ -180,4 +180,12 @@
             <version>${selc-commons.version}</version>
         </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>selfcare-platform</id>
+            <url>
+                https://pkgs.dev.azure.com/pagopaspa/selfcare-platform-app-projects/_packaging/selfcare-platform/maven/v1
+            </url>
+        </repository>
+    </repositories>
 </project>
