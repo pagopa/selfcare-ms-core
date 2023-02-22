@@ -4,10 +4,7 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.UserBinding;
+import it.pagopa.selfcare.mscore.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -19,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
 
@@ -93,6 +91,61 @@ public class UserConnectorImpl implements UserConnector {
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
                         GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
+
+    @Override
+    public List<OnboardedUser> findAdminWithFilter(EnvEnum env, String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId)
+                .and(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
+
+        query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
+                .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roles)
+                        .and(OnboardedProduct.Fields.env.name()).is(env)
+                        .and(OnboardedProduct.Fields.status.name()).in(states)));
+
+        return repository.find(query, UserEntity.class).stream()
+                .map(this::convertToOnboardedUser)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OnboardedUser> findWithFilter(EnvEnum env, String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<RelationshipState> stateList = states.isEmpty() ? List.of(RelationshipState.values()) : states;
+        List<PartyRole> roleList = roles.isEmpty() ? List.of(PartyRole.values()) : roles;
+
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(personId)
+                .and(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
+
+        if(productRoles.isEmpty() && products.isEmpty()) {
+            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
+                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.env.name()).is(env)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
+        }else if(productRoles.isEmpty()){
+            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
+                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.env.name()).is(env)
+                            .and(OnboardedProduct.Fields.productId.name()).in(products)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
+        }else if(products.isEmpty()){
+            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
+                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.env.name()).is(env)
+                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
+        }else {
+            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
+                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
+                            .and(OnboardedProduct.Fields.productId.name()).in(products)
+                            .and(OnboardedProduct.Fields.env.name()).is(env)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
+        }
+
+        return repository.find(query, UserEntity.class).stream()
+                .map(this::convertToOnboardedUser)
+                .collect(Collectors.toList());
+    }
+
 
     private String constructQuery(String... variables) {
         StringBuilder builder = new StringBuilder();

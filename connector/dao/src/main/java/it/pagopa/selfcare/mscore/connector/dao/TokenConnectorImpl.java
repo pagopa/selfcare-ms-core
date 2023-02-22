@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.TOKEN_NOT_FOUND;
@@ -76,6 +77,17 @@ public class TokenConnectorImpl implements TokenConnector {
         update.set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         tokenRepository.findAndModify(query, update, findAndModifyOptions, TokenEntity.class);
+    }
+
+    @Override
+    public List<Token> findWithFilter(String institutionId, String productId, List<RelationshipState> state) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.productId.name()).is(productId)
+                .and(TokenEntity.Fields.institutionId.name()).is(institutionId)
+                .and(TokenEntity.Fields.status.name()).nin(state));
+
+        return tokenRepository.find(query, TokenEntity.class).stream()
+                .map(this::convertToToken)
+                .collect(Collectors.toList());
     }
 
     private TokenEntity convertToTokenEntity(Token token) {

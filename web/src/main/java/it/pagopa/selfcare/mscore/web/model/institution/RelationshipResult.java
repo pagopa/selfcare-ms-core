@@ -15,11 +15,11 @@ public class RelationshipResult {
     private String from;
     private String to;
     private PartyRole role;
-    private ProductInfo productInfo;
+    private ProductInfo product;
     private String state;
     private String pricingPlan;
     private InstitutionUpdate institutionUpdate;
-    private BillingResponse billingResponse;
+    private BillingResponse billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updateAt;
 }

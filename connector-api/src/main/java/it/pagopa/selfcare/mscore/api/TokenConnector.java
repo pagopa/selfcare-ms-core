@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.api;
 
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
 
 import java.util.List;
@@ -9,6 +10,6 @@ public interface TokenConnector {
     void deleteById(String id);
     Token save(Token token);
     Token findById(String tokenId);
-
+    List<Token> findWithFilter(String institutionId, String productId, List<RelationshipState> state);
     void findAndUpdateTokenUser(String id, List<String> usersId);
 }

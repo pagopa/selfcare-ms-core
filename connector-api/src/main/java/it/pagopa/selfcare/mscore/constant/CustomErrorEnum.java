@@ -18,6 +18,7 @@ public enum CustomErrorEnum {
     ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),
     TOKEN_NOT_FOUND("0014","Token %s not found"),
+    CONTRACT_NOT_FOUND("0015","Token for institution %s and product %s not found"),
     GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s and productId %s");
 
     private final String code;
