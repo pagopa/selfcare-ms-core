@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -67,6 +68,16 @@ public class TokenConnectorImpl implements TokenConnector {
             throw new ResourceNotFoundException(String.format(TOKEN_NOT_FOUND.getMessage(), tokenId), TOKEN_NOT_FOUND.getCode());
         }
         return opt.get();
+    }
+
+    @Override
+    public Token findAndUpdateTokenState(String tokenId, RelationshipState status) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
+        UpdateDefinition updateDefinition = new Update()
+                .set(TokenEntity.Fields.status.name(), status)
+                .set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
     }
 
     @Override

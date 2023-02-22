@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -23,6 +24,8 @@ import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION
 @Slf4j
 @Component
 public class UserConnectorImpl implements UserConnector {
+    private static final String CURRENT_PRODUCT = "current.";
+    private static final String CURRENT_PRODUCT_REF = "$[current]";
     private static final String CURRENT_USER_BINDING = "currentUserBinding.";
     private static final String CURRENT_USER_BINDING_REF = "$[currentUserBinding]";
     private final UserRepository repository;
@@ -46,6 +49,18 @@ public class UserConnectorImpl implements UserConnector {
     public OnboardedUser getById(String userId) {
         Optional<UserEntity> entityOpt = repository.findById(userId);
         return entityOpt.map(this::convertToOnboardedUser).orElse(null);
+    }
+
+    @Override
+    public void findAndUpdateState(String userId, String institutionId, String productId, RelationshipState state) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
+        UpdateDefinition updateDefinition = new Update()
+                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
+                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now())
+                .filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId))
+                .filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.productId.name()).is(productId));
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        repository.findAndModify(query, updateDefinition, findAndModifyOptions, UserEntity.class);
     }
 
     @Override

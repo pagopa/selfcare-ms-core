@@ -10,6 +10,7 @@ public interface UserConnector {
     void deleteById(String id);
     OnboardedUser save(OnboardedUser example);
     OnboardedUser getById(String userId);
+    void findAndUpdateState(String userId, String institutionId,  String productId, RelationshipState state);
     void findAndUpdate(OnboardedUser onboardedUser, String id, String institutionId, OnboardedProduct product, UserBinding bindings);
     OnboardedUser findOnboardedManager(String institutionId, String productId, List<RelationshipState> state);
     void findAndCreate(String id, String institutionId, OnboardedProduct product, UserBinding binding);

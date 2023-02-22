@@ -19,7 +19,10 @@ public class UtilEnumList {
     public static final List<RelationshipState> ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES =
             List.of(RelationshipState.ACTIVE,
                     RelationshipState.PENDING);
-    private UtilEnumList() {}
+
+    public static final List<RelationshipState> VERIFY_TOKEN_RELATIONSHIP_STATES =
+            List.of(RelationshipState.TOBEVALIDATED,
+                    RelationshipState.PENDING);
 
     public static final List<PartyRole> VERIFY_USERS_ROLE =
             List.of(PartyRole.MANAGER,

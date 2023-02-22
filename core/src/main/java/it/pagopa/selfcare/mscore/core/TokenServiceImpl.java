@@ -1,9 +1,13 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -11,19 +15,87 @@ import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.CONTRACT_NOT_FOUND;
 
+import java.util.ArrayList;
+
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
+import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.VERIFY_TOKEN_RELATIONSHIP_STATES;
+
 @Slf4j
 @Service
 public class TokenServiceImpl implements TokenService {
 
     private final TokenConnector tokenConnector;
+    private final UserConnector userConnector;
+    private final InstitutionService institutionService;
+    private final OnboardingDao onboardingDao;
 
-    public TokenServiceImpl(TokenConnector tokenConnector) {
+    public TokenServiceImpl(TokenConnector tokenConnector, UserConnector userConnector, InstitutionService institutionService, OnboardingDao onboardingDao) {
         this.tokenConnector = tokenConnector;
+        this.userConnector = userConnector;
+        this.institutionService = institutionService;
+        this.onboardingDao = onboardingDao;
+    }
+
+    @Override
+    public Token verifyToken(String tokenId) {
+        Token token = tokenConnector.findById(tokenId);
+        if (!VERIFY_TOKEN_RELATIONSHIP_STATES.contains(token.getStatus())) {
+            throw new ResourceConflictException(String.format(TOKEN_ALREADY_CONSUMED.getMessage(), tokenId), TOKEN_ALREADY_CONSUMED.getCode());
+        }
+        return token;
+    }
+
+    @Override
+    public void activateRelationship(String id) {
+        Token token = tokenConnector.findById(id);
+        Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
+        List<OnboardedUser> userList = new ArrayList<>();
+        token.getUsers().forEach(s -> {
+            OnboardedUser user = userConnector.getById(id);
+            log.info("founded user {}", s);
+            if (user != null) {
+                userList.add(user);
+            }
+        });
+        if (RelationshipState.SUSPENDED == token.getStatus()) {
+            onboardingDao.persistForUpdate(token, institution, userList, RelationshipState.ACTIVE);
+        }else {
+            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), id, token.getStatus()), RELATIONSHIP_NOT_ACTIVABLE.getCode());
+        }
+    }
+
+    @Override
+    public void suspendRelationship(String id) {
+        Token token = tokenConnector.findById(id);
+        Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
+        List<OnboardedUser> userList = new ArrayList<>();
+        token.getUsers().forEach(s -> {
+            OnboardedUser user = userConnector.getById(id);
+            log.info("founded user {}", s);
+            if (user != null) {
+                userList.add(user);
+            }
+        });
+        if (RelationshipState.ACTIVE == token.getStatus()) {
+            onboardingDao.persistForUpdate(token, institution, userList, RelationshipState.SUSPENDED);
+        } else {
+            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), id, token.getStatus()), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
+        }
     }
 
     @Override
     public String findActiveContract(String institutionId, String userId, String productId) {
-        return tokenConnector.findActiveContract(institutionId, userId, productId).getId();
+       return tokenConnector.findActiveContract(institutionId, userId, productId).getId();
+    }
+
+    @Override
+    public ProductRelationship retrieveRelationship(String tokenId) {
+        return new ProductRelationship();
+    }
+
+    @Override
+    public Token getToken(String id){
+        return tokenConnector.findById(id);
     }
 
     @Override

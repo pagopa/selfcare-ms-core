@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -28,6 +29,9 @@ import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.INSTITUTION_NOT
 @Slf4j
 @Component
 public class InstitutionConnectorImpl implements InstitutionConnector {
+
+    private static final String CURRENT_ONBOARDING = "current.";
+    private static final String CURRENT_ONBOARDING_REFER = "$[current]";
     private final InstitutionRepository repository;
 
     @Autowired
@@ -54,6 +58,17 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                     return convertToInstitution(institution);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), id, null), INSTITUTION_NOT_FOUND.getCode()));
+    }
+
+    @Override
+    public void findAndUpdateStatus(String institutionId, String productId, RelationshipState status) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+        UpdateDefinition updateDefinition = new Update()
+                .set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.status.name()), status)
+                .set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.updatedAt.name()), OffsetDateTime.now())
+                .filterArray(Criteria.where(CURRENT_ONBOARDING + Onboarding.Fields.productId.name()).is(productId));
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        repository.findAndModify(query, updateDefinition, findAndModifyOptions, InstitutionEntity.class);
     }
 
     @Override

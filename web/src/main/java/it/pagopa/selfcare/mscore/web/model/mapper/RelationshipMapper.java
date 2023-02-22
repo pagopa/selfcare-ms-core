@@ -1,11 +1,13 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.ProductRelationship;
 import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -67,4 +69,11 @@ public class RelationshipMapper {
        institution.setImported(institution.isImported());
         return institutionUpdate;
     }
+
+    public static RelationshipResult toRelationshipInfo(ProductRelationship relationship) {
+        RelationshipResult relationshipInfo = new RelationshipResult();
+
+        return relationshipInfo;
+    }
+
 }

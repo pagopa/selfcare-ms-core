@@ -4,12 +4,7 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.Token;
-import it.pagopa.selfcare.mscore.model.UserBinding;
-import it.pagopa.selfcare.mscore.model.UserToOnboard;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -17,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +40,48 @@ public class OnboardingDao {
         updateInstitution(request, institution, geographicTaxonomies, token.getId());
         createUsers(toUpdate, toDelete, request, institution, token);
         return token.getId();
+    }
+
+    public String persistUsers(List<OnboardedUser> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, String digest) {
+        Token token = createToken(request, institution, digest);
+        createUsers(toUpdate, toDelete, request, institution, token);
+        return token.getId();
+    }
+
+    public void persistForUpdate(Token token, Institution institution, List<OnboardedUser> userList, RelationshipState stateTo) {
+        updateToken(token, stateTo);
+        updateInstitutionState(institution, token, stateTo);
+        updateUsers(userList, institution, token, stateTo);
+    }
+
+    private void updateUsers(List<OnboardedUser> userList, Institution institution, Token token, RelationshipState state) {
+        log.info("update {} users state from {} to {} for product {}", userList.size(), token.getStatus(), state, token.getProductId());
+        List<OnboardedUser> toUpdate = new ArrayList<>();
+        userList.forEach(onboardedUser -> {
+            try {
+                userConnector.findAndUpdateState(onboardedUser.getId(), institution.getId(), token.getProductId(), state);
+                toUpdate.add(onboardedUser);
+                log.debug("updated user {}", onboardedUser.getId());
+            } catch (Exception e) {
+                rollbackSecondStepOfUpdate(toUpdate, institution, token);
+            }
+        });
+    }
+
+
+    private void updateInstitutionState(Institution institution, Token token, RelationshipState state) {
+        log.info("update institution state from {} to {} for product {}", institution, state);
+        try {
+            institutionConnector.findAndUpdateStatus(institution.getId(), token.getProductId(), state);
+            //TODO: VEDERE L'ECCEZIONE IN CASO DI PRODOTTO NON TROVATO
+        } catch (Exception e) {
+            rollbackFirstStepOfUpdate(token);
+        }
+    }
+
+    private void updateToken(Token token, RelationshipState state) {
+        log.info("update token {} from state {} to {}", token.getId(), token.getStatus(), state);
+        tokenConnector.findAndUpdateTokenState(token.getId(), state);
     }
 
     private Token createToken(OnboardingRequest request, Institution institution, String digest) {
@@ -113,6 +151,18 @@ public class OnboardingDao {
     private void rollbackFirstStep(String tokenId, Institution institution) {
         tokenConnector.deleteById(tokenId);
         institutionConnector.save(institution);
+        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    public void rollbackSecondStepOfUpdate(List<OnboardedUser> toUpdate, Institution institution, Token token) {
+        tokenConnector.save(token);
+        institutionConnector.save(institution);
+        toUpdate.forEach(userConnector::save);
+        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    private void rollbackFirstStepOfUpdate(Token token) {
+        tokenConnector.save(token);
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
 }
