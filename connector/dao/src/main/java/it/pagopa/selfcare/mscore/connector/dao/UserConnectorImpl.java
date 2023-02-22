@@ -146,7 +146,6 @@ public class UserConnectorImpl implements UserConnector {
                 .collect(Collectors.toList());
     }
 
-
     private String constructQuery(String... variables) {
         StringBuilder builder = new StringBuilder();
         builder.append(UserEntity.Fields.bindings.name());

@@ -18,7 +18,7 @@ public class RelationshipResult {
     private ProductInfo product;
     private String state;
     private String pricingPlan;
-    private InstitutionUpdate institutionUpdate;
+    private InstitutionUpdateResponse institutionUpdate;
     private BillingResponse billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updateAt;

@@ -6,7 +6,7 @@ import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResponse;
 import org.junit.jupiter.api.Test;
 
@@ -116,7 +116,7 @@ class RelationshipMapperTest {
         assertEquals("42", actualToRelationshipResponseResult.getProduct());
         assertNull(actualToRelationshipResponseResult.getFrom());
         assertEquals("Pricing Plan", actualToRelationshipResponseResult.getPricingPlan());
-        InstitutionUpdate institutionUpdate = actualToRelationshipResponseResult.getInstitutionUpdate();
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResponseResult.getInstitutionUpdate();
         assertEquals("Tax Code", institutionUpdate.getTaxCode());
         assertEquals("4105551212", institutionUpdate.getSupportPhone());
         assertEquals("jane.doe@example.org", institutionUpdate.getSupportEmail());

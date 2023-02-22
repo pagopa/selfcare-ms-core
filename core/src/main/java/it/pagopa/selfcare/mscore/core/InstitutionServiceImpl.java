@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
@@ -7,21 +8,15 @@ import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,11 +28,15 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final InstitutionConnector institutionConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final GeoTaxonomiesConnector geoTaxonomiesConnector;
+    private final UserService userService;
+    private final TokenService tokenService;
 
-    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector) {
+    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector, UserService userService, TokenService tokenService) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
+        this.userService = userService;
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -125,18 +124,37 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public List<Onboarding> retrieveInstitutionProducts(String institutionId, List<String> states) {
-        Institution institution = retrieveInstitutionById(institutionId);
+    public List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states) {
         if (institution.getOnboarding() != null) {
             if (states != null && !states.isEmpty()) {
                 return institution.getOnboarding().stream()
-                        .filter(onboarding -> states.contains(onboarding.getStatus().name()))
+                        .filter(onboarding -> states.contains(onboarding.getStatus()))
                         .collect(Collectors.toList());
             } else {
                 return institution.getOnboarding();
             }
         } else {
-            throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), institutionId), PRODUCTS_NOT_FOUND_ERROR.getCode());
+            throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), institution.getId()), PRODUCTS_NOT_FOUND_ERROR.getCode());
+        }
+    }
+
+    @Override
+    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution) {
+        log.info("Retrieving geographic taxonomies for institution {}", institution.getId());
+        return institution.getGeographicTaxonomies().stream()
+                .map(GeographicTaxonomies::getCode)
+                .map(this::getGeoTaxonomies)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Institution updateInstitution(EnvEnum env, String institutionId, InstitutionUpdate institutionUpdate, String userId) {
+        if(userService.checkIfAdmin(env, userId, institutionId)) {
+            List<GeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomyCodes()
+                    .stream().map(this::getGeoTaxonomies).collect(Collectors.toList());
+            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
+        }else{
+            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), RELATIONSHIP_NOT_FOUND.getCode());
         }
     }
 
@@ -155,6 +173,36 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     public GeographicTaxonomies getGeoTaxonomies(String code) {
         return geoTaxonomiesConnector.getExtByCode(code);
+    }
+
+    @Override
+    public List<RelationshipInfo> getUserInstitutionRelationships(EnvEnum env, Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<OnboardedUser> adminRelationships = userService.retrieveAdminUsers(institution.getId(), userId, env);
+        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, env, roles, states, products, productRoles);
+        if(!adminRelationships.isEmpty()){
+            return toOnboardingInfo(institutionRelationships, institution);
+        }else{
+            List<OnboardedUser> filterInstitutionRelationships = institutionRelationships.stream().filter(user -> userId.equalsIgnoreCase(user.getId())).collect(Collectors.toList());
+            return toOnboardingInfo(filterInstitutionRelationships, institution);
+        }
+    }
+
+    private List<RelationshipInfo> toOnboardingInfo(List<OnboardedUser> institutionRelationships, Institution institution) {
+        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        for (OnboardedUser user : institutionRelationships) {
+            for(UserBinding binding : user.getBindings()){
+
+                Map<String, OnboardedProductInfo> map = binding.getProducts().stream()
+                        .collect(Collectors.toMap(OnboardedProduct::getProductId, onboardedProduct -> constructOnboardedProductsInfo(onboardedProduct, institution.getId()), (x, y) -> y));
+                relationshipInfoList.add(new RelationshipInfo(institution, user.getId(), map));
+            }
+        }
+        return relationshipInfoList;
+    }
+
+    private OnboardedProductInfo constructOnboardedProductsInfo(OnboardedProduct onboardedProduct, String id) {
+        String tokenId = tokenService.retrieveToken(id, onboardedProduct.getProductId()).getId();
+        return new OnboardedProductInfo(tokenId, onboardedProduct);
     }
 
     @Override

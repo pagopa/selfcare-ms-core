@@ -1,14 +1,23 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.model.*;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import it.pagopa.selfcare.mscore.web.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.institution.AttributesRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionProduct;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.AccessLevel;
@@ -21,16 +30,16 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
 
-    public static List<RelationshipResult> toRelationshipResponse(List<RelationshipInfo> relationshipInfoList){
+    public static List<RelationshipResult> toRelationshipResponse(List<RelationshipInfo> relationshipInfoList) {
         List<RelationshipResult> relationshipResults = new ArrayList<>();
-        for(RelationshipInfo info : relationshipInfoList) {
+        for (RelationshipInfo info : relationshipInfoList) {
             info.getOnboardedProductsInfo().forEach((s, onboardedProduct) -> {
                 RelationshipResult relationshipResult = new RelationshipResult();
                 relationshipResult.setId(onboardedProduct.getTokenId());
                 relationshipResult.setFrom(info.getUserId());
                 relationshipResult.setTo(info.getInstitution().getId());
 
-                if(onboardedProduct.getOnboardedProduct()!=null) {
+                if (onboardedProduct.getOnboardedProduct() != null) {
                     relationshipResult.setState(onboardedProduct.getOnboardedProduct().getStatus().name());
                     relationshipResult.setRole(onboardedProduct.getOnboardedProduct().getRole());
 
@@ -59,8 +68,8 @@ public class InstitutionMapper {
         }
     }
 
-    private static InstitutionUpdate constructInstitutionUpdate(Institution institution) {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+    private static InstitutionUpdateResponse constructInstitutionUpdate(Institution institution) {
+        InstitutionUpdateResponse institutionUpdate = new InstitutionUpdateResponse();
         institutionUpdate.setInstitutionType(institution.getInstitutionType());
         institutionUpdate.setDescription(institution.getDescription());
         institutionUpdate.setDigitalAddress(institution.getDigitalAddress());
@@ -146,7 +155,7 @@ public class InstitutionMapper {
     }
 
     private static void addInstitutionUpdate(InstitutionManagerResponse institutionManagerResponse, Institution institution) {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        InstitutionUpdateResponse institutionUpdate = new InstitutionUpdateResponse();
         institutionUpdate.setInstitutionType(institution.getInstitutionType());
         institutionUpdate.setDescription(institution.getDescription());
         institutionUpdate.setDigitalAddress(institution.getDigitalAddress());
@@ -256,6 +265,14 @@ public class InstitutionMapper {
             return billingResponse;
         }
         return billingResponse;
+    }
+
+    public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institution) {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        if (institution.getGeographicTaxonomyCodes() != null) {
+            institutionUpdate.setGeographicTaxonomyCodes(institution.getGeographicTaxonomyCodes());
+        }
+        return institutionUpdate;
     }
 
     public static Institution toInstitution(InstitutionRequest request, String externalId) {

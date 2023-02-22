@@ -17,9 +17,11 @@ public enum CustomErrorEnum {
     PRODUCTS_NOT_FOUND_ERROR("0030", "Products not found for institution having internalId %s"),
     ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),
+    TOKEN_ALREADY_CONSUMED("0040", "Token %s has already consumed"),
     TOKEN_NOT_FOUND("0014","Token %s not found"),
     CONTRACT_NOT_FOUND("0015","Token for institution %s and product %s not found"),
-    GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s and productId %s");
+    GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s and productId %s"),
+    RELATIONSHIP_NOT_FOUND("0008", "Relationship not found for Institution %s User %s Role %s");
 
     private final String code;
     private final String detail;

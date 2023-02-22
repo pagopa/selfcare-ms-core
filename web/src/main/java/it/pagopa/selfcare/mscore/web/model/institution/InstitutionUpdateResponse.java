@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InstitutionUpdate {
+public class InstitutionUpdateResponse {
     private InstitutionType institutionType;
     private String description;
     private String digitalAddress;

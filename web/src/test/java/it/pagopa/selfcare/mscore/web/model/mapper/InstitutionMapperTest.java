@@ -5,7 +5,7 @@ import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
@@ -225,7 +225,7 @@ class InstitutionMapperTest {
                 .toInstitutionManagerResponse(productManagerInfo, "42", "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertEquals("42", actualToInstitutionManagerResponseResult.getId());
-        InstitutionUpdate institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
+        InstitutionUpdateResponse institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
         assertNull(institutionUpdate.getInstitutionType());
         assertNull(institutionUpdate.getDigitalAddress());
         assertNull(institutionUpdate.getDescription());

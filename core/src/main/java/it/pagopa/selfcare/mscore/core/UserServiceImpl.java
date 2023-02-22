@@ -40,4 +40,9 @@ public class UserServiceImpl implements UserService{
     public List<OnboardedUser> retrieveUsers(String institutionId, String personId, EnvEnum env, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         return  userConnector.findWithFilter(env, institutionId, personId, roles, states, products, productRoles);
     }
+
+    @Override
+    public boolean checkIfAdmin(EnvEnum env, String userId, String institutionId) {
+        return !userConnector.findAdminWithFilter(env, userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
+    }
 }

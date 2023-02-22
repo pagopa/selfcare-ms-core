@@ -4,7 +4,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -47,8 +47,8 @@ public class RelationshipMapper {
         return billingResponse;
     }
 
-    private static InstitutionUpdate toInstitutionUpdate(Institution institution) {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+    private static InstitutionUpdateResponse toInstitutionUpdate(Institution institution) {
+        InstitutionUpdateResponse institutionUpdate = new InstitutionUpdateResponse();
         institutionUpdate.setAddress(institution.getAddress());
         institutionUpdate.setInstitutionType(institution.getInstitutionType());
         institutionUpdate.setDescription(institution.getDescription());

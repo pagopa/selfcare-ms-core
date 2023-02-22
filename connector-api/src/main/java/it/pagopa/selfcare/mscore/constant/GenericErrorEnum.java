@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.constant;
 
 public enum GenericErrorEnum {
+    GET_INSTITUTION_BY_ID_ERROR("0040", "Error while retrieving institution with internalId"),
     GET_INSTITUTION_BY_EXTERNAL_ID_ERROR("0041", "Error while retrieving institution with externalId"),
     INSTITUTION_MANAGER_ERROR("0042", "Error while retrieving institution with externalId"),
     INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution billing data"),
@@ -13,6 +14,7 @@ public enum GenericErrorEnum {
 
     CONTRACT_PATH_ERROR("0100", "Contract Path is required"),
     RETRIEVING_USER_RELATIONSHIP_ERROR("0023", "Error while retrieving user relationships"),
+    PUT_INSTITUTION_ERROR("0051", "Error while updating institution"),
     RETRIEVE_GEO_TAXONOMIES_ERROR("0050", "Error while retrieving institution geographic taxonomy"),
     GENERIC_ERROR("0000", "Generic Error");
     private final String code;

@@ -15,7 +15,7 @@ public class RelationshipResponse {
     private String product;
     private RelationshipState state;
     private String pricingPlan;
-    private InstitutionUpdate institutionUpdate;
+    private InstitutionUpdateResponse institutionUpdate;
     private BillingResponse billingResponse;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

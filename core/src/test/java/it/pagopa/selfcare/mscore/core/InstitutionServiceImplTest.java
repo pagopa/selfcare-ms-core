@@ -600,8 +600,9 @@ class InstitutionServiceImplTest {
     void testCreateInstitutionRaw4() {
         when(institutionConnector.save(any())).thenReturn(new Institution());
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
+        Institution institution = new Institution();
         assertThrows(ResourceConflictException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(new Institution(), "42"));
+                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
         verify(institutionConnector).findByExternalId(any());
     }
 
@@ -652,8 +653,9 @@ class InstitutionServiceImplTest {
                 .thenThrow(new InvalidRequestException("An error occurred", "START - check institution {} already exists"));
         when(institutionConnector.findByExternalId(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "START - check institution {} already exists"));
+        Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(new Institution(), "42"));
+                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
         verify(institutionConnector).findByExternalId(any());
     }
 
@@ -682,18 +684,20 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
      */
     @Test
     void testRetrieveInstitutionProducts() {
         when(institutionConnector.findById(any())).thenReturn(new Institution());
+        Institution institution = new Institution();
+        List<RelationshipState> list = List.of(RelationshipState.ACTIVE);
         assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionProducts("42", new ArrayList<>()));
+                () -> institutionServiceImpl.retrieveInstitutionProducts(institution, list));
         verify(institutionConnector).findById(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
      */
     @Test
     void testRetrieveInstitutionProducts3() {
@@ -708,26 +712,28 @@ class InstitutionServiceImplTest {
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
                         "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true));
         List<Onboarding> actualRetrieveInstitutionProductsResult = institutionServiceImpl
-                .retrieveInstitutionProducts("42", new ArrayList<>());
+                .retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values()));
         assertSame(onboardingList, actualRetrieveInstitutionProductsResult);
         assertTrue(actualRetrieveInstitutionProductsResult.isEmpty());
         verify(institutionConnector).findById(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
      */
     @Test
     void testRetrieveInstitutionProducts4() {
         when(institutionConnector.findById(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        Institution institution = new Institution();
+        List<RelationshipState> list = List.of(RelationshipState.values());
         assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionProducts("42", new ArrayList<>()));
+                () -> institutionServiceImpl.retrieveInstitutionProducts(institution, list));
         verify(institutionConnector).findById(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
      */
     @Test
     void testRetrieveInstitutionProducts5() {
@@ -742,14 +748,12 @@ class InstitutionServiceImplTest {
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
                         "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true));
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("foo");
-        assertTrue(institutionServiceImpl.retrieveInstitutionProducts("42", stringList).isEmpty());
+        assertTrue(institutionServiceImpl.retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values())).isEmpty());
         verify(institutionConnector).findById(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
      */
     @Test
     void testRetrieveInstitutionProducts6() {
@@ -785,14 +789,12 @@ class InstitutionServiceImplTest {
 
         when(institutionConnector.findById(any())).thenReturn(institution);
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("foo");
-        assertTrue(institutionServiceImpl.retrieveInstitutionProducts("42", stringList).isEmpty());
+        assertTrue(institutionServiceImpl.retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values())).isEmpty());
         verify(institutionConnector).findById(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
      */
     @Test
     void testRetrieveInstitutionProducts7() {
@@ -848,9 +850,7 @@ class InstitutionServiceImplTest {
 
         when(institutionConnector.findById(any())).thenReturn(institution);
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("foo");
-        assertTrue(institutionServiceImpl.retrieveInstitutionProducts("42", stringList).isEmpty());
+        assertTrue(institutionServiceImpl.retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values())).isEmpty());
         verify(institutionConnector).findById(any());
     }
 
@@ -946,8 +946,9 @@ class InstitutionServiceImplTest {
     void testRetrieveInstitutionsWithFilter() {
         when(institutionConnector.findWithFilter(any(), any(), any()))
                 .thenReturn(new ArrayList<>());
+        List<RelationshipState> list = List.of(RelationshipState.ACTIVE);
         assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", new ArrayList<>()));
+                () -> institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", list));
         verify(institutionConnector).findWithFilter(any(), any(), any());
     }
 
@@ -971,8 +972,9 @@ class InstitutionServiceImplTest {
     void testRetrieveInstitutionsWithFilter3() {
         when(institutionConnector.findWithFilter(any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        List<RelationshipState> list = List.of(RelationshipState.ACTIVE);
         assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", new ArrayList<>()));
+                () -> institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", list));
         verify(institutionConnector).findWithFilter(any(), any(), any());
     }
 }

@@ -11,5 +11,6 @@ public interface TokenConnector {
     Token save(Token token);
     Token findById(String tokenId);
     List<Token> findWithFilter(String institutionId, String productId, List<RelationshipState> state);
+
     void findAndUpdateTokenUser(String id, List<String> usersId);
 }

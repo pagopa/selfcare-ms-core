@@ -38,7 +38,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     @Override
     public Institution save(Institution institution) {
         final InstitutionEntity entity = convertToInstitutionEntity(institution);
-        return  convertToInstitution(repository.save(entity));
+        return convertToInstitution(repository.save(entity));
     }
 
     @Override
@@ -61,12 +61,12 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
         Update update = new Update();
         update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
-        update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
-
-        for(GeographicTaxonomies geo: geographicTaxonomiesList){
+        if (onboarding != null) {
+            update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
+        }
+        for (GeographicTaxonomies geo : geographicTaxonomiesList) {
             update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geo);
         }
-
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
@@ -95,7 +95,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.externalId.name()).is(externalId))
                 .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
                         .elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)
-                        .and(Onboarding.Fields.status.name()).in(validRelationshipStates)));
+                                .and(Onboarding.Fields.status.name()).in(validRelationshipStates)));
 
         return repository.find(query, InstitutionEntity.class).stream()
                 .map(this::convertToInstitution)
@@ -111,7 +111,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
     private Institution convertToInstitution(InstitutionEntity entity) {
         Institution institution = new Institution();
-        if(entity!=null) {
+        if (entity != null) {
             institution.setId(entity.getId());
             institution.setExternalId(entity.getExternalId());
             institution.setDescription(entity.getDescription());
@@ -143,8 +143,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         InstitutionEntity entity = new InstitutionEntity();
         if (institution.getId() != null) {
             entity.setId(institution.getId());
-        }
-        else{
+        } else {
             entity.setId(UUID.randomUUID().toString());
         }
         entity.setCreatedAt(institution.getCreatedAt());

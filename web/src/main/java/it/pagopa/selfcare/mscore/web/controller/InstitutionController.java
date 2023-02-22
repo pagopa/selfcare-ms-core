@@ -3,12 +3,19 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.model.EnvEnum;
+import it.pagopa.selfcare.mscore.model.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -17,14 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -129,11 +129,112 @@ public class InstitutionController {
     public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                          @PathVariable("id") String institutionId,
                                                                          @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
-                                                                         @RequestParam(value = "states", required = false) List<String> states) {
+                                                                         @RequestParam(value = "states", required = false) List<RelationshipState> states) {
 
         log.info("Retrieving products for institution {}", institutionId);
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
-        List<Onboarding> list = institutionService.retrieveInstitutionProducts(institutionId, states);
+        Institution institution = institutionService.retrieveInstitutionById(institutionId);
+        List<Onboarding> list = institutionService.retrieveInstitutionProducts(institution, states);
         return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(list));
     }
+
+
+    /**
+     * The function Update the corresponding institution given internal institution id
+     *
+     * @param institutionId String
+     * @param institutionPut InstitutionPut
+     *
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: OnboardedProducts
+     * * Code: 404, Message: Products not found, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.update}")
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.internalId}")
+                                                                 @PathVariable("institutionId") String institutionId,
+                                                                 @RequestBody InstitutionPut institutionPut,
+                                                                 Authentication authentication) {
+
+        log.info("Updating institution {} with {}", institutionId, institutionPut);
+        CustomExceptionMessage.setCustomMessage(PUT_INSTITUTION_ERROR);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        Institution saved = institutionService.updateInstitution(EnvEnum.ROOT, institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut), selfCareUser.getId());
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
+    }
+
+    /**
+     * The function return geographic taxonomies related to institution
+     *
+     * @param id String
+     *
+     * @return GeographicTaxonomies
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.geotaxonomies}")
+    @GetMapping(value = "/{id}/geotaxonomies")
+    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomies(@PathVariable("id") String id) {
+
+        CustomExceptionMessage.setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
+        Institution institution = institutionService.retrieveInstitutionById(id);
+        List<GeographicTaxonomies> list = institutionService.retrieveInstitutionGeoTaxonomies(institution);
+        return ResponseEntity.ok(list);
+    }
+
+    /**
+     * The function return an institution given institution internal id
+     *
+     * @param id String
+     *
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.find}")
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<InstitutionResponse> retrieveInstitutionById(@PathVariable("id") String id) {
+        CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        Institution institution = institutionService.retrieveInstitutionById(id);
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
+    }
+
+
+    /**
+     * The function return user institution relationships
+     *
+     * @param institutionId String
+     * @param personId String
+     * @param roles String[]
+     * @param states String[]
+     * @param products String[]
+     * @param productRoles String[]
+     *
+     * @return GeographicTaxonomies
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institution.relationships}")
+    @GetMapping(value = "/{id}/relationships")
+    public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationships(@PathVariable("id") String institutionId,
+                                                                                    @RequestParam(value = "personId", required = false) String personId,
+                                                                                    @RequestParam(value = "roles", required = false) List<PartyRole> roles,
+                                                                                    @RequestParam(value = "states", required = false) List<RelationshipState> states,
+                                                                                    @RequestParam(value = "products", required = false) List<String> products,
+                                                                                    @RequestParam(value = "productRoles", required = false) List<String> productRoles,
+                                                                                    Authentication authentication) {
+        log.info("Getting relationship for institution {} and current user", institutionId);
+        CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        Institution institution = institutionService.retrieveInstitutionById(institutionId);
+        List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(EnvEnum.ROOT, institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
+        return ResponseEntity.ok().body(InstitutionMapper.toRelationshipResponse(relationshipInfoList));
+    }
+
+
 }
