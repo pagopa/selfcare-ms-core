@@ -18,7 +18,7 @@ class UserMapperTest {
      */
     @Test
     void testToPersonResponse() {
-        assertNull(UserMapper.toPersonResponse(new OnboardedUser(), "42").getUserId());
+        assertNull(UserMapper.toPersonResponse(new OnboardedUser(), "42").getId());
         assertThrows(ResourceNotFoundException.class, () -> UserMapper.toPersonResponse(null, "foo"));
     }
 

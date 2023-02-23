@@ -50,6 +50,8 @@ public enum GenericErrorEnum {
     ONBOARDING_LEGALS_ERROR("0018", "Error while onboarding legals"),
     RETRIEVE_GEO_TAXONOMIES_ERROR("0050", "Error while retrieving institution geographic taxonomy"),
     GET_RELATIONSHIP_ERROR("0028", "Error while getting relationship"),
+    CREATE_PERSON_CONFLICT("0008", "Conflict while creating person"),
+    CREATE_PERSON_ERROR("0009", "Error while creating person"),
     GENERIC_ERROR("0000", "Generic Error");
     private final String code;
     private final String detail;

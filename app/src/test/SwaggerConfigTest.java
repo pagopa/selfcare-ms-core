@@ -1,8 +1,5 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.core.InstitutionService;
-import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.core.TokenService;
+import it.pagopa.selfcare.mscore.core.*;
 import it.pagopa.selfcare.mscore.web.config.SwaggerConfig;
 import it.pagopa.selfcare.mscore.web.config.WebConfig;
 import org.junit.jupiter.api.Test;
@@ -11,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -47,6 +45,9 @@ class SwaggerConfigTest {
 
     @MockBean
     TokenService tokenService;
+
+    @MockBean
+    UserService userService;
 
     @Autowired
     WebApplicationContext context;

@@ -27,6 +27,12 @@
   }, {
     "name" : "Onboarding",
     "description" : "Onboarding Controller"
+  }, {
+    "name" : "Persons",
+    "description" : "User Controller"
+  }, {
+    "name" : "Token",
+    "description" : "Token Controller"
   } ],
   "paths" : {
     "/external/institutions/{externalId}" : {
@@ -86,7 +92,7 @@
       "get" : {
         "tags" : [ "External" ],
         "summary" : "retrieveInstitutionGeoTaxonomiesByExternalId",
-        "description" : "${swagger.mscore.external.geotaxonomies}",
+        "description" : "The service retrieves the geographic taxonomies related to Institution.",
         "operationId" : "retrieveInstitutionGeoTaxonomiesByExternalIdUsingGET",
         "parameters" : [ {
           "name" : "externalId",
@@ -330,7 +336,7 @@
       "get" : {
         "tags" : [ "External" ],
         "summary" : "getUserInstitutionRelationshipsByExternalId",
-        "description" : "${swagger.mscore.external.institution.relationships}",
+        "description" : "The service returns the relationships related to the institution",
         "operationId" : "getUserInstitutionRelationshipsByExternalIdUsingGET",
         "parameters" : [ {
           "name" : "authenticated",
@@ -439,7 +445,10 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/RelationshipsResponse"
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelationshipResult"
+                  }
                 }
               }
             }
@@ -717,6 +726,225 @@
         } ]
       }
     },
+    "/institutions/{id}" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "retrieveInstitutionById",
+        "description" : "${swagger.mscore.institution.find}",
+        "operationId" : "retrieveInstitutionByIdUsingGET",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Institution" ],
+        "summary" : "updateInstitution",
+        "description" : "${swagger.mscore.institution.update}",
+        "operationId" : "updateInstitutionUsingPUT",
+        "parameters" : [ {
+          "name" : "authenticated",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "authorities[0].authority",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "credentials",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "details",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "institutionId",
+          "in" : "path",
+          "description" : "${swagger.mscore.institutions.model.internalId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "principal",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionPut"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/institutions/{id}/geotaxonomies" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "retrieveInstitutionGeoTaxonomies",
+        "description" : "${swagger.mscore.institution.geotaxonomies}",
+        "operationId" : "retrieveInstitutionGeoTaxonomiesUsingGET",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GeographicTaxonomies"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/{id}/products" : {
       "get" : {
         "tags" : [ "Institution" ],
@@ -740,7 +968,8 @@
           "style" : "form",
           "explode" : true,
           "schema" : {
-            "type" : "string"
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           }
         } ],
         "responses" : {
@@ -750,6 +979,153 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/OnboardedProducts"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/institutions/{id}/relationships" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "getUserInstitutionRelationships",
+        "description" : "${swagger.mscore.institution.relationships}",
+        "operationId" : "getUserInstitutionRelationshipsUsingGET",
+        "parameters" : [ {
+          "name" : "authenticated",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "authorities[0].authority",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "credentials",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "details",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "principal",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "personId",
+          "in" : "query",
+          "description" : "personId",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "roles",
+          "in" : "query",
+          "description" : "roles",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          }
+        }, {
+          "name" : "states",
+          "in" : "query",
+          "description" : "states",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          }
+        }, {
+          "name" : "products",
+          "in" : "query",
+          "description" : "products",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productRoles",
+          "in" : "query",
+          "description" : "productRoles",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelationshipResult"
+                  }
                 }
               }
             }
@@ -1042,6 +1418,417 @@
           "bearerAuth" : [ "global" ]
         } ]
       }
+    },
+    "/relationships/{id}" : {
+      "post" : {
+        "tags" : [ "Token" ],
+        "summary" : "getRelationship",
+        "description" : "${swagger.mscore.token.suspend}",
+        "operationId" : "getRelationshipUsingPOST",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "${swagger.mscore.token.tokenId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RelationshipResult"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/relationships/{tokenId}/activate" : {
+      "post" : {
+        "tags" : [ "Token" ],
+        "summary" : "activateRelationship",
+        "description" : "${swagger.mscore.token.activate}",
+        "operationId" : "activateRelationshipUsingPOST",
+        "parameters" : [ {
+          "name" : "tokenId",
+          "in" : "path",
+          "description" : "${swagger.mscore.token.tokenId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/relationships/{tokenId}/suspend" : {
+      "post" : {
+        "tags" : [ "Token" ],
+        "summary" : "suspendRelationship",
+        "description" : "${swagger.mscore.token.suspend}",
+        "operationId" : "suspendRelationshipUsingPOST",
+        "parameters" : [ {
+          "name" : "tokenId",
+          "in" : "path",
+          "description" : "${swagger.mscore.token.tokenId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/tokens/{tokenId}/verify" : {
+      "post" : {
+        "tags" : [ "Token" ],
+        "summary" : "verifyToken",
+        "description" : "The service verify token status",
+        "operationId" : "verifyTokenUsingPOST",
+        "parameters" : [ {
+          "name" : "tokenId",
+          "in" : "path",
+          "description" : "${swagger.mscore.token.tokenId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/persons" : {
+      "post" : {
+        "tags" : [ "Persons" ],
+        "summary" : "The service create a new person",
+        "description" : "The service create a new person",
+        "operationId" : "createUserUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Person"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PersonResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/persons/{id}" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "The service returns the identified person, if any.",
+        "description" : "The service returns the identified person, if any.",
+        "operationId" : "infoUserUsingGET",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PersonResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      },
+      "head" : {
+        "tags" : [ "Persons" ],
+        "summary" : "The service verify if a Person exists for a given ID",
+        "description" : "The service verify if a Person exists for a given ID",
+        "operationId" : "verifyUserUsingHEAD",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
     }
   },
   "components" : {
@@ -1284,7 +2071,7 @@
             "type" : "string"
           },
           "institutionUpdate" : {
-            "$ref" : "#/components/schemas/InstitutionUpdate"
+            "$ref" : "#/components/schemas/InstitutionUpdateResponse"
           },
           "pricingPlan" : {
             "type" : "string"
@@ -1318,6 +2105,18 @@
           "state" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          }
+        }
+      },
+      "InstitutionPut" : {
+        "title" : "InstitutionPut",
+        "type" : "object",
+        "properties" : {
+          "geographicTaxonomyCodes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },
@@ -1451,6 +2250,61 @@
       },
       "InstitutionUpdate" : {
         "title" : "InstitutionUpdate",
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "dataProtectionOfficer" : {
+            "$ref" : "#/components/schemas/DataProtectionOfficer"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "digitalAddress" : {
+            "type" : "string"
+          },
+          "geographicTaxonomyCodes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "imported" : {
+            "type" : "boolean"
+          },
+          "institutionType" : {
+            "type" : "string",
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP", "UNKNOWN" ]
+          },
+          "paymentServiceProvider" : {
+            "$ref" : "#/components/schemas/PaymentServiceProvider"
+          },
+          "rea" : {
+            "type" : "string"
+          },
+          "shareCapital" : {
+            "type" : "string"
+          },
+          "supportEmail" : {
+            "type" : "string"
+          },
+          "supportPhone" : {
+            "type" : "string"
+          },
+          "taxCode" : {
+            "type" : "string"
+          },
+          "zipCode" : {
+            "type" : "string"
+          }
+        }
+      },
+      "InstitutionUpdateResponse" : {
+        "title" : "InstitutionUpdateResponse",
         "type" : "object",
         "properties" : {
           "address" : {
@@ -1742,6 +2596,15 @@
           }
         }
       },
+      "PersonResponse" : {
+        "title" : "PersonResponse",
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string"
+          }
+        }
+      },
       "Problem" : {
         "title" : "Problem",
         "type" : "object",
@@ -1794,7 +2657,7 @@
         "title" : "RelationshipResult",
         "type" : "object",
         "properties" : {
-          "billingResponse" : {
+          "billing" : {
             "$ref" : "#/components/schemas/BillingResponse"
           },
           "createdAt" : {
@@ -1808,12 +2671,12 @@
             "type" : "string"
           },
           "institutionUpdate" : {
-            "$ref" : "#/components/schemas/InstitutionUpdate"
+            "$ref" : "#/components/schemas/InstitutionUpdateResponse"
           },
           "pricingPlan" : {
             "type" : "string"
           },
-          "productInfo" : {
+          "product" : {
             "$ref" : "#/components/schemas/ProductInfo"
           },
           "role" : {
@@ -1829,18 +2692,6 @@
           "updateAt" : {
             "type" : "string",
             "format" : "date-time"
-          }
-        }
-      },
-      "RelationshipsResponse" : {
-        "title" : "RelationshipsResponse",
-        "type" : "object",
-        "properties" : {
-          "relationshipInfoList" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/RelationshipResult"
-            }
           }
         }
       }
