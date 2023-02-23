@@ -2,21 +2,19 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import it.pagopa.selfcare.mscore.constant.CustomErrorEnum;
-import it.pagopa.selfcare.mscore.constant.GenericErrorEnum;
+import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.UserService;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
-import it.pagopa.selfcare.mscore.web.model.user.Person;
-import it.pagopa.selfcare.mscore.web.model.user.PersonResponse;
+import it.pagopa.selfcare.mscore.model.RelationshipInfo;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
+import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_RELATIONSHIP_ERROR;
 
 @Slf4j
 @RestController
@@ -28,24 +26,6 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
-    }
-
-    /**
-     * The function retrieves person by id
-     *
-     * @param userId String
-     *
-     * @return PersonResponse
-     * * Code: 200, Message: successful operation, DataType: PersonResponse
-     * * Code: 404, Message: Person not found, DataType: Problem
-     *
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.person.info}", notes = "${swagger.mscore.person.info}")
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<PersonResponse> infoUser(@PathVariable(value = "id") String userId) {
-        OnboardedUser onboardedUser = userService.findByUserId(userId);
-        return ResponseEntity.ok().body(UserMapper.toPersonResponse(onboardedUser, userId));
     }
 
     /**
@@ -67,25 +47,82 @@ public class UserController {
     }
 
     /**
-     * The function persist a new User
+     * The function activate a suspended relationship
      *
-     * @param person Person
-     *
-     * @return PersonResponse
-     * * Code: 201, Message: successful operation, DataType: PersonResponse
-     * * Code: 409, Message: Conflict while creating person, DataType: Problem
-     * * Code: 400, Message: Error while creating person, DataType: Problem
-     *
+     * @param tokenId tokenId
+     * @return no content
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid starter token status, DataType: Problem
+     * * Code: 404, Message: Token not found, DataType: Problem
      */
-    @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "${swagger.mscore.person.create}", notes = "${swagger.mscore.person.create}")
-    @PostMapping(value = "")
-    public ResponseEntity<PersonResponse> createUser(@RequestBody @Valid Person person) {
-        CustomExceptionMessage.setCustomMessage(GenericErrorEnum.CREATE_PERSON_ERROR);
-        OnboardedUser saved = userService.createUser(UserMapper.fromDto(person));
-        return ResponseEntity.ok().body(UserMapper.toPersonResponse(saved, person.getId()));
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.activate}")
+    @PostMapping("/relationships/{relationshipId}/activate")
+    public ResponseEntity<Void> activateRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+                                                     @PathVariable("relationshipId") String tokenId) {
+        log.info("Activating relationship {}", tokenId);
+        CustomExceptionMessage.setCustomMessage(ACTIVATE_RELATIONSHIP_ERROR);
+        userService.activateRelationship(tokenId);
+        return ResponseEntity.noContent().build();
     }
 
+    /**
+     * The function suspend an active relationship
+     *
+     * @param relationshipId tokenId
+     * @return no content
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid starter token status, DataType: Problem
+     * * Code: 404, Message: Token not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.suspend}")
+    @PostMapping("/relationships/{relationshipId}/suspend")
+    public ResponseEntity<Void> suspendRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+                                                    @PathVariable("tokenId") String relationshipId) {
+        log.info("Suspending relationship {}", relationshipId);
+        CustomExceptionMessage.setCustomMessage(SUSPEND_RELATIONSHIP_ERROR);
+        userService.suspendRelationship(relationshipId);
+        return ResponseEntity.noContent().build();
+    }
 
+    /**
+     * The function deleted the corresponding relationship
+     *
+     * @param relationshipId relationshipId
+     * @return RelationshipResponse
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid starter token status, DataType: Problem
+     * * Code: 404, Message: Token not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.delete}")
+    @DeleteMapping("/relationships/{relationshipId}")
+    public ResponseEntity<Void> deleteRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+                                                   @PathVariable("relationshipId") String relationshipId) {
+        log.info("Getting relationship {}", relationshipId);
+        CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
+        userService.deleteRelationship(relationshipId);
+        return ResponseEntity.ok().build();
+    }
 
+    /**
+     * The function Gets the corresponding relationship
+     *
+     * @param relationshipId relationshipId
+     * @return RelationshipResponse
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid starter token status, DataType: Problem
+     * * Code: 404, Messa
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.token.get}")
+    @PostMapping("/relationships/{relationshipId}")
+    public ResponseEntity<RelationshipResult> getRelationship(@ApiParam("${swagger.mscore.token.relationshipId}")
+                                                              @PathVariable("relationshipId") String relationshipId) {
+        log.info("Getting relationship {}", relationshipId);
+        CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
+        RelationshipInfo relationship = userService.retrieveRelationship(relationshipId);
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResult(relationship));
+    }
 }

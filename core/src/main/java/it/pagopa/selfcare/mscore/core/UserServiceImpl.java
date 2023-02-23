@@ -4,20 +4,16 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.CustomErrorEnum;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.UserToOnboard;
+import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.USER_ALREADY_EXIST_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.CREATE_PERSON_CONFLICT;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.RELATIONSHIP_NOT_SUSPENDABLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 
 @Service
@@ -25,9 +21,13 @@ import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 public class UserServiceImpl implements UserService{
 
     private final UserConnector userConnector;
+    private final OnboardingDao onboardingDao;
+    private final InstitutionService institutionService;
 
-    public UserServiceImpl(UserConnector userConnector) {
+    public UserServiceImpl(UserConnector userConnector, OnboardingDao onboardingDao, InstitutionService institutionService) {
         this.userConnector = userConnector;
+        this.onboardingDao = onboardingDao;
+        this.institutionService = institutionService;
     }
 
     @Override
@@ -61,22 +61,50 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public OnboardedUser createUser(UserToOnboard userToOnboard){
-        OnboardedUser onboardedUser = userConnector.getById(userToOnboard.getId());
-        if(onboardedUser != null) {
-            throw new ResourceConflictException(CREATE_PERSON_CONFLICT.getMessage(), CREATE_PERSON_CONFLICT.getCode());
-        }
-        OnboardedUser newOnboardedUser = new OnboardedUser();
-        newOnboardedUser.setId(userToOnboard.getId());
-        newOnboardedUser.setCreatedAt(OffsetDateTime.now());
-        return userConnector.save(newOnboardedUser);
-    }
-
-    @Override
     public void verifyUser(String userId) {
         OnboardedUser user = findByUserId(userId);
         if (user == null) {
             throw new ResourceNotFoundException(String.format(CustomErrorEnum.USER_NOT_FOUND_ERROR.getMessage(), userId), CustomErrorEnum.USER_NOT_FOUND_ERROR.getCode());
         }
+    }
+
+    @Override
+    public void activateRelationship(String relationshipId) {
+        OnboardedUser user = findByRelationshipId(relationshipId);
+        try {
+            onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.SUSPENDED), RelationshipState.ACTIVE);
+        } catch (InvalidRequestException e) {
+            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
+        }
+    }
+
+    @Override
+    public void suspendRelationship(String relationshipId) {
+        OnboardedUser user = findByRelationshipId(relationshipId);
+        try {
+            onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.ACTIVE), RelationshipState.SUSPENDED);
+        } catch (InvalidRequestException e) {
+            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
+        }
+    }
+
+    @Override
+    public void deleteRelationship(String relationshipId) {
+        OnboardedUser user = findByRelationshipId(relationshipId);
+        onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.values()), RelationshipState.DELETED);
+    }
+
+    @Override
+    public RelationshipInfo retrieveRelationship(String relationshipId) {
+        OnboardedUser user = findByRelationshipId(relationshipId);
+        for (UserBinding userBinding : user.getBindings()) {
+            for (OnboardedProduct product : userBinding.getProducts()) {
+                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())) {
+                    Institution institution = institutionService.retrieveInstitutionById(userBinding.getInstitutionId());
+                    return new RelationshipInfo(institution, user.getId(), product);
+                }
+            }
+        }
+        throw new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode());
     }
 }
