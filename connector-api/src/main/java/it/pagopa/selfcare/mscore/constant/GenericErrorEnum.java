@@ -15,7 +15,7 @@ public enum GenericErrorEnum {
     CONTRACT_PATH_ERROR("0100", "Contract Path is required"),
     MANAGER_EMAIL_NOT_FOUND("0101", "Manager email not found"),
 
-    VERIFY_TOKEN_FAILED("0041", "Something went wrong trying to verify token: %s"),
+    VERIFY_TOKEN_FAILED("0041", "Something went wrong trying to verify token"),
 
     SIGNATURE_NOT_FOUND("1007", "No signature found"),
 

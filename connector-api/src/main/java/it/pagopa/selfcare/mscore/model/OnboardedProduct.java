@@ -13,8 +13,8 @@ import static it.pagopa.selfcare.mscore.model.EnvEnum.ROOT;
 @FieldNameConstants(asEnum = true)
 public class OnboardedProduct {
 
+    private String relationshipId;
     private String productId;
-    private String productName;
     private RelationshipState status;
     private String contract;
     private List<String> productRoles;

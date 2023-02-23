@@ -14,6 +14,7 @@ public interface UserConnector {
     void findAndUpdate(OnboardedUser onboardedUser, String id, String institutionId, OnboardedProduct product, UserBinding bindings);
     OnboardedUser findOnboardedManager(String institutionId, String productId, List<RelationshipState> state);
     void findAndCreate(String id, String institutionId, OnboardedProduct product, UserBinding binding);
-    List<OnboardedUser> findAdminWithFilter(EnvEnum env, String userId, String institutionId, List<PartyRole> adminPartyRole, List<RelationshipState> active);
-    List<OnboardedUser> findWithFilter(EnvEnum env, String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+    List<OnboardedUser> findAdminWithFilter(EnvEnum envEnum, String userId, String institutionId, List<PartyRole> adminPartyRole, List<RelationshipState> active);
+    List<OnboardedUser> findWithFilter(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+    OnboardedUser findByRelationshipId(String relationshipId);
 }

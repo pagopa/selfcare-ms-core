@@ -10,7 +10,8 @@ import java.util.List;
 public interface UserService {
     OnboardedUser findOnboardedManager(String id, String productId, List<RelationshipState> active);
     OnboardedUser findByUserId(String id);
-    List<OnboardedUser> retrieveAdminUsers(String externalId, String userId, EnvEnum env);
-    List<OnboardedUser> retrieveUsers(String externalId, String personId, EnvEnum env, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+    List<OnboardedUser> retrieveAdminUsers(String externalId, String userId);
+    List<OnboardedUser> retrieveUsers(String externalId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
     boolean checkIfAdmin(EnvEnum env, String userId, String institutionId);
+    OnboardedUser findByRelationshipId(String relationshipId);
 }

@@ -54,7 +54,7 @@ public class OnboardingDao {
         updateUsers(userList, institution, token, stateTo);
     }
 
-    private void updateUsers(List<OnboardedUser> userList, Institution institution, Token token, RelationshipState state) {
+    public void updateUsers(List<OnboardedUser> userList, Institution institution, Token token, RelationshipState state) {
         log.info("update {} users state from {} to {} for product {}", userList.size(), token.getStatus(), state, token.getProductId());
         List<OnboardedUser> toUpdate = new ArrayList<>();
         userList.forEach(onboardedUser -> {
@@ -105,9 +105,9 @@ public class OnboardingDao {
             request.getUsers()
                     .forEach(userToOnboard -> {
                         OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
-                        if(onboardedUser != null){
+                        if (onboardedUser != null) {
                             updateUser(onboardedUser, userToOnboard, institution.getId(), request);
-                        }else{
+                        } else {
                             createNewUser(userToOnboard, institution.getId(), request);
                         }
                     });
@@ -164,5 +164,18 @@ public class OnboardingDao {
     private void rollbackFirstStepOfUpdate(Token token) {
         tokenConnector.save(token);
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    public void updateUserProductState(OnboardedUser user, String relationshipId, List<RelationshipState> fromStates, RelationshipState toState) {
+        for (UserBinding binding : user.getBindings()) {
+            for (OnboardedProduct product : binding.getProducts()) {
+                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())
+                        && fromStates.contains(product.getStatus())) {
+                    userConnector.findAndUpdateState(user.getId(), binding.getInstitutionId(), product.getProductId(), toState);
+                } else {
+                    throw new InvalidRequestException("0000", "Invalid status change");
+                }
+            }
+        }
     }
 }

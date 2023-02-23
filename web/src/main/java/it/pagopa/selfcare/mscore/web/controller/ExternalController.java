@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
@@ -15,6 +14,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -179,7 +179,7 @@ public class ExternalController {
         log.info("Getting relationship for institution {} and current user", externalId);
         CustomExceptionMessage.setCustomMessage(RETRIEVING_USER_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        List<RelationshipInfo> response = externalService.getUserInstitutionRelationships(EnvEnum.ROOT, externalId, selfCareUser.getId(), personId, roles, states, products, productRoles);
-        return ResponseEntity.ok().body(InstitutionMapper.toRelationshipResponse(response));
+        List<RelationshipInfo> response = externalService.getUserInstitutionRelationships(externalId, selfCareUser.getId(), personId, roles, states, products, productRoles);
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 }

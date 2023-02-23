@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RelationshipMapperTest {
 
     /**
-     * Method under test: {@link RelationshipMapper#toRelationshipResponse(Token, Institution)}
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(Token, Institution)}
      */
     @Test
     void testToRelationshipResponse4() {
@@ -48,11 +48,11 @@ class RelationshipMapperTest {
                 geographicTaxonomies1, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
                 "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
-        assertThrows(InvalidRequestException.class, () -> RelationshipMapper.toRelationshipResponse(token, institution));
+        assertThrows(InvalidRequestException.class, () -> RelationshipMapper.toRelationshipResult(token, institution));
     }
 
     /**
-     * Method under test: {@link RelationshipMapper#toRelationshipResponse(Token, Institution)}
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(Token, Institution)}
      */
     @Test
     void testToRelationshipResponse6() {
@@ -106,7 +106,7 @@ class RelationshipMapperTest {
                 geographicTaxonomies1, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
                 "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
-        RelationshipResponse actualToRelationshipResponseResult = RelationshipMapper.toRelationshipResponse(token,
+        RelationshipResponse actualToRelationshipResponseResult = RelationshipMapper.toRelationshipResult(token,
                 institution);
         assertNull(actualToRelationshipResponseResult.getUpdatedAt());
         assertNull(actualToRelationshipResponseResult.getCreatedAt());

@@ -17,6 +17,7 @@ import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -232,8 +233,8 @@ public class InstitutionController {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(EnvEnum.ROOT, institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
-        return ResponseEntity.ok().body(InstitutionMapper.toRelationshipResponse(relationshipInfoList));
+        List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
     }
 
 

@@ -23,7 +23,7 @@ public interface ExternalService {
 
     List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId);
 
-    List<RelationshipInfo> getUserInstitutionRelationships(EnvEnum env, String externalId, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+    List<RelationshipInfo> getUserInstitutionRelationships(String externalId, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 
     List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states);
 

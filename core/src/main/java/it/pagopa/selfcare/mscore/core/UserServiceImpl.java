@@ -32,17 +32,22 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<OnboardedUser> retrieveAdminUsers(String institutionId, String userId, EnvEnum env) {
-        return userConnector.findAdminWithFilter(env, userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE));
+    public List<OnboardedUser> retrieveAdminUsers(String institutionId, String userId) {
+        return userConnector.findWithFilter(institutionId, userId,ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE), null, null);
     }
 
     @Override
-    public List<OnboardedUser> retrieveUsers(String institutionId, String personId, EnvEnum env, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        return  userConnector.findWithFilter(env, institutionId, personId, roles, states, products, productRoles);
+    public List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        return  userConnector.findWithFilter(institutionId, personId, roles, states, products, productRoles);
     }
 
     @Override
     public boolean checkIfAdmin(EnvEnum env, String userId, String institutionId) {
         return !userConnector.findAdminWithFilter(env, userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
+    }
+
+    @Override
+    public OnboardedUser findByRelationshipId(String relationshipId) {
+        return userConnector.findByRelationshipId(relationshipId);
     }
 }

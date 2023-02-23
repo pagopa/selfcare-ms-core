@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,5 +13,5 @@ public class RelationshipInfo {
 
     Institution institution;
     String userId;
-    Map<String, OnboardedProductInfo> onboardedProductsInfo;
+    OnboardedProduct onboardedProduct;
 }

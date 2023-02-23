@@ -149,11 +149,11 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution updateInstitution(EnvEnum env, String institutionId, InstitutionUpdate institutionUpdate, String userId) {
-        if(userService.checkIfAdmin(env, userId, institutionId)) {
+        if (userService.checkIfAdmin(env, userId, institutionId)) {
             List<GeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomyCodes()
                     .stream().map(this::getGeoTaxonomies).collect(Collectors.toList());
             return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
-        }else{
+        } else {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), RELATIONSHIP_NOT_FOUND.getCode());
         }
     }
@@ -176,33 +176,37 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public List<RelationshipInfo> getUserInstitutionRelationships(EnvEnum env, Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<OnboardedUser> adminRelationships = userService.retrieveAdminUsers(institution.getId(), userId, env);
-        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, env, roles, states, products, productRoles);
-        if(!adminRelationships.isEmpty()){
-            return toOnboardingInfo(institutionRelationships, institution);
-        }else{
+    public List<RelationshipInfo> getUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<OnboardedUser> adminRelationships = userService.retrieveAdminUsers(institution.getId(), userId);
+        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, roles, states, products, productRoles);
+        if (!adminRelationships.isEmpty()) {
+            return toRelationshipInfo(institutionRelationships, institution);
+        } else {
             List<OnboardedUser> filterInstitutionRelationships = institutionRelationships.stream().filter(user -> userId.equalsIgnoreCase(user.getId())).collect(Collectors.toList());
-            return toOnboardingInfo(filterInstitutionRelationships, institution);
+            return toRelationshipInfo(filterInstitutionRelationships, institution);
         }
     }
 
-    private List<RelationshipInfo> toOnboardingInfo(List<OnboardedUser> institutionRelationships, Institution institution) {
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        for (OnboardedUser user : institutionRelationships) {
-            for(UserBinding binding : user.getBindings()){
-
-                Map<String, OnboardedProductInfo> map = binding.getProducts().stream()
-                        .collect(Collectors.toMap(OnboardedProduct::getProductId, onboardedProduct -> constructOnboardedProductsInfo(onboardedProduct, institution.getId()), (x, y) -> y));
-                relationshipInfoList.add(new RelationshipInfo(institution, user.getId(), map));
+    private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution) {
+        List<RelationshipInfo> list = new ArrayList<>();
+        for (OnboardedUser onboardedUser : institutionRelationships) {
+            for (UserBinding binding : onboardedUser.getBindings()) {
+                retrieveAllProduct(list, onboardedUser.getId(), binding, institution);
             }
         }
-        return relationshipInfoList;
+        return list;
     }
 
-    private OnboardedProductInfo constructOnboardedProductsInfo(OnboardedProduct onboardedProduct, String id) {
-        String tokenId = tokenService.retrieveToken(id, onboardedProduct.getProductId()).getId();
-        return new OnboardedProductInfo(tokenId, onboardedProduct);
+    private void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution) {
+        if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
+            for (OnboardedProduct product : binding.getProducts()) {
+                RelationshipInfo relationshipInfo = new RelationshipInfo();
+                relationshipInfo.setInstitution(institution);
+                relationshipInfo.setUserId(userId);
+                relationshipInfo.setOnboardedProduct(product);
+                list.add(relationshipInfo);
+            }
+        }
     }
 
     @Override

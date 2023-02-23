@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.RELATIONSHIP_ID_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -123,42 +124,52 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findWithFilter(EnvEnum env, String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+    public List<OnboardedUser> findWithFilter(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipState> stateList = states.isEmpty() ? List.of(RelationshipState.values()) : states;
         List<PartyRole> roleList = roles.isEmpty() ? List.of(PartyRole.values()) : roles;
 
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(personId)
                 .and(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
 
-        if(productRoles.isEmpty() && products.isEmpty()) {
-            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
-                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.env.name()).is(env)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
-        }else if(productRoles.isEmpty()){
-            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
-                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.env.name()).is(env)
-                            .and(OnboardedProduct.Fields.productId.name()).in(products)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
-        }else if(products.isEmpty()){
-            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
-                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.env.name()).is(env)
-                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
-        }else {
-            query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
-                    .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
-                            .and(OnboardedProduct.Fields.productId.name()).in(products)
-                            .and(OnboardedProduct.Fields.env.name()).is(env)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList)));
-        }
+        query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
+                .elemMatch(constructCriteria(roleList, stateList, productRoles, products)));
 
         return repository.find(query, UserEntity.class).stream()
                 .map(this::convertToOnboardedUser)
                 .collect(Collectors.toList());
+    }
+
+    private Criteria constructCriteria(List<PartyRole> roleList, List<RelationshipState> stateList, List<String> productRoles, List<String> products) {
+        if(productRoles.isEmpty() && products.isEmpty()) {
+            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
+        }else if(productRoles.isEmpty()){
+            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.productId.name()).in(products)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
+        }else if(products.isEmpty()){
+            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
+        }else {
+            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
+                            .and(OnboardedProduct.Fields.productId.name()).in(products)
+                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
+        }
+    }
+
+    @Override
+    public OnboardedUser findByRelationshipId(String relationshipId) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.products.name())
+                        .elemMatch(Criteria.where(OnboardedProduct.Fields.relationshipId.name()).in(relationshipId))));
+
+        return repository.find(query, UserEntity.class).stream()
+                .findFirst()
+                .map(this::convertToOnboardedUser)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId),
+                        RELATIONSHIP_ID_NOT_FOUND.getCode()));
     }
 
     private String constructQuery(String... variables) {

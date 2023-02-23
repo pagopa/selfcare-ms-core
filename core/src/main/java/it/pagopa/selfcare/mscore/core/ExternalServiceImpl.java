@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
@@ -20,13 +19,11 @@ public class ExternalServiceImpl implements ExternalService {
     private final InstitutionService institutionService;
     private final TokenService tokenService;
     private final UserService userService;
-    private final GeoTaxonomiesConnector geoTaxonomiesConnector;
 
-    public ExternalServiceImpl(InstitutionService institutionService, TokenService tokenService, UserService userService, GeoTaxonomiesConnector geoTaxonomiesConnector) {
+    public ExternalServiceImpl(InstitutionService institutionService, TokenService tokenService, UserService userService) {
         this.institutionService = institutionService;
         this.tokenService = tokenService;
         this.userService = userService;
-        this.geoTaxonomiesConnector = geoTaxonomiesConnector;
     }
 
     @Override
@@ -72,8 +69,8 @@ public class ExternalServiceImpl implements ExternalService {
     }
 
     @Override
-    public List<RelationshipInfo> getUserInstitutionRelationships(EnvEnum env, String externalId, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles){
+    public List<RelationshipInfo> getUserInstitutionRelationships(String externalId, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles){
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.getUserInstitutionRelationships(env, institution, userId, personId, roles, states, products, productRoles);
+        return institutionService.getUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles);
     }
 }
