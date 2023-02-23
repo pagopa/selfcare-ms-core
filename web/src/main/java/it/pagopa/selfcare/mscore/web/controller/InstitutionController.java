@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
@@ -162,7 +161,7 @@ public class InstitutionController {
         log.info("Updating institution {} with {}", institutionId, institutionPut);
         CustomExceptionMessage.setCustomMessage(PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(EnvEnum.ROOT, institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut), selfCareUser.getId());
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut), selfCareUser.getId());
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

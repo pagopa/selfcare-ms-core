@@ -23,5 +23,5 @@ public interface InstitutionService {
     List<RelationshipInfo> getUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
     void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
     List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution);
-    Institution updateInstitution(EnvEnum env, String institutionId, InstitutionUpdate institutionUpdate, String userId);
+    Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
 }

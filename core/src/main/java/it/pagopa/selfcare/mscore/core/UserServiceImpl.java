@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public boolean checkIfAdmin(EnvEnum env, String userId, String institutionId) {
-        return !userConnector.findAdminWithFilter(env, userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
+    public boolean checkIfAdmin(String userId, String institutionId) {
+        return !userConnector.findAdminWithFilter(userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
     }
 
     @Override

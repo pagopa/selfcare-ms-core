@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,14 +28,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final GeoTaxonomiesConnector geoTaxonomiesConnector;
     private final UserService userService;
-    private final TokenService tokenService;
 
-    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector, UserService userService, TokenService tokenService) {
+    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector, UserService userService) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
         this.userService = userService;
-        this.tokenService = tokenService;
     }
 
     @Override
@@ -148,8 +145,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution updateInstitution(EnvEnum env, String institutionId, InstitutionUpdate institutionUpdate, String userId) {
-        if (userService.checkIfAdmin(env, userId, institutionId)) {
+    public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
+        if (userService.checkIfAdmin(userId, institutionId)) {
             List<GeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomyCodes()
                     .stream().map(this::getGeoTaxonomies).collect(Collectors.toList());
             return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);

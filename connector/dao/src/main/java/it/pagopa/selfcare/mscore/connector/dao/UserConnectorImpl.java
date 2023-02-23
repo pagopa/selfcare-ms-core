@@ -109,13 +109,13 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findAdminWithFilter(EnvEnum env, String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states) {
+    public List<OnboardedUser> findAdminWithFilter(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states) {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId)
                 .and(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
 
         query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
                 .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roles)
-                        .and(OnboardedProduct.Fields.env.name()).is(env)
+                        .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT) //TODO: CAPIRE QUALE ENV CONSIDERARE
                         .and(OnboardedProduct.Fields.status.name()).in(states)));
 
         return repository.find(query, UserEntity.class).stream()
