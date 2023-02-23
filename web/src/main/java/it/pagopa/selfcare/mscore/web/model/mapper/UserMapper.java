@@ -16,7 +16,7 @@ public class UserMapper {
     public static PersonResponse toPersonResponse(OnboardedUser user, String userId){
         if(user!=null) {
             PersonResponse personResponse = new PersonResponse();
-            personResponse.setUserId(user.getId());
+            personResponse.setId(user.getId());
             return personResponse;
         }
         throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(),userId), USER_NOT_FOUND_ERROR.getCode());
@@ -31,9 +31,6 @@ public class UserMapper {
     public static UserToOnboard fromDto(Person dto) {
         UserToOnboard user = new UserToOnboard();
         user.setId(dto.getId());
-        user.setEnv(dto.getEnv());
-        user.setRole(dto.getRole());
-        user.setProductRole(dto.getProductRole());
         return user;
     }
 }
