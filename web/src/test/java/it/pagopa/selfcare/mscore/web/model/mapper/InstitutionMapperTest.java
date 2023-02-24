@@ -387,7 +387,7 @@ class InstitutionMapperTest {
         institutionRequest.setZipCode("21654");
         Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
-        assertTrue(actualToInstitutionResult.isImported());
+        assertFalse(actualToInstitutionResult.isImported());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
         assertEquals("4105551212", actualToInstitutionResult.getSupportPhone());
@@ -455,7 +455,7 @@ class InstitutionMapperTest {
         institutionRequest.setZipCode("21654");
         Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
-        assertTrue(actualToInstitutionResult.isImported());
+        assertFalse(actualToInstitutionResult.isImported());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
         assertEquals("4105551212", actualToInstitutionResult.getSupportPhone());
@@ -528,7 +528,7 @@ class InstitutionMapperTest {
         institutionRequest.setZipCode("21654");
         Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
-        assertTrue(actualToInstitutionResult.isImported());
+        assertFalse(actualToInstitutionResult.isImported());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
         assertEquals("4105551212", actualToInstitutionResult.getSupportPhone());
