@@ -80,7 +80,7 @@ public class RelationshipMapper {
         relationshipResult.setFrom(info.getUserId());
         relationshipResult.setTo(info.getInstitution().getId());
 
-        relationshipResult.setState(info.getOnboardedProduct().getStatus().name());
+        relationshipResult.setState(info.getOnboardedProduct().getStatus());
         relationshipResult.setRole(info.getOnboardedProduct().getRole());
 
         ProductInfo productInfo = new ProductInfo();

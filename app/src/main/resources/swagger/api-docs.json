@@ -781,7 +781,7 @@
       "put" : {
         "tags" : [ "Institution" ],
         "summary" : "updateInstitution",
-        "description" : "${swagger.mscore.institution.update}",
+        "description" : "The service update geographic taxonomy of given institution",
         "operationId" : "updateInstitutionUsingPUT",
         "parameters" : [ {
           "name" : "authenticated",
@@ -893,7 +893,7 @@
       "get" : {
         "tags" : [ "Institution" ],
         "summary" : "retrieveInstitutionGeoTaxonomies",
-        "description" : "${swagger.mscore.institution.geotaxonomies}",
+        "description" : "The service retrieves the geographic taxonomies this institution is related to",
         "operationId" : "retrieveInstitutionGeoTaxonomiesUsingGET",
         "parameters" : [ {
           "name" : "id",
@@ -1013,7 +1013,7 @@
       "get" : {
         "tags" : [ "Institution" ],
         "summary" : "getUserInstitutionRelationships",
-        "description" : "${swagger.mscore.institution.relationships}",
+        "description" : "The service returns the relationships related to the institution",
         "operationId" : "getUserInstitutionRelationshipsUsingGET",
         "parameters" : [ {
           "name" : "authenticated",
@@ -1142,6 +1142,228 @@
           },
           "404" : {
             "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/onboarding/approve/{tokenId}" : {
+      "post" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "approveOnboarding",
+        "description" : "The service approve an onboarding reuqest by an operator review",
+        "operationId" : "approveOnboardingUsingPOST",
+        "parameters" : [ {
+          "name" : "authenticated",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "authorities[0].authority",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "credentials",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "details",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "principal",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "tokenId",
+          "in" : "path",
+          "description" : "tokenId",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/onboarding/complete/{tokenId}" : {
+      "post" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "completeOnboarding",
+        "description" : "The service complete an onboarding request",
+        "operationId" : "completeOnboardingUsingPOST",
+        "parameters" : [ {
+          "name" : "tokenId",
+          "in" : "path",
+          "description" : "tokenId",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string",
+                "format" : "binary"
+              }
+            },
+            "application/octet-stream" : {
+              "schema" : {
+                "type" : "string",
+                "format" : "binary"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "invalidateOnboarding",
+        "description" : "The service invalidate an onboarding request",
+        "operationId" : "invalidateOnboardingUsingDELETE",
+        "parameters" : [ {
+          "name" : "tokenId",
+          "in" : "path",
+          "description" : "tokenId",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -1367,7 +1589,7 @@
     "/onboarding/institution/{externalId}/products/{productId}" : {
       "head" : {
         "tags" : [ "Onboarding" ],
-        "summary" : "The service verify if onboardedProduct is already onboarded for institution",
+        "summary" : "verifyOnboardingInfo",
         "description" : "The service verify if onboardedProduct is already onboarded for institution",
         "operationId" : "verifyOnboardingInfoUsingHEAD",
         "parameters" : [ {
@@ -1419,29 +1641,127 @@
         } ]
       }
     },
-    "/relationships/{id}" : {
+    "/onboarding/legals" : {
       "post" : {
-        "tags" : [ "Token" ],
-        "summary" : "getRelationship",
-        "description" : "${swagger.mscore.token.suspend}",
-        "operationId" : "getRelationshipUsingPOST",
+        "tags" : [ "Onboarding" ],
+        "summary" : "onboardingInstitutionLegals",
+        "description" : "The service performs legals onboarding on an already existing institution",
+        "operationId" : "onboardingInstitutionLegalsUsingPOST",
         "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "${swagger.mscore.token.tokenId}",
-          "required" : true,
-          "style" : "simple",
+          "name" : "authenticated",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "boolean"
+          }
+        }, {
+          "name" : "authorities[0].authority",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
           "schema" : {
             "type" : "string"
           }
+        }, {
+          "name" : "credentials",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "details",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
+        }, {
+          "name" : "principal",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "object"
+          }
         } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OnboardingInstitutionLegalsRequest"
+              }
+            }
+          }
+        },
         "responses" : {
           "204" : {
-            "description" : "No Content",
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/onboarding/operators" : {
+      "post" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "onboardingInstitutionOperators",
+        "description" : "The service performs operators onboarding on an already existing institution",
+        "operationId" : "onboardingInstitutionOperatorsUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OnboardingInstitutionOperatorsRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/RelationshipResult"
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelationshipResult"
+                  }
                 }
               }
             }
@@ -1482,16 +1802,16 @@
         } ]
       }
     },
-    "/relationships/{tokenId}/activate" : {
-      "post" : {
-        "tags" : [ "Token" ],
-        "summary" : "activateRelationship",
-        "description" : "${swagger.mscore.token.activate}",
-        "operationId" : "activateRelationshipUsingPOST",
+    "/onboarding/reject/{tokenId}" : {
+      "delete" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "onboardingReject",
+        "description" : "The service invalidate an onboarding request by an operator review",
+        "operationId" : "onboardingRejectUsingDELETE",
         "parameters" : [ {
           "name" : "tokenId",
           "in" : "path",
-          "description" : "${swagger.mscore.token.tokenId}",
+          "description" : "tokenId",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -1504,7 +1824,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "string"
+                  "$ref" : "#/components/schemas/OnboardingInfoResponse"
                 }
               }
             }
@@ -1545,16 +1865,16 @@
         } ]
       }
     },
-    "/relationships/{tokenId}/suspend" : {
-      "post" : {
-        "tags" : [ "Token" ],
-        "summary" : "suspendRelationship",
-        "description" : "${swagger.mscore.token.suspend}",
-        "operationId" : "suspendRelationshipUsingPOST",
+    "/onboarding/relationship/{relationshipId}/document" : {
+      "get" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "getOnboardingDocument",
+        "description" : "${swagger.mscore.onboarding.relationship.document}",
+        "operationId" : "getOnboardingDocumentUsingGET",
         "parameters" : [ {
-          "name" : "tokenId",
+          "name" : "relationshipId",
           "in" : "path",
-          "description" : "${swagger.mscore.token.tokenId}",
+          "description" : "relationshipId",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -1562,12 +1882,68 @@
           }
         } ],
         "responses" : {
-          "204" : {
-            "description" : "No Content",
+          "200" : {
+            "description" : "OK",
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "string"
+                  "type" : "string",
+                  "format" : "byte"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/onboarding/subdelegates" : {
+      "post" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "onboardingInstitutionSubDelegate",
+        "description" : "${swagger.mscore.onboarding.subdelegates}",
+        "operationId" : "onboardingInstitutionSubDelegateUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OnboardingInstitutionOperatorsRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelationshipResult"
+                  }
                 }
               }
             }
@@ -1611,13 +1987,13 @@
     "/tokens/{tokenId}/verify" : {
       "post" : {
         "tags" : [ "Token" ],
-        "summary" : "verifyToken",
+        "summary" : "The service verify token status",
         "description" : "The service verify token status",
         "operationId" : "verifyTokenUsingPOST",
         "parameters" : [ {
           "name" : "tokenId",
           "in" : "path",
-          "description" : "${swagger.mscore.token.tokenId}",
+          "description" : "contract's unique identifier",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -1630,69 +2006,7 @@
             "content" : {
               "*/*" : {
                 "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/persons" : {
-      "post" : {
-        "tags" : [ "Persons" ],
-        "summary" : "The service create a new person",
-        "description" : "The service create a new person",
-        "operationId" : "createUserUsingPOST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/Person"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Created",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PersonResponse"
+                  "$ref" : "#/components/schemas/TokenResponse"
                 }
               }
             }
@@ -1734,57 +2048,6 @@
       }
     },
     "/persons/{id}" : {
-      "get" : {
-        "tags" : [ "Persons" ],
-        "summary" : "The service returns the identified person, if any.",
-        "description" : "The service returns the identified person, if any.",
-        "operationId" : "infoUserUsingGET",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "id",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/PersonResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      },
       "head" : {
         "tags" : [ "Persons" ],
         "summary" : "The service verify if a Person exists for a given ID",
@@ -1816,6 +2079,225 @@
           },
           "404" : {
             "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/relationships/{relationshipId}" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "getRelationship",
+        "description" : "The service gets the corresponding relationship",
+        "operationId" : "getRelationshipUsingGET",
+        "parameters" : [ {
+          "name" : "relationshipId",
+          "in" : "path",
+          "description" : "${swagger.mscore.token.relationshipId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RelationshipResult"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Persons" ],
+        "summary" : "deleteRelationship",
+        "description" : "${swagger.mscore.relationship.delete}",
+        "operationId" : "deleteRelationshipUsingDELETE",
+        "parameters" : [ {
+          "name" : "relationshipId",
+          "in" : "path",
+          "description" : "${swagger.mscore.relationship.relationshipId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/relationships/{relationshipId}/activate" : {
+      "post" : {
+        "tags" : [ "Persons" ],
+        "summary" : "activateRelationship",
+        "description" : "${swagger.mscore.relationship.activate}",
+        "operationId" : "activateRelationshipUsingPOST",
+        "parameters" : [ {
+          "name" : "relationshipId",
+          "in" : "path",
+          "description" : "${swagger.mscore.relationship.relationshipId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/relationships/{relationshipId}/suspend" : {
+      "post" : {
+        "tags" : [ "Persons" ],
+        "summary" : "suspendRelationship",
+        "description" : "${swagger.mscore.relationship.suspend}",
+        "operationId" : "suspendRelationshipUsingPOST",
+        "parameters" : [ {
+          "name" : "tokenId",
+          "in" : "path",
+          "description" : "${swagger.mscore.relationship.relationshipId}",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -2462,6 +2944,54 @@
           }
         }
       },
+      "OnboardingInstitutionLegalsRequest" : {
+        "title" : "OnboardingInstitutionLegalsRequest",
+        "type" : "object",
+        "properties" : {
+          "contract" : {
+            "$ref" : "#/components/schemas/ContractRequest"
+          },
+          "institutionExternalId" : {
+            "type" : "string"
+          },
+          "institutionId" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "productName" : {
+            "type" : "string"
+          },
+          "signContract" : {
+            "type" : "boolean"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Person"
+            }
+          }
+        }
+      },
+      "OnboardingInstitutionOperatorsRequest" : {
+        "title" : "OnboardingInstitutionOperatorsRequest",
+        "type" : "object",
+        "properties" : {
+          "institutionId" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Person"
+            }
+          }
+        }
+      },
       "OnboardingInstitutionRequest" : {
         "title" : "OnboardingInstitutionRequest",
         "type" : "object",
@@ -2596,15 +3126,6 @@
           }
         }
       },
-      "PersonResponse" : {
-        "title" : "PersonResponse",
-        "type" : "object",
-        "properties" : {
-          "userId" : {
-            "type" : "string"
-          }
-        }
-      },
       "Problem" : {
         "title" : "Problem",
         "type" : "object",
@@ -2650,6 +3171,10 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "state" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           }
         }
       },
@@ -2694,6 +3219,10 @@
             "format" : "date-time"
           }
         }
+      },
+      "TokenResponse" : {
+        "title" : "TokenResponse",
+        "type" : "object"
       }
     },
     "securitySchemes" : {

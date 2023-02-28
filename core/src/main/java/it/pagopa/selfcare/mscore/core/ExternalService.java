@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;

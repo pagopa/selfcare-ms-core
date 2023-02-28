@@ -38,25 +38,6 @@ class UserConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
-     */
-    @Test
-    void testSave() {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setBindings(new ArrayList<>());
-        userEntity.setCreatedAt(null);
-        userEntity.setId("42");
-        userEntity.setUpdatedAt(null);
-        when(userRepository.save(any())).thenReturn(userEntity);
-        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser());
-        assertTrue(actualSaveResult.getBindings().isEmpty());
-        assertNull(actualSaveResult.getUpdatedAt());
-        assertEquals("42", actualSaveResult.getId());
-        assertNull(actualSaveResult.getCreatedAt());
-        verify(userRepository).save(any());
-    }
-
-    /**
      * Method under test: {@link UserConnectorImpl#getById}
      */
     @Test
@@ -100,7 +81,6 @@ class UserConnectorImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);

@@ -25,4 +25,6 @@ public interface InstitutionConnector {
     Institution findAndUpdate(String id, Onboarding onboarding, List<GeographicTaxonomies> geographicTaxonomies);
 
     Institution findInstitutionProduct(String externalId, String productId);
+
+    void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
 }

@@ -44,6 +44,6 @@ public class TokenController {
         log.info("Verify token identified with {}", tokenId);
         CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
         tokenService.verifyToken(tokenId);
-        return ResponseEntity.ok().body(TokenResponse.builder().id(tokenId).build());
+        return ResponseEntity.ok().body(new TokenResponse(tokenId));
     }
 }

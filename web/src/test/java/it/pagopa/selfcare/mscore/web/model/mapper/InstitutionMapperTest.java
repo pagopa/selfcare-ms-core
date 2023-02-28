@@ -213,7 +213,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String, String)}
+     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse9() {
@@ -222,7 +222,7 @@ class InstitutionMapperTest {
 
         ProductManagerInfo productManagerInfo = new ProductManagerInfo("id", institution, new ArrayList<>());
         InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
-                .toInstitutionManagerResponse(productManagerInfo, "42", "42");
+                .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertEquals("42", actualToInstitutionManagerResponseResult.getId());
         InstitutionUpdateResponse institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();

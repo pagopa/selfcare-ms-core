@@ -2,11 +2,10 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -17,10 +16,7 @@ import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_BILLING_ERROR;
@@ -79,9 +75,16 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         if (onboarding != null) {
             update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
         }
-        for (GeographicTaxonomies geo : geographicTaxonomiesList) {
-            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geo);
+        if (geographicTaxonomiesList != null && !geographicTaxonomiesList.isEmpty()) {
+            List<GeoTaxonomyEntity> list = geographicTaxonomiesList.stream().map(geographicTaxonomies -> {
+                GeoTaxonomyEntity entity = new GeoTaxonomyEntity();
+                entity.setCode(geographicTaxonomies.getCode());
+                entity.setDesc(geographicTaxonomies.getDesc());
+                return entity;
+            }).collect(Collectors.toList());
+            list.forEach(geoTaxonomyEntity -> update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geoTaxonomyEntity));
         }
+
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
@@ -95,6 +98,18 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .map(this::convertToInstitution)
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_BILLING_ERROR.getMessage(), externalId, productId),
                         GET_INSTITUTION_BILLING_ERROR.getCode()));
+    }
+
+    @Override
+    public void findAndRemoveOnboarding(String institutionId, Onboarding onboarding) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+        Update update = new Update();
+        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        if (onboarding != null) {
+            update.pull(InstitutionEntity.Fields.onboarding.name(), onboarding);
+        }
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
     }
 
     @Override
@@ -136,11 +151,11 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
             institution.setAddress(entity.getAddress());
             institution.setZipCode(entity.getZipCode());
             institution.setTaxCode(entity.getTaxCode());
-            institution.setOnboarding(entity.getOnboarding());
-            institution.setDataProtectionOfficer(entity.getDataProtectionOfficer());
-            institution.setPaymentServiceProvider(entity.getPaymentServiceProvider());
-            institution.setAttributes(entity.getAttributes());
-            institution.setGeographicTaxonomies(entity.getGeographicTaxonomies());
+            institution.setOnboarding(toOnboarding(entity.getOnboarding()));
+            institution.setDataProtectionOfficer(toDataProtectionOfficer(entity.getDataProtectionOfficer()));
+            institution.setPaymentServiceProvider(toPaymentServiceProvider(entity.getPaymentServiceProvider()));
+            institution.setAttributes(toAttributes(entity.getAttributes()));
+            institution.setGeographicTaxonomies(toGeographicTaxonomies(entity.getGeographicTaxonomies()));
             institution.setCreatedAt(entity.getCreatedAt());
             institution.setUpdatedAt(entity.getUpdatedAt());
 
@@ -152,6 +167,64 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
             institution.setImported(entity.isImported());
         }
         return institution;
+    }
+
+    private List<Onboarding> toOnboarding(List<OnboardingEntity> onboarding) {
+        List<Onboarding> list = new ArrayList<>();
+        for (OnboardingEntity onboardingEntity : onboarding) {
+            Onboarding o = new Onboarding();
+            o.setProductId(onboardingEntity.getProductId());
+            o.setStatus(onboardingEntity.getStatus());
+            o.setContract(onboardingEntity.getContract());
+            o.setPricingPlan(onboardingEntity.getPricingPlan());
+            o.setPremium(onboardingEntity.getPremium());
+            o.setBilling(onboardingEntity.getBilling());
+            o.setCreatedAt(onboardingEntity.getCreatedAt());
+            o.setUpdatedAt(onboardingEntity.getUpdatedAt());
+            list.add(o);
+        }
+        return list;
+    }
+
+    private DataProtectionOfficer toDataProtectionOfficer(DataProtectionOfficerEntity dataProtectionOfficer) {
+        DataProtectionOfficer data = new DataProtectionOfficer();
+        data.setPec(dataProtectionOfficer.getPec());
+        data.setEmail(dataProtectionOfficer.getEmail());
+        data.setAddress(dataProtectionOfficer.getAddress());
+        return data;
+    }
+
+    private PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderEntity paymentServiceProvider) {
+        PaymentServiceProvider provider = new PaymentServiceProvider();
+        provider.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());
+        provider.setAbiCode(paymentServiceProvider.getAbiCode());
+        provider.setLegalRegisterNumber(paymentServiceProvider.getLegalRegisterNumber());
+        provider.setVatNumberGroup(paymentServiceProvider.isVatNumberGroup());
+        provider.setBusinessRegisterNumber(paymentServiceProvider.getBusinessRegisterNumber());
+        return provider;
+    }
+
+    private List<Attributes> toAttributes(List<AttributesEntity> attributes) {
+        List<Attributes> list = new ArrayList<>();
+        for(AttributesEntity attributesEntity : attributes){
+            Attributes att = new Attributes();
+            att.setDescription(attributesEntity.getDescription());
+            att.setOrigin(attributesEntity.getOrigin());
+            att.setCode(attributesEntity.getCode());
+            list.add(att);
+        }
+        return list;
+    }
+
+    private List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
+        List<GeographicTaxonomies> list = new ArrayList<>();
+        for(GeoTaxonomyEntity entity : geographicTaxonomies){
+            GeographicTaxonomies geo = new GeographicTaxonomies();
+            geo.setDesc(entity.getDesc());
+            geo.setCode(entity.getCode());
+            list.add(geo);
+        }
+        return list;
     }
 
     private InstitutionEntity convertToInstitutionEntity(Institution institution) {
@@ -170,7 +243,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         entity.setAddress(institution.getAddress());
         entity.setZipCode(institution.getZipCode());
         entity.setTaxCode(institution.getTaxCode());
-        entity.setOnboarding(institution.getOnboarding());
+
 
         entity.setRea(institution.getRea());
         entity.setShareCapital(institution.getShareCapital());
@@ -179,16 +252,66 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         entity.setSupportPhone(institution.getSupportPhone());
         entity.setImported(institution.isImported());
 
+        if(institution.getOnboarding()!=null){
+            entity.setOnboarding(toOnboardingEntity(institution.getOnboarding()));
+        }
+
         if (institution.getGeographicTaxonomies() != null) {
-            entity.setGeographicTaxonomies(institution.getGeographicTaxonomies());
+            entity.setGeographicTaxonomies(toGeoTaxonomyEntity(institution.getGeographicTaxonomies()));
         }
         if (institution.getDataProtectionOfficer() != null) {
-            entity.setDataProtectionOfficer(institution.getDataProtectionOfficer());
+            entity.setDataProtectionOfficer(toDataProtectionOfficerEntity(institution.getDataProtectionOfficer()));
         }
         if (institution.getPaymentServiceProvider() != null) {
-            entity.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+            entity.setPaymentServiceProvider(toPaymentServiceProviderEntity(institution.getPaymentServiceProvider()));
         }
         entity.setUpdatedAt(OffsetDateTime.now());
         return entity;
+    }
+
+    private List<OnboardingEntity> toOnboardingEntity(List<Onboarding> onboardingList) {
+        List<OnboardingEntity> list = new ArrayList<>();
+        for (Onboarding onboarding : onboardingList) {
+            OnboardingEntity o = new OnboardingEntity();
+            o.setProductId(onboarding.getProductId());
+            o.setStatus(onboarding.getStatus());
+            o.setContract(onboarding.getContract());
+            o.setPricingPlan(onboarding.getPricingPlan());
+            o.setPremium(onboarding.getPremium());
+            o.setBilling(onboarding.getBilling());
+            o.setCreatedAt(onboarding.getCreatedAt());
+            o.setUpdatedAt(onboarding.getUpdatedAt());
+            list.add(o);
+        }
+        return list;
+    }
+
+    private List<GeoTaxonomyEntity> toGeoTaxonomyEntity(List<GeographicTaxonomies> geographicTaxonomies) {
+        List<GeoTaxonomyEntity> list = new ArrayList<>();
+        for(GeographicTaxonomies geo : geographicTaxonomies){
+            GeoTaxonomyEntity entity = new GeoTaxonomyEntity();
+            entity.setDesc(geo.getDesc());
+            entity.setCode(geo.getCode());
+            list.add(entity);
+        }
+        return list;
+    }
+
+    private DataProtectionOfficerEntity toDataProtectionOfficerEntity(DataProtectionOfficer dataProtectionOfficer) {
+        DataProtectionOfficerEntity data = new DataProtectionOfficerEntity();
+        data.setPec(dataProtectionOfficer.getPec());
+        data.setEmail(dataProtectionOfficer.getEmail());
+        data.setAddress(dataProtectionOfficer.getAddress());
+        return data;
+    }
+
+    private PaymentServiceProviderEntity toPaymentServiceProviderEntity(PaymentServiceProvider paymentServiceProvider) {
+        PaymentServiceProviderEntity provider = new PaymentServiceProviderEntity();
+        provider.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());
+        provider.setAbiCode(paymentServiceProvider.getAbiCode());
+        provider.setLegalRegisterNumber(paymentServiceProvider.getLegalRegisterNumber());
+        provider.setVatNumberGroup(paymentServiceProvider.isVatNumberGroup());
+        provider.setBusinessRegisterNumber(paymentServiceProvider.getBusinessRegisterNumber());
+        return provider;
     }
 }

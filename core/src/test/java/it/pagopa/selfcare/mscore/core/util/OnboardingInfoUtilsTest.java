@@ -86,7 +86,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName(", ");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -116,7 +115,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName(", ");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -127,7 +125,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct1.setCreatedAt(null);
         onboardedProduct1.setEnv(EnvEnum.ROOT);
         onboardedProduct1.setProductId("42");
-        onboardedProduct1.setProductName(", ");
         onboardedProduct1.setProductRoles(new ArrayList<>());
         onboardedProduct1.setRole(PartyRole.MANAGER);
         onboardedProduct1.setStatus(RelationshipState.PENDING);
@@ -158,7 +155,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName(", ");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -210,7 +206,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -266,7 +261,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -341,7 +335,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -396,7 +389,6 @@ class OnboardingInfoUtilsTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);

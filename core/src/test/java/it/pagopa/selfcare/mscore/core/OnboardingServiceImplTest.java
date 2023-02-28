@@ -91,7 +91,6 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("START - getUser with id: {}");
         ArrayList<String> stringList = new ArrayList<>();
         onboardedProduct.setProductRoles(stringList);
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -138,7 +137,6 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("START - getUser with id: {}");
         onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -333,7 +331,7 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setId("token");
-        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn("token");
+        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(new OnboardingRollback());
 
         onboardingServiceImpl.onboardingInstitution(onboardingRequest, selfCareUser);
 

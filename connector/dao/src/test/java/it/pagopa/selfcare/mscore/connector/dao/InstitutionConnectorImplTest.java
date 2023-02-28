@@ -131,8 +131,6 @@ class InstitutionConnectorImplTest {
         InstitutionEntity institutionEntity = new InstitutionEntity();
         institutionEntity.setId("507f1f77bcf86cd799439011");
         institutionEntity.setGeographicTaxonomies(new ArrayList<>());
-        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficer());
-        institutionEntity.setPaymentServiceProvider(new PaymentServiceProvider());
         when(institutionRepository.save(any())).thenReturn(institutionEntity);
         Institution response = institutionConnectionImpl.save(institution);
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());

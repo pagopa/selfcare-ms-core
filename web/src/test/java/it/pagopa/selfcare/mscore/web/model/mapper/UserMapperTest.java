@@ -13,14 +13,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 class UserMapperTest {
-    /**
-     * Method under test: {@link UserMapper#toPersonResponse(OnboardedUser, String)}
-     */
-    @Test
-    void testToPersonResponse() {
-        assertNull(UserMapper.toPersonResponse(new OnboardedUser(), "42").getId());
-        assertThrows(ResourceNotFoundException.class, () -> UserMapper.toPersonResponse(null, "foo"));
-    }
 
     /**
      * Method under test: {@link UserMapper#toResource(OnboardedUser)}

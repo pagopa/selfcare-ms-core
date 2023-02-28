@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.Data;
 
@@ -16,10 +17,10 @@ public class RelationshipResult {
     private String from;
     private PartyRole role;
     private ProductInfo product;
-    private String state;
+    private RelationshipState state;
     private String pricingPlan;
     private InstitutionUpdateResponse institutionUpdate;
     private BillingResponse billing;
     private OffsetDateTime createdAt;
-    private OffsetDateTime updateAt;
+    private OffsetDateTime updatedAt;
 }

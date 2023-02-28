@@ -1,8 +1,13 @@
 package it.pagopa.selfcare.mscore.web.model.onboarding;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Builder
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TokenResponse {
     private String id;
 }

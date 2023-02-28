@@ -22,6 +22,7 @@ public class OnboardingRequest {
     private String pricingPlan;
     private Billing billingRequest;
     private Contract contract;
+    private ContractImported contractImported;
 
     private boolean signContract = true;
 

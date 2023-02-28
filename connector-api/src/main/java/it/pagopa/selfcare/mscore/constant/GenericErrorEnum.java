@@ -1,6 +1,8 @@
 package it.pagopa.selfcare.mscore.constant;
 
 public enum GenericErrorEnum {
+
+    GET_USER_INSTITUTION_RELATIONSHIP_ERROR("0023", "Error while retrieving user relationships"),
     GET_INSTITUTION_BY_ID_ERROR("0040", "Error while retrieving institution having id %s"),
     GET_INSTITUTION_BY_EXTERNAL_ID_ERROR("0041", "Error while retrieving institution having externalId %s"),
     INSTITUTION_MANAGER_ERROR("0042", "Error while retrieving institution having externalId %s"),
@@ -26,7 +28,6 @@ public enum GenericErrorEnum {
     INVALID_SIGNATURE_FORMS("1003", "Only CAdES signature form is admitted. Invalid signatures forms detected: %s"),
     INVALIDATE_ONBOARDING_ERROR("0022", "Error while invalidating onboarding"),
     CONFIRM_ONBOARDING_ERROR("0021", "Error while confirming onboarding"),
-
     INVALID_DOCUMENT_SIGNATURE("1002", "Document signature is invalid"),
     INVALID_CONTRACT_DIGEST("1001", "Invalid file digest"),
 

@@ -1,12 +1,12 @@
 package it.pagopa.selfcare.mscore.core.util;
 
+import eu.europa.esig.dss.enumerations.DigestAlgorithm;
+import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.UserToOnboard;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
@@ -14,15 +14,13 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.ONBOARDING_INVALID_UPDATES;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.PRODUCT_ALREADY_ONBOARDED;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.ROLES_NOT_ADMITTED_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.PRODUCT_RELATIONSHIP_STATES;
 
 @Slf4j
@@ -42,6 +40,12 @@ public class OnboardingInstitutionUtils {
             List<PartyRole> userRoleList = userList.stream().map(UserToOnboard::getRole).collect(Collectors.toList());
             throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userRoleList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
         }
+    }
+
+    public static String createDigest(File pdf) {
+        log.info("START- createDigest for pdf {}", pdf.getName());
+        DSSDocument document = new FileDocument(pdf);
+        return document.getDigest(DigestAlgorithm.SHA256);
     }
 
     public static void checkIfProductAlreadyOnboarded(Institution institution, OnboardingRequest request) {
@@ -81,16 +85,36 @@ public class OnboardingInstitutionUtils {
         token.setInstitutionId(institution.getId());
         token.setProductId(request.getProductId());
         token.setChecksum(digest);
-
         if (request.getInstitutionUpdate() != null) {
             token.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         }
+
+        token.setUsers(request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList()));
+
+        // TODO: token.setExpiringDate();
         log.info("END - convertToToken");
         return token;
     }
 
+    public static OnboardedProduct constructOperatorProduct(UserToOnboard user, OnboardingOperatorsRequest request) {
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
+        onboardedProduct.setProductId(request.getProductId());
+        onboardedProduct.setRole(user.getRole());
+        onboardedProduct.setProductRoles(user.getProductRole());
+        onboardedProduct.setStatus(RelationshipState.ACTIVE);
+        onboardedProduct.setCreatedAt(OffsetDateTime.now());
+        if (user.getEnv() != null) {
+            onboardedProduct.setEnv(user.getEnv());
+        } else {
+            onboardedProduct.setEnv(EnvEnum.ROOT);
+        }
+        return onboardedProduct;
+    }
+
     public static OnboardedProduct constructProduct(UserToOnboard p, OnboardingRequest request) {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
         onboardedProduct.setProductId(request.getProductId());
         onboardedProduct.setRole(p.getRole());
         if (request.getContract() != null) {
@@ -118,6 +142,12 @@ public class OnboardingInstitutionUtils {
         }
     }
 
+    public static Map<String, OnboardedProduct> constructProductMap(OnboardingRequest onboardingInstitutionRequest, UserToOnboard userToOnboard) {
+        Map<String, OnboardedProduct> productMap = new HashMap<>();
+        productMap.put(onboardingInstitutionRequest.getProductId(), constructProduct(userToOnboard, onboardingInstitutionRequest));
+        return productMap;
+    }
+
     public static Onboarding constructOnboarding(OnboardingRequest request) {
         Onboarding onboarding = new Onboarding();
 
@@ -132,6 +162,8 @@ public class OnboardingInstitutionUtils {
         if (request.getInstitutionUpdate() != null) {
             onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         }
+        //TODO: onboarding.setPremium();
+
         return onboarding;
     }
 
@@ -144,5 +176,65 @@ public class OnboardingInstitutionUtils {
             default:
                 return RelationshipState.TOBEVALIDATED;
         }
+    }
+
+    public static List<String> getOnboardingValidManager(List<UserToOnboard> users) {
+        log.info("START - getOnboardingValidManager for users list size: {}", users.size());
+        List<String> response = new ArrayList<>();
+        users.forEach(user -> {
+            if (PartyRole.MANAGER == user.getRole()) {
+                response.add(user.getId());
+            }
+        });
+        if (response.isEmpty()) {
+            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+        }
+        return response;
+    }
+
+    public static List<String> getValidManager(List<OnboardedUser> users, String institutionId, String productId) {
+        log.info("START - getValidManager for users list size: {}", users.size());
+        List<String> response = new ArrayList<>();
+        for (OnboardedUser onboardedUser : users) {
+            onboardedUser.getBindings().stream()
+                    .filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
+                    .flatMap(userBinding -> userBinding.getProducts().stream())
+                    .filter(product -> productId.equalsIgnoreCase(product.getProductId()) && PartyRole.MANAGER == product.getRole())
+                    .forEach(product -> response.add(onboardedUser.getId()));
+        }
+        if (response.isEmpty()) {
+            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+        }
+        return response;
+    }
+
+    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution) {
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(token.getProductId());
+        onboardingRequest.setProductName(token.getProductId());
+        Contract contract = new Contract();
+        contract.setPath(token.getContract());
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription(institution.getDescription());
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setSignContract(true);
+
+        return onboardingRequest;
+    }
+
+    public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest request, Institution institution) {
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(request.getProductId());
+        onboardingRequest.setProductName(request.getProductId());
+        Contract contract = new Contract();
+        contract.setPath(request.getContract().getPath());
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription(institution.getDescription());
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setSignContract(true);
+
+        return onboardingRequest;
     }
 }

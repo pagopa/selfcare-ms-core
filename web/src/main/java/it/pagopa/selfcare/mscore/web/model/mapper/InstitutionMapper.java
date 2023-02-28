@@ -60,9 +60,8 @@ public class InstitutionMapper {
         return institutionResponse;
     }
 
-    public static InstitutionManagerResponse toInstitutionManagerResponse(ProductManagerInfo manager, String productId, String contractId) {
+    public static InstitutionManagerResponse toInstitutionManagerResponse(ProductManagerInfo manager, String productId) {
         InstitutionManagerResponse institutionManagerResponse = new InstitutionManagerResponse();
-        institutionManagerResponse.setId(contractId);
         institutionManagerResponse.setFrom(manager.getUserId());
         institutionManagerResponse.setTo(manager.getInstitution().getId());
 
@@ -94,6 +93,7 @@ public class InstitutionMapper {
                 institutionManagerResponse.setState(product.getStatus());
                 institutionManagerResponse.setCreatedAt(product.getCreatedAt());
                 institutionManagerResponse.setUpdatedAt(product.getUpdatedAt());
+                institutionManagerResponse.setId(product.getRelationshipId());
             }
         }
     }
@@ -201,12 +201,10 @@ public class InstitutionMapper {
             billingResponse.setVatNumber(billing.getVatNumber());
             billingResponse.setRecipientCode(billing.getRecipientCode());
             billingResponse.setPublicServices(billing.isPublicServices());
-            return billingResponse;
         } else if (institution.getBilling() != null) {
             billingResponse.setVatNumber(institution.getBilling().getVatNumber());
             billingResponse.setRecipientCode(institution.getBilling().getRecipientCode());
             billingResponse.setPublicServices(institution.getBilling().isPublicServices());
-            return billingResponse;
         }
         return billingResponse;
     }

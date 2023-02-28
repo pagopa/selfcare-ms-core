@@ -1,10 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.UserToOnboard;
-import it.pagopa.selfcare.mscore.model.Contract;
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
@@ -37,8 +33,19 @@ public class OnboardingMapper {
             onboardingRequest.setUsers(convertToOnboarderUser(onboardingInstitutionRequest.getUsers()));
         if (onboardingInstitutionRequest.getInstitutionUpdate() != null)
             onboardingRequest.setInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate());
+        if(onboardingInstitutionRequest.getContractImported()!=null){
+            onboardingRequest.setContractImported(toContractImported(onboardingInstitutionRequest.getContractImported()));
+        }
 
         return onboardingRequest;
+    }
+
+    private static ContractImported toContractImported(ContractImportedRequest contractImported) {
+        ContractImported response = new ContractImported();
+        response.setContractType(contractImported.getContractType());
+        response.setFilePath(contractImported.getFilePath());
+        response.setFileName(contractImported.getFileName());
+        return response;
     }
 
     private static Contract convertToContract(ContractRequest request) {
@@ -128,6 +135,14 @@ public class OnboardingMapper {
         return onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling();
     }
 
+    private static ProductInfo convertToProductInfo(OnboardedProduct onboardedProduct, String productId) {
+        ProductInfo productInfo = new ProductInfo();
+        productInfo.setId(productId);
+        productInfo.setRoles(onboardedProduct.getProductRoles());
+        productInfo.setCreatedAt(onboardedProduct.getCreatedAt());
+        return productInfo;
+    }
+
     private static List<AttributesResponse> convertToAttributesResponse(List<Attributes> attributesList) {
         if (attributesList == null) {
             return Collections.emptyList();
@@ -156,5 +171,19 @@ public class OnboardingMapper {
                     geoTaxonomies.setDesc(geo.getDesc());
                     return geoTaxonomies;
                 }).collect(Collectors.toList());
+    }
+
+    public static OnboardingOperatorsRequest toOnboardingOperatorRequest(OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
+        OnboardingOperatorsRequest request = new OnboardingOperatorsRequest();
+        request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());
+        request.setProductId(onboardingInstitutionOperatorsRequest.getProductId());
+        request.setUsers(convertToOnboarderUser(onboardingInstitutionOperatorsRequest.getUsers()));
+        return request;
+    }
+
+    public static OnboardingLegalsRequest toOnboardingLegalsRequest(OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest) {
+        OnboardingLegalsRequest request = new OnboardingLegalsRequest();
+
+        return request;
     }
 }

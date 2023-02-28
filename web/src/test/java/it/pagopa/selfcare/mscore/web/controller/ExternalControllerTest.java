@@ -1,9 +1,20 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
+import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
+import it.pagopa.selfcare.mscore.api.ProductConnector;
+import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.core.ExternalService;
+import it.pagopa.selfcare.mscore.core.ExternalServiceImpl;
+import it.pagopa.selfcare.mscore.core.InstitutionServiceImpl;
+import it.pagopa.selfcare.mscore.core.OnboardingDao;
+import it.pagopa.selfcare.mscore.core.TokenServiceImpl;
+import it.pagopa.selfcare.mscore.core.UserServiceImpl;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
@@ -17,13 +28,20 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Disabled;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -31,6 +49,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+@ContextConfiguration(classes = {ExternalController.class})
 @ExtendWith(SpringExtension.class)
 class ExternalControllerTest {
     @InjectMocks
@@ -38,6 +57,238 @@ class ExternalControllerTest {
 
     @Mock
     private ExternalService externalService;
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProductsByExternalId() throws Exception {
+        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+                .thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[]}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProductsByExternalId2() throws Exception {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("?");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("?");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("?");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("?");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+                .thenReturn(onboardingList);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProductsByExternalId3() throws Exception {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("?");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("?");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("?");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("?");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        Billing billing1 = new Billing();
+        billing1.setPublicServices(false);
+        billing1.setRecipientCode("U");
+        billing1.setVatNumber("?");
+
+        Premium premium1 = new Premium();
+        premium1.setContract("U");
+        premium1.setStatus(RelationshipState.ACTIVE);
+
+        Onboarding onboarding1 = new Onboarding();
+        onboarding1.setBilling(billing1);
+        onboarding1.setContract("U");
+        onboarding1.setCreatedAt(null);
+        onboarding1.setPremium(premium1);
+        onboarding1.setPricingPlan("U");
+        onboarding1.setProductId("?");
+        onboarding1.setStatus(RelationshipState.ACTIVE);
+        onboarding1.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding1);
+        onboardingList.add(onboarding);
+        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+                .thenReturn(onboardingList);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string("{\"products\":[{\"id\":\"?\",\"state\":\"ACTIVE\"},{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProductsByExternalId4() throws Exception {
+        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution());
+        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+                .thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products", "", "Uri Vars");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"imported\":false}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     */
+    @Test
+    void testRetrieveInstitutionProductsByExternalId5() throws Exception {
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution("42", "42", "?",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
+                billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
+                null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
+        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+                .thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products", "", "Uri Vars");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or"
+                                        + " something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":"
+                                        + "\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\""
+                                        + ":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup"
+                                        + "\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"rea\":\"?\",\"shareCapital\":"
+                                        + "\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\","
+                                        + "\"imported\":true}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String)}
+     */
+    @Test
+    void testRetrieveInstitutionGeoTaxonomiesByExternalId() throws Exception {
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId((String) any())).thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/geotaxonomies", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("[]"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String)}
+     */
+    @Test
+    void testRetrieveInstitutionGeoTaxonomiesByExternalId2() throws Exception {
+        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution());
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId((String) any())).thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/geotaxonomies", "", "Uri Vars");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"imported\":false}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String)}
+     */
+    @Test
+    void testRetrieveInstitutionGeoTaxonomiesByExternalId3() throws Exception {
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution("42", "42", "?",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
+                billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
+                null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId((String) any())).thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/geotaxonomies", "", "Uri Vars");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or"
+                                        + " something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":"
+                                        + "\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\""
+                                        + ":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup"
+                                        + "\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"rea\":\"?\",\"shareCapital\":"
+                                        + "\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\","
+                                        + "\"imported\":true}"));
+    }
 
     /**
      * Method under test: {@link ExternalController#getBillingInstitutionByExternalId(String, String)}
@@ -125,6 +376,48 @@ class ExternalControllerTest {
                                 "{\"institutionId\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics"
                                         + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":null,\"billing\":null}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#getUserInstitutionRelationshipsByExternalId(String, String, List, List, List, List, Authentication)}
+     */
+    @Test
+    @Disabled("TODO: Complete this test")
+    void testGetUserInstitutionRelationshipsByExternalId() {
+        // TODO: Complete this test.
+        //   Reason: R013 No inputs found that don't throw a trivial exception.
+        //   Diffblue Cover tried to run the arrange/act section, but the method under
+        //   test threw
+        //   java.lang.NullPointerException
+        //       at it.pagopa.selfcare.mscore.web.controller.ExternalController.getUserInstitutionRelationshipsByExternalId(ExternalController.java:181)
+        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:655)
+        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:764)
+        //   See https://diff.blue/R013 to resolve this issue.
+
+        GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, mock(ProductConnector.class));
+
+        InstitutionServiceImpl institutionService = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
+                new UserServiceImpl(null, onboardingDao,
+                        new InstitutionServiceImpl(null, null, mock(GeoTaxonomiesConnector.class), null),
+                        mock(UserRegistryConnector.class)));
+
+        TokenServiceImpl tokenService = new TokenServiceImpl(null);
+        OnboardingDao onboardingDao1 = new OnboardingDao(null, null, null, mock(ProductConnector.class));
+
+        GeoTaxonomiesConnector geoTaxonomiesConnector1 = mock(GeoTaxonomiesConnector.class);
+        ExternalController externalController = new ExternalController(
+                new ExternalServiceImpl(institutionService, tokenService,
+                        new UserServiceImpl(null, onboardingDao1,
+                                new InstitutionServiceImpl(null, null, geoTaxonomiesConnector1,
+                                        new UserServiceImpl(null, null, null, mock(UserRegistryConnector.class))),
+                                mock(UserRegistryConnector.class))));
+        ArrayList<PartyRole> roles = new ArrayList<>();
+        ArrayList<RelationshipState> states = new ArrayList<>();
+        ArrayList<String> products = new ArrayList<>();
+        ArrayList<String> productRoles = new ArrayList<>();
+        externalController.getUserInstitutionRelationshipsByExternalId("42", "42", roles, states, products, productRoles,
+                new JwtAuthenticationToken("ABC123"));
     }
 
     /**
@@ -236,6 +529,52 @@ class ExternalControllerTest {
                                         + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":\"?\",\"billing\":{\"vatNumber\":\"42\",\"recipientCode"
                                         + "\":\"?\",\"publicServices\":true}}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#getBillingInstitutionByExternalId(String, String)}
+     */
+    @Test
+    void testGetBillingInstitutionByExternalId3() throws Exception {
+        Institution institution = new Institution();
+        institution.setOnboarding(new ArrayList<>());
+        when(externalService.retrieveInstitutionProduct((String) any(), (String) any())).thenReturn(institution);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products/{productId}/billing", "42", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"institutionId\":null,\"externalId\":null,\"originId\":null,\"description\":null,\"institutionType\":null,"
+                                        + "\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"pricingPlan\":null,\"billing\":null"
+                                        + "}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#getBillingInstitutionByExternalId(String, String)}
+     */
+    @Test
+    void testGetBillingInstitutionByExternalId4() throws Exception {
+        Institution institution = new Institution();
+        institution.setTaxCode("U");
+        institution.setZipCode("OX1 1PT");
+        institution.setAddress("17 High St");
+        institution.setDigitalAddress("17 High St");
+        institution.setInstitutionType(InstitutionType.PG);
+        institution.setDescription("?");
+        institution.setIpaCode("U");
+        institution.setExternalId("?");
+        institution.setId("?");
+        when(externalService.retrieveInstitutionProduct((String) any(), (String) any())).thenReturn(institution);
+        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
+                .formLogin();
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     /**
@@ -461,6 +800,54 @@ class ExternalControllerTest {
     }
 
     /**
+     * Method under test: {@link ExternalController#getByExternalId(String)}
+     */
+    @Test
+    void testGetByExternalId5() throws Exception {
+        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
+                "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"imported\":false}"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#getByExternalId(String)}
+     */
+    @Test
+    void testGetByExternalId6() throws Exception {
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution("42", "42", "?",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
+                billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
+                null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
+                "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or"
+                                        + " something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":"
+                                        + "\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\""
+                                        + ":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup"
+                                        + "\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"rea\":\"?\",\"shareCapital\":"
+                                        + "\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\","
+                                        + "\"imported\":true}"));
+    }
+
+    /**
      * Method under test: {@link ExternalController#getManagerInstitutionByExternalId(String, String)}
      */
     @Test
@@ -507,6 +894,104 @@ class ExternalControllerTest {
         when(externalService.retrieveRelationship(any(), any())).thenReturn("ABC123");
         when(externalService.retrieveInstitutionManager(any(), any())).thenReturn(productManagerInfo);
         when(externalService.getInstitutionByExternalId(any())).thenReturn(institution);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#getManagerInstitutionByExternalId(String, String)}
+     */
+    @Test
+    void testGetManagerInstitutionByExternalId2() throws Exception {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("?");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("?");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("?");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("?");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution institution = new Institution();
+        institution.setOnboarding(onboardingList);
+
+        ProductManagerInfo productManagerInfo = new ProductManagerInfo();
+        productManagerInfo.setProducts(new ArrayList<>());
+        productManagerInfo.setInstitution(institution);
+        when(externalService.retrieveInstitutionManager((String) any(), (String) any())).thenReturn(productManagerInfo);
+        when(externalService.retrieveRelationship((ProductManagerInfo) any(), (String) any())).thenReturn("127.0.0.1");
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link ExternalController#getManagerInstitutionByExternalId(String, String)}
+     */
+    @Test
+    void testGetManagerInstitutionByExternalId3() throws Exception {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("?");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("?");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("?");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("?");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+        Billing billing1 = new Billing();
+        ArrayList<Onboarding> onboarding1 = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+
+        Institution institution = new Institution("42", "42", "?", "The characteristics of someone or something",
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing1, onboarding1, geographicTaxonomies,
+                attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "?", "?", "?",
+                "jane.doe@example.org", "6625550144", true);
+        institution.setId("?");
+        institution.setOnboarding(onboardingList);
+
+        ProductManagerInfo productManagerInfo = new ProductManagerInfo();
+        productManagerInfo.setProducts(new ArrayList<>());
+        productManagerInfo.setUserId("?");
+        productManagerInfo.setInstitution(institution);
+        when(externalService.retrieveInstitutionManager((String) any(), (String) any())).thenReturn(productManagerInfo);
+        when(externalService.retrieveRelationship((ProductManagerInfo) any(), (String) any())).thenReturn("127.0.0.1");
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
         MockMvcBuilders.standaloneSetup(externalController)

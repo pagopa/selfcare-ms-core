@@ -147,14 +147,14 @@ public class InstitutionController {
      *
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: OnboardedProducts
-     * * Code: 404, Message: Products not found, DataType: Problem
+     * * Code: 400, Message: bad request, DataType: Problem
      *
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.institution.update}")
     @PutMapping(value = "/{id}")
     public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.internalId}")
-                                                                 @PathVariable("institutionId") String institutionId,
+                                                                 @PathVariable("id") String institutionId,
                                                                  @RequestBody InstitutionPut institutionPut,
                                                                  Authentication authentication) {
 
@@ -229,7 +229,7 @@ public class InstitutionController {
                                                                                     @RequestParam(value = "productRoles", required = false) List<String> productRoles,
                                                                                     Authentication authentication) {
         log.info("Getting relationship for institution {} and current user", institutionId);
-        CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        CustomExceptionMessage.setCustomMessage(GET_USER_INSTITUTION_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
         List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);

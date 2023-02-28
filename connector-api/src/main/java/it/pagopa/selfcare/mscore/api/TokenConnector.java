@@ -10,10 +10,6 @@ public interface TokenConnector {
     void deleteById(String id);
     Token save(Token token);
     Token findById(String tokenId);
-
-    Token findAndUpdateTokenState(String tokenId, RelationshipState state);
-
-    void findAndUpdateTokenUser(String id, List<String> usersId);
-
+    Token findAndUpdateToken(String tokenId, RelationshipState state, String checksum);
     List<Token> findWithFilter(String institutionId, String productId, List<RelationshipState> state);
 }

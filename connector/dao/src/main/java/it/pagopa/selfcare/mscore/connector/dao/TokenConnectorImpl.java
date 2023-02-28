@@ -71,23 +71,17 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public Token findAndUpdateTokenState(String tokenId, RelationshipState status) {
+    public Token findAndUpdateToken(String tokenId, RelationshipState status, String digest) {
         Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
-        UpdateDefinition updateDefinition = new Update()
+        Update updateDefinition = new Update()
                 .set(TokenEntity.Fields.status.name(), status)
                 .set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+
+        if(digest != null){
+            updateDefinition.set(TokenEntity.Fields.checksum.name(), digest);
+        }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
-    }
-
-    @Override
-    public void findAndUpdateTokenUser(String tokenId, List<String> usersId) {
-        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
-        Update update = new Update();
-        usersId.forEach(s -> update.addToSet(TokenEntity.Fields.users.name(), s));
-        update.set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        tokenRepository.findAndModify(query, update, findAndModifyOptions, TokenEntity.class);
     }
 
     @Override

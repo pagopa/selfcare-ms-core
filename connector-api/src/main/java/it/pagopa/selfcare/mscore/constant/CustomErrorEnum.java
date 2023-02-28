@@ -6,10 +6,10 @@ public enum CustomErrorEnum {
     GET_INSTITUTION_MANAGER_NOT_FOUND("0043", "Cannot find active manager for institution having externalId %s and product %s"),
     USER_NOT_FOUND_ERROR("0031", "User having userId %s not found"),
     USER_ALREADY_EXIST_ERROR("0033", "Person already exists"),
-    USERS_SIZE_NOT_ADMITTED("0030", "At least one user for onboarding PG"),
+    USERS_SIZE_NOT_ADMITTED("0030","At least one user for onboarding PG"),
     PRODUCT_ALREADY_ONBOARDED("0032", "Product %s already onboarded for institution having externalId %s"),
     MANAGER_NOT_FOUND_ERROR("0033", "No onboarded managers for at least one of the institutions %s and product %s"),
-    ROLES_NOT_ADMITTED_ERROR("0034", "Roles %s are not admitted for this operation"),
+    ROLES_NOT_ADMITTED_ERROR("0034","Roles %s are not admitted for this operation"),
     INSTITUTION_NOT_ONBOARDED("0004", "Institution having externalId %s is not onboarded for product %s"),
     INSTITUTION_NOT_FOUND("0036", "Cannot find Institution using institutionId %s and externalInstitutionId %s"),
     INSTITUTION_LEGAL_NOT_FOUND("0037", "Institution with externalInstitutionId %s is not related to user"),
@@ -24,8 +24,10 @@ public enum CustomErrorEnum {
     TOKEN_ALREADY_CONSUMED("0040", "Token %s has already consumed"),
     TOKEN_NOT_FOUND("0014", "Token %s not found"),
     CONTRACT_NOT_FOUND("0015", "Token for institution %s and product %s not found"),
+    DOCUMENT_NOT_FOUND("0016", "Document for relationship %s not found"),
     GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s and productId %s"),
     RELATIONSHIP_NOT_ACTIVABLE("0007", "Relationship %s cannot be activated"),
+    INVALID_STATUS_CHANGE("0000", "Cannot update state from value %s to value %s"),
     RELATIONSHIP_NOT_SUSPENDABLE("0010", "Relationship %s cannot be suspended"),
     RELATIONSHIP_NOT_FOUND("0008", "Relationship not found for Institution %s User %s Role %s");
 

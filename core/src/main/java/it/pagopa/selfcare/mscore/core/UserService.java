@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.*;
 
+import java.util.EnumSet;
 import java.util.List;
 
 public interface UserService {
@@ -17,4 +18,6 @@ public interface UserService {
     void suspendRelationship(String relationshipId);
     RelationshipInfo retrieveRelationship(String relationshipId);
     void deleteRelationship(String relationshipId);
+    User getUserFromUserRegistry(String userId, EnumSet<User.Fields> fields);
+
 }

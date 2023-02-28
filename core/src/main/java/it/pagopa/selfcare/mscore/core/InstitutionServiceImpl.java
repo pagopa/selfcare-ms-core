@@ -20,6 +20,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
+import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
+import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
 @Slf4j
 @Service
@@ -174,7 +176,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<RelationshipInfo> getUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<OnboardedUser> adminRelationships = userService.retrieveAdminUsers(institution.getId(), userId);
+        List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
         List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, roles, states, products, productRoles);
         if (!adminRelationships.isEmpty()) {
             return toRelationshipInfo(institutionRelationships, institution);

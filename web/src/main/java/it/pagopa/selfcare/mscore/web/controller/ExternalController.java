@@ -83,8 +83,7 @@ public class ExternalController {
         log.info("Getting manager for institution having externalId {}", externalId);
         CustomExceptionMessage.setCustomMessage(INSTITUTION_MANAGER_ERROR);
         ProductManagerInfo manager = externalService.retrieveInstitutionManager(externalId, productId);
-        String contractId = externalService.retrieveRelationship(manager, productId);
-        return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(manager, productId, contractId));
+        return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(manager, productId));
     }
 
 

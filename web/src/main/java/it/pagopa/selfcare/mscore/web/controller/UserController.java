@@ -5,20 +5,26 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.ResourceResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_RELATIONSHIP_ERROR;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/persons")
 @Api(tags = "Persons")
 public class UserController {
 
@@ -40,7 +46,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.person.verify}", notes = "${swagger.mscore.person.verify}")
-    @RequestMapping(method = { RequestMethod.HEAD}, value = "/{id}")
+    @RequestMapping(method = { RequestMethod.HEAD}, value = "/persons/{id}")
     public ResponseEntity<Void> verifyUser(@PathVariable(value = "id") String userId) {
         userService.verifyUser(userId);
         return ResponseEntity.ok().build();
@@ -49,9 +55,9 @@ public class UserController {
     /**
      * The function activate a suspended relationship
      *
-     * @param tokenId tokenId
+     * @param relationshipId relationshipId
      * @return no content
-     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 204
      * * Code: 400, Message: Invalid starter token status, DataType: Problem
      * * Code: 404, Message: Token not found, DataType: Problem
      */
@@ -59,10 +65,10 @@ public class UserController {
     @ApiOperation(value = "", notes = "${swagger.mscore.relationship.activate}")
     @PostMapping("/relationships/{relationshipId}/activate")
     public ResponseEntity<Void> activateRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                     @PathVariable("relationshipId") String tokenId) {
-        log.info("Activating relationship {}", tokenId);
+                                                     @PathVariable("relationshipId") String relationshipId) {
+        log.info("Activating relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(ACTIVATE_RELATIONSHIP_ERROR);
-        userService.activateRelationship(tokenId);
+        userService.activateRelationship(relationshipId);
         return ResponseEntity.noContent().build();
     }
 
@@ -117,7 +123,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.token.get}")
-    @PostMapping("/relationships/{relationshipId}")
+    @GetMapping("/relationships/{relationshipId}")
     public ResponseEntity<RelationshipResult> getRelationship(@ApiParam("${swagger.mscore.token.relationshipId}")
                                                               @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting relationship {}", relationshipId);

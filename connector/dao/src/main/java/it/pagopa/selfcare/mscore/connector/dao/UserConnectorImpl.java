@@ -2,7 +2,10 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -38,12 +42,6 @@ public class UserConnectorImpl implements UserConnector {
     @Override
     public void deleteById(String id) {
         repository.deleteById(id);
-    }
-
-    @Override
-    public OnboardedUser save(OnboardedUser example) {
-        final UserEntity entity = convertToUserEntity(example);
-        return convertToOnboardedUser(repository.save(entity));
     }
 
     @Override
@@ -81,7 +79,7 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public void findAndCreate(String id, String institutionId, OnboardedProduct product, UserBinding binding) {
+    public void findAndCreate(String id, String institutionId, UserBinding binding) {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(id));
         Update update = new Update();
         update.set(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now());
@@ -97,9 +95,9 @@ public class UserConnectorImpl implements UserConnector {
         Query query = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
                 .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
                         .and(UserBinding.Fields.products.name())
-                                .elemMatch(Criteria.where(OnboardedProduct.Fields.productId.name()).is(productId)
-                                        .and(OnboardedProduct.Fields.role.name()).is(PartyRole.MANAGER)
-                                        .and(OnboardedProduct.Fields.status.name()).in(state))));
+                        .elemMatch(Criteria.where(OnboardedProduct.Fields.productId.name()).is(productId)
+                                .and(OnboardedProduct.Fields.role.name()).is(PartyRole.MANAGER)
+                                .and(OnboardedProduct.Fields.status.name()).in(state))));
 
         return repository.find(query, UserEntity.class).stream()
                 .findFirst()
@@ -140,23 +138,15 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     private Criteria constructCriteria(List<PartyRole> roleList, List<RelationshipState> stateList, List<String> productRoles, List<String> products) {
-        if(productRoles.isEmpty() && products.isEmpty()) {
-            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
-        }else if(productRoles.isEmpty()){
-            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.productId.name()).in(products)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
-        }else if(products.isEmpty()){
-            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
-        }else {
-            return Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
-                            .and(OnboardedProduct.Fields.productRoles.name()).in(productRoles)
-                            .and(OnboardedProduct.Fields.productId.name()).in(products)
-                            .and(OnboardedProduct.Fields.status.name()).in(stateList);
+        Criteria criteria = Criteria.where(OnboardedProduct.Fields.role.name()).in(roleList)
+                .and(OnboardedProduct.Fields.status.name()).in(stateList);
+        if (!products.isEmpty()) {
+            criteria = criteria.and(OnboardedProduct.Fields.productId.name()).in(products);
         }
+        if (!productRoles.isEmpty()) {
+            criteria = criteria.and(OnboardedProduct.Fields.productRoles.name()).in(productRoles);
+        }
+        return criteria;
     }
 
     @Override
@@ -172,6 +162,18 @@ public class UserConnectorImpl implements UserConnector {
                         RELATIONSHIP_ID_NOT_FOUND.getCode()));
     }
 
+    @Override
+    public void findAndRemoveProduct(String userId, String institutionId, OnboardedProduct product) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
+        Update update = new Update();
+
+        update.pull(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name()), product);
+        update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true).returnNew(true);
+        repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+    }
+
     private String constructQuery(String... variables) {
         StringBuilder builder = new StringBuilder();
         builder.append(UserEntity.Fields.bindings.name());
@@ -179,21 +181,42 @@ public class UserConnectorImpl implements UserConnector {
         return builder.toString();
     }
 
-    private UserEntity convertToUserEntity(OnboardedUser example) {
-        UserEntity user = new UserEntity();
-        user.setUpdatedAt(example.getUpdatedAt());
-        user.setCreatedAt(example.getCreatedAt());
-        user.setBindings(example.getBindings());
-        user.setId(example.getId());
-        return user;
-    }
-
     private OnboardedUser convertToOnboardedUser(UserEntity entity) {
         OnboardedUser user = new OnboardedUser();
         user.setId(entity.getId());
         user.setUpdatedAt(entity.getUpdatedAt());
         user.setCreatedAt(entity.getCreatedAt());
-        user.setBindings(entity.getBindings());
+        user.setBindings(toBindings(entity.getBindings()));
         return user;
+    }
+
+    private List<UserBinding> toBindings(List<UserBindingEntity> bindings) {
+        List<UserBinding> list = new ArrayList<>();
+        for(UserBindingEntity entity : bindings){
+            UserBinding binding = new UserBinding();
+            binding.setInstitutionId(entity.getInstitutionId());
+            binding.setCreatedAt(entity.getCreatedAt());
+            binding.setProducts(toOnboardedProduct(entity.getProducts()));
+            list.add(binding);
+        }
+        return list;
+    }
+
+    private List<OnboardedProduct> toOnboardedProduct(List<OnboardedProductEntity> products) {
+        List<OnboardedProduct> productList = new ArrayList<>();
+        for(OnboardedProductEntity entity : products){
+            OnboardedProduct product = new OnboardedProduct();
+            product.setProductId(entity.getProductId());
+            product.setProductRoles(entity.getProductRoles());
+            product.setRole(entity.getRole());
+            product.setStatus(entity.getStatus());
+            product.setEnv(entity.getEnv());
+            product.setRelationshipId(entity.getRelationshipId());
+            product.setContract(entity.getContract());
+            product.setUpdatedAt(entity.getUpdatedAt());
+            product.setCreatedAt(entity.getCreatedAt());
+            productList.add(product);
+        }
+        return productList;
     }
 }

@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import it.pagopa.selfcare.mscore.model.UserBinding;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
@@ -18,7 +18,7 @@ public class UserEntity {
 
     @Id
     private String id;
-    private List<UserBinding> bindings;
+    private List<UserBindingEntity> bindings;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
