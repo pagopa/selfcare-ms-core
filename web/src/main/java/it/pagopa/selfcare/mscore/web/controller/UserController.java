@@ -3,25 +3,19 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.ResourceResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_RELATIONSHIP_ERROR;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @Slf4j
 @RestController
@@ -29,9 +23,11 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 public class UserController {
 
     private final UserService userService;
+    private final UserRelationshipService userRelationshipService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserRelationshipService userRelationshipService) {
         this.userService = userService;
+        this.userRelationshipService = userRelationshipService;
     }
 
     /**
@@ -68,7 +64,7 @@ public class UserController {
                                                      @PathVariable("relationshipId") String relationshipId) {
         log.info("Activating relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(ACTIVATE_RELATIONSHIP_ERROR);
-        userService.activateRelationship(relationshipId);
+        userRelationshipService.activateRelationship(relationshipId);
         return ResponseEntity.noContent().build();
     }
 
@@ -88,7 +84,7 @@ public class UserController {
                                                     @PathVariable("tokenId") String relationshipId) {
         log.info("Suspending relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(SUSPEND_RELATIONSHIP_ERROR);
-        userService.suspendRelationship(relationshipId);
+        userRelationshipService.suspendRelationship(relationshipId);
         return ResponseEntity.noContent().build();
     }
 
@@ -108,7 +104,7 @@ public class UserController {
                                                    @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
-        userService.deleteRelationship(relationshipId);
+        userRelationshipService.deleteRelationship(relationshipId);
         return ResponseEntity.ok().build();
     }
 
@@ -128,7 +124,7 @@ public class UserController {
                                                               @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
-        RelationshipInfo relationship = userService.retrieveRelationship(relationshipId);
+        RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResult(relationship));
     }
 }

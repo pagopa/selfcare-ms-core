@@ -1,20 +1,9 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.core.ExternalServiceImpl;
-import it.pagopa.selfcare.mscore.core.InstitutionServiceImpl;
-import it.pagopa.selfcare.mscore.core.OnboardingDao;
-import it.pagopa.selfcare.mscore.core.TokenServiceImpl;
-import it.pagopa.selfcare.mscore.core.UserServiceImpl;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
@@ -30,16 +19,11 @@ import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -376,48 +360,6 @@ class ExternalControllerTest {
                                 "{\"institutionId\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics"
                                         + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
                                         + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":null,\"billing\":null}"));
-    }
-
-    /**
-     * Method under test: {@link ExternalController#getUserInstitutionRelationshipsByExternalId(String, String, List, List, List, List, Authentication)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetUserInstitutionRelationshipsByExternalId() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.NullPointerException
-        //       at it.pagopa.selfcare.mscore.web.controller.ExternalController.getUserInstitutionRelationshipsByExternalId(ExternalController.java:181)
-        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:655)
-        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:764)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, mock(ProductConnector.class));
-
-        InstitutionServiceImpl institutionService = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                new UserServiceImpl(null, onboardingDao,
-                        new InstitutionServiceImpl(null, null, mock(GeoTaxonomiesConnector.class), null),
-                        mock(UserRegistryConnector.class)));
-
-        TokenServiceImpl tokenService = new TokenServiceImpl(null);
-        OnboardingDao onboardingDao1 = new OnboardingDao(null, null, null, mock(ProductConnector.class));
-
-        GeoTaxonomiesConnector geoTaxonomiesConnector1 = mock(GeoTaxonomiesConnector.class);
-        ExternalController externalController = new ExternalController(
-                new ExternalServiceImpl(institutionService, tokenService,
-                        new UserServiceImpl(null, onboardingDao1,
-                                new InstitutionServiceImpl(null, null, geoTaxonomiesConnector1,
-                                        new UserServiceImpl(null, null, null, mock(UserRegistryConnector.class))),
-                                mock(UserRegistryConnector.class))));
-        ArrayList<PartyRole> roles = new ArrayList<>();
-        ArrayList<RelationshipState> states = new ArrayList<>();
-        ArrayList<String> products = new ArrayList<>();
-        ArrayList<String> productRoles = new ArrayList<>();
-        externalController.getUserInstitutionRelationshipsByExternalId("42", "42", roles, states, products, productRoles,
-                new JwtAuthenticationToken("ABC123"));
     }
 
     /**

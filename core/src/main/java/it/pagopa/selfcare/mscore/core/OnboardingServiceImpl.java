@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.DOCUMENT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.VERIFY_USERS_ROLE;
 
 @Slf4j
 @Service
@@ -38,17 +37,20 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final OnboardingDao onboardingDao;
     private final InstitutionService institutionService;
     private final UserService userService;
+    private final UserRelationshipService userRelationshipService;
     private final ContractService contractService;
     private final EmailService emailService;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  UserService userService,
+                                 UserRelationshipService userRelationshipService,
                                  ContractService contractService,
                                  EmailService emailService) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
+        this.userRelationshipService = userRelationshipService;
         this.contractService = contractService;
         this.emailService = emailService;
     }
@@ -238,7 +240,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public ResourceResponse retrieveDocument(String relationshipId) {
-        RelationshipInfo relationship = userService.retrieveRelationship(relationshipId);
+        RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
         if (relationship.getOnboardedProduct() != null &&
                 StringUtils.hasText(relationship.getOnboardedProduct().getContract())) {
             return contractService.getFile(relationship.getOnboardedProduct().getContract());
@@ -250,7 +252,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     @Override
     public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser) {
         //TODO
-
     }
 
 }
