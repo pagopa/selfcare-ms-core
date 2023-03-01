@@ -4,6 +4,10 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +42,7 @@ class UserConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link UserConnectorImpl#getById}
+     * Method under test: {@link UserConnectorImpl#findById}
      */
     @Test
     void testGetById() {
@@ -49,7 +53,7 @@ class UserConnectorImplTest {
         userEntity.setUpdatedAt(null);
         Optional<UserEntity> ofResult = Optional.of(userEntity);
         when(userRepository.findById( any())).thenReturn(ofResult);
-        OnboardedUser actualById = userConnectorImpl.getById("42");
+        OnboardedUser actualById = userConnectorImpl.findById("42");
         assertTrue(actualById.getBindings().isEmpty());
         assertNull(actualById.getUpdatedAt());
         assertEquals("42", actualById.getId());
@@ -58,12 +62,12 @@ class UserConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link UserConnectorImpl#getById}
+     * Method under test: {@link UserConnectorImpl#findById}
      */
     @Test
     void testGetById2() {
         when(userRepository.findById( any())).thenReturn(Optional.empty());
-        assertNull(userConnectorImpl.getById("42"));
+        assertNull(userConnectorImpl.findById("42"));
         verify(userRepository).findById( any());
     }
 

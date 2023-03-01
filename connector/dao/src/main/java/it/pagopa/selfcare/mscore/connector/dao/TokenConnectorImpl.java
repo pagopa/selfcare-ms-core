@@ -2,23 +2,24 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.TOKEN_NOT_FOUND;
 
@@ -50,7 +51,7 @@ public class TokenConnectorImpl implements TokenConnector {
         );
         return tokenRepository.find(query, TokenEntity.class).stream()
                 .findFirst()
-                .map(this::convertToToken)
+                .map(TokenMapper::convertToToken)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
                         GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
@@ -63,7 +64,7 @@ public class TokenConnectorImpl implements TokenConnector {
 
     @Override
     public Token findById(String tokenId) {
-        Optional<Token> opt = tokenRepository.findById(tokenId).map(this::convertToToken);
+        Optional<Token> opt = tokenRepository.findById(tokenId).map(TokenMapper::convertToToken);
         if (opt.isEmpty()) {
             throw new ResourceNotFoundException(String.format(TOKEN_NOT_FOUND.getMessage(), tokenId), TOKEN_NOT_FOUND.getCode());
         }
@@ -91,41 +92,7 @@ public class TokenConnectorImpl implements TokenConnector {
                 .and(TokenEntity.Fields.status.name()).nin(state));
 
         return tokenRepository.find(query, TokenEntity.class).stream()
-                .map(this::convertToToken)
+                .map(TokenMapper::convertToToken)
                 .collect(Collectors.toList());
-    }
-
-    private TokenEntity convertToTokenEntity(Token token) {
-        TokenEntity entity = new TokenEntity();
-        if (token.getId() != null) {
-            entity.setId(token.getId());
-        }else{
-            entity.setId(UUID.randomUUID().toString());
-        }
-        entity.setContract(token.getContract());
-        entity.setChecksum(token.getChecksum());
-        entity.setInstitutionId(token.getInstitutionId());
-        entity.setStatus(token.getStatus());
-        entity.setUsers(token.getUsers());
-        entity.setExpiringDate(token.getExpiringDate());
-        entity.setProductId(token.getProductId());
-        entity.setCreatedAt(token.getCreatedAt());
-        entity.setUpdatedAt(token.getUpdatedAt());
-        return entity;
-    }
-
-    private Token convertToToken(TokenEntity tokenEntity) {
-        Token token = new Token();
-        token.setId(tokenEntity.getId());
-        token.setContract(tokenEntity.getContract());
-        token.setChecksum(tokenEntity.getChecksum());
-        token.setInstitutionId(tokenEntity.getInstitutionId());
-        token.setStatus(tokenEntity.getStatus());
-        token.setUsers(tokenEntity.getUsers());
-        token.setExpiringDate(tokenEntity.getExpiringDate());
-        token.setCreatedAt(tokenEntity.getCreatedAt());
-        token.setUpdatedAt(tokenEntity.getUpdatedAt());
-        token.setProductId(tokenEntity.getProductId());
-        return token;
     }
 }

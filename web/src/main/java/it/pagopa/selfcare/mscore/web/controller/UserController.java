@@ -5,9 +5,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
-import it.pagopa.selfcare.mscore.model.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
+import it.pagopa.selfcare.mscore.web.model.user.Person;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,7 +34,25 @@ public class UserController {
     }
 
     /**
-     * The function verify is user existes
+     * The function create a new User
+     *
+     * @param userId String
+     *
+     * @return void
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: Person not found, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.person.verify}", notes = "${swagger.mscore.person.verify}")
+    @RequestMapping(method = { RequestMethod.HEAD}, value = "/persons/{id}")
+    public ResponseEntity<Person> createUser(@PathVariable(value = "id") String userId) {
+        OnboardedUser user = userService.createUser(userId);
+        return ResponseEntity.ok().body(UserMapper.toPerson(user));
+    }
+
+    /**
+     * The function verify is user exists
      *
      * @param userId String
      *
@@ -58,7 +79,7 @@ public class UserController {
      * * Code: 404, Message: Token not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.activate}")
+    @ApiOperation(value = "${swagger.mscore.relationship.activate}", notes = "${swagger.mscore.relationship.activate}")
     @PostMapping("/relationships/{relationshipId}/activate")
     public ResponseEntity<Void> activateRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                      @PathVariable("relationshipId") String relationshipId) {
@@ -78,7 +99,7 @@ public class UserController {
      * * Code: 404, Message: Token not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.suspend}")
+    @ApiOperation(value = "${swagger.mscore.relationship.suspend}", notes = "${swagger.mscore.relationship.suspend}")
     @PostMapping("/relationships/{relationshipId}/suspend")
     public ResponseEntity<Void> suspendRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                     @PathVariable("tokenId") String relationshipId) {
@@ -98,7 +119,7 @@ public class UserController {
      * * Code: 404, Message: Token not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.delete}")
+    @ApiOperation(value = "${swagger.mscore.relationship.delete}", notes = "${swagger.mscore.relationship.delete}")
     @DeleteMapping("/relationships/{relationshipId}")
     public ResponseEntity<Void> deleteRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                    @PathVariable("relationshipId") String relationshipId) {
@@ -118,7 +139,7 @@ public class UserController {
      * * Code: 404, Messa
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.token.get}")
+    @ApiOperation(value = "${swagger.mscore.token.get}", notes = "${swagger.mscore.token.get}")
     @GetMapping("/relationships/{relationshipId}")
     public ResponseEntity<RelationshipResult> getRelationship(@ApiParam("${swagger.mscore.token.relationshipId}")
                                                               @PathVariable("relationshipId") String relationshipId) {

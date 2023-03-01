@@ -1,8 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.inner;
 
-import it.pagopa.selfcare.mscore.model.Premium;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -15,8 +13,8 @@ public class OnboardingEntity {
     private RelationshipState status;
     private String contract;
     private String pricingPlan;
-    private Premium premium;
-    private Billing billing;
+    private PremiumEntity premium;
+    private BillingEntity billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 }

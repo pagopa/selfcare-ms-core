@@ -20,18 +20,12 @@ public class ProductConnectorImpl implements ProductConnector {
 
     @Override
     public Product getProductById(String productId) {
-       /* log.trace("getProductById start");
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById productId = {}",productId);
+        log.trace("getProductById start");
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById productId = {}", productId);
         Assert.hasText(productId, "A productId is required");
         Product result = restClient.getProductById(productId, null);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById result = {}", result);
         log.trace("getProductById end");
-        return result;*/
-
-        Product product = new Product();
-        product.setId("prod-interop");
-        product.setTitle("prod-interop");
-        product.setContractTemplatePath("contracts/template/interop/2.0.0/interop-accordo_di_adesione-v.2.0.0.html");
-        return product;
+        return result;
     }
 }

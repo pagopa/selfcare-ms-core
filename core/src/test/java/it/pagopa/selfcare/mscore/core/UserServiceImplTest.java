@@ -2,8 +2,8 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,9 +56,9 @@ class UserServiceImplTest {
     @Test
     void testFindByUserId() {
         OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.getById( any())).thenReturn(onboardedUser);
+        when(userConnector.findById( any())).thenReturn(onboardedUser);
         assertSame(onboardedUser, userServiceImpl.findByUserId("42"));
-        verify(userConnector).getById( any());
+        verify(userConnector).findById( any());
     }
 
     /**
@@ -66,9 +66,9 @@ class UserServiceImplTest {
      */
     @Test
     void testFindByUserId2() {
-        when(userConnector.getById( any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        when(userConnector.findById( any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.findByUserId("42"));
-        verify(userConnector).getById( any());
+        verify(userConnector).findById( any());
     }
 }
 

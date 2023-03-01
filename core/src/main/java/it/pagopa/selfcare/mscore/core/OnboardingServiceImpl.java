@@ -8,11 +8,15 @@ import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -107,7 +111,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         } else {
             User user = userService.getUserFromUserRegistry(principal.getId(), EnumSet.allOf(User.Fields.class));
             verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-            List<String> validManagerList = getOnboardingValidManager(request.getUsers());
+            List<String> validManagerList = getValidManagerToOnboard(request.getUsers());
             User manager = userService.getUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
 
             List<User> delegate = request.getUsers()
@@ -130,11 +134,8 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void completeOboarding(Token token, MultipartFile contract) {
-        List<OnboardedUser> onboardedUsers = new ArrayList<>();
-        if (token.getUsers() != null) {
-            token.getUsers().forEach(s -> onboardedUsers.add(userService.findByUserId(s)));
-        }
-        List<String> managerList = getValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
+        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers());
+        List<String> managerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
         List<User> managersData = managerList
                 .stream()
                 .map(user -> userService.getUserFromUserRegistry(user, EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
@@ -152,13 +153,9 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Onboarding Approve having tokenId {}", token.getId());
         User currentUser = userService.getUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
 
-        //LISTA SIA DI DELEGATI CHE DI MANAGER
-        List<OnboardedUser> onboardedUsers = new ArrayList<>();
-        if (token.getUsers() != null) {
-            token.getUsers().forEach(s -> onboardedUsers.add(userService.findByUserId(s)));
-        }
+        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers());
 
-        List<String> validManagerList = getValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
+        List<String> validManagerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
         User manager = userService.getUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         List<User> delegate = onboardedUsers
                 .stream()

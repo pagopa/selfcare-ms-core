@@ -1,8 +1,11 @@
 package it.pagopa.selfcare.mscore.web.model.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.EnvEnum;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -10,6 +13,9 @@ import java.util.List;
 
 @Data
 @Valid
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@AllArgsConstructor
+@NoArgsConstructor
 public class Person {
 
     @NotEmpty(message = "User internal id is required")
@@ -22,4 +28,7 @@ public class Person {
     private List<String> productRole;
     private EnvEnum env = EnvEnum.ROOT;
 
+    public Person(String id) {
+        this.id = id;
+    }
 }

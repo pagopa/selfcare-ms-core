@@ -2,10 +2,10 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +62,7 @@ class ExternalServiceImplTest {
     }
 
     /**
-     * Method under test: {@link ExternalServiceImpl#retrieveRelationship(it.pagopa.selfcare.mscore.model.ProductManagerInfo, String)}
+     * Method under test: {@link ExternalServiceImpl#retrieveRelationship(ProductManagerInfo, String)}
      */
     @Test
     void testRetrieveRelationship() {

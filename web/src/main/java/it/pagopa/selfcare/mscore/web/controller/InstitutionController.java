@@ -6,8 +6,8 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
-import it.pagopa.selfcare.mscore.model.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -151,7 +151,7 @@ public class InstitutionController {
      *
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.update}")
+    @ApiOperation(value = "${swagger.mscore.institution.update}", notes = "${swagger.mscore.institution.update}")
     @PutMapping(value = "/{id}")
     public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.internalId}")
                                                                  @PathVariable("id") String institutionId,
@@ -175,7 +175,7 @@ public class InstitutionController {
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.geotaxonomies}")
+    @ApiOperation(value = "${swagger.mscore.institution.geotaxonomies}", notes = "${swagger.mscore.institution.geotaxonomies}")
     @GetMapping(value = "/{id}/geotaxonomies")
     public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomies(@PathVariable("id") String id) {
 
@@ -195,7 +195,7 @@ public class InstitutionController {
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.find}")
+    @ApiOperation(value = "${swagger.mscore.institution.find}", notes = "${swagger.mscore.institution.find}")
     @GetMapping(value = "/{id}")
     public ResponseEntity<InstitutionResponse> retrieveInstitutionById(@PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
@@ -219,7 +219,7 @@ public class InstitutionController {
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institution.relationships}")
+    @ApiOperation(value = "${swagger.mscore.institution.relationships}", notes = "${swagger.mscore.institution.relationships}")
     @GetMapping(value = "/{id}/relationships")
     public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationships(@PathVariable("id") String institutionId,
                                                                                     @RequestParam(value = "personId", required = false) String personId,

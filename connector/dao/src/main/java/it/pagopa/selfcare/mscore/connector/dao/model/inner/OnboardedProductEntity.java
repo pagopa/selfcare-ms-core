@@ -2,7 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao.model.inner;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.EnvEnum;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 

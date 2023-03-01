@@ -7,10 +7,10 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
-import it.pagopa.selfcare.mscore.model.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
@@ -59,7 +59,7 @@ public class OnboardingController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.verify}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
     @RequestMapping(method = {RequestMethod.HEAD}, value = "/institution/{externalId}/products/{productId}")
     public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                      @PathVariable(value = "externalId") String externalId,
@@ -133,7 +133,7 @@ public class OnboardingController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.complete}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.complete}", notes = "${swagger.mscore.onboarding.complete}")
     @PostMapping(value = "/complete/{tokenId}")
     public ResponseEntity<Void> completeOnboarding(@PathVariable(value = "tokenId") String tokenId,
                                                    @RequestBody MultipartFile file) {
@@ -154,7 +154,7 @@ public class OnboardingController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.approve}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.approve}", notes = "${swagger.mscore.onboarding.approve}")
     @PostMapping(value = "/approve/{tokenId}")
     public ResponseEntity<Void> approveOnboarding(@PathVariable(value = "tokenId") String tokenId,
                                                   Authentication authentication) {
@@ -175,7 +175,7 @@ public class OnboardingController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.invalidate}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.invalidate}", notes = "${swagger.mscore.onboarding.invalidate}")
     @DeleteMapping(value = "/complete/{tokenId}")
     public ResponseEntity<Void> invalidateOnboarding(@PathVariable(value = "tokenId") String tokenId) {
         log.info("Invalidating onboarding for token identified with {}", tokenId);
@@ -195,7 +195,7 @@ public class OnboardingController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.reject}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.reject}", notes = "${swagger.mscore.onboarding.reject}")
     @DeleteMapping(value = "/reject/{tokenId}")
     public ResponseEntity<OnboardingInfoResponse> onboardingReject(@PathVariable("tokenId") String tokenId) {
         log.info("Onboarding Reject having tokenId {}", tokenId);
@@ -215,7 +215,7 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid request, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.operator}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.operator}", notes = "${swagger.mscore.onboarding.operator}")
     @PostMapping(value = "/operators")
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
         log.info("Onboarding operators on institution {}", request.getInstitutionId());
@@ -235,7 +235,7 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid request, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.subdelegates}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.subdelegates}", notes = "${swagger.mscore.onboarding.subdelegates}")
     @PostMapping(value = "/subdelegates")
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
         log.info("Onboarding subdelegates on institution {}", request.getInstitutionId());
@@ -255,7 +255,7 @@ public class OnboardingController {
      * * Code: 400, Message: Invalid request, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.legals}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.legals}", notes = "${swagger.mscore.onboarding.legals}")
     @PostMapping(value = "/legals")
     public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest request, Authentication authentication) {
         log.info("Onboarding Legals of institution {} and/or externalId {}", request.getInstitutionId(), request.getInstitutionExternalId());
@@ -275,7 +275,7 @@ public class OnboardingController {
      * * Code: 404, Message: Document Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.onboarding.relationship.document}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.relationship.document}", notes = "${swagger.mscore.onboarding.relationship.document}")
     @GetMapping(value = "/relationship/{relationshipId}/document")
     public ResponseEntity<byte[]> getOnboardingDocument(@PathVariable("relationshipId") String relationshipId) {
         log.info("Getting onboarding document of relationship {}", relationshipId);

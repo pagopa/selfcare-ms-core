@@ -5,7 +5,9 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.CustomErrorEnum;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +35,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public OnboardedUser findByUserId(String userId) {
-        return userConnector.getById(userId);
+        return userConnector.findById(userId);
+    }
+
+    @Override
+    public List<OnboardedUser> findAllByIds(List<String> users) {
+        return userConnector.findAllByIds(users);
     }
 
     @Override
@@ -57,5 +64,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserFromUserRegistry(String userId, EnumSet<User.Fields> fields) {
         return userRegistryConnector.getUserByInternalId(userId, fields);
+    }
+
+    @Override
+    public OnboardedUser createUser(String userId) {
+        return userConnector.findAndCreate(userId, null);
     }
 }

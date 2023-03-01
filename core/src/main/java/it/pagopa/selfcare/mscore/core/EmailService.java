@@ -4,9 +4,9 @@ import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.Token;
-import it.pagopa.selfcare.mscore.model.User;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.product.Product;
@@ -65,8 +65,8 @@ public class EmailService {
     public void sendCompletedEmail(MultipartFile contract, Token token, List<User> managers, Institution institution, Product product, File logo) {
         List<String> destinationMails = new ArrayList<>(getCompleteDestinationMails(institution));
         if (managers != null && !managers.isEmpty()) {
-            managers.stream().filter(user -> user.getEmail() != null && !destinationMails.contains(user.getEmail().getValue()))
-                    .forEach(user -> destinationMails.add(user.getEmail().getValue()));
+            managers.stream().filter(user -> user.getEmail() != null && !destinationMails.contains(user.getEmail()))
+                    .forEach(user -> destinationMails.add(user.getEmail()));
         }
         Map<String, String> mailParameter = mailParametersMapper.getCompleteOnbordingMailParameter(product.getTitle());
         emailConnector.sendMail(mailParametersMapper.getOnboardingCompletePath(), destinationMails, logo, product.getTitle(), mailParameter, "pagopa-logo.png");
