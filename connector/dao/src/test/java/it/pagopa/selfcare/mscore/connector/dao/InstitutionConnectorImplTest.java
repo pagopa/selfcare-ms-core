@@ -1,11 +1,11 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.Premium;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,11 +43,42 @@ class InstitutionConnectorImplTest {
 
     @Test
     void save() {
+        List<GeographicTaxonomies> geographicTaxonomies =new ArrayList<>();
+        geographicTaxonomies.add(new GeographicTaxonomies());
+        List<Onboarding> onboardings = new ArrayList<>();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setContract("contract");
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        onboarding.setPremium(new Premium());
+        onboarding.setCreatedAt(OffsetDateTime.now());
+        onboarding.setProductId("productId");
+        onboarding.setUpdatedAt(OffsetDateTime.now());
+        onboarding.setPricingPlan("pricingPal");
+        onboardings.add(onboarding);
         Institution institution = new Institution();
         institution.setExternalId("ext");
         institution.setId("507f1f77bcf86cd799439011");
+        institution.setOnboarding(onboardings);
+        institution.setGeographicTaxonomies(geographicTaxonomies);
         InstitutionEntity institutionEntity = new InstitutionEntity();
         institutionEntity.setId("507f1f77bcf86cd799439011");
+        List<AttributesEntity> attributes = new ArrayList<>();
+        AttributesEntity attributesEntity = new AttributesEntity();
+        attributesEntity.setCode("code");
+        attributesEntity.setOrigin("origin");
+        attributesEntity.setDescription("description");
+        attributes.add(attributesEntity);
+        institutionEntity.setAttributes(attributes);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        List<GeoTaxonomyEntity> geoTaxonomyEntities = new ArrayList<>();
+        GeoTaxonomyEntity geoTaxonomyEntity = new GeoTaxonomyEntity();
+        geoTaxonomyEntity.setCode("code");
+        geoTaxonomyEntity.setDesc("desc");
+        geoTaxonomyEntities.add(geoTaxonomyEntity);
+        institutionEntity.setGeographicTaxonomies(geoTaxonomyEntities);
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
         when(institutionRepository.save(any())).thenReturn(institutionEntity);
         Institution response = institutionConnectionImpl.save(institution);
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
@@ -58,6 +90,13 @@ class InstitutionConnectorImplTest {
         institution.setExternalId("ext");
         InstitutionEntity institutionEntity = new InstitutionEntity();
         institutionEntity.setExternalId("ext");
+        List<OnboardingEntity> onboardings = new ArrayList<>();
+        onboardings.add(new OnboardingEntity());
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setOnboarding(onboardings);
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
         when(institutionRepository.save(any())).thenReturn(institutionEntity);
         Institution response = institutionConnectionImpl.save(institution);
         Assertions.assertEquals("ext", response.getExternalId());
@@ -95,14 +134,33 @@ class InstitutionConnectorImplTest {
     @Test
     void testFindById2() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
+        List<OnboardingEntity> onboardings = new ArrayList<>();
+        onboardings.add(new OnboardingEntity());
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setOnboarding(onboardings);
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
         when(institutionRepository.findById(any())).thenReturn(Optional.of(institutionEntity));
         assertNotNull(institutionConnectionImpl.findById("id"));
     }
     @Test
     void testFindAndUpdate() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
+        List<OnboardingEntity> onboardings = new ArrayList<>();
+        onboardings.add(new OnboardingEntity());
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setOnboarding(onboardings);
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
         when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
-        Institution response = institutionConnectionImpl.findAndUpdate("institutionId",new Onboarding(), new ArrayList<>());
+        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        GeographicTaxonomies geographicTaxonomies1 = new GeographicTaxonomies();
+        geographicTaxonomies1.setCode("code");
+        geographicTaxonomies1.setDesc("desc");
+        geographicTaxonomies.add(geographicTaxonomies1);
+        Institution response = institutionConnectionImpl.findAndUpdate("institutionId",new Onboarding(), geographicTaxonomies);
         assertNotNull(response);
     }
 
@@ -131,8 +189,46 @@ class InstitutionConnectorImplTest {
         InstitutionEntity institutionEntity = new InstitutionEntity();
         institutionEntity.setId("507f1f77bcf86cd799439011");
         institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        List<OnboardingEntity> onboardings = new ArrayList<>();
+        onboardings.add(new OnboardingEntity());
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setOnboarding(onboardings);
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
         when(institutionRepository.save(any())).thenReturn(institutionEntity);
         Institution response = institutionConnectionImpl.save(institution);
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
+    }
+
+    @Test
+    void findAndUpdateStatus(){
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        List<OnboardingEntity> onboardings = new ArrayList<>();
+        onboardings.add(new OnboardingEntity());
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setOnboarding(onboardings);
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
+        when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
+        institutionConnectionImpl.findAndUpdateStatus("institutionId","productId", RelationshipState.ACTIVE);
+        assertNotNull(institutionEntity);
+    }
+
+
+    @Test
+    void findAndRemoveOnboarding(){
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        List<OnboardingEntity> onboardings = new ArrayList<>();
+        onboardings.add(new OnboardingEntity());
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setOnboarding(onboardings);
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
+        when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
+        institutionConnectionImpl.findAndRemoveOnboarding("institutionId",new Onboarding());
+        assertNotNull(institutionEntity);
     }
 }

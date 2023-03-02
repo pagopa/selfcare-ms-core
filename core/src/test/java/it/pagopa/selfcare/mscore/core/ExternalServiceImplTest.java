@@ -4,6 +4,7 @@ import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.model.UserBinding;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,6 +36,20 @@ class ExternalServiceImplTest {
 
     @Mock
     private GeoTaxonomiesConnector geoTaxonomiesConnector;
+
+    @Test
+    void getUserInstitutionRelationships(){
+        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(new Institution());
+        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any())).thenReturn(new ArrayList<>());
+        assertNotNull(externalServiceImpl.getUserInstitutionRelationships("externalId","42","42",new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+    }
+
+    @Test
+    void retrieveInstitutionProductsByExternalId(){
+        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionProducts(any(),any())).thenReturn(new ArrayList<>());
+        assertNotNull(externalServiceImpl.retrieveInstitutionProductsByExternalId("externalId",new ArrayList<>()));
+    }
 
     /**
      * Method under test: {@link ExternalServiceImpl#getInstitutionByExternalId(String)}
@@ -59,6 +75,25 @@ class ExternalServiceImplTest {
         institution.setOnboarding(new ArrayList<>());
         when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(institution);
         Assertions.assertThrows(InvalidRequestException.class, () -> externalServiceImpl.retrieveInstitutionManager("42", "42"));
+    }
+
+    @Test
+    void testRetrieveInstitutionManager2() {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        List<UserBinding> userBindings = new ArrayList<>();
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("id");
+        userBinding.setProducts(new ArrayList<>());
+        userBindings.add(userBinding);
+        onboardedUser.setBindings(userBindings);
+        onboardedUser.setId("id");
+        when(userService.findOnboardedManager(any(), any(), any()))
+                .thenReturn(onboardedUser);
+        Institution institution = new Institution();
+        institution.setId("id");
+        institution.setOnboarding(new ArrayList<>());
+        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(institution);
+        assertNotNull(externalServiceImpl.retrieveInstitutionManager("42", "42"));
     }
 
     /**

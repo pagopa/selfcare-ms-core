@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;

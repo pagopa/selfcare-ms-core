@@ -36,6 +36,110 @@ class InstitutionServiceImplTest {
     @Mock
     private GeoTaxonomiesConnector geoTaxonomiesConnector;
 
+    @Mock
+    private UserService userService;
+
+    @Test
+    void getUserInstitutionRelationships(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        List<UserBinding> userBindings = new ArrayList<>();
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("id");
+        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
+        onboardedProducts.add(new OnboardedProduct());
+        userBinding.setProducts(onboardedProducts);
+        userBindings.add(userBinding);
+
+        onboardedUser.setBindings(userBindings);
+        List<OnboardedUser> adminRelationships = new ArrayList<>();
+        adminRelationships.add(onboardedUser);
+        when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(adminRelationships);
+        Institution institution = new Institution();
+        institution.setId("id");
+        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(institution,"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
+    }
+
+    @Test
+    void getUserInstitutionRelationships2(){
+        when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(new ArrayList<>());
+        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(new Institution(),"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
+    }
+
+    @Test
+    void updateInstitution(){
+        String institutionId = "instituionId";
+        List<String> geographicTaxonomies1 = new ArrayList<>();
+        geographicTaxonomies1.add("geo");
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setGeographicTaxonomyCodes(geographicTaxonomies1);
+        String userId = "userId";
+        when(userService.checkIfAdmin(any(),any())).thenReturn(true);
+        when(institutionConnector.findAndUpdate(any(),any(), any())).thenReturn(new Institution());
+        assertNotNull(institutionServiceImpl.updateInstitution(institutionId,institutionUpdate,userId));
+    }
+
+    @Test
+    void updateInstitution2(){
+        String institutionId = "instituionId";
+        List<String> geographicTaxonomies1 = new ArrayList<>();
+        geographicTaxonomies1.add("geo");
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setGeographicTaxonomyCodes(geographicTaxonomies1);
+        String userId = "userId";
+        when(userService.checkIfAdmin(any(),any())).thenReturn(true);
+        InvalidRequestException invalidRequestException = mock(InvalidRequestException.class);
+        when(institutionConnector.findAndUpdate(any(),any(), any())).thenThrow(invalidRequestException);
+        assertThrows(InvalidRequestException.class, () -> institutionServiceImpl.updateInstitution(institutionId,institutionUpdate,userId));
+    }
+
+    @Test
+    void retrieveInstitutionGeoTaxonomies(){
+        Institution institution = new Institution();
+        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        geographicTaxonomies.setCode("code");
+        List<GeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
+        geographicTaxonomies1.add(geographicTaxonomies);
+        institution.setGeographicTaxonomies(geographicTaxonomies1);
+
+        assertNotNull(institutionServiceImpl.retrieveInstitutionGeoTaxonomies(institution));
+    }
+
+    @Test
+    void retrieveInstitutionProducts(){
+        Institution institution = new Institution();
+        List<RelationshipState> states = new ArrayList<>();
+        states.add(RelationshipState.ACTIVE);
+        List<Onboarding> onboardings = new ArrayList<>();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        onboardings.add(onboarding);
+        institution.setOnboarding(onboardings);
+
+        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution,states));
+    }
+
+    @Test
+    void retrieveInstitutionProducts2(){
+        Institution institution = new Institution();
+        List<Onboarding> onboardings = new ArrayList<>();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        onboardings.add(onboarding);
+        institution.setOnboarding(onboardings);
+
+        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution,null));
+    }
+
+    @Test
+    void retrieveInstitutionProducts3(){
+        Institution institution = new Institution();
+        List<RelationshipState> states = new ArrayList<>();
+        states.add(RelationshipState.ACTIVE);
+        institution.setOnboarding(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProducts(institution,states));
+    }
+
     /**
      * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionById(String)}
      */
@@ -683,176 +787,6 @@ class InstitutionServiceImplTest {
         verify(institutionConnector).findByExternalId(any());
     }
 
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts() {
-        when(institutionConnector.findById(any())).thenReturn(new Institution());
-        Institution institution = new Institution();
-        List<RelationshipState> list = List.of(RelationshipState.ACTIVE);
-        assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionProducts(institution, list));
-        verify(institutionConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts3() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionConnector.findById(any()))
-                .thenReturn(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
-                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true));
-        List<Onboarding> actualRetrieveInstitutionProductsResult = institutionServiceImpl
-                .retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values()));
-        assertSame(onboardingList, actualRetrieveInstitutionProductsResult);
-        assertTrue(actualRetrieveInstitutionProductsResult.isEmpty());
-        verify(institutionConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts4() {
-        when(institutionConnector.findById(any()))
-                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        Institution institution = new Institution();
-        List<RelationshipState> list = List.of(RelationshipState.values());
-        assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.retrieveInstitutionProducts(institution, list));
-        verify(institutionConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts5() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionConnector.findById(any()))
-                .thenReturn(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true));
-
-        assertTrue(institutionServiceImpl.retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values())).isEmpty());
-        verify(institutionConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts6() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(onboarding);
-        Billing billing1 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList,
-                geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
-
-        when(institutionConnector.findById(any())).thenReturn(institution);
-
-        assertTrue(institutionServiceImpl.retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values())).isEmpty());
-        verify(institutionConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts7() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-
-        Billing billing1 = new Billing();
-        billing1.setPublicServices(true);
-        billing1.setRecipientCode("Recipient Code");
-        billing1.setVatNumber("42");
-
-        Premium premium1 = new Premium();
-        premium1.setContract("Contract");
-        premium1.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding1 = new Onboarding();
-        onboarding1.setBilling(billing1);
-        onboarding1.setContract("Contract");
-        onboarding1.setCreatedAt(null);
-        onboarding1.setPremium(premium1);
-        onboarding1.setPricingPlan("Pricing Plan");
-        onboarding1.setProductId("42");
-        onboarding1.setStatus(RelationshipState.PENDING);
-        onboarding1.setUpdatedAt(null);
-
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(onboarding1);
-        onboardingList.add(onboarding);
-        Billing billing2 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing2, onboardingList,
-                geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
-
-        when(institutionConnector.findById(any())).thenReturn(institution);
-
-        assertTrue(institutionServiceImpl.retrieveInstitutionProducts(new Institution(), List.of(RelationshipState.values())).isEmpty());
-        verify(institutionConnector).findById(any());
-    }
 
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionProduct(String, String)}

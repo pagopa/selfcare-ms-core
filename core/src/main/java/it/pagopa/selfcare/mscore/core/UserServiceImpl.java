@@ -9,15 +9,12 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.util.EnumSet;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.RELATIONSHIP_NOT_SUSPENDABLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 

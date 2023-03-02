@@ -23,6 +23,15 @@ class LogFilterTest {
     @InjectMocks
     private LogFilter logFilter;
 
+    @Test
+    void testDoFilter() throws IOException, ServletException {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain filterChain = mock(FilterChain.class);
+        doNothing().when(filterChain).doFilter(any(), any());
+        logFilter.doFilter(request, response, filterChain);
+        verify(filterChain).doFilter(any(), any());
+    }
 
     /**
      * Method under test: {@link LogFilter#doFilter(ServletRequest, ServletResponse, FilterChain)}

@@ -45,6 +45,13 @@ class TokenConnectorImplTest {
     }
 
     @Test
+    void findActiveContractTest1() {
+        when(tokenRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class, () -> tokenConnectorImpl.findActiveContract("42", "42", "42"));
+
+    }
+
+    @Test
     void save() {
         Token token = new Token();
         token.setId("507f1f77bcf86cd799439011");
@@ -84,9 +91,6 @@ class TokenConnectorImplTest {
         assertNotNull(response);
     }
 
-    /**
-     * Method under test: {@link TokenConnectorImpl#findAndUpdateTokenUser(String, List)}
-     */
     @Test
     void testFindAndUpdateTokenUser() {
         TokenEntity tokenEntity = new TokenEntity();
@@ -105,4 +109,12 @@ class TokenConnectorImplTest {
         verify(tokenRepository).findAndModify(any(), any(), any(), any());
     }
 
+    @Test
+    void findWithFilter() {
+        TokenEntity token = new TokenEntity();
+        token.setId("507f1f77bcf86cd799439011");
+        when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
+        List<Token> tokens = tokenConnectorImpl.findWithFilter("42", "42", new ArrayList<>());
+        Assertions.assertEquals("507f1f77bcf86cd799439011", tokens.get(0).getId());
+    }
 }

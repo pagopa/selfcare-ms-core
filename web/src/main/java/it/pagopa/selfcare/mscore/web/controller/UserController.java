@@ -85,7 +85,7 @@ public class UserController {
     @ApiOperation(value = "", notes = "${swagger.mscore.relationship.suspend}")
     @PostMapping("/relationships/{relationshipId}/suspend")
     public ResponseEntity<Void> suspendRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                    @PathVariable("tokenId") String relationshipId) {
+                                                    @PathVariable("relationshipId") String relationshipId) {
         log.info("Suspending relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(SUSPEND_RELATIONSHIP_ERROR);
         userService.suspendRelationship(relationshipId);

@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,8 +49,6 @@ import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 @Slf4j
 @Service
 public class ContractService {
-
-
 
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
     private final PadesSignService padesSignService;

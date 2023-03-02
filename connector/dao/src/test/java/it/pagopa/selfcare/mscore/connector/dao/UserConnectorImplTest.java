@@ -2,6 +2,8 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.*;
 import org.junit.jupiter.api.Assertions;
@@ -34,7 +36,7 @@ class UserConnectorImplTest {
     void testDeleteById() {
         doNothing().when(userRepository).deleteById("any");
         userConnectorImpl.deleteById("42");
-        verify(userRepository).deleteById( any());
+        verify(userRepository).deleteById(any());
     }
 
     /**
@@ -43,18 +45,25 @@ class UserConnectorImplTest {
     @Test
     void testGetById() {
         UserEntity userEntity = new UserEntity();
-        userEntity.setBindings(new ArrayList<>());
+        List<UserBindingEntity> userBindingEntities = new ArrayList<>();
+        List<OnboardedProductEntity> onboardedProductEntities = new ArrayList<>();
+        onboardedProductEntities.add(new OnboardedProductEntity());
+        UserBindingEntity userBindingEntity = new UserBindingEntity();
+        userBindingEntity.setProducts(onboardedProductEntities);
+        userBindingEntities.add(userBindingEntity);
+        userEntity.setBindings(userBindingEntities);
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
+
         Optional<UserEntity> ofResult = Optional.of(userEntity);
-        when(userRepository.findById( any())).thenReturn(ofResult);
+        when(userRepository.findById(any())).thenReturn(ofResult);
         OnboardedUser actualById = userConnectorImpl.getById("42");
-        assertTrue(actualById.getBindings().isEmpty());
+        assertFalse(actualById.getBindings().isEmpty());
         assertNull(actualById.getUpdatedAt());
         assertEquals("42", actualById.getId());
         assertNull(actualById.getCreatedAt());
-        verify(userRepository).findById( any());
+        verify(userRepository).findById(any());
     }
 
     /**
@@ -62,9 +71,26 @@ class UserConnectorImplTest {
      */
     @Test
     void testGetById2() {
-        when(userRepository.findById( any())).thenReturn(Optional.empty());
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
         assertNull(userConnectorImpl.getById("42"));
-        verify(userRepository).findById( any());
+        verify(userRepository).findById(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAndUpdateState(String, String, String, RelationshipState)}
+     */
+    @Test
+    void testFindAndUpdateState() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(new ArrayList<>());
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.findAndModify(any(), any(), any(),
+                any())).thenReturn(userEntity);
+        Assertions.assertDoesNotThrow(() ->         userConnectorImpl.findAndUpdateState("42", "42", "42", RelationshipState.PENDING));
+
+
     }
 
     @Test
@@ -74,7 +100,7 @@ class UserConnectorImplTest {
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
-        when(userRepository.findAndModify(any(),  any(),  any(), any())).thenReturn(userEntity);
+        when(userRepository.findAndModify(any(), any(), any(), any())).thenReturn(userEntity);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -98,7 +124,67 @@ class UserConnectorImplTest {
         bindings.add(binding);
         user.setBindings(bindings);
         userConnectorImpl.findAndUpdate(user, "42", "42", onboardedProduct, userBinding);
-        verify(userRepository).findAndModify(any(),  any(),  any(), any());
+        verify(userRepository).findAndModify(any(), any(), any(), any());
+    }
+
+    @Test
+    void testFindAndUpdate2() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(new ArrayList<>());
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.findAndModify(any(), any(), any(), any())).thenReturn(userEntity);
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
+
+        UserBinding userBinding = new UserBinding();
+        userBinding.setCreatedAt(null);
+        userBinding.setInstitutionId("42");
+        userBinding.setProducts(new ArrayList<>());
+
+        OnboardedUser user = new OnboardedUser();
+        user.setBindings(new ArrayList<>());
+        userConnectorImpl.findAndUpdate(user, "42", "42", onboardedProduct, userBinding);
+        verify(userRepository).findAndModify(any(), any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAndCreate(String, String, UserBinding)}
+     */
+    @Test
+    void testFindAndCreate() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(new ArrayList<>());
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.findAndModify(any(), any(), any(),
+                any())).thenReturn(userEntity);
+        userConnectorImpl.findAndCreate("42", "42", new UserBinding());
+        verify(userRepository).findAndModify(any(), any(), any(),
+                any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAndCreate(String, String, UserBinding)}
+     */
+    @Test
+    void testFindAndCreate2() {
+        when(userRepository.findAndModify(any(), any(), any(),
+                any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class,
+                () -> userConnectorImpl.findAndCreate("42", "42", new UserBinding()));
+        verify(userRepository).findAndModify(any(), any(), any(),
+                any());
     }
 
     /**
@@ -106,9 +192,200 @@ class UserConnectorImplTest {
      */
     @Test
     void testFindOnboardedManager() {
-        when(userRepository.find(any(),any())).thenReturn(new ArrayList<>());
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
         List<RelationshipState> states = new ArrayList<>();
         Assertions.assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findOnboardedManager("42", "42", states));
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAdminWithFilter(String, String, List, List)}
+     */
+    @Test
+    void testFindAdminWithFilter() {
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        ArrayList<PartyRole> roles = new ArrayList<>();
+        assertTrue(userConnectorImpl.findAdminWithFilter("42", "42", roles, new ArrayList<>()).isEmpty());
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAdminWithFilter(String, String, List, List)}
+     */
+    @Test
+    void testFindAdminWithFilter4() {
+        when(userRepository.find(any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "."));
+        ArrayList<PartyRole> roles = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> userConnectorImpl.findAdminWithFilter("42", "42", roles, new ArrayList<>()));
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findWithFilter(String, String, List, List, List, List)}
+     */
+    @Test
+    void testFindWithFilter() {
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        ArrayList<PartyRole> roles = new ArrayList<>();
+        ArrayList<RelationshipState> states = new ArrayList<>();
+        ArrayList<String> products = new ArrayList<>();
+        assertTrue(userConnectorImpl.findWithFilter("42", "42", roles, states, products, new ArrayList<>()).isEmpty());
+        verify(userRepository).find(any(), any());
+    }
+
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findWithFilter(String, String, List, List, List, List)}
+     */
+    @Test
+    void testFindWithFilter4() {
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
+
+        ArrayList<PartyRole> partyRoleList = new ArrayList<>();
+        partyRoleList.add(PartyRole.MANAGER);
+        ArrayList<RelationshipState> states = new ArrayList<>();
+        ArrayList<String> products = new ArrayList<>();
+        assertTrue(
+                userConnectorImpl.findWithFilter("42", "42", partyRoleList, states, products, new ArrayList<>()).isEmpty());
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findWithFilter(String, String, List, List, List, List)}
+     */
+    @Test
+    void testFindWithFilter5() {
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        ArrayList<PartyRole> roles = new ArrayList<>();
+
+        ArrayList<RelationshipState> relationshipStateList = new ArrayList<>();
+        relationshipStateList.add(RelationshipState.PENDING);
+        ArrayList<String> products = new ArrayList<>();
+        assertTrue(userConnectorImpl.findWithFilter("42", "42", roles, relationshipStateList, products, new ArrayList<>())
+                .isEmpty());
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findWithFilter(String, String, List, List, List, List)}
+     */
+    @Test
+    void testFindWithFilter6() {
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        ArrayList<PartyRole> roles = new ArrayList<>();
+        ArrayList<RelationshipState> states = new ArrayList<>();
+
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(".");
+        assertTrue(userConnectorImpl.findWithFilter("42", "42", roles, states, stringList, new ArrayList<>()).isEmpty());
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findWithFilter(String, String, List, List, List, List)}
+     */
+    @Test
+    void testFindWithFilter7() {
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        ArrayList<PartyRole> roles = new ArrayList<>();
+        ArrayList<RelationshipState> states = new ArrayList<>();
+        ArrayList<String> products = new ArrayList<>();
+
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add(".");
+        assertTrue(userConnectorImpl.findWithFilter("42", "42", roles, states, products, stringList).isEmpty());
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findWithFilter(String, String, List, List, List, List)}
+     */
+    @Test
+    void testFindWithFilter8() {
+        when(userRepository.find(any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "."));
+        ArrayList<PartyRole> roles = new ArrayList<>();
+        ArrayList<RelationshipState> states = new ArrayList<>();
+        ArrayList<String> products = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class,
+                () -> userConnectorImpl.findWithFilter("42", "42", roles, states, products, new ArrayList<>()));
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findByRelationshipId(String)}
+     */
+    @Test
+    void testFindByRelationshipId() {
+        when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findByRelationshipId("42"));
+        verify(userRepository).find(any(), any());
+    }
+
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findByRelationshipId(String)}
+     */
+    @Test
+    void testFindByRelationshipId3() {
+        when(userRepository.find(any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findByRelationshipId("42"));
+        verify(userRepository).find(any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAndRemoveProduct(String, String, OnboardedProduct)}
+     */
+    @Test
+    void testFindAndRemoveProduct() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(new ArrayList<>());
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.findAndModify(any(), any(), any(),
+                any())).thenReturn(userEntity);
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
+        userConnectorImpl.findAndRemoveProduct("42", "42", onboardedProduct);
+        verify(userRepository).findAndModify(any(), any(), any(),
+                any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAndRemoveProduct(String, String, OnboardedProduct)}
+     */
+    @Test
+    void testFindAndRemoveProduct2() {
+        when(userRepository.findAndModify(any(), any(), any(),
+                any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "$[currentUserBinding]"));
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
+        assertThrows(ResourceNotFoundException.class,
+                () -> userConnectorImpl.findAndRemoveProduct("42", "42", onboardedProduct));
+        verify(userRepository).findAndModify(any(), any(), any(),
+                any());
     }
 
 }

@@ -1,0 +1,137 @@
+package it.pagopa.selfcare.mscore.web.controller;
+
+import it.pagopa.selfcare.mscore.core.UserService;
+import it.pagopa.selfcare.mscore.model.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.institution.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.ArrayList;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(SpringExtension.class)
+class UserControllerTest {
+
+    @InjectMocks
+    private UserController userController;
+
+    @Mock
+    private UserService userService;
+
+    @Test
+    void verifyUser() throws Exception {
+        doNothing().when(userService).verifyUser(any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .head("/persons/{id}","42")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void activateRelationship() throws Exception {
+        doNothing().when(userService).activateRelationship(any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/relationships/{relationshipId}/activate","42")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    void suspendRelationship() throws Exception {
+        doNothing().when(userService).suspendRelationship(any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/relationships/{relationshipId}/suspend","42")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    void deleteRelationship() throws Exception {
+        doNothing().when(userService).deleteRelationship(any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .delete("/relationships/{relationshipId}","42")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void getRelationship() throws Exception {
+        RelationshipInfo relationshipInfo = new RelationshipInfo();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("id");
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(new ArrayList<>());
+        institution.setBilling(billing);
+        institution.setDataProtectionOfficer(dataProtectionOfficer);
+        institution.setDescription("The characteristics of someone or something");
+        institution.setDigitalAddress("42 Main St");
+        institution.setExternalId("42");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setId("42");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setOnboarding(new ArrayList<>());
+        institution.setIpaCode("42");
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+
+        relationshipInfo.setInstitution(institution);
+        relationshipInfo.setOnboardedProduct(onboardedProduct);
+        when(userService.retrieveRelationship(any())).thenReturn(relationshipInfo);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/relationships/{relationshipId}","42")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+}
+

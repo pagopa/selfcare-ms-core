@@ -1,47 +1,21 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.core.ExternalServiceImpl;
-import it.pagopa.selfcare.mscore.core.InstitutionServiceImpl;
-import it.pagopa.selfcare.mscore.core.OnboardingDao;
-import it.pagopa.selfcare.mscore.core.TokenServiceImpl;
-import it.pagopa.selfcare.mscore.core.UserServiceImpl;
 import it.pagopa.selfcare.mscore.model.Premium;
 import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.jupiter.api.Disabled;
-
+import it.pagopa.selfcare.mscore.model.institution.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -49,7 +23,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@ContextConfiguration(classes = {ExternalController.class})
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(SpringExtension.class)
 class ExternalControllerTest {
     @InjectMocks
@@ -58,12 +37,31 @@ class ExternalControllerTest {
     @Mock
     private ExternalService externalService;
 
+    @Test
+    void getUserInstitutionRelationshipsByExternalId() throws Exception {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
+
+        when(externalService.getUserInstitutionRelationships(any(),any(),any(),any(),any(),any(),any())).thenReturn(new ArrayList<>());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/external/institutions/{externalId}/relationships", "42")
+                        .principal(authentication);
+        MockMvcBuilders.standaloneSetup(externalController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("[]"));
+    }
     /**
      * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId() throws Exception {
-        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
                 .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "42");
@@ -101,7 +99,7 @@ class ExternalControllerTest {
 
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
-        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
                 .thenReturn(onboardingList);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "42");
@@ -159,7 +157,7 @@ class ExternalControllerTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding1);
         onboardingList.add(onboarding);
-        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
                 .thenReturn(onboardingList);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "42");
@@ -177,8 +175,8 @@ class ExternalControllerTest {
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId4() throws Exception {
-        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution());
-        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
+        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
                 .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "", "Uri Vars");
@@ -200,11 +198,11 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution("42", "42", "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
-        when(externalService.retrieveInstitutionProductsByExternalId((String) any(), (List<RelationshipState>) any()))
+        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
                 .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "", "Uri Vars");
@@ -229,7 +227,7 @@ class ExternalControllerTest {
      */
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId() throws Exception {
-        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId((String) any())).thenReturn(new ArrayList<>());
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "42");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -245,8 +243,8 @@ class ExternalControllerTest {
      */
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId2() throws Exception {
-        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution());
-        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId((String) any())).thenReturn(new ArrayList<>());
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "", "Uri Vars");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -267,11 +265,11 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution("42", "42", "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
-        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId((String) any())).thenReturn(new ArrayList<>());
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "", "Uri Vars");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -372,52 +370,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"institutionId\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics"
-                                        + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":null,\"billing\":null}"));
-    }
-
-    /**
-     * Method under test: {@link ExternalController#getUserInstitutionRelationshipsByExternalId(String, String, List, List, List, List, Authentication)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testGetUserInstitutionRelationshipsByExternalId() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.NullPointerException
-        //       at it.pagopa.selfcare.mscore.web.controller.ExternalController.getUserInstitutionRelationshipsByExternalId(ExternalController.java:181)
-        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:655)
-        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:764)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, mock(ProductConnector.class));
-
-        InstitutionServiceImpl institutionService = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                new UserServiceImpl(null, onboardingDao,
-                        new InstitutionServiceImpl(null, null, mock(GeoTaxonomiesConnector.class), null),
-                        mock(UserRegistryConnector.class)));
-
-        TokenServiceImpl tokenService = new TokenServiceImpl(null);
-        OnboardingDao onboardingDao1 = new OnboardingDao(null, null, null, mock(ProductConnector.class));
-
-        GeoTaxonomiesConnector geoTaxonomiesConnector1 = mock(GeoTaxonomiesConnector.class);
-        ExternalController externalController = new ExternalController(
-                new ExternalServiceImpl(institutionService, tokenService,
-                        new UserServiceImpl(null, onboardingDao1,
-                                new InstitutionServiceImpl(null, null, geoTaxonomiesConnector1,
-                                        new UserServiceImpl(null, null, null, mock(UserRegistryConnector.class))),
-                                mock(UserRegistryConnector.class))));
-        ArrayList<PartyRole> roles = new ArrayList<>();
-        ArrayList<RelationshipState> states = new ArrayList<>();
-        ArrayList<String> products = new ArrayList<>();
-        ArrayList<String> productRoles = new ArrayList<>();
-        externalController.getUserInstitutionRelationshipsByExternalId("42", "42", roles, states, products, productRoles,
-                new JwtAuthenticationToken("ABC123"));
+                        .string("{\"institutionId\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":null,\"billing\":null}"));
     }
 
     /**
@@ -524,11 +477,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"institutionId\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics"
-                                        + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":\"?\",\"billing\":{\"vatNumber\":\"42\",\"recipientCode"
-                                        + "\":\"?\",\"publicServices\":true}}"));
+                        .string("{\"institutionId\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":\"?\",\"billing\":{\"vatNumber\":\"42\",\"recipientCode\":\"?\",\"publicServices\":true}}"));
     }
 
     /**
@@ -538,7 +487,7 @@ class ExternalControllerTest {
     void testGetBillingInstitutionByExternalId3() throws Exception {
         Institution institution = new Institution();
         institution.setOnboarding(new ArrayList<>());
-        when(externalService.retrieveInstitutionProduct((String) any(), (String) any())).thenReturn(institution);
+        when(externalService.retrieveInstitutionProduct(any(), any())).thenReturn(institution);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/billing", "42", "42");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -568,7 +517,7 @@ class ExternalControllerTest {
         institution.setIpaCode("U");
         institution.setExternalId("?");
         institution.setId("?");
-        when(externalService.retrieveInstitutionProduct((String) any(), (String) any())).thenReturn(institution);
+        when(externalService.retrieveInstitutionProduct(any(), any())).thenReturn(institution);
         SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
                 .formLogin();
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(externalController)
@@ -624,8 +573,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
+                        .string("{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
     }
 
     /**
@@ -683,8 +631,8 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[{\"origin\":\"?\",\"code\":\"?\",\"description\":\"The characteristics of someone or something\"}],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
+                        .string("{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[{\"origin\":\"?\",\"code\":\"?\",\"description\":\"The characteristics of someone or something\"}],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
+
     }
 
     /**
@@ -749,7 +697,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"id\":\"42\",\"externalId\":\"42\",\"ipaCode\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[{\"code\":\"?\",\"desc\":\"The characteristics of someone or something\",\"enable\":true}],\"attributes\":[],\"paymentServiceProviderResponse\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
+                        .string("{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[{\"code\":\"?\",\"desc\":\"The characteristics of someone or something\"}],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"imported\":false}"));
     }
 
     /**
@@ -804,7 +752,7 @@ class ExternalControllerTest {
      */
     @Test
     void testGetByExternalId5() throws Exception {
-        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution());
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
                 "42");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -825,7 +773,7 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId((String) any())).thenReturn(new Institution("42", "42", "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
@@ -936,8 +884,8 @@ class ExternalControllerTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setProducts(new ArrayList<>());
         productManagerInfo.setInstitution(institution);
-        when(externalService.retrieveInstitutionManager((String) any(), (String) any())).thenReturn(productManagerInfo);
-        when(externalService.retrieveRelationship((ProductManagerInfo) any(), (String) any())).thenReturn("127.0.0.1");
+        when(externalService.retrieveInstitutionManager(any(), any())).thenReturn(productManagerInfo);
+        when(externalService.retrieveRelationship(any(), any())).thenReturn("127.0.0.1");
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -990,8 +938,8 @@ class ExternalControllerTest {
         productManagerInfo.setProducts(new ArrayList<>());
         productManagerInfo.setUserId("?");
         productManagerInfo.setInstitution(institution);
-        when(externalService.retrieveInstitutionManager((String) any(), (String) any())).thenReturn(productManagerInfo);
-        when(externalService.retrieveRelationship((ProductManagerInfo) any(), (String) any())).thenReturn("127.0.0.1");
+        when(externalService.retrieveInstitutionManager(any(), any())).thenReturn(productManagerInfo);
+        when(externalService.retrieveRelationship(any(), any())).thenReturn("127.0.0.1");
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products/{productId}/manager", "42", "42");
         MockMvcBuilders.standaloneSetup(externalController)

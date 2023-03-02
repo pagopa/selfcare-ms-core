@@ -1,16 +1,21 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.RelationshipState;
 import it.pagopa.selfcare.mscore.model.Token;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -40,6 +45,44 @@ class TokenServiceImplTest {
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> tokenServiceImpl.findActiveContract("42", "42", "42"));
         verify(tokenConnector).findActiveContract( any(),  any(),  any());
+    }
+
+    @Test
+    void verifyToken(){
+        Token token = new Token();
+        ArrayList<String> users = new ArrayList<>();
+        users.add("user");
+        token.setUsers(users);
+        token.setStatus(RelationshipState.ACTIVE);
+        when(tokenConnector.findById(any())).thenReturn(token);
+        assertThrows(ResourceConflictException.class, () -> tokenServiceImpl.verifyToken("42"));
+    }
+
+    @Test
+    void verifyToken2(){
+        Token token = new Token();
+        ArrayList<String> users = new ArrayList<>();
+        users.add("user");
+        token.setUsers(users);
+        token.setStatus(RelationshipState.TOBEVALIDATED);
+        when(tokenConnector.findById(any())).thenReturn(token);
+        Token response = tokenServiceImpl.verifyToken("token");
+        assertNotNull(response);
+    }
+
+    @Test
+    void verifyOnboarding(){
+        Token token = new Token();
+        ArrayList<Token> tokens = new ArrayList<>();
+        tokens.add(token);
+        when(tokenConnector.findWithFilter(any(),any(),any())).thenReturn(tokens);
+        Assertions.assertDoesNotThrow(() -> tokenServiceImpl.verifyOnboarding("42","42",new ArrayList<>()));
+    }
+
+    @Test
+    void verifyOnboarding2(){
+        when(tokenConnector.findWithFilter(any(),any(),any())).thenReturn(new ArrayList<>());
+        Assertions.assertThrows(InvalidRequestException.class, () -> tokenServiceImpl.verifyOnboarding("42","42",new ArrayList<>()));
     }
 
 }
