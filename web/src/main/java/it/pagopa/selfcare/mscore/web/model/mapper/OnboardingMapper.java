@@ -26,9 +26,6 @@ public class OnboardingMapper {
             onboardingRequest.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionRequest.getUsers()));
         if (onboardingInstitutionRequest.getInstitutionUpdate() != null)
             onboardingRequest.setInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate());
-        if(onboardingInstitutionRequest.getContractImported()!=null){
-            onboardingRequest.setContractImported(toContractImported(onboardingInstitutionRequest.getContractImported()));
-        }
 
         return onboardingRequest;
     }

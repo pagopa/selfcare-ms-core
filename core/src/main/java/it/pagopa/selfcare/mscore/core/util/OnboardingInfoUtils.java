@@ -6,6 +6,8 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,10 +20,8 @@ import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.ONBOARDING_INFO
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingInfoUtils {
-
-    private OnboardingInfoUtils() {
-    }
 
     public static List<RelationshipState> convertStatesToRelationshipsState(String[] states) {
         return Arrays.stream(states)

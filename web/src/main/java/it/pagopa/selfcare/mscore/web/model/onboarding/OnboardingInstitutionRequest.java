@@ -33,6 +33,5 @@ public class OnboardingInstitutionRequest {
     private ContractRequest contract;
 
     private boolean signContract;
-    private ContractImportedRequest contractImported;
 
 }

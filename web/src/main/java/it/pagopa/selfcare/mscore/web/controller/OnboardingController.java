@@ -126,7 +126,7 @@ public class OnboardingController {
      * The function complete onboarding request
      *
      * @param tokenId String
-     * @param file    MultipartFile
+     * @param contract MultipartFile
      * @return no content
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
@@ -135,12 +135,13 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.complete}", notes = "${swagger.mscore.onboarding.complete}")
     @PostMapping(value = "/complete/{tokenId}")
-    public ResponseEntity<Void> completeOnboarding(@PathVariable(value = "tokenId") String tokenId,
-                                                   @RequestBody MultipartFile file) {
+    public ResponseEntity<Void> completeOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
+                                                   @PathVariable(value = "tokenId") String tokenId,
+                                                   @RequestBody MultipartFile contract) {
         log.info("Confirm onboarding of token identified with {}", tokenId);
         CustomExceptionMessage.setCustomMessage(CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
-        onboardingService.completeOboarding(token, file);
+        onboardingService.completeOboarding(token, contract);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -156,7 +157,8 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.approve}", notes = "${swagger.mscore.onboarding.approve}")
     @PostMapping(value = "/approve/{tokenId}")
-    public ResponseEntity<Void> approveOnboarding(@PathVariable(value = "tokenId") String tokenId,
+    public ResponseEntity<Void> approveOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
+                                                  @PathVariable(value = "tokenId") String tokenId,
                                                   Authentication authentication) {
         log.info("Onboarding Approve having tokenId {}", tokenId);
         CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
@@ -177,7 +179,8 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.invalidate}", notes = "${swagger.mscore.onboarding.invalidate}")
     @DeleteMapping(value = "/complete/{tokenId}")
-    public ResponseEntity<Void> invalidateOnboarding(@PathVariable(value = "tokenId") String tokenId) {
+    public ResponseEntity<Void> invalidateOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
+                                                     @PathVariable(value = "tokenId") String tokenId) {
         log.info("Invalidating onboarding for token identified with {}", tokenId);
         CustomExceptionMessage.setCustomMessage(INVALIDATE_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
@@ -197,7 +200,8 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.reject}", notes = "${swagger.mscore.onboarding.reject}")
     @DeleteMapping(value = "/reject/{tokenId}")
-    public ResponseEntity<OnboardingInfoResponse> onboardingReject(@PathVariable("tokenId") String tokenId) {
+    public ResponseEntity<OnboardingInfoResponse> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
+                                                                   @PathVariable("tokenId") String tokenId) {
         log.info("Onboarding Reject having tokenId {}", tokenId);
         CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
         Token token = tokenService.verifyToken(tokenId);
@@ -220,7 +224,7 @@ public class OnboardingController {
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
         log.info("Onboarding operators on institution {}", request.getInstitutionId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATORS_ERROR);
-        tokenService.verifyOnboarding(request.getInstitutionId(),request.getProductId(), PRODUCT_RELATIONSHIP_STATES);
+        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId(), PRODUCT_RELATIONSHIP_STATES);
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
@@ -240,7 +244,7 @@ public class OnboardingController {
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
         log.info("Onboarding subdelegates on institution {}", request.getInstitutionId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_SUBDELEGATES_ERROR);
-        tokenService.verifyOnboarding(request.getInstitutionId(),request.getProductId(), PRODUCT_RELATIONSHIP_STATES);
+        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId(), PRODUCT_RELATIONSHIP_STATES);
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
@@ -277,7 +281,8 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.relationship.document}", notes = "${swagger.mscore.onboarding.relationship.document}")
     @GetMapping(value = "/relationship/{relationshipId}/document")
-    public ResponseEntity<byte[]> getOnboardingDocument(@PathVariable("relationshipId") String relationshipId) {
+    public ResponseEntity<byte[]> getOnboardingDocument(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+                                                        @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting onboarding document of relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
         ResourceResponse file = onboardingService.retrieveDocument(relationshipId);

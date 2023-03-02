@@ -190,15 +190,17 @@ public class OnboardingDao {
 
     public void updateUserProductState(OnboardedUser user, String relationshipId, List<RelationshipState> fromStates, RelationshipState toState) {
         for (UserBinding binding : user.getBindings()) {
-            for (OnboardedProduct product : binding.getProducts()) {
-                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())) {
-                    if (fromStates.contains(product.getStatus())) {
-                        userConnector.findAndUpdateState(user.getId(), binding.getInstitutionId(), product.getProductId(), toState);
-                    } else {
-                        throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), product.getStatus(), toState)), INVALID_STATUS_CHANGE.getCode());
-                    }
-                }
-            }
+            binding.getProducts().stream()
+                    .filter(onboardedProduct -> relationshipId.equalsIgnoreCase(onboardedProduct.getRelationshipId()))
+                    .forEach(product -> checkStatus(fromStates, product.getStatus(), user.getId(), binding.getInstitutionId(), product.getProductId(), toState));
+        }
+    }
+
+    private void checkStatus(List<RelationshipState> fromStates, RelationshipState status, String userId, String institutionId, String productId, RelationshipState toState) {
+        if (fromStates.contains(status)) {
+            userConnector.findAndUpdateState(userId, institutionId, productId, toState);
+        } else {
+            throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), status, toState)), INVALID_STATUS_CHANGE.getCode());
         }
     }
 

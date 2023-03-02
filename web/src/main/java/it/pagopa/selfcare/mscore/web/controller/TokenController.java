@@ -59,7 +59,7 @@ public class TokenController {
      * * Code: 404, Message: Token not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.token}", notes = "${swagger.mscore.token")
+    @ApiOperation(value = "${swagger.mscore.token}", notes = "${swagger.mscore.token}")
     @GetMapping("/tokens/{tokenId}")
     public ResponseEntity<TokenResponse> getToken(@ApiParam("${swagger.mscore.token.tokenId}")
                                                      @PathVariable("tokenId") String tokenId) {

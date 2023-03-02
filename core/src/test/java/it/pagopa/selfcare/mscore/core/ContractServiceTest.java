@@ -7,6 +7,7 @@ import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -37,6 +38,9 @@ class ContractServiceTest {
 
     @Mock
     private SignatureService signatureService;
+
+    @Mock
+    private CoreConfig coreConfig;
 
 
     @Test

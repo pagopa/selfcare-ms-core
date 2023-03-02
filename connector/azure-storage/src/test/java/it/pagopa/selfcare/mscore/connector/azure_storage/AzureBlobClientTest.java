@@ -6,7 +6,7 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import it.pagopa.selfcare.mscore.connector.azure_storage.config.AzureStorageConfig;
-import it.pagopa.selfcare.mscore.model.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

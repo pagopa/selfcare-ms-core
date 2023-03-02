@@ -13,5 +13,6 @@ public interface TokenService {
     void verifyOnboarding(String institutionId, String productId, List<RelationshipState> states);
 
     String findActiveContract(String institutionId, String userId, String productId);
+
     TokenRelationships getToken(String tokenId);
 }
