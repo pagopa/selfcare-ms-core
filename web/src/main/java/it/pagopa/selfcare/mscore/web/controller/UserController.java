@@ -3,25 +3,24 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
-import it.pagopa.selfcare.mscore.model.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
+import it.pagopa.selfcare.mscore.web.model.user.Person;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
+import javax.validation.Valid;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_RELATIONSHIP_ERROR;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @Slf4j
 @RestController
@@ -29,13 +28,33 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 public class UserController {
 
     private final UserService userService;
+    private final UserRelationshipService userRelationshipService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserRelationshipService userRelationshipService) {
         this.userService = userService;
+        this.userRelationshipService = userRelationshipService;
     }
 
     /**
-     * The function verify is user existes
+     * The function create a new User
+     *
+     * @param person Person
+     *
+     * @return void
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: Person not found, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.person.create}", notes = "${swagger.mscore.person.create}")
+    @PostMapping("/persons")
+    public ResponseEntity<Person> createUser(@RequestBody @Valid Person person) {
+        OnboardedUser user = userService.createUser(person.getId());
+        return ResponseEntity.ok().body(UserMapper.toPerson(user));
+    }
+
+    /**
+     * The function verify is user exists
      *
      * @param userId String
      *
@@ -62,13 +81,13 @@ public class UserController {
      * * Code: 404, Message: Token not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.activate}")
+    @ApiOperation(value = "${swagger.mscore.relationship.activate}", notes = "${swagger.mscore.relationship.activate}")
     @PostMapping("/relationships/{relationshipId}/activate")
     public ResponseEntity<Void> activateRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                      @PathVariable("relationshipId") String relationshipId) {
         log.info("Activating relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(ACTIVATE_RELATIONSHIP_ERROR);
-        userService.activateRelationship(relationshipId);
+        userRelationshipService.activateRelationship(relationshipId);
         return ResponseEntity.noContent().build();
     }
 
@@ -82,13 +101,13 @@ public class UserController {
      * * Code: 404, Message: Token not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.suspend}")
+    @ApiOperation(value = "${swagger.mscore.relationship.suspend}", notes = "${swagger.mscore.relationship.suspend}")
     @PostMapping("/relationships/{relationshipId}/suspend")
     public ResponseEntity<Void> suspendRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                     @PathVariable("relationshipId") String relationshipId) {
         log.info("Suspending relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(SUSPEND_RELATIONSHIP_ERROR);
-        userService.suspendRelationship(relationshipId);
+        userRelationshipService.suspendRelationship(relationshipId);
         return ResponseEntity.noContent().build();
     }
 
@@ -102,13 +121,13 @@ public class UserController {
      * * Code: 404, Message: Token not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "", notes = "${swagger.mscore.relationship.delete}")
+    @ApiOperation(value = "${swagger.mscore.relationship.delete}", notes = "${swagger.mscore.relationship.delete}")
     @DeleteMapping("/relationships/{relationshipId}")
     public ResponseEntity<Void> deleteRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                    @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
-        userService.deleteRelationship(relationshipId);
+        userRelationshipService.deleteRelationship(relationshipId);
         return ResponseEntity.ok().build();
     }
 
@@ -122,13 +141,13 @@ public class UserController {
      * * Code: 404, Messa
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.token.get}")
+    @ApiOperation(value = "${swagger.mscore.token.get}", notes = "${swagger.mscore.token.get}")
     @GetMapping("/relationships/{relationshipId}")
     public ResponseEntity<RelationshipResult> getRelationship(@ApiParam("${swagger.mscore.token.relationshipId}")
                                                               @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
-        RelationshipInfo relationship = userService.retrieveRelationship(relationshipId);
+        RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResult(relationship));
     }
 }

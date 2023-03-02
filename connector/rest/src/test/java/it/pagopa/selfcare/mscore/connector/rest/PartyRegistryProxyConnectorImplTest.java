@@ -8,10 +8,10 @@ import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategor
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;

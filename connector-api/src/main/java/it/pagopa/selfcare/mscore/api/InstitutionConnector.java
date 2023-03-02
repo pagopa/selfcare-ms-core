@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.api;
 
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;

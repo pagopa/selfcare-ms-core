@@ -6,9 +6,9 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -125,7 +125,7 @@ public class ExternalController {
      *
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.products}")
+    @ApiOperation(value = "${swagger.mscore.external.institution.products}", notes = "${swagger.mscore.external.institution.products}")
     @GetMapping(value = "/{externalId}/products")
     public ResponseEntity<OnboardedProducts> retrieveInstitutionProductsByExternalId(@PathVariable("externalId") String externalId,
                                                                                      @RequestParam(value = "states", required = false) List<RelationshipState> states) {
@@ -146,7 +146,7 @@ public class ExternalController {
      *
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.external.geotaxonomies}")
+    @ApiOperation(value = "${swagger.mscore.external.geotaxonomies}", notes = "${swagger.mscore.external.geotaxonomies}")
     @GetMapping(value = "/{externalId}/geotaxonomies")
     public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId) {
 
@@ -166,7 +166,7 @@ public class ExternalController {
      *
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.external.institution.relationships}")
+    @ApiOperation(value = "${swagger.mscore.external.institution.relationships}", notes = "${swagger.mscore.external.institution.relationships}")
     @GetMapping(value = "/{externalId}/relationships")
     public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationshipsByExternalId(@PathVariable("externalId") String externalId,
                                                                                                 @RequestParam(value = "personId", required = false) String personId,

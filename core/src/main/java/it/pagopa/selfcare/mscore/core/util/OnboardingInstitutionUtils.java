@@ -4,13 +4,15 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.UserToOnboard;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,7 +65,6 @@ public class OnboardingInstitutionUtils {
 
     public static void validateOverridingData(InstitutionUpdate institutionUpdate, Institution institution) {
         log.info("START - validateOverridingData for institution having externalId: {}", institution.getExternalId());
-        //TODO: AGGIUNGERE INSTITUTIONTYPE EQUALS PG SE DATI OBBLIGATORI
         if (InstitutionType.PA == institutionUpdate.getInstitutionType()
                 && (!institution.getDescription().equalsIgnoreCase(institutionUpdate.getDescription())
                 || !institution.getTaxCode().equalsIgnoreCase(institutionUpdate.getTaxCode())
@@ -90,8 +91,7 @@ public class OnboardingInstitutionUtils {
         }
 
         token.setUsers(request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList()));
-
-        // TODO: token.setExpiringDate();
+        //TODO: TTL SUL TOKEN IN STATO PENDING? token.setExpiringDate();
         log.info("END - convertToToken");
         return token;
     }
@@ -142,12 +142,6 @@ public class OnboardingInstitutionUtils {
         }
     }
 
-    public static Map<String, OnboardedProduct> constructProductMap(OnboardingRequest onboardingInstitutionRequest, UserToOnboard userToOnboard) {
-        Map<String, OnboardedProduct> productMap = new HashMap<>();
-        productMap.put(onboardingInstitutionRequest.getProductId(), constructProduct(userToOnboard, onboardingInstitutionRequest));
-        return productMap;
-    }
-
     public static Onboarding constructOnboarding(OnboardingRequest request) {
         Onboarding onboarding = new Onboarding();
 
@@ -178,7 +172,7 @@ public class OnboardingInstitutionUtils {
         }
     }
 
-    public static List<String> getOnboardingValidManager(List<UserToOnboard> users) {
+    public static List<String> getValidManagerToOnboard(List<UserToOnboard> users) {
         log.info("START - getOnboardingValidManager for users list size: {}", users.size());
         List<String> response = new ArrayList<>();
         users.forEach(user -> {
@@ -192,7 +186,7 @@ public class OnboardingInstitutionUtils {
         return response;
     }
 
-    public static List<String> getValidManager(List<OnboardedUser> users, String institutionId, String productId) {
+    public static List<String> getOnboardedValidManager(List<OnboardedUser> users, String institutionId, String productId) {
         log.info("START - getValidManager for users list size: {}", users.size());
         List<String> response = new ArrayList<>();
         for (OnboardedUser onboardedUser : users) {
@@ -214,21 +208,6 @@ public class OnboardingInstitutionUtils {
         onboardingRequest.setProductName(token.getProductId());
         Contract contract = new Contract();
         contract.setPath(token.getContract());
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setDescription(institution.getDescription());
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setSignContract(true);
-
-        return onboardingRequest;
-    }
-
-    public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest request, Institution institution) {
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(request.getProductId());
-        onboardingRequest.setProductName(request.getProductId());
-        Contract contract = new Contract();
-        contract.setPath(request.getContract().getPath());
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setDescription(institution.getDescription());
         onboardingRequest.setInstitutionUpdate(institutionUpdate);

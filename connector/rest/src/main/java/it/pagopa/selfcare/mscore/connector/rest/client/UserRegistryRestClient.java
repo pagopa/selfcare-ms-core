@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
-import it.pagopa.selfcare.mscore.model.User;
+import it.pagopa.selfcare.mscore.model.user.User;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

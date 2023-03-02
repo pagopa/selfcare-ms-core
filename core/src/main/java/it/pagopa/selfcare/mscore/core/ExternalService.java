@@ -1,9 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;

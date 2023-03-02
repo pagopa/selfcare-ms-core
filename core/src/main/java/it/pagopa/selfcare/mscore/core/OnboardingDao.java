@@ -5,11 +5,15 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -128,7 +132,7 @@ public class OnboardingDao {
     private void createNewUser(UserToOnboard user, String institutionId, OnboardingRequest request) {
         OnboardedProduct product = constructProduct(user, request);
         UserBinding binding = new UserBinding(institutionId, List.of(product), OffsetDateTime.now());
-        userConnector.findAndCreate(user.getId(), institutionId, binding);
+        userConnector.findAndCreate(user.getId(), binding);
     }
 
     private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, String institutionId, OnboardingRequest request) {
@@ -139,7 +143,7 @@ public class OnboardingDao {
     }
 
     private OnboardedUser isNewUser(List<String> toUpdate, String userId) {
-        OnboardedUser onboardedUser = userConnector.getById(userId);
+        OnboardedUser onboardedUser = userConnector.findById(userId);
         if (onboardedUser != null) {
             toUpdate.add(onboardedUser.getId());
         }
@@ -187,11 +191,12 @@ public class OnboardingDao {
     public void updateUserProductState(OnboardedUser user, String relationshipId, List<RelationshipState> fromStates, RelationshipState toState) {
         for (UserBinding binding : user.getBindings()) {
             for (OnboardedProduct product : binding.getProducts()) {
-                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())
-                        && fromStates.contains(product.getStatus())) {
-                    userConnector.findAndUpdateState(user.getId(), binding.getInstitutionId(), product.getProductId(), toState);
-                } else {
-                    throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), product.getStatus(), toState)), INVALID_STATUS_CHANGE.getCode());
+                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())) {
+                    if (fromStates.contains(product.getStatus())) {
+                        userConnector.findAndUpdateState(user.getId(), binding.getInstitutionId(), product.getProductId(), toState);
+                    } else {
+                        throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), product.getStatus(), toState)), INVALID_STATUS_CHANGE.getCode());
+                    }
                 }
             }
         }
@@ -240,7 +245,7 @@ public class OnboardingDao {
     private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
         OnboardedProduct product = constructOperatorProduct(user, request);
         UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product), OffsetDateTime.now());
-        userConnector.findAndCreate(user.getId(), request.getInstitutionId(), binding);
+        userConnector.findAndCreate(user.getId(), binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
     }
 

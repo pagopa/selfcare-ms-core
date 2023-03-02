@@ -2,7 +2,8 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

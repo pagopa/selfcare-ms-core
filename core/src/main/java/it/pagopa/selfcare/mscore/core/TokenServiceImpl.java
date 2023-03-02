@@ -3,8 +3,10 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +22,11 @@ import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.VERIFY_TOKEN_RELA
 public class TokenServiceImpl implements TokenService {
 
     private final TokenConnector tokenConnector;
+    private final UserService userService;
 
-    public TokenServiceImpl(TokenConnector tokenConnector) {
+    public TokenServiceImpl(TokenConnector tokenConnector, UserService userService) {
         this.tokenConnector = tokenConnector;
+        this.userService = userService;
     }
 
     @Override
@@ -37,6 +41,23 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public String findActiveContract(String institutionId, String userId, String productId) {
         return tokenConnector.findActiveContract(institutionId, userId, productId).getId();
+    }
+
+    @Override
+    public TokenRelationships getToken(String tokenId) {
+        Token token = tokenConnector.findById(tokenId);
+        List<OnboardedUser> users = userService.findAllByIds(token.getUsers());
+        return toTokenRelationships(token, users);
+    }
+
+    private TokenRelationships toTokenRelationships(Token token, List<OnboardedUser> users) {
+        TokenRelationships tokenRelationships = new TokenRelationships();
+        tokenRelationships.setChecksum(token.getChecksum());
+        tokenRelationships.setTokenId(token.getId());
+        tokenRelationships.setInstitutionId(token.getInstitutionId());
+        tokenRelationships.setProductId(token.getProductId());
+        tokenRelationships.setUsers(users);
+        return tokenRelationships;
     }
 
     @Override

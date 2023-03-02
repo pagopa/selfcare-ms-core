@@ -16,7 +16,7 @@ import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.SignatureValidationReportType;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.model.User;
+import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.*;

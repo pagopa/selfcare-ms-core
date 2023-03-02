@@ -4,33 +4,27 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.CustomErrorEnum;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.*;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserConnector userConnector;
-    private final OnboardingDao onboardingDao;
-    private final InstitutionService institutionService;
     private final UserRegistryConnector userRegistryConnector;
 
-    public UserServiceImpl(UserConnector userConnector, OnboardingDao onboardingDao, InstitutionService institutionService, UserRegistryConnector userRegistryConnector) {
+    public UserServiceImpl(UserConnector userConnector, UserRegistryConnector userRegistryConnector) {
         this.userConnector = userConnector;
-        this.onboardingDao = onboardingDao;
-        this.institutionService = institutionService;
         this.userRegistryConnector = userRegistryConnector;
     }
 
@@ -41,12 +35,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public OnboardedUser findByUserId(String userId) {
-        return userConnector.getById(userId);
+        return userConnector.findById(userId);
     }
 
     @Override
-    public List<OnboardedUser> retrieveAdminUsers(String institutionId, String userId) {
-        return userConnector.findWithFilter(institutionId, userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
+    public List<OnboardedUser> findAllByIds(List<String> users) {
+        return userConnector.findAllByIds(users);
     }
 
     @Override
@@ -60,11 +54,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public OnboardedUser findByRelationshipId(String relationshipId) {
-        return userConnector.findByRelationshipId(relationshipId);
-    }
-
-    @Override
     public void verifyUser(String userId) {
         OnboardedUser user = findByUserId(userId);
         if (user == null) {
@@ -73,47 +62,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void activateRelationship(String relationshipId) {
-        OnboardedUser user = findByRelationshipId(relationshipId);
-        try {
-            onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.SUSPENDED), RelationshipState.ACTIVE);
-        } catch (InvalidRequestException e) {
-            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
-        }
-    }
-
-    @Override
-    public void suspendRelationship(String relationshipId) {
-        OnboardedUser user = findByRelationshipId(relationshipId);
-        try {
-            onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.ACTIVE), RelationshipState.SUSPENDED);
-        } catch (InvalidRequestException e) {
-            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
-        }
-    }
-
-    @Override
-    public void deleteRelationship(String relationshipId) {
-        OnboardedUser user = findByRelationshipId(relationshipId);
-        onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.values()), RelationshipState.DELETED);
-    }
-
-    @Override
-    public RelationshipInfo retrieveRelationship(String relationshipId) {
-        OnboardedUser user = findByRelationshipId(relationshipId);
-        for (UserBinding userBinding : user.getBindings()) {
-            for (OnboardedProduct product : userBinding.getProducts()) {
-                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())) {
-                    Institution institution = institutionService.retrieveInstitutionById(userBinding.getInstitutionId());
-                    return new RelationshipInfo(institution, user.getId(), product);
-                }
-            }
-        }
-        throw new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode());
-    }
-
-    @Override
     public User getUserFromUserRegistry(String userId, EnumSet<User.Fields> fields) {
         return userRegistryConnector.getUserByInternalId(userId, fields);
+    }
+
+    @Override
+    public OnboardedUser createUser(String userId) {
+        return userConnector.findAndCreate(userId, null);
     }
 }

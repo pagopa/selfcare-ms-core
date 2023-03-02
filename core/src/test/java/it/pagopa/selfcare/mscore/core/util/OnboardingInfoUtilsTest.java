@@ -6,6 +6,10 @@ import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.Premium;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

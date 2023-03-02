@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.User;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +18,10 @@ public class MailParametersMapper {
         Map<String, String> map = new HashMap<>();
         map.put(mailTemplateConfig.getProductName(), request.getProductId());
         if(user.getName()!=null) {
-            map.put(mailTemplateConfig.getUserName(), user.getName().getValue());
+            map.put(mailTemplateConfig.getUserName(), user.getName());
         }
         if(user.getFamilyName()!=null) {
-            map.put(mailTemplateConfig.getUserSurname(), user.getFamilyName().getValue());
+            map.put(mailTemplateConfig.getUserSurname(), user.getFamilyName());
         }
         map.put(mailTemplateConfig.getRejectTokenName(), mailTemplateConfig.getRejectTokenPlaceholder());
         map.put(mailTemplateConfig.getConfirmTokenName(), mailTemplateConfig.getConfirmTokenPlaceholder());
@@ -32,10 +32,10 @@ public class MailParametersMapper {
         Map<String, String> map = new HashMap<>();
         map.put(mailTemplateConfig.getNotificationProductName(), request.getProductName());
         if(user.getName()!=null) {
-            map.put(mailTemplateConfig.getNotificationRequesterName(), user.getName().getValue());
+            map.put(mailTemplateConfig.getNotificationRequesterName(), user.getName());
         }
         if(user.getFamilyName()!=null) {
-            map.put(mailTemplateConfig.getNotificationRequesterSurname(), user.getFamilyName().getValue());
+            map.put(mailTemplateConfig.getNotificationRequesterSurname(), user.getFamilyName());
         }
         if(request.getInstitutionUpdate()!=null) {
             map.put(mailTemplateConfig.getInstitutionDescription(), request.getInstitutionUpdate().getDescription());

@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.User;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
@@ -29,12 +29,12 @@ public class PdfMapper {
             map.put("address", institution.getAddress());
             map.put("institutionTaxCode", institution.getTaxCode());
             map.put("zipCode", institution.getZipCode());
-            map.put("managerName", validManager.getName()!=null ? validManager.getName().getValue():"");
-            map.put("managerSurname", validManager.getFamilyName()!=null ? validManager.getFamilyName().getValue():"");
+            map.put("managerName", validManager.getName());
+            map.put("managerSurname", validManager.getFamilyName());
             map.put("originId", institution.getIpaCode()!=null ? institution.getIpaCode():"");
             map.put("institutionMail", institution.getDigitalAddress());
             map.put("managerTaxCode", validManager.getFiscalCode());
-            map.put("managerEmail", validManager.getEmail()!=null ? validManager.getEmail().getValue():"");
+            map.put("managerEmail", validManager.getEmail());
             map.put("delegates", delegatesToText(users));
             map.put("institutionType", decodeInstitutionType(retrieveInstitutionType(institution, request)));
             if (request.getBillingRequest() != null) {
@@ -105,6 +105,8 @@ public class PdfMapper {
         InstitutionType institutionType = InstitutionType.UNKNOWN;
         if (institution.getInstitutionType() != null) {
             institutionType = institution.getInstitutionType();
+        }else if(request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null){
+            institutionType = request.getInstitutionUpdate().getInstitutionType();
         }
         return institutionType;
     }
@@ -131,8 +133,8 @@ public class PdfMapper {
         StringBuilder builder = new StringBuilder();
         users.forEach(user -> builder
                         .append("|<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
-                        .append(user.getName()!=null ? user.getName().getValue():"").append(" ")
-                        .append(user.getFamilyName()!=null ? user.getFamilyName().getValue():"")
+                        .append(user.getName()).append(" ")
+                        .append(user.getFamilyName())
                         .append("&nbsp;</span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
                         .append(user.getFiscalCode())
@@ -140,7 +142,7 @@ public class PdfMapper {
                         .append("|<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">e-mail: ")
-                        .append(user.getEmail()!=null ? user.getEmail().getValue():"")
+                        .append(user.getEmail())
                         .append("&nbsp;</span></p>\n")
                         .append("|<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
                         .append("|</br>"));

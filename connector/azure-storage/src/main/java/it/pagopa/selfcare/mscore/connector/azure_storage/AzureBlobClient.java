@@ -9,7 +9,7 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.connector.azure_storage.config.AzureStorageConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.model.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
