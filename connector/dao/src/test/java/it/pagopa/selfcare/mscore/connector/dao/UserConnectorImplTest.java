@@ -2,10 +2,12 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.EnvEnum;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,33 @@ class UserConnectorImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Test
+    void findById(){
+        UserEntity userEntity = new UserEntity();
+        when(userRepository.findById(any())).thenReturn(Optional.of(userEntity));
+        assertNotNull(userConnectorImpl.findById("id"));
+    }
+
+    @Test
+    void findAllByIds(){
+        List<UserEntity> userEntities = new ArrayList<>();
+        userEntities.add(new UserEntity());
+        when(userRepository.findAllById(any())).thenReturn(userEntities);
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findAllByIds(new ArrayList<>()));
+    }
+
+    @Test
+    void findAllByIds2(){
+        List<UserEntity> userEntities = new ArrayList<>();
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id");
+        userEntities.add(userEntity);
+        when(userRepository.findAllById(any())).thenReturn(userEntities);
+        List<String> users = new ArrayList<>();
+        users.add("id1");
+        assertNotNull(userConnectorImpl.findAllByIds(users));
+    }
+
 
     /**
      * Method under test: {@link UserConnectorImpl#deleteById}
@@ -37,43 +66,6 @@ class UserConnectorImplTest {
         doNothing().when(userRepository).deleteById("any");
         userConnectorImpl.deleteById("42");
         verify(userRepository).deleteById(any());
-    }
-
-    /**
-     * Method under test: {@link UserConnectorImpl#getById}
-     */
-    @Test
-    void testGetById() {
-        UserEntity userEntity = new UserEntity();
-        List<UserBindingEntity> userBindingEntities = new ArrayList<>();
-        List<OnboardedProductEntity> onboardedProductEntities = new ArrayList<>();
-        onboardedProductEntities.add(new OnboardedProductEntity());
-        UserBindingEntity userBindingEntity = new UserBindingEntity();
-        userBindingEntity.setProducts(onboardedProductEntities);
-        userBindingEntities.add(userBindingEntity);
-        userEntity.setBindings(userBindingEntities);
-        userEntity.setCreatedAt(null);
-        userEntity.setId("42");
-        userEntity.setUpdatedAt(null);
-
-        Optional<UserEntity> ofResult = Optional.of(userEntity);
-        when(userRepository.findById(any())).thenReturn(ofResult);
-        OnboardedUser actualById = userConnectorImpl.getById("42");
-        assertFalse(actualById.getBindings().isEmpty());
-        assertNull(actualById.getUpdatedAt());
-        assertEquals("42", actualById.getId());
-        assertNull(actualById.getCreatedAt());
-        verify(userRepository).findById(any());
-    }
-
-    /**
-     * Method under test: {@link UserConnectorImpl#getById}
-     */
-    @Test
-    void testGetById2() {
-        when(userRepository.findById(any())).thenReturn(Optional.empty());
-        assertNull(userConnectorImpl.getById("42"));
-        verify(userRepository).findById(any());
     }
 
     /**
@@ -157,9 +149,6 @@ class UserConnectorImplTest {
         verify(userRepository).findAndModify(any(), any(), any(), any());
     }
 
-    /**
-     * Method under test: {@link UserConnectorImpl#findAndCreate(String, String, UserBinding)}
-     */
     @Test
     void testFindAndCreate() {
         UserEntity userEntity = new UserEntity();
@@ -169,20 +158,17 @@ class UserConnectorImplTest {
         userEntity.setUpdatedAt(null);
         when(userRepository.findAndModify(any(), any(), any(),
                 any())).thenReturn(userEntity);
-        userConnectorImpl.findAndCreate("42", "42", new UserBinding());
+        userConnectorImpl.findAndCreate("42", new UserBinding());
         verify(userRepository).findAndModify(any(), any(), any(),
                 any());
     }
 
-    /**
-     * Method under test: {@link UserConnectorImpl#findAndCreate(String, String, UserBinding)}
-     */
     @Test
     void testFindAndCreate2() {
         when(userRepository.findAndModify(any(), any(), any(),
                 any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class,
-                () -> userConnectorImpl.findAndCreate("42", "42", new UserBinding()));
+                () -> userConnectorImpl.findAndCreate("42",  new UserBinding()));
         verify(userRepository).findAndModify(any(), any(), any(),
                 any());
     }

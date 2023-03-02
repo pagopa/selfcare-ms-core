@@ -4,7 +4,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.Problem;
+import it.pagopa.selfcare.mscore.model.error.Problem;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
@@ -85,6 +85,7 @@ class CustomExceptionHandlerTest {
     void testHandleResourceNotFoundException() {
         CustomExceptionHandler customExceptionHandler = new CustomExceptionHandler();
         MockHttpServletRequest request = new MockHttpServletRequest();
+
         ResponseEntity<Problem> actualHandleResourceNotFoundExceptionResult = customExceptionHandler
                 .handleResourceNotFoundException(request, new ResourceNotFoundException("An error occurred", "Code"));
         assertTrue(actualHandleResourceNotFoundExceptionResult.hasBody());

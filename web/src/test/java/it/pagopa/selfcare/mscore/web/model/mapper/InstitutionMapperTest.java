@@ -1,11 +1,9 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.Premium;
-import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
@@ -224,7 +222,6 @@ class InstitutionMapperTest {
         InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
                 .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
-        assertEquals(null, actualToInstitutionManagerResponseResult.getId());
         InstitutionUpdateResponse institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
         assertNull(institutionUpdate.getInstitutionType());
         assertNull(institutionUpdate.getDigitalAddress());
@@ -232,6 +229,99 @@ class InstitutionMapperTest {
         assertNull(institutionUpdate.getAddress());
         assertNull(institutionUpdate.getTaxCode());
         assertNull(institutionUpdate.getZipCode());
+    }
+
+    @Test
+    void testToInstitutionManagerResponse10() {
+        Institution institution = new Institution();
+        institution.setOnboarding(new ArrayList<>());
+        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("42");
+        onboardedProducts.add(onboardedProduct);
+        ProductManagerInfo productManagerInfo = new ProductManagerInfo("id", institution, onboardedProducts);
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+                .toInstitutionManagerResponse(productManagerInfo, "42");
+        assertNull(actualToInstitutionManagerResponseResult.getTo());
+        InstitutionUpdateResponse institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
+        assertNull(institutionUpdate.getInstitutionType());
+        assertNull(institutionUpdate.getDigitalAddress());
+        assertNull(institutionUpdate.getDescription());
+        assertNull(institutionUpdate.getAddress());
+        assertNull(institutionUpdate.getTaxCode());
+        assertNull(institutionUpdate.getZipCode());
+    }
+
+
+    /**
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
+     */
+    @Test
+    void testToInstitutionUpdateResponse2() {
+        Institution institution = new Institution();
+        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
+                .toInstitutionUpdateResponse(institution);
+        assertNull(actualToInstitutionUpdateResponseResult.getAddress());
+        assertNull(actualToInstitutionUpdateResponseResult.getZipCode());
+        assertNull(actualToInstitutionUpdateResponseResult.getTaxCode());
+        assertNull(actualToInstitutionUpdateResponseResult.getSupportPhone());
+        assertNull(actualToInstitutionUpdateResponseResult.getSupportEmail());
+        assertNull(actualToInstitutionUpdateResponseResult.getShareCapital());
+        assertNull(actualToInstitutionUpdateResponseResult.getRea());
+        assertNull(actualToInstitutionUpdateResponseResult.getPaymentServiceProvider());
+        assertNull(actualToInstitutionUpdateResponseResult.getInstitutionType());
+        assertNull(actualToInstitutionUpdateResponseResult.getDigitalAddress());
+        assertNull(actualToInstitutionUpdateResponseResult.getDescription());
+        assertNull(actualToInstitutionUpdateResponseResult.getDataProtectionOfficer());
+        assertNull(actualToInstitutionUpdateResponseResult.getBusinessRegisterPlace());
+        assertFalse(institution.isImported());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
+     */
+    @Test
+    void testToInstitutionUpdateResponse4() {
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        Institution institution = new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
+                geographicTaxonomies, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
+                "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
+
+        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
+                .toInstitutionUpdateResponse(institution);
+        assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getAddress());
+        assertEquals("21654", actualToInstitutionUpdateResponseResult.getZipCode());
+        assertEquals("Tax Code", actualToInstitutionUpdateResponseResult.getTaxCode());
+        assertEquals("4105551212", actualToInstitutionUpdateResponseResult.getSupportPhone());
+        assertEquals("jane.doe@example.org", actualToInstitutionUpdateResponseResult.getSupportEmail());
+        assertEquals("Share Capital", actualToInstitutionUpdateResponseResult.getShareCapital());
+        assertEquals("Rea", actualToInstitutionUpdateResponseResult.getRea());
+        assertSame(paymentServiceProvider, actualToInstitutionUpdateResponseResult.getPaymentServiceProvider());
+        assertEquals(InstitutionType.PA, actualToInstitutionUpdateResponseResult.getInstitutionType());
+        assertEquals("Business Register Place", actualToInstitutionUpdateResponseResult.getBusinessRegisterPlace());
+        assertEquals("The characteristics of someone or something",
+                actualToInstitutionUpdateResponseResult.getDescription());
+        assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getDigitalAddress());
+        assertSame(dataProtectionOfficer, actualToInstitutionUpdateResponseResult.getDataProtectionOfficer());
+        assertTrue(institution.isImported());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     */
+    @Test
+    void testToInstitutionUpdate() {
+        InstitutionPut institutionPut = new InstitutionPut();
+        institutionPut.setGeographicTaxonomyCodes(new ArrayList<>());
+        assertTrue(InstitutionMapper.toInstitutionUpdate(institutionPut).getGeographicTaxonomyCodes().isEmpty());
     }
 
 
@@ -349,6 +439,50 @@ class InstitutionMapperTest {
         assertNull(actualToBillingResponseResult.getExternalId());
         assertNull(actualToBillingResponseResult.getDigitalAddress());
         assertNull(actualToBillingResponseResult.getDescription());
+    }
+
+    @Test
+    void testToBillingResponse9() {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(null);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution institution = new Institution();
+        institution.setBilling(billing);
+        institution.setOnboarding(onboardingList);
+        institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
+        assertNull(actualToBillingResponseResult.getAddress());
+        assertNull(actualToBillingResponseResult.getZipCode());
+        assertNull(actualToBillingResponseResult.getTaxCode());
+        assertEquals("Pricing Plan", actualToBillingResponseResult.getPricingPlan());
+        assertNull(actualToBillingResponseResult.getOriginId());
+        assertNull(actualToBillingResponseResult.getInstitutionId());
+        assertNull(actualToBillingResponseResult.getExternalId());
+        assertNull(actualToBillingResponseResult.getDigitalAddress());
+        assertNull(actualToBillingResponseResult.getDescription());
+        BillingResponse billing1 = actualToBillingResponseResult.getBilling();
+        assertEquals("Recipient Code", billing1.getRecipientCode());
+        assertTrue(billing1.isPublicServices());
+        assertEquals("42", billing1.getVatNumber());
     }
 
     /**
@@ -611,6 +745,95 @@ class InstitutionMapperTest {
         assertEquals("Legal Register Name", paymentServiceProvider.getLegalRegisterName());
         assertTrue(paymentServiceProvider.isVatNumberGroup());
         assertEquals("42", paymentServiceProvider.getBusinessRegisterNumber());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toBillingResponse(Onboarding, Institution)}
+     */
+    @Test
+    void testToBillingResponse() {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding,
+                new Institution());
+        assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
+        assertTrue(actualToBillingResponseResult.isPublicServices());
+        assertEquals("42", actualToBillingResponseResult.getVatNumber());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toBillingResponse(Onboarding, Institution)}
+     */
+    @Test
+    void testToBillingResponse3() {
+        Billing billing = new Billing();
+        billing.setPublicServices(false);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding,
+                new Institution());
+        assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
+        assertFalse(actualToBillingResponseResult.isPublicServices());
+        assertEquals("42", actualToBillingResponseResult.getVatNumber());
+    }
+
+    @Test
+    void testToBillingResponse4() {
+        Billing billing = new Billing();
+        billing.setPublicServices(false);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(null);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPremium(premium);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+        Institution institution = new Institution();
+        institution.setBilling(billing);
+        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding,
+                institution);
+        assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
+        assertFalse(actualToBillingResponseResult.isPublicServices());
+        assertEquals("42", actualToBillingResponseResult.getVatNumber());
     }
 }
 

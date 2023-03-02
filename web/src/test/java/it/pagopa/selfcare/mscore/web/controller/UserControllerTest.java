@@ -1,9 +1,13 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +20,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -29,6 +34,9 @@ class UserControllerTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private UserRelationshipService userRelationshipService;
 
     @Test
     void verifyUser() throws Exception {
@@ -44,8 +52,32 @@ class UserControllerTest {
     }
 
     @Test
+    void createUser() throws Exception {
+        Person person = new Person();
+        person.setId("42");
+        person.setName("Name");
+        person.setProductRole(List.of("Product Role"));
+        person.setRole(PartyRole.MANAGER);
+        person.setSurname("Doe");
+        person.setTaxCode("Tax Code");
+
+        String content = (new ObjectMapper()).writeValueAsString(person);
+        when(userService.createUser(any())).thenReturn(new OnboardedUser());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/persons")
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
     void activateRelationship() throws Exception {
-        doNothing().when(userService).activateRelationship(any());
+        doNothing().when(userRelationshipService).activateRelationship(any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/relationships/{relationshipId}/activate","42")
                 .contentType(MediaType.APPLICATION_JSON);
@@ -58,7 +90,7 @@ class UserControllerTest {
 
     @Test
     void suspendRelationship() throws Exception {
-        doNothing().when(userService).suspendRelationship(any());
+        doNothing().when(userRelationshipService).suspendRelationship(any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/relationships/{relationshipId}/suspend","42")
                 .contentType(MediaType.APPLICATION_JSON);
@@ -71,7 +103,7 @@ class UserControllerTest {
 
     @Test
     void deleteRelationship() throws Exception {
-        doNothing().when(userService).deleteRelationship(any());
+        doNothing().when(userRelationshipService).deleteRelationship(any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .delete("/relationships/{relationshipId}","42")
                 .contentType(MediaType.APPLICATION_JSON);
@@ -85,8 +117,6 @@ class UserControllerTest {
     @Test
     void getRelationship() throws Exception {
         RelationshipInfo relationshipInfo = new RelationshipInfo();
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setProductId("id");
         Billing billing = new Billing();
         billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
@@ -115,15 +145,13 @@ class UserControllerTest {
         institution.setGeographicTaxonomies(new ArrayList<>());
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
+        institution.setIpaCode("Ipa Code");
         institution.setOnboarding(new ArrayList<>());
-        institution.setIpaCode("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-
         relationshipInfo.setInstitution(institution);
-        relationshipInfo.setOnboardedProduct(onboardedProduct);
-        when(userService.retrieveRelationship(any())).thenReturn(relationshipInfo);
+        when(userRelationshipService.retrieveRelationship(any())).thenReturn(relationshipInfo);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/relationships/{relationshipId}","42")
                 .contentType(MediaType.APPLICATION_JSON);

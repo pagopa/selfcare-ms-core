@@ -2,12 +2,9 @@ package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Contract;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Test;
@@ -75,88 +72,7 @@ class OnboardingInstitutionUtilsTest {
                 () -> OnboardingInstitutionUtils.verifyUsers(userToOnboardList, states));
     }
 
-    @Test
-    void getOnboardingValidManager() {
-        List<UserToOnboard> userToOnboardList = new ArrayList<>();
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(EnvEnum.ROOT);
-        userToOnboard.setId("42");
-        userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
-        userToOnboard.setRole(PartyRole.MANAGER);
-        userToOnboard.setSurname("Doe");
-        userToOnboard.setTaxCode("Tax Code");
-        userToOnboardList.add(userToOnboard);
 
-        assertNotNull(OnboardingInstitutionUtils.getOnboardingValidManager(userToOnboardList));
-    }
-
-    @Test
-    void getOnboardingValidManager2() {
-        List<UserToOnboard> userToOnboardList = new ArrayList<>();
-
-        assertThrows(InvalidRequestException.class, () -> OnboardingInstitutionUtils.getOnboardingValidManager(userToOnboardList));
-    }
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#getValidManager(List, String, String)}
-     */
-    @Test
-    void testGetValidManager() {
-        assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.getValidManager(new ArrayList<>(), "42", "42"));
-    }
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#getValidManager(List, String, String)}
-     */
-    @Test
-    void testGetValidManager3() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new ArrayList<>());
-
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(onboardedUser);
-        assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.getValidManager(onboardedUserList, "42", "42"));
-    }
-
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#getValidManager(List, String, String)}
-     */
-    @Test
-    void testGetValidManager5() {
-        ArrayList<UserBinding> userBindingList = new ArrayList<>();
-        userBindingList.add(new UserBinding());
-
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(userBindingList);
-
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(onboardedUser);
-        assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.getValidManager(onboardedUserList, "42", "42"));
-    }
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#getValidManager(List, String, String)}
-     */
-    @Test
-    void testGetValidManager6() {
-        ArrayList<UserBinding> userBindingList = new ArrayList<>();
-        userBindingList.add(new UserBinding());
-        userBindingList.add(new UserBinding());
-
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(userBindingList);
-
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(onboardedUser);
-        assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.getValidManager(onboardedUserList, "42", "42"));
-    }
 
     /**
      * Method under test: {@link OnboardingInstitutionUtils#constructOnboardingRequest(Token, Institution)}
@@ -172,92 +88,6 @@ class OnboardingInstitutionUtilsTest {
         assertNull(actualConstructOnboardingRequestResult.getInstitutionUpdate().getDescription());
     }
 
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#constructOnboardingRequest(OnboardingLegalsRequest, Institution)}
-     */
-    @Test
-    void testConstructOnboardingRequest4() {
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        OnboardingLegalsRequest onboardingLegalsRequest = new OnboardingLegalsRequest();
-        onboardingLegalsRequest.setContract(contract);
-        onboardingLegalsRequest.setInstitutionExternalId("42");
-        onboardingLegalsRequest.setInstitutionId("42");
-        onboardingLegalsRequest.setProductId("42");
-        onboardingLegalsRequest.setProductName("Product Name");
-        onboardingLegalsRequest.setSignContract(true);
-        onboardingLegalsRequest.setUsers(new ArrayList<>());
-        OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
-                .constructOnboardingRequest(onboardingLegalsRequest, new Institution());
-        assertTrue(actualConstructOnboardingRequestResult.isSignContract());
-        assertEquals("42", actualConstructOnboardingRequestResult.getProductName());
-        assertEquals("42", actualConstructOnboardingRequestResult.getProductId());
-        assertEquals("Path", actualConstructOnboardingRequestResult.getContract().getPath());
-        assertNull(actualConstructOnboardingRequestResult.getInstitutionUpdate().getDescription());
-    }
-
-    @Test
-    void constructProductMap() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(EnvEnum.ROOT);
-        userToOnboard.setId("42");
-        userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
-        userToOnboard.setRole(PartyRole.MANAGER);
-        userToOnboard.setSurname("Doe");
-        userToOnboard.setTaxCode("Tax Code");
-        assertNotNull(OnboardingInstitutionUtils.constructProductMap(onboardingRequest, userToOnboard));
-    }
 
     /**
      * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}

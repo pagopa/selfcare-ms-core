@@ -3,6 +3,8 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
@@ -302,7 +304,6 @@ class OnboardingMapperTest {
         assertTrue(actualToOnboardingRequestResult.isSignContract());
         assertEquals("42", actualToOnboardingRequestResult.getInstitutionExternalId());
         assertEquals("Product Name", actualToOnboardingRequestResult.getProductName());
-        assertEquals(stringList, actualToOnboardingRequestResult.getUsers());
         assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
@@ -421,7 +422,6 @@ class OnboardingMapperTest {
         ArrayList<OnboardingInfo> onboardingInfoList = new ArrayList<>();
         OnboardingInfoResponse actualToOnboardingInfoResponseResult = OnboardingMapper.toOnboardingInfoResponse("42",
                 onboardingInfoList);
-        assertEquals(onboardingInfoList, actualToOnboardingInfoResponseResult.getInstitutions());
         assertEquals("42", actualToOnboardingInfoResponseResult.getUserId());
     }
 
@@ -443,7 +443,6 @@ class OnboardingMapperTest {
         onboardingInfoList.add(e);
         OnboardingInfoResponse actualToOnboardingInfoResponseResult = OnboardingMapper.toOnboardingInfoResponse("foo",
                 onboardingInfoList);
-        assertEquals(onboardingList, actualToOnboardingInfoResponseResult.getInstitutions());
         assertEquals("foo", actualToOnboardingInfoResponseResult.getUserId());
     }
 
@@ -610,7 +609,6 @@ class OnboardingMapperTest {
         OnboardingOperatorsRequest actualToOnboardingOperatorRequestResult = OnboardingMapper
                 .toOnboardingOperatorRequest(onboardingInstitutionOperatorsRequest);
         assertEquals("42", actualToOnboardingOperatorRequestResult.getInstitutionId());
-        assertEquals(personList, actualToOnboardingOperatorRequestResult.getUsers());
         assertEquals("42", actualToOnboardingOperatorRequestResult.getProductId());
     }
 

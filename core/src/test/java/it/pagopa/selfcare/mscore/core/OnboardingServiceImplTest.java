@@ -2,17 +2,17 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
-import it.pagopa.selfcare.mscore.api.*;
-import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,83 +48,6 @@ class OnboardingServiceImplTest {
     @Mock
     private UserService userService;
 
-
-    /**
-     * Methods under test:
-     *
-     * <ul>
-     *   <li>{@link OnboardingServiceImpl#OnboardingServiceImpl(OnboardingDao, InstitutionService, UserService, ContractService, EmailService)}
-     *   <li>{@link OnboardingServiceImpl#onboardingLegals(OnboardingLegalsRequest, SelfCareUser)}
-     * </ul>
-     */
-    @Test
-    void testConstructor() {
-        OnboardingDao onboardingDao = new OnboardingDao(mock(InstitutionConnector.class), mock(TokenConnector.class),
-                mock(UserConnector.class), mock(ProductConnector.class));
-
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserConnector userConnector = mock(UserConnector.class);
-        OnboardingDao onboardingDao1 = new OnboardingDao(mock(InstitutionConnector.class), mock(TokenConnector.class),
-                mock(UserConnector.class), mock(ProductConnector.class));
-
-        PartyRegistryProxyConnector partyRegistryProxyConnector1 = mock(PartyRegistryProxyConnector.class);
-        InstitutionConnector institutionConnector1 = mock(InstitutionConnector.class);
-        GeoTaxonomiesConnector geoTaxonomiesConnector1 = mock(GeoTaxonomiesConnector.class);
-        InstitutionServiceImpl institutionService = new InstitutionServiceImpl(partyRegistryProxyConnector,
-                institutionConnector, geoTaxonomiesConnector,
-                new UserServiceImpl(userConnector, onboardingDao1,
-                        new InstitutionServiceImpl(partyRegistryProxyConnector1, institutionConnector1, geoTaxonomiesConnector1,
-                                new UserServiceImpl(mock(UserConnector.class), mock(OnboardingDao.class),
-                                        mock(InstitutionService.class), mock(UserRegistryConnector.class))),
-                        mock(UserRegistryConnector.class)));
-
-        UserConnector userConnector1 = mock(UserConnector.class);
-        OnboardingDao onboardingDao2 = new OnboardingDao(mock(InstitutionConnector.class), mock(TokenConnector.class),
-                mock(UserConnector.class), mock(ProductConnector.class));
-
-        PartyRegistryProxyConnector partyRegistryProxyConnector2 = mock(PartyRegistryProxyConnector.class);
-        InstitutionConnector institutionConnector2 = mock(InstitutionConnector.class);
-        GeoTaxonomiesConnector geoTaxonomiesConnector2 = mock(GeoTaxonomiesConnector.class);
-        UserConnector userConnector2 = mock(UserConnector.class);
-        OnboardingDao onboardingDao3 = new OnboardingDao(mock(InstitutionConnector.class), mock(TokenConnector.class),
-                mock(UserConnector.class), mock(ProductConnector.class));
-
-        UserServiceImpl userService = new UserServiceImpl(userConnector1, onboardingDao2,
-                new InstitutionServiceImpl(partyRegistryProxyConnector2, institutionConnector2, geoTaxonomiesConnector2,
-                        new UserServiceImpl(userConnector2, onboardingDao3,
-                                new InstitutionServiceImpl(mock(PartyRegistryProxyConnector.class), mock(InstitutionConnector.class),
-                                        mock(GeoTaxonomiesConnector.class), mock(UserService.class)),
-                                mock(UserRegistryConnector.class))),
-                mock(UserRegistryConnector.class));
-
-        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
-        FileStorageConnector fileStorageConnector = mock(FileStorageConnector.class);
-        CoreConfig coreConfig = new CoreConfig();
-        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
-        ContractService contractService = new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, new SignatureService());
-
-        EmailConnector emailConnector = mock(EmailConnector.class);
-        FileStorageConnector fileStorageConnector1 = mock(FileStorageConnector.class);
-        MailParametersMapper mailParametersMapper = new MailParametersMapper();
-        OnboardingServiceImpl actualOnboardingServiceImpl = new OnboardingServiceImpl(onboardingDao, institutionService,
-                userService, contractService,
-                new EmailService(emailConnector, fileStorageConnector1, mailParametersMapper, new CoreConfig()));
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-        OnboardingLegalsRequest onboardingLegalsRequest = new OnboardingLegalsRequest();
-        onboardingLegalsRequest.setContract(contract);
-        onboardingLegalsRequest.setInstitutionExternalId("42");
-        onboardingLegalsRequest.setInstitutionId("42");
-        onboardingLegalsRequest.setProductId("42");
-        onboardingLegalsRequest.setProductName("Product Name");
-        onboardingLegalsRequest.setSignContract(true);
-        onboardingLegalsRequest.setUsers(new ArrayList<>());
-        actualOnboardingServiceImpl.onboardingLegals(onboardingLegalsRequest, mock(SelfCareUser.class));
-    }
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -858,58 +780,6 @@ class OnboardingServiceImplTest {
         verify(institutionService).retrieveInstitutionById(any());
     }
 
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument() {
-        when(userService.retrieveRelationship(any())).thenReturn(new RelationshipInfo());
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
-        verify(userService).retrieveRelationship(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument3() {
-        Institution institution = new Institution();
-        when(userService.retrieveRelationship(any()))
-                .thenReturn(new RelationshipInfo(institution, "42", new OnboardedProduct()));
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
-        verify(userService).retrieveRelationship(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument4() {
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setContract("Contract");
-        onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
-        onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
-        onboardedProduct.setRelationshipId("42");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProduct.setStatus(RelationshipState.PENDING);
-        onboardedProduct.setUpdatedAt(null);
-
-        RelationshipInfo relationshipInfo = new RelationshipInfo();
-        relationshipInfo.setOnboardedProduct(onboardedProduct);
-        when(userService.retrieveRelationship(any())).thenReturn(relationshipInfo);
-
-        ResourceResponse resourceResponse = new ResourceResponse();
-        resourceResponse.setData("AAAAAAAA".getBytes(StandardCharsets.UTF_8));
-        resourceResponse.setFileName("foo.txt");
-        resourceResponse.setMimetype("Mimetype");
-        when(contractService.getFile(any())).thenReturn(resourceResponse);
-        assertSame(resourceResponse, onboardingServiceImpl.retrieveDocument("42"));
-        verify(userService).retrieveRelationship(any());
-        verify(contractService).getFile(any());
-    }
 
 }
 

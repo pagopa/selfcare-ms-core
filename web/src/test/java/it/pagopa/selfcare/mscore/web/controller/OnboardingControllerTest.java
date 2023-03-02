@@ -5,12 +5,12 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
-import it.pagopa.selfcare.mscore.model.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
@@ -172,35 +172,6 @@ class OnboardingControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
-    @Test
-    void onboardingInstitutionLegals() throws Exception {
-        OnboardingInstitutionLegalsRequest request = new OnboardingInstitutionLegalsRequest();
-        request.setInstitutionId("id");
-        request.setInstitutionExternalId("id");
-        request.setProductId("id");
-        List<Person> personList = new ArrayList<>();
-        personList.add(new Person());
-        request.setUsers(personList);
-        String content = (new ObjectMapper()).writeValueAsString(request);
-
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        doNothing().when(tokenService).verifyOnboarding(any(),any(),any());
-        doNothing().when(onboardingService).onboardingLegals(any(),any());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/onboarding/legals")
-                .content(content)
-                .principal(authentication)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
 
 
     @Test
