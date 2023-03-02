@@ -191,11 +191,12 @@ public class OnboardingDao {
     public void updateUserProductState(OnboardedUser user, String relationshipId, List<RelationshipState> fromStates, RelationshipState toState) {
         for (UserBinding binding : user.getBindings()) {
             for (OnboardedProduct product : binding.getProducts()) {
-                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())
-                        && fromStates.contains(product.getStatus())) {
-                    userConnector.findAndUpdateState(user.getId(), binding.getInstitutionId(), product.getProductId(), toState);
-                } else {
-                    throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), product.getStatus(), toState)), INVALID_STATUS_CHANGE.getCode());
+                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())) {
+                    if (fromStates.contains(product.getStatus())) {
+                        userConnector.findAndUpdateState(user.getId(), binding.getInstitutionId(), product.getProductId(), toState);
+                    } else {
+                        throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), product.getStatus(), toState)), INVALID_STATUS_CHANGE.getCode());
+                    }
                 }
             }
         }

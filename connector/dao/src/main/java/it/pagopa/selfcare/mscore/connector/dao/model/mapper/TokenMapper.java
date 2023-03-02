@@ -2,9 +2,12 @@ package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class TokenMapper {
 
     public static TokenEntity convertToTokenEntity(Token token) {

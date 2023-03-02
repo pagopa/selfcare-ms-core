@@ -3,12 +3,15 @@ package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
 
     public static Institution convertToInstitution(InstitutionEntity entity) {
@@ -23,11 +26,21 @@ public class InstitutionMapper {
             institution.setAddress(entity.getAddress());
             institution.setZipCode(entity.getZipCode());
             institution.setTaxCode(entity.getTaxCode());
-            institution.setOnboarding(toOnboarding(entity.getOnboarding()));
-            institution.setDataProtectionOfficer(toDataProtectionOfficer(entity.getDataProtectionOfficer()));
-            institution.setPaymentServiceProvider(toPaymentServiceProvider(entity.getPaymentServiceProvider()));
-            institution.setAttributes(toAttributes(entity.getAttributes()));
-            institution.setGeographicTaxonomies(toGeographicTaxonomies(entity.getGeographicTaxonomies()));
+            if (entity.getOnboarding() != null) {
+                institution.setOnboarding(toOnboarding(entity.getOnboarding()));
+            }
+            if (entity.getDataProtectionOfficer() != null) {
+                institution.setDataProtectionOfficer(toDataProtectionOfficer(entity.getDataProtectionOfficer()));
+            }
+            if (entity.getPaymentServiceProvider() != null) {
+                institution.setPaymentServiceProvider(toPaymentServiceProvider(entity.getPaymentServiceProvider()));
+            }
+            if (entity.getAttributes() != null) {
+                institution.setAttributes(toAttributes(entity.getAttributes()));
+            }
+            if (entity.getGeographicTaxonomies() != null) {
+                institution.setGeographicTaxonomies(toGeographicTaxonomies(entity.getGeographicTaxonomies()));
+            }
             institution.setCreatedAt(entity.getCreatedAt());
             institution.setUpdatedAt(entity.getUpdatedAt());
 
@@ -49,8 +62,12 @@ public class InstitutionMapper {
             o.setStatus(onboardingEntity.getStatus());
             o.setContract(onboardingEntity.getContract());
             o.setPricingPlan(onboardingEntity.getPricingPlan());
-            o.setPremium(toPremium(onboardingEntity.getPremium()));
-            o.setBilling(toBilling(onboardingEntity.getBilling()));
+            if (onboardingEntity.getPremium() != null) {
+                o.setPremium(toPremium(onboardingEntity.getPremium()));
+            }
+            if (onboardingEntity.getBilling() != null) {
+                o.setBilling(toBilling(onboardingEntity.getBilling()));
+            }
             o.setCreatedAt(onboardingEntity.getCreatedAt());
             o.setUpdatedAt(onboardingEntity.getUpdatedAt());
             list.add(o);
@@ -124,10 +141,9 @@ public class InstitutionMapper {
         entity.setSupportPhone(institution.getSupportPhone());
         entity.setImported(institution.isImported());
 
-        if(institution.getOnboarding()!=null){
+        if (institution.getOnboarding() != null) {
             entity.setOnboarding(toOnboardingEntity(institution.getOnboarding()));
         }
-
         if (institution.getGeographicTaxonomies() != null) {
             entity.setGeographicTaxonomies(toGeoTaxonomyEntity(institution.getGeographicTaxonomies()));
         }
@@ -149,8 +165,12 @@ public class InstitutionMapper {
             o.setStatus(onboarding.getStatus());
             o.setContract(onboarding.getContract());
             o.setPricingPlan(onboarding.getPricingPlan());
-            o.setPremium(toPremiumEntity(onboarding.getPremium()));
-            o.setBilling(toBillingEntity(onboarding.getBilling()));
+            if (onboarding.getPremium() != null) {
+                o.setPremium(toPremiumEntity(onboarding.getPremium()));
+            }
+            if (onboarding.getBilling() != null) {
+                o.setBilling(toBillingEntity(onboarding.getBilling()));
+            }
             o.setCreatedAt(onboarding.getCreatedAt());
             o.setUpdatedAt(onboarding.getUpdatedAt());
             list.add(o);

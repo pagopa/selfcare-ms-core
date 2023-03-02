@@ -27,10 +27,12 @@ import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 @Slf4j
 @Component
 public class UserConnectorImpl implements UserConnector {
+
     private static final String CURRENT_PRODUCT = "current.";
     private static final String CURRENT_PRODUCT_REF = "$[current]";
     private static final String CURRENT_USER_BINDING = "currentUserBinding.";
     private static final String CURRENT_USER_BINDING_REF = "$[currentUserBinding]";
+
     private final UserRepository repository;
 
     public UserConnectorImpl(UserRepository userRepository) {

@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_RELATIONSHIP_ERROR;
 
@@ -36,7 +38,7 @@ public class UserController {
     /**
      * The function create a new User
      *
-     * @param userId String
+     * @param person Person
      *
      * @return void
      * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
@@ -44,10 +46,10 @@ public class UserController {
      *
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.person.verify}", notes = "${swagger.mscore.person.verify}")
-    @RequestMapping(method = { RequestMethod.HEAD}, value = "/persons/{id}")
-    public ResponseEntity<Person> createUser(@PathVariable(value = "id") String userId) {
-        OnboardedUser user = userService.createUser(userId);
+    @ApiOperation(value = "${swagger.mscore.person.create}", notes = "${swagger.mscore.person.create}")
+    @PostMapping("/persons")
+    public ResponseEntity<Person> createUser(@RequestBody @Valid Person person) {
+        OnboardedUser user = userService.createUser(person.getId());
         return ResponseEntity.ok().body(UserMapper.toPerson(user));
     }
 
@@ -102,7 +104,7 @@ public class UserController {
     @ApiOperation(value = "${swagger.mscore.relationship.suspend}", notes = "${swagger.mscore.relationship.suspend}")
     @PostMapping("/relationships/{relationshipId}/suspend")
     public ResponseEntity<Void> suspendRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                    @PathVariable("tokenId") String relationshipId) {
+                                                    @PathVariable("relationshipId") String relationshipId) {
         log.info("Suspending relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(SUSPEND_RELATIONSHIP_ERROR);
         userRelationshipService.suspendRelationship(relationshipId);
