@@ -1,10 +1,12 @@
 package it.pagopa.selfcare.mscore.utils;
 
 import io.micrometer.core.instrument.util.StringUtils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class MaskDataUtils {
 
     private static final int MATCHER_GROUP = 2;
@@ -20,11 +22,6 @@ public class MaskDataUtils {
     private static final Pattern PATTERN_ADDRESS = Pattern.compile(REGEX_ADDRESS);
     private static final Pattern PATTERN_PEC = Pattern.compile(REGEX_PEC);
     private static final Pattern PATTERN_TOKEN = Pattern.compile(REGEX_TOKEN);
-
-
-
-
-    private MaskDataUtils(){}
 
     public static String maskInformation(String dataBuffered){
 

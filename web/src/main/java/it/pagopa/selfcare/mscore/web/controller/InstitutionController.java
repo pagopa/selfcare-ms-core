@@ -153,7 +153,7 @@ public class InstitutionController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.update}", notes = "${swagger.mscore.institution.update}")
     @PutMapping(value = "/{id}")
-    public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.internalId}")
+    public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @PathVariable("id") String institutionId,
                                                                  @RequestBody InstitutionPut institutionPut,
                                                                  Authentication authentication) {
@@ -195,7 +195,7 @@ public class InstitutionController {
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.institution.find}", notes = "${swagger.mscore.institution.find}")
+    @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
     @GetMapping(value = "/{id}")
     public ResponseEntity<InstitutionResponse> retrieveInstitutionById(@PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);

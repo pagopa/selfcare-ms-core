@@ -291,7 +291,6 @@ class OnboardingMapperTest {
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
         onboardingInstitutionRequest.setBilling(billingRequest);
         onboardingInstitutionRequest.setContract(contractRequest);
-        onboardingInstitutionRequest.setContractImported(contractImportedRequest);
         onboardingInstitutionRequest.setInstitutionExternalId("42");
         onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdate);
         onboardingInstitutionRequest.setPricingPlan("Pricing Plan");
@@ -307,16 +306,12 @@ class OnboardingMapperTest {
         assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
-        ContractImported contractImported = actualToOnboardingRequestResult.getContractImported();
-        assertEquals("foo.txt", contractImported.getFileName());
-        assertEquals("Contract Type", contractImported.getContractType());
         Billing billingRequest1 = actualToOnboardingRequestResult.getBillingRequest();
         assertEquals("Recipient Code", billingRequest1.getRecipientCode());
         Contract contract = actualToOnboardingRequestResult.getContract();
         assertEquals("1.0.2", contract.getVersion());
         assertFalse(billingRequest1.isPublicServices());
         assertEquals("Path", contract.getPath());
-        assertEquals("/directory/foo.txt", contractImported.getFilePath());
         assertEquals("42", billingRequest1.getVatNumber());
     }
 
@@ -384,7 +379,6 @@ class OnboardingMapperTest {
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
         onboardingInstitutionRequest.setBilling(billingRequest);
         onboardingInstitutionRequest.setContract(contractRequest);
-        onboardingInstitutionRequest.setContractImported(contractImportedRequest);
         onboardingInstitutionRequest.setInstitutionExternalId("42");
         onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdate);
         onboardingInstitutionRequest.setPricingPlan("Pricing Plan");
@@ -401,16 +395,12 @@ class OnboardingMapperTest {
         assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
-        ContractImported contractImported = actualToOnboardingRequestResult.getContractImported();
-        assertEquals("foo.txt", contractImported.getFileName());
-        assertEquals("Contract Type", contractImported.getContractType());
         Billing billingRequest1 = actualToOnboardingRequestResult.getBillingRequest();
         assertEquals("Recipient Code", billingRequest1.getRecipientCode());
         Contract contract = actualToOnboardingRequestResult.getContract();
         assertEquals("1.0.2", contract.getVersion());
         assertFalse(billingRequest1.isPublicServices());
         assertEquals("Path", contract.getPath());
-        assertEquals("/directory/foo.txt", contractImported.getFilePath());
         assertEquals("42", billingRequest1.getVatNumber());
     }
 

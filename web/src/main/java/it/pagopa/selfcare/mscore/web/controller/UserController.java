@@ -141,9 +141,9 @@ public class UserController {
      * * Code: 404, Messa
      */
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.token.get}", notes = "${swagger.mscore.token.get}")
+    @ApiOperation(value = "${swagger.mscore.relationships}", notes = "${swagger.mscore.relationships}")
     @GetMapping("/relationships/{relationshipId}")
-    public ResponseEntity<RelationshipResult> getRelationship(@ApiParam("${swagger.mscore.token.relationshipId}")
+    public ResponseEntity<RelationshipResult> getRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                               @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
