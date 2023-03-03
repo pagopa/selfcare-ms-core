@@ -16,5 +16,4 @@ import java.util.List;
 public class UserBinding {
     private String institutionId;
     private List<OnboardedProduct> products;
-    private OffsetDateTime createdAt;
 }

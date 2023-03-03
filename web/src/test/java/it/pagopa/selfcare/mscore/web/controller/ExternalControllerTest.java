@@ -321,7 +321,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setIpaCode("42");
+        institution.setOriginId("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -355,7 +355,7 @@ class ExternalControllerTest {
         institution1.setId("42");
         institution1.setInstitutionType(InstitutionType.PA);
         institution1.setOnboarding(new ArrayList<>());
-        institution1.setIpaCode("42");
+        institution1.setOriginId("42");
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
@@ -428,7 +428,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(onboardingList);
-        institution.setIpaCode("42");
+        institution.setOriginId("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -462,7 +462,7 @@ class ExternalControllerTest {
         institution1.setId("42");
         institution1.setInstitutionType(InstitutionType.PA);
         institution1.setOnboarding(new ArrayList<>());
-        institution1.setIpaCode("42");
+        institution1.setOriginId("42");
         institution1.setPaymentServiceProvider(paymentServiceProvider1);
         institution1.setTaxCode("Tax Code");
         institution1.setZipCode("21654");
@@ -513,7 +513,7 @@ class ExternalControllerTest {
         institution.setDigitalAddress("17 High St");
         institution.setInstitutionType(InstitutionType.PG);
         institution.setDescription("?");
-        institution.setIpaCode("U");
+        institution.setOriginId("U");
         institution.setExternalId("?");
         institution.setId("?");
         when(externalService.retrieveInstitutionProduct(any(), any())).thenReturn(institution);
@@ -559,7 +559,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setIpaCode("42");
+        institution.setOriginId("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -617,7 +617,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setIpaCode("42");
+        institution.setOriginId("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -683,7 +683,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setIpaCode("42");
+        institution.setOriginId("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -733,7 +733,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setIpaCode("42");
+        institution.setOriginId("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
@@ -828,7 +828,7 @@ class ExternalControllerTest {
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setIpaCode("42");
+        institution.setOriginId("42");
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");

@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.utils.TokenTypeEnum;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
@@ -26,6 +27,7 @@ public class OnboardingRequest {
     private ContractImported contractImported;
 
     private boolean signContract = true;
+    private TokenTypeEnum tokenType;
 
     public Contract getContract() {
         if (InstitutionType.PG == institutionUpdate.getInstitutionType()

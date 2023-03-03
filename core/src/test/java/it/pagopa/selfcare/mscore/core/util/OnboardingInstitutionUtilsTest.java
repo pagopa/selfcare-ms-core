@@ -244,7 +244,7 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42 Main St", institution.getDigitalAddress());
         assertEquals("42", institution.getExternalId());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getIpaCode());
+                institution.getOriginId());
         assertEquals(InstitutionType.PA, institution.getInstitutionType());
         assertEquals("42", institution.getId());
         assertSame(billing, institution.getBilling());
@@ -366,7 +366,7 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42 Main St", institution.getDigitalAddress());
         assertEquals("42", institution.getExternalId());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getIpaCode());
+                institution.getOriginId());
         assertEquals(InstitutionType.PA, institution.getInstitutionType());
         assertEquals("42", institution.getId());
         assertSame(billing1, institution.getBilling());
@@ -491,7 +491,7 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42 Main St", institution.getDigitalAddress());
         assertEquals("42", institution.getExternalId());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getIpaCode());
+                institution.getOriginId());
         assertEquals(InstitutionType.PA, institution.getInstitutionType());
         assertEquals("42", institution.getId());
         assertSame(billing1, institution.getBilling());
@@ -730,7 +730,7 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42 Main St", institution.getDigitalAddress());
         assertEquals("42", institution.getExternalId());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getIpaCode());
+                institution.getOriginId());
         assertEquals(InstitutionType.PA, institution.getInstitutionType());
         assertEquals("42", institution.getId());
         assertSame(billing2, institution.getBilling());

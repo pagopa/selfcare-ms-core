@@ -76,11 +76,11 @@ public class OnboardingInstitutionUtils {
         log.info("END - validateOverridingData without error");
     }
 
-    public static Token convertToToken(OnboardingRequest request, Institution institution, String digest) {
+    public static Token convertToToken(OnboardingRequest request, Institution institution, String digest, OffsetDateTime expiringDate) {
         log.info("START - convertToToken for institution having externalId: {} and digest: {}", institution.getExternalId(), digest);
         Token token = new Token();
         if (request.getContract() != null) {
-            token.setContract(request.getContract().getPath());
+            token.setContractTemplate(request.getContract().getPath());
         }
         token.setCreatedAt(OffsetDateTime.now());
         token.setInstitutionId(institution.getId());
@@ -90,10 +90,18 @@ public class OnboardingInstitutionUtils {
             token.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         }
 
-        token.setUsers(request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList()));
-        //TODO: TTL SUL TOKEN IN STATO PENDING? token.setExpiringDate();
+        token.setUsers(request.getUsers().stream().map(OnboardingInstitutionUtils::toTokenUser).collect(Collectors.toList()));
+        token.setExpiringDate(expiringDate);
+        token.setType(request.getTokenType());
         log.info("END - convertToToken");
         return token;
+    }
+
+    public static TokenUser toTokenUser(UserToOnboard userToOnboard) {
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId(userToOnboard.getId());
+        tokenUser.setRole(userToOnboard.getRole());
+        return tokenUser;
     }
 
     public static OnboardedProduct constructOperatorProduct(UserToOnboard user, OnboardingOperatorsRequest request) {
@@ -101,7 +109,7 @@ public class OnboardingInstitutionUtils {
         onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
         onboardedProduct.setProductId(request.getProductId());
         onboardedProduct.setRole(user.getRole());
-        onboardedProduct.setProductRoles(user.getProductRole());
+        onboardedProduct.setProductRole(user.getProductRole());
         onboardedProduct.setStatus(RelationshipState.ACTIVE);
         onboardedProduct.setCreatedAt(OffsetDateTime.now());
         if (user.getEnv() != null) {
@@ -120,7 +128,7 @@ public class OnboardingInstitutionUtils {
         if (request.getContract() != null) {
             onboardedProduct.setContract(request.getContract().getPath());
         }
-        onboardedProduct.setProductRoles(p.getProductRole());
+        onboardedProduct.setProductRole(p.getProductRole());
         if (request.getInstitutionUpdate() != null) {
             onboardedProduct.setStatus(retrieveStatusFromInstitutionType(request.getInstitutionUpdate().getInstitutionType()));
         }
@@ -207,7 +215,7 @@ public class OnboardingInstitutionUtils {
         onboardingRequest.setProductId(token.getProductId());
         onboardingRequest.setProductName(token.getProductId());
         Contract contract = new Contract();
-        contract.setPath(token.getContract());
+        contract.setPath(token.getContractTemplate());
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setDescription(institution.getDescription());
         onboardingRequest.setInstitutionUpdate(institutionUpdate);

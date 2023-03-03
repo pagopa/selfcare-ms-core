@@ -25,7 +25,7 @@ public class Person {
     private String surname;
     private String email;
     private PartyRole role;
-    private List<String> productRole;
+    private String productRole;
     private EnvEnum env = EnvEnum.ROOT;
 
     public Person(String id) {

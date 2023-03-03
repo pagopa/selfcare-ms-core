@@ -4,7 +4,6 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserMapper;
-import it.pagopa.selfcare.mscore.constant.CustomErrorEnum;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -120,6 +119,7 @@ public class UserConnectorImpl implements UserConnector {
                         .and(UserBinding.Fields.products.name())
                         .elemMatch(Criteria.where(OnboardedProduct.Fields.productId.name()).is(productId)
                                 .and(OnboardedProduct.Fields.role.name()).is(PartyRole.MANAGER)
+                                .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT)
                                 .and(OnboardedProduct.Fields.status.name()).in(state))));
 
         return repository.find(query, UserEntity.class).stream()
@@ -192,7 +192,7 @@ public class UserConnectorImpl implements UserConnector {
             criteria = criteria.and(OnboardedProduct.Fields.productId.name()).in(products);
         }
         if (!productRoles.isEmpty()) {
-            criteria = criteria.and(OnboardedProduct.Fields.productRoles.name()).in(productRoles);
+            criteria = criteria.and(OnboardedProduct.Fields.productRole.name()).in(productRoles);
         }
         return criteria;
     }

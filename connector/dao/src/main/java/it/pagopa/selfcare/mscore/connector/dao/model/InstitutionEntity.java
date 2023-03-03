@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao.model;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
@@ -19,7 +20,8 @@ public class InstitutionEntity {
     private String id;
     private String externalId;
     private String description;
-    private String ipaCode;
+    private OriginEnum origin;
+    private String originId;
     private InstitutionType institutionType;
     private String digitalAddress;
     private String address;

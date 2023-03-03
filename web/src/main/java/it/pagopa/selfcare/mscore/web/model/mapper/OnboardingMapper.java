@@ -67,7 +67,7 @@ public class OnboardingMapper {
         OnboardedInstitutionResponse institutionResponse = new OnboardedInstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setOriginId(institution.getIpaCode());
+        institutionResponse.setOriginId(institution.getOriginId());
         institutionResponse.setDescription(institution.getDescription());
         institutionResponse.setInstitutionType(institution.getInstitutionType());
         institutionResponse.setDigitalAddress(institution.getDigitalAddress());
@@ -80,7 +80,7 @@ public class OnboardingMapper {
         Billing billing = InstitutionMapper.getBillingFromOnboarding(onboarding, institution);
         institutionResponse.setBilling(billing);
         ProductInfo productInfo = new ProductInfo();
-        productInfo.setRoles(product.getProductRoles());
+        productInfo.setRole(product.getProductRole());
         productInfo.setId(product.getProductId());
         productInfo.setCreatedAt(product.getCreatedAt());
         institutionResponse.setState(product.getStatus().name());

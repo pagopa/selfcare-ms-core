@@ -4,6 +4,7 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.INVALID_STATUS_CHANGE;
@@ -35,18 +37,21 @@ public class OnboardingDao {
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
     private final ProductConnector productConnector;
-
+    private final CoreConfig coreConfig;
     public OnboardingDao(InstitutionConnector institutionConnector,
                          TokenConnector tokenConnector,
-                         UserConnector userConnector, ProductConnector productConnector) {
+                         UserConnector userConnector,
+                         ProductConnector productConnector,
+                         CoreConfig coreConfig) {
         this.institutionConnector = institutionConnector;
         this.tokenConnector = tokenConnector;
         this.userConnector = userConnector;
         this.productConnector = productConnector;
+        this.coreConfig = coreConfig;
     }
 
     public OnboardingRollback persist(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies, String digest) {
-        Token token = createToken(request, institution, digest);
+        Token token = createToken(request, institution, digest, coreConfig.getExpiringDate());
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
         Onboarding onboarding = updateInstitution(request, institution, geographicTaxonomies, token);
         Map<String, OnboardedProduct> productMap = createUsers(toUpdate, toDelete, request, institution.getId(), token.getId(), onboarding);
@@ -63,14 +68,14 @@ public class OnboardingDao {
         }
     }
 
-    public void updateUsers(List<String> userList, Institution institution, Token token, RelationshipState state) {
+    public void updateUsers(List<TokenUser> userList, Institution institution, Token token, RelationshipState state) {
         log.info("update {} users state from {} to {} for product {}", userList.size(), token.getStatus(), state, token.getProductId());
         List<String> toUpdate = new ArrayList<>();
-        userList.forEach(userId -> {
+        userList.forEach(tokenUser -> {
             try {
-                userConnector.findAndUpdateState(userId, institution.getId(), token.getProductId(), state);
-                toUpdate.add(userId);
-                log.debug("updated user {}", userId);
+                userConnector.findAndUpdateState(tokenUser.getUserId(), institution.getId(), token.getProductId(), state);
+                toUpdate.add(tokenUser.getUserId());
+                log.debug("updated user {}", tokenUser.getUserId());
             } catch (Exception e) {
                 rollbackSecondStepOfUpdate(toUpdate, institution, token);
             }
@@ -92,13 +97,15 @@ public class OnboardingDao {
         tokenConnector.findAndUpdateToken(token.getId(), state, digest);
     }
 
-    private Token createToken(OnboardingRequest request, Institution institution, String digest) {
+    private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire) {
         log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
-        return tokenConnector.save(convertToToken(request, institution, digest));
+        OffsetDateTime expiringDate = OffsetDateTime.now().plus(expire, TimeUnit.DAYS.toChronoUnit());
+        return tokenConnector.save(convertToToken(request, institution, digest, expiringDate));
     }
 
     private Onboarding updateInstitution(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies, Token token) {
         Onboarding onboarding = constructOnboarding(request);
+        onboarding.setTokenId(token.getId());
         try {
             log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
             institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
@@ -115,10 +122,10 @@ public class OnboardingDao {
             for (UserToOnboard userToOnboard : request.getUsers()) {
                 OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
                 if (onboardedUser != null) {
-                    OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institutionId, request);
+                    OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institutionId, request, tokenId);
                     productMap.put(userToOnboard.getId(), currentProduct);
                 } else {
-                    createNewUser(userToOnboard, institutionId, request);
+                    createNewUser(userToOnboard, institutionId, request, tokenId);
                 }
             }
             log.debug("users to update: {}", toUpdate);
@@ -129,15 +136,17 @@ public class OnboardingDao {
         return productMap;
     }
 
-    private void createNewUser(UserToOnboard user, String institutionId, OnboardingRequest request) {
+    private void createNewUser(UserToOnboard user, String institutionId, OnboardingRequest request, String tokenId) {
         OnboardedProduct product = constructProduct(user, request);
-        UserBinding binding = new UserBinding(institutionId, List.of(product), OffsetDateTime.now());
+        product.setTokenId(tokenId);
+        UserBinding binding = new UserBinding(institutionId, List.of(product));
         userConnector.findAndCreate(user.getId(), binding);
     }
 
-    private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, String institutionId, OnboardingRequest request) {
+    private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, String institutionId, OnboardingRequest request, String tokenId) {
         OnboardedProduct product = constructProduct(user, request);
-        UserBinding binding = new UserBinding(institutionId, List.of(product), OffsetDateTime.now());
+        product.setTokenId(tokenId);
+        UserBinding binding = new UserBinding(institutionId, List.of(product));
         userConnector.findAndUpdate(onboardedUser, user.getId(), institutionId, product, binding);
         return product;
     }
@@ -246,14 +255,14 @@ public class OnboardingDao {
 
     private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
         OnboardedProduct product = constructOperatorProduct(user, request);
-        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product), OffsetDateTime.now());
+        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
         userConnector.findAndCreate(user.getId(), binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
     }
 
     private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
         OnboardedProduct product = constructOperatorProduct(user, request);
-        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product), OffsetDateTime.now());
+        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
         userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
         return product;

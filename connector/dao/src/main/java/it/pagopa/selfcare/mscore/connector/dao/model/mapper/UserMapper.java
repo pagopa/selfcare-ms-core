@@ -18,7 +18,6 @@ public class UserMapper {
     public static OnboardedUser toOnboardedUser(UserEntity entity) {
         OnboardedUser user = new OnboardedUser();
         user.setId(entity.getId());
-        user.setUpdatedAt(entity.getUpdatedAt());
         user.setCreatedAt(entity.getCreatedAt());
         if (entity.getBindings() != null) {
             user.setBindings(toBindings(entity.getBindings()));
@@ -31,7 +30,6 @@ public class UserMapper {
         for (UserBindingEntity entity : bindings) {
             UserBinding binding = new UserBinding();
             binding.setInstitutionId(entity.getInstitutionId());
-            binding.setCreatedAt(entity.getCreatedAt());
             if (entity.getProducts() != null) {
                 binding.setProducts(toOnboardedProduct(entity.getProducts()));
             }
@@ -45,7 +43,7 @@ public class UserMapper {
         for (OnboardedProductEntity entity : products) {
             OnboardedProduct product = new OnboardedProduct();
             product.setProductId(entity.getProductId());
-            product.setProductRoles(entity.getProductRoles());
+            product.setProductRole(entity.getProductRole());
             product.setRole(entity.getRole());
             product.setStatus(entity.getStatus());
             product.setEnv(entity.getEnv());

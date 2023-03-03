@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
-
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -15,5 +13,4 @@ import java.util.List;
 public class UserBindingEntity {
     private String institutionId;
     private List<OnboardedProductEntity> products;
-    private OffsetDateTime createdAt;
 }

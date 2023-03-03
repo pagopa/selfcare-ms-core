@@ -20,7 +20,7 @@ public class InstitutionMapper {
         InstitutionResponse institutionResponse = new InstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setOriginId(institution.getIpaCode());
+        institutionResponse.setOriginId(institution.getOriginId());
         institutionResponse.setDescription(institution.getDescription());
         institutionResponse.setInstitutionType(institution.getInstitutionType());
         institutionResponse.setDigitalAddress(institution.getDigitalAddress());
@@ -64,7 +64,7 @@ public class InstitutionMapper {
 
         response.setInstitutionId(institution.getId());
         response.setExternalId(institution.getExternalId());
-        response.setOriginId(institution.getIpaCode());
+        response.setOriginId(institution.getOriginId());
         response.setDescription(institution.getDescription());
         response.setInstitutionType(institution.getInstitutionType());
         response.setDigitalAddress(institution.getDigitalAddress());
@@ -109,7 +109,7 @@ public class InstitutionMapper {
                 ProductInfo productInfo = new ProductInfo();
                 productInfo.setId(productId);
                 productInfo.setCreatedAt(product.getCreatedAt());
-                productInfo.setRoles(product.getProductRoles());
+                productInfo.setRole(product.getProductRole());
                 institutionManagerResponse.setProduct(productInfo);
                 institutionManagerResponse.setState(product.getStatus());
                 institutionManagerResponse.setCreatedAt(product.getCreatedAt());

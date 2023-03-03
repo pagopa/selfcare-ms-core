@@ -14,6 +14,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -70,11 +71,12 @@ public class InstitutionServiceImpl implements InstitutionService {
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(externalId);
         newInstitution.setInstitutionType(InstitutionType.PA);
+        newInstitution.setOrigin(OriginEnum.IPA);
+        newInstitution.setOriginId(institutionProxyInfo.getOriginId());
         newInstitution.setTaxCode(institutionProxyInfo.getTaxCode());
         newInstitution.setAddress(institutionProxyInfo.getAddress());
         newInstitution.setZipCode(institutionProxyInfo.getZipCode());
 
-        newInstitution.setIpaCode(institutionProxyInfo.getOriginId());
         newInstitution.setDescription(institutionProxyInfo.getDescription());
         newInstitution.setDigitalAddress(institutionProxyInfo.getDigitalAddress());
 
@@ -97,6 +99,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
+        newInstitution.setOrigin(OriginEnum.INFOCAMERE);
+        newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
         if (existsInRegistry) {
@@ -122,6 +126,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (institution.getInstitutionType() == null) {
             institution.setInstitutionType(InstitutionType.UNKNOWN);
         }
+        institution.setOrigin(OriginEnum.SELC);
+        institution.setOriginId("SELC_" + institution.getExternalId());
         institution.setCreatedAt(OffsetDateTime.now());
         return institutionConnector.save(institution);
     }

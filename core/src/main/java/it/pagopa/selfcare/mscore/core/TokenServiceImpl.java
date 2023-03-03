@@ -5,16 +5,19 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.CONTRACT_NOT_FOUND;
 
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
+import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.toTokenUser;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.VERIFY_TOKEN_RELATIONSHIP_STATES;
 
 @Slf4j
@@ -46,7 +49,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public TokenRelationships getToken(String tokenId) {
         Token token = tokenConnector.findById(tokenId);
-        List<OnboardedUser> users = userService.findAllByIds(token.getUsers());
+        List<OnboardedUser> users = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
         return toTokenRelationships(token, users);
     }
 

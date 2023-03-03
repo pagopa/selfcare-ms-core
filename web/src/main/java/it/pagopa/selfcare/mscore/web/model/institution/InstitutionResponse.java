@@ -12,6 +12,7 @@ public class InstitutionResponse {
 
     private String id;
     private String externalId;
+    private String origin;
     private String originId;
     private String description;
     private InstitutionType institutionType;

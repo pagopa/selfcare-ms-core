@@ -11,10 +11,11 @@ import java.time.OffsetDateTime;
 public class OnboardingEntity {
     private String productId;
     private RelationshipState status;
+    private String tokenId;
     private String contract;
     private String pricingPlan;
-    private PremiumEntity premium;
     private BillingEntity billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private OffsetDateTime closedAt;
 }

@@ -5,9 +5,7 @@ import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
-
 import java.time.OffsetDateTime;
-import java.util.List;
 
 import static it.pagopa.selfcare.mscore.model.EnvEnum.ROOT;
 
@@ -16,9 +14,10 @@ import static it.pagopa.selfcare.mscore.model.EnvEnum.ROOT;
 public class OnboardedProductEntity {
     private String relationshipId;
     private String productId;
+    private String tokenId;
     private RelationshipState status;
     private String contract;
-    private List<String> productRoles;
+    private String productRole;
     private PartyRole role;
     private EnvEnum env = ROOT;
     private OffsetDateTime createdAt;

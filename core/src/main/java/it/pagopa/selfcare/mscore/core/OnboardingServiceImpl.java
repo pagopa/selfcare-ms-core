@@ -17,6 +17,7 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.utils.TokenTypeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -93,6 +94,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
+        request.setTokenType(TokenTypeEnum.INSTITUTION);
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, request);
         OnboardingInstitutionUtils.validateOverridingData(request.getInstitutionUpdate(), institution);
@@ -134,7 +136,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void completeOboarding(Token token, MultipartFile contract) {
-        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers());
+        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
         List<String> managerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
         List<User> managersData = managerList
                 .stream()
@@ -153,7 +155,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Onboarding Approve having tokenId {}", token.getId());
         User currentUser = userService.getUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
 
-        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers());
+        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
         List<String> validManagerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
         User manager = userService.getUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
@@ -172,7 +174,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         try {
             emailService.sendMail(pdf, institution, currentUser, request, true);
         } catch (Exception e) {
-            onboardingDao.rollbackSecondStepOfUpdate(token.getUsers(), institution, token);
+            onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
     }
 

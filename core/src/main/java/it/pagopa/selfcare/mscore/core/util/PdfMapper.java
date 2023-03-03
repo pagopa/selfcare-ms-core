@@ -31,7 +31,7 @@ public class PdfMapper {
             map.put("zipCode", institution.getZipCode());
             map.put("managerName", validManager.getName());
             map.put("managerSurname", validManager.getFamilyName());
-            map.put("originId", institution.getIpaCode()!=null ? institution.getIpaCode():"");
+            map.put("originId", institution.getOriginId()!=null ? institution.getOriginId():"");
             map.put("institutionMail", institution.getDigitalAddress());
             map.put("managerTaxCode", validManager.getFiscalCode());
             map.put("managerEmail", validManager.getEmail());

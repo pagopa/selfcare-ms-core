@@ -127,7 +127,7 @@ class InstitutionControllerTest {
         institution.setGeographicTaxonomies(new ArrayList<>());
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
-        institution.setIpaCode("Ipa Code");
+        institution.setOriginId("Ipa Code");
         institution.setOnboarding(new ArrayList<>());
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
@@ -191,7 +191,7 @@ class InstitutionControllerTest {
         institution.setGeographicTaxonomies(new ArrayList<>());
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
-        institution.setIpaCode("Ipa Code");
+        institution.setOriginId("Ipa Code");
         institution.setOnboarding(new ArrayList<>());
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
@@ -273,7 +273,7 @@ class InstitutionControllerTest {
         institution.setGeographicTaxonomies(new ArrayList<>());
         institution.setId("42");
         institution.setInstitutionType(InstitutionType.PA);
-        institution.setIpaCode("Ipa Code");
+        institution.setOriginId("Ipa Code");
         institution.setOnboarding(new ArrayList<>());
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");

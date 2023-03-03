@@ -18,7 +18,7 @@ public class RelationshipMapper {
     public static RelationshipResponse toRelationshipResult(Token token, Institution institution) {
         RelationshipResponse response = new RelationshipResponse();
         response.setId(token.getId());
-        response.setFrom(token.getUsers());
+       // response.setFrom(token.getUsers());
         response.setProduct(token.getProductId());
         response.setState(token.getStatus());
         response.setCreatedAt(token.getCreatedAt());
@@ -50,7 +50,7 @@ public class RelationshipMapper {
             ProductInfo productInfo = new ProductInfo();
             productInfo.setId(info.getOnboardedProduct().getProductId());
             productInfo.setCreatedAt(info.getOnboardedProduct().getCreatedAt());
-            productInfo.setRoles(info.getOnboardedProduct().getProductRoles());
+            productInfo.setRole(info.getOnboardedProduct().getProductRole());
 
             relationshipResult.setProduct(productInfo);
         }

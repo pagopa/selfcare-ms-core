@@ -14,5 +14,4 @@ public class OnboardedUser {
     private String id;
     private List<UserBinding> bindings;
     private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
 }
