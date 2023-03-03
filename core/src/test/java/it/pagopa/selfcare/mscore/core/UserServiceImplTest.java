@@ -30,6 +30,18 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
+    @Test
+    void findAllByIds(){
+        when(userConnector.findAllByIds(any())).thenReturn(new ArrayList<>());
+        assertNotNull(userServiceImpl.findAllByIds(new ArrayList<>()));
+    }
+
+    @Test
+    void createUser(){
+        when(userConnector.findAndCreate(any(),any())).thenReturn(new OnboardedUser());
+        assertNotNull(userServiceImpl.createUser("42"));
+    }
+
     /**
      * Method under test: {@link UserServiceImpl#findOnboardedManager(String, String, List)}
      */

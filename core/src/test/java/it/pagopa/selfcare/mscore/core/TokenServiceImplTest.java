@@ -26,6 +26,16 @@ class TokenServiceImplTest {
     @InjectMocks
     private TokenServiceImpl tokenServiceImpl;
 
+    @Mock
+    private UserService userService;
+
+    @Test
+    void getToken(){
+        when(tokenConnector.findById(any())).thenReturn(new Token());
+        when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
+        assertNotNull(tokenServiceImpl.getToken("id"));
+    }
+
     /**
      * Method under test: {@link TokenServiceImpl#findActiveContract(String, String, String)}
      */
