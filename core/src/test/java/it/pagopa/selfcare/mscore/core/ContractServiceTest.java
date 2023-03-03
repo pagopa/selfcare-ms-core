@@ -9,7 +9,6 @@ import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
@@ -162,9 +161,6 @@ class ContractServiceTest {
         when(fileStorageConnector.getTemplateFile(any())).thenThrow(ioException);
         assertThrows(InvalidRequestException.class, () -> contractService.getLogoFile());
     }
-    @Mock
-    private CoreConfig coreConfig;
-
 
     @Test
     void extractTemplate(){
