@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,37 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class OnboardingInstitutionUtilsTest {
+
+    @Test
+    void getOnboardedValidManager(){
+        OnboardedUser user = new OnboardedUser();
+        UserBinding userBinding = new UserBinding();
+        List<UserBinding> userBindings = new ArrayList<>();
+        userBindings.add(userBinding);
+        user.setBindings(userBindings);
+        List<OnboardedUser> users = new ArrayList<>();
+        users.add(user);
+        assertThrows(InvalidRequestException.class, () -> OnboardingInstitutionUtils.getOnboardedValidManager(users,"id","id"));
+    }
+
+    @Test
+    void getOnboardedValidManager2(){
+        OnboardedUser user = new OnboardedUser();
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("id");
+        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("id");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProducts.add(onboardedProduct);
+        userBinding.setProducts(onboardedProducts);
+        List<UserBinding> userBindings = new ArrayList<>();
+        userBindings.add(userBinding);
+        user.setBindings(userBindings);
+        List<OnboardedUser> users = new ArrayList<>();
+        users.add(user);
+        assertNotNull(OnboardingInstitutionUtils.getOnboardedValidManager(users,"id","id"));
+    }
 
 
     /**

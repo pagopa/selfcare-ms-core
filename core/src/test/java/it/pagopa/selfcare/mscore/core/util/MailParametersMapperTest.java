@@ -35,8 +35,10 @@ class MailParametersMapperTest {
         when(mailTemplateConfig.getConfirmTokenName()).thenReturn("confirmTokenName");
         when(mailTemplateConfig.getConfirmTokenPlaceholder()).thenReturn("confirmTokenPlaceholder");
         User user = new User();
-        user.setName(new CertifiedField<>());
-        user.setFamilyName(new CertifiedField<>());
+        CertifiedField<String> certifiedField = new CertifiedField();
+        certifiedField.setValue("val");
+        user.setName(certifiedField);
+        user.setFamilyName(certifiedField);
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("productId");
         Map<String, String> map = mailParametersMapper.getOnboardingMailParameter(user, request);
@@ -55,8 +57,10 @@ class MailParametersMapperTest {
         when(mailTemplateConfig.getConfirmTokenPlaceholder()).thenReturn("confirmTokenPlaceholder");
         when(mailTemplateConfig.getInstitutionDescription()).thenReturn("institutionDescription");
         User user = new User();
-        user.setName(new CertifiedField<>());
-        user.setFamilyName(new CertifiedField<>());
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setValue("42");
+        user.setName(certifiedField);
+        user.setFamilyName(certifiedField);
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("productId");
         request.setInstitutionUpdate(new InstitutionUpdate());

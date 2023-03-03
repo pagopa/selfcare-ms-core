@@ -385,6 +385,14 @@ class PartyRegistryProxyConnectorImplTest {
         verify(partyRegistryProxyRestClient).getInstitutionsByLegal(any());
     }
 
+    @Test
+    void testGetInstitutionsByLegal10() {
+        InstitutionsByLegalResponse response = new InstitutionsByLegalResponse();
+        when(partyRegistryProxyRestClient.getInstitutionsByLegal(any())).thenReturn(response);
+        assertNotNull(partyRegistryProxyConnectorImpl.getInstitutionsByLegal("42"));
+    }
+
+
     /**
      * Method under test: {@link PartyRegistryProxyConnectorImpl#getLegalAddress(String)}
      */

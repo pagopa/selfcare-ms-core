@@ -173,6 +173,20 @@ class UserConnectorImplTest {
                 any());
     }
 
+    @Test
+    void testFindAndCreate3() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(new ArrayList<>());
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.findAndModify(any(), any(), any(),
+                any())).thenReturn(userEntity);
+        userConnectorImpl.findAndCreate("42", null);
+        verify(userRepository).findAndModify(any(), any(), any(),
+                any());
+    }
+
     /**
      * Method under test: {@link UserConnectorImpl#findOnboardedManager(String, String, List)}
      */
