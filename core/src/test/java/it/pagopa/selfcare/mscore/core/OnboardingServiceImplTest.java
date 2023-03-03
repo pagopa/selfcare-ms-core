@@ -1,7 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
+import eu.europa.esig.dss.model.DSSDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.EnvEnum;
@@ -9,17 +11,16 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
-import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
+import it.pagopa.selfcare.mscore.model.user.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -51,6 +52,76 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserService userService;
+
+    @Test
+    void approveOnboarding(){
+        Token token = new Token();
+        token.setInstitutionId("id");
+        token.setProductId("id");
+        when(userService.getUserFromUserRegistry(any(),any())).thenReturn(new User());
+        SelfCareUser selfCareUser = mock(SelfCareUser.class);
+
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("id");
+        OnboardedUser user = new OnboardedUser();
+        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("id");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProducts.add(onboardedProduct);
+        userBinding.setProducts(onboardedProducts);
+        List<UserBinding> userBindings = new ArrayList<>();
+        userBindings.add(userBinding);
+        user.setBindings(userBindings);
+        List<OnboardedUser> users = new ArrayList<>();
+        users.add(user);
+
+        when(userService.findAllByIds(any())).thenReturn(users);
+        when(userService.getUserFromUserRegistry(any(),any())).thenReturn(new User());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(onboardingDao.getProductById(any())).thenReturn(new Product());
+        when(contractService.extractTemplate(any())).thenReturn("42");
+        File file = mock(File.class);
+        when(contractService.createContractPDF(any(),any(),any(),any(),any(),any())).thenReturn(file);
+        when(file.getName()).thenReturn("42");
+        when(file.exists()).thenReturn(true);
+        DSSDocument document = mock(DSSDocument.class);
+        when(document.getDigest(any())).thenReturn("42");
+        assertThrows(NullPointerException.class, () -> onboardingServiceImpl.approveOnboarding(token,selfCareUser));
+        assertNotNull(token);
+    }
+
+
+    @Test
+    void completeOboarding(){
+        Token token = new Token();
+        token.setInstitutionId("id");
+        token.setProductId("id");
+        MultipartFile file = mock(MultipartFile.class);
+        File file1 = mock(File.class);
+        OnboardedUser user = new OnboardedUser();
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("id");
+        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("id");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProducts.add(onboardedProduct);
+        userBinding.setProducts(onboardedProducts);
+        List<UserBinding> userBindings = new ArrayList<>();
+        userBindings.add(userBinding);
+        user.setBindings(userBindings);
+        List<OnboardedUser> users = new ArrayList<>();
+        users.add(user);
+        when(userService.findAllByIds(any())).thenReturn(users);
+        when(userService.getUserFromUserRegistry(any(),any())).thenReturn(new User());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(onboardingDao.getProductById(any())).thenReturn(new Product());
+        doNothing().when(contractService).verifySignature(any(),any(),any());
+        when(contractService.getLogoFile()).thenReturn(file1);
+        onboardingServiceImpl.completeOboarding(token,file);
+        assertNotNull(token);
+    }
 
 
     /**
