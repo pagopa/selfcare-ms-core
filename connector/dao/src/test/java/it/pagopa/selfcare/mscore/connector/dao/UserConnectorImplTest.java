@@ -99,13 +99,12 @@ class UserConnectorImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("role");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
         userBinding.setInstitutionId("42");
         userBinding.setProducts(new ArrayList<>());
 
@@ -133,13 +132,12 @@ class UserConnectorImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("role");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
         userBinding.setInstitutionId("42");
         userBinding.setProducts(new ArrayList<>());
 
@@ -353,7 +351,7 @@ class UserConnectorImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("role");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -377,7 +375,7 @@ class UserConnectorImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("role");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);

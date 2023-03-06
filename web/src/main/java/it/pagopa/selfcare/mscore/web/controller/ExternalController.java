@@ -17,6 +17,7 @@ import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
+import it.pagopa.selfcare.mscore.web.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -148,11 +149,13 @@ public class ExternalController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.external.geotaxonomies}", notes = "${swagger.mscore.external.geotaxonomies}")
     @GetMapping(value = "/{externalId}/geotaxonomies")
-    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId) {
+    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId,
+                                                                                                   @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
+                                                                                                   @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber) {
 
         CustomExceptionMessage.setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
         List<GeographicTaxonomies> list = externalService.retrieveInstitutionGeoTaxonomiesByExternalId(externalId);
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(PaginationUtils.paginate(list,pageSize,pageNumber));
     }
 
     /**
@@ -174,11 +177,13 @@ public class ExternalController {
                                                                                                 @RequestParam(value = "states", required = false) List<RelationshipState> states,
                                                                                                 @RequestParam(value = "products", required = false) List<String> products,
                                                                                                 @RequestParam(value = "productRoles", required = false) List<String> productRoles,
+                                                                                                @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
+                                                                                                @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber,
                                                                                                 Authentication authentication) {
         log.info("Getting relationship for institution {} and current user", externalId);
         CustomExceptionMessage.setCustomMessage(RETRIEVING_USER_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = externalService.getUserInstitutionRelationships(externalId, selfCareUser.getId(), personId, roles, states, products, productRoles);
-        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
+        return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(response),pageSize,pageNumber));
     }
 }

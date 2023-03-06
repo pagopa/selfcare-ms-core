@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -56,7 +55,7 @@ class UserControllerTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(List.of("Product Role"));
+        person.setProductRole("Product Role");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");

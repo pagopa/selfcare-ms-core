@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -231,9 +232,9 @@ class EmailServiceTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setContract("Contract");
+        
         token.setCreatedAt(null);
-        token.setExpiringDate("2020-03-01");
+        token.setExpiringDate(OffsetDateTime.now());
         token.setId("42");
         token.setInstitutionId("42");
         token.setProductId("42");
@@ -267,9 +268,9 @@ class EmailServiceTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setContract("Contract");
+        
         token.setCreatedAt(null);
-        token.setExpiringDate("2020-03-01");
+        token.setExpiringDate(OffsetDateTime.now());
         token.setId("42");
         token.setInstitutionId("42");
         token.setProductId("42");

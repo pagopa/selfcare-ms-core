@@ -733,20 +733,21 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testCreateInstitutionRaw6() {
-        Institution institution = new Institution();
-        when(institutionConnector.save(any())).thenReturn(institution);
+        Institution institution1 = new Institution();
+        when(institutionConnector.save(any())).thenReturn(institution1);
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42",
-                "START - check institution {} already exists", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
-                billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
-                null, null, "START - check institution {} already exists", "START - check institution {} already exists",
-                "START - check institution {} already exists", "jane.doe@example.org", "4105551212", true), "42"));
+        Institution institution = new Institution();
+        institution.setBilling(billing);
+        institution.setOnboarding(onboarding);
+        institution.setGeographicTaxonomies(geographicTaxonomies);
+        institution.setAttributes(attributes);
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        assertSame(institution1, institutionServiceImpl.createInstitutionRaw(institution, "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
     }
@@ -772,20 +773,21 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testCreateInstitutionRaw9() {
-        Institution institution = new Institution();
-        when(institutionConnector.save(any())).thenReturn(institution);
+        Institution institution1 = new Institution();
+        when(institutionConnector.save(any())).thenReturn(institution1);
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42",
-                "START - check institution {} already exists", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
-                billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
-                null, null, "START - check institution {} already exists", "START - check institution {} already exists",
-                "START - check institution {} already exists", "jane.doe@example.org", "4105551212", true), "42"));
+        Institution institution = new Institution();
+        institution.setBilling(billing);
+        institution.setOnboarding(onboarding);
+        institution.setGeographicTaxonomies(geographicTaxonomies);
+        institution.setAttributes(attributes);
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        assertSame(institution1, institutionServiceImpl.createInstitutionRaw(institution, "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
     }

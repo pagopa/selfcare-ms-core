@@ -47,7 +47,7 @@ class InstitutionControllerTest {
         Institution institution = new Institution();
         institution.setId("id");
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(institutionService.getUserInstitutionRelationships(any(),any(),any(),any(),any(),any(),any())).thenReturn(new ArrayList<>());
+        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = get("/institutions/{id}/relationships", "42")
                 .principal(authentication);
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
@@ -154,8 +154,6 @@ class InstitutionControllerTest {
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
-
-
 
 
     /**
@@ -498,7 +496,6 @@ class InstitutionControllerTest {
         onboarding.setBilling(billing);
         onboarding.setContract("?");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("?");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -535,7 +532,6 @@ class InstitutionControllerTest {
         onboarding.setBilling(billing);
         onboarding.setContract("?");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("?");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -554,7 +550,7 @@ class InstitutionControllerTest {
         onboarding1.setBilling(billing1);
         onboarding1.setContract("?");
         onboarding1.setCreatedAt(null);
-        onboarding1.setPremium(premium1);
+
         onboarding1.setPricingPlan("?");
         onboarding1.setProductId("42");
         onboarding1.setStatus(RelationshipState.PENDING);
@@ -587,7 +583,7 @@ class InstitutionControllerTest {
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/institutions/pg/42")
-                .queryParam("existsInRegistry","true")
+                .queryParam("existsInRegistry", "true")
                 .principal(authentication);
 
         MockMvcBuilders.standaloneSetup(institutionController)

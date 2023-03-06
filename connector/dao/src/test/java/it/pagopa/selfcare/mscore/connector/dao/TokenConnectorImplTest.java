@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +40,7 @@ class TokenConnectorImplTest {
     void findActiveContractTest() {
         TokenEntity token = new TokenEntity();
         token.setId("507f1f77bcf86cd799439011");
+        token.setUsers(new ArrayList<>());
         when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
         Token tokenResp = tokenConnectorImpl.findActiveContract("42", "42", "42");
         Assertions.assertEquals("507f1f77bcf86cd799439011", tokenResp.getId());
@@ -57,6 +59,8 @@ class TokenConnectorImplTest {
         token.setId("507f1f77bcf86cd799439011");
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setId("507f1f77bcf86cd799439011");
+        tokenEntity.setUsers(new ArrayList<>());
+        token.setUsers(new ArrayList<>());
         when(tokenRepository.save(any())).thenReturn(tokenEntity);
         Token response = tokenConnectorImpl.save(token);
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
@@ -68,6 +72,8 @@ class TokenConnectorImplTest {
         token.setProductId("507f1f77bcf86cd799439011");
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setProductId("507f1f77bcf86cd799439011");
+        tokenEntity.setUsers(new ArrayList<>());
+        token.setUsers(new ArrayList<>());
         when(tokenRepository.save(any())).thenReturn(tokenEntity);
         Token response = tokenConnectorImpl.save(token);
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getProductId());
@@ -86,6 +92,7 @@ class TokenConnectorImplTest {
     @Test
     void testFindById2() {
         TokenEntity tokenEntity = new TokenEntity();
+        tokenEntity.setUsers(new ArrayList<>());
         when(tokenRepository.findById(any())).thenReturn(Optional.of(tokenEntity));
         Token response = tokenConnectorImpl.findById("tokenId");
         assertNotNull(response);
@@ -95,9 +102,8 @@ class TokenConnectorImplTest {
     void testFindAndUpdateTokenUser() {
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setContract("Contract");
         tokenEntity.setCreatedAt(null);
-        tokenEntity.setExpiringDate("2020-03-01");
+        tokenEntity.setExpiringDate(OffsetDateTime.now());
         tokenEntity.setId("42");
         tokenEntity.setInstitutionId("42");
         tokenEntity.setProductId("42");
@@ -113,6 +119,7 @@ class TokenConnectorImplTest {
     void findWithFilter() {
         TokenEntity token = new TokenEntity();
         token.setId("507f1f77bcf86cd799439011");
+        token.setUsers(new ArrayList<>());
         when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
         List<Token> tokens = tokenConnectorImpl.findWithFilter("42", "42", new ArrayList<>());
         Assertions.assertEquals("507f1f77bcf86cd799439011", tokens.get(0).getId());

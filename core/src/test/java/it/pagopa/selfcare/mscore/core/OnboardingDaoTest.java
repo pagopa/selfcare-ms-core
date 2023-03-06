@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -44,6 +45,9 @@ class OnboardingDaoTest {
 
     @Mock
     private UserConnector userConnector;
+
+    @Mock
+    private CoreConfig coreConfig;
 
     @Test
     void testPersist0() {
@@ -196,6 +200,7 @@ class OnboardingDaoTest {
         onboardingRequest.setUsers(users);
         when(userConnector.findById(any())).thenReturn(new OnboardedUser());
         Institution institution = new Institution();
+        when(coreConfig.getExpiringDate()).thenReturn(1);
         OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
                 new ArrayList<>(), "Digest");
         assertNull(actualPersistResult.getTokenId());
@@ -675,62 +680,11 @@ class OnboardingDaoTest {
     }
 
     /**
-     * Method under test: {@link OnboardingDao#persistForUpdate(Token, Institution, RelationshipState, String)}
-     */
-    @Test
-    void testPersistForUpdate13() {
-        doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
-                .thenReturn(new Token());
-        doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update token {} from state {} to {}");
-
-        Token token = new Token();
-        token.setUsers(stringList);
-        token.setStatus(RelationshipState.PENDING);
-        onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
-        verify(userConnector).findAndUpdateState(any(), any(), any(),
-               any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persistForUpdate(Token, Institution, RelationshipState, String)}
-     */
-    @Test
-    void testPersistForUpdate14() {
-        doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
-                .thenReturn(new Token());
-        doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update token {} from state {} to {}");
-        stringList.add("update token {} from state {} to {}");
-
-        Token token = new Token();
-        token.setUsers(stringList);
-        token.setStatus(RelationshipState.PENDING);
-        onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
-        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(),
-               any());
-    }
-
-    /**
      * Method under test: {@link OnboardingDao#updateUsers(List, Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers() {
-        ArrayList<String> userList = new ArrayList<>();
+        ArrayList<TokenUser> userList = new ArrayList<>();
         Institution institution = new Institution();
         onboardingDao.updateUsers(userList, institution, new Token(), RelationshipState.PENDING);
     }
@@ -743,8 +697,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update {} users state from {} to {} for product {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
         Institution institution = new Institution();
         onboardingDao.updateUsers(stringList, institution, new Token(), RelationshipState.PENDING);
         verify(userConnector).findAndUpdateState(any(), any(), any(),
@@ -759,9 +713,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update {} users state from {} to {} for product {}");
-        stringList.add("update {} users state from {} to {} for product {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
         Institution institution = new Institution();
         onboardingDao.updateUsers(stringList, institution, new Token(), RelationshipState.PENDING);
         verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(),
@@ -779,8 +732,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update {} users state from {} to {} for product {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.updateUsers(stringList, null, new Token(), RelationshipState.PENDING));
         verify(tokenConnector).findAndUpdateToken(any(),any(), any());
@@ -809,7 +762,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -844,7 +796,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -880,7 +831,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -919,7 +869,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -1100,7 +1049,6 @@ class OnboardingDaoTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -1134,7 +1082,6 @@ class OnboardingDaoTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);

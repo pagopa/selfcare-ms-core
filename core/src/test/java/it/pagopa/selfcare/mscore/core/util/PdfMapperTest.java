@@ -99,6 +99,7 @@ class PdfMapperTest {
         onboardingRequest.setUsers(new ArrayList<>());
         assertEquals(13, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>()).size());
     }
+
     /**
      * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List)}
      */
@@ -537,11 +538,12 @@ class PdfMapperTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "START - setupCommonData",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "START - setupCommonData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
-                "START - setupCommonData", "jane.doe@example.org", "4105551212", true);
+        Institution institution = new Institution();
+        institution.setBilling(billing);
+        institution.setOnboarding(onboarding);
+        institution.setGeographicTaxonomies(geographicTaxonomies);
+        institution.setAttributes(attributes);
+        institution.setPaymentServiceProvider(paymentServiceProvider);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -662,12 +664,13 @@ class PdfMapperTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        PdfMapper.setupPSPData(stringObjectMap, user,
-                new Institution("42", "42", "START - setupPSPData", "The characteristics of someone or something",
-                        InstitutionType.GSP, "42 Main St", "42 Main St", "21654", "START - setupPSPData", billing, onboarding,
-                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", "jane.doe@example.org",
-                        "4105551212", true));
+        Institution institution = new Institution();
+        institution.setBilling(billing);
+        institution.setOnboarding(onboarding);
+        institution.setGeographicTaxonomies(geographicTaxonomies);
+        institution.setAttributes(attributes);
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+        PdfMapper.setupPSPData(stringObjectMap, user,institution);
         assertEquals(5, stringObjectMap.size());
     }
 
@@ -867,11 +870,12 @@ class PdfMapperTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "START - setupProdIOData",
-                "The characteristics of someone or something", InstitutionType.PT, "42 Main St", "42 Main St", "21654",
-                "START - setupProdIOData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer(), null, null, "START - setupProdIOData", "START - setupProdIOData",
-                "START - setupProdIOData", "jane.doe@example.org", "4105551212", true);
+        Institution institution = new Institution();
+        institution.setBilling(billing);
+        institution.setOnboarding(onboarding);
+        institution.setGeographicTaxonomies(geographicTaxonomies);
+        institution.setAttributes(attributes);
+        institution.setPaymentServiceProvider(paymentServiceProvider);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);

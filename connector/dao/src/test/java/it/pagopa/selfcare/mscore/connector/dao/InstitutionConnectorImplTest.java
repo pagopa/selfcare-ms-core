@@ -49,7 +49,6 @@ class InstitutionConnectorImplTest {
         onboarding.setBilling(new Billing());
         onboarding.setContract("contract");
         onboarding.setStatus(RelationshipState.ACTIVE);
-        onboarding.setPremium(new Premium());
         onboarding.setCreatedAt(OffsetDateTime.now());
         onboarding.setProductId("productId");
         onboarding.setUpdatedAt(OffsetDateTime.now());
