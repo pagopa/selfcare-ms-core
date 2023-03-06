@@ -43,12 +43,13 @@ public class UserMapper {
         for (OnboardedProductEntity entity : products) {
             OnboardedProduct product = new OnboardedProduct();
             product.setProductId(entity.getProductId());
-            product.setProductRole(entity.getProductRole());
             product.setRole(entity.getRole());
-            product.setStatus(entity.getStatus());
+            product.setTokenId(entity.getTokenId());
+            product.setContract(entity.getContract());
             product.setEnv(entity.getEnv());
             product.setRelationshipId(entity.getRelationshipId());
-            product.setContract(entity.getContract());
+            product.setProductRole(entity.getProductRole());
+            product.setStatus(entity.getStatus());
             product.setUpdatedAt(entity.getUpdatedAt());
             product.setCreatedAt(entity.getCreatedAt());
             productList.add(product);

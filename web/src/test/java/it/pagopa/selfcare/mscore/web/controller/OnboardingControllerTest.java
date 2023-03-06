@@ -237,7 +237,7 @@ class OnboardingControllerTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(List.of("Product Role"));
+        person.setProductRole("Product Role");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");

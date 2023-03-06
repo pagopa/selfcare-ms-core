@@ -25,27 +25,27 @@ public class InstitutionEntity {
     @Indexed(unique = true)
     private String externalId;
 
-    private String description;
     private OriginEnum origin;
     private String originId;
+    private String description;
     private InstitutionType institutionType;
     private String digitalAddress;
     private String address;
     private String zipCode;
     private String taxCode;
-    private Billing billing;
+    private BillingEntity billing;
     private List<OnboardingEntity> onboarding;
     private List<GeoTaxonomyEntity> geographicTaxonomies;
     private List<AttributesEntity> attributes;
     private PaymentServiceProviderEntity paymentServiceProvider;
     private DataProtectionOfficerEntity dataProtectionOfficer;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
     private String rea;
     private String shareCapital;
     private String businessRegisterPlace;
     private String supportEmail;
     private String supportPhone;
     private boolean imported;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
 }

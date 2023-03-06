@@ -686,8 +686,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update token {} from state {} to {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
 
         Token token = new Token();
         token.setUsers(stringList);
@@ -711,9 +711,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update token {} from state {} to {}");
-        stringList.add("update token {} from state {} to {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
 
         Token token = new Token();
         token.setUsers(stringList);
@@ -730,7 +729,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUsers() {
-        ArrayList<String> userList = new ArrayList<>();
+        ArrayList<TokenUser> userList = new ArrayList<>();
+        userList.add(new TokenUser());
         Institution institution = new Institution();
         onboardingDao.updateUsers(userList, institution, new Token(), RelationshipState.PENDING);
     }
@@ -743,8 +743,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update {} users state from {} to {} for product {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
         Institution institution = new Institution();
         onboardingDao.updateUsers(stringList, institution, new Token(), RelationshipState.PENDING);
         verify(userConnector).findAndUpdateState(any(), any(), any(),
@@ -759,9 +759,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update {} users state from {} to {} for product {}");
-        stringList.add("update {} users state from {} to {} for product {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
         Institution institution = new Institution();
         onboardingDao.updateUsers(stringList, institution, new Token(), RelationshipState.PENDING);
         verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(),
@@ -779,8 +778,8 @@ class OnboardingDaoTest {
         doNothing().when(userConnector)
                 .findAndUpdateState(any(), any(), any(),any());
 
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("update {} users state from {} to {} for product {}");
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.updateUsers(stringList, null, new Token(), RelationshipState.PENDING));
         verify(tokenConnector).findAndUpdateToken(any(),any(), any());
@@ -809,7 +808,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -844,7 +842,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -880,7 +877,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -919,7 +915,6 @@ class OnboardingDaoTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -1100,7 +1095,7 @@ class OnboardingDaoTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -1134,7 +1129,7 @@ class OnboardingDaoTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);

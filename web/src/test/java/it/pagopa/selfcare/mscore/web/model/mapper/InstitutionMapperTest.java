@@ -4,9 +4,11 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,20 +77,15 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", OriginEnum.SELC,  "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
-                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true));
+                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, "share capital", "Rea",
+                        "mail", "phone", true, OffsetDateTime.now(), OffsetDateTime.now()));
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResponseResult.getTaxCode());
-        assertEquals("4105551212", actualToInstitutionResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionResponseResult.getSupportEmail());
-        assertEquals("Share Capital", actualToInstitutionResponseResult.getShareCapital());
-        assertEquals("Rea", actualToInstitutionResponseResult.getRea());
         assertEquals("Ipa Code", actualToInstitutionResponseResult.getOriginId());
-        assertEquals("Business Register Place", actualToInstitutionResponseResult.getBusinessRegisterPlace());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         assertEquals("42", actualToInstitutionResponseResult.getId());
         assertEquals(InstitutionType.PA, actualToInstitutionResponseResult.getInstitutionType());
@@ -132,20 +129,15 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", OriginEnum.SELC,  "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true));
+                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now()));
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResponseResult.getTaxCode());
-        assertEquals("4105551212", actualToInstitutionResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionResponseResult.getSupportEmail());
-        assertEquals("Share Capital", actualToInstitutionResponseResult.getShareCapital());
-        assertEquals("Rea", actualToInstitutionResponseResult.getRea());
         assertEquals("Ipa Code", actualToInstitutionResponseResult.getOriginId());
-        assertEquals("Business Register Place", actualToInstitutionResponseResult.getBusinessRegisterPlace());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         List<GeoTaxonomies> geographicTaxonomies1 = actualToInstitutionResponseResult.getGeographicTaxonomies();
         assertEquals(1, geographicTaxonomies1.size());
@@ -177,22 +169,17 @@ class InstitutionMapperTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomies, attributesList, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true));
+                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now()));
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResponseResult.getTaxCode());
-        assertEquals("4105551212", actualToInstitutionResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionResponseResult.getSupportEmail());
-        assertEquals("Share Capital", actualToInstitutionResponseResult.getShareCapital());
-        assertEquals("Rea", actualToInstitutionResponseResult.getRea());
         assertEquals("Ipa Code", actualToInstitutionResponseResult.getOriginId());
         List<AttributesResponse> attributes1 = actualToInstitutionResponseResult.getAttributes();
         assertEquals(1, attributes1.size());
-        assertEquals("Business Register Place", actualToInstitutionResponseResult.getBusinessRegisterPlace());
         assertEquals("42", actualToInstitutionResponseResult.getExternalId());
         assertEquals("42", actualToInstitutionResponseResult.getId());
         assertEquals(InstitutionType.PA, actualToInstitutionResponseResult.getInstitutionType());
@@ -290,23 +277,18 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                 geographicTaxonomies, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
+                "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now());
 
         InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
                 .toInstitutionUpdateResponse(institution);
         assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getAddress());
         assertEquals("21654", actualToInstitutionUpdateResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionUpdateResponseResult.getTaxCode());
-        assertEquals("4105551212", actualToInstitutionUpdateResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionUpdateResponseResult.getSupportEmail());
-        assertEquals("Share Capital", actualToInstitutionUpdateResponseResult.getShareCapital());
-        assertEquals("Rea", actualToInstitutionUpdateResponseResult.getRea());
         assertSame(paymentServiceProvider, actualToInstitutionUpdateResponseResult.getPaymentServiceProvider());
         assertEquals(InstitutionType.PA, actualToInstitutionUpdateResponseResult.getInstitutionType());
-        assertEquals("Business Register Place", actualToInstitutionUpdateResponseResult.getBusinessRegisterPlace());
         assertEquals("The characteristics of someone or something",
                 actualToInstitutionUpdateResponseResult.getDescription());
         assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getDigitalAddress());
@@ -371,7 +353,6 @@ class InstitutionMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -417,7 +398,6 @@ class InstitutionMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -456,7 +436,6 @@ class InstitutionMapperTest {
         onboarding.setBilling(null);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -765,7 +744,6 @@ class InstitutionMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -795,7 +773,6 @@ class InstitutionMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -822,7 +799,6 @@ class InstitutionMapperTest {
         onboarding.setBilling(null);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);

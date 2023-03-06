@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -60,8 +61,8 @@ class TokenServiceImplTest {
     @Test
     void verifyToken(){
         Token token = new Token();
-        ArrayList<String> users = new ArrayList<>();
-        users.add("user");
+        ArrayList<TokenUser>users = new ArrayList<>();
+       users.add(new TokenUser());
         token.setUsers(users);
         token.setStatus(RelationshipState.ACTIVE);
         when(tokenConnector.findById(any())).thenReturn(token);
@@ -71,9 +72,9 @@ class TokenServiceImplTest {
     @Test
     void verifyToken2(){
         Token token = new Token();
-        ArrayList<String> users = new ArrayList<>();
-        users.add("user");
-        token.setUsers(users);
+        ArrayList<TokenUser> stringList = new ArrayList<>();
+        stringList.add(new TokenUser());
+        token.setUsers(stringList);
         token.setStatus(RelationshipState.TOBEVALIDATED);
         when(tokenConnector.findById(any())).thenReturn(token);
         Token response = tokenServiceImpl.verifyToken("token");

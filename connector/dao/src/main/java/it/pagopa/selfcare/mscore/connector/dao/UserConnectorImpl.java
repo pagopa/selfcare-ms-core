@@ -64,7 +64,7 @@ public class UserConnectorImpl implements UserConnector {
                     userList.add(UserMapper.toOnboardedUser(userEntity));
                     userIds.remove(userEntity.getId());
                 });
-        if(users.size() != userList.size()) {
+        if (users.size() != userList.size()) {
             throw new ResourceNotFoundException(String.format(USERS_NOT_FOUND_ERROR.getMessage(), String.join(",", userIds)), USERS_NOT_FOUND_ERROR.getCode());
         }
         return userList;
@@ -134,10 +134,13 @@ public class UserConnectorImpl implements UserConnector {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId)
                 .and(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
 
-        query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
-                .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roles)
-                        .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT) //TODO: CAPIRE QUALE ENV CONSIDERARE
-                        .and(OnboardedProduct.Fields.status.name()).in(states)));
+        query.addCriteria(Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
+                        .and(constructQuery(UserBinding.Fields.products.name()))
+                                .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name())).in(roles)
+                                        .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT)
+                                        .and(OnboardedProduct.Fields.status.name()).in(states)));
+
 
         return repository.find(query, UserEntity.class).stream()
                 .map(UserMapper::toOnboardedUser)
@@ -149,10 +152,11 @@ public class UserConnectorImpl implements UserConnector {
         List<RelationshipState> stateList = states.isEmpty() ? List.of(RelationshipState.values()) : states;
         List<PartyRole> roleList = roles.isEmpty() ? List.of(PartyRole.values()) : roles;
 
-        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(personId)
-                .and(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(personId));
 
-        query.addCriteria(Criteria.where(constructQuery(UserBinding.Fields.products.name()))
+        query.addCriteria(Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId))
+                .and(constructQuery(UserBinding.Fields.products.name()))
                 .elemMatch(constructCriteria(roleList, stateList, productRoles, products)));
 
         return repository.find(query, UserEntity.class).stream()

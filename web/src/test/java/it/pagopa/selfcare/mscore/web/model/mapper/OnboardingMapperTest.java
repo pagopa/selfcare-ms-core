@@ -60,7 +60,7 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(new ArrayList<>());
+        person.setProductRole("");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
@@ -135,7 +135,7 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(new ArrayList<>());
+        person.setProductRole("");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
@@ -203,7 +203,7 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(new ArrayList<>());
+        person.setProductRole("");
         person.setRole(PartyRole.DELEGATE);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
@@ -211,7 +211,7 @@ class OnboardingMapperTest {
         Person person1 = new Person();
         person1.setId("42");
         person1.setName("Name");
-        person1.setProductRole(new ArrayList<>());
+        person1.setProductRole("");
         person1.setRole(PartyRole.DELEGATE);
         person1.setSurname("Doe");
         person1.setTaxCode("Tax Code");
@@ -368,7 +368,7 @@ class OnboardingMapperTest {
         person.setEnv(EnvEnum.ROOT);
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(new ArrayList<>());
+        person.setProductRole("");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
@@ -454,7 +454,6 @@ class OnboardingMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -493,7 +492,6 @@ class OnboardingMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -516,7 +514,7 @@ class OnboardingMapperTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -552,7 +550,6 @@ class OnboardingMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -568,7 +565,7 @@ class OnboardingMapperTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -612,7 +609,7 @@ class OnboardingMapperTest {
         person.setEnv(EnvEnum.ROOT);
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(new ArrayList<>());
+        person.setProductRole("");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");

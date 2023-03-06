@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +92,6 @@ class ExternalControllerTest {
         onboarding.setBilling(billing);
         onboarding.setContract("?");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("?");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -128,7 +129,6 @@ class ExternalControllerTest {
         onboarding.setBilling(billing);
         onboarding.setContract("?");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("?");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -147,7 +147,6 @@ class ExternalControllerTest {
         onboarding1.setBilling(billing1);
         onboarding1.setContract("U");
         onboarding1.setCreatedAt(null);
-        onboarding1.setPremium(premium1);
         onboarding1.setPricingPlan("U");
         onboarding1.setProductId("?");
         onboarding1.setStatus(RelationshipState.ACTIVE);
@@ -197,10 +196,10 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC, "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
-                null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
+                null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
         when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
                 .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -212,13 +211,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or"
-                                        + " something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":"
-                                        + "\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\""
-                                        + ":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup"
-                                        + "\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"rea\":\"?\",\"shareCapital\":"
-                                        + "\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\","
-                                        + "\"imported\":true}"));
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"businessRegisterPlace\":\"?\",\"supportEmail\":\"?\",\"supportPhone\":\"?\",\"imported\":true}"));
     }
 
     /**
@@ -264,10 +257,10 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC, "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
-                null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
+                null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
         when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "", "Uri Vars");
@@ -278,13 +271,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or"
-                                        + " something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":"
-                                        + "\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\""
-                                        + ":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup"
-                                        + "\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"rea\":\"?\",\"shareCapital\":"
-                                        + "\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\","
-                                        + "\"imported\":true}"));
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"businessRegisterPlace\":\"?\",\"supportEmail\":\"?\",\"supportPhone\":\"?\",\"imported\":true}"));
     }
 
     /**
@@ -369,7 +356,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"institutionId\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":null,\"billing\":null}"));
+                        .string("{\"institutionId\":\"42\",\"externalId\":\"42\",\"origin\":null,\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":null,\"billing\":null}"));
     }
 
     /**
@@ -400,7 +387,6 @@ class ExternalControllerTest {
         onboarding.setBilling(billing1);
         onboarding.setContract("?");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("?");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -476,7 +462,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"institutionId\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":\"?\",\"billing\":{\"vatNumber\":\"42\",\"recipientCode\":\"?\",\"publicServices\":true}}"));
+                        .string("{\"institutionId\":\"42\",\"externalId\":\"42\",\"origin\":null,\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"pricingPlan\":\"?\",\"billing\":{\"vatNumber\":\"42\",\"recipientCode\":\"?\",\"publicServices\":true}}"));
     }
 
     /**
@@ -496,9 +482,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"institutionId\":null,\"externalId\":null,\"originId\":null,\"description\":null,\"institutionType\":null,"
-                                        + "\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"pricingPlan\":null,\"billing\":null"
-                                        + "}"));
+                                "{\"institutionId\":null,\"externalId\":null,\"origin\":null,\"originId\":null,\"description\":null,\"institutionType\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"pricingPlan\":null,\"billing\":null}"));
     }
 
     /**
@@ -772,10 +756,10 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC, "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
-                null, null, "?", "?", "?", "jane.doe@example.org", "6625550144", true));
+                null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
                 "42");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -785,13 +769,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or"
-                                        + " something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":"
-                                        + "\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\""
-                                        + ":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup"
-                                        + "\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"rea\":\"?\",\"shareCapital\":"
-                                        + "\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\","
-                                        + "\"imported\":true}"));
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"businessRegisterPlace\":\"?\",\"supportEmail\":\"?\",\"supportPhone\":\"?\",\"imported\":true}"));
     }
 
     /**
@@ -868,7 +846,6 @@ class ExternalControllerTest {
         onboarding.setBilling(billing);
         onboarding.setContract("?");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("?");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -912,7 +889,6 @@ class ExternalControllerTest {
         onboarding.setBilling(billing);
         onboarding.setContract("?");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("?");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -926,10 +902,10 @@ class ExternalControllerTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
 
-        Institution institution = new Institution("42", "42", "?", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,  "?", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing1, onboarding1, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "?", "?", "?",
-                "jane.doe@example.org", "6625550144", true);
+                true, OffsetDateTime.now(), OffsetDateTime.now());
         institution.setId("?");
         institution.setOnboarding(onboardingList);
 

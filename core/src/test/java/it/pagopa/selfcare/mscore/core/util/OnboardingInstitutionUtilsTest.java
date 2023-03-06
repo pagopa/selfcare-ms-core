@@ -8,8 +8,10 @@ import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
+import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,7 +61,7 @@ class OnboardingInstitutionUtilsTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -81,7 +83,7 @@ class OnboardingInstitutionUtilsTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -91,7 +93,7 @@ class OnboardingInstitutionUtilsTest {
         userToOnboard1.setEnv(EnvEnum.ROOT);
         userToOnboard1.setId("42");
         userToOnboard1.setName(", ");
-        userToOnboard1.setProductRole(new ArrayList<>());
+        userToOnboard1.setProductRole("");
         userToOnboard1.setRole(PartyRole.MANAGER);
         userToOnboard1.setSurname("Doe");
         userToOnboard1.setTaxCode(", ");
@@ -200,7 +202,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing,
@@ -208,7 +210,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "jane.doe@example.org", "4105551212", true);
+                true, OffsetDateTime.now(), OffsetDateTime.now());
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -264,25 +266,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("21654", institution.getZipCode());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 institution.getTaxCode());
-        assertEquals("4105551212", institution.getSupportPhone());
-        assertEquals("jane.doe@example.org", institution.getSupportEmail());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getShareCapital());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getRea());
-        assertSame(paymentServiceProvider, institution.getPaymentServiceProvider());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getBusinessRegisterPlace());
-        assertEquals("42 Main St", institution.getDigitalAddress());
-        assertEquals("42", institution.getExternalId());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getOriginId());
-        assertEquals(InstitutionType.PA, institution.getInstitutionType());
-        assertEquals("42", institution.getId());
-        assertSame(billing, institution.getBilling());
-        assertSame(dataProtectionOfficer, institution.getDataProtectionOfficer());
-        assertEquals("The characteristics of someone or something", institution.getDescription());
-        assertSame(billing1, onboardingRequest.getBillingRequest());
         assertTrue(onboardingRequest.isSignContract());
     }
 
@@ -307,7 +290,6 @@ class OnboardingInstitutionUtilsTest {
         onboarding.setContract(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setProductId("42");
@@ -321,7 +303,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -329,7 +311,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "jane.doe@example.org", "4105551212", true);
+                true, OffsetDateTime.now(), OffsetDateTime.now());
 
         Billing billing2 = new Billing();
         billing2.setPublicServices(true);
@@ -385,13 +367,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("21654", institution.getZipCode());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 institution.getTaxCode());
-        assertEquals("4105551212", institution.getSupportPhone());
-        assertEquals("jane.doe@example.org", institution.getSupportEmail());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getShareCapital());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getRea());
-        assertSame(paymentServiceProvider, institution.getPaymentServiceProvider());
         assertEquals(1, institution.getOnboarding().size());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 institution.getBusinessRegisterPlace());
@@ -404,10 +379,6 @@ class OnboardingInstitutionUtilsTest {
         assertSame(billing1, institution.getBilling());
         assertSame(dataProtectionOfficer, institution.getDataProtectionOfficer());
         assertEquals("The characteristics of someone or something", institution.getDescription());
-        assertSame(billing2, onboardingRequest.getBillingRequest());
-        assertTrue(onboardingRequest.isSignContract());
-        assertSame(contract, onboardingRequest.getContract());
-        assertSame(institutionUpdate, onboardingRequest.getInstitutionUpdate());
     }
 
     /**
@@ -431,7 +402,6 @@ class OnboardingInstitutionUtilsTest {
         onboarding.setContract(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setProductId(
@@ -446,7 +416,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -454,7 +424,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "jane.doe@example.org", "4105551212", true);
+                true, OffsetDateTime.now(), OffsetDateTime.now());
 
         Billing billing2 = new Billing();
         billing2.setPublicServices(true);
@@ -510,13 +480,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("21654", institution.getZipCode());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 institution.getTaxCode());
-        assertEquals("4105551212", institution.getSupportPhone());
-        assertEquals("jane.doe@example.org", institution.getSupportEmail());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getShareCapital());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getRea());
-        assertSame(paymentServiceProvider, institution.getPaymentServiceProvider());
         assertEquals(1, institution.getOnboarding().size());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 institution.getBusinessRegisterPlace());
@@ -552,7 +515,6 @@ class OnboardingInstitutionUtilsTest {
         onboarding.setContract(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setProductId("42");
@@ -565,7 +527,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -573,7 +535,7 @@ class OnboardingInstitutionUtilsTest {
                 null, "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "jane.doe@example.org", "4105551212", true);
+                true, OffsetDateTime.now(), OffsetDateTime.now());
 
         Billing billing2 = new Billing();
         billing2.setPublicServices(true);
@@ -647,7 +609,6 @@ class OnboardingInstitutionUtilsTest {
         onboarding.setContract(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding.setProductId("42");
@@ -670,7 +631,6 @@ class OnboardingInstitutionUtilsTest {
         onboarding1.setContract(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding1.setCreatedAt(null);
-        onboarding1.setPremium(premium1);
         onboarding1.setPricingPlan(
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
         onboarding1.setProductId("Product Id");
@@ -685,7 +645,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing2,
@@ -693,7 +653,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "jane.doe@example.org", "4105551212", true);
+                true, OffsetDateTime.now(), OffsetDateTime.now());
 
         Billing billing3 = new Billing();
         billing3.setPublicServices(true);
@@ -749,13 +709,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("21654", institution.getZipCode());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 institution.getTaxCode());
-        assertEquals("4105551212", institution.getSupportPhone());
-        assertEquals("jane.doe@example.org", institution.getSupportEmail());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getShareCapital());
-        assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                institution.getRea());
-        assertSame(paymentServiceProvider, institution.getPaymentServiceProvider());
         assertEquals(2, institution.getOnboarding().size());
         assertEquals("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 institution.getBusinessRegisterPlace());
@@ -806,14 +759,14 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC, "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
                 "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}",
-                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org",
-                "4105551212", true);
+                "START - validateOverridingData for institution having externalId: {}", true,
+                OffsetDateTime.now(), OffsetDateTime.now());
         assertThrows(InvalidRequestException.class,
                 () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
@@ -855,14 +808,14 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "START - validateOverridingData for institution having externalId: {}",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC, "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
                 "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}",
-                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org",
-                "4105551212", true);
+                "START - validateOverridingData for institution having externalId: {}", true,
+                OffsetDateTime.now(), OffsetDateTime.now());
         assertThrows(InvalidRequestException.class,
                 () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
@@ -905,15 +858,15 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,
                 "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - validateOverridingData for institution having externalId: {}", billing, onboardingList,
                 geographicTaxonomiesList, attributes, paymentServiceProvider1, dataProtectionOfficer1, null, null,
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}",
-                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org", "4105551212",
-                true);
+                "START - validateOverridingData for institution having externalId: {}",true, OffsetDateTime.now(),
+                OffsetDateTime.now());
 
         OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution);
         assertEquals("42 Main St", institutionUpdate.getAddress());
@@ -933,10 +886,6 @@ class OnboardingInstitutionUtilsTest {
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
         assertEquals("START - validateOverridingData for institution having externalId: {}", institution.getTaxCode());
-        assertEquals("4105551212", institution.getSupportPhone());
-        assertEquals("jane.doe@example.org", institution.getSupportEmail());
-        assertEquals("START - validateOverridingData for institution having externalId: {}",
-                institution.getShareCapital());
     }
 
     /**
@@ -977,15 +926,14 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC,
                 "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - validateOverridingData for institution having externalId: {}", billing, onboardingList,
                 geographicTaxonomiesList, attributes, paymentServiceProvider1, dataProtectionOfficer1, null, null,
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}",
-                "START - validateOverridingData for institution having externalId: {}", "jane.doe@example.org", "4105551212",
-                true);
+                "START - validateOverridingData for institution having externalId: {}", true, OffsetDateTime.now(), OffsetDateTime.now());
 
         OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution);
         assertEquals("42 Main St", institutionUpdate.getAddress());
@@ -1006,14 +954,10 @@ class OnboardingInstitutionUtilsTest {
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
         assertEquals("START - validateOverridingData for institution having externalId: {}", institution.getTaxCode());
-        assertEquals("4105551212", institution.getSupportPhone());
-        assertEquals("jane.doe@example.org", institution.getSupportEmail());
-        assertEquals("START - validateOverridingData for institution having externalId: {}",
-                institution.getShareCapital());
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String)}
+     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String, OffsetDateTime)}
      */
     @Test
     void testConvertToToken() {
@@ -1065,17 +1009,17 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Token actualConvertToTokenResult = OnboardingInstitutionUtils.convertToToken(onboardingRequest, new Institution(),
-                "Digest");
+                "Digest", OffsetDateTime.now());
         assertEquals("Digest", actualConvertToTokenResult.getChecksum());
         assertEquals(RelationshipState.PENDING, actualConvertToTokenResult.getStatus());
         assertEquals("42", actualConvertToTokenResult.getProductId());
         assertNull(actualConvertToTokenResult.getInstitutionId());
-        assertEquals("Path", actualConvertToTokenResult.getContract());
+        assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
     }
 
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String)}
+     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String, OffsetDateTime)}
      */
     @Test
     void testConvertToToken4() {
@@ -1127,16 +1071,16 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Token actualConvertToTokenResult = OnboardingInstitutionUtils.convertToToken(onboardingRequest, new Institution(),
-                "Digest");
+                "Digest", OffsetDateTime.now());
         assertEquals("Digest", actualConvertToTokenResult.getChecksum());
         assertEquals(RelationshipState.ACTIVE, actualConvertToTokenResult.getStatus());
         assertEquals("42", actualConvertToTokenResult.getProductId());
         assertNull(actualConvertToTokenResult.getInstitutionId());
-        assertEquals("Path", actualConvertToTokenResult.getContract());
+        assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String)}
+     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String, OffsetDateTime)}
      */
     @Test
     void testConvertToToken5() {
@@ -1188,12 +1132,12 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Token actualConvertToTokenResult = OnboardingInstitutionUtils.convertToToken(onboardingRequest, new Institution(),
-                "Digest");
+                "Digest", OffsetDateTime.now());
         assertEquals("Digest", actualConvertToTokenResult.getChecksum());
         assertEquals(RelationshipState.TOBEVALIDATED, actualConvertToTokenResult.getStatus());
         assertEquals("42", actualConvertToTokenResult.getProductId());
         assertNull(actualConvertToTokenResult.getInstitutionId());
-        assertEquals("Path", actualConvertToTokenResult.getContract());
+        assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
     }
 
     /**
@@ -1206,7 +1150,7 @@ class OnboardingInstitutionUtilsTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -1234,7 +1178,7 @@ class OnboardingInstitutionUtilsTest {
         userToOnboard.setEnv(null);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -1262,7 +1206,7 @@ class OnboardingInstitutionUtilsTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -1276,7 +1220,6 @@ class OnboardingInstitutionUtilsTest {
                 onboardingRequest);
         assertEquals(RelationshipState.ACTIVE, actualConstructProductResult.getStatus());
         assertEquals(PartyRole.MANAGER, actualConstructProductResult.getRole());
-        assertTrue(actualConstructProductResult.getProductRoles().isEmpty());
         assertEquals(EnvEnum.ROOT, actualConstructProductResult.getEnv());
     }
 

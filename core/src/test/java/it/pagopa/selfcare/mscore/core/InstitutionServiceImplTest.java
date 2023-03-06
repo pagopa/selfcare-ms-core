@@ -12,12 +12,14 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -741,12 +743,11 @@ class InstitutionServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42",
-                "START - check institution {} already exists", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
+        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42", OriginEnum.SELC,"",
+                "START - check institution {} already exists", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "START - check institution {} already exists", "START - check institution {} already exists",
-                "START - check institution {} already exists", "jane.doe@example.org", "4105551212", true), "42"));
+                "START - check institution {} already exists", true, OffsetDateTime.now(), OffsetDateTime.now()), "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
     }
@@ -780,12 +781,12 @@ class InstitutionServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42",
+        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42",OriginEnum.SELC,
                 "START - check institution {} already exists", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "START - check institution {} already exists", "START - check institution {} already exists",
-                "START - check institution {} already exists", "jane.doe@example.org", "4105551212", true), "42"));
+                "START - check institution {} already exists", true, OffsetDateTime.now(), OffsetDateTime.now()), "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
     }

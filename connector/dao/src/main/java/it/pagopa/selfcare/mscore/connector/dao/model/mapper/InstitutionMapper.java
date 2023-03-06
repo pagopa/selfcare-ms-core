@@ -19,13 +19,17 @@ public class InstitutionMapper {
         if (entity != null) {
             institution.setId(entity.getId());
             institution.setExternalId(entity.getExternalId());
+            institution.setOrigin(entity.getOrigin());
+            institution.setOriginId(entity.getOriginId());
             institution.setDescription(entity.getDescription());
             institution.setInstitutionType(entity.getInstitutionType());
-            institution.setOriginId(entity.getOriginId());
             institution.setDigitalAddress(entity.getDigitalAddress());
             institution.setAddress(entity.getAddress());
             institution.setZipCode(entity.getZipCode());
             institution.setTaxCode(entity.getTaxCode());
+            if(institution.getBilling() != null){
+                institution.setBilling(toBilling(entity.getBilling()));
+            }
             if (entity.getOnboarding() != null) {
                 institution.setOnboarding(toOnboarding(entity.getOnboarding()));
             }
@@ -43,7 +47,6 @@ public class InstitutionMapper {
             }
             institution.setCreatedAt(entity.getCreatedAt());
             institution.setUpdatedAt(entity.getUpdatedAt());
-
             institution.setRea(entity.getRea());
             institution.setShareCapital(entity.getShareCapital());
             institution.setBusinessRegisterPlace(entity.getBusinessRegisterPlace());
@@ -52,6 +55,49 @@ public class InstitutionMapper {
             institution.setImported(entity.isImported());
         }
         return institution;
+    }
+
+    public static InstitutionEntity convertToInstitutionEntity(Institution institution) {
+        InstitutionEntity entity = new InstitutionEntity();
+        if (institution.getId() != null) {
+            entity.setId(institution.getId());
+        } else {
+            entity.setId(UUID.randomUUID().toString());
+        }
+        entity.setCreatedAt(institution.getCreatedAt());
+        entity.setExternalId(institution.getExternalId());
+        entity.setDescription(institution.getDescription());
+        entity.setOrigin(institution.getOrigin());
+        entity.setOriginId(institution.getOriginId());
+        entity.setInstitutionType(institution.getInstitutionType());
+        entity.setDigitalAddress(institution.getDigitalAddress());
+        entity.setAddress(institution.getAddress());
+        entity.setZipCode(institution.getZipCode());
+        entity.setTaxCode(institution.getTaxCode());
+        entity.setRea(institution.getRea());
+        entity.setShareCapital(institution.getShareCapital());
+        entity.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        entity.setSupportEmail(institution.getSupportEmail());
+        entity.setSupportPhone(institution.getSupportPhone());
+        entity.setImported(institution.isImported());
+
+        if (institution.getOnboarding() != null) {
+            entity.setOnboarding(toOnboardingEntity(institution.getOnboarding()));
+        }
+        if (institution.getGeographicTaxonomies() != null) {
+            entity.setGeographicTaxonomies(toGeoTaxonomyEntity(institution.getGeographicTaxonomies()));
+        }
+        if (institution.getDataProtectionOfficer() != null) {
+            entity.setDataProtectionOfficer(toDataProtectionOfficerEntity(institution.getDataProtectionOfficer()));
+        }
+        if (institution.getPaymentServiceProvider() != null) {
+            entity.setPaymentServiceProvider(toPaymentServiceProviderEntity(institution.getPaymentServiceProvider()));
+        }
+        if( institution.getAttributes() != null){
+            entity.setAttributes(toAttributesEntity(institution.getAttributes()));
+        }
+        entity.setUpdatedAt(OffsetDateTime.now());
+        return entity;
     }
 
     private static List<Onboarding> toOnboarding(List<OnboardingEntity> onboarding) {
@@ -102,6 +148,25 @@ public class InstitutionMapper {
         return list;
     }
 
+    private static List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
+        List<GeographicTaxonomies> list = new ArrayList<>();
+        for(GeoTaxonomyEntity entity : geographicTaxonomies){
+            GeographicTaxonomies geo = new GeographicTaxonomies();
+            geo.setDesc(entity.getDesc());
+            geo.setCode(entity.getCode());
+            list.add(geo);
+        }
+        return list;
+    }
+
+    private static Billing toBilling(BillingEntity billing) {
+        Billing response = new Billing();
+        response.setPublicServices(billing.isPublicServices());
+        response.setVatNumber(billing.getVatNumber());
+        response.setRecipientCode(billing.getRecipientCode());
+        return response;
+    }
+
     private static List<AttributesEntity> toAttributesEntity(List<Attributes> attributes) {
         List<AttributesEntity> list = new ArrayList<>();
         for(Attributes attribute : attributes){
@@ -114,59 +179,7 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
-        List<GeographicTaxonomies> list = new ArrayList<>();
-        for(GeoTaxonomyEntity entity : geographicTaxonomies){
-            GeographicTaxonomies geo = new GeographicTaxonomies();
-            geo.setDesc(entity.getDesc());
-            geo.setCode(entity.getCode());
-            list.add(geo);
-        }
-        return list;
-    }
 
-    public static InstitutionEntity convertToInstitutionEntity(Institution institution) {
-        InstitutionEntity entity = new InstitutionEntity();
-        if (institution.getId() != null) {
-            entity.setId(institution.getId());
-        } else {
-            entity.setId(UUID.randomUUID().toString());
-        }
-        entity.setCreatedAt(institution.getCreatedAt());
-        entity.setExternalId(institution.getExternalId());
-        entity.setDescription(institution.getDescription());
-        entity.setOrigin(institution.getOrigin());
-        entity.setOriginId(institution.getOriginId());
-        entity.setInstitutionType(institution.getInstitutionType());
-        entity.setDigitalAddress(institution.getDigitalAddress());
-        entity.setAddress(institution.getAddress());
-        entity.setZipCode(institution.getZipCode());
-        entity.setTaxCode(institution.getTaxCode());
-        entity.setRea(institution.getRea());
-        entity.setShareCapital(institution.getShareCapital());
-        entity.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
-        entity.setSupportEmail(institution.getSupportEmail());
-        entity.setSupportPhone(institution.getSupportPhone());
-        entity.setImported(institution.isImported());
-
-        if (institution.getOnboarding() != null) {
-            entity.setOnboarding(toOnboardingEntity(institution.getOnboarding()));
-        }
-        if (institution.getGeographicTaxonomies() != null) {
-            entity.setGeographicTaxonomies(toGeoTaxonomyEntity(institution.getGeographicTaxonomies()));
-        }
-        if (institution.getDataProtectionOfficer() != null) {
-            entity.setDataProtectionOfficer(toDataProtectionOfficerEntity(institution.getDataProtectionOfficer()));
-        }
-        if (institution.getPaymentServiceProvider() != null) {
-            entity.setPaymentServiceProvider(toPaymentServiceProviderEntity(institution.getPaymentServiceProvider()));
-        }
-        if( institution.getAttributes() != null){
-            entity.setAttributes(toAttributesEntity(institution.getAttributes()));
-        }
-        entity.setUpdatedAt(OffsetDateTime.now());
-        return entity;
-    }
 
     private static List<OnboardingEntity> toOnboardingEntity(List<Onboarding> onboardingList) {
         List<OnboardingEntity> list = new ArrayList<>();
@@ -215,14 +228,6 @@ public class InstitutionMapper {
         provider.setVatNumberGroup(paymentServiceProvider.isVatNumberGroup());
         provider.setBusinessRegisterNumber(paymentServiceProvider.getBusinessRegisterNumber());
         return provider;
-    }
-
-    private static Billing toBilling(BillingEntity billing) {
-        Billing response = new Billing();
-        response.setPublicServices(billing.isPublicServices());
-        response.setVatNumber(billing.getVatNumber());
-        response.setRecipientCode(billing.getRecipientCode());
-        return response;
     }
 
     private static BillingEntity toBillingEntity(Billing billing) {

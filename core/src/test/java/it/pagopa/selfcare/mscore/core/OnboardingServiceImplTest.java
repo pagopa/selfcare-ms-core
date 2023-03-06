@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.*;
+import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -247,11 +249,11 @@ class OnboardingServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "START - getUser with id: {}",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC, "START - getUser with id: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
-                "START - getUser with id: {}", "jane.doe@example.org", "4105551212", true);
+                "true", true, OffsetDateTime.now(), OffsetDateTime.now());
 
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
 
@@ -260,8 +262,7 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        ArrayList<String> stringList = new ArrayList<>();
-        onboardedProduct.setProductRoles(stringList);
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -270,7 +271,6 @@ class OnboardingServiceImplTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -300,11 +300,11 @@ class OnboardingServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", "START - getUser with id: {}",
+        Institution institution = new Institution("42", "42", OriginEnum.SELC, "START - getUser with id: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
-                "START - getUser with id: {}", "jane.doe@example.org", "4105551212", true);
+                "START - getUser with id: {}", true, OffsetDateTime.now(), OffsetDateTime.now());
 
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
 
@@ -313,8 +313,7 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        ArrayList<String> stringList = new ArrayList<>();
-        onboardedProduct.setProductRoles(stringList);
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -323,7 +322,6 @@ class OnboardingServiceImplTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -369,7 +367,7 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -378,7 +376,6 @@ class OnboardingServiceImplTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -404,18 +401,18 @@ class OnboardingServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42",
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC,
                 "START - getUser with id: {}", "The characteristics of someone or something", InstitutionType.PA,
                 "42 Main St", "42 Main St", "21654", "START - getUser with id: {}", billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "START - getUser with id: {}",
-                "START - getUser with id: {}", "START - getUser with id: {}", "jane.doe@example.org", "4105551212", true));
+                "START - getUser with id: {}", "START - getUser with id: {}", true, OffsetDateTime.now(), OffsetDateTime.now()));
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("START - getUser with id: {}");
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -453,7 +450,7 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -487,18 +484,18 @@ class OnboardingServiceImplTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42",
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC,
                 "START - getUser with id: {}", "The characteristics of someone or something", InstitutionType.PA,
-                "42 Main St", "42 Main St", "21654", "START - getUser with id: {}", billing, onboarding, geographicTaxonomies,
+                "42 Main St", "42 Main St", "21654", "", billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "START - getUser with id: {}",
-                "START - getUser with id: {}", "START - getUser with id: {}", "jane.doe@example.org", "4105551212", true));
+                "START - getUser with id: {}", "START - getUser with id: {}", true, OffsetDateTime.now(), OffsetDateTime.now()));
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("START - getUser with id: {}");
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -512,7 +509,7 @@ class OnboardingServiceImplTest {
 
         ArrayList<UserBinding> userBindingList = new ArrayList<>();
         userBindingList.add(userBinding);
-        OnboardedUser onboardedUser = new OnboardedUser("42", userBindingList, null, null);
+        OnboardedUser onboardedUser = new OnboardedUser("42", userBindingList, null);
 
         when(userService.findByUserId(any())).thenReturn(onboardedUser);
         assertThrows(InvalidRequestException.class,
@@ -534,7 +531,7 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
@@ -548,7 +545,7 @@ class OnboardingServiceImplTest {
 
         ArrayList<UserBinding> userBindingList = new ArrayList<>();
         userBindingList.add(userBinding);
-        OnboardedUser onboardedUser = new OnboardedUser("42", userBindingList, null, null);
+        OnboardedUser onboardedUser = new OnboardedUser("42", userBindingList, null);
 
         when(userService.findByUserId(any())).thenReturn(onboardedUser);
         assertThrows(InvalidRequestException.class,
@@ -903,9 +900,9 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setContract("Contract");
+        token.setContractTemplate("Contract");
         token.setCreatedAt(null);
-        token.setExpiringDate("2020-03-01");
+        token.setExpiringDate(OffsetDateTime.now());
         token.setId("42");
         token.setInstitutionId("42");
         token.setProductId("42");
@@ -922,8 +919,7 @@ class OnboardingServiceImplTest {
         assertEquals("42", token.getProductId());
         assertEquals("42", token.getInstitutionId());
         assertEquals("42", token.getId());
-        assertEquals("2020-03-01", token.getExpiringDate());
-        assertEquals("Contract", token.getContract());
+        assertEquals("Contract", token.getContractTemplate());
     }
 
     /**
@@ -938,9 +934,9 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setContract("Contract");
+        token.setContractTemplate("Contract");
         token.setCreatedAt(null);
-        token.setExpiringDate("2020-03-01");
+        token.setExpiringDate(OffsetDateTime.now());
         token.setId("42");
         token.setInstitutionId("42");
         token.setProductId("42");
@@ -1004,9 +1000,8 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setContract("Contract");
+        token.setContractTemplate("Contract");
         token.setCreatedAt(null);
-        token.setExpiringDate("2020-03-01");
         token.setId("42");
         token.setInstitutionId("42");
         token.setProductId("42");
@@ -1026,8 +1021,7 @@ class OnboardingServiceImplTest {
         assertEquals("42", token.getProductId());
         assertEquals("42", token.getInstitutionId());
         assertEquals("42", token.getId());
-        assertEquals("2020-03-01", token.getExpiringDate());
-        assertEquals("Contract", token.getContract());
+        assertEquals("Contract", token.getContractTemplate());
     }
 
     @Test
@@ -1083,7 +1077,7 @@ class OnboardingServiceImplTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -1118,7 +1112,7 @@ class OnboardingServiceImplTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -1128,7 +1122,7 @@ class OnboardingServiceImplTest {
         userToOnboard1.setEnv(EnvEnum.ROOT);
         userToOnboard1.setId("42");
         userToOnboard1.setName("Name");
-        userToOnboard1.setProductRole(new ArrayList<>());
+        userToOnboard1.setProductRole("");
         userToOnboard1.setRole(PartyRole.MANAGER);
         userToOnboard1.setSurname("Doe");
         userToOnboard1.setTaxCode("Tax Code");
@@ -1271,7 +1265,7 @@ class OnboardingServiceImplTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -1306,7 +1300,7 @@ class OnboardingServiceImplTest {
         userToOnboard.setEnv(EnvEnum.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
-        userToOnboard.setProductRole(new ArrayList<>());
+        userToOnboard.setProductRole("");
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
@@ -1316,7 +1310,6 @@ class OnboardingServiceImplTest {
         userToOnboard1.setEnv(EnvEnum.ROOT);
         userToOnboard1.setId("42");
         userToOnboard1.setName("Name");
-        userToOnboard1.setProductRole(new ArrayList<>());
         userToOnboard1.setRole(PartyRole.MANAGER);
         userToOnboard1.setSurname("Doe");
         userToOnboard1.setTaxCode("Tax Code");
@@ -1435,7 +1428,7 @@ class OnboardingServiceImplTest {
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(EnvEnum.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
