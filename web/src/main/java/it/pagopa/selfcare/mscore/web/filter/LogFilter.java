@@ -21,13 +21,20 @@ import java.io.UnsupportedEncodingException;
 public class LogFilter implements Filter {
 
     private static final int MAX_LENGTH_CONTENT = 150;
+
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
         final String httpUri = httpServletRequest.getRequestURI();
+
+        if (httpUri.startsWith("/actuator/health")) {
+            log.trace("request to health-check actuator");
+            chain.doFilter(httpServletRequest, httpServletResponse);
+            return;
+        }
+
         final String httpMethod = httpServletRequest.getMethod();
         long startTime = System.currentTimeMillis();
 
@@ -37,8 +44,8 @@ public class LogFilter implements Filter {
         chain.doFilter(requestCacheWrapperObject, responseCacheWrapperObject);
 
         Long endTime = System.currentTimeMillis() - startTime;
-        String requestBody = this.getContentAsString(requestCacheWrapperObject.getContentAsByteArray(), request.getCharacterEncoding());
-        String responseBody = this.getContentAsString(responseCacheWrapperObject.getContentAsByteArray(), response.getCharacterEncoding());
+        String requestBody = getContentAsString(requestCacheWrapperObject.getContentAsByteArray(), request.getCharacterEncoding());
+        String responseBody = getContentAsString(responseCacheWrapperObject.getContentAsByteArray(), response.getCharacterEncoding());
         log.info("Request from URI : {} - method: {} - timelapse: {}ms - Request body {} - Response body {}", httpUri, httpMethod, endTime, MaskDataUtils.maskInformation(requestBody), MaskDataUtils.maskInformation(responseBody));
         responseCacheWrapperObject.copyBodyToResponse();
     }

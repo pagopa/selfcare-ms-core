@@ -6,7 +6,6 @@ import lombok.Data;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
 
 @Data
 @Valid
@@ -19,7 +18,7 @@ public class Person {
     private String surname;
     private String email;
     private PartyRole role;
-    private List<String> productRole;
+    private String productRole;
     private EnvEnum env = EnvEnum.ROOT;
 
 }

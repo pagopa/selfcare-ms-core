@@ -18,20 +18,21 @@ public class OnboardingInstitutionRequest {
 
     private String productName;
 
+    @Valid
     @NotEmpty(message = "at least one user is required")
     private List<Person> users;
 
     @NotEmpty(message = "Institution externalId is required")
     private String institutionExternalId;
 
-    @NotNull(message = "institutionData is required")
     @Valid
+    @NotNull(message = "institutionData is required")
     private InstitutionUpdate institutionUpdate;
 
     private String pricingPlan;
     private BillingRequest billing;
     private ContractRequest contract;
 
-    private boolean signContract ;
+    private boolean signContract;
 
 }

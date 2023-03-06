@@ -59,7 +59,9 @@ public class OnboardingMapper {
                 userToOnboard.setTaxCode(p.getTaxCode());
                 userToOnboard.setEmail(p.getEmail());
                 userToOnboard.setRole(p.getRole());
-                userToOnboard.setProductRole(p.getProductRole());
+                if (p.getProductRole() != null) {
+                    userToOnboard.setProductRole(List.of(p.getProductRole()));
+                }
                 userToOnboard.setEnv(p.getEnv());
                 users.add(userToOnboard);
             }

@@ -8,6 +8,8 @@ import it.pagopa.selfcare.mscore.web.model.user.PersonResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.USER_NOT_FOUND_ERROR;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
@@ -33,7 +35,9 @@ public class UserMapper {
         user.setId(dto.getId());
         user.setEnv(dto.getEnv());
         user.setRole(dto.getRole());
-        user.setProductRole(dto.getProductRole());
+        if (dto.getProductRole() != null) {
+            user.setProductRole(List.of(dto.getProductRole()));
+        }
         return user;
     }
 }

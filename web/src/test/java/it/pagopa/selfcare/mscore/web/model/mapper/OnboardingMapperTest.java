@@ -78,7 +78,7 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(List.of("Product Role"));
+        person.setProductRole("Product Role");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
@@ -153,7 +153,7 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(List.of("Product Role"));
+        person.setProductRole("Product Role");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
@@ -221,7 +221,7 @@ class OnboardingMapperTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(List.of("Product Role"));
+        person.setProductRole("Product Role");
         person.setRole(PartyRole.DELEGATE);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
@@ -229,7 +229,7 @@ class OnboardingMapperTest {
         Person person1 = new Person();
         person1.setId("42");
         person1.setName("Name");
-        person1.setProductRole(List.of("Product Role"));
+        person1.setProductRole("Product Role");
         person1.setRole(PartyRole.MANAGER);
         person1.setSurname("Doe");
         person1.setTaxCode("Tax Code");

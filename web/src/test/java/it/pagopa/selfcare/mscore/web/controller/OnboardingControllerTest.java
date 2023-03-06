@@ -10,7 +10,6 @@ import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import java.util.ArrayList;
-import java.util.List;
 
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Test;
@@ -94,7 +93,7 @@ class OnboardingControllerTest {
         Person person = new Person();
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(List.of("Product Role"));
+        person.setProductRole("Product Role");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");

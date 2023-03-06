@@ -10,8 +10,6 @@ import it.pagopa.selfcare.mscore.model.OnboardedUser;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 class UserMapperTest {
     /**
      * Method under test: {@link UserMapper#toPersonResponse(OnboardedUser, String)}
@@ -39,7 +37,7 @@ class UserMapperTest {
         person.setEmail("jane.doe@example.org");
         person.setId("42");
         person.setName("Name");
-        person.setProductRole(List.of("Product Role"));
+        person.setProductRole("Product Role");
         person.setRole(PartyRole.MANAGER);
         person.setSurname("Doe");
         person.setTaxCode("Tax Code");
