@@ -5,6 +5,8 @@ import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 import java.time.OffsetDateTime;
 
 import static it.pagopa.selfcare.mscore.model.EnvEnum.ROOT;
@@ -12,8 +14,11 @@ import static it.pagopa.selfcare.mscore.model.EnvEnum.ROOT;
 @Data
 @FieldNameConstants(asEnum = true)
 public class OnboardedProductEntity {
-    private String relationshipId;
+
+    @Indexed
     private String productId;
+
+    private String relationshipId;
     private String tokenId;
     private RelationshipState status;
     private String contract;

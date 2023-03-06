@@ -6,19 +6,25 @@ import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Sharded;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
 @Document("Institution")
+@Sharded(shardKey = {"id"})
 @FieldNameConstants(asEnum = true)
 public class InstitutionEntity {
 
     @Id
     private String id;
+
+    @Indexed(unique = true)
     private String externalId;
+
     private String description;
     private OriginEnum origin;
     private String originId;

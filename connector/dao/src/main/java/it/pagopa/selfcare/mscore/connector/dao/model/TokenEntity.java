@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Sharded;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Document("Token")
+@Sharded(shardKey = {"id"})
 @FieldNameConstants(asEnum = true)
 public class TokenEntity {
 

@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
+import org.springframework.data.mongodb.core.index.Indexed;
+
 import java.util.List;
 
 @Data
@@ -11,6 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserBindingEntity {
+
+    @Indexed(unique = true)
     private String institutionId;
     private List<OnboardedProductEntity> products;
 }
