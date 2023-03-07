@@ -31,14 +31,14 @@ class UserConnectorImplTest {
     private UserRepository userRepository;
 
     @Test
-    void findById(){
+    void findById() {
         UserEntity userEntity = new UserEntity();
         when(userRepository.findById(any())).thenReturn(Optional.of(userEntity));
         assertNotNull(userConnectorImpl.findById("id"));
     }
 
     @Test
-    void findAllByIds(){
+    void findAllByIds() {
         List<UserEntity> userEntities = new ArrayList<>();
         userEntities.add(new UserEntity());
         when(userRepository.findAllById(any())).thenReturn(userEntities);
@@ -46,7 +46,7 @@ class UserConnectorImplTest {
     }
 
     @Test
-    void findAllByIds2(){
+    void findAllByIds2() {
         List<UserEntity> userEntities = new ArrayList<>();
         UserEntity userEntity = new UserEntity();
         userEntity.setId("id");
@@ -78,11 +78,9 @@ class UserConnectorImplTest {
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
-        when(userRepository.findAndModify(any(), any(), any(),
-                any())).thenReturn(userEntity);
-        Assertions.assertDoesNotThrow(() ->         userConnectorImpl.findAndUpdateState("42", "42", "42", RelationshipState.PENDING));
-
-
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(userEntity);
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateState("42", "42", "42", RelationshipState.PENDING));
     }
 
     @Test
@@ -154,21 +152,19 @@ class UserConnectorImplTest {
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
-        when(userRepository.findAndModify(any(), any(), any(),
-                any())).thenReturn(userEntity);
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(userEntity);
         userConnectorImpl.findAndCreate("42", new UserBinding());
-        verify(userRepository).findAndModify(any(), any(), any(),
-                any());
+        verify(userRepository).findAndModify(any(), any(), any(), any());
     }
 
     @Test
     void testFindAndCreate2() {
-        when(userRepository.findAndModify(any(), any(), any(),
-                any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class,
-                () -> userConnectorImpl.findAndCreate("42",  new UserBinding()));
-        verify(userRepository).findAndModify(any(), any(), any(),
-                any());
+                () -> userConnectorImpl.findAndCreate("42", new UserBinding()));
+        verify(userRepository).findAndModify(any(), any(), any(), any());
     }
 
     @Test
@@ -178,11 +174,10 @@ class UserConnectorImplTest {
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
-        when(userRepository.findAndModify(any(), any(), any(),
-                any())).thenReturn(userEntity);
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(userEntity);
         userConnectorImpl.findAndCreate("42", null);
-        verify(userRepository).findAndModify(any(), any(), any(),
-                any());
+        verify(userRepository).findAndModify(any(), any(), any(), any());
     }
 
     /**
@@ -196,18 +191,18 @@ class UserConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link UserConnectorImpl#findAdminWithFilter(String, String, List, List)}
+     * Method under test: {@link UserConnectorImpl#findActiveInstitutionAdmin(String, String, List, List)}
      */
     @Test
     void testFindAdminWithFilter() {
         when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
         ArrayList<PartyRole> roles = new ArrayList<>();
-        assertTrue(userConnectorImpl.findAdminWithFilter("42", "42", roles, new ArrayList<>()).isEmpty());
+        assertTrue(userConnectorImpl.findActiveInstitutionAdmin("42", "42", roles, new ArrayList<>()).isEmpty());
         verify(userRepository).find(any(), any());
     }
 
     /**
-     * Method under test: {@link UserConnectorImpl#findAdminWithFilter(String, String, List, List)}
+     * Method under test: {@link UserConnectorImpl#findActiveInstitutionAdmin(String, String, List, List)}
      */
     @Test
     void testFindAdminWithFilter4() {
@@ -215,7 +210,7 @@ class UserConnectorImplTest {
                 .thenThrow(new ResourceNotFoundException("An error occurred", "."));
         ArrayList<PartyRole> roles = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> userConnectorImpl.findAdminWithFilter("42", "42", roles, new ArrayList<>()));
+                () -> userConnectorImpl.findActiveInstitutionAdmin("42", "42", roles, new ArrayList<>()));
         verify(userRepository).find(any(), any());
     }
 
@@ -343,8 +338,8 @@ class UserConnectorImplTest {
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
-        when(userRepository.findAndModify(any(), any(), any(),
-                any())).thenReturn(userEntity);
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(userEntity);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -357,8 +352,7 @@ class UserConnectorImplTest {
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
         userConnectorImpl.findAndRemoveProduct("42", "42", onboardedProduct);
-        verify(userRepository).findAndModify(any(), any(), any(),
-                any());
+        verify(userRepository).findAndModify(any(), any(), any(), any());
     }
 
     /**
@@ -382,9 +376,7 @@ class UserConnectorImplTest {
         onboardedProduct.setUpdatedAt(null);
         assertThrows(ResourceNotFoundException.class,
                 () -> userConnectorImpl.findAndRemoveProduct("42", "42", onboardedProduct));
-        verify(userRepository).findAndModify(any(), any(), any(),
-                any());
+        verify(userRepository).findAndModify(any(), any(), any(), any());
     }
 
 }
-

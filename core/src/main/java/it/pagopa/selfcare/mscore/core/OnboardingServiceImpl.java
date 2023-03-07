@@ -136,7 +136,8 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void completeOboarding(Token token, MultipartFile contract) {
-        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
+        var ids = token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
+        List<OnboardedUser> onboardedUsers = userService.findAllByIds(ids);
         List<String> managerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
         List<User> managersData = managerList
                 .stream()

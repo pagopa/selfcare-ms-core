@@ -15,7 +15,6 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -62,14 +61,19 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public void findAndUpdateStatus(String institutionId, String productId, RelationshipState status) {
+    public void findAndUpdateStatus(String institutionId, String tokenId, RelationshipState status) {
+        OffsetDateTime now = OffsetDateTime.now();
+
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
-        UpdateDefinition updateDefinition = new Update()
+        Update update = new Update()
                 .set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.status.name()), status)
-                .set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.updatedAt.name()), OffsetDateTime.now())
-                .filterArray(Criteria.where(CURRENT_ONBOARDING + Onboarding.Fields.productId.name()).is(productId));
+                .set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.updatedAt.name()), now)
+                .filterArray(Criteria.where(CURRENT_ONBOARDING + Onboarding.Fields.tokenId.name()).is(tokenId));
+        if (status == RelationshipState.DELETED) {
+            update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.closedAt.name()), now);
+        }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        repository.findAndModify(query, updateDefinition, findAndModifyOptions, InstitutionEntity.class);
+        repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
     }
 
     @Override

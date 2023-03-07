@@ -166,10 +166,10 @@ class UserServiceImplTest {
      */
     @Test
     void testCheckIfAdmin() {
-        when(userConnector.findAdminWithFilter(any(), any(), any(),
+        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
                 any())).thenReturn(new ArrayList<>());
         assertFalse(userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findAdminWithFilter(any(), any(), any(),
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
                 any());
     }
 
@@ -180,10 +180,10 @@ class UserServiceImplTest {
     void testCheckIfAdmin2() {
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
         onboardedUserList.add(new OnboardedUser());
-        when(userConnector.findAdminWithFilter(any(), any(), any(),
+        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
                 any())).thenReturn(onboardedUserList);
         assertTrue(userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findAdminWithFilter(any(), any(), any(),
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
                 any());
     }
 
@@ -192,10 +192,10 @@ class UserServiceImplTest {
      */
     @Test
     void testCheckIfAdmin3() {
-        when(userConnector.findAdminWithFilter(any(), any(), any(),
+        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
                 any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findAdminWithFilter(any(), any(), any(),
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
                 any());
     }
 

@@ -15,4 +15,6 @@ public interface TokenService {
     String findActiveContract(String institutionId, String userId, String productId);
 
     TokenRelationships getToken(String tokenId);
+
+    void checkAndHandleExpiring(Token token);
 }

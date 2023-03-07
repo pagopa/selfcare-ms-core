@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.data.mongodb.core.query.UpdateDefinition;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -71,22 +71,27 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public void findAndUpdateState(String userId, String institutionId, String productId, RelationshipState state) {
+    public void findAndUpdateState(String userId, @Nullable String relationshipId, @Nullable String tokenId, RelationshipState state) {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
-        UpdateDefinition updateDefinition = new Update()
+        Update update = new Update()
                 .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
-                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now())
-                .filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId))
-                .filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.productId.name()).is(productId));
+                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
+        if (relationshipId != null) {
+            update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.relationshipId.name()).is(relationshipId));
+        }
+        if (tokenId != null) {
+            update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.tokenId.name()).is(tokenId));
+        }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        repository.findAndModify(query, updateDefinition, findAndModifyOptions, UserEntity.class);
+        repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
     }
 
     @Override
-    public void findAndUpdate(OnboardedUser onboardedUser, String id, String institutionId, OnboardedProduct product, UserBinding bindings) {
-        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(id));
+    public void findAndUpdate(OnboardedUser onboardedUser, String userId, String institutionId, OnboardedProduct product, UserBinding bindings) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
         Update update = new Update();
-        Optional<UserBinding> opt = onboardedUser.getBindings().stream().filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
+        Optional<UserBinding> opt = onboardedUser.getBindings().stream()
+                .filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
                 .findFirst();
         if (opt.isPresent()) {
             update.addToSet(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name()), product);
@@ -130,17 +135,14 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findAdminWithFilter(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states) {
-        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId)
-                .and(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId));
-
-        query.addCriteria(Criteria.where(UserEntity.Fields.bindings.name())
-                .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
-                        .and(constructQuery(UserBinding.Fields.products.name()))
+    public List<OnboardedUser> findActiveInstitutionAdmin(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId))
+                .addCriteria(Criteria.where(UserEntity.Fields.bindings.name())
+                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
+                                .and(constructQuery(UserBinding.Fields.products.name()))
                                 .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name())).in(roles)
-                                        .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT)
-                                        .and(OnboardedProduct.Fields.status.name()).in(states)));
-
+                                .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT)
+                                .and(OnboardedProduct.Fields.status.name()).in(states)));
 
         return repository.find(query, UserEntity.class).stream()
                 .map(UserMapper::toOnboardedUser)

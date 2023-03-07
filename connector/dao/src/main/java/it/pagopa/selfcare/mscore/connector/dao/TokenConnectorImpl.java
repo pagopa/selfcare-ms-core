@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -72,14 +73,19 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public Token findAndUpdateToken(String tokenId, RelationshipState status, String digest) {
+    public Token findAndUpdateToken(String tokenId, RelationshipState status, @Nullable String digest) {
+        OffsetDateTime now = OffsetDateTime.now();
+
         Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
         Update updateDefinition = new Update()
                 .set(TokenEntity.Fields.status.name(), status)
-                .set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+                .set(TokenEntity.Fields.updatedAt.name(), now);
 
-        if(digest != null){
+        if (digest != null) {
             updateDefinition.set(TokenEntity.Fields.checksum.name(), digest);
+        }
+        if (status == RelationshipState.DELETED) {
+            updateDefinition.set(TokenEntity.Fields.closedAt.name(), now);
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));

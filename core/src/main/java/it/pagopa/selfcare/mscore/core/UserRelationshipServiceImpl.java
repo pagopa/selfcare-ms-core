@@ -10,8 +10,6 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
 import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.RELATIONSHIP_ID_NOT_FOUND;
 
@@ -37,7 +35,7 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     public void activateRelationship(String relationshipId) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         try {
-            onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.SUSPENDED), RelationshipState.ACTIVE);
+            onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.ACTIVE);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
         }
@@ -47,7 +45,7 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     public void suspendRelationship(String relationshipId) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         try {
-            onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.ACTIVE), RelationshipState.SUSPENDED);
+            onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.SUSPENDED);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
         }
@@ -56,7 +54,7 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     @Override
     public void deleteRelationship(String relationshipId) {
         OnboardedUser user = findByRelationshipId(relationshipId);
-        onboardingDao.updateUserProductState(user, relationshipId, List.of(RelationshipState.values()), RelationshipState.DELETED);
+        onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.DELETED);
     }
 
     @Override

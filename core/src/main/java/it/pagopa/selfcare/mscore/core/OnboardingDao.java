@@ -33,11 +33,13 @@ import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
 @Service
 @Slf4j
 public class OnboardingDao {
+
     private final InstitutionConnector institutionConnector;
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
     private final ProductConnector productConnector;
     private final CoreConfig coreConfig;
+
     public OnboardingDao(InstitutionConnector institutionConnector,
                          TokenConnector tokenConnector,
                          UserConnector userConnector,
@@ -50,7 +52,12 @@ public class OnboardingDao {
         this.coreConfig = coreConfig;
     }
 
-    public OnboardingRollback persist(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies, String digest) {
+    public OnboardingRollback persist(List<String> toUpdate,
+                                      List<String> toDelete,
+                                      OnboardingRequest request,
+                                      Institution institution,
+                                      List<GeographicTaxonomies> geographicTaxonomies,
+                                      String digest) {
         Token token = createToken(request, institution, digest, coreConfig.getExpiringDate());
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
         Onboarding onboarding = updateInstitution(request, institution, geographicTaxonomies, token);
@@ -58,22 +65,23 @@ public class OnboardingDao {
         return new OnboardingRollback(token.getId(), onboarding, productMap);
     }
 
-    public void persistForUpdate(Token token, Institution institution, RelationshipState stateTo, String digest) {
-        if (isValidStatusChange(token.getStatus(), stateTo)) {
-            updateToken(token, stateTo, digest);
-            updateInstitutionState(institution, token, stateTo);
-            updateUsers(token.getUsers(), institution, token, stateTo);
+    public void persistForUpdate(Token token, Institution institution, RelationshipState toState, String digest) {
+        if (isValidStateChangeForToken(token.getStatus(), toState)) {
+            updateToken(token, toState, digest);
+            updateInstitutionState(institution, token, toState);
+            updateUsers(institution, token, toState);
         } else {
-            throw new InvalidRequestException(String.format(INVALID_STATUS_CHANGE.getMessage(), token.getStatus(), stateTo), INVALID_STATUS_CHANGE.getCode());
+            throw new InvalidRequestException(String.format(INVALID_STATUS_CHANGE.getMessage(), token.getStatus(), toState), INVALID_STATUS_CHANGE.getCode());
         }
     }
 
-    public void updateUsers(List<TokenUser> userList, Institution institution, Token token, RelationshipState state) {
-        log.info("update {} users state from {} to {} for product {}", userList.size(), token.getStatus(), state, token.getProductId());
+    public void updateUsers(Institution institution, Token token, RelationshipState state) {
+        log.info("update {} users state from {} to {} for product {}", token.getUsers().size(), token.getStatus(), state, token.getProductId());
         List<String> toUpdate = new ArrayList<>();
-        userList.forEach(tokenUser -> {
+        token.getUsers().forEach(tokenUser -> {
             try {
-                userConnector.findAndUpdateState(tokenUser.getUserId(), institution.getId(), token.getProductId(), state);
+                log.debug("updating user {} with tokenId {} to state {}", tokenUser.getUserId(), token.getId(), state);
+                userConnector.findAndUpdateState(tokenUser.getUserId(), null, token.getId(), state);
                 toUpdate.add(tokenUser.getUserId());
                 log.debug("updated user {}", tokenUser.getUserId());
             } catch (Exception e) {
@@ -82,11 +90,10 @@ public class OnboardingDao {
         });
     }
 
-
     private void updateInstitutionState(Institution institution, Token token, RelationshipState state) {
         log.info("update institution status from {} to {} for product {}", token.getStatus(), state, token.getProductId());
         try {
-            institutionConnector.findAndUpdateStatus(institution.getId(), token.getProductId(), state);
+            institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), state);
         } catch (Exception e) {
             rollbackFirstStepOfUpdate(token);
         }
@@ -185,8 +192,8 @@ public class OnboardingDao {
 
     public void rollbackSecondStepOfUpdate(List<String> toUpdate, Institution institution, Token token) {
         tokenConnector.findAndUpdateToken(token.getId(), token.getStatus(), token.getChecksum());
-        institutionConnector.findAndUpdateStatus(institution.getId(), token.getProductId(), token.getStatus());
-        toUpdate.forEach(userId -> userConnector.findAndUpdateState(userId, institution.getId(), token.getProductId(), token.getStatus()));
+        institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), token.getStatus());
+        toUpdate.forEach(userId -> userConnector.findAndUpdateState(userId, null, token.getId(), token.getStatus()));
         log.debug("rollback second step completed");
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
@@ -197,19 +204,19 @@ public class OnboardingDao {
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
 
-    public void updateUserProductState(OnboardedUser user, String relationshipId, List<RelationshipState> fromStates, RelationshipState toState) {
+    public void updateUserProductState(OnboardedUser user, String relationshipId, RelationshipState toState) {
         for (UserBinding binding : user.getBindings()) {
             binding.getProducts().stream()
                     .filter(onboardedProduct -> relationshipId.equalsIgnoreCase(onboardedProduct.getRelationshipId()))
-                    .forEach(product -> checkStatus(fromStates, product.getStatus(), user.getId(), binding.getInstitutionId(), product.getProductId(), toState));
+                    .forEach(product -> checkStatus(product.getStatus(), user.getId(), product.getRelationshipId(), toState));
         }
     }
 
-    private void checkStatus(List<RelationshipState> fromStates, RelationshipState status, String userId, String institutionId, String productId, RelationshipState toState) {
-        if (fromStates.contains(status)) {
-            userConnector.findAndUpdateState(userId, institutionId, productId, toState);
+    private void checkStatus(RelationshipState fromState, String userId, String relationshipId, RelationshipState toState) {
+        if (isValidStateChangeForRelationship(fromState, toState)) {
+            userConnector.findAndUpdateState(userId, relationshipId, null, toState);
         } else {
-            throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), status, toState)), INVALID_STATUS_CHANGE.getCode());
+            throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), fromState, toState)), INVALID_STATUS_CHANGE.getCode());
         }
     }
 
@@ -217,13 +224,25 @@ public class OnboardingDao {
         return productConnector.getProductById(productId);
     }
 
-    private boolean isValidStatusChange(RelationshipState status, RelationshipState stateTo) {
-        switch (status) {
+    private boolean isValidStateChangeForRelationship(RelationshipState fromState, RelationshipState toState) {
+        switch (toState) {
+            case ACTIVE:
+                return fromState == RelationshipState.SUSPENDED;
+            case SUSPENDED:
+                return fromState == RelationshipState.ACTIVE;
+            case DELETED:
+                return fromState != RelationshipState.DELETED;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isValidStateChangeForToken(RelationshipState fromState, RelationshipState toState) {
+        switch (fromState) {
             case TOBEVALIDATED:
-                return RelationshipState.PENDING == stateTo || RelationshipState.REJECTED == stateTo;
+                return RelationshipState.PENDING == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
             case PENDING:
-                //TODO: SCADENZA TOKEN IN PENDING CHANGE STATUS? DELETE RECORD?
-                return RelationshipState.ACTIVE == stateTo;
+                return RelationshipState.ACTIVE == toState || RelationshipState.DELETED == toState;
             default:
                 return false;
         }

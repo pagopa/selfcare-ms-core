@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.core;
 import eu.europa.esig.dss.model.DSSDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.EnvEnum;
@@ -26,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -95,10 +95,11 @@ class OnboardingServiceImplTest {
 
 
     @Test
-    void completeOboarding(){
+    void completeOboarding() {
         Token token = new Token();
         token.setInstitutionId("id");
         token.setProductId("id");
+        token.setUsers(Collections.emptyList());
         MultipartFile file = mock(MultipartFile.class);
         File file1 = mock(File.class);
         OnboardedUser user = new OnboardedUser();
@@ -116,15 +117,14 @@ class OnboardingServiceImplTest {
         List<OnboardedUser> users = new ArrayList<>();
         users.add(user);
         when(userService.findAllByIds(any())).thenReturn(users);
-        when(userService.getUserFromUserRegistry(any(),any())).thenReturn(new User());
+        when(userService.getUserFromUserRegistry(any(), any())).thenReturn(new User());
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(onboardingDao.getProductById(any())).thenReturn(new Product());
-        doNothing().when(contractService).verifySignature(any(),any(),any());
+        doNothing().when(contractService).verifySignature(any(), any(), any());
         when(contractService.getLogoFile()).thenReturn(file1);
-        onboardingServiceImpl.completeOboarding(token,file);
+        onboardingServiceImpl.completeOboarding(token, file);
         assertNotNull(token);
     }
-
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}

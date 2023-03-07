@@ -26,10 +26,9 @@ public class TokenController {
         this.tokenService = tokenService;
     }
 
-
     /**
      * The verifyToken function is used to verify the token that was created by the onboarding service.
-     * It takes in a String tokenId and returns an Institution object.
+     * It takes in a String tokenId and returns a Token object.
      *
      * @param tokenId tokenId
      * @return The token tokenId

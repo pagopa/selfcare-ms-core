@@ -11,6 +11,7 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -40,6 +41,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<OnboardedUser> findAllByIds(List<String> users) {
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
         return userConnector.findAllByIds(users);
     }
 
@@ -50,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean checkIfAdmin(String userId, String institutionId) {
-        return !userConnector.findAdminWithFilter(userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
+        return !userConnector.findActiveInstitutionAdmin(userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
     }
 
     @Override

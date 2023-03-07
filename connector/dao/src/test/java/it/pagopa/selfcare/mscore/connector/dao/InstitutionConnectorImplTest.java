@@ -42,7 +42,7 @@ class InstitutionConnectorImplTest {
 
     @Test
     void save() {
-        List<GeographicTaxonomies> geographicTaxonomies =new ArrayList<>();
+        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         geographicTaxonomies.add(new GeographicTaxonomies());
         List<Onboarding> onboardings = new ArrayList<>();
         Onboarding onboarding = new Onboarding();
@@ -142,6 +142,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.findById(any())).thenReturn(Optional.of(institutionEntity));
         assertNotNull(institutionConnectionImpl.findById("id"));
     }
+
     @Test
     void testFindAndUpdate() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
@@ -152,27 +153,27 @@ class InstitutionConnectorImplTest {
         institutionEntity.setGeographicTaxonomies(new ArrayList<>());
         institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
         institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
-        when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
+        when(institutionRepository.findAndModify(any(), any(), any(), any())).thenReturn(institutionEntity);
         List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         GeographicTaxonomies geographicTaxonomies1 = new GeographicTaxonomies();
         geographicTaxonomies1.setCode("code");
         geographicTaxonomies1.setDesc("desc");
         geographicTaxonomies.add(geographicTaxonomies1);
-        Institution response = institutionConnectionImpl.findAndUpdate("institutionId",new Onboarding(), geographicTaxonomies);
+        Institution response = institutionConnectionImpl.findAndUpdate("institutionId", new Onboarding(), geographicTaxonomies);
         assertNotNull(response);
     }
 
     @Test
     void testFindWithFilter() {
-        when(institutionRepository.find(any(),any())).thenReturn(new ArrayList<>());
-        List<Institution> response = institutionConnectionImpl.findWithFilter("externalId","productId",new ArrayList<>());
+        when(institutionRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        List<Institution> response = institutionConnectionImpl.findWithFilter("externalId", "productId", new ArrayList<>());
         assertNotNull(response);
     }
 
     @Test
     void testFindInstitutionProduct() {
-        when(institutionRepository.find(any(),any())).thenReturn(new ArrayList<>());
-        assertThrows(ResourceNotFoundException.class, () -> institutionConnectionImpl.findInstitutionProduct("externalId","productId"));
+        when(institutionRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class, () -> institutionConnectionImpl.findInstitutionProduct("externalId", "productId"));
     }
 
     @Test
@@ -200,7 +201,7 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
-    void findAndUpdateStatus(){
+    void findAndUpdateStatus() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
         List<OnboardingEntity> onboardings = new ArrayList<>();
         onboardings.add(new OnboardingEntity());
@@ -209,14 +210,13 @@ class InstitutionConnectorImplTest {
         institutionEntity.setGeographicTaxonomies(new ArrayList<>());
         institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
         institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
-        when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
-        institutionConnectionImpl.findAndUpdateStatus("institutionId","productId", RelationshipState.ACTIVE);
+        when(institutionRepository.findAndModify(any(), any(), any(), any())).thenReturn(institutionEntity);
+        institutionConnectionImpl.findAndUpdateStatus("institutionId", "tokenId", RelationshipState.ACTIVE);
         assertNotNull(institutionEntity);
     }
 
-
     @Test
-    void findAndRemoveOnboarding(){
+    void findAndRemoveOnboarding() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
         List<OnboardingEntity> onboardings = new ArrayList<>();
         onboardings.add(new OnboardingEntity());
@@ -225,8 +225,8 @@ class InstitutionConnectorImplTest {
         institutionEntity.setGeographicTaxonomies(new ArrayList<>());
         institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
         institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
-        when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
-        institutionConnectionImpl.findAndRemoveOnboarding("institutionId",new Onboarding());
+        when(institutionRepository.findAndModify(any(), any(), any(), any())).thenReturn(institutionEntity);
+        institutionConnectionImpl.findAndRemoveOnboarding("institutionId", new Onboarding());
         assertNotNull(institutionEntity);
     }
 }

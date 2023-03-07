@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.EnvEnum;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -20,35 +21,33 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class OnboardingDaoTest {
+
     @Mock
     private InstitutionConnector institutionConnector;
+    @Mock
+    private ProductConnector productConnector;
+    @Mock
+    private TokenConnector tokenConnector;
+    @Mock
+    private UserConnector userConnector;
+    @Mock
+    private CoreConfig coreConfig;
 
     @InjectMocks
     private OnboardingDao onboardingDao;
 
-    @Mock
-    private ProductConnector productConnector;
-
-    @Mock
-    private TokenConnector tokenConnector;
-
-    @Mock
-    private UserConnector userConnector;
-
     @Test
     void testPersist0() {
-        when(institutionConnector.findAndUpdate(any(),any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenReturn(new Institution());
+        when(coreConfig.getExpiringDate()).thenReturn(60);
         when(tokenConnector.save(any())).thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
@@ -121,7 +120,7 @@ class OnboardingDaoTest {
         assertEquals("Pricing Plan", onboarding.getPricingPlan());
         assertEquals("Path", onboarding.getContract());
         assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdate(any(),any(),
+        verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(tokenConnector).save(any());
     }
@@ -131,9 +130,11 @@ class OnboardingDaoTest {
      */
     @Test
     void testPersist() {
-        when(institutionConnector.findAndUpdate(any(),any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenReturn(new Institution());
-        when(tokenConnector.save(any())).thenReturn(new Token());
+        Token token = new Token();
+        token.setId("tokenId");
+        when(tokenConnector.save(any())).thenReturn(token);
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
@@ -198,14 +199,14 @@ class OnboardingDaoTest {
         Institution institution = new Institution();
         OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
                 new ArrayList<>(), "Digest");
-        assertNull(actualPersistResult.getTokenId());
+        assertEquals("tokenId", actualPersistResult.getTokenId());
         Onboarding onboarding = actualPersistResult.getOnboarding();
         assertEquals(RelationshipState.PENDING, onboarding.getStatus());
         assertEquals("42", onboarding.getProductId());
         assertEquals("Pricing Plan", onboarding.getPricingPlan());
         assertEquals("Path", onboarding.getContract());
         assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdate(any(),any(),
+        verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(tokenConnector).save(any());
     }
@@ -215,8 +216,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testPersist2() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
-        when(institutionConnector.findAndUpdate(any(),any(), any()))
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
+        when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any())).thenReturn(new Token());
@@ -280,9 +281,9 @@ class OnboardingDaoTest {
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
-        verify(institutionConnector).findAndUpdate(any(),any(),
+        verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
-        verify(institutionConnector).findAndRemoveOnboarding(any(),any());
+        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any());
         verify(tokenConnector).deleteById(any());
     }
@@ -292,8 +293,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testPersist3() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
-        when(institutionConnector.findAndUpdate(any(),any(), any()))
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
+        when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"))
                 .when(tokenConnector)
@@ -359,7 +360,7 @@ class OnboardingDaoTest {
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
-        verify(institutionConnector).findAndUpdate(any(),any(),
+        verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(tokenConnector).save(any());
         verify(tokenConnector).deleteById(any());
@@ -370,8 +371,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testPersist6() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
-        when(institutionConnector.findAndUpdate(any(),any(), any()))
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
+        when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any())).thenReturn(new Token());
@@ -435,9 +436,9 @@ class OnboardingDaoTest {
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
-        verify(institutionConnector).findAndUpdate(any(),any(),
+        verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
-        verify(institutionConnector).findAndRemoveOnboarding(any(),any());
+        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any());
         verify(tokenConnector).deleteById(any());
     }
@@ -447,8 +448,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testPersist7() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
-        when(institutionConnector.findAndUpdate(any(),any(), any()))
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
+        when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any())).thenReturn(new Token());
@@ -512,9 +513,9 @@ class OnboardingDaoTest {
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
-        verify(institutionConnector).findAndUpdate(any(),any(),
+        verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
-        verify(institutionConnector).findAndRemoveOnboarding(any(),any());
+        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any());
         verify(tokenConnector).deleteById(any());
     }
@@ -548,15 +549,15 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate5() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "update token {} from state {} to {}"));
 
         Token token = new Token();
         token.setStatus(RelationshipState.PENDING);
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest"));
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
     }
 
     /**
@@ -565,15 +566,15 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate6() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
 
         Token token = new Token();
         token.setStatus(RelationshipState.PENDING);
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persistForUpdate(token, null, RelationshipState.ACTIVE, "Digest"));
-        verify(tokenConnector, atLeast(1)).findAndUpdateToken(any(),any(), any());
+        verify(tokenConnector, atLeast(1)).findAndUpdateToken(any(), any(), any());
     }
 
     /**
@@ -582,8 +583,8 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate7() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "update token {} from state {} to {}"));
 
         Token token = new Token();
@@ -598,8 +599,8 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate8() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "update token {} from state {} to {}"));
 
         Token token = new Token();
@@ -614,16 +615,16 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate9() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
 
         Token token = new Token();
         token.setUsers(new ArrayList<>());
         token.setStatus(RelationshipState.PENDING);
         onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
+        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
     }
 
     /**
@@ -632,8 +633,8 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate10() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "update token {} from state {} to {}"));
 
         Token token = new Token();
@@ -648,8 +649,8 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate11() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "update token {} from state {} to {}"));
 
         Token token = new Token();
@@ -664,8 +665,8 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate12() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "update token {} from state {} to {}"));
 
         Token token = new Token();
@@ -680,23 +681,24 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate13() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
         doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
-        ArrayList<TokenUser> stringList = new ArrayList<>();
-        stringList.add(new TokenUser());
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId("userId");
 
         Token token = new Token();
-        token.setUsers(stringList);
+        token.setUsers(List.of(tokenUser));
         token.setStatus(RelationshipState.PENDING);
+
         onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
-        verify(userConnector).findAndUpdateState(any(), any(), any(),
-               any());
+
+        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
+        verify(userConnector).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
@@ -705,84 +707,98 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate14() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
         doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
-        ArrayList<TokenUser> stringList = new ArrayList<>();
-        stringList.add(new TokenUser());
+        TokenUser tokenUser1 = new TokenUser();
+        tokenUser1.setUserId("userId1");
+        TokenUser tokenUser2 = new TokenUser();
+        tokenUser2.setUserId("userId2");
 
         Token token = new Token();
-        token.setUsers(stringList);
+        token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setStatus(RelationshipState.PENDING);
+
         onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
-        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(),
-               any());
+
+        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
+        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUsers(List, Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers() {
-        ArrayList<TokenUser> userList = new ArrayList<>();
-        userList.add(new TokenUser());
         Institution institution = new Institution();
-        onboardingDao.updateUsers(userList, institution, new Token(), RelationshipState.PENDING);
+        Token token = new Token();
+        token.setUsers(Collections.emptyList());
+        assertDoesNotThrow(() -> onboardingDao.updateUsers(institution, token, RelationshipState.PENDING));
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUsers(List, Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers2() {
         doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
-        ArrayList<TokenUser> stringList = new ArrayList<>();
-        stringList.add(new TokenUser());
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId("userId");
+
+        Token token = new Token();
+        token.setUsers(List.of(tokenUser));
+
         Institution institution = new Institution();
-        onboardingDao.updateUsers(stringList, institution, new Token(), RelationshipState.PENDING);
-        verify(userConnector).findAndUpdateState(any(), any(), any(),
-               any());
+        onboardingDao.updateUsers(institution, token, RelationshipState.PENDING);
+        verify(userConnector).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUsers(List, Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers3() {
         doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
-        ArrayList<TokenUser> stringList = new ArrayList<>();
-        stringList.add(new TokenUser());
+        TokenUser tokenUser1 = new TokenUser();
+        tokenUser1.setUserId("userId1");
+        TokenUser tokenUser2 = new TokenUser();
+        tokenUser2.setUserId("userId2");
+
+        Token token = new Token();
+        token.setUsers(List.of(tokenUser1, tokenUser2));
+
         Institution institution = new Institution();
-        onboardingDao.updateUsers(stringList, institution, new Token(), RelationshipState.PENDING);
-        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(),
-               any());
+        onboardingDao.updateUsers(institution, token, RelationshipState.PENDING);
+        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(), any());
     }
 
-
     /**
-     * Method under test: {@link OnboardingDao#updateUsers(List, Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers5() {
-        when(tokenConnector.findAndUpdateToken(any(),any(), any())).thenThrow(
+        when(tokenConnector.findAndUpdateToken(any(), any(), any())).thenThrow(
                 new InvalidRequestException("An error occurred", "update {} users state from {} to {} for product {}"));
-        doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+        doThrow(new RuntimeException()).when(userConnector)
+                .findAndUpdateState(any(), any(), any(), any());
 
-        ArrayList<TokenUser> stringList = new ArrayList<>();
-        stringList.add(new TokenUser());
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId("userId");
+
+        Token token = new Token();
+        token.setUsers(List.of(tokenUser));
+
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.updateUsers(stringList, null, new Token(), RelationshipState.PENDING));
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
+                () -> onboardingDao.updateUsers(null, token, RelationshipState.PENDING));
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
     }
 
     /**
@@ -790,7 +806,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testRollbackSecondStep() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
         doNothing().when(tokenConnector).deleteById(any());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
@@ -814,7 +830,7 @@ class OnboardingDaoTest {
         onboarding.setUpdatedAt(null);
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", "42", onboarding, new HashMap<>()));
-        verify(institutionConnector).findAndRemoveOnboarding(any(),any());
+        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).deleteById(any());
     }
 
@@ -823,7 +839,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testRollbackSecondStep2() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
         doThrow(new InvalidRequestException("An error occurred", "rollback second step completed")).when(tokenConnector)
                 .deleteById(any());
         ArrayList<String> toUpdate = new ArrayList<>();
@@ -856,7 +872,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testRollbackSecondStep3() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
         doNothing().when(tokenConnector).deleteById(any());
         doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
 
@@ -883,7 +899,7 @@ class OnboardingDaoTest {
         onboarding.setUpdatedAt(null);
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, new HashMap<>()));
-        verify(institutionConnector).findAndRemoveOnboarding(any(),any());
+        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).deleteById(any());
         verify(userConnector).findAndRemoveProduct(any(), any(), any());
     }
@@ -893,7 +909,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testRollbackSecondStep4() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(),any());
+        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
         doNothing().when(tokenConnector).deleteById(any());
         doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
 
@@ -921,7 +937,7 @@ class OnboardingDaoTest {
         onboarding.setUpdatedAt(null);
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, new HashMap<>()));
-        verify(institutionConnector).findAndRemoveOnboarding(any(),any());
+        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).deleteById(any());
         verify(userConnector, atLeast(1)).findAndRemoveProduct(any(), any(), any());
     }
@@ -933,15 +949,15 @@ class OnboardingDaoTest {
     @Test
     void testRollbackSecondStepOfUpdate() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStepOfUpdate(toUpdate, institution, new Token()));
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
+        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
     }
 
     /**
@@ -950,14 +966,14 @@ class OnboardingDaoTest {
     @Test
     void testRollbackSecondStepOfUpdate2() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "rollback second step completed"));
         ArrayList<String> toUpdate = new ArrayList<>();
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStepOfUpdate(toUpdate, institution, new Token()));
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
     }
 
     /**
@@ -966,21 +982,20 @@ class OnboardingDaoTest {
     @Test
     void testRollbackSecondStepOfUpdate3() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
         doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
         ArrayList<String> stringList = new ArrayList<>();
         stringList.add("rollback second step completed");
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStepOfUpdate(stringList, institution, new Token()));
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
-        verify(userConnector).findAndUpdateState(any(), any(), any(),
-               any());
+        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
+        verify(userConnector).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
@@ -989,11 +1004,11 @@ class OnboardingDaoTest {
     @Test
     void testRollbackSecondStepOfUpdate4() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
         doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
         ArrayList<String> stringList = new ArrayList<>();
         stringList.add("rollback second step completed");
@@ -1001,10 +1016,9 @@ class OnboardingDaoTest {
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStepOfUpdate(stringList, institution, new Token()));
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
-        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(),
-               any());
+        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
+        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
@@ -1013,63 +1027,58 @@ class OnboardingDaoTest {
     @Test
     void testRollbackSecondStepOfUpdate7() {
         doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(),any());
-        when(tokenConnector.findAndUpdateToken(any(),any(), any()))
+                .findAndUpdateStatus(any(), any(), any());
+        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
                 .thenReturn(new Token());
         doThrow(new InvalidRequestException("An error occurred", "rollback second step completed")).when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
         ArrayList<String> stringList = new ArrayList<>();
         stringList.add("rollback second step completed");
         Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.rollbackSecondStepOfUpdate(stringList, institution, new Token()));
-        verify(institutionConnector).findAndUpdateStatus(any(), any(),any());
-        verify(tokenConnector).findAndUpdateToken(any(),any(), any());
-        verify(userConnector).findAndUpdateState(any(), any(), any(),
-               any());
+        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
+        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
+        verify(userConnector).findAndUpdateState(any(), any(), any(), any());
     }
 
 
     /**
-     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, List, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, RelationshipState)}
      */
     @Test
     void testUpdateUserProductState2() {
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
-        ArrayList<RelationshipState> relationshipStateList = new ArrayList<>();
-        onboardingDao.updateUserProductState(onboardedUser, "42", relationshipStateList, RelationshipState.PENDING);
+        onboardingDao.updateUserProductState(onboardedUser, "42", RelationshipState.PENDING);
         assertNotNull(onboardedUser);
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, List, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, RelationshipState)}
      */
     @Test
     void testUpdateUserProductState5() {
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
-        ArrayList<RelationshipState> relationshipStateList = new ArrayList<>();
-        onboardingDao.updateUserProductState(onboardedUser, "42", relationshipStateList, RelationshipState.ACTIVE);
+        onboardingDao.updateUserProductState(onboardedUser, "42", RelationshipState.ACTIVE);
         assertNotNull(onboardedUser);
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, List, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, RelationshipState)}
      */
     @Test
     void testUpdateUserProductState6() {
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
-        ArrayList<RelationshipState> relationshipStateList = new ArrayList<>();
-        onboardingDao.updateUserProductState(onboardedUser, "42", relationshipStateList, RelationshipState.SUSPENDED);
+        onboardingDao.updateUserProductState(onboardedUser, "42", RelationshipState.SUSPENDED);
         assertNotNull(onboardedUser);
     }
 
-
     /**
-     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, List, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, RelationshipState)}
      */
     @Test
     void testUpdateUserProductState8() {
@@ -1081,12 +1090,12 @@ class OnboardingDaoTest {
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(userBindingList);
-        onboardingDao.updateUserProductState(onboardedUser, "42", new ArrayList<>(), RelationshipState.PENDING);
+        onboardingDao.updateUserProductState(onboardedUser, "42", RelationshipState.PENDING);
         assertEquals(1, onboardedUser.getBindings().size());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, List, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, RelationshipState)}
      */
     @Test
     void testUpdateUserProductState11() {
@@ -1112,17 +1121,16 @@ class OnboardingDaoTest {
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(userBindingList);
-        assertThrows(InvalidRequestException.class, () -> onboardingDao.updateUserProductState(onboardedUser, "42",
-                new ArrayList<>(), RelationshipState.PENDING));
+        assertThrows(InvalidRequestException.class, () -> onboardingDao.updateUserProductState(onboardedUser, "42", RelationshipState.PENDING));
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, List, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, RelationshipState)}
      */
     @Test
     void testUpdateUserProductState13() {
         doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(),any());
+                .findAndUpdateState(any(), any(), any(), any());
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -1132,7 +1140,7 @@ class OnboardingDaoTest {
         onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
         onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setStatus(RelationshipState.ACTIVE);
         onboardedProduct.setUpdatedAt(null);
 
         ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
@@ -1147,11 +1155,8 @@ class OnboardingDaoTest {
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(userBindingList);
 
-        ArrayList<RelationshipState> relationshipStateList = new ArrayList<>();
-        relationshipStateList.add(RelationshipState.PENDING);
-        onboardingDao.updateUserProductState(onboardedUser, "42", relationshipStateList, RelationshipState.PENDING);
-        verify(userConnector).findAndUpdateState(any(), any(), any(),
-               any());
+        onboardingDao.updateUserProductState(onboardedUser, "42", RelationshipState.SUSPENDED);
+        verify(userConnector).findAndUpdateState(any(), any(), any(), any());
         assertEquals(1, onboardedUser.getBindings().size());
     }
 
@@ -1215,4 +1220,3 @@ class OnboardingDaoTest {
         assertFalse(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
     }
 }
-

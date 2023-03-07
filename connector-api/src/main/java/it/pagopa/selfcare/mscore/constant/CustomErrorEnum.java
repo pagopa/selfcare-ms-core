@@ -23,6 +23,7 @@ public enum CustomErrorEnum {
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),
     TOKEN_ALREADY_CONSUMED("0040", "Token %s has already consumed"),
     TOKEN_NOT_FOUND("0014", "Token %s not found"),
+    TOKEN_EXPIRED("0040", "Token %s expired on %s"),
     CONTRACT_NOT_FOUND("0015", "Token for institution %s and product %s not found"),
     DOCUMENT_NOT_FOUND("0016", "Document for relationship %s not found"),
     GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s and productId %s"),

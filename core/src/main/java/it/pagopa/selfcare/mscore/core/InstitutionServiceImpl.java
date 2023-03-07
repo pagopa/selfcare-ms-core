@@ -31,12 +31,16 @@ import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_D
 @Slf4j
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
+
     private final InstitutionConnector institutionConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final GeoTaxonomiesConnector geoTaxonomiesConnector;
     private final UserService userService;
 
-    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, GeoTaxonomiesConnector geoTaxonomiesConnector, UserService userService) {
+    public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
+                                  InstitutionConnector institutionConnector,
+                                  GeoTaxonomiesConnector geoTaxonomiesConnector,
+                                  UserService userService) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
@@ -60,8 +64,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution createInstitutionByExternalId(String externalId) {
-
         checkIfAlreadyExists(externalId);
+
         InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(externalId);
         log.debug("institution from proxy: {}", institutionProxyInfo);
         log.info("getInstitution {}", institutionProxyInfo.getId());
@@ -105,8 +109,10 @@ public class InstitutionServiceImpl implements InstitutionService {
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
         if (existsInRegistry) {
             List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
-            institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
-                    .findFirst().ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
+            institutionByLegal.stream()
+                    .filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
+                    .findFirst()
+                    .ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
                             () -> {
                                 throw new InvalidRequestException(String.format(INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId), INSTITUTION_LEGAL_NOT_FOUND.getCode());
                             });

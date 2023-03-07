@@ -63,26 +63,21 @@ class UserRelationshipServiceImplTest {
     @Test
     void testActivateRelationship() {
         doNothing().when(onboardingDao)
-                .updateUserProductState(any(), any(), any(),
-                        any());
+                .updateUserProductState(any(), any(), any());
         when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
         userRelationshipServiceImpl.activateRelationship("42");
-        verify(onboardingDao).updateUserProductState(any(), any(), any(),
-                any());
+        verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }
 
     /**
-     * Method under test: {@link UserRelationshipServiceImpl#
-     *
-     *
-     * (String)}
+     * Method under test: {@link UserRelationshipServiceImpl#(String)}
      */
     @Test
     void testActivateRelationship2() {
         when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
         InvalidRequestException invalidRequestException = mock(InvalidRequestException.class);
-        doThrow(invalidRequestException).when(onboardingDao).updateUserProductState(any(),any(),any(),any());
+        doThrow(invalidRequestException).when(onboardingDao).updateUserProductState(any(), any(), any());
         assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.activateRelationship("42"));
         verify(userConnector).findByRelationshipId(any());
     }
@@ -90,7 +85,7 @@ class UserRelationshipServiceImplTest {
     @Test
     void testActivateRelationship3() {
         when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
-        doNothing().when(onboardingDao).updateUserProductState(any(),any(),any(),any());
+        doNothing().when(onboardingDao).updateUserProductState(any(), any(), any());
         userRelationshipServiceImpl.activateRelationship("42");
         verify(userConnector).findByRelationshipId(any());
     }
@@ -101,12 +96,10 @@ class UserRelationshipServiceImplTest {
     @Test
     void testSuspendRelationship() {
         doNothing().when(onboardingDao)
-                .updateUserProductState(any(), any(), any(),
-                        any());
+                .updateUserProductState(any(), any(), any());
         when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
         userRelationshipServiceImpl.suspendRelationship("42");
-        verify(onboardingDao).updateUserProductState(any(), any(),
-                any(), any());
+        verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }
 
@@ -118,7 +111,7 @@ class UserRelationshipServiceImplTest {
         when(userConnector.findByRelationshipId(any()))
                 .thenReturn(new OnboardedUser());
         InvalidRequestException invalidRequestException = mock(InvalidRequestException.class);
-        doThrow(invalidRequestException).when(onboardingDao).updateUserProductState(any(),any(),any(),any());
+        doThrow(invalidRequestException).when(onboardingDao).updateUserProductState(any(), any(), any());
         assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.suspendRelationship("42"));
         verify(userConnector).findByRelationshipId(any());
     }
@@ -129,12 +122,10 @@ class UserRelationshipServiceImplTest {
     @Test
     void testDeleteRelationship() {
         doNothing().when(onboardingDao)
-                .updateUserProductState(any(), any(), any(),
-                        any());
+                .updateUserProductState(any(), any(), any());
         when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
         userRelationshipServiceImpl.deleteRelationship("42");
-        verify(onboardingDao).updateUserProductState(any(), any(),
-                any(), any());
+        verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }
 
@@ -144,8 +135,7 @@ class UserRelationshipServiceImplTest {
     @Test
     void testDeleteRelationship2() {
         doNothing().when(onboardingDao)
-                .updateUserProductState(any(), any(), any(),
-                        any());
+                .updateUserProductState(any(), any(), any());
         when(userConnector.findByRelationshipId(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
         assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.deleteRelationship("42"));
@@ -302,4 +292,3 @@ class UserRelationshipServiceImplTest {
         verify(institutionService).retrieveInstitutionById(any());
     }
 }
-
