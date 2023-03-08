@@ -93,6 +93,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         checkIfAlreadyExists(taxId);
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(taxId);
+        newInstitution.setDescription(description);
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
