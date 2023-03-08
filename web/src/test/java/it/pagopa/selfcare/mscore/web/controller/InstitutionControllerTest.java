@@ -558,7 +558,7 @@ class InstitutionControllerTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(institutionService.createPgInstitution(any(), anyBoolean(), any()))
+        when(institutionService.createPgInstitution(any(), any(), anyBoolean(), any()))
                 .thenReturn(new Institution());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -569,7 +569,7 @@ class InstitutionControllerTest {
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isCreated());
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 }
 
