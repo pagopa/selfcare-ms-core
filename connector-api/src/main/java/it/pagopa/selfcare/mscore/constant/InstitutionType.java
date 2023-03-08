@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.model.institution;
+package it.pagopa.selfcare.mscore.constant;
 
 public enum InstitutionType {
     PA,

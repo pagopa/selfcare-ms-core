@@ -12,22 +12,22 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.INVALID_STATUS_CHANGE;
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ONBOARDING_OPERATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.CustomError.INVALID_STATUS_CHANGE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
 
 @Service
@@ -58,20 +58,38 @@ public class OnboardingDao {
                                       Institution institution,
                                       List<GeographicTaxonomies> geographicTaxonomies,
                                       String digest) {
-        Token token = createToken(request, institution, digest, coreConfig.getExpiringDate());
+        Token token = createToken(request, institution, digest, coreConfig.getExpiringDate(), geographicTaxonomies);
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
         Onboarding onboarding = updateInstitution(request, institution, geographicTaxonomies, token);
         Map<String, OnboardedProduct> productMap = createUsers(toUpdate, toDelete, request, institution.getId(), token.getId(), onboarding);
         return new OnboardingRollback(token.getId(), onboarding, productMap);
     }
 
+    public OnboardingRollback persistLegals(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, String digest) {
+        Token token = createToken(request, institution, digest, coreConfig.getExpiringDate(), null);
+        Map<String, OnboardedProduct> productMap = createUsers(toUpdate, toDelete, request, institution.getId(), token.getId(), null);
+        return new OnboardingRollback(token.getId(), null, productMap);
+    }
+
     public void persistForUpdate(Token token, Institution institution, RelationshipState toState, String digest) {
         if (isValidStateChangeForToken(token.getStatus(), toState)) {
             updateToken(token, toState, digest);
-            updateInstitutionState(institution, token, toState);
+            if (RelationshipState.ACTIVE == toState) {
+                updateInstitutionData(institution, token, toState);
+            } else {
+                updateInstitutionState(institution, token, toState);
+            }
             updateUsers(institution, token, toState);
         } else {
             throw new InvalidRequestException(String.format(INVALID_STATUS_CHANGE.getMessage(), token.getStatus(), toState), INVALID_STATUS_CHANGE.getCode());
+        }
+    }
+
+    private void updateInstitutionData(Institution institution, Token token, RelationshipState toState) {
+        try {
+            institutionConnector.findAndUpdateInstitutionData(institution.getId(), token, null, toState);
+        } catch (Exception e) {
+            rollbackFirstStepOfUpdate(token);
         }
     }
 
@@ -104,10 +122,10 @@ public class OnboardingDao {
         tokenConnector.findAndUpdateToken(token.getId(), state, digest);
     }
 
-    private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire) {
+    private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<GeographicTaxonomies> geographicTaxonomies) {
         log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
-        OffsetDateTime expiringDate = OffsetDateTime.now().plus(expire, TimeUnit.DAYS.toChronoUnit());
-        return tokenConnector.save(convertToToken(request, institution, digest, expiringDate));
+        OffsetDateTime expiringDate = OffsetDateTime.now().plus(expire, ChronoUnit.DAYS);
+        return tokenConnector.save(convertToToken(request, institution, digest, expiringDate), geographicTaxonomies);
     }
 
     private Onboarding updateInstitution(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies, Token token) {
@@ -115,7 +133,11 @@ public class OnboardingDao {
         onboarding.setTokenId(token.getId());
         try {
             log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
-            institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
+            if (RelationshipState.ACTIVE == token.getStatus()) {
+                institutionConnector.findAndUpdateInstitutionData(institution.getId(), token, onboarding, null);
+            } else {
+                institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
+            }
         } catch (Exception e) {
             rollbackFirstStep(token, institution.getId(), onboarding);
         }

@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GET_RELATIONSHIP_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_RELATIONSHIP_ERROR;
 
 @Slf4j
 @RestController

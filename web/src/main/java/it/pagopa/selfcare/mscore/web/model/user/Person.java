@@ -2,14 +2,13 @@ package it.pagopa.selfcare.mscore.web.model.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
+import it.pagopa.selfcare.mscore.constant.Env;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
 
 @Data
 @Valid
@@ -26,7 +25,7 @@ public class Person {
     private String email;
     private PartyRole role;
     private String productRole;
-    private EnvEnum env = EnvEnum.ROOT;
+    private Env env = Env.ROOT;
 
     public Person(String id) {
         this.id = id;

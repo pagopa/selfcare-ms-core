@@ -4,8 +4,9 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -196,7 +197,7 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC, "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC, "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -214,9 +215,6 @@ class ExternalControllerTest {
                                 "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"businessRegisterPlace\":\"?\",\"supportEmail\":\"?\",\"supportPhone\":\"?\",\"imported\":true}"));
     }
 
-    /**
-     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String)}
-     */
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId() throws Exception {
         when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
@@ -230,9 +228,6 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string("[]"));
     }
 
-    /**
-     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String)}
-     */
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId2() throws Exception {
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
@@ -247,9 +242,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string("{\"imported\":false}"));
     }
 
-    /**
-     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String)}
-     */
+
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId3() throws Exception {
         Billing billing = new Billing();
@@ -257,7 +250,7 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC, "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC, "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -756,7 +749,7 @@ class ExternalControllerTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", OriginEnum.SELC, "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC, "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -902,7 +895,7 @@ class ExternalControllerTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
 
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,  "?", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", Origin.SELC,  "?", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing1, onboarding1, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "?", "?", "?",
                 true, OffsetDateTime.now(), OffsetDateTime.now());

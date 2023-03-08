@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
-import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
@@ -25,7 +25,7 @@ public class InstitutionEntity {
     @Indexed(unique = true)
     private String externalId;
 
-    private OriginEnum origin;
+    private Origin origin;
     private String originId;
     private String description;
     private InstitutionType institutionType;

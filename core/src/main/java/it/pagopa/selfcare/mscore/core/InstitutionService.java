@@ -7,7 +7,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public interface InstitutionService {
 
     Institution createInstitutionRaw(Institution institution, String externalId);
 
-    Institution createPgInstitution(String taxId, boolean existsInRegistry, SelfCareUser selfCareUser);
+    Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser);
 
     List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states);
 

@@ -1,10 +1,11 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
@@ -365,7 +366,7 @@ class OnboardingMapperTest {
 
         Person person = new Person();
         person.setEmail("jane.doe@example.org");
-        person.setEnv(EnvEnum.ROOT);
+        person.setEnv(Env.ROOT);
         person.setId("42");
         person.setName("Name");
         person.setProductRole("");
@@ -512,7 +513,7 @@ class OnboardingMapperTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
@@ -563,7 +564,7 @@ class OnboardingMapperTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
@@ -606,7 +607,7 @@ class OnboardingMapperTest {
     void testToOnboardingOperatorRequest2() {
         Person person = new Person();
         person.setEmail("jane.doe@example.org");
-        person.setEnv(EnvEnum.ROOT);
+        person.setEnv(Env.ROOT);
         person.setId("42");
         person.setName("Name");
         person.setProductRole("");

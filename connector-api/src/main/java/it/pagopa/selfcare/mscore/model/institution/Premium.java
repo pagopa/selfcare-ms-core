@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import lombok.Data;
 
 @Data

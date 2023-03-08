@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -12,9 +13,10 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
@@ -36,15 +38,17 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final GeoTaxonomiesConnector geoTaxonomiesConnector;
     private final UserService userService;
+    private final CoreConfig coreConfig;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
                                   GeoTaxonomiesConnector geoTaxonomiesConnector,
-                                  UserService userService) {
+                                  UserService userService, CoreConfig coreConfig) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
         this.userService = userService;
+        this.coreConfig = coreConfig;
     }
 
     @Override
@@ -75,7 +79,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(externalId);
         newInstitution.setInstitutionType(InstitutionType.PA);
-        newInstitution.setOrigin(OriginEnum.IPA);
+        newInstitution.setOrigin(Origin.IPA);
         newInstitution.setOriginId(institutionProxyInfo.getOriginId());
         newInstitution.setTaxCode(institutionProxyInfo.getTaxCode());
         newInstitution.setAddress(institutionProxyInfo.getAddress());
@@ -96,18 +100,19 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createPgInstitution(String taxId, boolean existsInRegistry, SelfCareUser selfCareUser) {
+    public Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
         checkIfAlreadyExists(taxId);
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(taxId);
+        newInstitution.setDescription(description);
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
-        newInstitution.setOrigin(OriginEnum.INFOCAMERE);
+        newInstitution.setOrigin(Origin.INFOCAMERE);
         newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
-        if (existsInRegistry) {
+        if (existsInRegistry && coreConfig.isInfoCamereEnable()) {
             List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
             institutionByLegal.stream()
                     .filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
@@ -132,7 +137,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (institution.getInstitutionType() == null) {
             institution.setInstitutionType(InstitutionType.UNKNOWN);
         }
-        institution.setOrigin(OriginEnum.SELC);
+        institution.setOrigin(Origin.SELC);
         institution.setOriginId("SELC_" + institution.getExternalId());
         institution.setCreatedAt(OffsetDateTime.now());
         return institutionConnector.save(institution);

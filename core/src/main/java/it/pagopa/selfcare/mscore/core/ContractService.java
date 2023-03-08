@@ -19,7 +19,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 import static it.pagopa.selfcare.mscore.core.SignatureService.VALID_CHECK;
 import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 

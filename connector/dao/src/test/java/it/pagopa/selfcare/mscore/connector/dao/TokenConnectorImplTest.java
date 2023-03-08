@@ -3,7 +3,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +62,7 @@ class TokenConnectorImplTest {
         tokenEntity.setUsers(new ArrayList<>());
         token.setUsers(new ArrayList<>());
         when(tokenRepository.save(any())).thenReturn(tokenEntity);
-        Token response = tokenConnectorImpl.save(token);
+        Token response = tokenConnectorImpl.save(token, new ArrayList<>());
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
     }
 
@@ -75,7 +75,7 @@ class TokenConnectorImplTest {
         tokenEntity.setUsers(new ArrayList<>());
         token.setUsers(new ArrayList<>());
         when(tokenRepository.save(any())).thenReturn(tokenEntity);
-        Token response = tokenConnectorImpl.save(token);
+        Token response = tokenConnectorImpl.save(token, new ArrayList<>());
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getProductId());
     }
 
@@ -121,7 +121,7 @@ class TokenConnectorImplTest {
         token.setId("507f1f77bcf86cd799439011");
         token.setUsers(new ArrayList<>());
         when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
-        List<Token> tokens = tokenConnectorImpl.findWithFilter("42", "42", new ArrayList<>());
-        Assertions.assertEquals("507f1f77bcf86cd799439011", tokens.get(0).getId());
+        Token tokens = tokenConnectorImpl.findWithFilter("42", "42");
+        Assertions.assertEquals("507f1f77bcf86cd799439011", tokens.getId());
     }
 }

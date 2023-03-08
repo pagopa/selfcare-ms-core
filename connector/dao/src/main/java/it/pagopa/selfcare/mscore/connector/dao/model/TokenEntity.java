@@ -2,8 +2,8 @@ package it.pagopa.selfcare.mscore.connector.dao.model;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.InstitutionUpdateEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.TokenUserEntity;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
-import it.pagopa.selfcare.mscore.utils.TokenTypeEnum;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
@@ -23,7 +23,7 @@ public class TokenEntity {
 
     @Id
     private String id;
-    private TokenTypeEnum type;
+    private TokenType type;
     private RelationshipState status;
     private String institutionId;
     private String productId;

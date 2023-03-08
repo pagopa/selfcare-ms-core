@@ -31,8 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.PRODUCT_RELATIONSHIP_STATES;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @Slf4j
@@ -105,7 +104,7 @@ public class OnboardingController {
     /**
      * The function persist onboarding data
      *
-     * @param onboardingInstitutionRequest OnboardingInstitutionRequest
+     * @param request OnboardingInstitutionRequest
      * @return no content
      * <p>
      * * Code: 204, Message: successful operation, DataType: TokenId
@@ -115,11 +114,11 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.institution}", notes = "${swagger.mscore.onboarding.institution}")
     @PostMapping(value = "/institution")
-    public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest onboardingInstitutionRequest,
+    public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest request,
                                                       Authentication authentication) {
-        log.info("Onboarding institution having externalId {}", onboardingInstitutionRequest.getInstitutionExternalId());
+        log.info("Onboarding institution having externalId {}", request.getInstitutionExternalId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest), (SelfCareUser) authentication.getPrincipal());
+        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -227,7 +226,7 @@ public class OnboardingController {
                                                                                    @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber) {
         log.info("Onboarding operators on institution {}", request.getInstitutionId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATORS_ERROR);
-        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId(), PRODUCT_RELATIONSHIP_STATES);
+        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR);
         return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(response),pageSize,pageNumber));
     }
@@ -249,7 +248,7 @@ public class OnboardingController {
                                                                                      @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber) {
         log.info("Onboarding subdelegates on institution {}", request.getInstitutionId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_SUBDELEGATES_ERROR);
-        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId(), PRODUCT_RELATIONSHIP_STATES);
+        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE);
         return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(response),pageSize,pageNumber));
     }
@@ -269,9 +268,8 @@ public class OnboardingController {
     public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest request, Authentication authentication) {
         log.info("Onboarding Legals of institution {} and/or externalId {}", request.getInstitutionId(), request.getInstitutionExternalId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_LEGALS_ERROR);
-        //Token token = tokenService.
-        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId(), PRODUCT_RELATIONSHIP_STATES);
-        onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal());
+        Token token = tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
+        onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal(), token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

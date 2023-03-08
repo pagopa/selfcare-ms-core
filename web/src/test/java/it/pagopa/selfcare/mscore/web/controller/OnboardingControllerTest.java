@@ -6,7 +6,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -133,7 +133,7 @@ class OnboardingControllerTest {
         request.setUsers(personList);
         String content = (new ObjectMapper()).writeValueAsString(request);
 
-        doNothing().when(tokenService).verifyOnboarding(any(),any(),any());
+        doNothing().when(tokenService).verifyOnboarding(any(),any());
         when(onboardingService.onboardingOperators(any(),any())).thenReturn(new ArrayList<>());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -158,7 +158,7 @@ class OnboardingControllerTest {
         request.setUsers(personList);
         String content = (new ObjectMapper()).writeValueAsString(request);
 
-        doNothing().when(tokenService).verifyOnboarding(any(),any(),any());
+        doNothing().when(tokenService).verifyOnboarding(any(),any());
         when(onboardingService.onboardingOperators(any(),any())).thenReturn(new ArrayList<>());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders

@@ -1,24 +1,20 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstitutionUpdate {
-
-    @NotNull(message = "institutionType is required")
     private InstitutionType institutionType;
 
     private String description;
     private String digitalAddress;
     private String address;
 
-    @NotEmpty(message = "taxCode is required")
     private String taxCode;
 
     private String zipCode;

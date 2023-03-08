@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.CREATE_INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.CREATE_INSTITUTION_NOT_FOUND;
 
 @Slf4j
 @Service

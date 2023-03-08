@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ public class OnboardingMapper {
 
     public static OnboardingRequest toOnboardingRequest(OnboardingInstitutionRequest onboardingInstitutionRequest) {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setProductId(onboardingInstitutionRequest.getProductId());
         onboardingRequest.setProductName(onboardingInstitutionRequest.getProductName());
         onboardingRequest.setInstitutionExternalId(onboardingInstitutionRequest.getInstitutionExternalId());
@@ -28,14 +30,6 @@ public class OnboardingMapper {
             onboardingRequest.setInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate());
 
         return onboardingRequest;
-    }
-
-    private static ContractImported toContractImported(ContractImportedRequest contractImported) {
-        ContractImported response = new ContractImported();
-        response.setContractType(contractImported.getContractType());
-        response.setFilePath(contractImported.getFilePath());
-        response.setFileName(contractImported.getFileName());
-        return response;
     }
 
     private static Contract toContract(ContractRequest request) {
@@ -103,6 +97,7 @@ public class OnboardingMapper {
 
     public static OnboardingLegalsRequest toOnboardingLegalsRequest(OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest) {
         OnboardingLegalsRequest request = new OnboardingLegalsRequest();
+        request.setTokenType(TokenType.LEGALS);
         request.setProductId(onboardingInstitutionLegalsRequest.getProductId());
         request.setProductName(onboardingInstitutionLegalsRequest.getProductName());
         request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionLegalsRequest.getUsers()));

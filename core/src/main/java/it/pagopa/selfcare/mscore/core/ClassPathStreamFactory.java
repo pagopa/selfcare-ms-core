@@ -8,13 +8,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.GENERIC_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 
 @Slf4j
 public class ClassPathStreamFactory implements FSStreamFactory {
     @Override
     public FSStream getUrl(String url) {
-        URI fullUri = null;
+        URI fullUri;
         try {
             fullUri = new URI(url);
             return new ClassPathStream(fullUri.getPath());

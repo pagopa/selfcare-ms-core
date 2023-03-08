@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ERROR_DURING_SEND_MAIL;
+import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_SEND_MAIL;
 
 @Slf4j
 @Service

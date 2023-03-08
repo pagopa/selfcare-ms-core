@@ -7,8 +7,10 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -23,8 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_BILLING_ERROR;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_BILLING_ERROR;
+import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -57,7 +59,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                     log.info("Founded institution {}", institution.getExternalId());
                     return InstitutionMapper.convertToInstitution(institution);
                 })
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), id, null), INSTITUTION_NOT_FOUND.getCode()));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), id, "UNDEFINED"), INSTITUTION_NOT_FOUND.getCode()));
     }
 
     @Override
@@ -96,6 +98,31 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
+    }
+
+    @Override
+    public void findAndUpdateInstitutionData(String institutionId, Token token, Onboarding onboarding, RelationshipState state) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+        Update update = new Update();
+        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        if (onboarding != null) {
+            update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
+        }
+        if (state != null) {
+            update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.status.name()), state)
+                    .set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.updatedAt.name()), OffsetDateTime.now())
+                    .filterArray(Criteria.where(CURRENT_ONBOARDING + Onboarding.Fields.tokenId.name()).is(token.getId()));
+            if (state == RelationshipState.DELETED) {
+                update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.closedAt.name()), OffsetDateTime.now());
+            }
+        }
+
+        InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
+        //TODO: UPDATE INSTITUTION UPDATE
+
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
     }
 
     @Override

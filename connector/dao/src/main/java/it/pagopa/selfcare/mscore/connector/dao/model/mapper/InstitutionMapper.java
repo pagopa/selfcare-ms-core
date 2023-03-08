@@ -118,7 +118,7 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static DataProtectionOfficer toDataProtectionOfficer(DataProtectionOfficerEntity dataProtectionOfficer) {
+    public static DataProtectionOfficer toDataProtectionOfficer(DataProtectionOfficerEntity dataProtectionOfficer) {
         DataProtectionOfficer data = new DataProtectionOfficer();
         data.setPec(dataProtectionOfficer.getPec());
         data.setEmail(dataProtectionOfficer.getEmail());
@@ -126,7 +126,7 @@ public class InstitutionMapper {
         return data;
     }
 
-    private static PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderEntity paymentServiceProvider) {
+    public static PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderEntity paymentServiceProvider) {
         PaymentServiceProvider provider = new PaymentServiceProvider();
         provider.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());
         provider.setAbiCode(paymentServiceProvider.getAbiCode());
@@ -201,7 +201,7 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static List<GeoTaxonomyEntity> toGeoTaxonomyEntity(List<GeographicTaxonomies> geographicTaxonomies) {
+    public static List<GeoTaxonomyEntity> toGeoTaxonomyEntity(List<GeographicTaxonomies> geographicTaxonomies) {
         List<GeoTaxonomyEntity> list = new ArrayList<>();
         for(GeographicTaxonomies geo : geographicTaxonomies){
             GeoTaxonomyEntity entity = new GeoTaxonomyEntity();
@@ -212,7 +212,7 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static DataProtectionOfficerEntity toDataProtectionOfficerEntity(DataProtectionOfficer dataProtectionOfficer) {
+    public static DataProtectionOfficerEntity toDataProtectionOfficerEntity(DataProtectionOfficer dataProtectionOfficer) {
         DataProtectionOfficerEntity data = new DataProtectionOfficerEntity();
         data.setPec(dataProtectionOfficer.getPec());
         data.setEmail(dataProtectionOfficer.getEmail());
@@ -220,7 +220,7 @@ public class InstitutionMapper {
         return data;
     }
 
-    private static PaymentServiceProviderEntity toPaymentServiceProviderEntity(PaymentServiceProvider paymentServiceProvider) {
+    public static PaymentServiceProviderEntity toPaymentServiceProviderEntity(PaymentServiceProvider paymentServiceProvider) {
         PaymentServiceProviderEntity provider = new PaymentServiceProviderEntity();
         provider.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());
         provider.setAbiCode(paymentServiceProvider.getAbiCode());

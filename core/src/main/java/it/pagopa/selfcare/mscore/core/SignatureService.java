@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @Service

@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.web.exception;
 
-import it.pagopa.selfcare.mscore.constant.GenericErrorEnum;
+import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
@@ -35,16 +35,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
     private static final String BAD_REQUEST = "BAD_REQUEST";
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(@NonNull MissingServletRequestParameterException ex, @NonNull HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
-        GenericErrorEnum genericErrorEnum = GenericErrorEnum.GENERIC_ERROR;
+        GenericError genericError = GenericError.GENERIC_ERROR;
         log.error("InvalidRequestException Occured --> MESSAGE:{}",ex.getMessage(),ex);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem("MISSING PARAMETER", BAD_REQUEST, genericErrorEnum.getMessage(), ex.getMessage(), HttpStatus.BAD_REQUEST.value(), "0000");
+        Problem problem = createProblem("MISSING PARAMETER", BAD_REQUEST, genericError.getMessage(), ex.getMessage(), HttpStatus.BAD_REQUEST.value(), "0000");
         return new ResponseEntity<>(problem, headers, HttpStatus.BAD_REQUEST);
     }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex, HttpHeaders headers, @NonNull HttpStatus status, @NonNull WebRequest request) {
-        GenericErrorEnum genericErrorEnum = GenericErrorEnum.GENERIC_ERROR;
+        GenericError genericError = GenericError.GENERIC_ERROR;
         log.error("InvalidRequestException Occured --> MESSAGE:{}",ex.getMessage(),ex);
         headers.setContentType(MediaType.APPLICATION_JSON);
         List<String> errors = ex.getBindingResult()
@@ -52,56 +52,56 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
-        Problem problem = createProblem("INVALID ARGUMENT", BAD_REQUEST, genericErrorEnum.getMessage(), errors.toString(), HttpStatus.BAD_REQUEST.value(), "0000");
+        Problem problem = createProblem("INVALID ARGUMENT", BAD_REQUEST, genericError.getMessage(), errors.toString(), HttpStatus.BAD_REQUEST.value(), "0000");
         return new ResponseEntity<>(problem, headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Problem> handleResourceNotFoundException(HttpServletRequest request, ResourceNotFoundException ex) {
-        GenericErrorEnum genericErrorEnum = retrieveGenericError(request);
+        GenericError genericError = retrieveGenericError(request);
         log.error("ResourceNotFoundException Occured --> URL:{}, MESSAGE:{}",request.getRequestURL(),ex.getMessage(),ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), "NOT_FOUND", genericErrorEnum.getMessage(), ex.getMessage(), HttpStatus.NOT_FOUND.value(), ex.getCode());
+        Problem problem = createProblem(request.getRequestURL().toString(), "NOT_FOUND", genericError.getMessage(), ex.getMessage(), HttpStatus.NOT_FOUND.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ResourceConflictException.class)
     public ResponseEntity<Problem> handleResourceConflictException(HttpServletRequest request, ResourceConflictException ex) {
-        GenericErrorEnum genericErrorEnum = retrieveGenericError(request);
+        GenericError genericError = retrieveGenericError(request);
         log.error("ResourceConflictException Occured --> URL:{}, MESSAGE:{}",request.getRequestURL(),ex.getMessage(),ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), "CONFLICT", genericErrorEnum.getMessage(), ex.getMessage(), HttpStatus.CONFLICT.value(), ex.getCode());
+        Problem problem = createProblem(request.getRequestURL().toString(), "CONFLICT", genericError.getMessage(), ex.getMessage(), HttpStatus.CONFLICT.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<Problem> handleInvalidRequestException(HttpServletRequest request, InvalidRequestException ex) {
-        GenericErrorEnum genericErrorEnum = retrieveGenericError(request);
+        GenericError genericError = retrieveGenericError(request);
         log.error("InvalidRequestException Occured --> URL:{}, MESSAGE:{}",request.getRequestURL(),ex.getMessage(),ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), BAD_REQUEST, genericErrorEnum.getMessage(), ex.getMessage(), HttpStatus.BAD_REQUEST.value(), ex.getCode());
+        Problem problem = createProblem(request.getRequestURL().toString(), BAD_REQUEST, genericError.getMessage(), ex.getMessage(), HttpStatus.BAD_REQUEST.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MsCoreException.class)
     public ResponseEntity<Problem> handleMsCoreException(HttpServletRequest request, MsCoreException ex) {
-        GenericErrorEnum genericErrorEnum = retrieveGenericError(request);
+        GenericError genericError = retrieveGenericError(request);
         log.error("Exception Occured --> URL:{}, MESSAGE:{}",request.getRequestURL(),ex.getMessage(),ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), "FATAL_ERROR", genericErrorEnum.getMessage(),  ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getCode());
+        Problem problem = createProblem(request.getRequestURL().toString(), "FATAL_ERROR", genericError.getMessage(),  ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Problem> handleException(HttpServletRequest request, RuntimeException ex) {
-        GenericErrorEnum genericErrorEnum = retrieveGenericError(request);
-        log.error("{} Occured --> URL:{}, MESSAGE:{}",ex.getCause(), request.getRequestURL(),genericErrorEnum.getMessage(),ex);
+        GenericError genericError = retrieveGenericError(request);
+        log.error("{} Occured --> URL:{}, MESSAGE:{}",ex.getCause(), request.getRequestURL(), genericError.getMessage(),ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(createProblem(request.getRequestURL().toString(), BAD_REQUEST, genericErrorEnum.getMessage(), genericErrorEnum.getMessage(), HttpStatus.BAD_REQUEST.value(), genericErrorEnum.getCode()));
+                .body(createProblem(request.getRequestURL().toString(), BAD_REQUEST, genericError.getMessage(), genericError.getMessage(), HttpStatus.BAD_REQUEST.value(), genericError.getCode()));
     }
 
     private Problem createProblem(String url, String title, String customMessage, String errorMessage, Integer status, String code) {
@@ -123,11 +123,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return list;
     }
 
-    private GenericErrorEnum retrieveGenericError(HttpServletRequest request){
-        GenericErrorEnum genericErrorEnum = (GenericErrorEnum) request.getAttribute("errorEnum");
-        if(genericErrorEnum == null){
-            genericErrorEnum = GenericErrorEnum.GENERIC_ERROR;
+    private GenericError retrieveGenericError(HttpServletRequest request){
+        GenericError genericError = (GenericError) request.getAttribute("errorEnum");
+        if(genericError == null){
+            genericError = GenericError.GENERIC_ERROR;
         }
-        return genericErrorEnum;
+        return genericError;
     }
 }

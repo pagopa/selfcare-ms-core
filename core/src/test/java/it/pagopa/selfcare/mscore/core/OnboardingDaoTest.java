@@ -7,14 +7,15 @@ import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,7 +49,7 @@ class OnboardingDaoTest {
         when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenReturn(new Institution());
         when(coreConfig.getExpiringDate()).thenReturn(60);
-        when(tokenConnector.save(any())).thenReturn(new Token());
+        when(tokenConnector.save(any(), any())).thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
@@ -98,7 +99,6 @@ class OnboardingDaoTest {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
@@ -122,7 +122,7 @@ class OnboardingDaoTest {
         assertSame(billing, onboarding.getBilling());
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
-        verify(tokenConnector).save(any());
+        verify(tokenConnector).save(any(), any());
     }
 
     /**
@@ -134,7 +134,7 @@ class OnboardingDaoTest {
                 .thenReturn(new Institution());
         Token token = new Token();
         token.setId("tokenId");
-        when(tokenConnector.save(any())).thenReturn(token);
+        when(tokenConnector.save(any(), any())).thenReturn(token);
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
@@ -184,7 +184,6 @@ class OnboardingDaoTest {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
@@ -208,7 +207,7 @@ class OnboardingDaoTest {
         assertSame(billing, onboarding.getBilling());
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
-        verify(tokenConnector).save(any());
+        verify(tokenConnector).save(any(), any());
     }
 
     /**
@@ -220,7 +219,7 @@ class OnboardingDaoTest {
         when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
-        when(tokenConnector.save(any())).thenReturn(new Token());
+        when(tokenConnector.save(any(), any())).thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
@@ -270,7 +269,6 @@ class OnboardingDaoTest {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
@@ -284,7 +282,7 @@ class OnboardingDaoTest {
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).save(any());
+        verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
     }
 
@@ -299,7 +297,7 @@ class OnboardingDaoTest {
         doThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"))
                 .when(tokenConnector)
                 .deleteById(any());
-        when(tokenConnector.save(any())).thenReturn(new Token());
+        when(tokenConnector.save(any(), any())).thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
@@ -349,7 +347,6 @@ class OnboardingDaoTest {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
@@ -362,7 +359,7 @@ class OnboardingDaoTest {
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
-        verify(tokenConnector).save(any());
+        verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
     }
 
@@ -375,7 +372,7 @@ class OnboardingDaoTest {
         when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
-        when(tokenConnector.save(any())).thenReturn(new Token());
+        when(tokenConnector.save(any(), any())).thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
@@ -425,7 +422,6 @@ class OnboardingDaoTest {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
@@ -439,7 +435,7 @@ class OnboardingDaoTest {
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).save(any());
+        verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
     }
 
@@ -452,7 +448,7 @@ class OnboardingDaoTest {
         when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
-        when(tokenConnector.save(any())).thenReturn(new Token());
+        when(tokenConnector.save(any(), any())).thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
@@ -502,7 +498,6 @@ class OnboardingDaoTest {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
@@ -516,7 +511,7 @@ class OnboardingDaoTest {
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).save(any());
+        verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
     }
 
@@ -1102,7 +1097,7 @@ class OnboardingDaoTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");
@@ -1135,7 +1130,7 @@ class OnboardingDaoTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRelationshipId("42");

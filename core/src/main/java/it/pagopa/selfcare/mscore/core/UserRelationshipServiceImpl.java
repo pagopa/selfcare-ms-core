@@ -6,12 +6,12 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.springframework.stereotype.Service;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.RELATIONSHIP_ID_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.RELATIONSHIP_ID_NOT_FOUND;
 
 @Service
 public class UserRelationshipServiceImpl implements UserRelationshipService {

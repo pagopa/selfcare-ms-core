@@ -3,8 +3,11 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -17,12 +20,11 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
 import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.TOKEN_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_MANAGER_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -58,8 +60,8 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public Token save(Token token) {
-        final TokenEntity entity = convertToTokenEntity(token);
+    public Token save(Token token, List<GeographicTaxonomies> geographicTaxonomies) {
+        final TokenEntity entity = convertToTokenEntity(token, geographicTaxonomies);
         return convertToToken(tokenRepository.save(entity));
     }
 
@@ -92,13 +94,15 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public List<Token> findWithFilter(String institutionId, String productId, List<RelationshipState> state) {
+    public Token findWithFilter(String institutionId, String productId) {
         Query query = Query.query(Criteria.where(TokenEntity.Fields.productId.name()).is(productId)
                 .and(TokenEntity.Fields.institutionId.name()).is(institutionId)
-                .and(TokenEntity.Fields.status.name()).nin(state));
+                .and(TokenEntity.Fields.status.name()).is(RelationshipState.ACTIVE)
+                .and(TokenEntity.Fields.type.name()).is(TokenType.INSTITUTION));
 
         return tokenRepository.find(query, TokenEntity.class).stream()
                 .map(TokenMapper::convertToToken)
-                .collect(Collectors.toList());
+                .findFirst()
+                .orElseThrow(() -> new InvalidRequestException("",""));
     }
 }

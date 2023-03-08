@@ -5,10 +5,10 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 
 @Slf4j
 @Component
@@ -124,7 +124,7 @@ public class UserConnectorImpl implements UserConnector {
                         .and(UserBinding.Fields.products.name())
                         .elemMatch(Criteria.where(OnboardedProduct.Fields.productId.name()).is(productId)
                                 .and(OnboardedProduct.Fields.role.name()).is(PartyRole.MANAGER)
-                                .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT)
+                                .and(OnboardedProduct.Fields.env.name()).is(Env.ROOT)
                                 .and(OnboardedProduct.Fields.status.name()).in(state))));
 
         return repository.find(query, UserEntity.class).stream()
@@ -141,7 +141,7 @@ public class UserConnectorImpl implements UserConnector {
                         .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
                                 .and(constructQuery(UserBinding.Fields.products.name()))
                                 .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name())).in(roles)
-                                .and(OnboardedProduct.Fields.env.name()).is(EnvEnum.ROOT)
+                                .and(OnboardedProduct.Fields.env.name()).is(Env.ROOT)
                                 .and(OnboardedProduct.Fields.status.name()).in(states)));
 
         return repository.find(query, UserEntity.class).stream()

@@ -2,13 +2,14 @@ package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
@@ -58,7 +59,7 @@ class OnboardingInstitutionUtilsTest {
     void testVerifyUsers2() {
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(EnvEnum.ROOT);
+        userToOnboard.setEnv(Env.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
         userToOnboard.setProductRole("");
@@ -80,7 +81,7 @@ class OnboardingInstitutionUtilsTest {
     void testVerifyUsers3() {
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(EnvEnum.ROOT);
+        userToOnboard.setEnv(Env.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
         userToOnboard.setProductRole("");
@@ -90,7 +91,7 @@ class OnboardingInstitutionUtilsTest {
 
         UserToOnboard userToOnboard1 = new UserToOnboard();
         userToOnboard1.setEmail("jane.doe@example.org");
-        userToOnboard1.setEnv(EnvEnum.ROOT);
+        userToOnboard1.setEnv(Env.ROOT);
         userToOnboard1.setId("42");
         userToOnboard1.setName(", ");
         userToOnboard1.setProductRole("");
@@ -202,7 +203,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing,
@@ -303,7 +304,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -416,7 +417,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -527,7 +528,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -645,7 +646,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC,
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing2,
@@ -759,7 +760,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC, "START - validateOverridingData for institution having externalId: {}",
+        Institution institution = new Institution("42", "42", Origin.SELC, "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
                 "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
@@ -808,7 +809,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC, "START - validateOverridingData for institution having externalId: {}",
+        Institution institution = new Institution("42", "42", Origin.SELC, "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
                 "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
@@ -858,7 +859,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC,
                 "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - validateOverridingData for institution having externalId: {}", billing, onboardingList,
@@ -926,7 +927,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC,
                 "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - validateOverridingData for institution having externalId: {}", billing, onboardingList,
@@ -1147,7 +1148,7 @@ class OnboardingInstitutionUtilsTest {
     void testConstructOperatorProduct() {
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(EnvEnum.ROOT);
+        userToOnboard.setEnv(Env.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
         userToOnboard.setProductRole("");
@@ -1165,7 +1166,7 @@ class OnboardingInstitutionUtilsTest {
         assertEquals(RelationshipState.ACTIVE, actualConstructOperatorProductResult.getStatus());
         assertEquals(PartyRole.MANAGER, actualConstructOperatorProductResult.getRole());
         assertEquals("42", actualConstructOperatorProductResult.getProductId());
-        assertEquals(EnvEnum.ROOT, actualConstructOperatorProductResult.getEnv());
+        assertEquals(Env.ROOT, actualConstructOperatorProductResult.getEnv());
     }
 
     /**
@@ -1193,7 +1194,7 @@ class OnboardingInstitutionUtilsTest {
         assertEquals(RelationshipState.ACTIVE, actualConstructOperatorProductResult.getStatus());
         assertEquals(PartyRole.MANAGER, actualConstructOperatorProductResult.getRole());
         assertEquals("42", actualConstructOperatorProductResult.getProductId());
-        assertEquals(EnvEnum.ROOT, actualConstructOperatorProductResult.getEnv());
+        assertEquals(Env.ROOT, actualConstructOperatorProductResult.getEnv());
     }
 
     /**
@@ -1203,7 +1204,7 @@ class OnboardingInstitutionUtilsTest {
     void testConstructProduct() {
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(EnvEnum.ROOT);
+        userToOnboard.setEnv(Env.ROOT);
         userToOnboard.setId("42");
         userToOnboard.setName("Name");
         userToOnboard.setProductRole("");
@@ -1220,7 +1221,7 @@ class OnboardingInstitutionUtilsTest {
                 onboardingRequest);
         assertEquals(RelationshipState.ACTIVE, actualConstructProductResult.getStatus());
         assertEquals(PartyRole.MANAGER, actualConstructProductResult.getRole());
-        assertEquals(EnvEnum.ROOT, actualConstructProductResult.getEnv());
+        assertEquals(Env.ROOT, actualConstructProductResult.getEnv());
     }
 
     /**

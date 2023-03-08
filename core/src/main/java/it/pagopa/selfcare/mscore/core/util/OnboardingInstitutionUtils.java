@@ -4,12 +4,13 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
@@ -21,8 +22,8 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.*;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.ONBOARDING_INVALID_UPDATES;
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INVALID_UPDATES;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.PRODUCT_RELATIONSHIP_STATES;
 
 @Slf4j
@@ -54,11 +55,13 @@ public class OnboardingInstitutionUtils {
         log.info("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", institution.getExternalId(), request.getProductId());
         if (institution.getOnboarding() != null) {
             Optional<Onboarding> optionalOnboarding = institution.getOnboarding().stream()
-                    .filter(onboarding -> request.getProductId().equalsIgnoreCase(onboarding.getProductId()))
+                    .filter(onboarding -> request.getProductId().equalsIgnoreCase(onboarding.getProductId())
+                            && RelationshipState.ACTIVE == onboarding.getStatus())
                     .findAny();
             if (optionalOnboarding.isPresent() && !PRODUCT_RELATIONSHIP_STATES.contains(optionalOnboarding.get().getStatus())) {
-                throw new InvalidRequestException(String.format(PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), PRODUCT_ALREADY_ONBOARDED.getCode());
+                throw new ResourceConflictException(String.format(PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), PRODUCT_ALREADY_ONBOARDED.getCode());
             }
+            //TODO: INSERIRE IL CHECK SU PENDING O TOBEVALIDATED? (EXPIRING_DATA > NOW)
         }
         log.info("END - checkIfProductAlreadyOnboarded without error");
     }
@@ -88,8 +91,10 @@ public class OnboardingInstitutionUtils {
         token.setChecksum(digest);
         if (request.getInstitutionUpdate() != null) {
             token.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+        } else if (institution.getInstitutionType() != null) {
+            token.setStatus(getStatus(institution.getInstitutionType()));
         }
-
+        token.setInstitutionUpdate(request.getInstitutionUpdate());
         token.setUsers(request.getUsers().stream().map(OnboardingInstitutionUtils::toTokenUser).collect(Collectors.toList()));
         token.setExpiringDate(expiringDate);
         token.setType(request.getTokenType());
@@ -115,7 +120,7 @@ public class OnboardingInstitutionUtils {
         if (user.getEnv() != null) {
             onboardedProduct.setEnv(user.getEnv());
         } else {
-            onboardedProduct.setEnv(EnvEnum.ROOT);
+            onboardedProduct.setEnv(Env.ROOT);
         }
         return onboardedProduct;
     }
@@ -164,7 +169,6 @@ public class OnboardingInstitutionUtils {
         if (request.getInstitutionUpdate() != null) {
             onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         }
-        //TODO: onboarding.setPremium();
 
         return onboarding;
     }
@@ -180,14 +184,20 @@ public class OnboardingInstitutionUtils {
         }
     }
 
-    public static List<String> getValidManagerToOnboard(List<UserToOnboard> users) {
+    public static List<String> getValidManagerToOnboard(List<UserToOnboard> users, Token token) {
         log.info("START - getOnboardingValidManager for users list size: {}", users.size());
-        List<String> response = new ArrayList<>();
-        users.forEach(user -> {
-            if (PartyRole.MANAGER == user.getRole()) {
-                response.add(user.getId());
-            }
-        });
+        List<String> response;
+        if (token != null) {
+            response = token.getUsers().stream()
+                    .filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
+                    .map(TokenUser::getUserId)
+                    .collect(Collectors.toList());
+        } else {
+            response = users.stream()
+                    .filter(userToOnboard -> PartyRole.MANAGER == userToOnboard.getRole())
+                    .map(UserToOnboard::getId)
+                    .collect(Collectors.toList());
+        }
         if (response.isEmpty()) {
             throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
         }

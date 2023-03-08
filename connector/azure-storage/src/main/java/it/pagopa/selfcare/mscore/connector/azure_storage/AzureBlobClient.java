@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ERROR_DURING_DOWNLOAD_FILE;
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.ERROR_DURING_UPLOAD_FILE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_DOWNLOAD_FILE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_UPLOAD_FILE;
 
 @Slf4j
 @Service

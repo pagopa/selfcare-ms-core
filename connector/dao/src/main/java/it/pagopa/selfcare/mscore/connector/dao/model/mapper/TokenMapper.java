@@ -1,7 +1,11 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.InstitutionUpdateEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.TokenUserEntity;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import lombok.AccessLevel;
@@ -10,11 +14,14 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper.*;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class TokenMapper {
 
-    public static TokenEntity convertToTokenEntity(Token token) {
+    public static TokenEntity convertToTokenEntity(Token token, List<GeographicTaxonomies> geographicTaxonomies) {
         TokenEntity entity = new TokenEntity();
         if (token.getId() != null) {
             entity.setId(token.getId());
@@ -32,8 +39,41 @@ public class TokenMapper {
         entity.setProductId(token.getProductId());
         entity.setCreatedAt(token.getCreatedAt());
         entity.setUpdatedAt(token.getUpdatedAt());
+        if(token.getInstitutionUpdate()!=null) {
+            entity.setInstitutionUpdate(toInstitutionUpdateEntity(token.getInstitutionUpdate(), geographicTaxonomies));
+        }
         return entity;
     }
+
+    private static InstitutionUpdateEntity toInstitutionUpdateEntity(InstitutionUpdate institutionUpdate, List<GeographicTaxonomies> geographicTaxonomies) {
+        InstitutionUpdateEntity entity = new InstitutionUpdateEntity();
+        entity.setDescription(institutionUpdate.getDescription());
+        entity.setDigitalAddress(institutionUpdate.getDigitalAddress());
+        entity.setAddress(institutionUpdate.getAddress());
+        entity.setTaxCode(institutionUpdate.getTaxCode());
+        entity.setZipCode(institutionUpdate.getZipCode());
+
+        if(geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
+            entity.setGeographicTaxonomies(toGeoTaxonomyEntity(geographicTaxonomies));
+        }
+
+        if(institutionUpdate.getPaymentServiceProvider() != null) {
+            entity.setPaymentServiceProvider(toPaymentServiceProviderEntity(institutionUpdate.getPaymentServiceProvider()));
+        }
+
+        if(institutionUpdate.getDataProtectionOfficer() != null) {
+            entity.setDataProtectionOfficer(toDataProtectionOfficerEntity(institutionUpdate.getDataProtectionOfficer()));
+        }
+
+        entity.setRea(institutionUpdate.getRea());
+        entity.setShareCapital(institutionUpdate.getShareCapital());
+        entity.setBusinessRegisterPlace(institutionUpdate.getBusinessRegisterPlace());
+        entity.setSupportEmail(institutionUpdate.getSupportEmail());
+        entity.setSupportPhone(institutionUpdate.getSupportPhone());
+        entity.setImported(institutionUpdate.isImported());
+        return entity;
+    }
+
     public static Token convertToToken(TokenEntity tokenEntity) {
         Token token = new Token();
         token.setId(tokenEntity.getId());
@@ -47,7 +87,37 @@ public class TokenMapper {
         token.setCreatedAt(tokenEntity.getCreatedAt());
         token.setUpdatedAt(tokenEntity.getUpdatedAt());
         token.setProductId(tokenEntity.getProductId());
+        token.setInstitutionUpdate(toInstitutionUpdate(tokenEntity.getInstitutionUpdate()));
         return token;
+    }
+
+    private static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateEntity entity) {
+        InstitutionUpdate response = new InstitutionUpdate();
+        response.setDescription(entity.getDescription());
+        response.setDigitalAddress(entity.getDigitalAddress());
+        response.setAddress(entity.getAddress());
+        response.setTaxCode(entity.getTaxCode());
+        response.setZipCode(entity.getZipCode());
+
+        if(entity.getGeographicTaxonomies() != null && !entity.getGeographicTaxonomies().isEmpty()) {
+            response.setGeographicTaxonomyCodes(entity.getGeographicTaxonomies().stream().map(GeoTaxonomyEntity::getCode).collect(Collectors.toList()));
+        }
+
+        if(entity.getPaymentServiceProvider() != null) {
+            response.setPaymentServiceProvider(toPaymentServiceProvider(entity.getPaymentServiceProvider()));
+        }
+
+        if(entity.getDataProtectionOfficer() != null) {
+            response.setDataProtectionOfficer(toDataProtectionOfficer(entity.getDataProtectionOfficer()));
+        }
+
+        response.setRea(entity.getRea());
+        response.setShareCapital(entity.getShareCapital());
+        response.setBusinessRegisterPlace(entity.getBusinessRegisterPlace());
+        response.setSupportEmail(entity.getSupportEmail());
+        response.setSupportPhone(entity.getSupportPhone());
+        response.setImported(entity.isImported());
+        return response;
     }
 
     private static List<TokenUserEntity> toTokenUserEntity(List<TokenUser> users) {

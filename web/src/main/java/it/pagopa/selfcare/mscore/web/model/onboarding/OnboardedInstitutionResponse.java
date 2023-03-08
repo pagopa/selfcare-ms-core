@@ -3,7 +3,7 @@ package it.pagopa.selfcare.mscore.web.model.onboarding;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
 import lombok.Data;

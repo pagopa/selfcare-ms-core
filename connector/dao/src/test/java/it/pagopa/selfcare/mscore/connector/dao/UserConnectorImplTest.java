@@ -3,10 +3,10 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.EnvEnum;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -95,7 +95,7 @@ class UserConnectorImplTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("role");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -128,7 +128,7 @@ class UserConnectorImplTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("role");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -344,7 +344,7 @@ class UserConnectorImplTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("role");
         onboardedProduct.setRelationshipId("42");
@@ -367,7 +367,7 @@ class UserConnectorImplTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("role");
         onboardedProduct.setRelationshipId("42");

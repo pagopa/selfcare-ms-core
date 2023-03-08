@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.constant;
 
-public enum CustomErrorEnum {
+public enum CustomError {
 
     RELATIONSHIP_ID_NOT_FOUND("0008", "Relationship %s not found"),
     GET_INSTITUTION_MANAGER_NOT_FOUND("0043", "Cannot find active manager for institution having externalId %s and product %s"),
@@ -22,8 +22,9 @@ public enum CustomErrorEnum {
     ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),
     TOKEN_ALREADY_CONSUMED("0040", "Token %s has already consumed"),
+    TOKEN_EXPIRED("0040", "Token %s is expired in %s and is status is DELETED"),
+    TOKEN_DELETED("0040", "Token %s was DELETED"),
     TOKEN_NOT_FOUND("0014", "Token %s not found"),
-    TOKEN_EXPIRED("0040", "Token %s expired on %s"),
     CONTRACT_NOT_FOUND("0015", "Token for institution %s and product %s not found"),
     DOCUMENT_NOT_FOUND("0016", "Document for relationship %s not found"),
     GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s and productId %s"),
@@ -35,7 +36,7 @@ public enum CustomErrorEnum {
     private final String code;
     private final String detail;
 
-    CustomErrorEnum(String code, String detail) {
+    CustomError(String code, String detail) {
         this.code = code;
         this.detail = detail;
     }

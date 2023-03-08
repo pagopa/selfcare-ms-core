@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ public class Institution {
 
     private String id;
     private String externalId;
-    private OriginEnum origin;
+    private Origin origin;
     private String originId;
     private String description;
     private InstitutionType institutionType;

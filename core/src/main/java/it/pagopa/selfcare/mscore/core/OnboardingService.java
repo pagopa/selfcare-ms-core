@@ -26,7 +26,8 @@ public interface OnboardingService {
 
     List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest toOnboardingOperatorRequest, PartyRole role);
 
-    void onboardingLegals(OnboardingLegalsRequest toOnboardingLegalsRequest, SelfCareUser selfCareUser);
+    void onboardingLegals(OnboardingLegalsRequest toOnboardingLegalsRequest, SelfCareUser selfCareUser, Token token);
 
     ResourceResponse retrieveDocument(String relationshipId);
+
 }

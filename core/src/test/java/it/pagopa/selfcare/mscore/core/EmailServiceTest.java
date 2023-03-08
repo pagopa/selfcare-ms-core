@@ -13,8 +13,9 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -98,7 +99,6 @@ class EmailServiceTest {
         contractImported.setContractType("Contract Type");
         contractImported.setFileName("foo.txt");
         contractImported.setFilePath("/directory/foo.txt");
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
@@ -182,7 +182,6 @@ class EmailServiceTest {
         contractImported.setContractType("Contract Type");
         contractImported.setFileName("foo.txt");
         contractImported.setFilePath("/directory/foo.txt");
-        onboardingRequest.setContractImported(contractImported);
         onboardingRequest.setInstitutionExternalId("42");
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();

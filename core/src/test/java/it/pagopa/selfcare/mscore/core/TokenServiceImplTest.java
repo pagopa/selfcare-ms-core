@@ -6,7 +6,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,16 +84,14 @@ class TokenServiceImplTest {
     @Test
     void verifyOnboarding(){
         Token token = new Token();
-        ArrayList<Token> tokens = new ArrayList<>();
-        tokens.add(token);
-        when(tokenConnector.findWithFilter(any(),any(),any())).thenReturn(tokens);
-        Assertions.assertDoesNotThrow(() -> tokenServiceImpl.verifyOnboarding("42","42",new ArrayList<>()));
+        when(tokenConnector.findWithFilter(any(),any())).thenReturn(token);
+        Assertions.assertDoesNotThrow(() -> tokenServiceImpl.verifyOnboarding("42","42"));
     }
 
     @Test
     void verifyOnboarding2(){
-        when(tokenConnector.findWithFilter(any(),any(),any())).thenReturn(new ArrayList<>());
-        Assertions.assertThrows(InvalidRequestException.class, () -> tokenServiceImpl.verifyOnboarding("42","42",new ArrayList<>()));
+        when(tokenConnector.findWithFilter(any(),any())).thenReturn(new Token());
+        Assertions.assertThrows(InvalidRequestException.class, () -> tokenServiceImpl.verifyOnboarding("42","42"));
     }
 
 }

@@ -13,7 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @RestController

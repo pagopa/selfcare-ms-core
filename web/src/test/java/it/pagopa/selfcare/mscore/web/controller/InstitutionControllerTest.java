@@ -5,11 +5,13 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
 import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.InstitutionServiceImpl;
 import it.pagopa.selfcare.mscore.core.UserServiceImpl;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
 import org.junit.jupiter.api.Disabled;
@@ -44,6 +46,9 @@ class InstitutionControllerTest {
 
     @Mock
     private InstitutionService institutionService;
+
+    @Mock
+    private CoreConfig coreConfig;
 
     @Test
     void getUserInstitutionRelationships() throws Exception {
@@ -596,7 +601,7 @@ class InstitutionControllerTest {
 
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         InstitutionController institutionController = new InstitutionController(new InstitutionServiceImpl(null, null,
-                geoTaxonomiesConnector, new UserServiceImpl(null, mock(UserRegistryConnector.class))));
+                geoTaxonomiesConnector, new UserServiceImpl(null, mock(UserRegistryConnector.class)), coreConfig));
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(new ArrayList<>());
@@ -610,7 +615,7 @@ class InstitutionControllerTest {
         Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        when(institutionService.createPgInstitution(any(), anyBoolean(), any()))
+        when(institutionService.createPgInstitution(any(), any(), any(), any()))
                 .thenReturn(new Institution());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders

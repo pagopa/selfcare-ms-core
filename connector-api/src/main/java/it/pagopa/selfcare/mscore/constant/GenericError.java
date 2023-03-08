@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.constant;
 
-public enum GenericErrorEnum {
+public enum GenericError {
 
     GET_USER_INSTITUTION_RELATIONSHIP_ERROR("0023", "Error while retrieving user relationships"),
     GET_INSTITUTION_BY_ID_ERROR("0040", "Error while retrieving institution having id %s"),
@@ -49,7 +49,7 @@ public enum GenericErrorEnum {
     private final String detail;
 
 
-    GenericErrorEnum(String code, String detail) {
+    GenericError(String code, String detail) {
         this.code = code;
         this.detail = detail;
     }

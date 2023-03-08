@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.inner;
 
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.mongodb.core.index.Indexed;

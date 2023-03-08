@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.model.onboarding;
 
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
-import it.pagopa.selfcare.mscore.utils.TokenTypeEnum;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Token {
     private String id;
-    private TokenTypeEnum type;
+    private TokenType type;
     private RelationshipState status;
     private String institutionId;
     private String productId;

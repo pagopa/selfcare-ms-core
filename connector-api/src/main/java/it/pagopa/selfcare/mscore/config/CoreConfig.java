@@ -23,6 +23,7 @@ public class CoreConfig {
     private String institutionAlternativeEmail;
     private boolean sendEmailToInstitution;
     private Integer expiringDate;
+    private boolean infoCamereEnable;
 
     public String getInstitutionAlternativeEmail() {
         return new String(Base64.getDecoder().decode(institutionAlternativeEmail), StandardCharsets.UTF_8);

@@ -7,14 +7,11 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -30,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -38,7 +35,7 @@ import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 @Slf4j
 public class InstitutionController {
 
-    private static final String ENTRY_LOG = "Creating institution having external id {}";
+    private static final String ENTRY_LOG = "Creating institution given externalId";
     private final InstitutionService institutionService;
 
     public InstitutionController(InstitutionService institutionService) {
@@ -61,7 +58,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> createInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                              @PathVariable("externalId") String externalId) {
 
-        log.info(ENTRY_LOG, externalId);
+        log.info(ENTRY_LOG);
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionByExternalId(externalId);
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
@@ -83,7 +80,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> createInstitutionRaw(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                     @PathVariable("externalId") String externalId,
                                                                     @RequestBody @Valid InstitutionRequest institution) {
-        log.info(ENTRY_LOG, externalId);
+        log.info(ENTRY_LOG);
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionRaw(InstitutionMapper.toInstitution(institution, externalId), externalId);
         return ResponseEntity.ok(InstitutionMapper.toInstitutionResponse(saved));
@@ -92,7 +89,7 @@ public class InstitutionController {
     /**
      * The function persist PG institution
      *
-     * @param externalId       String
+     * @param request CreatePgInstitutionRequest
      * @param existsInRegistry boolean
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: TokenId
@@ -102,15 +99,13 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
-    @PostMapping(value = "/pg/{externalId}")
-    public ResponseEntity<InstitutionResponse> createPgInstitution(@ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                                   @PathVariable("externalId") String externalId,
+    @PostMapping(value = "/pg")
+    public ResponseEntity<InstitutionResponse> createPgInstitution(@RequestBody @Valid CreatePgInstitutionRequest request,
                                                                    @ApiParam("${swagger.mscore.institutions.existsInRegistry}")
                                                                    @RequestParam(value = "existsInRegistry") boolean existsInRegistry,
                                                                    Authentication authentication) {
-        log.info(ENTRY_LOG, externalId);
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
-        Institution saved = institutionService.createPgInstitution(externalId, existsInRegistry, (SelfCareUser) authentication.getPrincipal());
+        Institution saved = institutionService.createPgInstitution(request.getTaxId(), request.getDescription(), existsInRegistry, (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

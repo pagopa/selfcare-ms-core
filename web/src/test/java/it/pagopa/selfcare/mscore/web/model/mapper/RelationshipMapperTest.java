@@ -5,8 +5,9 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResponse;
@@ -113,7 +114,7 @@ class RelationshipMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         assertThrows(InvalidRequestException.class,
                 () -> RelationshipMapper.toRelationshipResult(token,
-                        new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
+                        new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
                                 "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies,
                                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea", "Share Capital",
                                 "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now())));
@@ -162,7 +163,7 @@ class RelationshipMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
         RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
-                new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
+                new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
                         "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList, geographicTaxonomiesList,
                         attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea", "Share Capital",
                         "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -249,7 +250,7 @@ class RelationshipMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
         RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
-                new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
+                new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
                         "42 Main St", "42 Main St", "21654", "Tax Code", billing2, onboardingList, geographicTaxonomiesList,
                         attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea", "Share Capital",
                         "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -352,7 +353,7 @@ class RelationshipMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
 
-        Institution institution = new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
                 geographicTaxonomies1, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
                 "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now());
@@ -605,7 +606,7 @@ class RelationshipMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
 
-        Institution institution = new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
                 geographicTaxonomies1, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
                 "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now());

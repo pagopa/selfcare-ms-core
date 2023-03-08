@@ -1,14 +1,14 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.Premium;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Test;
 
@@ -88,7 +88,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract(", ");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -117,7 +117,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract(", ");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -127,7 +127,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct1 = new OnboardedProduct();
         onboardedProduct1.setContract(", ");
         onboardedProduct1.setCreatedAt(null);
-        onboardedProduct1.setEnv(EnvEnum.ROOT);
+        onboardedProduct1.setEnv(Env.ROOT);
         onboardedProduct1.setProductId("42");
         onboardedProduct1.setProductRole("");
         onboardedProduct1.setRole(PartyRole.MANAGER);
@@ -157,7 +157,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract(", ");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -208,7 +208,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -262,7 +262,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -334,7 +334,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
@@ -387,7 +387,7 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
         onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);

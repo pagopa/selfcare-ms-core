@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.model.user;
+package it.pagopa.selfcare.mscore.constant;
 
 public enum RelationshipState {
     PENDING,

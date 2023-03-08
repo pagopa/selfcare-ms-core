@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 

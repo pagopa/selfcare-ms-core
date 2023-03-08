@@ -3,8 +3,9 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
@@ -77,7 +78,7 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", OriginEnum.SELC,  "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", Origin.SELC,  "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, "share capital", "Rea",
                         "mail", "phone", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -129,7 +130,7 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", OriginEnum.SELC,  "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", Origin.SELC,  "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -169,7 +170,7 @@ class InstitutionMapperTest {
         ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomies, attributesList, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -277,7 +278,7 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", OriginEnum.SELC, "Ipa Code", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                 geographicTaxonomies, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
                 "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now());
@@ -323,7 +324,7 @@ class InstitutionMapperTest {
     void testToBillingResponse6() {
         Institution institution = new Institution();
         institution.setOnboarding(new ArrayList<>());
-        institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
+        institution.setInstitutionType(InstitutionType.GSP);
         InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
@@ -363,7 +364,7 @@ class InstitutionMapperTest {
 
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
-        institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
+        institution.setInstitutionType(InstitutionType.GSP);
         InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
@@ -408,7 +409,7 @@ class InstitutionMapperTest {
 
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
-        institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
+        institution.setInstitutionType(InstitutionType.GSP);
         InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution,
                 "Product Id");
         assertNull(actualToBillingResponseResult.getAddress());
@@ -447,7 +448,7 @@ class InstitutionMapperTest {
         Institution institution = new Institution();
         institution.setBilling(billing);
         institution.setOnboarding(onboardingList);
-        institution.setInstitutionType(it.pagopa.selfcare.mscore.model.institution.InstitutionType.GSP);
+        institution.setInstitutionType(InstitutionType.GSP);
         InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
