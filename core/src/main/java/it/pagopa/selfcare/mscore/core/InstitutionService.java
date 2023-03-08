@@ -14,7 +14,7 @@ public interface InstitutionService {
     Institution retrieveInstitutionByExternalId(String institutionExternalId);
     Institution createInstitutionByExternalId(String externalId);
     Institution createInstitutionRaw(Institution institution, String externalId);
-    Institution createPgInstitution(String taxId, boolean existsInRegistry, SelfCareUser selfCareUser);
+    Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser);
     List<Onboarding> retrieveInstitutionProducts(String institutionId, List<String> states);
     Institution getInstitutionProduct(String externalId, String productId);
     GeographicTaxonomies getGeoTaxonomies(String code);

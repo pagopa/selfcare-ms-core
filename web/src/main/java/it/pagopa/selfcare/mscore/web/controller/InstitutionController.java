@@ -7,6 +7,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.web.model.institution.CreatePgInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
@@ -91,8 +92,8 @@ public class InstitutionController {
     /**
      * The function persist PG institution
      *
-     * @param externalId       String
-     * @param existsInRegistry boolean
+     * @param request CreatePgInstitutionRequest
+     *
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Bad Request, DataType: Problem
@@ -101,15 +102,11 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
-    @PostMapping(value = "/pg/{externalId}")
-    public ResponseEntity<InstitutionResponse> createPgInstitution(@ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                                   @PathVariable("externalId") String externalId,
-                                                                   @ApiParam("${swagger.mscore.institutions.existsInRegistry}")
-                                                                   @RequestParam(value = "existsInRegistry") boolean existsInRegistry,
+    @PostMapping(value = "/pg")
+    public ResponseEntity<InstitutionResponse> createPgInstitution(@RequestBody @Valid CreatePgInstitutionRequest request,
                                                                    Authentication authentication) {
-        log.info(ENTRY_LOG, externalId);
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
-        Institution saved = institutionService.createPgInstitution(externalId, existsInRegistry, (SelfCareUser) authentication.getPrincipal());
+        Institution saved = institutionService.createPgInstitution(request.getTaxId(), request.getDescription(), request.isExistsInRegistry(), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

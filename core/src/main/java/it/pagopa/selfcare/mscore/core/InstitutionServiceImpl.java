@@ -88,7 +88,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createPgInstitution(String taxId, boolean existsInRegistry, SelfCareUser selfCareUser) {
+    public Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
+        boolean isInfocamereEnable = false;
         checkIfAlreadyExists(taxId);
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(taxId);
@@ -97,7 +98,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setCreatedAt(OffsetDateTime.now());
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
-        if (existsInRegistry) {
+        if (existsInRegistry && isInfocamereEnable) {
             List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
             institutionByLegal.stream().filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
                     .findFirst().ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
