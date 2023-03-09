@@ -11,6 +11,6 @@ public interface TokenService {
 
     String findActiveContract(String institutionId, String userId, String productId);
 
-    TokenRelationships getToken(String tokenId);
+    TokenRelationships retrieveToken(String tokenId);
 
 }

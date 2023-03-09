@@ -64,7 +64,7 @@ public class TokenController {
                                                      @PathVariable("tokenId") String tokenId) {
         log.info("Verify token identified with {}", tokenId);
         CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
-        TokenRelationships tokenRelationships = tokenService.getToken(tokenId);
+        TokenRelationships tokenRelationships = tokenService.retrieveToken(tokenId);
         return ResponseEntity.ok().body(TokenMapper.toTokenResponse(tokenRelationships));
     }
 }

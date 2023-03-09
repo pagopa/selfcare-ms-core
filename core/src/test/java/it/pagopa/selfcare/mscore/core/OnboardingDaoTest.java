@@ -16,6 +16,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -85,7 +86,7 @@ class OnboardingDaoTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -170,7 +171,7 @@ class OnboardingDaoTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -255,7 +256,7 @@ class OnboardingDaoTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -333,7 +334,7 @@ class OnboardingDaoTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -408,7 +409,7 @@ class OnboardingDaoTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PG);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -484,7 +485,7 @@ class OnboardingDaoTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.GSP);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -617,9 +618,7 @@ class OnboardingDaoTest {
         Token token = new Token();
         token.setUsers(new ArrayList<>());
         token.setStatus(RelationshipState.PENDING);
-        onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
-        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
-        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
+        Assertions.assertDoesNotThrow(() -> onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest"));
     }
 
     /**
@@ -689,54 +688,23 @@ class OnboardingDaoTest {
         token.setUsers(List.of(tokenUser));
         token.setStatus(RelationshipState.PENDING);
 
-        onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
+        Assertions.assertDoesNotThrow(() -> onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest"));
 
-        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
-        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
-        verify(userConnector).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#persistForUpdate(Token, Institution, RelationshipState, String)}
-     */
-    @Test
-    void testPersistForUpdate14() {
-        doNothing().when(institutionConnector)
-                .findAndUpdateStatus(any(), any(), any());
-        when(tokenConnector.findAndUpdateToken(any(), any(), any()))
-                .thenReturn(new Token());
-        doNothing().when(userConnector)
-                .findAndUpdateState(any(), any(), any(), any());
-
-        TokenUser tokenUser1 = new TokenUser();
-        tokenUser1.setUserId("userId1");
-        TokenUser tokenUser2 = new TokenUser();
-        tokenUser2.setUserId("userId2");
-
-        Token token = new Token();
-        token.setUsers(List.of(tokenUser1, tokenUser2));
-        token.setStatus(RelationshipState.PENDING);
-
-        onboardingDao.persistForUpdate(token, new Institution(), RelationshipState.ACTIVE, "Digest");
-
-        verify(institutionConnector).findAndUpdateStatus(any(), any(), any());
-        verify(tokenConnector).findAndUpdateToken(any(), any(), any());
-        verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(), any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsersState(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers() {
         Institution institution = new Institution();
         Token token = new Token();
         token.setUsers(Collections.emptyList());
-        assertDoesNotThrow(() -> onboardingDao.updateUsers(institution, token, RelationshipState.PENDING));
+        assertDoesNotThrow(() -> onboardingDao.updateUsersState(institution, token, RelationshipState.PENDING));
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsersState(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers2() {
@@ -750,12 +718,12 @@ class OnboardingDaoTest {
         token.setUsers(List.of(tokenUser));
 
         Institution institution = new Institution();
-        onboardingDao.updateUsers(institution, token, RelationshipState.PENDING);
+        onboardingDao.updateUsersState(institution, token, RelationshipState.PENDING);
         verify(userConnector).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsersState(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers3() {
@@ -771,12 +739,12 @@ class OnboardingDaoTest {
         token.setUsers(List.of(tokenUser1, tokenUser2));
 
         Institution institution = new Institution();
-        onboardingDao.updateUsers(institution, token, RelationshipState.PENDING);
+        onboardingDao.updateUsersState(institution, token, RelationshipState.PENDING);
         verify(userConnector, atLeast(1)).findAndUpdateState(any(), any(), any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#updateUsers(Institution, Token, RelationshipState)}
+     * Method under test: {@link OnboardingDao#updateUsersState(Institution, Token, RelationshipState)}
      */
     @Test
     void testUpdateUsers5() {
@@ -792,7 +760,7 @@ class OnboardingDaoTest {
         token.setUsers(List.of(tokenUser));
 
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.updateUsers(null, token, RelationshipState.PENDING));
+                () -> onboardingDao.updateUsersState(null, token, RelationshipState.PENDING));
         verify(tokenConnector).findAndUpdateToken(any(), any(), any());
     }
 

@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserFromUserRegistry(String userId, EnumSet<User.Fields> fields) {
+    public User retrieveUserFromUserRegistry(String userId, EnumSet<User.Fields> fields) {
         return userRegistryConnector.getUserByInternalId(userId, fields);
     }
 

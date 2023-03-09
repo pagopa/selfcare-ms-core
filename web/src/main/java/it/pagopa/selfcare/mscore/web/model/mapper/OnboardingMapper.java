@@ -3,11 +3,15 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.*;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
@@ -27,9 +31,30 @@ public class OnboardingMapper {
         if (onboardingInstitutionRequest.getUsers() != null)
             onboardingRequest.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionRequest.getUsers()));
         if (onboardingInstitutionRequest.getInstitutionUpdate() != null)
-            onboardingRequest.setInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate());
+            onboardingRequest.setInstitutionUpdate(toInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate()));
 
         return onboardingRequest;
+    }
+
+    private static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request){
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setInstitutionType(request.getInstitutionType());
+        institutionUpdate.setDescription(request.getDescription());
+        institutionUpdate.setDigitalAddress(request.getDigitalAddress());
+        institutionUpdate.setAddress(request.getAddress());
+        institutionUpdate.setTaxCode(request.getTaxCode());
+        institutionUpdate.setZipCode(request.getZipCode());
+        institutionUpdate.setPaymentServiceProvider(toPaymentServiceProvider(request.getPaymentServiceProvider()));
+        institutionUpdate.setDataProtectionOfficer(toDataProtectionOfficer(request.getDataProtectionOfficer()));
+        institutionUpdate.setGeographicTaxonomies(request.getGeographicTaxonomyCodes().stream()
+                .map(s -> new InstitutionGeographicTaxonomies(s,null)).collect(Collectors.toList()));
+        institutionUpdate.setRea(institutionUpdate.getRea());
+        institutionUpdate.setShareCapital(institutionUpdate.getShareCapital());
+        institutionUpdate.setBusinessRegisterPlace(institutionUpdate.getBusinessRegisterPlace());
+        institutionUpdate.setSupportEmail(institutionUpdate.getSupportEmail());
+        institutionUpdate.setSupportPhone(institutionUpdate.getSupportPhone());
+        institutionUpdate.setImported(request.isImported());
+        return institutionUpdate;
     }
 
     private static Contract toContract(ContractRequest request) {
@@ -80,11 +105,8 @@ public class OnboardingMapper {
         institutionResponse.setState(product.getStatus().name());
         institutionResponse.setRole(product.getRole());
         institutionResponse.setProductInfo(productInfo);
-        institutionResponse.setRea(institution.getRea());
-        institutionResponse.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
-        institutionResponse.setShareCapital(institution.getShareCapital());
-        institutionResponse.setSupportEmail(institution.getSupportEmail());
-        institutionResponse.setSupportPhone(institution.getSupportPhone());
+        institutionResponse.setBusinessData(new BusinessData(institution.getRea(), institution.getShareCapital(), institution.getBusinessRegisterPlace()));
+        institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail(), institution.getSupportPhone()));
         return institutionResponse;
     }
     public static OnboardingOperatorsRequest toOnboardingOperatorRequest(OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {

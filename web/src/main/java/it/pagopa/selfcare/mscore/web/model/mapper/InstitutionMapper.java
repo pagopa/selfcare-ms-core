@@ -95,7 +95,7 @@ public class InstitutionMapper {
         institutionUpdate.setPaymentServiceProvider(institution.getPaymentServiceProvider());
         institutionUpdate.setDataProtectionOfficer(institution.getDataProtectionOfficer());
         institutionUpdate.setGeographicTaxonomyCodes(institution.getGeographicTaxonomies().stream()
-                .map(GeographicTaxonomies::getCode).collect(Collectors.toList()));
+                .map(InstitutionGeographicTaxonomies::getCode).collect(Collectors.toList()));
         institutionUpdate.setRea(institution.getRea());
         institutionUpdate.setShareCapital(institution.getShareCapital());
         institutionUpdate.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
@@ -146,7 +146,8 @@ public class InstitutionMapper {
     public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institution) {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         if (institution.getGeographicTaxonomyCodes() != null) {
-            institutionUpdate.setGeographicTaxonomyCodes(institution.getGeographicTaxonomyCodes());
+            institutionUpdate.setGeographicTaxonomies(institution.getGeographicTaxonomyCodes()
+                    .stream().map(s -> new InstitutionGeographicTaxonomies(s, null)).collect(Collectors.toList()));
         }
         return institutionUpdate;
     }
@@ -224,7 +225,7 @@ public class InstitutionMapper {
         }
     }
 
-    private static DataProtectionOfficer toDataProtectionOfficer(DataProtectionOfficerRequest request) {
+    public static DataProtectionOfficer toDataProtectionOfficer(DataProtectionOfficerRequest request) {
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
         dataProtectionOfficer.setAddress(request.getAddress());
         dataProtectionOfficer.setEmail(request.getEmail());
@@ -240,7 +241,7 @@ public class InstitutionMapper {
         return response;
     }
 
-    private static PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderRequest request) {
+    public static PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderRequest request) {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         paymentServiceProvider.setAbiCode(request.getAbiCode());
         paymentServiceProvider.setVatNumberGroup(request.isVatNumberGroup());
@@ -287,22 +288,20 @@ public class InstitutionMapper {
     }
 
 
-    private static List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomies> request) {
-        List<GeographicTaxonomies> response = new ArrayList<>();
+    private static List<InstitutionGeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomies> request) {
+        List<InstitutionGeographicTaxonomies> response = new ArrayList<>();
         if (request != null) {
             for (GeoTaxonomies g : request) {
-                GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-                geographicTaxonomies.setCode(g.getCode());
-                geographicTaxonomies.setDesc(g.getDesc());
+                InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies(g.getCode(), g.getDesc());
                 response.add(geographicTaxonomies);
             }
         }
         return response;
     }
 
-    public static List<GeoTaxonomies> toGeoTaxonomies(List<GeographicTaxonomies> geographicTaxonomies) {
+    public static List<GeoTaxonomies> toGeoTaxonomies(List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         List<GeoTaxonomies> list = new ArrayList<>();
-        for (GeographicTaxonomies g : geographicTaxonomies) {
+        for (InstitutionGeographicTaxonomies g : geographicTaxonomies) {
             GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
             geoTaxonomies.setCode(g.getCode());
             geoTaxonomies.setDesc(g.getDesc());
@@ -311,7 +310,7 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static List<String> convertToGeoString(List<GeographicTaxonomies> geographicTaxonomies) {
+    private static List<String> convertToGeoString(List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         List<String> list = new ArrayList<>();
         geographicTaxonomies.forEach(g -> list.add(g.getCode()));
         return list;

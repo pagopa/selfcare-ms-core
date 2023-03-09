@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 
@@ -23,7 +23,7 @@ public interface InstitutionConnector {
 
     void findAndUpdateStatus(String id, String tokenId, RelationshipState state);
 
-    Institution findAndUpdate(String id, Onboarding onboarding, List<GeographicTaxonomies> geographicTaxonomies);
+    Institution findAndUpdate(String id, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomies);
 
     Institution findInstitutionProduct(String externalId, String productId);
 

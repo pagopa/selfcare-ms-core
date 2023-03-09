@@ -56,7 +56,7 @@ public class ExternalServiceImpl implements ExternalService {
 
     @Override
     public Institution retrieveInstitutionProduct(String externalId, String productId) {
-        return institutionService.getInstitutionProduct(externalId, productId);
+        return institutionService.retrieveInstitutionProduct(externalId, productId);
     }
 
     @Override
@@ -75,6 +75,6 @@ public class ExternalServiceImpl implements ExternalService {
     @Override
     public List<RelationshipInfo> getUserInstitutionRelationships(String externalId, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles){
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.getUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles);
+        return institutionService.retrieveUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles);
     }
 }

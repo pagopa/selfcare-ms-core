@@ -5,12 +5,14 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
+import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
+import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
 @Service
@@ -100,7 +103,10 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, request);
         OnboardingInstitutionUtils.validateOverridingData(request.getInstitutionUpdate(), institution);
         List<GeographicTaxonomies> geographicTaxonomies = getGeographicTaxonomy(request);
-
+        List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies = new ArrayList<>();
+        if(!geographicTaxonomies.isEmpty()) {
+               institutionGeographicTaxonomies = geographicTaxonomies.stream().map(geo -> new InstitutionGeographicTaxonomies(geo.getCode(), geo.getDesc())).collect(Collectors.toList());
+        }
         List<String> toUpdate = new ArrayList<>();
         List<String> toDelete = new ArrayList<>();
 
@@ -110,22 +116,22 @@ public class OnboardingServiceImpl implements OnboardingService {
             } else {
                 throw new InvalidRequestException(CustomError.USERS_SIZE_NOT_ADMITTED.getMessage(), CustomError.USERS_SIZE_NOT_ADMITTED.getCode());
             }
-            onboardingDao.persist(toUpdate, toDelete, request, institution, geographicTaxonomies, null);
+            onboardingDao.persist(toUpdate, toDelete, request, institution, institutionGeographicTaxonomies, null);
         } else {
-            User user = userService.getUserFromUserRegistry(principal.getId(), EnumSet.allOf(User.Fields.class));
+            User user = userService.retrieveUserFromUserRegistry(principal.getId(), EnumSet.allOf(User.Fields.class));
             verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
             List<String> validManagerList = getValidManagerToOnboard(request.getUsers(), null);
-            User manager = userService.getUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+            User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
 
             List<User> delegate = request.getUsers()
                     .stream()
                     .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
-                    .map(userToOnboard -> userService.getUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+                    .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, geographicTaxonomies);
-            String digest = createDigest(pdf);
-            OnboardingRollback rollback = onboardingDao.persist(toUpdate, toDelete, request, institution, geographicTaxonomies, digest);
+            File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, institutionGeographicTaxonomies);
+            String digest = TokenUtils.createDigest(pdf);
+            OnboardingRollback rollback = onboardingDao.persist(toUpdate, toDelete, request, institution, institutionGeographicTaxonomies, digest);
             log.info("{} - Digest {}", rollback.getTokenId(), digest);
             try {
                 emailService.sendMail(pdf, institution, user, request, false);
@@ -143,7 +149,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<String> managerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
         List<User> managersData = managerList
                 .stream()
-                .map(user -> userService.getUserFromUserRegistry(user, EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+                .map(user -> userService.retrieveUserFromUserRegistry(user, EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = onboardingDao.getProductById(token.getProductId());
@@ -156,22 +162,22 @@ public class OnboardingServiceImpl implements OnboardingService {
     @Override
     public void approveOnboarding(Token token, SelfCareUser selfCareUser) {
         checkAndHandleExpiring(token);
-        User currentUser = userService.getUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
 
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
         List<String> validManagerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
-        User manager = userService.getUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         List<User> delegate = onboardedUsers
                 .stream()
                 .filter(onboardedUser -> validManagerList.contains(onboardedUser.getId()))
-                .map(onboardedUser -> userService.getUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+                .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         OnboardingRequest request = constructOnboardingRequest(token, institution);
         Product product = onboardingDao.getProductById(token.getProductId());
         String contractTemplate = contractService.extractTemplate(product.getContractTemplatePath());
         File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null);
-        String digest = createDigest(pdf);
+        String digest = TokenUtils.createDigest(pdf);
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
@@ -202,6 +208,54 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
+    @Override
+    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
+        verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
+        Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
+        return onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+    }
+
+    @Override
+    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser, Token token) {
+        Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
+        OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(onboardingLegalsRequest);
+        request.setTokenType(TokenType.INSTITUTION);
+
+        List<String> toUpdate = new ArrayList<>();
+        List<String> toDelete = new ArrayList<>();
+
+        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
+        List<String> validManagerList = getValidManagerToOnboard(request.getUsers(), token);
+        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+
+        List<User> delegate = request.getUsers()
+                .stream()
+                .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
+                .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+
+        String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
+        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null);
+        String digest = createDigest(pdf);
+        OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
+        log.info("{} - Digest {}", rollback.getTokenId(), digest);
+        try {
+            emailService.sendMail(pdf, institution, user, request, false);
+        } catch (Exception e) {
+            onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getTokenId(), rollback.getOnboarding(), rollback.getProductMap());
+        }
+    }
+
+    @Override
+    public ResourceResponse retrieveDocument(String relationshipId) {
+        RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
+        if (relationship.getOnboardedProduct() != null &&
+                StringUtils.hasText(relationship.getOnboardedProduct().getContract())) {
+            return contractService.getFile(relationship.getOnboardedProduct().getContract());
+        } else {
+            throw new InvalidRequestException(String.format(DOCUMENT_NOT_FOUND.getMessage(), relationshipId), DOCUMENT_NOT_FOUND.getCode());
+        }
+    }
 
     private void invalidateToken(Token token, Institution institution) {
         log.info("START - invalidate token {}", token.getId());
@@ -227,77 +281,16 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private List<GeographicTaxonomies> getGeographicTaxonomy(OnboardingRequest request) {
         List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        if (request.getInstitutionUpdate().getGeographicTaxonomyCodes() != null &&
-                !request.getInstitutionUpdate().getGeographicTaxonomyCodes().isEmpty()) {
-            geographicTaxonomies = request.getInstitutionUpdate().getGeographicTaxonomyCodes().stream
-                    ().map(institutionService::getGeoTaxonomies).collect(Collectors.toList());
+        if (request.getInstitutionUpdate().getGeographicTaxonomies() != null &&
+                !request.getInstitutionUpdate().getGeographicTaxonomies().isEmpty()) {
+            geographicTaxonomies = request.getInstitutionUpdate().getGeographicTaxonomies().stream
+                    ().map(institutionGeographicTaxonomies -> institutionService.retrieveGeoTaxonomies(institutionGeographicTaxonomies.getCode())).collect(Collectors.toList());
             if (geographicTaxonomies.isEmpty()) {
-                throw new ResourceNotFoundException(String.format(GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), request.getInstitutionUpdate().getGeographicTaxonomyCodes()),
+                throw new ResourceNotFoundException(String.format(GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), request.getInstitutionUpdate().getGeographicTaxonomies()),
                         GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
             }
         }
         return geographicTaxonomies;
-    }
-
-    @Override
-    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
-        verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
-        Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
-        return onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
-    }
-
-    @Override
-    public ResourceResponse retrieveDocument(String relationshipId) {
-        RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
-        if (relationship.getOnboardedProduct() != null &&
-                StringUtils.hasText(relationship.getOnboardedProduct().getContract())) {
-            return contractService.getFile(relationship.getOnboardedProduct().getContract());
-        } else {
-            throw new InvalidRequestException(String.format(DOCUMENT_NOT_FOUND.getMessage(), relationshipId), DOCUMENT_NOT_FOUND.getCode());
-        }
-    }
-
-    @Override
-    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser, Token token) {
-        Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
-        OnboardingRequest request = toOnboardingRequest(onboardingLegalsRequest);
-        request.setTokenType(TokenType.INSTITUTION);
-
-        List<String> toUpdate = new ArrayList<>();
-        List<String> toDelete = new ArrayList<>();
-
-        User user = userService.getUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
-        verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-        List<String> validManagerList = getValidManagerToOnboard(request.getUsers(), token);
-        User manager = userService.getUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
-
-        List<User> delegate = request.getUsers()
-                .stream()
-                .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
-                .map(userToOnboard -> userService.getUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
-
-        String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
-        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null);
-        String digest = createDigest(pdf);
-        OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
-        log.info("{} - Digest {}", rollback.getTokenId(), digest);
-        try {
-            emailService.sendMail(pdf, institution, user, request, false);
-        } catch (Exception e) {
-            onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getTokenId(), rollback.getOnboarding(), rollback.getProductMap());
-        }
-    }
-
-    private OnboardingRequest toOnboardingRequest(OnboardingLegalsRequest onboardingLegalsRequest) {
-        OnboardingRequest request = new OnboardingRequest();
-        request.setProductId(onboardingLegalsRequest.getProductId());
-        request.setProductName(onboardingLegalsRequest.getProductName());
-        request.setUsers(onboardingLegalsRequest.getUsers());
-        request.setInstitutionExternalId(onboardingLegalsRequest.getInstitutionExternalId());
-        request.setContract(onboardingLegalsRequest.getContract());
-        request.setSignContract(true);
-        request.setTokenType(TokenType.LEGALS);
-        return request;
     }
 
     public void checkAndHandleExpiring(Token token) {

@@ -62,22 +62,22 @@ class InstitutionServiceImplTest {
         when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(adminRelationships);
         Institution institution = new Institution();
         institution.setId("id");
-        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(institution,"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
+        assertNotNull(institutionServiceImpl.retrieveUserInstitutionRelationships(institution,"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
     }
 
     @Test
     void getUserInstitutionRelationships2(){
         when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(new ArrayList<>());
-        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(new Institution(),"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
+        assertNotNull(institutionServiceImpl.retrieveUserInstitutionRelationships(new Institution(),"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
     }
 
     @Test
     void updateInstitution(){
         String institutionId = "instituionId";
-        List<String> geographicTaxonomies1 = new ArrayList<>();
-        geographicTaxonomies1.add("geo");
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
+        geographicTaxonomies1.add(new InstitutionGeographicTaxonomies());
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setGeographicTaxonomyCodes(geographicTaxonomies1);
+        institutionUpdate.setGeographicTaxonomies(geographicTaxonomies1);
         String userId = "userId";
         when(userService.checkIfAdmin(any(),any())).thenReturn(true);
         when(institutionConnector.findAndUpdate(any(),any(), any())).thenReturn(new Institution());
@@ -87,10 +87,10 @@ class InstitutionServiceImplTest {
     @Test
     void updateInstitution2(){
         String institutionId = "instituionId";
-        List<String> geographicTaxonomies1 = new ArrayList<>();
-        geographicTaxonomies1.add("geo");
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
+        geographicTaxonomies1.add(new InstitutionGeographicTaxonomies());
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setGeographicTaxonomyCodes(geographicTaxonomies1);
+        institutionUpdate.setGeographicTaxonomies(geographicTaxonomies1);
         String userId = "userId";
         when(userService.checkIfAdmin(any(),any())).thenReturn(true);
         InvalidRequestException invalidRequestException = mock(InvalidRequestException.class);
@@ -101,9 +101,9 @@ class InstitutionServiceImplTest {
     @Test
     void retrieveInstitutionGeoTaxonomies(){
         Institution institution = new Institution();
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("code");
-        List<GeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
         geographicTaxonomies1.add(geographicTaxonomies);
         institution.setGeographicTaxonomies(geographicTaxonomies1);
 
@@ -741,7 +741,7 @@ class InstitutionServiceImplTest {
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42", Origin.SELC,"",
@@ -779,7 +779,7 @@ class InstitutionServiceImplTest {
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42", Origin.SELC,
@@ -794,24 +794,24 @@ class InstitutionServiceImplTest {
 
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#getInstitutionProduct(String, String)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProduct(String, String)}
      */
     @Test
     void testGetInstitutionProduct() {
         Institution institution = new Institution();
         when(institutionConnector.findInstitutionProduct(any(), any())).thenReturn(institution);
-        assertSame(institution, institutionServiceImpl.getInstitutionProduct("42", "42"));
+        assertSame(institution, institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
         verify(institutionConnector).findInstitutionProduct(any(), any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#getInstitutionProduct(String, String)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProduct(String, String)}
      */
     @Test
     void testGetInstitutionProduct2() {
         when(institutionConnector.findInstitutionProduct(any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.getInstitutionProduct("42", "42"));
+        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
         verify(institutionConnector).findInstitutionProduct(any(), any());
     }
 
@@ -847,7 +847,7 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#getGeoTaxonomies(String)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveGeoTaxonomies(String)}
      */
     @Test
     void testGetGeoTaxonomies() {
@@ -863,18 +863,18 @@ class InstitutionServiceImplTest {
         geographicTaxonomies.setRegion("us-east-2");
         geographicTaxonomies.setStartDate("2020-03-01");
         when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
-        assertSame(geographicTaxonomies, institutionServiceImpl.getGeoTaxonomies("Code"));
+        assertSame(geographicTaxonomies, institutionServiceImpl.retrieveGeoTaxonomies("Code"));
         verify(geoTaxonomiesConnector).getExtByCode(any());
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#getGeoTaxonomies(String)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveGeoTaxonomies(String)}
      */
     @Test
     void testGetGeoTaxonomies2() {
         when(geoTaxonomiesConnector.getExtByCode(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.getGeoTaxonomies("Code"));
+        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveGeoTaxonomies("Code"));
         verify(geoTaxonomiesConnector).getExtByCode(any());
     }
 

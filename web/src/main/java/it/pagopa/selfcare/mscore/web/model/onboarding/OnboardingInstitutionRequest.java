@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.onboarding;
 
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.Data;
 
@@ -26,7 +26,7 @@ public class OnboardingInstitutionRequest {
 
     @NotNull(message = "institutionData is required")
     @Valid
-    private InstitutionUpdate institutionUpdate;
+    private InstitutionUpdateRequest institutionUpdate;
 
     private String pricingPlan;
     private BillingRequest billing;

@@ -25,13 +25,11 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
 
     @Override
     public User getUserByInternalId(String userId, EnumSet<User.Fields> fieldList) {
-        log.trace("getUserByInternalId start");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId userId = {}", userId);
         Assert.hasText(userId, "A userId is required");
         Assert.notEmpty(fieldList, "At least one user fields is required");
         User result = restClient.getUserByInternalId(UUID.fromString(userId), fieldList);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId result = {}", result);
-        log.trace("getUserByInternalId end");
         return result;
 
     }

@@ -112,7 +112,7 @@ class EmailServiceTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
 
@@ -195,7 +195,7 @@ class EmailServiceTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PSP);
 

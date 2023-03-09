@@ -2,9 +2,21 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.BillingEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
+import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -42,8 +55,8 @@ class InstitutionConnectorImplTest {
 
     @Test
     void save() {
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        geographicTaxonomies.add(new GeographicTaxonomies());
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        geographicTaxonomies.add(new InstitutionGeographicTaxonomies());
         List<Onboarding> onboardings = new ArrayList<>();
         Onboarding onboarding = new Onboarding();
         onboarding.setBilling(new Billing());
@@ -154,13 +167,130 @@ class InstitutionConnectorImplTest {
         institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
         institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
         when(institutionRepository.findAndModify(any(), any(), any(), any())).thenReturn(institutionEntity);
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        GeographicTaxonomies geographicTaxonomies1 = new GeographicTaxonomies();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        InstitutionGeographicTaxonomies geographicTaxonomies1 = new InstitutionGeographicTaxonomies();
         geographicTaxonomies1.setCode("code");
         geographicTaxonomies1.setDesc("desc");
         geographicTaxonomies.add(geographicTaxonomies1);
         Institution response = institutionConnectionImpl.findAndUpdate("institutionId", new Onboarding(), geographicTaxonomies);
         assertNotNull(response);
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAndUpdateInstitutionData(String, Token, Onboarding, RelationshipState)}
+     */
+    @Test
+    void testFindAndUpdateInstitutionData() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+        when(institutionRepository.findAndModify(org.mockito.Mockito.any(),
+                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
+                org.mockito.Mockito.any())).thenReturn(institutionEntity);
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setClosedAt(null);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setTokenId("42");
+        onboarding.setUpdatedAt(null);
+        institutionConnectionImpl.findAndUpdateInstitutionData("42", token, onboarding, RelationshipState.PENDING);
+        verify(institutionRepository).findAndModify(org.mockito.Mockito.any(),
+                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
+                org.mockito.Mockito.any());
     }
 
     @Test

@@ -194,7 +194,7 @@ class ExternalControllerTest {
     void testRetrieveInstitutionProductsByExternalId5() throws Exception {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC, "?",
@@ -247,7 +247,7 @@ class ExternalControllerTest {
     void testRetrieveInstitutionGeoTaxonomiesByExternalId3() throws Exception {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC, "?",
@@ -626,19 +626,11 @@ class ExternalControllerTest {
         dataProtectionOfficer.setEmail("jane.doe@example.org");
         dataProtectionOfficer.setPec("Pec");
 
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("?");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("?");
-        geographicTaxonomies.setProvinceAbbreviation("?");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
 
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
@@ -746,7 +738,7 @@ class ExternalControllerTest {
     void testGetByExternalId6() throws Exception {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC, "?",
@@ -891,7 +883,7 @@ class ExternalControllerTest {
         onboardingList.add(onboarding);
         Billing billing1 = new Billing();
         ArrayList<Onboarding> onboarding1 = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
 

@@ -6,8 +6,7 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Test;
@@ -34,29 +33,17 @@ class OnboardingMapperTest {
         contractRequest.setPath("Path");
         contractRequest.setVersion("1.0.2");
 
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        InstitutionUpdateRequest institutionUpdate = new InstitutionUpdateRequest();
         institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
+        List<String> geographicTaxonomies = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomyCodes(geographicTaxonomies);
         institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
+        institutionUpdate.setDataProtectionOfficer(new DataProtectionOfficerRequest());
+        institutionUpdate.setPaymentServiceProvider(new PaymentServiceProviderRequest());
 
         Person person = new Person();
         person.setId("42");
@@ -81,7 +68,6 @@ class OnboardingMapperTest {
         onboardingInstitutionRequest.setUsers(new ArrayList<>());
         OnboardingRequest actualToOnboardingRequestResult = OnboardingMapper
                 .toOnboardingRequest(onboardingInstitutionRequest);
-        assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getInstitutionExternalId());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
@@ -122,16 +108,17 @@ class OnboardingMapperTest {
         paymentServiceProvider.setLegalRegisterNumber("42");
         paymentServiceProvider.setVatNumberGroup(true);
 
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        InstitutionUpdateRequest institutionUpdate = new InstitutionUpdateRequest();
         institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
+
+        institutionUpdate.setDataProtectionOfficer(new DataProtectionOfficerRequest());
+        institutionUpdate.setPaymentServiceProvider(new PaymentServiceProviderRequest());
 
         Person person = new Person();
         person.setId("42");
@@ -154,8 +141,6 @@ class OnboardingMapperTest {
         onboardingInstitutionRequest.setProductName("Product Name");
         onboardingInstitutionRequest.setUsers(personList);
         OnboardingRequest actualToOnboardingRequestResult = OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest);
-
-        assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getInstitutionExternalId());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
@@ -190,16 +175,16 @@ class OnboardingMapperTest {
         paymentServiceProvider.setLegalRegisterNumber("42");
         paymentServiceProvider.setVatNumberGroup(true);
 
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        InstitutionUpdateRequest institutionUpdate = new InstitutionUpdateRequest();
         institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PG);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
+        institutionUpdate.setDataProtectionOfficer(new DataProtectionOfficerRequest());
+        institutionUpdate.setPaymentServiceProvider(new PaymentServiceProviderRequest());
 
         Person person = new Person();
         person.setId("42");
@@ -231,8 +216,6 @@ class OnboardingMapperTest {
         onboardingInstitutionRequest.setProductName("Product Name");
         onboardingInstitutionRequest.setUsers(personList);
         OnboardingRequest actualToOnboardingRequestResult = OnboardingMapper.toOnboardingRequest(onboardingInstitutionRequest);
-
-        assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getInstitutionExternalId());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
@@ -271,23 +254,23 @@ class OnboardingMapperTest {
         paymentServiceProvider.setLegalRegisterNumber("42");
         paymentServiceProvider.setVatNumberGroup(true);
 
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        InstitutionUpdateRequest institutionUpdate = new InstitutionUpdateRequest();
         institutionUpdate.setAddress("42 Main St");
         institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
+        List<String> geographicTaxonomies = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomyCodes(geographicTaxonomies);
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
         institutionUpdate.setShareCapital("Share Capital");
         institutionUpdate.setSupportEmail("jane.doe@example.org");
         institutionUpdate.setSupportPhone("4105551212");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
+        institutionUpdate.setDataProtectionOfficer(new DataProtectionOfficerRequest());
+        institutionUpdate.setPaymentServiceProvider(new PaymentServiceProviderRequest());
 
         OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
         onboardingInstitutionRequest.setBilling(billingRequest);
@@ -304,7 +287,6 @@ class OnboardingMapperTest {
         assertTrue(actualToOnboardingRequestResult.isSignContract());
         assertEquals("42", actualToOnboardingRequestResult.getInstitutionExternalId());
         assertEquals("Product Name", actualToOnboardingRequestResult.getProductName());
-        assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
         Billing billingRequest1 = actualToOnboardingRequestResult.getBillingRequest();
@@ -335,34 +317,22 @@ class OnboardingMapperTest {
         contractImportedRequest.setFileName("foo.txt");
         contractImportedRequest.setFilePath("/directory/foo.txt");
 
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        InstitutionUpdateRequest institutionUpdate = new InstitutionUpdateRequest();
         institutionUpdate.setAddress("42 Main St");
         institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
         institutionUpdate.setShareCapital("Share Capital");
         institutionUpdate.setSupportEmail("jane.doe@example.org");
         institutionUpdate.setSupportPhone("4105551212");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
+        institutionUpdate.setDataProtectionOfficer(new DataProtectionOfficerRequest());
+        institutionUpdate.setPaymentServiceProvider(new PaymentServiceProviderRequest());
 
         Person person = new Person();
         person.setEmail("jane.doe@example.org");
@@ -393,7 +363,6 @@ class OnboardingMapperTest {
         assertEquals("42", actualToOnboardingRequestResult.getInstitutionExternalId());
         assertEquals("Product Name", actualToOnboardingRequestResult.getProductName());
         assertEquals(1, actualToOnboardingRequestResult.getUsers().size());
-        assertSame(institutionUpdate, actualToOnboardingRequestResult.getInstitutionUpdate());
         assertEquals("Pricing Plan", actualToOnboardingRequestResult.getPricingPlan());
         assertEquals("42", actualToOnboardingRequestResult.getProductId());
         Billing billingRequest1 = actualToOnboardingRequestResult.getBillingRequest();
@@ -506,8 +475,8 @@ class OnboardingMapperTest {
         List<Attributes> attributes = new ArrayList<>();
         attributes.add(new Attributes());
         institution.setAttributes(attributes);
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        geographicTaxonomies.add(new GeographicTaxonomies());
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        geographicTaxonomies.add(new InstitutionGeographicTaxonomies());
         institution.setGeographicTaxonomies(geographicTaxonomies);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();

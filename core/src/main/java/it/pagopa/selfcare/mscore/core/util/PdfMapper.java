@@ -1,27 +1,28 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.MANAGER_EMAIL_NOT_FOUND;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class PdfMapper {
 
-    private PdfMapper() {
-    }
+    private static final String[] PLAN_LIST = {"C1" , "C2" , "C3" , "C4" , "C5" , "C6" , "C7"};
 
-    public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<GeographicTaxonomies> geographicTaxonomies) {
+    public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         log.info("START - setupCommonData");
         if (validManager.getEmail() != null) {
             Map<String, Object> map = new HashMap<>();
@@ -43,7 +44,7 @@ public class PdfMapper {
                 map.put("institutionVatNumber", "");
             }
             if (geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
-                map.put("institutionGeoTaxonomies", geographicTaxonomies.stream().map(GeographicTaxonomies::getDesc).collect(Collectors.toList()));
+                map.put("institutionGeoTaxonomies", geographicTaxonomies.stream().map(InstitutionGeographicTaxonomies::getDesc).collect(Collectors.toList()));
             }
             return map;
         } else {
@@ -88,6 +89,26 @@ public class PdfMapper {
         map.put("GPSmanagerName", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getName() : underscore);
         map.put("GPSmanagerSurname", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getFamilyName() : underscore);
         map.put("GPSmanagerTaxCode", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getFiscalCode() : underscore);
+
+        map.put("institutionREA", Optional.ofNullable(institution.getRea()).orElse(underscore));
+        map.put("institutionShareCapital", Optional.ofNullable(institution.getShareCapital()).orElse(underscore));
+        map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institution.getBusinessRegisterPlace()).orElse(underscore));
+
+        if(StringUtils.hasText(request.getPricingPlan()) && Arrays.stream(PLAN_LIST).anyMatch(s -> s.equalsIgnoreCase(request.getPricingPlan()))){
+            map.put("pricingPlanPremium", request.getPricingPlan().replace("C",""));
+            map.put("pricingPlanPremiumCheckbox", "X");
+        }else{
+            map.put("pricingPlanPremium", "");
+            map.put("pricingPlanPremiumCheckbox", "");
+        }
+
+        map.put("pricingPlanPremiumBase", Optional.ofNullable(request.getPricingPlan()).orElse(""));
+
+        if(StringUtils.hasText(request.getPricingPlan()) && request.getPricingPlan().equalsIgnoreCase("C0")){
+            map.put("pricingPlanPremiumBaseCheckbox", "X");
+        }else{
+            map.put("pricingPlanPremiumBaseCheckbox", "");
+        }
     }
 
     private static String decodePricingPlan(String pricingPlan, String productId) {

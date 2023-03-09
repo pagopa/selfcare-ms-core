@@ -5,11 +5,11 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
@@ -148,10 +148,10 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
-        List<GeographicTaxonomies> list = new ArrayList<>();
+    private static List<InstitutionGeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
+        List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
         for(GeoTaxonomyEntity entity : geographicTaxonomies){
-            GeographicTaxonomies geo = new GeographicTaxonomies();
+            InstitutionGeographicTaxonomies geo = new InstitutionGeographicTaxonomies();
             geo.setDesc(entity.getDesc());
             geo.setCode(entity.getCode());
             list.add(geo);
@@ -201,9 +201,9 @@ public class InstitutionMapper {
         return list;
     }
 
-    public static List<GeoTaxonomyEntity> toGeoTaxonomyEntity(List<GeographicTaxonomies> geographicTaxonomies) {
+    public static List<GeoTaxonomyEntity> toGeoTaxonomyEntity(List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         List<GeoTaxonomyEntity> list = new ArrayList<>();
-        for(GeographicTaxonomies geo : geographicTaxonomies){
+        for(InstitutionGeographicTaxonomies geo : geographicTaxonomies){
             GeoTaxonomyEntity entity = new GeoTaxonomyEntity();
             entity.setDesc(geo.getDesc());
             entity.setCode(geo.getCode());
@@ -236,5 +236,66 @@ public class InstitutionMapper {
         response.setVatNumber(billing.getVatNumber());
         response.setRecipientCode(billing.getRecipientCode());
         return response;
+    }
+
+    public static void addGeographicTaxonomies(InstitutionUpdate institutionUpdate, Update update) {
+        if (institutionUpdate.getGeographicTaxonomies() != null && !institutionUpdate.getGeographicTaxonomies().isEmpty()) {
+            List<GeoTaxonomyEntity> list = institutionUpdate.getGeographicTaxonomies().stream().map(geographicTaxonomies -> {
+                GeoTaxonomyEntity entity = new GeoTaxonomyEntity();
+                entity.setCode(geographicTaxonomies.getCode());
+                entity.setDesc(geographicTaxonomies.getDesc());
+                return entity;
+            }).collect(Collectors.toList());
+            list.forEach(geoTaxonomyEntity -> update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geoTaxonomyEntity));
+        }
+    }
+    public static Map<String, Object> getNotNullField(InstitutionUpdate institutionUpdate) {
+        Map<String, Object> response = new HashMap<>();
+        response.put(InstitutionUpdate.Fields.institutionType.name(), institutionUpdate.getInstitutionType().name());
+        response.put(InstitutionUpdate.Fields.description.name(), institutionUpdate.getDescription());
+        response.put(InstitutionUpdate.Fields.digitalAddress.name(), institutionUpdate.getDigitalAddress());
+        response.put(InstitutionUpdate.Fields.address.name(), institutionUpdate.getAddress());
+        response.put(InstitutionUpdate.Fields.taxCode.name(), institutionUpdate.getTaxCode());
+        response.put(InstitutionUpdate.Fields.zipCode.name(), institutionUpdate.getZipCode());
+        response.put(InstitutionUpdate.Fields.rea.name(), institutionUpdate.getRea());
+        response.put(InstitutionUpdate.Fields.shareCapital.name(), institutionUpdate.getShareCapital());
+        response.put(InstitutionUpdate.Fields.businessRegisterPlace.name(), institutionUpdate.getBusinessRegisterPlace());
+        response.put(InstitutionUpdate.Fields.supportEmail.name(), institutionUpdate.getSupportEmail());
+        response.put(InstitutionUpdate.Fields.supportPhone.name(), institutionUpdate.getSupportPhone());
+        response.put(InstitutionUpdate.Fields.imported.name(), institutionUpdate.isImported());
+
+        if(institutionUpdate.getPaymentServiceProvider() != null) {
+            response.put(constructPaymentInnerField(PaymentServiceProvider.Fields.abiCode.name()),
+                    institutionUpdate.getPaymentServiceProvider().getAbiCode());
+            response.put(constructPaymentInnerField(PaymentServiceProvider.Fields.businessRegisterNumber.name()),
+                    institutionUpdate.getPaymentServiceProvider().getBusinessRegisterNumber());
+            response.put(constructPaymentInnerField(PaymentServiceProvider.Fields.legalRegisterNumber.name()),
+                    institutionUpdate.getPaymentServiceProvider().getLegalRegisterNumber());
+            response.put(constructPaymentInnerField(PaymentServiceProvider.Fields.legalRegisterName.name()),
+                    institutionUpdate.getPaymentServiceProvider().getLegalRegisterName());
+            response.put(constructPaymentInnerField(PaymentServiceProvider.Fields.vatNumberGroup.name()),
+                    institutionUpdate.getPaymentServiceProvider().isVatNumberGroup());
+        }
+
+        if(institutionUpdate.getDataProtectionOfficer() != null){
+            response.put(constructProtectionOfficerInnerField(DataProtectionOfficer.Fields.pec.name()),
+                    institutionUpdate.getDataProtectionOfficer().getPec());
+            response.put(constructProtectionOfficerInnerField(DataProtectionOfficer.Fields.address.name()),
+                    institutionUpdate.getDataProtectionOfficer().getAddress());
+            response.put(constructProtectionOfficerInnerField(DataProtectionOfficer.Fields.email.name()),
+                    institutionUpdate.getDataProtectionOfficer().getEmail());
+        }
+        response.put(InstitutionUpdate.Fields.dataProtectionOfficer.name(), institutionUpdate.getDataProtectionOfficer());
+
+        response.values().removeIf(Objects::isNull);
+        return response;
+    }
+
+    private static String constructProtectionOfficerInnerField(String name) {
+        return InstitutionUpdate.Fields.dataProtectionOfficer.name() + "." + name;
+    }
+
+    private static String constructPaymentInnerField(String name) {
+        return InstitutionUpdate.Fields.businessRegisterPlace.name() + "." + name;
     }
 }

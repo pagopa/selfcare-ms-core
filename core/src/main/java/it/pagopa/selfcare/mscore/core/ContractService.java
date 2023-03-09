@@ -13,11 +13,11 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +68,7 @@ public class ContractService {
         this.signatureService = signatureService;
     }
 
-    public File createContractPDF(String contractTemplate, User validManager, List<User> users, Institution institution, OnboardingRequest request, List<GeographicTaxonomies> geographicTaxonomies) {
+    public File createContractPDF(String contractTemplate, User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         log.info("START - createContractPdf");
         String builder = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "_" + UUID.randomUUID() + "_contratto_interoperabilita.";
         try {
@@ -127,6 +127,37 @@ public class ContractService {
                 .replace("${productName}", request.getProductName());
     }
 
+    private void validateSignature(String... errorEnums) {
+        StringBuilder stringBuilder = new StringBuilder();
+        List<String> strings = Arrays.stream(errorEnums).filter(s -> !VALID_CHECK.equals(s)).collect(Collectors.toList());
+        if (!strings.isEmpty()) {
+            for (String s : errorEnums) {
+                stringBuilder.append(s);
+                stringBuilder.append("\n");
+            }
+            throw new MsCoreException(String.format(INVALID_SIGNATURE.getMessage(), stringBuilder), INVALID_SIGNATURE.getCode());
+        }
+    }
+
+    public void verifySignature(MultipartFile contract, Token token, List<User> users) {
+        try {
+            SignedDocumentValidator validator = signatureService.createDocumentValidator(contract.getInputStream().readAllBytes());
+            signatureService.isDocumentSigned(validator);
+            signatureService.verifyOriginalDocument(validator);
+            Reports reports = signatureService.validateDocument(validator);
+            validateSignature(
+                    signatureService.verifySignatureForm(validator),
+                    signatureService.verifySignature(reports),
+                    signatureService.verifyDigest(validator, token.getChecksum()),
+                    signatureService.verifyManagerTaxCode(reports, users)
+            );
+        } catch (MsCoreException e) {
+            throw e;
+        } catch (Exception ex) {
+            throw new MsCoreException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
+        }
+    }
+
     private void getPDFAsFile(Path files, String contractTemplate, Map<String, Object> data) throws IOException {
         log.debug("Getting PDF for HTML template...");
         String html = StringSubstitutor.replace(contractTemplate, data);
@@ -160,37 +191,6 @@ public class ContractService {
             return path.toFile();
         } catch (IOException e) {
             throw new InvalidRequestException(String.format(UNABLE_TO_DOWNLOAD_FILE.getMessage(), coreConfig.getLogoPath()), UNABLE_TO_DOWNLOAD_FILE.getCode());
-        }
-    }
-
-    private void validateSignature(String... errorEnums) {
-        StringBuilder stringBuilder = new StringBuilder();
-        List<String> strings = Arrays.stream(errorEnums).filter(s -> !VALID_CHECK.equals(s)).collect(Collectors.toList());
-        if (!strings.isEmpty()) {
-            for (String s : errorEnums) {
-                stringBuilder.append(s);
-                stringBuilder.append("\n");
-            }
-            throw new MsCoreException(String.format(INVALID_SIGNATURE.getMessage(), stringBuilder), INVALID_SIGNATURE.getCode());
-        }
-    }
-
-    public void verifySignature(MultipartFile contract, Token token, List<User> users) {
-        try {
-            SignedDocumentValidator validator = signatureService.createDocumentValidator(contract.getInputStream().readAllBytes());
-            signatureService.isDocumentSigned(validator);
-            signatureService.verifyOriginalDocument(validator);
-            Reports reports = signatureService.validateDocument(validator);
-            validateSignature(
-                    signatureService.verifySignatureForm(validator),
-                    signatureService.verifySignature(reports),
-                    signatureService.verifyDigest(validator, token.getChecksum()),
-                    signatureService.verifyManagerTaxCode(reports, users)
-            );
-        } catch (MsCoreException e) {
-            throw e;
-        } catch (Exception ex) {
-            throw new MsCoreException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
         }
     }
 }

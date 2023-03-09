@@ -65,7 +65,7 @@ class RelationshipMapperTest {
         token.setUsers(new ArrayList<>());
 
         Institution institution = new Institution();
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
                 institution);
@@ -109,7 +109,7 @@ class RelationshipMapperTest {
         token.setUsers(new ArrayList<>());
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         assertThrows(InvalidRequestException.class,
@@ -158,13 +158,13 @@ class RelationshipMapperTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
         Billing billing1 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
         RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
                 new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
-                        "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList, geographicTaxonomiesList,
+                        "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList, geographicTaxonomies,
                         attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea", "Share Capital",
                         "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now()));
         assertNull(actualToRelationshipResultResult.getUpdatedAt());
@@ -245,13 +245,13 @@ class RelationshipMapperTest {
         onboardingList.add(onboarding1);
         onboardingList.add(onboarding);
         Billing billing2 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
         RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
                 new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
-                        "42 Main St", "42 Main St", "21654", "Tax Code", billing2, onboardingList, geographicTaxonomiesList,
+                        "42 Main St", "42 Main St", "21654", "Tax Code", billing2, onboardingList, geographicTaxonomies,
                         attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea", "Share Capital",
                         "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now()));
         assertNull(actualToRelationshipResultResult.getUpdatedAt());
@@ -279,19 +279,11 @@ class RelationshipMapperTest {
 
     @Test
     void testToRelationshipResult12() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
 
         Institution institution = new Institution();
@@ -332,30 +324,21 @@ class RelationshipMapperTest {
      */
     @Test
     void testToRelationshipResult13() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
 
         Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                geographicTaxonomies1, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
+                geographicTaxonomiesList, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
                 "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now());
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         Institution institution1 = new Institution();
@@ -388,19 +371,11 @@ class RelationshipMapperTest {
      */
     @Test
     void testToRelationshipResult14() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
 
         Billing billing = new Billing();
@@ -462,19 +437,10 @@ class RelationshipMapperTest {
      */
     @Test
     void testToRelationshipResult15() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
-
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
 
         Billing billing = new Billing();
@@ -552,19 +518,11 @@ class RelationshipMapperTest {
      */
     @Test
     void testToRelationshipResultList6() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
 
         Institution institution = new Institution();
@@ -586,29 +544,20 @@ class RelationshipMapperTest {
      */
     @Test
     void testToRelationshipResultList7() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
 
         Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                geographicTaxonomies1, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
+                geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
                 "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now());
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         Institution institution1 = new Institution();
@@ -627,19 +576,11 @@ class RelationshipMapperTest {
      */
     @Test
     void testToRelationshipResultList8() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
 
         Billing billing = new Billing();
@@ -682,19 +623,11 @@ class RelationshipMapperTest {
      */
     @Test
     void testToRelationshipResultList9() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
 
         Billing billing = new Billing();

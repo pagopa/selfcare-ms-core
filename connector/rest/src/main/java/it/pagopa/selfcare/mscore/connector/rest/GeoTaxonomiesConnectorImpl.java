@@ -23,12 +23,10 @@ public class GeoTaxonomiesConnectorImpl implements GeoTaxonomiesConnector {
 
     @Override
     public GeographicTaxonomies getExtByCode(String code) {
-        log.trace("getExtByCode code = {}", code);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getExtByCode code = {}", code);
         Assert.hasText(code, "Code is required");
         GeographicTaxonomiesResponse result = restClient.getExtByCode(code);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getExtByCode result = {}", result);
-        log.trace("getExtByCode end");
         return toGeoTaxonomies(result);
     }
 

@@ -1,23 +1,20 @@
 package it.pagopa.selfcare.mscore.core.util;
 
-import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,29 +24,8 @@ import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INVALID_
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.PRODUCT_RELATIONSHIP_STATES;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingInstitutionUtils {
-
-    private OnboardingInstitutionUtils() {
-    }
-
-    public static void verifyUsers(List<UserToOnboard> users, List<PartyRole> role) {
-        List<UserToOnboard> userList = new ArrayList<>();
-        users.forEach(onboardedUser -> {
-            if (!role.contains(onboardedUser.getRole())) {
-                userList.add(onboardedUser);
-            }
-        });
-        if (!userList.isEmpty()) {
-            List<PartyRole> userRoleList = userList.stream().map(UserToOnboard::getRole).collect(Collectors.toList());
-            throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userRoleList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
-        }
-    }
-
-    public static String createDigest(File pdf) {
-        log.info("START- createDigest for pdf {}", pdf.getName());
-        DSSDocument document = new FileDocument(pdf);
-        return document.getDigest(DigestAlgorithm.SHA256);
-    }
 
     public static void checkIfProductAlreadyOnboarded(Institution institution, OnboardingRequest request) {
         log.info("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", institution.getExternalId(), request.getProductId());
@@ -61,7 +37,6 @@ public class OnboardingInstitutionUtils {
             if (optionalOnboarding.isPresent() && !PRODUCT_RELATIONSHIP_STATES.contains(optionalOnboarding.get().getStatus())) {
                 throw new ResourceConflictException(String.format(PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), PRODUCT_ALREADY_ONBOARDED.getCode());
             }
-            //TODO: INSERIRE IL CHECK SU PENDING O TOBEVALIDATED? (EXPIRING_DATA > NOW)
         }
         log.info("END - checkIfProductAlreadyOnboarded without error");
     }
@@ -79,72 +54,7 @@ public class OnboardingInstitutionUtils {
         log.info("END - validateOverridingData without error");
     }
 
-    public static Token convertToToken(OnboardingRequest request, Institution institution, String digest, OffsetDateTime expiringDate) {
-        log.info("START - convertToToken for institution having externalId: {} and digest: {}", institution.getExternalId(), digest);
-        Token token = new Token();
-        if (request.getContract() != null) {
-            token.setContractTemplate(request.getContract().getPath());
-        }
-        token.setCreatedAt(OffsetDateTime.now());
-        token.setInstitutionId(institution.getId());
-        token.setProductId(request.getProductId());
-        token.setChecksum(digest);
-        if (request.getInstitutionUpdate() != null) {
-            token.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
-        } else if (institution.getInstitutionType() != null) {
-            token.setStatus(getStatus(institution.getInstitutionType()));
-        }
-        token.setInstitutionUpdate(request.getInstitutionUpdate());
-        token.setUsers(request.getUsers().stream().map(OnboardingInstitutionUtils::toTokenUser).collect(Collectors.toList()));
-        token.setExpiringDate(expiringDate);
-        token.setType(request.getTokenType());
-        log.info("END - convertToToken");
-        return token;
-    }
-
-    public static TokenUser toTokenUser(UserToOnboard userToOnboard) {
-        TokenUser tokenUser = new TokenUser();
-        tokenUser.setUserId(userToOnboard.getId());
-        tokenUser.setRole(userToOnboard.getRole());
-        return tokenUser;
-    }
-
-    public static OnboardedProduct constructOperatorProduct(UserToOnboard user, OnboardingOperatorsRequest request) {
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
-        onboardedProduct.setProductId(request.getProductId());
-        onboardedProduct.setRole(user.getRole());
-        onboardedProduct.setProductRole(user.getProductRole());
-        onboardedProduct.setStatus(RelationshipState.ACTIVE);
-        onboardedProduct.setCreatedAt(OffsetDateTime.now());
-        if (user.getEnv() != null) {
-            onboardedProduct.setEnv(user.getEnv());
-        } else {
-            onboardedProduct.setEnv(Env.ROOT);
-        }
-        return onboardedProduct;
-    }
-
-    public static OnboardedProduct constructProduct(UserToOnboard p, OnboardingRequest request) {
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
-        onboardedProduct.setProductId(request.getProductId());
-        onboardedProduct.setRole(p.getRole());
-        if (request.getContract() != null) {
-            onboardedProduct.setContract(request.getContract().getPath());
-        }
-        onboardedProduct.setProductRole(p.getProductRole());
-        if (request.getInstitutionUpdate() != null) {
-            onboardedProduct.setStatus(retrieveStatusFromInstitutionType(request.getInstitutionUpdate().getInstitutionType()));
-        }
-        onboardedProduct.setCreatedAt(OffsetDateTime.now());
-        if (p.getEnv() != null) {
-            onboardedProduct.setEnv(p.getEnv());
-        }
-        return onboardedProduct;
-    }
-
-    public static RelationshipState retrieveStatusFromInstitutionType(InstitutionType institutionType) {
+    public static RelationshipState getStatus(InstitutionType institutionType) {
         switch (institutionType) {
             case PA:
                 return RelationshipState.PENDING;
@@ -155,32 +65,16 @@ public class OnboardingInstitutionUtils {
         }
     }
 
-    public static Onboarding constructOnboarding(OnboardingRequest request) {
-        Onboarding onboarding = new Onboarding();
-
-        onboarding.setProductId(request.getProductId());
-        onboarding.setBilling(request.getBillingRequest());
-        onboarding.setPricingPlan(request.getPricingPlan());
-        onboarding.setCreatedAt(OffsetDateTime.now());
-
-        if (request.getContract() != null) {
-            onboarding.setContract(request.getContract().getPath());
-        }
-        if (request.getInstitutionUpdate() != null) {
-            onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
-        }
-
-        return onboarding;
-    }
-
-    private static RelationshipState getStatus(InstitutionType institutionType) {
-        switch (institutionType) {
-            case PA:
-                return RelationshipState.PENDING;
-            case PG:
-                return RelationshipState.ACTIVE;
-            default:
-                return RelationshipState.TOBEVALIDATED;
+    public static void verifyUsers(List<UserToOnboard> users, List<PartyRole> role) {
+        List<UserToOnboard> userList = new ArrayList<>();
+        users.forEach(onboardedUser -> {
+            if (!role.contains(onboardedUser.getRole())) {
+                userList.add(onboardedUser);
+            }
+        });
+        if (!userList.isEmpty()) {
+            List<PartyRole> userRoleList = userList.stream().map(UserToOnboard::getRole).collect(Collectors.toList());
+            throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userRoleList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
         }
     }
 
@@ -220,6 +114,18 @@ public class OnboardingInstitutionUtils {
         return response;
     }
 
+    public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest onboardingLegalsRequest) {
+        OnboardingRequest request = new OnboardingRequest();
+        request.setProductId(onboardingLegalsRequest.getProductId());
+        request.setProductName(onboardingLegalsRequest.getProductName());
+        request.setUsers(onboardingLegalsRequest.getUsers());
+        request.setInstitutionExternalId(onboardingLegalsRequest.getInstitutionExternalId());
+        request.setContract(onboardingLegalsRequest.getContract());
+        request.setSignContract(true);
+        request.setTokenType(TokenType.LEGALS);
+        return request;
+    }
+
     public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution) {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setProductId(token.getProductId());
@@ -233,5 +139,58 @@ public class OnboardingInstitutionUtils {
         onboardingRequest.setSignContract(true);
 
         return onboardingRequest;
+    }
+
+    public static Onboarding constructOnboarding(OnboardingRequest request) {
+        Onboarding onboarding = new Onboarding();
+
+        onboarding.setProductId(request.getProductId());
+        onboarding.setBilling(request.getBillingRequest());
+        onboarding.setPricingPlan(request.getPricingPlan());
+        onboarding.setCreatedAt(OffsetDateTime.now());
+
+        if (request.getContract() != null) {
+            onboarding.setContract(request.getContract().getPath());
+        }
+        if (request.getInstitutionUpdate() != null) {
+            onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+        }
+
+        return onboarding;
+    }
+
+    public static OnboardedProduct constructOperatorProduct(UserToOnboard user, OnboardingOperatorsRequest request) {
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
+        onboardedProduct.setProductId(request.getProductId());
+        onboardedProduct.setRole(user.getRole());
+        onboardedProduct.setProductRole(user.getProductRole());
+        onboardedProduct.setStatus(RelationshipState.ACTIVE);
+        onboardedProduct.setCreatedAt(OffsetDateTime.now());
+        if (user.getEnv() != null) {
+            onboardedProduct.setEnv(user.getEnv());
+        } else {
+            onboardedProduct.setEnv(Env.ROOT);
+        }
+        return onboardedProduct;
+    }
+
+    public static OnboardedProduct constructProduct(UserToOnboard p, OnboardingRequest request) {
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
+        onboardedProduct.setProductId(request.getProductId());
+        onboardedProduct.setRole(p.getRole());
+        if (request.getContract() != null) {
+            onboardedProduct.setContract(request.getContract().getPath());
+        }
+        onboardedProduct.setProductRole(p.getProductRole());
+        if (request.getInstitutionUpdate() != null) {
+            onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+        }
+        onboardedProduct.setCreatedAt(OffsetDateTime.now());
+        if (p.getEnv() != null) {
+            onboardedProduct.setEnv(p.getEnv());
+        }
+        return onboardedProduct;
     }
 }

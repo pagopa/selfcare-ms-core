@@ -74,7 +74,7 @@ class InstitutionMapperTest {
     void testToInstitutionResponse4() {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
@@ -111,19 +111,11 @@ class InstitutionMapperTest {
      */
     @Test
     void testToInstitutionResponse5() {
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
         Billing billing = new Billing();
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
@@ -167,7 +159,7 @@ class InstitutionMapperTest {
         attributesList.add(attributes);
         Billing billing = new Billing();
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
                 .toInstitutionResponse(new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
@@ -247,7 +239,7 @@ class InstitutionMapperTest {
     @Test
     void testToInstitutionUpdateResponse2() {
         Institution institution = new Institution();
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
                 .toInstitutionUpdateResponse(institution);
@@ -274,7 +266,7 @@ class InstitutionMapperTest {
     void testToInstitutionUpdateResponse4() {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
@@ -304,7 +296,7 @@ class InstitutionMapperTest {
     void testToInstitutionUpdate() {
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(new ArrayList<>());
-        assertTrue(InstitutionMapper.toInstitutionUpdate(institutionPut).getGeographicTaxonomyCodes().isEmpty());
+        assertTrue(InstitutionMapper.toInstitutionUpdate(institutionPut).getGeographicTaxonomies().isEmpty());
     }
 
 

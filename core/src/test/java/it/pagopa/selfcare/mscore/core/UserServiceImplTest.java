@@ -205,7 +205,7 @@ class UserServiceImplTest {
     void testGetUserFromUserRegistry2() {
         when(userRegistryConnector.getUserByInternalId(any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.getUserFromUserRegistry("42", null));
+        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.retrieveUserFromUserRegistry("42", null));
         verify(userRegistryConnector).getUserByInternalId(any(), any());
     }
 }

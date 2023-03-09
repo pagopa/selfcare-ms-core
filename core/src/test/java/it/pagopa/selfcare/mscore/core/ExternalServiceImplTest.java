@@ -40,7 +40,7 @@ class ExternalServiceImplTest {
     @Test
     void getUserInstitutionRelationships(){
         when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(new Institution());
-        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any())).thenReturn(new ArrayList<>());
+        when(institutionService.retrieveUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any())).thenReturn(new ArrayList<>());
         assertNotNull(externalServiceImpl.getUserInstitutionRelationships("externalId","42","42",new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
     }
 
@@ -114,9 +114,9 @@ class ExternalServiceImplTest {
     @Test
     void testRetrieveInstitutionProduct() {
         Institution institution = new Institution();
-        when(institutionService.getInstitutionProduct(any(), any())).thenReturn(institution);
+        when(institutionService.retrieveInstitutionProduct(any(), any())).thenReturn(institution);
         assertSame(institution, externalServiceImpl.retrieveInstitutionProduct("42", "42"));
-        verify(institutionService).getInstitutionProduct(any(), any());
+        verify(institutionService).retrieveInstitutionProduct(any(), any());
     }
 
     /**

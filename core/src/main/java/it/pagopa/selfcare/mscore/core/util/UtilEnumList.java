@@ -10,7 +10,6 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class UtilEnumList {
 
-
     public static final List<RelationshipState> PRODUCT_RELATIONSHIP_STATES =
             List.of(RelationshipState.PENDING,
                     RelationshipState.REJECTED,

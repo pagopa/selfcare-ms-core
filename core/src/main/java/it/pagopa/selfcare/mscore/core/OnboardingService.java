@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface OnboardingService {
 
-    void onboardingInstitution(OnboardingRequest request, SelfCareUser principal);
-
     void verifyOnboardingInfo(String externalId, String productId);
 
     List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId);
+
+    void onboardingInstitution(OnboardingRequest request, SelfCareUser principal);
 
     void completeOboarding(Token token, MultipartFile contract);
 

@@ -26,7 +26,7 @@ public class Institution {
     private String taxCode;
     private Billing billing;
     private List<Onboarding> onboarding;
-    private List<GeographicTaxonomies> geographicTaxonomies;
+    private List<InstitutionGeographicTaxonomies> geographicTaxonomies;
     private List<Attributes> attributes;
     private PaymentServiceProvider paymentServiceProvider;
     private DataProtectionOfficer dataProtectionOfficer;

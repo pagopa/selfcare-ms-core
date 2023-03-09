@@ -17,6 +17,8 @@ public interface InstitutionService {
 
     Institution retrieveInstitutionByExternalId(String institutionExternalId);
 
+    void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
+
     Institution createInstitutionByExternalId(String externalId);
 
     Institution createInstitutionRaw(Institution institution, String externalId);
@@ -25,15 +27,13 @@ public interface InstitutionService {
 
     List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states);
 
-    Institution getInstitutionProduct(String externalId, String productId);
+    Institution retrieveInstitutionProduct(String externalId, String productId);
 
-    GeographicTaxonomies getGeoTaxonomies(String code);
-
-    List<RelationshipInfo> getUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
-
-    void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
+    List<RelationshipInfo> retrieveUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 
     List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution);
+
+    GeographicTaxonomies retrieveGeoTaxonomies(String code);
 
     Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
 }

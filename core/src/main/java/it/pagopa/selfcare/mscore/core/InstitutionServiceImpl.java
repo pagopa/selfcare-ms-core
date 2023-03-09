@@ -67,6 +67,15 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates) {
+        List<Institution> list = institutionConnector.findWithFilter(externalId, productId, validRelationshipStates);
+        if (list == null || list.isEmpty()) {
+            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_ONBOARDED.getMessage(), externalId, productId),
+                    INSTITUTION_NOT_ONBOARDED.getCode());
+        }
+    }
+
+    @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
 
@@ -159,19 +168,26 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution retrieveInstitutionProduct(String externalId, String productId) {
+        return institutionConnector.findInstitutionProduct(externalId, productId);
+    }
+
+    @Override
     public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution) {
         log.info("Retrieving geographic taxonomies for institution {}", institution.getId());
         return institution.getGeographicTaxonomies().stream()
-                .map(GeographicTaxonomies::getCode)
-                .map(this::getGeoTaxonomies)
+                .map(InstitutionGeographicTaxonomies::getCode)
+                .map(this::retrieveGeoTaxonomies)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
         if (userService.checkIfAdmin(userId, institutionId)) {
-            List<GeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomyCodes()
-                    .stream().map(this::getGeoTaxonomies).collect(Collectors.toList());
+            List<InstitutionGeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomies()
+                    .stream()
+                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getCode(), geo.getDesc())).collect(Collectors.toList());
             return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
         } else {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), RELATIONSHIP_NOT_FOUND.getCode());
@@ -179,8 +195,15 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution getInstitutionProduct(String externalId, String productId) {
-        return institutionConnector.findInstitutionProduct(externalId, productId);
+    public List<RelationshipInfo> retrieveUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
+        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, roles, states, products, productRoles);
+        if (!adminRelationships.isEmpty()) {
+            return toRelationshipInfo(institutionRelationships, institution);
+        } else {
+            List<OnboardedUser> filterInstitutionRelationships = institutionRelationships.stream().filter(user -> userId.equalsIgnoreCase(user.getId())).collect(Collectors.toList());
+            return toRelationshipInfo(filterInstitutionRelationships, institution);
+        }
     }
 
     public void checkIfAlreadyExists(String externalId) {
@@ -191,20 +214,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
-    public GeographicTaxonomies getGeoTaxonomies(String code) {
+    public GeographicTaxonomies retrieveGeoTaxonomies(String code) {
         return geoTaxonomiesConnector.getExtByCode(code);
-    }
-
-    @Override
-    public List<RelationshipInfo> getUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
-        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, roles, states, products, productRoles);
-        if (!adminRelationships.isEmpty()) {
-            return toRelationshipInfo(institutionRelationships, institution);
-        } else {
-            List<OnboardedUser> filterInstitutionRelationships = institutionRelationships.stream().filter(user -> userId.equalsIgnoreCase(user.getId())).collect(Collectors.toList());
-            return toRelationshipInfo(filterInstitutionRelationships, institution);
-        }
     }
 
     private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution) {
@@ -226,15 +237,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                 relationshipInfo.setOnboardedProduct(product);
                 list.add(relationshipInfo);
             }
-        }
-    }
-
-    @Override
-    public void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates) {
-        List<Institution> list = institutionConnector.findWithFilter(externalId, productId, validRelationshipStates);
-        if (list == null || list.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_ONBOARDED.getMessage(), externalId, productId),
-                    INSTITUTION_NOT_ONBOARDED.getCode());
         }
     }
 }

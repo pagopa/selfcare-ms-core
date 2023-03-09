@@ -90,7 +90,6 @@ public class InstitutionController {
      * The function persist PG institution
      *
      * @param request CreatePgInstitutionRequest
-     * @param existsInRegistry boolean
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Bad Request, DataType: Problem
@@ -101,11 +100,9 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
     @PostMapping(value = "/pg")
     public ResponseEntity<InstitutionResponse> createPgInstitution(@RequestBody @Valid CreatePgInstitutionRequest request,
-                                                                   @ApiParam("${swagger.mscore.institutions.existsInRegistry}")
-                                                                   @RequestParam(value = "existsInRegistry") boolean existsInRegistry,
                                                                    Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
-        Institution saved = institutionService.createPgInstitution(request.getTaxId(), request.getDescription(), existsInRegistry, (SelfCareUser) authentication.getPrincipal());
+        Institution saved = institutionService.createPgInstitution(request.getTaxId(), request.getDescription(), request.isExistsInRegistry(), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
@@ -232,7 +229,7 @@ public class InstitutionController {
         CustomExceptionMessage.setCustomMessage(GET_USER_INSTITUTION_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
+        List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
         return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(relationshipInfoList),pageSize,pageNumber));
     }
 

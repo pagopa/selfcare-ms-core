@@ -30,10 +30,7 @@ public class OnboardedInstitutionResponse {
     private String state;
     private PartyRole role;
     private ProductInfo productInfo;
-    private String rea;
-    private String shareCapital;
-    private String businessRegisterPlace;
-    private String supportEmail;
-    private String supportPhone;
+    private BusinessData businessData;
+    private SupportContact supportContact;
 
 }

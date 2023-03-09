@@ -62,7 +62,7 @@ class OnboardingServiceImplTest {
         Token token = new Token();
         token.setInstitutionId("id");
         token.setProductId("id");
-        when(userService.getUserFromUserRegistry(any(),any())).thenReturn(new User());
+        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(new User());
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
 
         UserBinding userBinding = new UserBinding();
@@ -81,7 +81,7 @@ class OnboardingServiceImplTest {
         users.add(user);
 
         when(userService.findAllByIds(any())).thenReturn(users);
-        when(userService.getUserFromUserRegistry(any(),any())).thenReturn(new User());
+        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(new User());
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(onboardingDao.getProductById(any())).thenReturn(new Product());
         when(contractService.extractTemplate(any())).thenReturn("42");
@@ -119,7 +119,7 @@ class OnboardingServiceImplTest {
         List<OnboardedUser> users = new ArrayList<>();
         users.add(user);
         when(userService.findAllByIds(any())).thenReturn(users);
-        when(userService.getUserFromUserRegistry(any(), any())).thenReturn(new User());
+        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(new User());
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(onboardingDao.getProductById(any())).thenReturn(new Product());
         doNothing().when(contractService).verifySignature(any(), any(), any());
@@ -248,7 +248,7 @@ class OnboardingServiceImplTest {
     void testGetOnboardingInfo10() {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC, "START - getUser with id: {}",
@@ -299,7 +299,7 @@ class OnboardingServiceImplTest {
     void testGetOnboardingInfo11() {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC, "START - getUser with id: {}",
@@ -400,7 +400,7 @@ class OnboardingServiceImplTest {
     void testGetOnboardingInfo16() {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC,
@@ -483,7 +483,7 @@ class OnboardingServiceImplTest {
     void testGetOnboardingInfo20() {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC,
@@ -588,7 +588,7 @@ class OnboardingServiceImplTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("description");
         institutionUpdate.setDigitalAddress("digitalAddress");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -673,7 +673,7 @@ class OnboardingServiceImplTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -740,7 +740,7 @@ class OnboardingServiceImplTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -798,7 +798,7 @@ class OnboardingServiceImplTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("description");
         institutionUpdate.setDigitalAddress("digitalAddress");
-        institutionUpdate.setGeographicTaxonomyCodes(List.of("code1"));
+        institutionUpdate.setGeographicTaxonomies(List.of(new InstitutionGeographicTaxonomies()));
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -827,8 +827,7 @@ class OnboardingServiceImplTest {
         onboardingRequest.setUsers(userToOnboardList);
 
 
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-        geographicTaxonomies.setEnable(true);
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
         geographicTaxonomies.setDesc("desc");
         geographicTaxonomies.setCode("code");
 
@@ -854,7 +853,7 @@ class OnboardingServiceImplTest {
         when(selfCareUser.getId()).thenReturn("42");
 
         when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(institution);
-
+        when(institutionService.retrieveGeoTaxonomies(any())).thenReturn(new GeographicTaxonomies());
         Token token = new Token();
         token.setId("token");
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(new OnboardingRollback());
@@ -902,7 +901,7 @@ class OnboardingServiceImplTest {
         token.setChecksum("Checksum");
         token.setContractTemplate("Contract");
         token.setCreatedAt(null);
-        token.setExpiringDate(OffsetDateTime.now());
+        token.setExpiringDate(OffsetDateTime.now().plusYears(10));
         token.setId("42");
         token.setInstitutionId("42");
         token.setProductId("42");

@@ -78,7 +78,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -161,7 +161,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -181,8 +181,8 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        geographicTaxonomies.add(new GeographicTaxonomies());
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        geographicTaxonomies.add(new InstitutionGeographicTaxonomies());
         assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, geographicTaxonomies).size());
     }
 
@@ -246,7 +246,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.GSP);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -352,7 +352,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PT);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -480,7 +480,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.SCP);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -532,7 +532,7 @@ class PdfMapperTest {
         ArrayList<User> users = new ArrayList<>();
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC, "START - setupCommonData",
@@ -573,7 +573,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PSP);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider1);
@@ -656,7 +656,7 @@ class PdfMapperTest {
         user.setWorkContacts(new HashMap<>());
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         PdfMapper.setupPSPData(stringObjectMap, user,
@@ -807,7 +807,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -860,7 +860,7 @@ class PdfMapperTest {
         user.setWorkContacts(new HashMap<>());
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC, "START - setupProdIOData",
@@ -901,7 +901,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider1);
@@ -986,7 +986,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
@@ -1071,7 +1071,7 @@ class PdfMapperTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);

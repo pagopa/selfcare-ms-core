@@ -22,7 +22,7 @@ public interface UserService {
 
     void verifyUser(String userId);
 
-    User getUserFromUserRegistry(String userId, EnumSet<User.Fields> fields);
+    User retrieveUserFromUserRegistry(String userId, EnumSet<User.Fields> fields);
 
     OnboardedUser createUser(String userId);
 }

@@ -12,9 +12,11 @@ import eu.europa.esig.dss.validation.timestamp.DetachedTimestampValidator;
 import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.user.User;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.Date;
@@ -25,11 +27,36 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ContextConfiguration(classes = {SignatureService.class})
 @ExtendWith(SpringExtension.class)
 class SignatureServiceTest {
     @InjectMocks
     private SignatureService signatureService;
 
+
+    /**
+     * Method under test: {@link SignatureService#createDocumentValidator(byte[])}
+     */
+    @Test
+    @Disabled("TODO: Complete this test")
+    void testCreateDocumentValidator() {
+        // TODO: Complete this test.
+        //   Reason: R005 Unable to load class.
+        //   Class: javax.activation.DataSource
+        //   Please check that the class is available on your test runtime classpath.
+        //   See https://diff.blue/R005 to resolve this issue.
+
+        // Arrange
+        // TODO: Populate arranged inputs
+        byte[] bytes = null;
+
+        // Act
+        SignedDocumentValidator actualCreateDocumentValidatorResult = this.signatureService
+                .createDocumentValidator(bytes);
+
+        // Assert
+        // TODO: Add assertions on result
+    }
 
     /**
      * Method under test: {@link SignatureService#isDocumentSigned(SignedDocumentValidator)}
@@ -51,17 +78,17 @@ class SignatureServiceTest {
     }
 
     @Test
-    void validateDocument(){
+    void validateDocument() {
         DetachedTimestampValidator detachedTimestampValidator = new DetachedTimestampValidator(new DigestDocument());
-        assertThrows(NoClassDefFoundError.class, () ->signatureService.validateDocument(detachedTimestampValidator));
+        assertThrows(NoClassDefFoundError.class, () -> signatureService.validateDocument(detachedTimestampValidator));
     }
 
     @Test
-    void validateDocument2(){
+    void validateDocument2() {
         SignedDocumentValidator signedDocumentValidator = mock(SignedDocumentValidator.class);
         MsCoreException msCoreException = mock(MsCoreException.class);
         when(signedDocumentValidator.validateDocument()).thenThrow(msCoreException);
-        assertThrows(MsCoreException.class, () ->signatureService.validateDocument(signedDocumentValidator));
+        assertThrows(MsCoreException.class, () -> signatureService.validateDocument(signedDocumentValidator));
     }
 
     /**

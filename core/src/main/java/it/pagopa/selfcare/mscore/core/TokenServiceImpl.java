@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -44,7 +45,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public TokenRelationships getToken(String tokenId) {
+    public TokenRelationships retrieveToken(String tokenId) {
         Token token = tokenConnector.findById(tokenId);
         List<OnboardedUser> users;
         if (token.getUsers() != null) {
@@ -53,22 +54,11 @@ public class TokenServiceImpl implements TokenService {
         } else {
             users = Collections.emptyList();
         }
-        return toTokenRelationships(token, users);
+        return TokenUtils.toTokenRelationships(token, users);
     }
 
     @Override
     public Token verifyOnboarding(String institutionId, String productId) {
         return tokenConnector.findWithFilter(institutionId, productId);
     }
-
-    private TokenRelationships toTokenRelationships(Token token, List<OnboardedUser> users) {
-        TokenRelationships tokenRelationships = new TokenRelationships();
-        tokenRelationships.setChecksum(token.getChecksum());
-        tokenRelationships.setTokenId(token.getId());
-        tokenRelationships.setInstitutionId(token.getInstitutionId());
-        tokenRelationships.setProductId(token.getProductId());
-        tokenRelationships.setUsers(users);
-        return tokenRelationships;
-    }
-
 }

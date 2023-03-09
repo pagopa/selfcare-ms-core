@@ -20,12 +20,10 @@ public class ProductConnectorImpl implements ProductConnector {
 
     @Override
     public Product getProductById(String productId) {
-        log.trace("getProductById start");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById productId = {}", productId);
         Assert.hasText(productId, "A productId is required");
         Product result = restClient.getProductById(productId, null);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById result = {}", result);
-        log.trace("getProductById end");
         return result;
     }
 }

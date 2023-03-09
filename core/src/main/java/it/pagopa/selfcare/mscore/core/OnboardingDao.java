@@ -5,9 +5,10 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
@@ -56,7 +57,7 @@ public class OnboardingDao {
                                       List<String> toDelete,
                                       OnboardingRequest request,
                                       Institution institution,
-                                      List<GeographicTaxonomies> geographicTaxonomies,
+                                      List<InstitutionGeographicTaxonomies> geographicTaxonomies,
                                       String digest) {
         Token token = createToken(request, institution, digest, coreConfig.getExpiringDate(), geographicTaxonomies);
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
@@ -79,10 +80,26 @@ public class OnboardingDao {
             } else {
                 updateInstitutionState(institution, token, toState);
             }
-            updateUsers(institution, token, toState);
+            updateUsersState(institution, token, toState);
         } else {
             throw new InvalidRequestException(String.format(INVALID_STATUS_CHANGE.getMessage(), token.getStatus(), toState), INVALID_STATUS_CHANGE.getCode());
         }
+    }
+
+    private Onboarding updateInstitution(OnboardingRequest request, Institution institution, List<InstitutionGeographicTaxonomies> geographicTaxonomies, Token token) {
+        Onboarding onboarding = constructOnboarding(request);
+        onboarding.setTokenId(token.getId());
+        try {
+            log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
+            if (RelationshipState.ACTIVE == token.getStatus()) {
+                institutionConnector.findAndUpdateInstitutionData(institution.getId(), token, onboarding, null);
+            } else {
+                institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
+            }
+        } catch (Exception e) {
+            rollbackFirstStep(token, institution.getId(), onboarding);
+        }
+        return onboarding;
     }
 
     private void updateInstitutionData(Institution institution, Token token, RelationshipState toState) {
@@ -93,7 +110,24 @@ public class OnboardingDao {
         }
     }
 
-    public void updateUsers(Institution institution, Token token, RelationshipState state) {
+    private void updateInstitutionState(Institution institution, Token token, RelationshipState state) {
+        log.info("update institution status from {} to {} for product {}", token.getStatus(), state, token.getProductId());
+        try {
+            institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), state);
+        } catch (Exception e) {
+            rollbackFirstStepOfUpdate(token);
+        }
+    }
+
+    private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, String institutionId, OnboardingRequest request, String tokenId) {
+        OnboardedProduct product = constructProduct(user, request);
+        product.setTokenId(tokenId);
+        UserBinding binding = new UserBinding(institutionId, List.of(product));
+        userConnector.findAndUpdate(onboardedUser, user.getId(), institutionId, product, binding);
+        return product;
+    }
+
+    public void updateUsersState(Institution institution, Token token, RelationshipState state) {
         log.info("update {} users state from {} to {} for product {}", token.getUsers().size(), token.getStatus(), state, token.getProductId());
         List<String> toUpdate = new ArrayList<>();
         token.getUsers().forEach(tokenUser -> {
@@ -108,13 +142,20 @@ public class OnboardingDao {
         });
     }
 
-    private void updateInstitutionState(Institution institution, Token token, RelationshipState state) {
-        log.info("update institution status from {} to {} for product {}", token.getStatus(), state, token.getProductId());
-        try {
-            institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), state);
-        } catch (Exception e) {
-            rollbackFirstStepOfUpdate(token);
+    public void updateUserProductState(OnboardedUser user, String relationshipId, RelationshipState toState) {
+        for (UserBinding binding : user.getBindings()) {
+            binding.getProducts().stream()
+                    .filter(onboardedProduct -> relationshipId.equalsIgnoreCase(onboardedProduct.getRelationshipId()))
+                    .forEach(product -> checkStatus(product.getStatus(), user.getId(), product.getRelationshipId(), toState));
         }
+    }
+
+    private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
+        OnboardedProduct product = constructOperatorProduct(user, request);
+        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
+        userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
+        response.add(new RelationshipInfo(institution, user.getId(), product));
+        return product;
     }
 
     private void updateToken(Token token, RelationshipState state, String digest) {
@@ -122,26 +163,10 @@ public class OnboardingDao {
         tokenConnector.findAndUpdateToken(token.getId(), state, digest);
     }
 
-    private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<GeographicTaxonomies> geographicTaxonomies) {
+    private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
         OffsetDateTime expiringDate = OffsetDateTime.now().plus(expire, ChronoUnit.DAYS);
-        return tokenConnector.save(convertToToken(request, institution, digest, expiringDate), geographicTaxonomies);
-    }
-
-    private Onboarding updateInstitution(OnboardingRequest request, Institution institution, List<GeographicTaxonomies> geographicTaxonomies, Token token) {
-        Onboarding onboarding = constructOnboarding(request);
-        onboarding.setTokenId(token.getId());
-        try {
-            log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
-            if (RelationshipState.ACTIVE == token.getStatus()) {
-                institutionConnector.findAndUpdateInstitutionData(institution.getId(), token, onboarding, null);
-            } else {
-                institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
-            }
-        } catch (Exception e) {
-            rollbackFirstStep(token, institution.getId(), onboarding);
-        }
-        return onboarding;
+        return tokenConnector.save(TokenUtils.toToken(request, institution, digest, expiringDate), geographicTaxonomies);
     }
 
     private Map<String, OnboardedProduct> createUsers(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, String institutionId, String tokenId, Onboarding onboarding) {
@@ -163,111 +188,6 @@ public class OnboardingDao {
             rollbackSecondStep(toUpdate, toDelete, institutionId, tokenId, onboarding, productMap);
         }
         return productMap;
-    }
-
-    private void createNewUser(UserToOnboard user, String institutionId, OnboardingRequest request, String tokenId) {
-        OnboardedProduct product = constructProduct(user, request);
-        product.setTokenId(tokenId);
-        UserBinding binding = new UserBinding(institutionId, List.of(product));
-        userConnector.findAndCreate(user.getId(), binding);
-    }
-
-    private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, String institutionId, OnboardingRequest request, String tokenId) {
-        OnboardedProduct product = constructProduct(user, request);
-        product.setTokenId(tokenId);
-        UserBinding binding = new UserBinding(institutionId, List.of(product));
-        userConnector.findAndUpdate(onboardedUser, user.getId(), institutionId, product, binding);
-        return product;
-    }
-
-    private OnboardedUser isNewUser(List<String> toUpdate, String userId) {
-        OnboardedUser onboardedUser = userConnector.findById(userId);
-        if (onboardedUser != null) {
-            toUpdate.add(onboardedUser.getId());
-        }
-        return onboardedUser;
-    }
-
-    public void rollbackSecondStep(List<String> toUpdate, List<String> toDelete, String institutionId, String tokenId, Onboarding onboarding, Map<String, OnboardedProduct> productMap) {
-        if (tokenId != null) {
-            tokenConnector.deleteById(tokenId);
-        }
-        if (institutionId != null && onboarding != null) {
-            institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
-        }
-        rollbackUser(toUpdate, toDelete, institutionId, productMap);
-        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
-    }
-
-    private void rollbackUser(List<String> toUpdate, List<String> toDelete, String institutionId, Map<String, OnboardedProduct> productMap) {
-        toUpdate.forEach(userId -> userConnector.findAndRemoveProduct(userId, institutionId, productMap.get(userId)));
-        toDelete.forEach(userConnector::deleteById);
-        log.debug("rollback second step completed");
-    }
-
-    private void rollbackFirstStep(Token token, String institutionId, Onboarding onboarding) {
-        tokenConnector.deleteById(token.getId());
-        institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
-        log.debug("rollback first step completed");
-        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
-    }
-
-    public void rollbackSecondStepOfUpdate(List<String> toUpdate, Institution institution, Token token) {
-        tokenConnector.findAndUpdateToken(token.getId(), token.getStatus(), token.getChecksum());
-        institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), token.getStatus());
-        toUpdate.forEach(userId -> userConnector.findAndUpdateState(userId, null, token.getId(), token.getStatus()));
-        log.debug("rollback second step completed");
-        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
-    }
-
-    private void rollbackFirstStepOfUpdate(Token token) {
-        tokenConnector.findAndUpdateToken(token.getId(), token.getStatus(), token.getChecksum());
-        log.debug("rollback first step completed");
-        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
-    }
-
-    public void updateUserProductState(OnboardedUser user, String relationshipId, RelationshipState toState) {
-        for (UserBinding binding : user.getBindings()) {
-            binding.getProducts().stream()
-                    .filter(onboardedProduct -> relationshipId.equalsIgnoreCase(onboardedProduct.getRelationshipId()))
-                    .forEach(product -> checkStatus(product.getStatus(), user.getId(), product.getRelationshipId(), toState));
-        }
-    }
-
-    private void checkStatus(RelationshipState fromState, String userId, String relationshipId, RelationshipState toState) {
-        if (isValidStateChangeForRelationship(fromState, toState)) {
-            userConnector.findAndUpdateState(userId, relationshipId, null, toState);
-        } else {
-            throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), fromState, toState)), INVALID_STATUS_CHANGE.getCode());
-        }
-    }
-
-    public Product getProductById(String productId) {
-        return productConnector.getProductById(productId);
-    }
-
-    private boolean isValidStateChangeForRelationship(RelationshipState fromState, RelationshipState toState) {
-        switch (toState) {
-            case ACTIVE:
-                return fromState == RelationshipState.SUSPENDED;
-            case SUSPENDED:
-                return fromState == RelationshipState.ACTIVE;
-            case DELETED:
-                return fromState != RelationshipState.DELETED;
-            default:
-                return false;
-        }
-    }
-
-    private boolean isValidStateChangeForToken(RelationshipState fromState, RelationshipState toState) {
-        switch (fromState) {
-            case TOBEVALIDATED:
-                return RelationshipState.PENDING == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
-            case PENDING:
-                return RelationshipState.ACTIVE == toState || RelationshipState.DELETED == toState;
-            default:
-                return false;
-        }
     }
 
     public List<RelationshipInfo> onboardOperator(OnboardingOperatorsRequest request, Institution institution) {
@@ -294,6 +214,13 @@ public class OnboardingDao {
         return response;
     }
 
+    private void createNewUser(UserToOnboard user, String institutionId, OnboardingRequest request, String tokenId) {
+        OnboardedProduct product = constructProduct(user, request);
+        product.setTokenId(tokenId);
+        UserBinding binding = new UserBinding(institutionId, List.of(product));
+        userConnector.findAndCreate(user.getId(), binding);
+    }
+
     private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
         OnboardedProduct product = constructOperatorProduct(user, request);
         UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
@@ -301,11 +228,86 @@ public class OnboardingDao {
         response.add(new RelationshipInfo(institution, user.getId(), product));
     }
 
-    private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request);
-        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
-        userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
-        response.add(new RelationshipInfo(institution, user.getId(), product));
-        return product;
+    private OnboardedUser isNewUser(List<String> toUpdate, String userId) {
+        OnboardedUser onboardedUser = userConnector.findById(userId);
+        if (onboardedUser != null) {
+            toUpdate.add(onboardedUser.getId());
+        }
+        return onboardedUser;
+    }
+
+    private void checkStatus(RelationshipState fromState, String userId, String relationshipId, RelationshipState toState) {
+        if (isValidStateChangeForRelationship(fromState, toState)) {
+            userConnector.findAndUpdateState(userId, relationshipId, null, toState);
+        } else {
+            throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), fromState, toState)), INVALID_STATUS_CHANGE.getCode());
+        }
+    }
+
+    public Product getProductById(String productId) {
+        return productConnector.getProductById(productId);
+    }
+
+
+    private void rollbackFirstStep(Token token, String institutionId, Onboarding onboarding) {
+        tokenConnector.deleteById(token.getId());
+        institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
+        log.debug("rollback first step completed");
+        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    public void rollbackSecondStep(List<String> toUpdate, List<String> toDelete, String institutionId, String tokenId, Onboarding onboarding, Map<String, OnboardedProduct> productMap) {
+        if (tokenId != null) {
+            tokenConnector.deleteById(tokenId);
+        }
+        if (institutionId != null && onboarding != null) {
+            institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
+        }
+        rollbackUser(toUpdate, toDelete, institutionId, productMap);
+        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    private void rollbackFirstStepOfUpdate(Token token) {
+        tokenConnector.findAndUpdateToken(token.getId(), token.getStatus(), token.getChecksum());
+        log.debug("rollback first step completed");
+        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    public void rollbackSecondStepOfUpdate(List<String> toUpdate, Institution institution, Token token) {
+        tokenConnector.findAndUpdateToken(token.getId(), token.getStatus(), token.getChecksum());
+        institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), token.getStatus());
+        toUpdate.forEach(userId -> userConnector.findAndUpdateState(userId, null, token.getId(), token.getStatus()));
+        log.debug("rollback second step completed");
+        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    private void rollbackUser(List<String> toUpdate, List<String> toDelete, String institutionId, Map<String, OnboardedProduct> productMap) {
+        toUpdate.forEach(userId -> userConnector.findAndRemoveProduct(userId, institutionId, productMap.get(userId)));
+        toDelete.forEach(userConnector::deleteById);
+        log.debug("rollback second step completed");
+    }
+
+    private boolean isValidStateChangeForRelationship(RelationshipState fromState, RelationshipState toState) {
+        switch (toState) {
+            case ACTIVE:
+                return fromState == RelationshipState.SUSPENDED;
+            case SUSPENDED:
+                return fromState == RelationshipState.ACTIVE;
+            case DELETED:
+                return fromState != RelationshipState.DELETED;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isValidStateChangeForToken(RelationshipState fromState, RelationshipState toState) {
+        switch (fromState) {
+            case TOBEVALIDATED:
+                return RelationshipState.PENDING == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
+            case PENDING:
+                return RelationshipState.ACTIVE == toState || RelationshipState.DELETED == toState;
+            default:
+                return false;
+        }
     }
 }

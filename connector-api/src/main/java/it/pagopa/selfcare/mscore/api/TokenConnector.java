@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.springframework.lang.Nullable;
 
@@ -13,7 +13,7 @@ public interface TokenConnector {
 
     void deleteById(String id);
 
-    Token save(Token token, List<GeographicTaxonomies> geographicTaxonomies);
+    Token save(Token token, List<InstitutionGeographicTaxonomies> geographicTaxonomies);
 
     Token findById(String tokenId);
 

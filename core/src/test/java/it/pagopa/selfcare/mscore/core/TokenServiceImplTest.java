@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -34,7 +33,7 @@ class TokenServiceImplTest {
     void getToken(){
         when(tokenConnector.findById(any())).thenReturn(new Token());
         when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
-        assertNotNull(tokenServiceImpl.getToken("id"));
+        assertNotNull(tokenServiceImpl.retrieveToken("id"));
     }
 
     /**
@@ -86,12 +85,6 @@ class TokenServiceImplTest {
         Token token = new Token();
         when(tokenConnector.findWithFilter(any(),any())).thenReturn(token);
         Assertions.assertDoesNotThrow(() -> tokenServiceImpl.verifyOnboarding("42","42"));
-    }
-
-    @Test
-    void verifyOnboarding2(){
-        when(tokenConnector.findWithFilter(any(),any())).thenReturn(new Token());
-        Assertions.assertThrows(InvalidRequestException.class, () -> tokenServiceImpl.verifyOnboarding("42","42"));
     }
 
 }

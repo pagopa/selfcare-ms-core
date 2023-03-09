@@ -46,7 +46,7 @@ class TokenControllerTest {
     void getToken() throws Exception {
         TokenRelationships tokenRelationships = new TokenRelationships();
         tokenRelationships.setUsers(new ArrayList<>());
-        when(tokenService.getToken(any())).thenReturn(tokenRelationships);
+        when(tokenService.retrieveToken(any())).thenReturn(tokenRelationships);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/tokens/{tokenId}","42")

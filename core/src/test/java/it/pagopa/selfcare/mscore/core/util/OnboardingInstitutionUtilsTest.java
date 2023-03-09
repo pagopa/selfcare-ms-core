@@ -158,8 +158,8 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
+        List<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomies(stringList);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -199,7 +199,7 @@ class OnboardingInstitutionUtilsTest {
     void testCheckIfProductAlreadyOnboarded3() {
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
@@ -240,8 +240,8 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer1);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
+        ArrayList<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomies(stringList);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider1);
         institutionUpdate.setRea("Rea");
@@ -300,7 +300,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
         Billing billing1 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
@@ -341,8 +341,8 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer1);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
+        ArrayList<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomies(stringList);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider1);
         institutionUpdate.setRea("Rea");
@@ -413,7 +413,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
         Billing billing1 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
@@ -454,8 +454,8 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer1);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
+        ArrayList<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomies(stringList);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider1);
         institutionUpdate.setRea("Rea");
@@ -495,99 +495,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("The characteristics of someone or something", institution.getDescription());
     }
 
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
-     */
-    @Test
-    void testCheckIfProductAlreadyOnboarded7() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode(
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract(
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract(
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan(
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.ACTIVE);
-        onboarding.setUpdatedAt(null);
-
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(onboarding);
-        Billing billing1 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC,
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
-                onboardingList, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null,
-                null, "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                true, OffsetDateTime.now(), OffsetDateTime.now());
-
-        Billing billing2 = new Billing();
-        billing2.setPublicServices(true);
-        billing2.setRecipientCode("Recipient Code");
-        billing2.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
-        paymentServiceProvider1.setAbiCode("Abi Code");
-        paymentServiceProvider1.setBusinessRegisterNumber("42");
-        paymentServiceProvider1.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider1.setLegalRegisterNumber("42");
-        paymentServiceProvider1.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider1);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing2);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest));
-    }
 
     /**
      * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
@@ -642,7 +549,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingList.add(onboarding1);
         onboardingList.add(onboarding);
         Billing billing2 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
@@ -683,8 +590,8 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer1);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        ArrayList<String> stringList = new ArrayList<>();
-        institutionUpdate.setGeographicTaxonomyCodes(stringList);
+        ArrayList<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomies(stringList);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider1);
         institutionUpdate.setRea("Rea");
@@ -746,7 +653,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -757,7 +664,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setZipCode("21654");
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC, "START - validateOverridingData for institution having externalId: {}",
@@ -795,7 +702,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("START - validateOverridingData for institution having externalId: {}");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -806,7 +713,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setZipCode("21654");
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC, "START - validateOverridingData for institution having externalId: {}",
@@ -844,7 +751,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PG);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -855,7 +762,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setZipCode("21654");
         Billing billing = new Billing();
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
@@ -912,7 +819,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -923,7 +830,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setZipCode("21654");
         Billing billing = new Billing();
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
@@ -955,190 +862,6 @@ class OnboardingInstitutionUtilsTest {
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
         assertEquals("START - validateOverridingData for institution having externalId: {}", institution.getTaxCode());
-    }
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String, OffsetDateTime)}
-     */
-    @Test
-    void testConvertToToken() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        Token actualConvertToTokenResult = OnboardingInstitutionUtils.convertToToken(onboardingRequest, new Institution(),
-                "Digest", OffsetDateTime.now());
-        assertEquals("Digest", actualConvertToTokenResult.getChecksum());
-        assertEquals(RelationshipState.PENDING, actualConvertToTokenResult.getStatus());
-        assertEquals("42", actualConvertToTokenResult.getProductId());
-        assertNull(actualConvertToTokenResult.getInstitutionId());
-        assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
-    }
-
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String, OffsetDateTime)}
-     */
-    @Test
-    void testConvertToToken4() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
-        institutionUpdate.setInstitutionType(InstitutionType.PG);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        Token actualConvertToTokenResult = OnboardingInstitutionUtils.convertToToken(onboardingRequest, new Institution(),
-                "Digest", OffsetDateTime.now());
-        assertEquals("Digest", actualConvertToTokenResult.getChecksum());
-        assertEquals(RelationshipState.ACTIVE, actualConvertToTokenResult.getStatus());
-        assertEquals("42", actualConvertToTokenResult.getProductId());
-        assertNull(actualConvertToTokenResult.getInstitutionId());
-        assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
-    }
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#convertToToken(OnboardingRequest, Institution, String, OffsetDateTime)}
-     */
-    @Test
-    void testConvertToToken5() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
-        institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        Token actualConvertToTokenResult = OnboardingInstitutionUtils.convertToToken(onboardingRequest, new Institution(),
-                "Digest", OffsetDateTime.now());
-        assertEquals("Digest", actualConvertToTokenResult.getChecksum());
-        assertEquals(RelationshipState.TOBEVALIDATED, actualConvertToTokenResult.getStatus());
-        assertEquals("42", actualConvertToTokenResult.getProductId());
-        assertNull(actualConvertToTokenResult.getInstitutionId());
-        assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
     }
 
     /**
@@ -1225,28 +948,6 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#retrieveStatusFromInstitutionType(InstitutionType)}
-     */
-    @Test
-    void testRetrieveStatusFromInstitutionType() {
-        assertEquals(RelationshipState.PENDING,
-                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PA));
-        assertEquals(RelationshipState.ACTIVE,
-                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PG));
-        assertEquals(RelationshipState.TOBEVALIDATED,
-                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.GSP));
-        assertEquals(RelationshipState.TOBEVALIDATED,
-                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PT));
-        assertEquals(RelationshipState.TOBEVALIDATED,
-                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.SCP));
-        assertEquals(RelationshipState.TOBEVALIDATED,
-                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.PSP));
-        assertEquals(RelationshipState.TOBEVALIDATED,
-                OnboardingInstitutionUtils.retrieveStatusFromInstitutionType(InstitutionType.UNKNOWN));
-    }
-
-
-    /**
      * Method under test: {@link OnboardingInstitutionUtils#constructOnboarding(OnboardingRequest)}
      */
     @Test
@@ -1278,7 +979,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -1338,7 +1039,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.PG);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
@@ -1398,7 +1099,7 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomyCodes(new ArrayList<>());
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setInstitutionType(InstitutionType.GSP);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");

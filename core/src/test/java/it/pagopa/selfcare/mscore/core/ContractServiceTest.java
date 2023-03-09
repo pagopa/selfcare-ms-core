@@ -11,9 +11,9 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -64,7 +64,7 @@ class ContractServiceTest {
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.isEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName}${productName}");
@@ -83,7 +83,7 @@ class ContractServiceTest {
         request.setProductId("prod-io");
         request.setSignContract(true);
         request.setProductName("42");
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.isEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName}${productName}");
@@ -102,7 +102,7 @@ class ContractServiceTest {
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.isEnabled()).thenReturn(false);
         when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName}${productName}");
@@ -121,7 +121,7 @@ class ContractServiceTest {
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         when(pagoPaSignatureConfig.isEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName}${productName}");
@@ -140,7 +140,7 @@ class ContractServiceTest {
         request.setProductId("prod-io-premium");
         request.setSignContract(true);
         request.setProductName("42");
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.isEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName}${productName}");

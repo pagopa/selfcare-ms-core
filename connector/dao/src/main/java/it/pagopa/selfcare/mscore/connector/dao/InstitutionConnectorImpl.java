@@ -2,13 +2,10 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +17,11 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper.addGeographicTaxonomies;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper.getNotNullField;
 import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_BILLING_ERROR;
 import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_NOT_FOUND;
 
@@ -79,7 +76,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<GeographicTaxonomies> geographicTaxonomiesList) {
+    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomiesList) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
         Update update = new Update();
         update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
@@ -116,10 +113,12 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.closedAt.name()), OffsetDateTime.now());
             }
         }
-
         InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
-        //TODO: UPDATE INSTITUTION UPDATE
-
+        if (institutionUpdate != null) {
+            Map<String, Object> map = getNotNullField(institutionUpdate);
+            map.forEach(update::set);
+            addGeographicTaxonomies(institutionUpdate, update);
+        }
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
