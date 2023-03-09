@@ -6,9 +6,11 @@ import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.CustomErrorEnum;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipPage;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -50,6 +52,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         return userConnector.findWithFilter(institutionId, personId, roles, states, products, productRoles);
+    }
+
+    @Override
+    public RelationshipPage retrievePagedUsers(String institutionId, String personId,
+                                               List<PartyRole> roles, List<RelationshipState> states,
+                                               List<String> products, List<String> productRoles,
+                                               Pageable pageable) {
+        return userConnector.findPagedWithFilter(institutionId, personId, roles, states, products, productRoles, pageable);
     }
 
     @Override

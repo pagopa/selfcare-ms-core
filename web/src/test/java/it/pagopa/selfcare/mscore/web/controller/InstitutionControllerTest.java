@@ -2,22 +2,17 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.web.security.JwtAuthenticationToken;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
-import it.pagopa.selfcare.mscore.core.InstitutionServiceImpl;
-import it.pagopa.selfcare.mscore.core.UserServiceImpl;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -30,10 +25,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -55,10 +50,12 @@ class InstitutionControllerTest {
         Institution institution = new Institution();
         institution.setId("id");
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any())).thenReturn(new ArrayList<>());
+        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = get("/institutions/{id}/relationships", "42")
                 .principal(authentication);
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isOk())
@@ -93,9 +90,12 @@ class InstitutionControllerTest {
         Institution institution = new Institution();
         institution.setId("id");
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(institutionService.retrieveInstitutionGeoTaxonomies(any())).thenReturn(new ArrayList<>());
+        GeographicTaxonomyPage page = new GeographicTaxonomyPage();
+        page.setData(Collections.emptyList());
+        when(institutionService.retrieveInstitutionGeoTaxonomies(any(), any())).thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = get("/institutions/{id}/geotaxonomies", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isOk())
@@ -471,23 +471,25 @@ class InstitutionControllerTest {
 
 
     /**
-     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProducts4() throws Exception {
-        when(institutionService.retrieveInstitutionProducts(any(), any()))
-                .thenReturn(new ArrayList<>());
+        OnboardingPage page = new OnboardingPage();
+        when(institutionService.retrieveInstitutionProducts(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[]}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[],\"total\":null}"));
     }
 
     /**
-     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProducts5() throws Exception {
@@ -509,21 +511,22 @@ class InstitutionControllerTest {
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
 
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(onboarding);
-        when(institutionService.retrieveInstitutionProducts(any(), any()))
-                .thenReturn(onboardingList);
+        OnboardingPage page = new OnboardingPage();
+        page.setData(List.of(onboarding));
+        when(institutionService.retrieveInstitutionProducts(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
     }
 
     /**
-     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List)}
+     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProducts6() throws Exception {
@@ -563,44 +566,19 @@ class InstitutionControllerTest {
         onboarding1.setStatus(RelationshipState.PENDING);
         onboarding1.setUpdatedAt(null);
 
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(onboarding1);
-        onboardingList.add(onboarding);
-        when(institutionService.retrieveInstitutionProducts(any(), any()))
-                .thenReturn(onboardingList);
+        OnboardingPage page = new OnboardingPage();
+        page.setData(List.of(onboarding, onboarding1));
+        when(institutionService.retrieveInstitutionProducts(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"},{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
-    }
-
-    /**
-     * Method under test: {@link InstitutionController#updateInstitution(String, InstitutionPut, Authentication)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testUpdateInstitution() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.NullPointerException
-        //       at it.pagopa.selfcare.mscore.web.controller.InstitutionController.updateInstitution(InstitutionController.java:163)
-        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:684)
-        //       at javax.servlet.http.HttpServlet.service(HttpServlet.java:764)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        InstitutionController institutionController = new InstitutionController(new InstitutionServiceImpl(null, null,
-                geoTaxonomiesConnector, new UserServiceImpl(null, mock(UserRegistryConnector.class))));
-
-        InstitutionPut institutionPut = new InstitutionPut();
-        institutionPut.setGeographicTaxonomyCodes(new ArrayList<>());
-        institutionController.updateInstitution("42", institutionPut, new JwtAuthenticationToken("ABC123"));
+                        .string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"},{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
     }
 
     @Test
@@ -624,4 +602,3 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 }
-

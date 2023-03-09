@@ -100,20 +100,22 @@ public class InstitutionMapper {
         return entity;
     }
 
-    private static List<Onboarding> toOnboarding(List<OnboardingEntity> onboarding) {
+    public static List<Onboarding> toOnboarding(List<OnboardingEntity> onboarding) {
         List<Onboarding> list = new ArrayList<>();
-        for (OnboardingEntity onboardingEntity : onboarding) {
-            Onboarding o = new Onboarding();
-            o.setProductId(onboardingEntity.getProductId());
-            o.setStatus(onboardingEntity.getStatus());
-            o.setContract(onboardingEntity.getContract());
-            o.setPricingPlan(onboardingEntity.getPricingPlan());
-            if (onboardingEntity.getBilling() != null) {
-                o.setBilling(toBilling(onboardingEntity.getBilling()));
+        if (onboarding != null) {
+            for (OnboardingEntity onboardingEntity : onboarding) {
+                Onboarding o = new Onboarding();
+                o.setProductId(onboardingEntity.getProductId());
+                o.setStatus(onboardingEntity.getStatus());
+                o.setContract(onboardingEntity.getContract());
+                o.setPricingPlan(onboardingEntity.getPricingPlan());
+                if (onboardingEntity.getBilling() != null) {
+                    o.setBilling(toBilling(onboardingEntity.getBilling()));
+                }
+                o.setCreatedAt(onboardingEntity.getCreatedAt());
+                o.setUpdatedAt(onboardingEntity.getUpdatedAt());
+                list.add(o);
             }
-            o.setCreatedAt(onboardingEntity.getCreatedAt());
-            o.setUpdatedAt(onboardingEntity.getUpdatedAt());
-            list.add(o);
         }
         return list;
     }
@@ -148,13 +150,15 @@ public class InstitutionMapper {
         return list;
     }
 
-    private static List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
+    public static List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
         List<GeographicTaxonomies> list = new ArrayList<>();
-        for(GeoTaxonomyEntity entity : geographicTaxonomies){
-            GeographicTaxonomies geo = new GeographicTaxonomies();
-            geo.setDesc(entity.getDesc());
-            geo.setCode(entity.getCode());
-            list.add(geo);
+        if (geographicTaxonomies != null) {
+            for (GeoTaxonomyEntity entity : geographicTaxonomies) {
+                GeographicTaxonomies geo = new GeographicTaxonomies();
+                geo.setDesc(entity.getDesc());
+                geo.setCode(entity.getCode());
+                list.add(geo);
+            }
         }
         return list;
     }
@@ -178,8 +182,6 @@ public class InstitutionMapper {
         }
         return list;
     }
-
-
 
     private static List<OnboardingEntity> toOnboardingEntity(List<Onboarding> onboardingList) {
         List<OnboardingEntity> list = new ArrayList<>();

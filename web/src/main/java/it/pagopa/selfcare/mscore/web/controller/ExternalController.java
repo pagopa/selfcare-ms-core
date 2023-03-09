@@ -6,19 +6,20 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.ExternalService;
+import it.pagopa.selfcare.mscore.model.institution.OnboardingPage;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
-import it.pagopa.selfcare.mscore.web.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -129,11 +130,12 @@ public class ExternalController {
     @ApiOperation(value = "${swagger.mscore.external.institution.products}", notes = "${swagger.mscore.external.institution.products}")
     @GetMapping(value = "/{externalId}/products")
     public ResponseEntity<OnboardedProducts> retrieveInstitutionProductsByExternalId(@PathVariable("externalId") String externalId,
-                                                                                     @RequestParam(value = "states", required = false) List<RelationshipState> states) {
+                                                                                     @RequestParam(value = "states", required = false) List<RelationshipState> states,
+                                                                                     @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         log.info("Retrieving products for institution having externalId {}", externalId);
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
-        List<Onboarding> onboardings = externalService.retrieveInstitutionProductsByExternalId(externalId, states);
-        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(onboardings));
+        OnboardingPage page = externalService.retrieveInstitutionProductsByExternalId(externalId, states, pageable);
+        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(page));
     }
 
     /**
@@ -150,12 +152,10 @@ public class ExternalController {
     @ApiOperation(value = "${swagger.mscore.external.geotaxonomies}", notes = "${swagger.mscore.external.geotaxonomies}")
     @GetMapping(value = "/{externalId}/geotaxonomies")
     public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId,
-                                                                                                   @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
-                                                                                                   @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber) {
-
+                                                                                                   @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
         CustomExceptionMessage.setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
-        List<GeographicTaxonomies> list = externalService.retrieveInstitutionGeoTaxonomiesByExternalId(externalId);
-        return ResponseEntity.ok(PaginationUtils.paginate(list,pageSize,pageNumber));
+        List<GeographicTaxonomies> list = externalService.retrieveInstitutionGeoTaxonomiesByExternalId(externalId, pageable);
+        return ResponseEntity.ok(list);
     }
 
     /**
@@ -177,13 +177,12 @@ public class ExternalController {
                                                                                                 @RequestParam(value = "states", required = false) List<RelationshipState> states,
                                                                                                 @RequestParam(value = "products", required = false) List<String> products,
                                                                                                 @RequestParam(value = "productRoles", required = false) List<String> productRoles,
-                                                                                                @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
-                                                                                                @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber,
+                                                                                                @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable,
                                                                                                 Authentication authentication) {
         log.info("Getting relationship for institution {} and current user", externalId);
         CustomExceptionMessage.setCustomMessage(RETRIEVING_USER_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        List<RelationshipInfo> response = externalService.getUserInstitutionRelationships(externalId, selfCareUser.getId(), personId, roles, states, products, productRoles);
-        return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(response),pageSize,pageNumber));
+        List<RelationshipInfo> response = externalService.getUserInstitutionRelationships(externalId, selfCareUser.getId(), personId, roles, states, products, productRoles, pageable);
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 }

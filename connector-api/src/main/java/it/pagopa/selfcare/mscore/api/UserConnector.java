@@ -3,8 +3,10 @@ package it.pagopa.selfcare.mscore.api;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipPage;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -34,6 +36,14 @@ public interface UserConnector {
     List<OnboardedUser> findActiveInstitutionAdmin(String userId, String institutionId, List<PartyRole> adminPartyRole, List<RelationshipState> active);
 
     List<OnboardedUser> findWithFilter(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+
+    RelationshipPage findPagedWithFilter(String institutionId,
+                                         @Nullable String personId,
+                                         @Nullable List<PartyRole> roles,
+                                         @Nullable List<RelationshipState> states,
+                                         @Nullable List<String> products,
+                                         @Nullable List<String> productRoles,
+                                         Pageable pageable);
 
     OnboardedUser findByRelationshipId(String relationshipId);
 

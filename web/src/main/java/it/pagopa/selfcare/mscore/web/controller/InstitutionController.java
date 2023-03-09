@@ -6,11 +6,9 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
@@ -19,8 +17,9 @@ import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
-import it.pagopa.selfcare.mscore.web.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +31,10 @@ import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "Institution")
-@Slf4j
 public class InstitutionController {
 
     private static final String ENTRY_LOG = "Creating institution having external id {}";
@@ -130,15 +129,15 @@ public class InstitutionController {
     public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                          @PathVariable("id") String institutionId,
                                                                          @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
-                                                                         @RequestParam(value = "states", required = false) List<RelationshipState> states) {
+                                                                         @RequestParam(value = "states", required = false) List<RelationshipState> states,
+                                                                         @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
 
         log.info("Retrieving products for institution {}", institutionId);
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        List<Onboarding> list = institutionService.retrieveInstitutionProducts(institution, states);
-        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(list));
+        OnboardingPage page = institutionService.retrieveInstitutionProducts(institution, states, pageable);
+        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(page));
     }
-
 
     /**
      * The function Update the corresponding institution given internal institution id
@@ -179,13 +178,12 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institution.geotaxonomies}", notes = "${swagger.mscore.institution.geotaxonomies}")
     @GetMapping(value = "/{id}/geotaxonomies")
     public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomies(@PathVariable("id") String id,
-                                                                                       @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
-                                                                                       @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber) {
+                                                                                       @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable) {
 
         CustomExceptionMessage.setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
         Institution institution = institutionService.retrieveInstitutionById(id);
-        List<GeographicTaxonomies> list = institutionService.retrieveInstitutionGeoTaxonomies(institution);
-        return ResponseEntity.ok(PaginationUtils.paginate(list,pageSize,pageNumber));
+        GeographicTaxonomyPage page = institutionService.retrieveInstitutionGeoTaxonomies(institution, pageable);
+        return ResponseEntity.ok(page.getData());
     }
 
     /**
@@ -205,7 +203,6 @@ public class InstitutionController {
         Institution institution = institutionService.retrieveInstitutionById(id);
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
     }
-
 
     /**
      * The function return user institution relationships
@@ -230,16 +227,13 @@ public class InstitutionController {
                                                                                     @RequestParam(value = "states", required = false) List<RelationshipState> states,
                                                                                     @RequestParam(value = "products", required = false) List<String> products,
                                                                                     @RequestParam(value = "productRoles", required = false) List<String> productRoles,
-                                                                                    @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
-                                                                                    @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber,
+                                                                                    @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable,
                                                                                     Authentication authentication) {
         log.info("Getting relationship for institution {} and current user", institutionId);
         CustomExceptionMessage.setCustomMessage(GET_USER_INSTITUTION_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
-        return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(relationshipInfoList),pageSize,pageNumber));
+        List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles, pageable);
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
     }
-
-
 }
