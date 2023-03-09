@@ -1,6 +1,8 @@
 package it.pagopa.selfcare.mscore.connector.azure_storage;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageCredentials;
+import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.BlobProperties;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -20,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_DOWNLOAD_FILE;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_UPLOAD_FILE;
@@ -36,15 +37,23 @@ class AzureBlobClient implements FileStorageConnector {
 
 
     AzureBlobClient(AzureStorageConfig azureStorageConfig)
-            throws URISyntaxException, InvalidKeyException {
+            throws URISyntaxException{
         if (log.isDebugEnabled()) {
             log.trace("AzureBlobClient.AzureBlobClient");
             log.debug("storageConnectionString = {}", azureStorageConfig.getConnectionString());
         }
         this.azureStorageConfig = azureStorageConfig;
-        final CloudStorageAccount storageAccount = CloudStorageAccount.parse(azureStorageConfig.getConnectionString());
+        final CloudStorageAccount storageAccount = buildStorageAccount();
         this.blobClient = storageAccount.createCloudBlobClient();
 
+    }
+
+    private CloudStorageAccount buildStorageAccount() throws URISyntaxException {
+        StorageCredentials storageCredentials = new StorageCredentialsAccountAndKey(azureStorageConfig.getAccountName(), azureStorageConfig.getAccountKey());
+        return new CloudStorageAccount(storageCredentials,
+                true,
+                azureStorageConfig.getEndpointSuffix(),
+                azureStorageConfig.getAccountName());
     }
 
     public ResourceResponse getFile(String fileName) {

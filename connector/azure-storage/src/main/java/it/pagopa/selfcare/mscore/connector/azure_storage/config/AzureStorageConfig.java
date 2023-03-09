@@ -7,9 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
 @Configuration
 @PropertySource("classpath:config/azure-storage-config.properties")
 @ConfigurationProperties(prefix = "blob-storage")
@@ -20,14 +17,9 @@ public
 class AzureStorageConfig {
     private String connectionString;
     private String contractsTemplateContainer;
+    private String accountName;
+    private String endpointSuffix;
+    private String accountKey;
 
     private String contractPath;
-
-    public String getConnectionString() {
-        return new String(Base64.getDecoder().decode(connectionString), StandardCharsets.UTF_8);
-    }
-
-    public String getContractsTemplateContainer() {
-        return new String(Base64.getDecoder().decode(contractsTemplateContainer), StandardCharsets.UTF_8);
-    }
 }
