@@ -305,7 +305,7 @@ public class OnboardingDao {
             case TOBEVALIDATED:
                 return RelationshipState.PENDING == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
             case PENDING:
-                return RelationshipState.ACTIVE == toState || RelationshipState.DELETED == toState;
+                return RelationshipState.ACTIVE == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
             default:
                 return false;
         }
