@@ -33,31 +33,6 @@ class SignatureServiceTest {
     @InjectMocks
     private SignatureService signatureService;
 
-
-    /**
-     * Method under test: {@link SignatureService#createDocumentValidator(byte[])}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testCreateDocumentValidator() {
-        // TODO: Complete this test.
-        //   Reason: R005 Unable to load class.
-        //   Class: javax.activation.DataSource
-        //   Please check that the class is available on your test runtime classpath.
-        //   See https://diff.blue/R005 to resolve this issue.
-
-        // Arrange
-        // TODO: Populate arranged inputs
-        byte[] bytes = null;
-
-        // Act
-        SignedDocumentValidator actualCreateDocumentValidatorResult = this.signatureService
-                .createDocumentValidator(bytes);
-
-        // Assert
-        // TODO: Add assertions on result
-    }
-
     /**
      * Method under test: {@link SignatureService#isDocumentSigned(SignedDocumentValidator)}
      */

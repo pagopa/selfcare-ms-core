@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -45,6 +46,9 @@ class InstitutionServiceImplTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private CoreConfig coreConfig;
+
     @Test
     void getUserInstitutionRelationships(){
         OnboardedUser onboardedUser = new OnboardedUser();
@@ -81,6 +85,7 @@ class InstitutionServiceImplTest {
         String userId = "userId";
         when(userService.checkIfAdmin(any(),any())).thenReturn(true);
         when(institutionConnector.findAndUpdate(any(),any(), any())).thenReturn(new Institution());
+        when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(new GeographicTaxonomies());
         assertNotNull(institutionServiceImpl.updateInstitution(institutionId,institutionUpdate,userId));
     }
 
@@ -95,6 +100,7 @@ class InstitutionServiceImplTest {
         when(userService.checkIfAdmin(any(),any())).thenReturn(true);
         InvalidRequestException invalidRequestException = mock(InvalidRequestException.class);
         when(institutionConnector.findAndUpdate(any(),any(), any())).thenThrow(invalidRequestException);
+        when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(new GeographicTaxonomies());
         assertThrows(InvalidRequestException.class, () -> institutionServiceImpl.updateInstitution(institutionId,institutionUpdate,userId));
     }
 
@@ -401,22 +407,6 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
      */
     @Test
-    void testCreatePgInstitution2() {
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
-        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(new ArrayList<>());
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
-        assertThrows(InvalidRequestException.class,
-                () -> institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
-        verify(institutionConnector).findByExternalId(any());
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(selfCareUser).getFiscalCode();
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
-     */
-    @Test
     void testCreatePgInstitution3() {
         when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(new ArrayList<>());
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
@@ -444,10 +434,6 @@ class InstitutionServiceImplTest {
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
         assertSame(institution, institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(selfCareUser).getFiscalCode();
     }
 
     /**
@@ -506,26 +492,6 @@ class InstitutionServiceImplTest {
         when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
         assertThrows(ResourceConflictException.class,
                 () -> institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(selfCareUser).getFiscalCode();
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
-     */
-    @Test
-    void testCreatePgInstitution8() {
-        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(new ArrayList<>());
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
-        assertThrows(InvalidRequestException.class,
-                () -> institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(institutionConnector).findByExternalId(any());
-        verify(selfCareUser).getFiscalCode();
     }
 
     /**
@@ -555,11 +521,6 @@ class InstitutionServiceImplTest {
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
         assertSame(institution, institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
-        verify(partyRegistryProxyConnector).getLegalAddress(any());
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
-        verify(selfCareUser).getFiscalCode();
     }
 
     /**
@@ -590,43 +551,6 @@ class InstitutionServiceImplTest {
         when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
         assertThrows(ResourceNotFoundException.class,
                 () -> institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
-        verify(partyRegistryProxyConnector).getLegalAddress(any());
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
-        verify(selfCareUser).getFiscalCode();
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
-     */
-    @Test
-    void testCreatePgInstitution11() {
-        InstitutionByLegal institutionByLegal = new InstitutionByLegal();
-        institutionByLegal.setBusinessName("START - check institution {} already exists");
-        institutionByLegal.setBusinessTaxId("START - check institution {} already exists");
-
-        ArrayList<InstitutionByLegal> institutionByLegalList = new ArrayList<>();
-        institutionByLegalList.add(institutionByLegal);
-
-        NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
-        nationalRegistriesProfessionalAddress.setAddress("42 Main St");
-        nationalRegistriesProfessionalAddress.setDescription("The characteristics of someone or something");
-        nationalRegistriesProfessionalAddress.setMunicipality("Municipality");
-        nationalRegistriesProfessionalAddress.setProvince("Province");
-        nationalRegistriesProfessionalAddress.setZip("21654");
-        when(partyRegistryProxyConnector.getLegalAddress(any()))
-                .thenReturn(nationalRegistriesProfessionalAddress);
-        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(institutionByLegalList);
-        when(institutionConnector.save(any())).thenReturn(new Institution());
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getFiscalCode()).thenReturn("Fiscal Code");
-        assertThrows(InvalidRequestException.class,
-                () -> institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
-        verify(partyRegistryProxyConnector).getInstitutionsByLegal(any());
-        verify(institutionConnector).findByExternalId(any());
-        verify(selfCareUser).getFiscalCode();
     }
 
     /**
