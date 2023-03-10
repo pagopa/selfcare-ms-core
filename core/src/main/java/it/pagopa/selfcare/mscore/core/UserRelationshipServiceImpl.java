@@ -9,7 +9,6 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.springframework.stereotype.Service;
-
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.constant.CustomError.RELATIONSHIP_ID_NOT_FOUND;
 
@@ -70,5 +69,4 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         }
         throw new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode());
     }
-
 }

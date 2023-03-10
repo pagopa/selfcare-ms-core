@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.*;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -189,6 +191,51 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
+    @Override
+    public List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, String searchMode) {
+        List<String> geo = Arrays.stream(geoTaxonomies.split(",")).collect(Collectors.toList());
+        return institutionConnector.findByGeotaxonomies(geo, searchMode);
+    }
+
+    @Override
+    public List<Institution> findInstitutionsByProductId(String productId) {
+        return institutionConnector.findByProductId(productId);
+    }
+
+    @Override
+    public List<RelationshipInfo> retrieveUserInstitutionRelationshipsPageable(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles, Pageable pageable) {
+        List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
+        String personToFilter = personId;
+        if (adminRelationships.isEmpty()) {
+            personToFilter = userId;
+        }
+        RelationshipPage page = userService.retrievePagedUsers(institution.getId(), personToFilter, roles, states, products, productRoles, pageable);
+        return toRelationshipInfoPageable(page.getData(), institution);
+    }
+
+    @Override
+    public List<RelationshipInfo> retrieveUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
+        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, roles, states, products, productRoles);
+        if (!adminRelationships.isEmpty()) {
+            return toRelationshipInfo(institutionRelationships, institution);
+        } else {
+            List<OnboardedUser> filterInstitutionRelationships = institutionRelationships.stream().filter(user -> userId.equalsIgnoreCase(user.getId())).collect(Collectors.toList());
+            return toRelationshipInfo(filterInstitutionRelationships, institution);
+        }
+    }
+
+    @Override
+    public List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        if (userId != null) {
+            return new ArrayList<>(); //TODO: filtra per userId senza institutionId, recupera tutte le institution presenti nell'onboarded User e mappa il risultato
+        } else if (institutionId != null) {
+            Institution institution = retrieveInstitutionById(institutionId);
+            return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution);
+        }
+        throw new InvalidRequestException("", "");
+    }
+
     public void checkIfAlreadyExists(String externalId) {
         log.info("START - check institution {} already exists", externalId);
         Optional<Institution> opt = institutionConnector.findByExternalId(externalId);
@@ -197,25 +244,17 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
-    @Override
-    public List<RelationshipInfo> getUserInstitutionRelationships(Institution institution,
-                                                                  String userId,
-                                                                  String personId,
-                                                                  List<PartyRole> roles,
-                                                                  List<RelationshipState> states,
-                                                                  List<String> products,
-                                                                  List<String> productRoles,
-                                                                  Pageable pageable) {
-        List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
-        String personToFilter = personId;
-        if (adminRelationships.isEmpty()) {
-            personToFilter = userId;
+    private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution) {
+        List<RelationshipInfo> list = new ArrayList<>();
+        for (OnboardedUser onboardedUser : institutionRelationships) {
+            for (UserBinding binding : onboardedUser.getBindings()) {
+                retrieveAllProduct(list, onboardedUser.getId(), binding, institution);
+            }
         }
-        RelationshipPage page = userService.retrievePagedUsers(institution.getId(), personToFilter, roles, states, products, productRoles, pageable);
-        return toRelationshipInfo(page.getData(), institution);
+        return list;
     }
 
-    private List<RelationshipInfo> toRelationshipInfo(List<RelationshipPageElement> elements, Institution institution) {
+    private List<RelationshipInfo> toRelationshipInfoPageable(List<RelationshipPageElement> elements, Institution institution) {
         List<RelationshipInfo> list = new ArrayList<>();
         for (RelationshipPageElement element : elements) {
             RelationshipInfo relationshipInfo = new RelationshipInfo();
@@ -225,6 +264,18 @@ public class InstitutionServiceImpl implements InstitutionService {
             list.add(relationshipInfo);
         }
         return list;
+    }
+
+    private void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution) {
+        if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
+            for (OnboardedProduct product : binding.getProducts()) {
+                RelationshipInfo relationshipInfo = new RelationshipInfo();
+                relationshipInfo.setInstitution(institution);
+                relationshipInfo.setUserId(userId);
+                relationshipInfo.setOnboardedProduct(product);
+                list.add(relationshipInfo);
+            }
+        }
     }
 
     private GeographicTaxonomyPage toGeographicTaxonomyPage(InstitutionGeographicTaxonomyPage geographicTaxonomies) {

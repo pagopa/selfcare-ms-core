@@ -219,13 +219,31 @@ public class InstitutionController {
                                                                                     @RequestParam(value = "states", required = false) List<RelationshipState> states,
                                                                                     @RequestParam(value = "products", required = false) List<String> products,
                                                                                     @RequestParam(value = "productRoles", required = false) List<String> productRoles,
+                                                                                    Authentication authentication) {
+        log.info("Getting relationship for institution {} and current user", institutionId);
+        CustomExceptionMessage.setCustomMessage(GET_USER_INSTITUTION_RELATIONSHIP_ERROR);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        Institution institution = institutionService.retrieveInstitutionById(institutionId);
+        List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution.relationships}", notes = "${swagger.mscore.institution.relationships}")
+    @GetMapping(value = "/{id}/relationships")
+    public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationshipsPageable(@PathVariable("id") String institutionId,
+                                                                                    @RequestParam(value = "personId", required = false) String personId,
+                                                                                    @RequestParam(value = "roles", required = false) List<PartyRole> roles,
+                                                                                    @RequestParam(value = "states", required = false) List<RelationshipState> states,
+                                                                                    @RequestParam(value = "products", required = false) List<String> products,
+                                                                                    @RequestParam(value = "productRoles", required = false) List<String> productRoles,
                                                                                     @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable,
                                                                                     Authentication authentication) {
         log.info("Getting relationship for institution {} and current user", institutionId);
         CustomExceptionMessage.setCustomMessage(GET_USER_INSTITUTION_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        List<RelationshipInfo> relationshipInfoList = institutionService.getUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles, pageable);
+        List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationshipsPageable(institution, selfCareUser.getId(), personId, roles, states, products, productRoles, pageable);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
     }
 }

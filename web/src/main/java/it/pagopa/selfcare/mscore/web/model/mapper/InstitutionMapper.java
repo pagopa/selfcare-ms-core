@@ -9,9 +9,7 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
@@ -338,5 +336,56 @@ public class InstitutionMapper {
             product.setState(onboarding.getStatus());
             return product;
         }).collect(Collectors.toList());
+    }
+
+    public static InstitutionManagementResponse toInstitutionManagementResponse(Institution institution) {
+        InstitutionManagementResponse response = new InstitutionManagementResponse();
+        response.setId(institution.getId());
+        response.setExternalId(institution.getExternalId());
+        response.setOrigin(institution.getOrigin());
+        response.setOriginId(institution.getOriginId());
+        response.setDescription(institution.getDescription());
+        response.setInstitutionType(institution.getInstitutionType());
+        response.setDigitalAddress(institution.getDigitalAddress());
+        response.setAddress(institution.getAddress());
+        response.setZipCode(institution.getZipCode());
+        response.setTaxCode(institution.getTaxCode());
+        response.setProducts(toProductsMap(institution.getOnboarding(), institution));
+        response.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
+        response.setAttributes(toAttributeResponse(institution.getAttributes()));
+        response.setPaymentServiceProvider(toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
+        response.setDataProtectionOfficer(toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
+        response.setRea(institution.getRea());
+        response.setShareCapital(institution.getShareCapital());
+        response.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        response.setSupportEmail(institution.getSupportEmail());
+        response.setSupportPhone(institution.getSupportPhone());
+        response.setImported(institution.isImported());
+        response.setCreatedAt(institution.getCreatedAt());
+        response.setUpdatedAt(institution.getUpdatedAt());
+        return response;
+    }
+
+    public static List<InstitutionManagementResponse> toInstitutionListResponse(List<Institution> institutions) {
+        List<InstitutionManagementResponse> list = new ArrayList<>();
+        for (Institution institution : institutions) {
+            InstitutionManagementResponse response = toInstitutionManagementResponse(institution);
+            list.add(response);
+        }
+        return list;
+    }
+
+    private static Map<String, ProductsManagement> toProductsMap(List<Onboarding> onboarding, Institution institution) {
+        Map<String, ProductsManagement> map = new HashMap<>();
+        if (onboarding != null) {
+            for (Onboarding o : onboarding) {
+                ProductsManagement productsManagement = new ProductsManagement();
+                productsManagement.setProduct(o.getProductId());
+                productsManagement.setPricingPlan(o.getPricingPlan());
+                productsManagement.setBilling(toBillingResponse(o.getBilling(), institution));
+                map.put(o.getProductId(), productsManagement);
+            }
+        }
+        return map;
     }
 }

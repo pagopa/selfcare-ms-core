@@ -34,4 +34,7 @@ public interface InstitutionConnector {
 
     void findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
 
+    List<Institution> findByGeotaxonomies(List<String> geo, String searchMode);
+
+    List<Institution> findByProductId(String productId);
 }

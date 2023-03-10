@@ -16,6 +16,7 @@ public class RelationshipResult {
     private String to;
     private String from;
     private PartyRole role;
+    private String tokenId;
     private ProductInfo product;
     private RelationshipState state;
     private String pricingPlan;

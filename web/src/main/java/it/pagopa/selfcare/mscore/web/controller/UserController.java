@@ -5,19 +5,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
-import it.pagopa.selfcare.mscore.web.model.user.Person;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 import static it.pagopa.selfcare.mscore.constant.GenericError.GET_RELATIONSHIP_ERROR;
@@ -33,24 +28,6 @@ public class UserController {
     public UserController(UserService userService, UserRelationshipService userRelationshipService) {
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
-    }
-
-    /**
-     * The function create a new User
-     *
-     * @param person Person
-     *
-     * @return void
-     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
-     * * Code: 404, Message: Person not found, DataType: Problem
-     *
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.person.create}", notes = "${swagger.mscore.person.create}")
-    @PostMapping("/persons")
-    public ResponseEntity<Person> createUser(@RequestBody @Valid Person person) {
-        OnboardedUser user = userService.createUser(person.getId());
-        return ResponseEntity.ok().body(UserMapper.toPerson(user));
     }
 
     /**

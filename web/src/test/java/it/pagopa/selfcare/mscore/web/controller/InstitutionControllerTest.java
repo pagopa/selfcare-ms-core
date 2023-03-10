@@ -56,7 +56,7 @@ class InstitutionControllerTest {
         Institution institution = new Institution();
         institution.setId("id");
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(institutionService.getUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any(), any()))
+        when(institutionService.retrieveUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = get("/institutions/{id}/relationships", "42")
                 .principal(authentication);

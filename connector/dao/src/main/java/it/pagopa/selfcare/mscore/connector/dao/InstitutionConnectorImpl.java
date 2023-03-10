@@ -215,6 +215,22 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
+    public List<Institution> findByGeotaxonomies(List<String> geo, String searchMode) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.geographicTaxonomies.name()).in(geo));
+        return repository.find(query, InstitutionEntity.class).stream()
+                .map(InstitutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Institution> findByProductId(String productId) {
+        Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId));
+        return repository.find(query, InstitutionEntity.class).stream()
+                .map(InstitutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Institution findInstitutionProduct(String externalId, String productId) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.externalId.name()).is(externalId)
                 .and(constructQuery(Onboarding.Fields.productId.name())).is(productId));

@@ -25,14 +25,15 @@ public interface InstitutionService {
 
     Institution retrieveInstitutionProduct(String externalId, String productId);
 
-    List<RelationshipInfo> getUserInstitutionRelationships(Institution institution,
+    List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+
+    List<RelationshipInfo> retrieveUserInstitutionRelationships(Institution institution,
                                                            String userId,
                                                            String personId,
                                                            List<PartyRole> roles,
                                                            List<RelationshipState> states,
                                                            List<String> products,
-                                                           List<String> productRoles,
-                                                           Pageable pageable);
+                                                           List<String> productRoles);
 
     void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
 
@@ -41,4 +42,10 @@ public interface InstitutionService {
     GeographicTaxonomies retrieveGeoTaxonomies(String code);
 
     Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
+
+    List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, String searchMode);
+
+    List<Institution> findInstitutionsByProductId(String productId);
+
+    List<RelationshipInfo> retrieveUserInstitutionRelationshipsPageable(Institution institution, String id, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles, Pageable pageable);
 }

@@ -14,4 +14,5 @@ public interface UserRelationshipService {
     void deleteRelationship(String relationshipId);
 
     RelationshipInfo retrieveRelationship(String relationshipId);
+
 }
