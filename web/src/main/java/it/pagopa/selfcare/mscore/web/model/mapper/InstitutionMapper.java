@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,8 +95,12 @@ public class InstitutionMapper {
         institutionUpdate.setZipCode(institution.getZipCode());
         institutionUpdate.setPaymentServiceProvider(institution.getPaymentServiceProvider());
         institutionUpdate.setDataProtectionOfficer(institution.getDataProtectionOfficer());
-        institutionUpdate.setGeographicTaxonomyCodes(institution.getGeographicTaxonomies().stream()
-                .map(InstitutionGeographicTaxonomies::getCode).collect(Collectors.toList()));
+        if (institution.getGeographicTaxonomies() != null) {
+            var geoCodes = institution.getGeographicTaxonomies().stream()
+                    .map(GeographicTaxonomies::getCode)
+                    .collect(Collectors.toList());
+            institutionUpdate.setGeographicTaxonomyCodes(geoCodes);
+        }
         institutionUpdate.setRea(institution.getRea());
         institutionUpdate.setShareCapital(institution.getShareCapital());
         institutionUpdate.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
@@ -316,13 +321,17 @@ public class InstitutionMapper {
         return list;
     }
 
-    public static OnboardedProducts toOnboardedProducts(List<Onboarding> onboardings) {
+    public static OnboardedProducts toOnboardedProducts(OnboardingPage page) {
         OnboardedProducts onboardedProducts = new OnboardedProducts();
-        onboardedProducts.setProducts(toInstitutionProduct(onboardings));
+        onboardedProducts.setTotal(page.getTotal());
+        onboardedProducts.setProducts(toInstitutionProduct(page.getData()));
         return onboardedProducts;
     }
 
     public static List<InstitutionProduct> toInstitutionProduct(List<Onboarding> onboardings) {
+        if (onboardings == null) {
+            return Collections.emptyList();
+        }
         return onboardings.stream().map(onboarding -> {
             InstitutionProduct product = new InstitutionProduct();
             product.setId(onboarding.getProductId());

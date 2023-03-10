@@ -4,13 +4,14 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.OnboardingPage;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,21 +61,28 @@ public class ExternalServiceImpl implements ExternalService {
     }
 
     @Override
-    public List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states){
+    public OnboardingPage retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states, Pageable pageable) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.retrieveInstitutionProducts(institution, states);
+        return institutionService.retrieveInstitutionProducts(institution, states, pageable);
     }
 
     @Override
-    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId) {
+    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId, Pageable pageable) {
         log.info("Retrieving geographic taxonomies for institution having externalId {}", externalId);
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.retrieveInstitutionGeoTaxonomies(institution);
+        return institutionService.retrieveInstitutionGeoTaxonomies(institution, pageable).getData();
     }
 
     @Override
-    public List<RelationshipInfo> getUserInstitutionRelationships(String externalId, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles){
+    public List<RelationshipInfo> getUserInstitutionRelationships(String externalId,
+                                                                  String userId,
+                                                                  String personId,
+                                                                  List<PartyRole> roles,
+                                                                  List<RelationshipState> states,
+                                                                  List<String> products,
+                                                                  List<String> productRoles,
+                                                                  Pageable pageable) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.retrieveUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles);
+        return institutionService.getUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles, pageable);
     }
 }

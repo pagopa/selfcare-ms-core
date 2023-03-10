@@ -19,7 +19,6 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionReque
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
-import it.pagopa.selfcare.mscore.web.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -221,14 +220,12 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.operator}", notes = "${swagger.mscore.onboarding.operator}")
     @PostMapping(value = "/operators")
-    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
-                                                                                   @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
-                                                                                   @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber) {
+    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
         log.info("Onboarding operators on institution {}", request.getInstitutionId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATORS_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR);
-        return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(response),pageSize,pageNumber));
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 
     /**
@@ -243,14 +240,12 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.subdelegates}", notes = "${swagger.mscore.onboarding.subdelegates}")
     @PostMapping(value = "/subdelegates")
-    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
-                                                                                     @RequestParam(value = "pageSize", required = false, defaultValue = "0") Integer pageSize,
-                                                                                     @RequestParam(value = "pageNumber", required = false, defaultValue = "10") Integer pageNumber) {
+    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
         log.info("Onboarding subdelegates on institution {}", request.getInstitutionId());
         CustomExceptionMessage.setCustomMessage(ONBOARDING_SUBDELEGATES_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE);
-        return ResponseEntity.ok().body(PaginationUtils.paginate(RelationshipMapper.toRelationshipResultList(response),pageSize,pageNumber));
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 
     /**

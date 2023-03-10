@@ -11,7 +11,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
@@ -19,10 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,15 +66,23 @@ class InstitutionServiceImplTest {
         List<OnboardedUser> adminRelationships = new ArrayList<>();
         adminRelationships.add(onboardedUser);
         when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(adminRelationships);
+        RelationshipPage page = new RelationshipPage();
+        page.setData(Collections.emptyList());
+        when(userService.retrievePagedUsers(any(),any(),any(),any(),any(),any(),any()))
+                .thenReturn(page);
         Institution institution = new Institution();
         institution.setId("id");
-        assertNotNull(institutionServiceImpl.retrieveUserInstitutionRelationships(institution,"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
+        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(institution,"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>(), Pageable.unpaged()));
     }
 
     @Test
     void getUserInstitutionRelationships2(){
         when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(new ArrayList<>());
-        assertNotNull(institutionServiceImpl.retrieveUserInstitutionRelationships(new Institution(),"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>()));
+        RelationshipPage page = new RelationshipPage();
+        page.setData(Collections.emptyList());
+        when(userService.retrievePagedUsers(any(),any(),any(),any(),any(),any(),any()))
+                .thenReturn(page);
+        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(new Institution(),"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>(), Pageable.unpaged()));
     }
 
     @Test
@@ -113,7 +123,9 @@ class InstitutionServiceImplTest {
         geographicTaxonomies1.add(geographicTaxonomies);
         institution.setGeographicTaxonomies(geographicTaxonomies1);
 
-        assertNotNull(institutionServiceImpl.retrieveInstitutionGeoTaxonomies(institution));
+        when(institutionConnector.findGeographicTaxonomies(any(),any())).thenReturn(new GeographicTaxonomyPage());
+
+        assertNotNull(institutionServiceImpl.retrieveInstitutionGeoTaxonomies(institution, Pageable.unpaged()));
     }
 
     @Test
@@ -127,7 +139,9 @@ class InstitutionServiceImplTest {
         onboardings.add(onboarding);
         institution.setOnboarding(onboardings);
 
-        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution,states));
+        when(institutionConnector.findOnboarding(any(),any(),any())).thenReturn(new OnboardingPage());
+
+        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution, states, Pageable.unpaged()));
     }
 
     @Test
@@ -139,7 +153,9 @@ class InstitutionServiceImplTest {
         onboardings.add(onboarding);
         institution.setOnboarding(onboardings);
 
-        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution,null));
+        when(institutionConnector.findOnboarding(any(),any(),any())).thenReturn(new OnboardingPage());
+
+        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution,null, Pageable.unpaged()));
     }
 
     @Test
@@ -149,7 +165,7 @@ class InstitutionServiceImplTest {
         states.add(RelationshipState.ACTIVE);
         institution.setOnboarding(null);
 
-        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProducts(institution,states));
+        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProducts(institution, states, Pageable.unpaged()));
     }
 
     /**

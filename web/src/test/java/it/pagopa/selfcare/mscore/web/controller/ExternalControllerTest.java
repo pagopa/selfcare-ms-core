@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -47,11 +49,13 @@ class ExternalControllerTest {
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
 
-        when(externalService.getUserInstitutionRelationships(any(),any(),any(),any(),any(),any(),any())).thenReturn(new ArrayList<>());
+        when(externalService.getUserInstitutionRelationships(any(),any(),any(),any(),any(),any(),any(), any()))
+                .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/relationships", "42")
                         .principal(authentication);
         MockMvcBuilders.standaloneSetup(externalController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -59,24 +63,26 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string("[]"));
     }
     /**
-     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId() throws Exception {
-        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
-                .thenReturn(new ArrayList<>());
+        OnboardingPage page = new OnboardingPage();
+        when(externalService.retrieveInstitutionProductsByExternalId(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "42");
         MockMvcBuilders.standaloneSetup(externalController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[]}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[],\"total\":null}"));
     }
 
     /**
-     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId2() throws Exception {
@@ -98,22 +104,23 @@ class ExternalControllerTest {
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
 
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(onboarding);
-        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
-                .thenReturn(onboardingList);
+        OnboardingPage page = new OnboardingPage();
+        page.setData(List.of(onboarding));
+        when(externalService.retrieveInstitutionProductsByExternalId(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "42");
         MockMvcBuilders.standaloneSetup(externalController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
     }
 
     /**
-     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId3() throws Exception {
@@ -153,30 +160,31 @@ class ExternalControllerTest {
         onboarding1.setStatus(RelationshipState.ACTIVE);
         onboarding1.setUpdatedAt(null);
 
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(onboarding1);
-        onboardingList.add(onboarding);
-        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
-                .thenReturn(onboardingList);
+        OnboardingPage page = new OnboardingPage();
+        page.setData(List.of(onboarding1, onboarding));
+        when(externalService.retrieveInstitutionProductsByExternalId(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "42");
         MockMvcBuilders.standaloneSetup(externalController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"products\":[{\"id\":\"?\",\"state\":\"ACTIVE\"},{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
+                        .string("{\"products\":[{\"id\":\"?\",\"state\":\"ACTIVE\"},{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
     }
 
     /**
-     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId4() throws Exception {
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
-        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
-                .thenReturn(new ArrayList<>());
+        OnboardingPage page = new OnboardingPage();
+        when(externalService.retrieveInstitutionProductsByExternalId(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "", "Uri Vars");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -188,7 +196,7 @@ class ExternalControllerTest {
     }
 
     /**
-     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}
+     * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List, Pageable)}
      */
     @Test
     void testRetrieveInstitutionProductsByExternalId5() throws Exception {
@@ -201,8 +209,9 @@ class ExternalControllerTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
-        when(externalService.retrieveInstitutionProductsByExternalId(any(),any()))
-                .thenReturn(new ArrayList<>());
+        OnboardingPage page = new OnboardingPage();
+        when(externalService.retrieveInstitutionProductsByExternalId(any(), any(), any()))
+                .thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/products", "", "Uri Vars");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -215,12 +224,16 @@ class ExternalControllerTest {
                                 "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"businessRegisterPlace\":\"?\",\"supportEmail\":\"?\",\"supportPhone\":\"?\",\"imported\":true}"));
     }
 
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String, org.springframework.data.domain.Pageable)}
+     */
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId() throws Exception {
-        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any(), any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "42");
         MockMvcBuilders.standaloneSetup(externalController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -228,10 +241,13 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string("[]"));
     }
 
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String, Pageable)}
+     */
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId2() throws Exception {
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution());
-        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any(), any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "", "Uri Vars");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -242,7 +258,9 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string("{\"imported\":false}"));
     }
 
-
+    /**
+     * Method under test: {@link ExternalController#retrieveInstitutionGeoTaxonomiesByExternalId(String, Pageable)}
+     */
     @Test
     void testRetrieveInstitutionGeoTaxonomiesByExternalId3() throws Exception {
         Billing billing = new Billing();
@@ -254,7 +272,7 @@ class ExternalControllerTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
-        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any())).thenReturn(new ArrayList<>());
+        when(externalService.retrieveInstitutionGeoTaxonomiesByExternalId(any(), any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/{externalId}/geotaxonomies", "", "Uri Vars");
         MockMvcBuilders.standaloneSetup(externalController)
