@@ -35,6 +35,13 @@ public class GeoTaxonomiesConnectorImpl implements GeoTaxonomiesConnector {
         geographicTaxonomies.setDesc(result.getDesc());
         geographicTaxonomies.setCode(result.getCode());
         geographicTaxonomies.setEnable(result.isEnable());
+        geographicTaxonomies.setRegion(result.getRegion());
+        geographicTaxonomies.setProvince(result.getProvince());
+        geographicTaxonomies.setProvinceAbbreviation(result.getProvinceAbbreviation());
+        geographicTaxonomies.setCountry(result.getCountry());
+        geographicTaxonomies.setCountryAbbreviation(result.getCountryAbbreviation());
+        geographicTaxonomies.setStartDate(result.getStartDate());
+        geographicTaxonomies.setEndDate(result.getEndDate());
         return geographicTaxonomies;
     }
 }

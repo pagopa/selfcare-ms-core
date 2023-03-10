@@ -7,9 +7,10 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.page.GeographicTaxonomyEntityPage;
 import it.pagopa.selfcare.mscore.connector.dao.model.page.OnboardingEntityPage;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +29,9 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_BILLING_ERROR;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper.addGeographicTaxonomies;
+import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_BILLING_ERROR;
+import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_NOT_FOUND;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 
 @Slf4j
@@ -77,7 +79,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public GeographicTaxonomyPage findGeographicTaxonomies(String institutionId, Pageable pageable) {
+    public InstitutionGeographicTaxonomyPage findGeographicTaxonomies(String institutionId, Pageable pageable) {
         /* Step pipeline di aggregazione per query paginata con ordinamento e conteggio totale elementi
         [
             { "$match" : { "_id" : "462f2565-4244-4f30-bb0b-52d71e166aaf"}},
@@ -101,10 +103,10 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         AggregationResults<GeographicTaxonomyEntityPage> result = mongoTemplate.aggregate(aggregation, InstitutionEntity.class, GeographicTaxonomyEntityPage.class);
 
         GeographicTaxonomyEntityPage entityPage = result.getUniqueMappedResult();
-        GeographicTaxonomyPage page = new GeographicTaxonomyPage();
+        InstitutionGeographicTaxonomyPage page = new InstitutionGeographicTaxonomyPage();
         if (entityPage != null) {
             page.setTotal(entityPage.getTotal());
-            page.setData(InstitutionMapper.toGeographicTaxonomies(entityPage.getData()));
+            page.setData(InstitutionMapper.toInstitutionGeographicTaxonomies(entityPage.getData()));
         }
         return page;
     }
@@ -123,7 +125,8 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         */
         Criteria criteria = Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId);
         if (states != null && !states.isEmpty()) {
-            criteria.andOperator(Criteria.where(InstitutionEntity.Fields.onboarding.name()).elemMatch(Criteria.where(OnboardingEntity.Fields.status.name()).in(states)));
+            criteria.andOperator(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                    .elemMatch(Criteria.where(OnboardingEntity.Fields.status.name()).in(states)));
         }
         AggregationOperation aoMatch = match(criteria);
         AggregationOperation aoP1 = c -> new Document(PROJECT, new Document(InstitutionEntity.Fields.onboarding.name(), 1L)
@@ -202,7 +205,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         }
         InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
         if (institutionUpdate != null) {
-            Map<String, Object> map = getNotNullField(institutionUpdate);
+            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
             map.forEach(update::set);
             addGeographicTaxonomies(institutionUpdate, update);
         }

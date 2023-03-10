@@ -2,9 +2,9 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -14,8 +14,6 @@ public interface InstitutionService {
     Institution retrieveInstitutionById(String id);
 
     Institution retrieveInstitutionByExternalId(String institutionExternalId);
-
-    void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
 
     Institution createInstitutionByExternalId(String externalId);
 

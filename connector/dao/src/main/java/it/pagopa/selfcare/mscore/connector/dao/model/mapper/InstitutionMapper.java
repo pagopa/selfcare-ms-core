@@ -43,7 +43,7 @@ public class InstitutionMapper {
                 institution.setAttributes(toAttributes(entity.getAttributes()));
             }
             if (entity.getGeographicTaxonomies() != null) {
-                institution.setGeographicTaxonomies(toGeographicTaxonomies(entity.getGeographicTaxonomies()));
+                institution.setGeographicTaxonomies(toInstitutionGeographicTaxonomies(entity.getGeographicTaxonomies()));
             }
             institution.setCreatedAt(entity.getCreatedAt());
             institution.setUpdatedAt(entity.getUpdatedAt());
@@ -150,11 +150,11 @@ public class InstitutionMapper {
         return list;
     }
 
-    public static List<GeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
-        List<GeographicTaxonomies> list = new ArrayList<>();
+    public static List<InstitutionGeographicTaxonomies> toInstitutionGeographicTaxonomies(List<GeoTaxonomyEntity> geographicTaxonomies) {
+        List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
         if (geographicTaxonomies != null) {
             for (GeoTaxonomyEntity entity : geographicTaxonomies) {
-                GeographicTaxonomies geo = new GeographicTaxonomies();
+                InstitutionGeographicTaxonomies geo = new InstitutionGeographicTaxonomies();
                 geo.setDesc(entity.getDesc());
                 geo.setCode(entity.getCode());
                 list.add(geo);

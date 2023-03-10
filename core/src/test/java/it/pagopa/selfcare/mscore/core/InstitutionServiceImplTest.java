@@ -5,13 +5,14 @@ import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.RelationshipPage;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
@@ -123,7 +124,9 @@ class InstitutionServiceImplTest {
         geographicTaxonomies1.add(geographicTaxonomies);
         institution.setGeographicTaxonomies(geographicTaxonomies1);
 
-        when(institutionConnector.findGeographicTaxonomies(any(),any())).thenReturn(new GeographicTaxonomyPage());
+        InstitutionGeographicTaxonomyPage page = new InstitutionGeographicTaxonomyPage();
+        page.setData(new ArrayList<>());
+        when(institutionConnector.findGeographicTaxonomies(any(),any())).thenReturn(page);
 
         assertNotNull(institutionServiceImpl.retrieveInstitutionGeoTaxonomies(institution, Pageable.unpaged()));
     }
@@ -164,8 +167,8 @@ class InstitutionServiceImplTest {
         List<RelationshipState> states = new ArrayList<>();
         states.add(RelationshipState.ACTIVE);
         institution.setOnboarding(null);
-
-        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProducts(institution, states, Pageable.unpaged()));
+        Pageable pageable =  Pageable.unpaged();
+        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProducts(institution, states, pageable));
     }
 
     /**

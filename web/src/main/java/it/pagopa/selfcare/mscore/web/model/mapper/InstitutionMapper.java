@@ -97,7 +97,7 @@ public class InstitutionMapper {
         institutionUpdate.setDataProtectionOfficer(institution.getDataProtectionOfficer());
         if (institution.getGeographicTaxonomies() != null) {
             var geoCodes = institution.getGeographicTaxonomies().stream()
-                    .map(GeographicTaxonomies::getCode)
+                    .map(InstitutionGeographicTaxonomies::getCode)
                     .collect(Collectors.toList());
             institutionUpdate.setGeographicTaxonomyCodes(geoCodes);
         }

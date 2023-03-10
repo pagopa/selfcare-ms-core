@@ -6,13 +6,15 @@ import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.*;
-import it.pagopa.selfcare.mscore.utils.OriginEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -166,7 +168,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public GeographicTaxonomyPage retrieveInstitutionGeoTaxonomies(Institution institution, Pageable pageable) {
         log.info("Retrieving geographic taxonomies for institution {}", institution.getId());
-        return institutionConnector.findGeographicTaxonomies(institution.getId(), pageable);
+        return toGeographicTaxonomyPage(institutionConnector.findGeographicTaxonomies(institution.getId(), pageable));
+    }
+
+    @Override
+    public GeographicTaxonomies retrieveGeoTaxonomies(String code) {
+        return geoTaxonomiesConnector.getExtByCode(code);
     }
 
     @Override
@@ -182,21 +189,12 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
-    @Override
-    public Institution getInstitutionProduct(String externalId, String productId) {
-        return institutionConnector.findInstitutionProduct(externalId, productId);
-    }
-
     public void checkIfAlreadyExists(String externalId) {
         log.info("START - check institution {} already exists", externalId);
         Optional<Institution> opt = institutionConnector.findByExternalId(externalId);
         if (opt.isPresent()) {
             throw new ResourceConflictException(String.format(CREATE_INSTITUTION_CONFLICT.getMessage(), externalId), CREATE_INSTITUTION_CONFLICT.getCode());
         }
-    }
-
-    public GeographicTaxonomies getGeoTaxonomies(String code) {
-        return geoTaxonomiesConnector.getExtByCode(code);
     }
 
     @Override
@@ -210,7 +208,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                                                                   Pageable pageable) {
         List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
         String personToFilter = personId;
-        if (!adminRelationships.isEmpty()) {
+        if (adminRelationships.isEmpty()) {
             personToFilter = userId;
         }
         RelationshipPage page = userService.retrievePagedUsers(institution.getId(), personToFilter, roles, states, products, productRoles, pageable);
@@ -227,5 +225,13 @@ public class InstitutionServiceImpl implements InstitutionService {
             list.add(relationshipInfo);
         }
         return list;
+    }
+
+    private GeographicTaxonomyPage toGeographicTaxonomyPage(InstitutionGeographicTaxonomyPage geographicTaxonomies) {
+        GeographicTaxonomyPage geographicTaxonomyPage = new GeographicTaxonomyPage();
+        geographicTaxonomyPage.setData(geographicTaxonomies.getData().stream()
+                .map(geo -> retrieveGeoTaxonomies(geo.getCode())).collect(Collectors.toList()));
+        geographicTaxonomyPage.setTotal(geographicTaxonomies.getTotal());
+        return geographicTaxonomyPage;
     }
 }
