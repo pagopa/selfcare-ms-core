@@ -111,6 +111,7 @@ public class SwaggerConfig {
                 .tags(new Tag("External", environment.getProperty("swagger.name.api.external.description")))
                 .tags(new Tag("Institution", environment.getProperty("swagger.name.api.institution.description")))
                 .tags(new Tag("Onboarding", environment.getProperty("swagger.name.api.onboarding.description")))
+                .tags(new Tag("Management", environment.getProperty("swagger.name.api.management.description")))
                 .directModelSubstitute(LocalTime.class, String.class)
                 .forCodeGeneration(true)
                 .useDefaultResponseMessages(false)

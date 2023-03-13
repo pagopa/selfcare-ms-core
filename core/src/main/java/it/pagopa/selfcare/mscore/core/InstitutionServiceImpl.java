@@ -216,13 +216,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<RelationshipInfo> retrieveUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
-        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personId, roles, states, products, productRoles);
-        if (!adminRelationships.isEmpty()) {
-            return toRelationshipInfo(institutionRelationships, institution);
-        } else {
-            List<OnboardedUser> filterInstitutionRelationships = institutionRelationships.stream().filter(user -> userId.equalsIgnoreCase(user.getId())).collect(Collectors.toList());
-            return toRelationshipInfo(filterInstitutionRelationships, institution);
+        String personToFilter = personId;
+        if(adminRelationships.isEmpty()){
+            personToFilter = userId;
         }
+        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personToFilter, roles, states, products, productRoles);
+        return toRelationshipInfo(institutionRelationships, institution);
     }
 
     @Override

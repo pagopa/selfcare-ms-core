@@ -44,7 +44,12 @@ public enum GenericError {
     RETRIEVE_GEO_TAXONOMIES_ERROR("0050", "Error while retrieving institution geographic taxonomy"),
     GET_RELATIONSHIP_ERROR("0028", "Error while getting relationship"),
     CREATE_PERSON_ERROR("0009", "Error while creating person"),
-    GENERIC_ERROR("0000", "Generic Error");
+    GET_INSTITUTION_ATTRIBUTES_ERROR("0022", "Error while getting party attributes"),
+    GET_INSTITUTION_BY_GEOTAXONOMY_ERROR("0053", "Error while searching institutions related to given geoTaxonomies"),
+    GET_INSTITUTION_BY_PRODUCTID_ERROR("0053", "Error while searching institutions related to given productId"),
+    VERIFY_USER_ERROR("0000", "Error while searching institutions related to given productId"),
+    GET_USER_ERROR("0000", "Error while searching user given UserID"),
+    GENERIC_ERROR("0000", "Error while verify user given UserID");
     private final String code;
     private final String detail;
 

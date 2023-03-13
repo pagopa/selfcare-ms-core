@@ -172,13 +172,10 @@ public class UserConnectorImpl implements UserConnector {
 
     @Override
     public List<OnboardedUser> findWithFilter(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<RelationshipState> stateList = states.isEmpty() ? List.of(RelationshipState.values()) : states;
-        List<PartyRole> roleList = roles.isEmpty() ? List.of(PartyRole.values()) : roles;
-
         Criteria criteria = Criteria.where(UserEntity.Fields.bindings.name())
                 .elemMatch(Criteria.where(constructQuery(UserBinding.Fields.institutionId.name())).is(institutionId))
                 .and(constructQuery(UserBinding.Fields.products.name()))
-                .elemMatch(constructCriteria("", roleList, stateList, productRoles, products));
+                .elemMatch(constructCriteria("", roles, states, productRoles, products));
         if (personId != null) {
             criteria = criteria.and(UserEntity.Fields.id.name()).is(personId);
         }
