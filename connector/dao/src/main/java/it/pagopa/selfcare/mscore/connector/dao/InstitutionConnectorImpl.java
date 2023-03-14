@@ -43,6 +43,13 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
+    public Institution saveOrRetrievePnPg(Institution institution) {
+        final InstitutionEntity entity = InstitutionMapper.convertToInstitutionEntity(institution);
+        return findByExternalId(institution.getExternalId())
+                .orElse(InstitutionMapper.convertToInstitution(repository.save(entity)));
+    }
+
+    @Override
     public void deleteById(String id) {
         repository.deleteById(id);
     }

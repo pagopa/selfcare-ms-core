@@ -28,4 +28,6 @@ public interface InstitutionConnector {
     void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
 
     void findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
+
+    Institution saveOrRetrievePnPg(Institution newInstitution);
 }

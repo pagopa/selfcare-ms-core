@@ -10,10 +10,7 @@ import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.web.model.institution.CreatePgInstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -48,7 +45,7 @@ public class InstitutionController {
      *
      * @param externalId String
      * @return InstitutionResponse
-     * * Code: 201, Message: successful operation, DataType: TokenId
+     * * Code: 201, Message: successful operation, DataType: Institution
      * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
@@ -71,7 +68,7 @@ public class InstitutionController {
      * @param externalId  String
      * @param institution InstitutionRequest
      * @return InstitutionResponse
-     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 200, Message: successful operation, DataType: Institution
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
      */
@@ -92,7 +89,7 @@ public class InstitutionController {
      *
      * @param request CreatePgInstitutionRequest
      * @return InstitutionResponse
-     * * Code: 201, Message: successful operation, DataType: TokenId
+     * * Code: 201, Message: successful operation, DataType: Institution
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Institution data not found on InfoCamere, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
@@ -105,6 +102,23 @@ public class InstitutionController {
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createPgInstitution(request.getTaxId(), request.getDescription(), request.isExistsInRegistry(), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
+    }
+
+    /**
+     * The function persist PG institution
+     *
+     * @param request CreatePnPgInstitutionRequest
+     * @return InstitutionPnPgResponse
+     * * Code: 201, Message: successful operation, DataType: InstitutionId
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
+    @PostMapping(value = "/pn-pg")
+    public ResponseEntity<InstitutionPnPgResponse> createPnPgInstitution(@RequestBody @Valid CreatePnPgInstitutionRequest request) {
+        CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
+        Institution saved = institutionService.createPnPgInstitution(request.getTaxId(), request.getDescription());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new InstitutionPnPgResponse(saved.getId()));
     }
 
     /**

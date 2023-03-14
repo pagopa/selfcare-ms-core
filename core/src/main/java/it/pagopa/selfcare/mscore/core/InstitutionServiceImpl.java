@@ -106,6 +106,19 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         return institutionConnector.save(newInstitution);
     }
+    @Override
+    public Institution createPnPgInstitution(String taxId, String description) {
+        checkIfAlreadyExists(taxId);
+        Institution newInstitution = new Institution();
+        newInstitution.setExternalId(taxId);
+        newInstitution.setDescription(description);
+        newInstitution.setInstitutionType(InstitutionType.PG);
+        newInstitution.setTaxCode(taxId);
+        newInstitution.setCreatedAt(OffsetDateTime.now());
+        newInstitution.setOrigin(Origin.INFOCAMERE);
+        newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
+        return institutionConnector.saveOrRetrievePnPg(newInstitution);
+    }
 
     @Override
     public Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
