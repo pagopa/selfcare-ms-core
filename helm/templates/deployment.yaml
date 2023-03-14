@@ -40,14 +40,8 @@ spec:
                 name: application-insights
             - secretRef:
                 name: common-secrets
-            - secretRef:
-                name: aruba-sign-service-secrets
             - configMapRef:
                 name: jwt
-            - configMapRef:
-                name: aruba-sign-service
-            - secretRef:
-                name: contracts-storage
             - secretRef:
                 name: uservice-party-process
             - configMapRef:
