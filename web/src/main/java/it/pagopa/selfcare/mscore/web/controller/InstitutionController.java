@@ -105,23 +105,6 @@ public class InstitutionController {
     }
 
     /**
-     * The function persist PG institution
-     *
-     * @param request CreatePnPgInstitutionRequest
-     * @return InstitutionPnPgResponse
-     * * Code: 201, Message: successful operation, DataType: InstitutionId
-     * * Code: 400, Message: Bad Request, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
-    @PostMapping(value = "/pn-pg")
-    public ResponseEntity<InstitutionPnPgResponse> createPnPgInstitution(@RequestBody @Valid CreatePnPgInstitutionRequest request) {
-        CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
-        Institution saved = institutionService.createPnPgInstitution(request.getTaxId(), request.getDescription());
-        return ResponseEntity.status(HttpStatus.CREATED).body(new InstitutionPnPgResponse(saved.getId()));
-    }
-
-    /**
      * The function return products related to institution
      *
      * @param institutionId String

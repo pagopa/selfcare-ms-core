@@ -58,6 +58,11 @@ public class ExternalServiceImpl implements ExternalService {
     }
 
     @Override
+    public Institution createPnPgInstitution(String taxId, String description) {
+        return institutionService.createPnPgInstitution(taxId, description);
+    }
+
+    @Override
     public List<RelationshipInfo> getUserInstitutionRelationships(String externalId,
                                                                   String userId,
                                                                   String personId,

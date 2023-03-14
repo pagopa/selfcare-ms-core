@@ -25,4 +25,5 @@ public interface ExternalService {
 
     List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states);
 
+    Institution createPnPgInstitution(String taxId, String description);
 }

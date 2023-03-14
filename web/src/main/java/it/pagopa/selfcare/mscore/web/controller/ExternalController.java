@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
@@ -159,5 +160,22 @@ public class ExternalController {
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = externalService.getUserInstitutionRelationships(externalId, selfCareUser.getId(), personId, roles, states, products, productRoles);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
+    }
+
+    /**
+     * The function persist PG institution
+     *
+     * @param request CreatePnPgInstitutionRequest
+     * @return InstitutionPnPgResponse
+     * * Code: 201, Message: successful operation, DataType: InstitutionId
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
+    @PostMapping(value = "/pn-pg")
+    public ResponseEntity<InstitutionPnPgResponse> createPnPgInstitution(@RequestBody @Valid CreatePnPgInstitutionRequest request) {
+        CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
+        Institution saved = externalService.createPnPgInstitution(request.getTaxId(), request.getDescription());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new InstitutionPnPgResponse(saved.getId()));
     }
 }
