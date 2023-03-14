@@ -228,7 +228,7 @@ paths:
   /institutions/pn-pg:
     post:
       tags:
-        - Institution
+        - External
       summary: create an institution (PG) using external institution id fetching data from info-camere
       description: create an institution (PG) using external institution id fetching data from info-camere
       operationId: createPnPgInstitutionUsingPOST

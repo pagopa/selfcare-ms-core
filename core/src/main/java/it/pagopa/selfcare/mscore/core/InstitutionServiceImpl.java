@@ -108,7 +108,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
     @Override
     public Institution createPnPgInstitution(String taxId, String description) {
-        checkIfAlreadyExists(taxId);
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(taxId);
         newInstitution.setDescription(description);
