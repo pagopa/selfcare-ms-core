@@ -116,17 +116,4 @@ public class OnboardingMapper {
         request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionOperatorsRequest.getUsers()));
         return request;
     }
-
-    public static OnboardingLegalsRequest toOnboardingLegalsRequest(OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest) {
-        OnboardingLegalsRequest request = new OnboardingLegalsRequest();
-        request.setTokenType(TokenType.LEGALS);
-        request.setProductId(onboardingInstitutionLegalsRequest.getProductId());
-        request.setProductName(onboardingInstitutionLegalsRequest.getProductName());
-        request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionLegalsRequest.getUsers()));
-        request.setInstitutionExternalId(onboardingInstitutionLegalsRequest.getInstitutionExternalId());
-        request.setInstitutionId(onboardingInstitutionLegalsRequest.getInstitutionId());
-        request.setContract(toContract(onboardingInstitutionLegalsRequest.getContract()));
-        request.setSignContract(onboardingInstitutionLegalsRequest.isSignContract());
-        return request;
-    }
 }

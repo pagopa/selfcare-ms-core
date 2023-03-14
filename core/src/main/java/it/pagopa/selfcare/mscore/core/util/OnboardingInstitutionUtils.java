@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.Env;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -76,69 +75,6 @@ public class OnboardingInstitutionUtils {
             List<PartyRole> userRoleList = userList.stream().map(UserToOnboard::getRole).collect(Collectors.toList());
             throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userRoleList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
         }
-    }
-
-    public static List<String> getValidManagerToOnboard(List<UserToOnboard> users, Token token) {
-        log.info("START - getOnboardingValidManager for users list size: {}", users.size());
-        List<String> response;
-        if (token != null) {
-            response = token.getUsers().stream()
-                    .filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
-                    .map(TokenUser::getUserId)
-                    .collect(Collectors.toList());
-        } else {
-            response = users.stream()
-                    .filter(userToOnboard -> PartyRole.MANAGER == userToOnboard.getRole())
-                    .map(UserToOnboard::getId)
-                    .collect(Collectors.toList());
-        }
-        if (response.isEmpty()) {
-            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
-        }
-        return response;
-    }
-
-    public static List<String> getOnboardedValidManager(List<OnboardedUser> users, String institutionId, String productId) {
-        log.info("START - getValidManager for users list size: {}", users.size());
-        List<String> response = new ArrayList<>();
-        for (OnboardedUser onboardedUser : users) {
-            onboardedUser.getBindings().stream()
-                    .filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
-                    .flatMap(userBinding -> userBinding.getProducts().stream())
-                    .filter(product -> productId.equalsIgnoreCase(product.getProductId()) && PartyRole.MANAGER == product.getRole())
-                    .forEach(product -> response.add(onboardedUser.getId()));
-        }
-        if (response.isEmpty()) {
-            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
-        }
-        return response;
-    }
-
-    public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest onboardingLegalsRequest) {
-        OnboardingRequest request = new OnboardingRequest();
-        request.setProductId(onboardingLegalsRequest.getProductId());
-        request.setProductName(onboardingLegalsRequest.getProductName());
-        request.setUsers(onboardingLegalsRequest.getUsers());
-        request.setInstitutionExternalId(onboardingLegalsRequest.getInstitutionExternalId());
-        request.setContract(onboardingLegalsRequest.getContract());
-        request.setSignContract(true);
-        request.setTokenType(TokenType.LEGALS);
-        return request;
-    }
-
-    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution) {
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(token.getProductId());
-        onboardingRequest.setProductName(token.getProductId());
-        Contract contract = new Contract();
-        contract.setPath(token.getContractTemplate());
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setDescription(institution.getDescription());
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setSignContract(true);
-
-        return onboardingRequest;
     }
 
     public static Onboarding constructOnboarding(OnboardingRequest request) {

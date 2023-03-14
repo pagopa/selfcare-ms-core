@@ -3,10 +3,8 @@ package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.page.RelationshipEntityPageElement;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipPageElement;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -25,24 +23,6 @@ public class UserMapper {
             user.setBindings(toBindings(entity.getBindings()));
         }
         return user;
-    }
-
-    public static List<RelationshipPageElement> toRelationshipElement(List<RelationshipEntityPageElement> entities) {
-        List<RelationshipPageElement> list = new ArrayList<>();
-        if (entities != null) {
-            for (RelationshipEntityPageElement entity : entities) {
-                RelationshipPageElement element = toRelationshipElement(entity);
-                list.add(element);
-            }
-        }
-        return list;
-    }
-
-    private static RelationshipPageElement toRelationshipElement(RelationshipEntityPageElement entity) {
-        RelationshipPageElement element = new RelationshipPageElement();
-        element.setUserId(entity.getId());
-        element.setProduct(toOnboardedProduct(entity.getProduct()));
-        return element;
     }
 
     private static List<UserBinding> toBindings(List<UserBindingEntity> bindings) {

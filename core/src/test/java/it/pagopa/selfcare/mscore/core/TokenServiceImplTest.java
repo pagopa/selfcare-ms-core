@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -28,34 +27,6 @@ class TokenServiceImplTest {
 
     @Mock
     private UserService userService;
-
-    @Test
-    void getToken(){
-        when(tokenConnector.findById(any())).thenReturn(new Token());
-        when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
-        assertNotNull(tokenServiceImpl.retrieveToken("id"));
-    }
-
-    /**
-     * Method under test: {@link TokenServiceImpl#findActiveContract(String, String, String)}
-     */
-    @Test
-    void testFindActiveContract2() {
-        when(tokenConnector.findActiveContract( any(),  any(),  any())).thenReturn(new Token());
-        assertNull(tokenServiceImpl.findActiveContract("42", "42", "42"));
-        verify(tokenConnector).findActiveContract( any(),  any(),  any());
-    }
-
-    /**
-     * Method under test: {@link TokenServiceImpl#findActiveContract(String, String, String)}
-     */
-    @Test
-    void testFindActiveContract3() {
-        when(tokenConnector.findActiveContract( any(),  any(),  any()))
-                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> tokenServiceImpl.findActiveContract("42", "42", "42"));
-        verify(tokenConnector).findActiveContract( any(),  any(),  any());
-    }
 
     @Test
     void verifyToken(){

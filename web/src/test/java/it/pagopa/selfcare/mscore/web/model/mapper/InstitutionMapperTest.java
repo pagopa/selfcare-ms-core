@@ -232,33 +232,6 @@ class InstitutionMapperTest {
         assertNull(institutionUpdate.getZipCode());
     }
 
-
-    /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
-     */
-    @Test
-    void testToInstitutionUpdateResponse2() {
-        Institution institution = new Institution();
-        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
-        institution.setGeographicTaxonomies(geographicTaxonomiesList);
-        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
-                .toInstitutionUpdateResponse(institution);
-        assertNull(actualToInstitutionUpdateResponseResult.getAddress());
-        assertNull(actualToInstitutionUpdateResponseResult.getZipCode());
-        assertNull(actualToInstitutionUpdateResponseResult.getTaxCode());
-        assertNull(actualToInstitutionUpdateResponseResult.getSupportPhone());
-        assertNull(actualToInstitutionUpdateResponseResult.getSupportEmail());
-        assertNull(actualToInstitutionUpdateResponseResult.getShareCapital());
-        assertNull(actualToInstitutionUpdateResponseResult.getRea());
-        assertNull(actualToInstitutionUpdateResponseResult.getPaymentServiceProvider());
-        assertNull(actualToInstitutionUpdateResponseResult.getInstitutionType());
-        assertNull(actualToInstitutionUpdateResponseResult.getDigitalAddress());
-        assertNull(actualToInstitutionUpdateResponseResult.getDescription());
-        assertNull(actualToInstitutionUpdateResponseResult.getDataProtectionOfficer());
-        assertNull(actualToInstitutionUpdateResponseResult.getBusinessRegisterPlace());
-        assertFalse(institution.isImported());
-    }
-
     /**
      * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
      */
@@ -280,23 +253,11 @@ class InstitutionMapperTest {
         assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getAddress());
         assertEquals("21654", actualToInstitutionUpdateResponseResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionUpdateResponseResult.getTaxCode());
-        assertSame(paymentServiceProvider, actualToInstitutionUpdateResponseResult.getPaymentServiceProvider());
         assertEquals(InstitutionType.PA, actualToInstitutionUpdateResponseResult.getInstitutionType());
         assertEquals("The characteristics of someone or something",
                 actualToInstitutionUpdateResponseResult.getDescription());
         assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getDigitalAddress());
-        assertSame(dataProtectionOfficer, actualToInstitutionUpdateResponseResult.getDataProtectionOfficer());
         assertTrue(institution.isImported());
-    }
-
-    /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
-     */
-    @Test
-    void testToInstitutionUpdate() {
-        InstitutionPut institutionPut = new InstitutionPut();
-        institutionPut.setGeographicTaxonomyCodes(new ArrayList<>());
-        assertTrue(InstitutionMapper.toInstitutionUpdate(institutionPut).getGeographicTaxonomies().isEmpty());
     }
 
 

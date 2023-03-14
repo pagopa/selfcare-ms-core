@@ -1,10 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.AccessLevel;
@@ -14,30 +11,6 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class RelationshipMapper {
-
-    public static RelationshipResponse toRelationshipResult(Token token, Institution institution) {
-        RelationshipResponse response = new RelationshipResponse();
-        response.setId(token.getId());
-       // response.setFrom(token.getUsers());
-        response.setProduct(token.getProductId());
-        response.setState(token.getStatus());
-        response.setCreatedAt(token.getCreatedAt());
-        response.setUpdatedAt(token.getUpdatedAt());
-        if (institution != null) {
-            response.setTo(institution.getId());
-            response.setInstitutionUpdate(InstitutionMapper.toInstitutionUpdateResponse(institution));
-
-            if (institution.getOnboarding() != null) {
-                Onboarding onboarding = institution.getOnboarding().stream()
-                        .filter(o -> token.getProductId().equalsIgnoreCase(o.getProductId()))
-                        .findFirst()
-                        .orElseThrow(() -> new InvalidRequestException("", ""));
-                response.setPricingPlan(onboarding.getPricingPlan());
-                response.setBillingResponse(InstitutionMapper.toBillingResponse(onboarding, institution));
-            }
-        }
-        return response;
-    }
 
     public static RelationshipResult toRelationshipResult(RelationshipInfo info) {
 

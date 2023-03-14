@@ -30,17 +30,6 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
-    @Test
-    void findAllByIds(){
-        when(userConnector.findAllByIds(any())).thenReturn(new ArrayList<>());
-        assertNotNull(userServiceImpl.findAllByIds(new ArrayList<>()));
-    }
-
-    @Test
-    void createUser(){
-        when(userConnector.findAndCreate(any(),any())).thenReturn(new OnboardedUser());
-        assertNotNull(userServiceImpl.createUser("42"));
-    }
 
     /**
      * Method under test: {@link UserServiceImpl#findOnboardedManager(String, String, List)}
@@ -109,6 +98,7 @@ class UserServiceImplTest {
         Assertions.assertDoesNotThrow(() -> userServiceImpl.verifyUser("42"));
         verify(userConnector).findById(any());
     }
+
     @Test
     void verifyUser2() {
         when(userConnector.findById(any())).thenReturn(null);
@@ -152,61 +142,12 @@ class UserServiceImplTest {
     void retrieveUsers() {
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
         when(userConnector.findWithFilter(any(), any(), any(),
-                any(),any(),any())).thenReturn(onboardedUserList);
+                any(), any(), any())).thenReturn(onboardedUserList);
         List<OnboardedUser> actualRetrieveAdminUsersResult = userServiceImpl.retrieveUsers("42", "42", new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         assertSame(onboardedUserList, actualRetrieveAdminUsersResult);
         assertTrue(actualRetrieveAdminUsersResult.isEmpty());
         verify(userConnector).findWithFilter(any(), any(), any(),
-                any(),any(),any());
-    }
-
-
-    /**
-     * Method under test: {@link UserServiceImpl#checkIfAdmin(String, String)}
-     */
-    @Test
-    void testCheckIfAdmin() {
-        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
-                any())).thenReturn(new ArrayList<>());
-        assertFalse(userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
-                any());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#checkIfAdmin(String, String)}
-     */
-    @Test
-    void testCheckIfAdmin2() {
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        onboardedUserList.add(new OnboardedUser());
-        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
-                any())).thenReturn(onboardedUserList);
-        assertTrue(userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
-                any());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#checkIfAdmin(String, String)}
-     */
-    @Test
-    void testCheckIfAdmin3() {
-        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
-                any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
-                any());
-    }
-
-
-
-    @Test
-    void testGetUserFromUserRegistry2() {
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
-                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.retrieveUserFromUserRegistry("42", null));
-        verify(userRegistryConnector).getUserByInternalId(any(), any());
+                any(), any(), any());
     }
 }
 

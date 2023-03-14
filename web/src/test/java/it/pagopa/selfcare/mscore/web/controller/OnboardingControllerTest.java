@@ -6,14 +6,11 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
@@ -33,7 +30,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,120 +47,6 @@ class OnboardingControllerTest {
 
     @Mock
     private TokenService tokenService;
-
-    @Test
-    void completeOnboarding() throws Exception {
-        when(tokenService.verifyToken(any())).thenReturn(new Token());
-        doNothing().when(onboardingService).completeOboarding(any(),any());
-        MultipartFile multipartFile = mock(MultipartFile.class);
-        String content = (new ObjectMapper()).writeValueAsString(multipartFile);
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/onboarding/complete/{tokenId}","42")
-                .content(content)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-
-    @Test
-    void approveOnboarding() throws Exception {
-        when(tokenService.verifyToken(any())).thenReturn(new Token());
-        doNothing().when(onboardingService).approveOnboarding(any(),any());
-
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/onboarding/approve/{tokenId}","42")
-                .principal(authentication)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    @Test
-    void onboardingLegals() throws Exception {
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        ContractRequest contractRequest = new ContractRequest();
-        contractRequest.setPath("Path");
-        contractRequest.setVersion("1.0.2");
-
-        Person person = new Person();
-        person.setId("42");
-        person.setName("Name");
-        person.setProductRole("Product Role");
-        person.setRole(PartyRole.MANAGER);
-        person.setSurname("Doe");
-        person.setTaxCode("Tax Code");
-
-        ArrayList<Person> personList = new ArrayList<>();
-        personList.add(person);
-
-        OnboardingInstitutionLegalsRequest onboardingInstitutionRequest = new OnboardingInstitutionLegalsRequest();
-        onboardingInstitutionRequest.setUsers(personList);
-        onboardingInstitutionRequest.setContract(contractRequest);
-        onboardingInstitutionRequest.setInstitutionExternalId("42");
-        onboardingInstitutionRequest.setProductId("42");
-        onboardingInstitutionRequest.setProductName("Product Name");
-
-        String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionRequest);
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/onboarding/legals")
-                .principal(authentication)
-                .content(content)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-
-    @Test
-    void invalidateOnboarding() throws Exception {
-        when(tokenService.verifyToken(any())).thenReturn(new Token());
-        doNothing().when(onboardingService).invalidateOnboarding(any());
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .delete("/onboarding/complete/{tokenId}","42")
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    @Test
-    void onboardingReject() throws Exception {
-        when(tokenService.verifyToken(any())).thenReturn(new Token());
-        doNothing().when(onboardingService).onboardingReject(any());
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .delete("/onboarding/reject/{tokenId}","42")
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
 
     @Test
     void onboardingInstitutionOperators() throws Exception {
@@ -191,9 +73,8 @@ class OnboardingControllerTest {
 
     @Test
     void onboardingInstitutionSubDelegate() throws Exception {
-        OnboardingInstitutionLegalsRequest request = new OnboardingInstitutionLegalsRequest();
+        OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
         request.setInstitutionId("id");
-        request.setInstitutionExternalId("id");
         request.setProductId("id");
         List<Person> personList = new ArrayList<>();
         personList.add(new Person());
@@ -204,24 +85,6 @@ class OnboardingControllerTest {
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/onboarding/subdelegates")
                 .content(content)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-
-
-    @Test
-    void getOnboardingDocument() throws Exception {
-        ResourceResponse file = new ResourceResponse();
-        file.setFileName("fileName");
-        file.setData(new byte[]{3});
-        when(onboardingService.retrieveDocument(any())).thenReturn(file);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/onboarding/relationship/{relationshipId}/document","42")
                 .contentType(MediaType.APPLICATION_JSON);
 
         MockMvcBuilders.standaloneSetup(onboardingController)

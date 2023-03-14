@@ -237,11 +237,6 @@ class OnboardingMapperTest {
         contractRequest.setPath("Path");
         contractRequest.setVersion("1.0.2");
 
-        ContractImportedRequest contractImportedRequest = new ContractImportedRequest();
-        contractImportedRequest.setContractType("Contract Type");
-        contractImportedRequest.setFileName("foo.txt");
-        contractImportedRequest.setFilePath("/directory/foo.txt");
-
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
         dataProtectionOfficer.setAddress("42 Main St");
         dataProtectionOfficer.setEmail("jane.doe@example.org");
@@ -311,11 +306,6 @@ class OnboardingMapperTest {
         ContractRequest contractRequest = new ContractRequest();
         contractRequest.setPath("Path");
         contractRequest.setVersion("1.0.2");
-
-        ContractImportedRequest contractImportedRequest = new ContractImportedRequest();
-        contractImportedRequest.setContractType("Contract Type");
-        contractImportedRequest.setFileName("foo.txt");
-        contractImportedRequest.setFilePath("/directory/foo.txt");
 
         InstitutionUpdateRequest institutionUpdate = new InstitutionUpdateRequest();
         institutionUpdate.setAddress("42 Main St");

@@ -4,24 +4,21 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.CreatePgInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -126,11 +123,12 @@ public class InstitutionController {
     public ResponseEntity<OnboardedProducts> retrieveInstitutionProducts(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                          @PathVariable("id") String institutionId,
                                                                          @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
-                                                                         @RequestParam(value = "states", required = false) List<String> states) {
+                                                                         @RequestParam(value = "states", required = false) List<RelationshipState> states) {
 
         log.info("Retrieving products for institution {}", institutionId);
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
-        List<Onboarding> list = institutionService.retrieveInstitutionProducts(institutionId, states);
+        Institution institution = institutionService.retrieveInstitutionById(institutionId);
+        List<Onboarding> list = institutionService.retrieveInstitutionProducts(institution, states);
         return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(list));
     }
 

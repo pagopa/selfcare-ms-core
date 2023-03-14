@@ -10,22 +10,16 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipPage;
-import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,125 +45,6 @@ class InstitutionServiceImplTest {
 
     @Mock
     private CoreConfig coreConfig;
-
-    @Test
-    void getUserInstitutionRelationships(){
-        OnboardedUser onboardedUser = new OnboardedUser();
-        List<UserBinding> userBindings = new ArrayList<>();
-        UserBinding userBinding = new UserBinding();
-        userBinding.setInstitutionId("id");
-        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
-        onboardedProducts.add(new OnboardedProduct());
-        userBinding.setProducts(onboardedProducts);
-        userBindings.add(userBinding);
-
-        onboardedUser.setBindings(userBindings);
-        List<OnboardedUser> adminRelationships = new ArrayList<>();
-        adminRelationships.add(onboardedUser);
-        when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(adminRelationships);
-        RelationshipPage page = new RelationshipPage();
-        page.setData(Collections.emptyList());
-        when(userService.retrievePagedUsers(any(),any(),any(),any(),any(),any(),any()))
-                .thenReturn(page);
-        Institution institution = new Institution();
-        institution.setId("id");
-        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(institution,"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>(), Pageable.unpaged()));
-    }
-
-    @Test
-    void getUserInstitutionRelationships2(){
-        when(userService.retrieveUsers(any(),any(),any(),any(),any(),any())).thenReturn(new ArrayList<>());
-        RelationshipPage page = new RelationshipPage();
-        page.setData(Collections.emptyList());
-        when(userService.retrievePagedUsers(any(),any(),any(),any(),any(),any(),any()))
-                .thenReturn(page);
-        assertNotNull(institutionServiceImpl.getUserInstitutionRelationships(new Institution(),"userId","personId", new ArrayList<>(), new ArrayList<>(),new ArrayList<>(), new ArrayList<>(), Pageable.unpaged()));
-    }
-
-    @Test
-    void updateInstitution(){
-        String institutionId = "instituionId";
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
-        geographicTaxonomies1.add(new InstitutionGeographicTaxonomies());
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setGeographicTaxonomies(geographicTaxonomies1);
-        String userId = "userId";
-        when(userService.checkIfAdmin(any(),any())).thenReturn(true);
-        when(institutionConnector.findAndUpdate(any(),any(), any())).thenReturn(new Institution());
-        when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(new GeographicTaxonomies());
-        assertNotNull(institutionServiceImpl.updateInstitution(institutionId,institutionUpdate,userId));
-    }
-
-    @Test
-    void updateInstitution2(){
-        String institutionId = "instituionId";
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
-        geographicTaxonomies1.add(new InstitutionGeographicTaxonomies());
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setGeographicTaxonomies(geographicTaxonomies1);
-        String userId = "userId";
-        when(userService.checkIfAdmin(any(),any())).thenReturn(true);
-        InvalidRequestException invalidRequestException = mock(InvalidRequestException.class);
-        when(institutionConnector.findAndUpdate(any(),any(), any())).thenThrow(invalidRequestException);
-        when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(new GeographicTaxonomies());
-        assertThrows(InvalidRequestException.class, () -> institutionServiceImpl.updateInstitution(institutionId,institutionUpdate,userId));
-    }
-
-    @Test
-    void retrieveInstitutionGeoTaxonomies(){
-        Institution institution = new Institution();
-        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
-        geographicTaxonomies.setCode("code");
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
-        geographicTaxonomies1.add(geographicTaxonomies);
-        institution.setGeographicTaxonomies(geographicTaxonomies1);
-
-        InstitutionGeographicTaxonomyPage page = new InstitutionGeographicTaxonomyPage();
-        page.setData(new ArrayList<>());
-        when(institutionConnector.findGeographicTaxonomies(any(),any())).thenReturn(page);
-
-        assertNotNull(institutionServiceImpl.retrieveInstitutionGeoTaxonomies(institution, Pageable.unpaged()));
-    }
-
-    @Test
-    void retrieveInstitutionProducts(){
-        Institution institution = new Institution();
-        List<RelationshipState> states = new ArrayList<>();
-        states.add(RelationshipState.ACTIVE);
-        List<Onboarding> onboardings = new ArrayList<>();
-        Onboarding onboarding = new Onboarding();
-        onboarding.setStatus(RelationshipState.ACTIVE);
-        onboardings.add(onboarding);
-        institution.setOnboarding(onboardings);
-
-        when(institutionConnector.findOnboarding(any(),any(),any())).thenReturn(new OnboardingPage());
-
-        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution, states, Pageable.unpaged()));
-    }
-
-    @Test
-    void retrieveInstitutionProducts2(){
-        Institution institution = new Institution();
-        List<Onboarding> onboardings = new ArrayList<>();
-        Onboarding onboarding = new Onboarding();
-        onboarding.setStatus(RelationshipState.ACTIVE);
-        onboardings.add(onboarding);
-        institution.setOnboarding(onboardings);
-
-        when(institutionConnector.findOnboarding(any(),any(),any())).thenReturn(new OnboardingPage());
-
-        assertNotNull(institutionServiceImpl.retrieveInstitutionProducts(institution,null, Pageable.unpaged()));
-    }
-
-    @Test
-    void retrieveInstitutionProducts3(){
-        Institution institution = new Institution();
-        List<RelationshipState> states = new ArrayList<>();
-        states.add(RelationshipState.ACTIVE);
-        institution.setOnboarding(null);
-        Pageable pageable =  Pageable.unpaged();
-        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProducts(institution, states, pageable));
-    }
 
     /**
      * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionById(String)}

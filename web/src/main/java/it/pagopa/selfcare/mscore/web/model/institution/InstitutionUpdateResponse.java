@@ -1,9 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import lombok.Data;
 
 import java.util.List;
@@ -17,8 +15,8 @@ public class InstitutionUpdateResponse {
     private String address;
     private String taxCode;
     private String zipCode;
-    private PaymentServiceProvider paymentServiceProvider;
-    private DataProtectionOfficer dataProtectionOfficer;
+    private PaymentServiceProviderResponse paymentServiceProvider;
+    private DataProtectionOfficerResponse dataProtectionOfficer;
     private List<String> geographicTaxonomyCodes;
     private String rea;
     private String shareCapital;

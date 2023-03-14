@@ -4,8 +4,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.core.TokenService;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
-import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -46,25 +44,5 @@ public class TokenController {
         CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
         tokenService.verifyToken(tokenId);
         return ResponseEntity.ok().body(new TokenResponse(tokenId));
-    }
-
-    /**
-     * The getToken function is used to retrieve a TokenEntity
-     *
-     * @param tokenId tokenId
-     * @return TokenResponse
-     * * Code: 200, Message: successful operation, DataType: TokenResponse
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Token not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.token}", notes = "${swagger.mscore.token}")
-    @GetMapping("/tokens/{tokenId}")
-    public ResponseEntity<TokenResponse> getToken(@ApiParam("${swagger.mscore.token.tokenId}")
-                                                     @PathVariable("tokenId") String tokenId) {
-        log.info("Verify token identified with {}", tokenId);
-        CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
-        TokenRelationships tokenRelationships = tokenService.retrieveToken(tokenId);
-        return ResponseEntity.ok().body(TokenMapper.toTokenResponse(tokenRelationships));
     }
 }

@@ -6,21 +6,17 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.springframework.stereotype.Service;
-import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.constant.CustomError.RELATIONSHIP_ID_NOT_FOUND;
 
 @Service
 public class UserRelationshipServiceImpl implements UserRelationshipService {
 
-    private final OnboardingDao onboardingDao;
     private final UserConnector userConnector;
     private final InstitutionService institutionService;
 
-    public UserRelationshipServiceImpl(OnboardingDao onboardingDao, UserConnector userConnector, InstitutionService institutionService) {
-        this.onboardingDao = onboardingDao;
+    public UserRelationshipServiceImpl(UserConnector userConnector, InstitutionService institutionService) {
         this.userConnector = userConnector;
         this.institutionService = institutionService;
     }
@@ -28,32 +24,6 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     @Override
     public OnboardedUser findByRelationshipId(String relationshipId) {
         return userConnector.findByRelationshipId(relationshipId);
-    }
-
-    @Override
-    public void activateRelationship(String relationshipId) {
-        OnboardedUser user = findByRelationshipId(relationshipId);
-        try {
-            onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.ACTIVE);
-        } catch (InvalidRequestException e) {
-            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
-        }
-    }
-
-    @Override
-    public void suspendRelationship(String relationshipId) {
-        OnboardedUser user = findByRelationshipId(relationshipId);
-        try {
-            onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.SUSPENDED);
-        } catch (InvalidRequestException e) {
-            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
-        }
-    }
-
-    @Override
-    public void deleteRelationship(String relationshipId) {
-        OnboardedUser user = findByRelationshipId(relationshipId);
-        onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.DELETED);
     }
 
     @Override

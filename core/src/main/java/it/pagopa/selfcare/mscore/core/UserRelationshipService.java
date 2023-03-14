@@ -7,12 +7,6 @@ public interface UserRelationshipService {
 
     OnboardedUser findByRelationshipId(String relationshipId);
 
-    void activateRelationship(String relationshipId);
-
-    void suspendRelationship(String relationshipId);
-
-    void deleteRelationship(String relationshipId);
-
     RelationshipInfo retrieveRelationship(String relationshipId);
 
 }

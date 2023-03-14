@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.AccessLevel;
@@ -30,9 +29,5 @@ public class UserMapper {
         userToOnboard.setProductRole(p.getProductRole());
         userToOnboard.setEnv(p.getEnv());
         return userToOnboard;
-    }
-
-    public static Person toPerson(OnboardedUser user) {
-        return new Person(user.getId());
     }
 }

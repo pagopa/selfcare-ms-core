@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.core;
 
-import eu.europa.esig.dss.model.DSSDocument;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -8,8 +7,6 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.*;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
@@ -20,14 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,12 +31,6 @@ class OnboardingServiceImplTest {
     private UserRelationshipService userRelationshipService;
 
     @Mock
-    private ContractService contractService;
-
-    @Mock
-    private EmailService emailService;
-
-    @Mock
     private OnboardingDao onboardingDao;
 
     @InjectMocks
@@ -56,77 +41,6 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserService userService;
-
-    @Test
-    void approveOnboarding(){
-        Token token = new Token();
-        token.setInstitutionId("id");
-        token.setProductId("id");
-        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(new User());
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-
-        UserBinding userBinding = new UserBinding();
-        userBinding.setInstitutionId("id");
-        OnboardedUser user = new OnboardedUser();
-        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setProductId("id");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProducts.add(onboardedProduct);
-        userBinding.setProducts(onboardedProducts);
-        List<UserBinding> userBindings = new ArrayList<>();
-        userBindings.add(userBinding);
-        user.setBindings(userBindings);
-        List<OnboardedUser> users = new ArrayList<>();
-        users.add(user);
-
-        when(userService.findAllByIds(any())).thenReturn(users);
-        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(new User());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(onboardingDao.getProductById(any())).thenReturn(new Product());
-        when(contractService.extractTemplate(any())).thenReturn("42");
-        File file = mock(File.class);
-        when(contractService.createContractPDF(any(),any(),any(),any(),any(),any())).thenReturn(file);
-        when(file.getName()).thenReturn("42");
-        when(file.exists()).thenReturn(true);
-        DSSDocument document = mock(DSSDocument.class);
-        when(document.getDigest(any())).thenReturn("42");
-        assertThrows(NullPointerException.class, () -> onboardingServiceImpl.approveOnboarding(token,selfCareUser));
-        assertNotNull(token);
-    }
-
-
-    @Test
-    void completeOboarding() {
-        Token token = new Token();
-        token.setInstitutionId("id");
-        token.setProductId("id");
-        token.setUsers(Collections.emptyList());
-        MultipartFile file = mock(MultipartFile.class);
-        File file1 = mock(File.class);
-        OnboardedUser user = new OnboardedUser();
-        UserBinding userBinding = new UserBinding();
-        userBinding.setInstitutionId("id");
-        List<OnboardedProduct> onboardedProducts = new ArrayList<>();
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setProductId("id");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProducts.add(onboardedProduct);
-        userBinding.setProducts(onboardedProducts);
-        List<UserBinding> userBindings = new ArrayList<>();
-        userBindings.add(userBinding);
-        user.setBindings(userBindings);
-        List<OnboardedUser> users = new ArrayList<>();
-        users.add(user);
-        when(userService.findAllByIds(any())).thenReturn(users);
-        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(new User());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(onboardingDao.getProductById(any())).thenReturn(new Product());
-        doNothing().when(contractService).verifySignature(any(), any(), any());
-        when(contractService.getLogoFile()).thenReturn(file1);
-        onboardingServiceImpl.completeOboarding(token, file);
-        assertNotNull(token);
-    }
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -865,165 +779,6 @@ class OnboardingServiceImplTest {
     }
 
     @Test
-    void testInvalidateOnboarding() {
-        doNothing().when(onboardingDao)
-                .persistForUpdate(any(), any(), any(), any());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        onboardingServiceImpl.invalidateOnboarding(new Token());
-        verify(onboardingDao).persistForUpdate(any(), any(), any(),
-                any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#invalidateOnboarding(Token)}
-     */
-    @Test
-    void testInvalidateOnboarding2() {
-        doNothing().when(onboardingDao)
-                .persistForUpdate(any(), any(), any(), any());
-        when(institutionService.retrieveInstitutionById(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "START - invalidate token {}"));
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.invalidateOnboarding(new Token()));
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#invalidateOnboarding(Token)}
-     */
-    @Test
-    void testInvalidateOnboarding3() {
-        doNothing().when(onboardingDao)
-                .persistForUpdate(any(), any(), any(), any());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setContractTemplate("Contract");
-        token.setCreatedAt(null);
-        token.setExpiringDate(OffsetDateTime.now().plusYears(10));
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        onboardingServiceImpl.invalidateOnboarding(token);
-        verify(onboardingDao).persistForUpdate(any(), any(), any(),
-                any());
-        verify(institutionService).retrieveInstitutionById(any());
-        assertEquals("Checksum", token.getChecksum());
-        assertTrue(token.getUsers().isEmpty());
-        assertEquals(RelationshipState.PENDING, token.getStatus());
-        assertEquals("42", token.getProductId());
-        assertEquals("42", token.getInstitutionId());
-        assertEquals("42", token.getId());
-        assertEquals("Contract", token.getContractTemplate());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#invalidateOnboarding(Token)}
-     */
-    @Test
-    void testInvalidateOnboarding4() {
-        doNothing().when(onboardingDao)
-                .persistForUpdate(any(), any(), any(), any());
-        when(institutionService.retrieveInstitutionById(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "START - invalidate token {}"));
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setContractTemplate("Contract");
-        token.setCreatedAt(null);
-        token.setExpiringDate(OffsetDateTime.now());
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.invalidateOnboarding(token));
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingReject(Token)}
-     */
-    @Test
-    void testOnboardingReject() {
-        Product product = new Product();
-        product.setContractTemplatePath("Contract Template Path");
-        product.setContractTemplateVersion("1.0.2");
-        product.setId("42");
-        product.setParentId("42");
-        product.setRoleMappings(null);
-        product.setStatus(ProductStatus.ACTIVE);
-        product.setTitle("Dr");
-        when(onboardingDao.getProductById(any())).thenReturn(product);
-        doNothing().when(onboardingDao)
-                .persistForUpdate(any(), any(), any(), any());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(contractService.getLogoFile())
-                .thenReturn(Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile());
-        doNothing().when(emailService).sendRejectMail(any(), any(), any());
-        onboardingServiceImpl.onboardingReject(new Token());
-        verify(onboardingDao).getProductById(any());
-        verify(onboardingDao).persistForUpdate(any(), any(), any(),
-                any());
-        verify(institutionService).retrieveInstitutionById(any());
-        verify(contractService).getLogoFile();
-        verify(emailService).sendRejectMail(any(), any(), any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingReject(Token)}
-     */
-    @Test
-    void testOnboardingReject2() {
-        Product product = new Product();
-        product.setContractTemplatePath("Contract Template Path");
-        product.setContractTemplateVersion("1.0.2");
-        product.setId("42");
-        product.setParentId("42");
-        product.setRoleMappings(null);
-        product.setStatus(ProductStatus.ACTIVE);
-        product.setTitle("Dr");
-        when(onboardingDao.getProductById(any())).thenReturn(product);
-        doNothing().when(onboardingDao)
-                .persistForUpdate(any(), any(), any(), any());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(contractService.getLogoFile())
-                .thenReturn(Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile());
-        doNothing().when(emailService).sendRejectMail(any(), any(), any());
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setContractTemplate("Contract");
-        token.setCreatedAt(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        onboardingServiceImpl.onboardingReject(token);
-        verify(onboardingDao).getProductById(any());
-        verify(onboardingDao).persistForUpdate(any(), any(), any(),
-                any());
-        verify(institutionService).retrieveInstitutionById(any());
-        verify(contractService).getLogoFile();
-        verify(emailService).sendRejectMail(any(), any(), any());
-        assertEquals("Checksum", token.getChecksum());
-        assertTrue(token.getUsers().isEmpty());
-        assertEquals(RelationshipState.PENDING, token.getStatus());
-        assertEquals("42", token.getProductId());
-        assertEquals("42", token.getInstitutionId());
-        assertEquals("42", token.getId());
-        assertEquals("Contract", token.getContractTemplate());
-    }
-
-    @Test
     void testOnboardingOperators() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any()))
@@ -1394,59 +1149,5 @@ class OnboardingServiceImplTest {
         verify(onboardingDao).onboardOperator(any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument() {
-        when(userRelationshipService.retrieveRelationship(any())).thenReturn(new RelationshipInfo());
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
-        verify(userRelationshipService).retrieveRelationship(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument3() {
-        Institution institution = new Institution();
-        when(userRelationshipService.retrieveRelationship(any()))
-                .thenReturn(new RelationshipInfo(institution, "42", new OnboardedProduct()));
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
-        verify(userRelationshipService).retrieveRelationship(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument4() {
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setContract("Contract");
-        onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(Env.ROOT);
-        onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRole("");
-        onboardedProduct.setRelationshipId("42");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProduct.setStatus(RelationshipState.PENDING);
-        onboardedProduct.setUpdatedAt(null);
-
-        RelationshipInfo relationshipInfo = new RelationshipInfo();
-        relationshipInfo.setOnboardedProduct(onboardedProduct);
-        when(userRelationshipService.retrieveRelationship(any())).thenReturn(relationshipInfo);
-
-        ResourceResponse resourceResponse = new ResourceResponse();
-        resourceResponse.setData("AAAAAAAA".getBytes(StandardCharsets.UTF_8));
-        resourceResponse.setFileName("foo.txt");
-        resourceResponse.setMimetype("Mimetype");
-        when(contractService.getFile(any())).thenReturn(resourceResponse);
-        assertSame(resourceResponse, onboardingServiceImpl.retrieveDocument("42"));
-        verify(userRelationshipService).retrieveRelationship(any());
-        verify(contractService).getFile(any());
-    }
-
-
 }
 

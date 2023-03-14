@@ -2,16 +2,14 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.OnboardingPage;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,12 +20,10 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.INSTITUTION_MANAGE
 public class ExternalServiceImpl implements ExternalService {
 
     private final InstitutionService institutionService;
-    private final TokenService tokenService;
     private final UserService userService;
 
-    public ExternalServiceImpl(InstitutionService institutionService, TokenService tokenService, UserService userService) {
+    public ExternalServiceImpl(InstitutionService institutionService, UserService userService) {
         this.institutionService = institutionService;
-        this.tokenService = tokenService;
         this.userService = userService;
     }
 
@@ -51,26 +47,14 @@ public class ExternalServiceImpl implements ExternalService {
     }
 
     @Override
-    public String retrieveRelationship(ProductManagerInfo manager, String productId) {
-        return tokenService.findActiveContract(manager.getInstitution().getId(), manager.getUserId(), productId);
-    }
-
-    @Override
     public Institution retrieveInstitutionProduct(String externalId, String productId) {
         return institutionService.retrieveInstitutionProduct(externalId, productId);
     }
 
     @Override
-    public OnboardingPage retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states, Pageable pageable) {
+    public List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states){
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.retrieveInstitutionProducts(institution, states, pageable);
-    }
-
-    @Override
-    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId, Pageable pageable) {
-        log.info("Retrieving geographic taxonomies for institution having externalId {}", externalId);
-        Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.retrieveInstitutionGeoTaxonomies(institution, pageable).getData();
+        return institutionService.retrieveInstitutionProducts(institution, states);
     }
 
     @Override
@@ -80,9 +64,8 @@ public class ExternalServiceImpl implements ExternalService {
                                                                   List<PartyRole> roles,
                                                                   List<RelationshipState> states,
                                                                   List<String> products,
-                                                                  List<String> productRoles,
-                                                                  Pageable pageable) {
+                                                                  List<String> productRoles) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institutionService.getUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles, pageable);
+        return institutionService.retrieveUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles);
     }
 }

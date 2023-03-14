@@ -5,7 +5,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Disabled;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -29,7 +27,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -98,14 +95,12 @@ class InstitutionControllerTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         GeographicTaxonomyPage page = new GeographicTaxonomyPage();
         page.setData(Collections.emptyList());
-        when(institutionService.retrieveInstitutionGeoTaxonomies(any(), any())).thenReturn(page);
         MockHttpServletRequestBuilder requestBuilder = get("/institutions/{id}/geotaxonomies", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     /**
@@ -476,117 +471,6 @@ class InstitutionControllerTest {
     }
 
 
-    /**
-     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List, Pageable)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts4() throws Exception {
-        OnboardingPage page = new OnboardingPage();
-        when(institutionService.retrieveInstitutionProducts(any(), any(), any()))
-                .thenReturn(page);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
-        MockMvcBuilders.standaloneSetup(institutionController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[],\"total\":null}"));
-    }
-
-    /**
-     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List, Pageable)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts5() throws Exception {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("?");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("?");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("?");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("?");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-
-        OnboardingPage page = new OnboardingPage();
-        page.setData(List.of(onboarding));
-        when(institutionService.retrieveInstitutionProducts(any(), any(), any()))
-                .thenReturn(page);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
-        MockMvcBuilders.standaloneSetup(institutionController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
-    }
-
-    /**
-     * Method under test: {@link InstitutionController#retrieveInstitutionProducts(String, List, Pageable)}
-     */
-    @Test
-    void testRetrieveInstitutionProducts6() throws Exception {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("?");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("?");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("?");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("?");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-
-        Billing billing1 = new Billing();
-        billing1.setPublicServices(true);
-        billing1.setRecipientCode("?");
-        billing1.setVatNumber("42");
-
-        Premium premium1 = new Premium();
-        premium1.setContract("?");
-        premium1.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding1 = new Onboarding();
-        onboarding1.setBilling(billing1);
-        onboarding1.setContract("?");
-        onboarding1.setCreatedAt(null);
-        onboarding1.setPricingPlan("?");
-        onboarding1.setProductId("42");
-        onboarding1.setStatus(RelationshipState.PENDING);
-        onboarding1.setUpdatedAt(null);
-
-        OnboardingPage page = new OnboardingPage();
-        page.setData(List.of(onboarding, onboarding1));
-        when(institutionService.retrieveInstitutionProducts(any(), any(), any()))
-                .thenReturn(page);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
-        MockMvcBuilders.standaloneSetup(institutionController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"},{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
-    }
-
     @Test
     @Disabled
     void createPgInstitutionTest() throws Exception {
@@ -605,27 +489,5 @@ class InstitutionControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isCreated());
-    }
-
-    @Test
-    @Disabled
-    void TestUpdateInstitution() throws Exception {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/institutions/{id}", "42")
-                .content("{\"geographicTaxonomyCodes\":[\"1\",\"2\"]}")
-                .contentType(MediaType.APPLICATION_JSON)
-                .principal(authentication);
-
-        when(institutionService.updateInstitution(anyString(), any(), any())).thenReturn(new Institution());
-
-        MockMvcBuilders.standaloneSetup(institutionController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
     }
 }
