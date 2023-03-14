@@ -21,9 +21,6 @@
         <module>app</module>
     </modules>
 
-
-
-
     <properties>
         <selc-commons.version>2.4.4</selc-commons.version>
     </properties>

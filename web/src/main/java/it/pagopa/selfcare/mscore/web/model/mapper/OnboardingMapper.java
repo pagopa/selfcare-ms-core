@@ -1,80 +1,67 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import it.pagopa.selfcare.mscore.model.UserToOnboard;
-import it.pagopa.selfcare.mscore.model.Contract;
-import it.pagopa.selfcare.mscore.model.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
-import it.pagopa.selfcare.mscore.web.model.user.Person;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.*;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
 
     public static OnboardingRequest toOnboardingRequest(OnboardingInstitutionRequest onboardingInstitutionRequest) {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setProductId(onboardingInstitutionRequest.getProductId());
         onboardingRequest.setProductName(onboardingInstitutionRequest.getProductName());
         onboardingRequest.setInstitutionExternalId(onboardingInstitutionRequest.getInstitutionExternalId());
         onboardingRequest.setPricingPlan(onboardingInstitutionRequest.getPricingPlan());
 
         if (onboardingInstitutionRequest.getBilling() != null)
-            onboardingRequest.setBillingRequest(convertToBilling(onboardingInstitutionRequest.getBilling()));
+            onboardingRequest.setBillingRequest(InstitutionMapper.toBilling(onboardingInstitutionRequest.getBilling()));
         if (onboardingInstitutionRequest.getContract() != null)
-            onboardingRequest.setContract(convertToContract(onboardingInstitutionRequest.getContract()));
+            onboardingRequest.setContract(toContract(onboardingInstitutionRequest.getContract()));
         if (onboardingInstitutionRequest.getUsers() != null)
-            onboardingRequest.setUsers(convertToOnboarderUser(onboardingInstitutionRequest.getUsers()));
+            onboardingRequest.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionRequest.getUsers()));
         if (onboardingInstitutionRequest.getInstitutionUpdate() != null)
-            onboardingRequest.setInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate());
+            onboardingRequest.setInstitutionUpdate(toInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate()));
 
         return onboardingRequest;
     }
 
-    private static Contract convertToContract(ContractRequest request) {
+    private static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request){
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setInstitutionType(request.getInstitutionType());
+        institutionUpdate.setDescription(request.getDescription());
+        institutionUpdate.setDigitalAddress(request.getDigitalAddress());
+        institutionUpdate.setAddress(request.getAddress());
+        institutionUpdate.setTaxCode(request.getTaxCode());
+        institutionUpdate.setZipCode(request.getZipCode());
+        institutionUpdate.setPaymentServiceProvider(toPaymentServiceProvider(request.getPaymentServiceProvider()));
+        institutionUpdate.setDataProtectionOfficer(toDataProtectionOfficer(request.getDataProtectionOfficer()));
+        institutionUpdate.setGeographicTaxonomies(request.getGeographicTaxonomyCodes().stream()
+                .map(s -> new InstitutionGeographicTaxonomies(s,null)).collect(Collectors.toList()));
+        institutionUpdate.setRea(institutionUpdate.getRea());
+        institutionUpdate.setShareCapital(institutionUpdate.getShareCapital());
+        institutionUpdate.setBusinessRegisterPlace(institutionUpdate.getBusinessRegisterPlace());
+        institutionUpdate.setSupportEmail(institutionUpdate.getSupportEmail());
+        institutionUpdate.setSupportPhone(institutionUpdate.getSupportPhone());
+        institutionUpdate.setImported(request.isImported());
+        return institutionUpdate;
+    }
+
+    private static Contract toContract(ContractRequest request) {
         Contract contract = new Contract();
         contract.setPath(request.getPath());
         contract.setVersion(request.getVersion());
         return contract;
-    }
-
-    private static List<UserToOnboard> convertToOnboarderUser(List<Person> personList) {
-        List<UserToOnboard> users = new ArrayList<>();
-        if (!personList.isEmpty()) {
-            for (Person p : personList) {
-                UserToOnboard userToOnboard = new UserToOnboard();
-                userToOnboard.setId(p.getId());
-                userToOnboard.setName(p.getName());
-                userToOnboard.setSurname(p.getSurname());
-                userToOnboard.setTaxCode(p.getTaxCode());
-                userToOnboard.setEmail(p.getEmail());
-                userToOnboard.setRole(p.getRole());
-                if (p.getProductRole() != null) {
-                    userToOnboard.setProductRole(List.of(p.getProductRole()));
-                }
-                userToOnboard.setEnv(p.getEnv());
-                users.add(userToOnboard);
-            }
-        }
-        return users;
-    }
-
-    private static Billing convertToBilling(BillingRequest billingRequest) {
-        Billing billing = new Billing();
-        billing.setRecipientCode(billingRequest.getRecipientCode());
-        billing.setVatNumber(billingRequest.getVatNumber());
-        billing.setPublicServices(billing.isPublicServices());
-        return billing;
     }
 
     public static OnboardingInfoResponse toOnboardingInfoResponse(String userId, List<OnboardingInfo> onboardingInfos) {
@@ -99,64 +86,47 @@ public class OnboardingMapper {
         OnboardedInstitutionResponse institutionResponse = new OnboardedInstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setOriginId(institution.getIpaCode());
+        institutionResponse.setOriginId(institution.getOriginId());
         institutionResponse.setDescription(institution.getDescription());
         institutionResponse.setInstitutionType(institution.getInstitutionType());
         institutionResponse.setDigitalAddress(institution.getDigitalAddress());
         institutionResponse.setAddress(institution.getAddress());
         institutionResponse.setZipCode(institution.getZipCode());
         institutionResponse.setTaxCode(institution.getTaxCode());
-        institutionResponse.setGeographicTaxonomies(convertToGeoTaxonomies(institution.getGeographicTaxonomies()));
-        institutionResponse.setAttributes(convertToAttributesResponse(institution.getAttributes()));
+        institutionResponse.setGeographicTaxonomies(InstitutionMapper.toGeoTaxonomies(institution.getGeographicTaxonomies()));
+        institutionResponse.setAttributes(InstitutionMapper.toAttributeResponse(institution.getAttributes()));
         institutionResponse.setPricingPlan(onboarding.getPricingPlan());
-        Billing billing = getBillingFromOnboarding(onboarding, institution);
+        Billing billing = InstitutionMapper.getBillingFromOnboarding(onboarding, institution);
         institutionResponse.setBilling(billing);
         ProductInfo productInfo = new ProductInfo();
-        productInfo.setRoles(product.getProductRoles());
+        productInfo.setRole(product.getProductRole());
         productInfo.setId(product.getProductId());
         productInfo.setCreatedAt(product.getCreatedAt());
         institutionResponse.setState(product.getStatus().name());
         institutionResponse.setRole(product.getRole());
         institutionResponse.setProductInfo(productInfo);
-        institutionResponse.setRea(institution.getRea());
-        institutionResponse.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
-        institutionResponse.setShareCapital(institution.getShareCapital());
-        institutionResponse.setSupportEmail(institution.getSupportEmail());
-        institutionResponse.setSupportPhone(institution.getSupportPhone());
+        institutionResponse.setBusinessData(new BusinessData(institution.getRea(), institution.getShareCapital(), institution.getBusinessRegisterPlace()));
+        institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail(), institution.getSupportPhone()));
         return institutionResponse;
     }
-
-    private static Billing getBillingFromOnboarding(Onboarding onboarding, Institution institution) {
-        return onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling();
+    public static OnboardingOperatorsRequest toOnboardingOperatorRequest(OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
+        OnboardingOperatorsRequest request = new OnboardingOperatorsRequest();
+        request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());
+        request.setProductId(onboardingInstitutionOperatorsRequest.getProductId());
+        request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionOperatorsRequest.getUsers()));
+        return request;
     }
 
-    private static List<AttributesResponse> convertToAttributesResponse(List<Attributes> attributesList) {
-        if (attributesList == null) {
-            return Collections.emptyList();
-        }
-
-        return attributesList.stream()
-                .map((attribute -> {
-                            AttributesResponse response = new AttributesResponse();
-                            response.setCode(attribute.getCode());
-                            response.setOrigin(attribute.getOrigin());
-                            response.setDescription(attribute.getDescription());
-                            return response;
-                        })
-                ).collect(Collectors.toList());
-    }
-
-    private static List<GeoTaxonomies> convertToGeoTaxonomies(List<GeographicTaxonomies> geographicTaxonomies) {
-        if (geographicTaxonomies == null) {
-            return Collections.emptyList();
-        }
-
-        return geographicTaxonomies.stream()
-                .map(geo -> {
-                    GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
-                    geoTaxonomies.setCode(geo.getCode());
-                    geoTaxonomies.setDesc(geo.getDesc());
-                    return geoTaxonomies;
-                }).collect(Collectors.toList());
+    public static OnboardingLegalsRequest toOnboardingLegalsRequest(OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest) {
+        OnboardingLegalsRequest request = new OnboardingLegalsRequest();
+        request.setTokenType(TokenType.LEGALS);
+        request.setProductId(onboardingInstitutionLegalsRequest.getProductId());
+        request.setProductName(onboardingInstitutionLegalsRequest.getProductName());
+        request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionLegalsRequest.getUsers()));
+        request.setInstitutionExternalId(onboardingInstitutionLegalsRequest.getInstitutionExternalId());
+        request.setInstitutionId(onboardingInstitutionLegalsRequest.getInstitutionId());
+        request.setContract(toContract(onboardingInstitutionLegalsRequest.getContract()));
+        request.setSignContract(onboardingInstitutionLegalsRequest.isSignContract());
+        return request;
     }
 }

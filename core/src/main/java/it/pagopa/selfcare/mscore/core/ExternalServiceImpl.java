@@ -1,19 +1,21 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.UserBinding;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.OnboardingPage;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.INSTITUTION_MANAGER_ERROR;
+import java.util.List;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INSTITUTION_MANAGER_ERROR;
 
 @Service
 @Slf4j
@@ -22,13 +24,11 @@ public class ExternalServiceImpl implements ExternalService {
     private final InstitutionService institutionService;
     private final TokenService tokenService;
     private final UserService userService;
-    private final GeoTaxonomiesConnector geoTaxonomiesConnector;
 
-    public ExternalServiceImpl(InstitutionService institutionService, TokenService tokenService, UserService userService, GeoTaxonomiesConnector geoTaxonomiesConnector) {
+    public ExternalServiceImpl(InstitutionService institutionService, TokenService tokenService, UserService userService) {
         this.institutionService = institutionService;
         this.tokenService = tokenService;
         this.userService = userService;
-        this.geoTaxonomiesConnector = geoTaxonomiesConnector;
     }
 
     @Override
@@ -57,16 +57,32 @@ public class ExternalServiceImpl implements ExternalService {
 
     @Override
     public Institution retrieveInstitutionProduct(String externalId, String productId) {
-        return institutionService.getInstitutionProduct(externalId, productId);
+        return institutionService.retrieveInstitutionProduct(externalId, productId);
     }
 
     @Override
-    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId) {
+    public OnboardingPage retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states, Pageable pageable) {
+        Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
+        return institutionService.retrieveInstitutionProducts(institution, states, pageable);
+    }
+
+    @Override
+    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId, Pageable pageable) {
         log.info("Retrieving geographic taxonomies for institution having externalId {}", externalId);
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return institution.getGeographicTaxonomies().stream()
-                .map(GeographicTaxonomies::getCode)
-                .map(geoTaxonomiesConnector::getExtByCode)
-                .collect(Collectors.toList());
+        return institutionService.retrieveInstitutionGeoTaxonomies(institution, pageable).getData();
+    }
+
+    @Override
+    public List<RelationshipInfo> getUserInstitutionRelationships(String externalId,
+                                                                  String userId,
+                                                                  String personId,
+                                                                  List<PartyRole> roles,
+                                                                  List<RelationshipState> states,
+                                                                  List<String> products,
+                                                                  List<String> productRoles,
+                                                                  Pageable pageable) {
+        Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
+        return institutionService.getUserInstitutionRelationships(institution, userId, personId, roles, states, products, productRoles, pageable);
     }
 }

@@ -1,12 +1,14 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.Data;
 
 @Data
 public class InstitutionBillingResponse {
     private String institutionId;
     private String externalId;
+    private Origin origin;
     private String originId;
     private String description;
     private InstitutionType institutionType;

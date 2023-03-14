@@ -1,78 +1,141 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.Premium;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.Token;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
+import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import org.junit.jupiter.api.Test;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RelationshipMapperTest {
 
     /**
-     * Method under test: {@link RelationshipMapper#toRelationshipResponse(Token, Institution)}
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(Token, Institution)}
      */
     @Test
-    void testToRelationshipResponse4() {
+    void testToRelationshipResult2() {
         Token token = new Token();
-
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-        geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
-        geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
-
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
-        geographicTaxonomiesList.add(geographicTaxonomies);
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-
-        Institution institution = new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                geographicTaxonomies1, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
-        institution.setGeographicTaxonomies(geographicTaxonomiesList);
-        assertThrows(InvalidRequestException.class, () -> RelationshipMapper.toRelationshipResponse(token, institution));
+        token.setChecksum("Checksum");
+        token.setContractTemplate("Contract");
+        token.setCreatedAt(null);
+        token.setExpiringDate(OffsetDateTime.now());
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+        RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token, null);
+        assertNull(actualToRelationshipResultResult.getUpdatedAt());
+        assertEquals(RelationshipState.PENDING, actualToRelationshipResultResult.getState());
+        assertEquals("42", actualToRelationshipResultResult.getProduct());
+        assertEquals("42", actualToRelationshipResultResult.getId());
+        assertNull(actualToRelationshipResultResult.getCreatedAt());
     }
 
     /**
-     * Method under test: {@link RelationshipMapper#toRelationshipResponse(Token, Institution)}
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(Token, Institution)}
      */
     @Test
-    void testToRelationshipResponse6() {
+    void testToRelationshipResult3() {
         Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setContractTemplate("Contract");
+        token.setCreatedAt(null);
+        token.setExpiringDate(OffsetDateTime.now());
+        token.setId("42");
+        token.setInstitutionId("42");
         token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
 
-        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-        geographicTaxonomies.setCode("Code");
-        geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
-        geographicTaxonomies.setDesc("The characteristics of someone or something");
-        geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
+        Institution institution = new Institution();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
+                institution);
+        assertNull(actualToRelationshipResultResult.getUpdatedAt());
+        assertNull(actualToRelationshipResultResult.getTo());
+        assertEquals(RelationshipState.PENDING, actualToRelationshipResultResult.getState());
+        assertEquals("42", actualToRelationshipResultResult.getProduct());
+        assertEquals("42", actualToRelationshipResultResult.getId());
+        assertNull(actualToRelationshipResultResult.getCreatedAt());
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
+        assertNull(institutionUpdate.getTaxCode());
+        assertNull(institutionUpdate.getSupportPhone());
+        assertNull(institutionUpdate.getSupportEmail());
+        assertNull(institutionUpdate.getShareCapital());
+        assertNull(institutionUpdate.getRea());
+        assertNull(institutionUpdate.getPaymentServiceProvider());
+        assertNull(institutionUpdate.getInstitutionType());
+        assertNull(institutionUpdate.getDigitalAddress());
+        assertNull(institutionUpdate.getDescription());
+        assertNull(institutionUpdate.getDataProtectionOfficer());
+        assertNull(institutionUpdate.getBusinessRegisterPlace());
+        assertNull(institutionUpdate.getAddress());
+        assertNull(institutionUpdate.getZipCode());
+    }
 
-        ArrayList<GeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
-        geographicTaxonomiesList.add(geographicTaxonomies);
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(Token, Institution)}
+     */
+    @Test
+    void testToRelationshipResult4() {
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setContractTemplate("Contract");
+        token.setCreatedAt(null);
+        token.setExpiringDate(OffsetDateTime.now());
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        assertThrows(InvalidRequestException.class,
+                () -> RelationshipMapper.toRelationshipResult(token,
+                        new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
+                                "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies,
+                                attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea", "Share Capital",
+                                "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now())));
+    }
+
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(Token, Institution)}
+     */
+    @Test
+    void testToRelationshipResult5() {
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setContractTemplate("Contract");
+        token.setCreatedAt(null);
+        token.setExpiringDate(OffsetDateTime.now());
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -87,7 +150,6 @@ class RelationshipMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -96,52 +158,53 @@ class RelationshipMapperTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
         Billing billing1 = new Billing();
-        ArrayList<GeographicTaxonomies> geographicTaxonomies1 = new ArrayList<>();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-
-        Institution institution = new Institution("42", "42", "Ipa Code", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList,
-                geographicTaxonomies1, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "4105551212", true);
-        institution.setGeographicTaxonomies(geographicTaxonomiesList);
-        RelationshipResponse actualToRelationshipResponseResult = RelationshipMapper.toRelationshipResponse(token,
-                institution);
-        assertNull(actualToRelationshipResponseResult.getUpdatedAt());
-        assertNull(actualToRelationshipResponseResult.getCreatedAt());
-        assertNull(actualToRelationshipResponseResult.getId());
-        assertEquals("42", actualToRelationshipResponseResult.getTo());
-        assertNull(actualToRelationshipResponseResult.getState());
-        assertEquals("42", actualToRelationshipResponseResult.getProduct());
-        assertNull(actualToRelationshipResponseResult.getFrom());
-        assertEquals("Pricing Plan", actualToRelationshipResponseResult.getPricingPlan());
-        InstitutionUpdate institutionUpdate = actualToRelationshipResponseResult.getInstitutionUpdate();
+        RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
+                new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
+                        "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList, geographicTaxonomies,
+                        attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea", "Share Capital",
+                        "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now()));
+        assertNull(actualToRelationshipResultResult.getUpdatedAt());
+        assertNull(actualToRelationshipResultResult.getCreatedAt());
+        assertEquals("42", actualToRelationshipResultResult.getId());
+        assertEquals("42", actualToRelationshipResultResult.getTo());
+        assertEquals(RelationshipState.PENDING, actualToRelationshipResultResult.getState());
+        assertEquals("42", actualToRelationshipResultResult.getProduct());
+        assertEquals("Pricing Plan", actualToRelationshipResultResult.getPricingPlan());
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
         assertEquals("Tax Code", institutionUpdate.getTaxCode());
-        assertEquals("4105551212", institutionUpdate.getSupportPhone());
-        assertEquals("jane.doe@example.org", institutionUpdate.getSupportEmail());
-        assertEquals("Share Capital", institutionUpdate.getShareCapital());
-        assertEquals("Rea", institutionUpdate.getRea());
-        assertSame(paymentServiceProvider, institutionUpdate.getPaymentServiceProvider());
         assertEquals(InstitutionType.PA, institutionUpdate.getInstitutionType());
-        BillingResponse billingResponse = actualToRelationshipResponseResult.getBillingResponse();
+        BillingResponse billingResponse = actualToRelationshipResultResult.getBillingResponse();
         assertTrue(billingResponse.isPublicServices());
         assertEquals("Recipient Code", billingResponse.getRecipientCode());
-        assertEquals("Business Register Place", institutionUpdate.getBusinessRegisterPlace());
         assertSame(dataProtectionOfficer, institutionUpdate.getDataProtectionOfficer());
         assertEquals("42", billingResponse.getVatNumber());
         assertEquals("The characteristics of someone or something", institutionUpdate.getDescription());
         assertEquals("42 Main St", institutionUpdate.getDigitalAddress());
         assertEquals("21654", institutionUpdate.getZipCode());
-        assertEquals(1, institutionUpdate.getGeographicTaxonomyCodes().size());
         assertEquals("42 Main St", institutionUpdate.getAddress());
     }
 
     /**
-     * Method under test: {@link RelationshipMapper#toBillingResponse(Onboarding, Institution)}
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(Token, Institution)}
      */
     @Test
-    void testToBillingResponse() {
+    void testToRelationshipResult6() {
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setContractTemplate("Contract");
+        token.setCreatedAt(null);
+        token.setExpiringDate(OffsetDateTime.now());
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+
         Billing billing = new Billing();
         billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
@@ -155,24 +218,168 @@ class RelationshipMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
-        BillingResponse actualToBillingResponseResult = RelationshipMapper.toBillingResponse(onboarding, new Institution());
-        assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
-        assertTrue(actualToBillingResponseResult.isPublicServices());
-        assertEquals("42", actualToBillingResponseResult.getVatNumber());
+
+        Billing billing1 = new Billing();
+        billing1.setPublicServices(true);
+        billing1.setRecipientCode("Recipient Code");
+        billing1.setVatNumber("42");
+
+        Premium premium1 = new Premium();
+        premium1.setContract("Contract");
+        premium1.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding1 = new Onboarding();
+        onboarding1.setBilling(billing1);
+        onboarding1.setContract("Contract");
+        onboarding1.setCreatedAt(null);
+        onboarding1.setPricingPlan("Pricing Plan");
+        onboarding1.setProductId("Product Id");
+        onboarding1.setStatus(RelationshipState.PENDING);
+        onboarding1.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding1);
+        onboardingList.add(onboarding);
+        Billing billing2 = new Billing();
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        RelationshipResponse actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(token,
+                new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something", InstitutionType.PA,
+                        "42 Main St", "42 Main St", "21654", "Tax Code", billing2, onboardingList, geographicTaxonomies,
+                        attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea", "Share Capital",
+                        "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now()));
+        assertNull(actualToRelationshipResultResult.getUpdatedAt());
+        assertNull(actualToRelationshipResultResult.getCreatedAt());
+        assertEquals("42", actualToRelationshipResultResult.getId());
+        assertEquals("42", actualToRelationshipResultResult.getTo());
+        assertEquals(RelationshipState.PENDING, actualToRelationshipResultResult.getState());
+        assertEquals("42", actualToRelationshipResultResult.getProduct());
+        assertEquals("Pricing Plan", actualToRelationshipResultResult.getPricingPlan());
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
+        assertEquals("Tax Code", institutionUpdate.getTaxCode());
+        assertSame(paymentServiceProvider, institutionUpdate.getPaymentServiceProvider());
+        assertEquals(InstitutionType.PA, institutionUpdate.getInstitutionType());
+        BillingResponse billingResponse = actualToRelationshipResultResult.getBillingResponse();
+        assertTrue(billingResponse.isPublicServices());
+        assertEquals("Recipient Code", billingResponse.getRecipientCode());
+        assertSame(dataProtectionOfficer, institutionUpdate.getDataProtectionOfficer());
+        assertEquals("42", billingResponse.getVatNumber());
+        assertEquals("The characteristics of someone or something", institutionUpdate.getDescription());
+        assertEquals("42 Main St", institutionUpdate.getDigitalAddress());
+        assertEquals("21654", institutionUpdate.getZipCode());
+        assertEquals("42 Main St", institutionUpdate.getAddress());
+    }
+
+
+    @Test
+    void testToRelationshipResult12() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
+
+        Institution institution = new Institution();
+        institution.setOnboarding(new ArrayList<>());
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        Institution institution1 = new Institution();
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(institution1, "42", new OnboardedProduct());
+        relationshipInfo.setInstitution(institution);
+        RelationshipResult actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(relationshipInfo);
+        assertNull(actualToRelationshipResultResult.getTo());
+        assertNull(actualToRelationshipResultResult.getState());
+        assertNull(actualToRelationshipResultResult.getRole());
+        assertNull(actualToRelationshipResultResult.getId());
+        assertEquals("42", actualToRelationshipResultResult.getFrom());
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
+        assertNull(institutionUpdate.getZipCode());
+        assertNull(institutionUpdate.getTaxCode());
+        assertNull(institutionUpdate.getSupportPhone());
+        assertNull(institutionUpdate.getSupportEmail());
+        assertNull(institutionUpdate.getShareCapital());
+        assertNull(institutionUpdate.getRea());
+        assertNull(institutionUpdate.getPaymentServiceProvider());
+        assertNull(institutionUpdate.getInstitutionType());
+        assertEquals(1, institutionUpdate.getGeographicTaxonomyCodes().size());
+        assertNull(institutionUpdate.getDigitalAddress());
+        assertNull(institutionUpdate.getDescription());
+        assertNull(institutionUpdate.getDataProtectionOfficer());
+        assertNull(institutionUpdate.getBusinessRegisterPlace());
+        assertNull(institutionUpdate.getAddress());
+        ProductInfo product = actualToRelationshipResultResult.getProduct();
+        assertNull(product.getId());
+        assertNull(product.getCreatedAt());
     }
 
     /**
-     * Method under test: {@link RelationshipMapper#toBillingResponse(Onboarding, Institution)}
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(RelationshipInfo)}
      */
     @Test
-    void testToBillingResponse2() {
+    void testToRelationshipResult13() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
         Billing billing = new Billing();
-        billing.setPublicServices(false);
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+
+        Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
+                geographicTaxonomiesList, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
+                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now());
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        Institution institution1 = new Institution();
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(institution1, "42", new OnboardedProduct());
+        relationshipInfo.setInstitution(institution);
+        RelationshipResult actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(relationshipInfo);
+        assertEquals("42", actualToRelationshipResultResult.getTo());
+        assertNull(actualToRelationshipResultResult.getState());
+        assertNull(actualToRelationshipResultResult.getRole());
+        assertNull(actualToRelationshipResultResult.getId());
+        assertEquals("42", actualToRelationshipResultResult.getFrom());
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
+        assertEquals("21654", institutionUpdate.getZipCode());
+        assertEquals("Tax Code", institutionUpdate.getTaxCode());
+        assertSame(paymentServiceProvider, institutionUpdate.getPaymentServiceProvider());
+        assertEquals(InstitutionType.PA, institutionUpdate.getInstitutionType());
+        ProductInfo product = actualToRelationshipResultResult.getProduct();
+        assertNull(product.getCreatedAt());
+        assertEquals("The characteristics of someone or something", institutionUpdate.getDescription());
+        assertEquals("42 Main St", institutionUpdate.getDigitalAddress());
+        assertEquals("42 Main St", institutionUpdate.getAddress());
+        assertEquals(1, institutionUpdate.getGeographicTaxonomyCodes().size());
+        assertNull(product.getId());
+        assertSame(dataProtectionOfficer, institutionUpdate.getDataProtectionOfficer());
+    }
+
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(RelationshipInfo)}
+     */
+    @Test
+    void testToRelationshipResult14() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
         billing.setVatNumber("42");
 
@@ -184,22 +391,60 @@ class RelationshipMapperTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
-        BillingResponse actualToBillingResponseResult = RelationshipMapper.toBillingResponse(onboarding,
-                new Institution());
-        assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
-        assertFalse(actualToBillingResponseResult.isPublicServices());
-        assertEquals("42", actualToBillingResponseResult.getVatNumber());
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution institution = new Institution();
+        institution.setOnboarding(onboardingList);
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        Institution institution1 = new Institution();
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(institution1, "42", new OnboardedProduct());
+        relationshipInfo.setInstitution(institution);
+        RelationshipResult actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(relationshipInfo);
+        assertNull(actualToRelationshipResultResult.getTo());
+        assertNull(actualToRelationshipResultResult.getState());
+        assertNull(actualToRelationshipResultResult.getRole());
+        assertNull(actualToRelationshipResultResult.getId());
+        assertEquals("42", actualToRelationshipResultResult.getFrom());
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
+        assertNull(institutionUpdate.getZipCode());
+        assertNull(institutionUpdate.getTaxCode());
+        assertNull(institutionUpdate.getSupportPhone());
+        assertNull(institutionUpdate.getSupportEmail());
+        assertNull(institutionUpdate.getShareCapital());
+        assertNull(institutionUpdate.getRea());
+        assertNull(institutionUpdate.getPaymentServiceProvider());
+        assertNull(institutionUpdate.getInstitutionType());
+        assertEquals(1, institutionUpdate.getGeographicTaxonomyCodes().size());
+        assertNull(institutionUpdate.getDigitalAddress());
+        assertNull(institutionUpdate.getDescription());
+        assertNull(institutionUpdate.getDataProtectionOfficer());
+        assertNull(institutionUpdate.getBusinessRegisterPlace());
+        assertNull(institutionUpdate.getAddress());
+        ProductInfo product = actualToRelationshipResultResult.getProduct();
+        assertNull(product.getId());
+        assertNull(product.getCreatedAt());
     }
 
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResult(RelationshipInfo)}
+     */
     @Test
-    void testToBillingResponse3() {
+    void testToRelationshipResult15() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
+
         Billing billing = new Billing();
-        billing.setPublicServices(false);
+        billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
         billing.setVatNumber("42");
 
@@ -208,18 +453,218 @@ class RelationshipMapperTest {
         premium.setStatus(RelationshipState.PENDING);
 
         Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
-        Institution institution = new Institution();
-        institution.setBilling(billing);
-        BillingResponse actualToBillingResponseResult = RelationshipMapper.toBillingResponse(onboarding,
-                institution);
-        assertFalse(actualToBillingResponseResult.isPublicServices());
-    }
-}
 
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution institution = new Institution();
+        institution.setOnboarding(onboardingList);
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("42");
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(new Institution(), "42", onboardedProduct);
+        relationshipInfo.setInstitution(institution);
+        RelationshipResult actualToRelationshipResultResult = RelationshipMapper.toRelationshipResult(relationshipInfo);
+        assertNull(actualToRelationshipResultResult.getId());
+        assertNull(actualToRelationshipResultResult.getRole());
+        assertNull(actualToRelationshipResultResult.getTo());
+        assertNull(actualToRelationshipResultResult.getState());
+        assertEquals("42", actualToRelationshipResultResult.getFrom());
+        assertEquals("Pricing Plan", actualToRelationshipResultResult.getPricingPlan());
+        ProductInfo product = actualToRelationshipResultResult.getProduct();
+        assertEquals("42", product.getId());
+        assertNull(product.getCreatedAt());
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
+        assertNull(institutionUpdate.getZipCode());
+        assertNull(institutionUpdate.getTaxCode());
+        assertNull(institutionUpdate.getSupportPhone());
+        assertNull(institutionUpdate.getSupportEmail());
+        assertNull(institutionUpdate.getShareCapital());
+        assertNull(institutionUpdate.getRea());
+        assertNull(institutionUpdate.getPaymentServiceProvider());
+        assertNull(institutionUpdate.getInstitutionType());
+        assertEquals(1, institutionUpdate.getGeographicTaxonomyCodes().size());
+        assertNull(institutionUpdate.getDigitalAddress());
+        assertNull(institutionUpdate.getDescription());
+        assertNull(institutionUpdate.getDataProtectionOfficer());
+        assertNull(institutionUpdate.getBusinessRegisterPlace());
+        assertNull(institutionUpdate.getAddress());
+        BillingResponse billing1 = actualToRelationshipResultResult.getBilling();
+        assertEquals("42", billing1.getVatNumber());
+        assertEquals("Recipient Code", billing1.getRecipientCode());
+        assertTrue(billing1.isPublicServices());
+    }
+
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResultList(List)}
+     */
+    @Test
+    void testToRelationshipResultList() {
+        assertTrue(RelationshipMapper.toRelationshipResultList(new ArrayList<>()).isEmpty());
+    }
+
+
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResultList(List)}
+     */
+    @Test
+    void testToRelationshipResultList6() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
+
+        Institution institution = new Institution();
+        institution.setOnboarding(new ArrayList<>());
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        Institution institution1 = new Institution();
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(institution1, "42", new OnboardedProduct());
+        relationshipInfo.setInstitution(institution);
+
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        relationshipInfoList.add(relationshipInfo);
+        assertEquals(1, RelationshipMapper.toRelationshipResultList(relationshipInfoList).size());
+        assertFalse(relationshipInfoList.get(0).getInstitution().isImported());
+    }
+
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResultList(List)}
+     */
+    @Test
+    void testToRelationshipResultList7() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+
+        Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
+                geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
+                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now());
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        Institution institution1 = new Institution();
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(institution1, "42", new OnboardedProduct());
+        relationshipInfo.setInstitution(institution);
+
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        relationshipInfoList.add(relationshipInfo);
+        assertEquals(1, RelationshipMapper.toRelationshipResultList(relationshipInfoList).size());
+        assertTrue(relationshipInfoList.get(0).getInstitution().isImported());
+    }
+
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResultList(List)}
+     */
+    @Test
+    void testToRelationshipResultList8() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution institution = new Institution();
+        institution.setOnboarding(onboardingList);
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        Institution institution1 = new Institution();
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(institution1, "42", new OnboardedProduct());
+        relationshipInfo.setInstitution(institution);
+
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        relationshipInfoList.add(relationshipInfo);
+        assertEquals(1, RelationshipMapper.toRelationshipResultList(relationshipInfoList).size());
+        assertFalse(relationshipInfoList.get(0).getInstitution().isImported());
+    }
+
+    /**
+     * Method under test: {@link RelationshipMapper#toRelationshipResultList(List)}
+     */
+    @Test
+    void testToRelationshipResultList9() {
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setDesc("The characteristics of someone or something");
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
+        geographicTaxonomiesList.add(geographicTaxonomies);
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Premium premium = new Premium();
+        premium.setContract("Contract");
+        premium.setStatus(RelationshipState.PENDING);
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setUpdatedAt(null);
+
+        ArrayList<Onboarding> onboardingList = new ArrayList<>();
+        onboardingList.add(onboarding);
+
+        Institution institution = new Institution();
+        institution.setOnboarding(onboardingList);
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("42");
+
+        RelationshipInfo relationshipInfo = new RelationshipInfo(new Institution(), "42", onboardedProduct);
+        relationshipInfo.setInstitution(institution);
+
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        relationshipInfoList.add(relationshipInfo);
+        assertEquals(1, RelationshipMapper.toRelationshipResultList(relationshipInfoList).size());
+        assertFalse(relationshipInfoList.get(0).getInstitution().isImported());
+    }
+
+}

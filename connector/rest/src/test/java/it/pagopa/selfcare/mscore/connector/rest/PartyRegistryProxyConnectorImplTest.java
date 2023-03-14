@@ -1,15 +1,17 @@
 package it.pagopa.selfcare.mscore.connector.rest;
 
+import feign.FeignException;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.Institutions;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -122,6 +124,15 @@ class PartyRegistryProxyConnectorImplTest {
         verify(partyRegistryProxyRestClient).getInstitutionById(any());
     }
 
+    @Test
+    void testGetInstitutionById5() {
+        FeignException feignException = mock(FeignException.class);
+        when(partyRegistryProxyRestClient.getInstitutionById(any()))
+                .thenThrow(feignException);
+        assertThrows(MsCoreException.class, () -> partyRegistryProxyConnectorImpl.getInstitutionById("42"));
+        verify(partyRegistryProxyRestClient).getInstitutionById(any());
+    }
+
     /**
      * Method under test: {@link PartyRegistryProxyConnectorImpl#getCategory(String, String)}
      */
@@ -181,6 +192,15 @@ class PartyRegistryProxyConnectorImplTest {
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class,
                 () -> partyRegistryProxyConnectorImpl.getCategory("Origin", "Code"));
+        verify(partyRegistryProxyRestClient).getCategory(any(), any());
+    }
+
+    @Test
+    void testGetCategory5() {
+        FeignException feignException = mock(FeignException.class);
+        when(partyRegistryProxyRestClient.getCategory(any(), any()))
+                .thenThrow(feignException);
+        assertThrows(MsCoreException.class, () -> partyRegistryProxyConnectorImpl.getCategory("origin","code"));
         verify(partyRegistryProxyRestClient).getCategory(any(), any());
     }
 
@@ -356,6 +376,23 @@ class PartyRegistryProxyConnectorImplTest {
         verify(partyRegistryProxyRestClient).getInstitutionsByLegal(any());
     }
 
+    @Test
+    void testGetInstitutionsByLegal9() {
+        FeignException feignException = mock(FeignException.class);
+        when(partyRegistryProxyRestClient.getInstitutionsByLegal(any()))
+                .thenThrow(feignException);
+        assertThrows(MsCoreException.class, () -> partyRegistryProxyConnectorImpl.getInstitutionsByLegal("42"));
+        verify(partyRegistryProxyRestClient).getInstitutionsByLegal(any());
+    }
+
+    @Test
+    void testGetInstitutionsByLegal10() {
+        InstitutionsByLegalResponse response = new InstitutionsByLegalResponse();
+        when(partyRegistryProxyRestClient.getInstitutionsByLegal(any())).thenReturn(response);
+        assertNotNull(partyRegistryProxyConnectorImpl.getInstitutionsByLegal("42"));
+    }
+
+
     /**
      * Method under test: {@link PartyRegistryProxyConnectorImpl#getLegalAddress(String)}
      */
@@ -381,6 +418,15 @@ class PartyRegistryProxyConnectorImplTest {
         when(partyRegistryProxyRestClient.getLegalAddress(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getLegalAddress("id"));
+    }
+
+    @Test
+    void testGetLegalAddress3() {
+        FeignException feignException = mock(FeignException.class);
+        when(partyRegistryProxyRestClient.getLegalAddress(any()))
+                .thenThrow(feignException);
+        assertThrows(MsCoreException.class, () -> partyRegistryProxyConnectorImpl.getLegalAddress("42"));
+        verify(partyRegistryProxyRestClient).getLegalAddress(any());
     }
 
     @Test

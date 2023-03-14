@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class OnboardedProducts {
-
-    List<InstitutionProduct> products;
-
+    private List<InstitutionProduct> products;
+    private Integer total;
 }

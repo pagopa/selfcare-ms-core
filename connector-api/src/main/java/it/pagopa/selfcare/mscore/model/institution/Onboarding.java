@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
-import it.pagopa.selfcare.mscore.model.Premium;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -12,11 +11,12 @@ import java.time.OffsetDateTime;
 public class Onboarding {
 
     private String productId;
+    private String tokenId;
     private RelationshipState status;
     private String contract;
     private String pricingPlan;
-    private Premium premium;
     private Billing billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private OffsetDateTime closedAt;
 }

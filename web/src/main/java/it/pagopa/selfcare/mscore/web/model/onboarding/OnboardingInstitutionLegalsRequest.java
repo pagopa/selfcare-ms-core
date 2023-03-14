@@ -17,10 +17,8 @@ public class OnboardingInstitutionLegalsRequest {
     @NotEmpty(message = "at least one user is required")
     private List<Person> users;
 
-    @NotEmpty(message = "Institution externalId is required")
     private String institutionExternalId;
 
-    @NotEmpty(message = "InstitutionId is required")
     private String institutionId;
 
     private ContractRequest contract;

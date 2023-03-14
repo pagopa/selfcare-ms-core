@@ -3,7 +3,7 @@ package it.pagopa.selfcare.mscore.web.model.onboarding;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
 import lombok.Data;
@@ -30,10 +30,7 @@ public class OnboardedInstitutionResponse {
     private String state;
     private PartyRole role;
     private ProductInfo productInfo;
-    private String rea;
-    private String shareCapital;
-    private String businessRegisterPlace;
-    private String supportEmail;
-    private String supportPhone;
+    private BusinessData businessData;
+    private SupportContact supportContact;
 
 }

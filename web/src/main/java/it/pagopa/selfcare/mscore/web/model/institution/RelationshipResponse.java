@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import it.pagopa.selfcare.mscore.model.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
@@ -15,7 +15,7 @@ public class RelationshipResponse {
     private String product;
     private RelationshipState state;
     private String pricingPlan;
-    private InstitutionUpdate institutionUpdate;
+    private InstitutionUpdateResponse institutionUpdate;
     private BillingResponse billingResponse;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

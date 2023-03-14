@@ -2,8 +2,8 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,9 +40,17 @@ class TokenConnectorImplTest {
     void findActiveContractTest() {
         TokenEntity token = new TokenEntity();
         token.setId("507f1f77bcf86cd799439011");
+        token.setUsers(new ArrayList<>());
         when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
         Token tokenResp = tokenConnectorImpl.findActiveContract("42", "42", "42");
         Assertions.assertEquals("507f1f77bcf86cd799439011", tokenResp.getId());
+    }
+
+    @Test
+    void findActiveContractTest1() {
+        when(tokenRepository.find(any(), any())).thenReturn(new ArrayList<>());
+        assertThrows(ResourceNotFoundException.class, () -> tokenConnectorImpl.findActiveContract("42", "42", "42"));
+
     }
 
     @Test
@@ -50,8 +59,10 @@ class TokenConnectorImplTest {
         token.setId("507f1f77bcf86cd799439011");
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setId("507f1f77bcf86cd799439011");
+        tokenEntity.setUsers(new ArrayList<>());
+        token.setUsers(new ArrayList<>());
         when(tokenRepository.save(any())).thenReturn(tokenEntity);
-        Token response = tokenConnectorImpl.save(token);
+        Token response = tokenConnectorImpl.save(token, new ArrayList<>());
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
     }
 
@@ -61,8 +72,10 @@ class TokenConnectorImplTest {
         token.setProductId("507f1f77bcf86cd799439011");
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setProductId("507f1f77bcf86cd799439011");
+        tokenEntity.setUsers(new ArrayList<>());
+        token.setUsers(new ArrayList<>());
         when(tokenRepository.save(any())).thenReturn(tokenEntity);
-        Token response = tokenConnectorImpl.save(token);
+        Token response = tokenConnectorImpl.save(token, new ArrayList<>());
         Assertions.assertEquals("507f1f77bcf86cd799439011", response.getProductId());
     }
 
@@ -79,21 +92,18 @@ class TokenConnectorImplTest {
     @Test
     void testFindById2() {
         TokenEntity tokenEntity = new TokenEntity();
+        tokenEntity.setUsers(new ArrayList<>());
         when(tokenRepository.findById(any())).thenReturn(Optional.of(tokenEntity));
         Token response = tokenConnectorImpl.findById("tokenId");
         assertNotNull(response);
     }
 
-    /**
-     * Method under test: {@link TokenConnectorImpl#findAndUpdateTokenUser(String, List)}
-     */
     @Test
     void testFindAndUpdateTokenUser() {
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setContract("Contract");
         tokenEntity.setCreatedAt(null);
-        tokenEntity.setExpiringDate("2020-03-01");
+        tokenEntity.setExpiringDate(OffsetDateTime.now());
         tokenEntity.setId("42");
         tokenEntity.setInstitutionId("42");
         tokenEntity.setProductId("42");
@@ -101,8 +111,17 @@ class TokenConnectorImplTest {
         tokenEntity.setUpdatedAt(null);
         tokenEntity.setUsers(new ArrayList<>());
         when(tokenRepository.findAndModify(any(), any(), any(),any())).thenReturn(tokenEntity);
-        tokenConnectorImpl.findAndUpdateTokenUser("42", new ArrayList<>());
+        tokenConnectorImpl.findAndUpdateToken("42", RelationshipState.REJECTED, "");
         verify(tokenRepository).findAndModify(any(), any(), any(), any());
     }
 
+    @Test
+    void findWithFilter() {
+        TokenEntity token = new TokenEntity();
+        token.setId("507f1f77bcf86cd799439011");
+        token.setUsers(new ArrayList<>());
+        when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
+        Token tokens = tokenConnectorImpl.findWithFilter("42", "42");
+        Assertions.assertEquals("507f1f77bcf86cd799439011", tokens.getId());
+    }
 }

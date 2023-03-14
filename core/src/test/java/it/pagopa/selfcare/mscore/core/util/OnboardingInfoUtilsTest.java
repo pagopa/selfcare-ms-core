@@ -1,11 +1,15 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.Premium;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -39,7 +43,7 @@ class OnboardingInfoUtilsTest {
     @Test
     void testGetUserInstitutionsWithProductStatusIn2() {
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(new ArrayList<>());
 
@@ -84,10 +88,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract(", ");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName(", ");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -96,7 +99,7 @@ class OnboardingInfoUtilsTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -114,10 +117,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract(", ");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName(", ");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -125,10 +127,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct1 = new OnboardedProduct();
         onboardedProduct1.setContract(", ");
         onboardedProduct1.setCreatedAt(null);
-        onboardedProduct1.setEnv(EnvEnum.ROOT);
+        onboardedProduct1.setEnv(Env.ROOT);
         onboardedProduct1.setProductId("42");
-        onboardedProduct1.setProductName(", ");
-        onboardedProduct1.setProductRoles(new ArrayList<>());
+        onboardedProduct1.setProductRole("");
         onboardedProduct1.setRole(PartyRole.MANAGER);
         onboardedProduct1.setStatus(RelationshipState.PENDING);
         onboardedProduct1.setUpdatedAt(null);
@@ -138,7 +139,7 @@ class OnboardingInfoUtilsTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -156,10 +157,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract(", ");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName(", ");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -168,7 +168,7 @@ class OnboardingInfoUtilsTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -189,7 +189,7 @@ class OnboardingInfoUtilsTest {
     @Test
     void testFindOnboardingLinkedToProductWithStateIn() {
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
         userBinding.setProducts(onboardedProductList);
@@ -208,10 +208,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -220,7 +219,7 @@ class OnboardingInfoUtilsTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -237,7 +236,6 @@ class OnboardingInfoUtilsTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -264,10 +262,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -276,7 +273,7 @@ class OnboardingInfoUtilsTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -293,7 +290,6 @@ class OnboardingInfoUtilsTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -312,7 +308,6 @@ class OnboardingInfoUtilsTest {
         onboarding1.setBilling(billing1);
         onboarding1.setContract("Contract");
         onboarding1.setCreatedAt(null);
-        onboarding1.setPremium(premium1);
         onboarding1.setPricingPlan("Pricing Plan");
         onboarding1.setProductId("42");
         onboarding1.setStatus(RelationshipState.PENDING);
@@ -339,10 +334,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -351,7 +345,7 @@ class OnboardingInfoUtilsTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -368,7 +362,6 @@ class OnboardingInfoUtilsTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("Product Id");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -394,10 +387,9 @@ class OnboardingInfoUtilsTest {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(EnvEnum.ROOT);
+        onboardedProduct.setEnv(Env.ROOT);
         onboardedProduct.setProductId("42");
-        onboardedProduct.setProductName("Product Name");
-        onboardedProduct.setProductRoles(new ArrayList<>());
+        onboardedProduct.setProductRole("");
         onboardedProduct.setRole(PartyRole.MANAGER);
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
@@ -406,7 +398,7 @@ class OnboardingInfoUtilsTest {
         onboardedProductList.add(onboardedProduct);
 
         UserBinding userBinding = new UserBinding();
-        userBinding.setCreatedAt(null);
+
         userBinding.setInstitutionId("42");
         userBinding.setProducts(onboardedProductList);
 
@@ -423,7 +415,6 @@ class OnboardingInfoUtilsTest {
         onboarding.setBilling(billing);
         onboarding.setContract("Contract");
         onboarding.setCreatedAt(null);
-        onboarding.setPremium(premium);
         onboarding.setPricingPlan("Pricing Plan");
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);

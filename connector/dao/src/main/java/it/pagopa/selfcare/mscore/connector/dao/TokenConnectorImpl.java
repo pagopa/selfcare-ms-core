@@ -2,23 +2,29 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.RelationshipState;
-import it.pagopa.selfcare.mscore.model.Token;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.GET_INSTITUTION_MANAGER_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.TOKEN_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
+import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_MANAGER_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -48,20 +54,20 @@ public class TokenConnectorImpl implements TokenConnector {
         );
         return tokenRepository.find(query, TokenEntity.class).stream()
                 .findFirst()
-                .map(this::convertToToken)
+                .map(TokenMapper::convertToToken)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
                         GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
 
     @Override
-    public Token save(Token token) {
-        final TokenEntity entity = convertToTokenEntity(token);
+    public Token save(Token token, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
+        final TokenEntity entity = convertToTokenEntity(token, geographicTaxonomies);
         return convertToToken(tokenRepository.save(entity));
     }
 
     @Override
     public Token findById(String tokenId) {
-        Optional<Token> opt = tokenRepository.findById(tokenId).map(this::convertToToken);
+        Optional<Token> opt = tokenRepository.findById(tokenId).map(TokenMapper::convertToToken);
         if (opt.isEmpty()) {
             throw new ResourceNotFoundException(String.format(TOKEN_NOT_FOUND.getMessage(), tokenId), TOKEN_NOT_FOUND.getCode());
         }
@@ -69,46 +75,34 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public void findAndUpdateTokenUser(String tokenId, List<String> usersId) {
+    public Token findAndUpdateToken(String tokenId, RelationshipState status, @Nullable String digest) {
+        OffsetDateTime now = OffsetDateTime.now();
+
         Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
-        Update update = new Update();
-        usersId.forEach(s -> update.addToSet(TokenEntity.Fields.users.name(), s));
-        update.set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now());
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        tokenRepository.findAndModify(query, update, findAndModifyOptions, TokenEntity.class);
-    }
+        Update updateDefinition = new Update()
+                .set(TokenEntity.Fields.status.name(), status)
+                .set(TokenEntity.Fields.updatedAt.name(), now);
 
-    private TokenEntity convertToTokenEntity(Token token) {
-        TokenEntity entity = new TokenEntity();
-        if (token.getId() != null) {
-            entity.setId(token.getId());
-        }else{
-            entity.setId(UUID.randomUUID().toString());
+        if (digest != null) {
+            updateDefinition.set(TokenEntity.Fields.checksum.name(), digest);
         }
-        entity.setContract(token.getContract());
-        entity.setChecksum(token.getChecksum());
-        entity.setInstitutionId(token.getInstitutionId());
-        entity.setStatus(token.getStatus());
-        entity.setUsers(token.getUsers());
-        entity.setExpiringDate(token.getExpiringDate());
-        entity.setProductId(token.getProductId());
-        entity.setCreatedAt(token.getCreatedAt());
-        entity.setUpdatedAt(token.getUpdatedAt());
-        return entity;
+        if (status == RelationshipState.DELETED) {
+            updateDefinition.set(TokenEntity.Fields.closedAt.name(), now);
+        }
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
     }
 
-    private Token convertToToken(TokenEntity tokenEntity) {
-        Token token = new Token();
-        token.setId(tokenEntity.getId());
-        token.setContract(tokenEntity.getContract());
-        token.setChecksum(tokenEntity.getChecksum());
-        token.setInstitutionId(tokenEntity.getInstitutionId());
-        token.setStatus(tokenEntity.getStatus());
-        token.setUsers(tokenEntity.getUsers());
-        token.setExpiringDate(tokenEntity.getExpiringDate());
-        token.setCreatedAt(tokenEntity.getCreatedAt());
-        token.setUpdatedAt(tokenEntity.getUpdatedAt());
-        token.setProductId(tokenEntity.getProductId());
-        return token;
+    @Override
+    public Token findWithFilter(String institutionId, String productId) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.productId.name()).is(productId)
+                .and(TokenEntity.Fields.institutionId.name()).is(institutionId)
+                .and(TokenEntity.Fields.status.name()).is(RelationshipState.ACTIVE)
+                .and(TokenEntity.Fields.type.name()).is(TokenType.INSTITUTION));
+
+        return tokenRepository.find(query, TokenEntity.class).stream()
+                .map(TokenMapper::convertToToken)
+                .findFirst()
+                .orElseThrow(() -> new InvalidRequestException("",""));
     }
 }

@@ -10,9 +10,9 @@ import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.Institutions
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.LegalFilter;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.CustomErrorEnum.CREATE_INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.CREATE_INSTITUTION_NOT_FOUND;
 
 @Slf4j
 @Service

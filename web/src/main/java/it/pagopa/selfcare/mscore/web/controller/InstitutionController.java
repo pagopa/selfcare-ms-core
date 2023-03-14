@@ -3,34 +3,35 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.web.model.institution.CreatePgInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -38,7 +39,7 @@ import static it.pagopa.selfcare.mscore.constant.GenericErrorEnum.*;
 @Slf4j
 public class InstitutionController {
 
-    private static final String ENTRY_LOG = "Creating institution having external id {}";
+    private static final String ENTRY_LOG = "Creating institution given externalId";
     private final InstitutionService institutionService;
 
     public InstitutionController(InstitutionService institutionService) {
@@ -61,7 +62,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> createInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                              @PathVariable("externalId") String externalId) {
 
-        log.info(ENTRY_LOG, externalId);
+        log.info(ENTRY_LOG);
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionByExternalId(externalId);
         return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
@@ -83,7 +84,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> createInstitutionRaw(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                     @PathVariable("externalId") String externalId,
                                                                     @RequestBody @Valid InstitutionRequest institution) {
-        log.info(ENTRY_LOG, externalId);
+        log.info(ENTRY_LOG);
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionRaw(InstitutionMapper.toInstitution(institution, externalId), externalId);
         return ResponseEntity.ok(InstitutionMapper.toInstitutionResponse(saved));
@@ -93,7 +94,6 @@ public class InstitutionController {
      * The function persist PG institution
      *
      * @param request CreatePgInstitutionRequest
-     *
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Bad Request, DataType: Problem
@@ -132,5 +132,55 @@ public class InstitutionController {
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
         List<Onboarding> list = institutionService.retrieveInstitutionProducts(institutionId, states);
         return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(list));
+    }
+
+    /**
+     * The function return an institution given institution internal id
+     *
+     * @param id String
+     *
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<InstitutionResponse> retrieveInstitutionById(@PathVariable("id") String id) {
+        CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        Institution institution = institutionService.retrieveInstitutionById(id);
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
+    }
+
+    /**
+     * The function return user institution relationships
+     *
+     * @param institutionId String
+     * @param personId String
+     * @param roles String[]
+     * @param states String[]
+     * @param products String[]
+     * @param productRoles String[]
+     *
+     * @return GeographicTaxonomies
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution.relationships}", notes = "${swagger.mscore.institution.relationships}")
+    @GetMapping(value = "/{id}/relationships")
+    public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationships(@PathVariable("id") String institutionId,
+                                                                                    @RequestParam(value = "personId", required = false) String personId,
+                                                                                    @RequestParam(value = "roles", required = false) List<PartyRole> roles,
+                                                                                    @RequestParam(value = "states", required = false) List<RelationshipState> states,
+                                                                                    @RequestParam(value = "products", required = false) List<String> products,
+                                                                                    @RequestParam(value = "productRoles", required = false) List<String> productRoles,
+                                                                                    Authentication authentication) {
+        log.info("Getting relationship for institution {} and current user", institutionId);
+        CustomExceptionMessage.setCustomMessage(GET_USER_INSTITUTION_RELATIONSHIP_ERROR);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        Institution institution = institutionService.retrieveInstitutionById(institutionId);
+        List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
     }
 }

@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.api;
 
-import it.pagopa.selfcare.mscore.model.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 
 import java.util.List;
