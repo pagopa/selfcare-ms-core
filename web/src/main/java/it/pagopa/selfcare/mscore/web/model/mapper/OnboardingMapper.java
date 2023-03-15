@@ -93,8 +93,12 @@ public class OnboardingMapper {
         institutionResponse.setAddress(institution.getAddress());
         institutionResponse.setZipCode(institution.getZipCode());
         institutionResponse.setTaxCode(institution.getTaxCode());
-        institutionResponse.setGeographicTaxonomies(InstitutionMapper.toGeoTaxonomies(institution.getGeographicTaxonomies()));
-        institutionResponse.setAttributes(InstitutionMapper.toAttributeResponse(institution.getAttributes()));
+        if (institution.getGeographicTaxonomies() != null) {
+            institutionResponse.setGeographicTaxonomies(InstitutionMapper.toGeoTaxonomies(institution.getGeographicTaxonomies()));
+        }
+        if (institution.getAttributes() != null) {
+            institutionResponse.setAttributes(InstitutionMapper.toAttributeResponse(institution.getAttributes()));
+        }
         institutionResponse.setPricingPlan(onboarding.getPricingPlan());
         Billing billing = InstitutionMapper.getBillingFromOnboarding(onboarding, institution);
         institutionResponse.setBilling(billing);
