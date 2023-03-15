@@ -221,15 +221,17 @@ public class InstitutionMapper {
 
     public static DataProtectionOfficer toDataProtectionOfficer(DataProtectionOfficerRequest request) {
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress(request.getAddress());
-        dataProtectionOfficer.setEmail(request.getEmail());
-        dataProtectionOfficer.setPec(request.getPec());
+        if (request != null) {
+            dataProtectionOfficer.setAddress(request.getAddress());
+            dataProtectionOfficer.setEmail(request.getEmail());
+            dataProtectionOfficer.setPec(request.getPec());
+        }
         return dataProtectionOfficer;
     }
 
     private static DataProtectionOfficerResponse toDataProtectionOfficerResponse(DataProtectionOfficer dataProtectionOfficer) {
         DataProtectionOfficerResponse response = new DataProtectionOfficerResponse();
-        if(dataProtectionOfficer != null) {
+        if (dataProtectionOfficer != null) {
             response.setPec(dataProtectionOfficer.getPec());
             response.setEmail(dataProtectionOfficer.getEmail());
             response.setAddress(dataProtectionOfficer.getAddress());
@@ -239,7 +241,7 @@ public class InstitutionMapper {
 
     public static PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderRequest request) {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        if(request != null) {
+        if (request != null) {
             paymentServiceProvider.setAbiCode(request.getAbiCode());
             paymentServiceProvider.setVatNumberGroup(request.isVatNumberGroup());
             paymentServiceProvider.setBusinessRegisterNumber(request.getBusinessRegisterNumber());
@@ -251,7 +253,7 @@ public class InstitutionMapper {
 
     private static PaymentServiceProviderResponse toPaymentServiceProviderResponse(PaymentServiceProvider paymentServiceProvider) {
         PaymentServiceProviderResponse response = new PaymentServiceProviderResponse();
-        if(paymentServiceProvider != null) {
+        if (paymentServiceProvider != null) {
             response.setAbiCode(paymentServiceProvider.getAbiCode());
             response.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());
             response.setBusinessRegisterNumber(paymentServiceProvider.getBusinessRegisterNumber());
@@ -301,11 +303,13 @@ public class InstitutionMapper {
 
     public static List<GeoTaxonomies> toGeoTaxonomies(List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         List<GeoTaxonomies> list = new ArrayList<>();
-        for (InstitutionGeographicTaxonomies g : geographicTaxonomies) {
-            GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
-            geoTaxonomies.setCode(g.getCode());
-            geoTaxonomies.setDesc(g.getDesc());
-            list.add(geoTaxonomies);
+        if (geographicTaxonomies != null) {
+            for (InstitutionGeographicTaxonomies g : geographicTaxonomies) {
+                GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
+                geoTaxonomies.setCode(g.getCode());
+                geoTaxonomies.setDesc(g.getDesc());
+                list.add(geoTaxonomies);
+            }
         }
         return list;
     }
@@ -316,18 +320,31 @@ public class InstitutionMapper {
         return list;
     }
 
-    public static OnboardedProducts toOnboardedProducts(List<Onboarding> onboardings) {
+    public static OnboardedProducts toOnboardedProducts(List<Onboarding> page) {
         OnboardedProducts onboardedProducts = new OnboardedProducts();
-        onboardedProducts.setProducts(toInstitutionProduct(onboardings));
+        onboardedProducts.setProducts(toInstitutionProduct(page));
         return onboardedProducts;
     }
 
     public static List<InstitutionProduct> toInstitutionProduct(List<Onboarding> onboardings) {
+        if (onboardings == null) {
+            return Collections.emptyList();
+        }
         return onboardings.stream().map(onboarding -> {
             InstitutionProduct product = new InstitutionProduct();
             product.setId(onboarding.getProductId());
             product.setState(onboarding.getStatus());
             return product;
         }).collect(Collectors.toList());
+    }
+
+    public static List<InstitutionResponse> toInstitutionResponseList(List<Institution> institutions) {
+        List<InstitutionResponse> responses = new ArrayList<>();
+        if (!institutions.isEmpty()) {
+            for (Institution institution : institutions) {
+                responses.add(toInstitutionResponse(institution));
+            }
+        }
+        return responses;
     }
 }

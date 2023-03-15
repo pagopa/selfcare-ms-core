@@ -118,6 +118,9 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.closedAt.name()), OffsetDateTime.now());
             }
         }
+        if (token.getContractSigned() != null) {
+            update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.contract.name()), token.getContractSigned());
+        }
         InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
         if (institutionUpdate != null) {
             Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
@@ -127,6 +130,14 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
+    }
+
+    @Override
+    public List<Institution> findAllByIds(List<String> ids) {
+        List<Institution> list = new ArrayList<>();
+        repository.findAllById(ids)
+                .forEach(entity -> list.add(InstitutionMapper.convertToInstitution(entity)));
+        return list;
     }
 
     @Override

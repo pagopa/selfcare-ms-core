@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
@@ -131,8 +132,27 @@ public class ExternalController {
                                                                                      @RequestParam(value = "states", required = false) List<RelationshipState> states) {
         log.info("Retrieving products for institution having externalId {}", externalId);
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
-        List<Onboarding> onboardings = externalService.retrieveInstitutionProductsByExternalId(externalId, states);
-        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(onboardings));
+        List<Onboarding> page = externalService.retrieveInstitutionProductsByExternalId(externalId, states);
+        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(page));
+    }
+
+    /**
+     * The function returns geographic taxonomies related to institution
+     *
+     * @param externalId String
+     *
+     * @return GeographicTaxonomies
+     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     *
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.external.geotaxonomies}", notes = "${swagger.mscore.external.geotaxonomies}")
+    @GetMapping(value = "/{externalId}/geotaxonomies")
+    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId) {
+        CustomExceptionMessage.setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
+        List<GeographicTaxonomies> list = externalService.retrieveInstitutionGeoTaxonomiesByExternalId(externalId);
+        return ResponseEntity.ok(list);
     }
 
     /**
@@ -177,5 +197,23 @@ public class ExternalController {
         CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
         Institution saved = externalService.createPnPgInstitution(request.getTaxId(), request.getDescription());
         return ResponseEntity.status(HttpStatus.CREATED).body(new InstitutionPnPgResponse(saved.getId()));
+    }
+
+    /**
+     * The function return an institution given institution internal id
+     *
+     * @param ids List
+     *
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: InstitutuonResponse
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
+    @GetMapping(value = "")
+    public ResponseEntity<List<InstitutionResponse>> retrieveInstitutionByIds(@RequestParam("ids") List<String> ids) {
+        CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        List<Institution> institution = externalService.retrieveInstitutionByIds(ids);
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponseList(institution));
     }
 }

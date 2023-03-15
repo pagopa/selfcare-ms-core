@@ -34,7 +34,11 @@ public interface InstitutionService {
 
     void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
 
+    List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution);
+
     GeographicTaxonomies retrieveGeoTaxonomies(String code);
+
+    List<Institution> retrieveInstitutionByIds(List<String> ids);
 
     Institution createPnPgInstitution(String taxId, String description);
 }

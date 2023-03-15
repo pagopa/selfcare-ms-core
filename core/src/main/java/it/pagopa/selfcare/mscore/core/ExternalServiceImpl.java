@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -52,14 +53,26 @@ public class ExternalServiceImpl implements ExternalService {
     }
 
     @Override
-    public List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states){
+    public List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
         return institutionService.retrieveInstitutionProducts(institution, states);
     }
 
     @Override
+    public List<Institution> retrieveInstitutionByIds(List<String> ids) {
+        return institutionService.retrieveInstitutionByIds(ids);
+    }
+
+    @Override
     public Institution createPnPgInstitution(String taxId, String description) {
         return institutionService.createPnPgInstitution(taxId, description);
+    }
+
+    @Override
+    public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId) {
+        log.info("Retrieving geographic taxonomies for institution having externalId {}", externalId);
+        Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
+        return institutionService.retrieveInstitutionGeoTaxonomies(institution);
     }
 
     @Override

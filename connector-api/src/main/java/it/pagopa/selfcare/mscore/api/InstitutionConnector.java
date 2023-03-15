@@ -29,5 +29,7 @@ public interface InstitutionConnector {
 
     void findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
 
+    List<Institution> findAllByIds(List<String> ids);
+
     Institution saveOrRetrievePnPg(Institution newInstitution);
 }
