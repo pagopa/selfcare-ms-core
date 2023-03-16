@@ -56,7 +56,6 @@ public class ExternalController {
     @GetMapping("/{externalId}")
     public ResponseEntity<InstitutionResponse> getByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                                @PathVariable("externalId") String externalId) {
-        log.info("Retrieving institution for externalId {}", externalId);
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_EXTERNAL_ID_ERROR);
         Institution institution = externalService.getInstitutionByExternalId(externalId);
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
@@ -70,7 +69,7 @@ public class ExternalController {
      * @param productId  String
      *
      * @return InstitutionManagerResponse
-     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 200, Message: successful operation, DataType: InstitutionManagerResponse
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Institution Manager not found, DataType: Problem
      */
@@ -81,7 +80,6 @@ public class ExternalController {
                                                                                         @PathVariable("externalId") String externalId,
                                                                                         @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                                                         @PathVariable("productId") String productId) {
-        log.info("Getting manager for institution having externalId {}", externalId);
         CustomExceptionMessage.setCustomMessage(INSTITUTION_MANAGER_ERROR);
         ProductManagerInfo manager = externalService.retrieveInstitutionManager(externalId, productId);
         return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(manager, productId));
@@ -95,7 +93,7 @@ public class ExternalController {
      * @param productId  String
      *
      * @return InstitutionBillingResponse
-     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 200, Message: successful operation, DataType: InstitutionBillingResponse
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Institution Billing not found, DataType: Problem
      */
@@ -106,7 +104,6 @@ public class ExternalController {
                                                                                         @PathVariable("externalId") String externalId,
                                                                                         @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                                                         @PathVariable("productId") String productId) {
-        log.info("Retrieving billing data for institution having externalId {} and productId {}", externalId, productId);
         CustomExceptionMessage.setCustomMessage(INSTITUTION_BILLING_ERROR);
         Institution institution = externalService.retrieveInstitutionProduct(externalId, productId);
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionBillingResponse(institution, productId));
@@ -120,17 +117,16 @@ public class ExternalController {
      * @param states List<String>
      *
      * @return OnboardedProducts
-     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 200, Message: successful operation, DataType: OnboardedProducts
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Institution Billing not found, DataType: Problem
-     *
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.external.institution.products}", notes = "${swagger.mscore.external.institution.products}")
     @GetMapping(value = "/{externalId}/products")
-    public ResponseEntity<OnboardedProducts> retrieveInstitutionProductsByExternalId(@PathVariable("externalId") String externalId,
+    public ResponseEntity<OnboardedProducts> retrieveInstitutionProductsByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
+                                                                                     @PathVariable("externalId") String externalId,
                                                                                      @RequestParam(value = "states", required = false) List<RelationshipState> states) {
-        log.info("Retrieving products for institution having externalId {}", externalId);
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
         List<Onboarding> page = externalService.retrieveInstitutionProductsByExternalId(externalId, states);
         return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(page));
@@ -141,15 +137,15 @@ public class ExternalController {
      *
      * @param externalId String
      *
-     * @return GeographicTaxonomies
-     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * @return List
+     * * Code: 200, Message: successful operation, DataType: List<GeographicTaxonomies>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
-     *
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.external.geotaxonomies}", notes = "${swagger.mscore.external.geotaxonomies}")
     @GetMapping(value = "/{externalId}/geotaxonomies")
-    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@PathVariable("externalId") String externalId) {
+    public ResponseEntity<List<GeographicTaxonomies>> retrieveInstitutionGeoTaxonomiesByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
+                                                                                                   @PathVariable("externalId") String externalId) {
         CustomExceptionMessage.setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
         List<GeographicTaxonomies> list = externalService.retrieveInstitutionGeoTaxonomiesByExternalId(externalId);
         return ResponseEntity.ok(list);
@@ -158,24 +154,27 @@ public class ExternalController {
     /**
      * The function returns the relationships related to the institution
      *
-     * @param externalId String
+     * @param externalId   String
+     * @param personId     String
+     * @param roles        List
+     * @param states       List
+     * @param products     List
+     * @param productRoles List
      *
-     * @return GeographicTaxonomies
-     * * Code: 200, Message: successful operation, DataType: GeographicTaxonomies
+     * @return List
+     * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
-     *
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.external.institution.relationships}", notes = "${swagger.mscore.external.institution.relationships}")
     @GetMapping(value = "/{externalId}/relationships")
-    public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationshipsByExternalId(@PathVariable("externalId") String externalId,
+    public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationshipsByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}") @PathVariable("externalId") String externalId,
                                                                                                 @RequestParam(value = "personId", required = false) String personId,
                                                                                                 @RequestParam(value = "roles", required = false) List<PartyRole> roles,
                                                                                                 @RequestParam(value = "states", required = false) List<RelationshipState> states,
                                                                                                 @RequestParam(value = "products", required = false) List<String> products,
                                                                                                 @RequestParam(value = "productRoles", required = false) List<String> productRoles,
                                                                                                 Authentication authentication) {
-        log.info("Getting relationship for institution {} and current user", externalId);
         CustomExceptionMessage.setCustomMessage(RETRIEVING_USER_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = externalService.getUserInstitutionRelationships(externalId, selfCareUser.getId(), personId, roles, states, products, productRoles);
@@ -187,7 +186,8 @@ public class ExternalController {
      *
      * @param request CreatePnPgInstitutionRequest
      * @return InstitutionPnPgResponse
-     * * Code: 201, Message: successful operation, DataType: InstitutionId
+     *
+     * * Code: 201, Message: successful operation, DataType: InstitutionPnPgResponse
      * * Code: 400, Message: Bad Request, DataType: Problem
      */
     @ResponseStatus(HttpStatus.CREATED)
@@ -203,9 +203,9 @@ public class ExternalController {
      * The function return an institution given institution internal id
      *
      * @param ids List
+     * @return List
      *
-     * @return InstitutionResponse
-     * * Code: 200, Message: successful operation, DataType: InstitutuonResponse
+     * * Code: 200, Message: successful operation, DataType: List<InstitutionResponse>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)

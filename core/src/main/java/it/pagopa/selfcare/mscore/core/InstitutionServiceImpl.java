@@ -199,6 +199,19 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
+        if (userService.checkIfAdmin(userId, institutionId)) {
+            List<InstitutionGeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomies()
+                    .stream()
+                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getCode(), geo.getDesc())).collect(Collectors.toList());
+            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
+        } else {
+            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), RELATIONSHIP_NOT_FOUND.getCode());
+        }
+    }
+
+    @Override
     public List<Institution> retrieveInstitutionByIds(List<String> ids) {
         return institutionConnector.findAllByIds(ids);
     }

@@ -146,6 +146,15 @@ public class InstitutionMapper {
         institutionManagerResponse.setInstitutionUpdate(institutionUpdate);
     }
 
+    public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institution) {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        if (institution.getGeographicTaxonomyCodes() != null) {
+            institutionUpdate.setGeographicTaxonomies(institution.getGeographicTaxonomyCodes()
+                    .stream().map(s -> new InstitutionGeographicTaxonomies(s, null)).collect(Collectors.toList()));
+        }
+        return institutionUpdate;
+    }
+
     public static Institution toInstitution(InstitutionRequest request, String externalId) {
         Institution institution = new Institution();
         institution.setExternalId(externalId);

@@ -37,6 +37,63 @@
     "description" : "Token Controller"
   } ],
   "paths" : {
+    "/external/institutions" : {
+      "get" : {
+        "tags" : [ "External" ],
+        "summary" : "Gets the corresponding institution using internal institution id",
+        "description" : "Gets the corresponding institution using internal institution id",
+        "operationId" : "retrieveInstitutionByIdsUsingGET",
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "ids",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/InstitutionResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/external/institutions/pn-pg" : {
       "post" : {
         "tags" : [ "External" ],
@@ -152,6 +209,62 @@
         } ]
       }
     },
+    "/external/institutions/{externalId}/geotaxonomies" : {
+      "get" : {
+        "tags" : [ "External" ],
+        "summary" : "retrieves the geographic taxonomies related to Institution.",
+        "description" : "retrieves the geographic taxonomies related to Institution.",
+        "operationId" : "retrieveInstitutionGeoTaxonomiesByExternalIdUsingGET",
+        "parameters" : [ {
+          "name" : "externalId",
+          "in" : "path",
+          "description" : "Institution's unique external identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GeographicTaxonomies"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/external/institutions/{externalId}/products" : {
       "get" : {
         "tags" : [ "External" ],
@@ -161,7 +274,7 @@
         "parameters" : [ {
           "name" : "externalId",
           "in" : "path",
-          "description" : "externalId",
+          "description" : "Institution's unique external identifier",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -347,53 +460,13 @@
         "description" : "returns the relationships related to the institution",
         "operationId" : "getUserInstitutionRelationshipsByExternalIdUsingGET",
         "parameters" : [ {
-          "name" : "authenticated",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "name" : "authorities[0].authority",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "credentials",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "details",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
           "name" : "externalId",
           "in" : "path",
-          "description" : "externalId",
+          "description" : "Institution's unique external identifier",
           "required" : true,
           "style" : "simple",
           "schema" : {
             "type" : "string"
-          }
-        }, {
-          "name" : "principal",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
           }
         }, {
           "name" : "personId",
@@ -565,47 +638,6 @@
         "summary" : "create an institution (PG) using external institution id fetching data from info-camere",
         "description" : "create an institution (PG) using external institution id fetching data from info-camere",
         "operationId" : "createPgInstitutionUsingPOST",
-        "parameters" : [ {
-          "name" : "authenticated",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "name" : "authorities[0].authority",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "credentials",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "details",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "principal",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        } ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -734,7 +766,7 @@
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
-          "description" : "id",
+          "description" : "The internal identifier of the institution",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -748,6 +780,132 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      },
+      "put" : {
+        "tags" : [ "Institution" ],
+        "summary" : "update geographic taxonomy of given institution",
+        "description" : "update geographic taxonomy of given institution",
+        "operationId" : "updateInstitutionUsingPUT",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The internal identifier of the institution",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionPut"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/institutions/{id}/geotaxonomies" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "retrieves the geographic taxonomies this institution is related to",
+        "description" : "retrieves the geographic taxonomies this institution is related to",
+        "operationId" : "retrieveInstitutionGeoTaxonomiesUsingGET",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "The internal identifier of the institution",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GeographicTaxonomies"
+                  }
                 }
               }
             }
@@ -849,53 +1007,13 @@
         "description" : "returns the relationships related to the institution",
         "operationId" : "getUserInstitutionRelationshipsUsingGET",
         "parameters" : [ {
-          "name" : "authenticated",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "name" : "authorities[0].authority",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "credentials",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "details",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
           "name" : "id",
           "in" : "path",
-          "description" : "id",
+          "description" : "The internal identifier of the institution",
           "required" : true,
           "style" : "simple",
           "schema" : {
             "type" : "string"
-          }
-        }, {
-          "name" : "principal",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
           }
         }, {
           "name" : "personId",
@@ -996,38 +1114,6 @@
         "description" : "returns onboarding info",
         "operationId" : "onboardingInfoUsingGET",
         "parameters" : [ {
-          "name" : "authenticated",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "name" : "authorities[0].authority",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "credentials",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "details",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
           "name" : "institutionId",
           "in" : "query",
           "description" : "The internal identifier of the institution",
@@ -1035,14 +1121,6 @@
           "style" : "form",
           "schema" : {
             "type" : "string"
-          }
-        }, {
-          "name" : "principal",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
           }
         }, {
           "name" : "institutionExternalId",
@@ -1107,47 +1185,6 @@
         "summary" : "create a new Token (contract), and update institution and users data",
         "description" : "create a new Token (contract), and update institution and users data",
         "operationId" : "onboardingInstitutionUsingPOST",
-        "parameters" : [ {
-          "name" : "authenticated",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "boolean"
-          }
-        }, {
-          "name" : "authorities[0].authority",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "credentials",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "details",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        }, {
-          "name" : "principal",
-          "in" : "query",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "object"
-          }
-        } ],
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -1445,16 +1482,16 @@
         } ]
       }
     },
-    "/persons/{id}" : {
-      "head" : {
+    "/relationships/{relationshipId}" : {
+      "get" : {
         "tags" : [ "Persons" ],
-        "summary" : "verify if a Person exists for a given ID",
-        "description" : "verify if a Person exists for a given ID",
-        "operationId" : "verifyUserUsingHEAD",
+        "summary" : "Gets the corresponding relationship",
+        "description" : "Gets the corresponding relationship",
+        "operationId" : "getRelationshipUsingGET",
         "parameters" : [ {
-          "name" : "id",
+          "name" : "relationshipId",
           "in" : "path",
-          "description" : "id",
+          "description" : "UserBinding's unique identifier",
           "required" : true,
           "style" : "simple",
           "schema" : {
@@ -1463,7 +1500,14 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RelationshipResult"
+                }
+              }
+            }
           },
           "400" : {
             "description" : "Bad Request",
@@ -1477,6 +1521,172 @@
           },
           "404" : {
             "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      },
+      "delete" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Given a relationship identifier, it deletes the corresponding relationship",
+        "description" : "Given a relationship identifier, it deletes the corresponding relationship",
+        "operationId" : "deleteRelationshipUsingDELETE",
+        "parameters" : [ {
+          "name" : "relationshipId",
+          "in" : "path",
+          "description" : "UserBinding's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/relationships/{relationshipId}/activate" : {
+      "post" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Activate the relationship",
+        "description" : "Activate the relationship",
+        "operationId" : "activateRelationshipUsingPOST",
+        "parameters" : [ {
+          "name" : "relationshipId",
+          "in" : "path",
+          "description" : "UserBinding's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/relationships/{relationshipId}/suspend" : {
+      "post" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Suspend the relationship",
+        "description" : "Suspend the relationship",
+        "operationId" : "suspendRelationshipUsingPOST",
+        "parameters" : [ {
+          "name" : "relationshipId",
+          "in" : "path",
+          "description" : "UserBinding's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -1665,6 +1875,42 @@
           }
         }
       },
+      "GeographicTaxonomies" : {
+        "title" : "GeographicTaxonomies",
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "countryAbbreviation" : {
+            "type" : "string"
+          },
+          "desc" : {
+            "type" : "string"
+          },
+          "enable" : {
+            "type" : "boolean"
+          },
+          "endDate" : {
+            "type" : "string"
+          },
+          "province" : {
+            "type" : "string"
+          },
+          "provinceAbbreviation" : {
+            "type" : "string"
+          },
+          "region" : {
+            "type" : "string"
+          },
+          "startDate" : {
+            "type" : "string"
+          }
+        }
+      },
       "InstitutionBillingResponse" : {
         "title" : "InstitutionBillingResponse",
         "type" : "object",
@@ -1770,6 +2016,18 @@
           "state" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          }
+        }
+      },
+      "InstitutionPut" : {
+        "title" : "InstitutionPut",
+        "type" : "object",
+        "properties" : {
+          "geographicTaxonomyCodes" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

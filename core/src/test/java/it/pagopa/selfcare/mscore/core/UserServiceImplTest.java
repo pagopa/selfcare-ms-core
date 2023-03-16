@@ -1,16 +1,15 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +17,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-
-    @Mock
-    private UserRegistryConnector userRegistryConnector;
 
     @Mock
     private UserConnector userConnector;
@@ -75,8 +71,9 @@ class UserServiceImplTest {
     void testFindOnboardedManager4() {
         when(userConnector.findOnboardedManager(any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        List<RelationshipState> states = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> userServiceImpl.findOnboardedManager("42", "42", new ArrayList<>()));
+                () -> userServiceImpl.findOnboardedManager("42", "42", states));
         verify(userConnector).findOnboardedManager(any(), any(), any());
     }
 
@@ -148,6 +145,44 @@ class UserServiceImplTest {
         assertTrue(actualRetrieveAdminUsersResult.isEmpty());
         verify(userConnector).findWithFilter(any(), any(), any(),
                 any(), any(), any());
+    }
+
+    /**
+     * Method under test: {@link UserServiceImpl#checkIfAdmin(String, String)}
+     */
+    @Test
+    void testCheckIfAdmin() {
+        when(userConnector.findActiveInstitutionAdmin(any(), any(),any(),
+                any())).thenReturn(new ArrayList<>());
+        assertFalse(userServiceImpl.checkIfAdmin("42", "42"));
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(),any(),
+                any());
+    }
+
+    /**
+     * Method under test: {@link UserServiceImpl#checkIfAdmin(String, String)}
+     */
+    @Test
+    void testCheckIfAdmin2() {
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        onboardedUserList.add(new OnboardedUser());
+        when(userConnector.findActiveInstitutionAdmin(any(), any(),any(),
+                any())).thenReturn(onboardedUserList);
+        assertTrue(userServiceImpl.checkIfAdmin("42", "42"));
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(),any(),
+                any());
+    }
+
+    /**
+     * Method under test: {@link UserServiceImpl#checkIfAdmin(String, String)}
+     */
+    @Test
+    void testCheckIfAdmin3() {
+        when(userConnector.findActiveInstitutionAdmin(any(), any(),any(),
+                any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.checkIfAdmin("42", "42"));
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(),any(),
+                any());
     }
 }
 

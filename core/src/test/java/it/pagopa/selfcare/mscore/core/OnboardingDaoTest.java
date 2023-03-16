@@ -272,8 +272,9 @@ class OnboardingDaoTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Institution institution = new Institution();
+        List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
+                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
@@ -350,8 +351,9 @@ class OnboardingDaoTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Institution institution = new Institution();
+        List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
+                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(tokenConnector).save(any(), any());
@@ -425,8 +427,9 @@ class OnboardingDaoTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Institution institution = new Institution();
+        List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
+                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
@@ -501,8 +504,9 @@ class OnboardingDaoTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         Institution institution = new Institution();
+        List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, new ArrayList<>(), "Digest"));
+                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, list, "Digest"));
         verify(institutionConnector).findAndUpdate(any(), any(),
                 any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
@@ -537,8 +541,9 @@ class OnboardingDaoTest {
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
+        Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", "42", onboarding, new HashMap<>()));
+                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", "42", onboarding, map));
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).deleteById(any());
     }
@@ -571,8 +576,9 @@ class OnboardingDaoTest {
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
+        Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", "42", onboarding, new HashMap<>()));
+                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", "42", onboarding, map));
         verify(tokenConnector).deleteById(any());
     }
 
@@ -606,8 +612,9 @@ class OnboardingDaoTest {
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
+        Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, new HashMap<>()));
+                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, map));
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).deleteById(any());
         verify(userConnector).findAndRemoveProduct(any(), any(), any());
@@ -644,8 +651,9 @@ class OnboardingDaoTest {
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
+        Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, new HashMap<>()));
+                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, map));
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).deleteById(any());
         verify(userConnector, atLeast(1)).findAndRemoveProduct(any(), any(), any());

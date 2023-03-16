@@ -11,6 +11,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.builders.ResponseBuilder;
@@ -113,6 +114,7 @@ public class SwaggerConfig {
                 .tags(new Tag("Onboarding", environment.getProperty("swagger.name.api.onboarding.description")))
                 .tags(new Tag("Management", environment.getProperty("swagger.name.api.management.description")))
                 .directModelSubstitute(LocalTime.class, String.class)
+                .ignoredParameterTypes(Authentication.class)
                 .forCodeGeneration(true)
                 .useDefaultResponseMessages(false)
                 .globalResponses(HttpMethod.GET, List.of(BAD_REQUEST_RESPONSE, NOT_FOUND_RESPONSE))

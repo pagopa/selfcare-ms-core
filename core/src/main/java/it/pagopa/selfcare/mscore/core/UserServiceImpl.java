@@ -8,8 +8,10 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
+import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 
 @Service
 @Slf4j
@@ -36,6 +38,10 @@ public class UserServiceImpl implements UserService {
         return userConnector.findWithFilter(institutionId, personId, roles, states, products, productRoles);
     }
 
+    @Override
+    public boolean checkIfAdmin(String userId, String institutionId) {
+        return !userConnector.findActiveInstitutionAdmin(userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
+    }
 
     @Override
     public void verifyUser(String userId) {

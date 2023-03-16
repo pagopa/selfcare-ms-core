@@ -42,7 +42,8 @@ class UserConnectorImplTest {
         List<UserEntity> userEntities = new ArrayList<>();
         userEntities.add(new UserEntity());
         when(userRepository.findAllById(any())).thenReturn(userEntities);
-        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findAllByIds(new ArrayList<>()));
+        List<String> ids = new ArrayList<>();
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findAllByIds(ids));
     }
 
     @Test
@@ -162,8 +163,9 @@ class UserConnectorImplTest {
     void testFindAndCreate2() {
         when(userRepository.findAndModify(any(), any(), any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        UserBinding userBinding = new UserBinding();
         assertThrows(ResourceNotFoundException.class,
-                () -> userConnectorImpl.findAndCreate("42", new UserBinding()));
+                () -> userConnectorImpl.findAndCreate("42", userBinding));
         verify(userRepository).findAndModify(any(), any(), any(), any());
     }
 
@@ -209,8 +211,9 @@ class UserConnectorImplTest {
         when(userRepository.find(any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "."));
         ArrayList<PartyRole> roles = new ArrayList<>();
+        List<RelationshipState> states = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> userConnectorImpl.findActiveInstitutionAdmin("42", "42", roles, new ArrayList<>()));
+                () -> userConnectorImpl.findActiveInstitutionAdmin("42", "42", roles, states));
         verify(userRepository).find(any(), any());
     }
 
@@ -301,8 +304,9 @@ class UserConnectorImplTest {
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
         ArrayList<String> products = new ArrayList<>();
+        List<String> productRoles = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> userConnectorImpl.findWithFilter("42", "42", roles, states, products, new ArrayList<>()));
+                () -> userConnectorImpl.findWithFilter("42", "42", roles, states, products, productRoles));
         verify(userRepository).find(any(), any());
     }
 

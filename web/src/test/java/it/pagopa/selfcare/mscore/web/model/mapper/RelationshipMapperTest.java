@@ -137,7 +137,7 @@ class RelationshipMapperTest {
         assertNull(actualToRelationshipResultResult.getRole());
         assertNull(actualToRelationshipResultResult.getId());
         assertEquals("42", actualToRelationshipResultResult.getFrom());
-        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();;
+        InstitutionUpdateResponse institutionUpdate = actualToRelationshipResultResult.getInstitutionUpdate();
         assertNull(institutionUpdate.getInstitutionType());
         assertEquals(1, institutionUpdate.getGeographicTaxonomyCodes().size());
     }

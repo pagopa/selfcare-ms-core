@@ -10,23 +10,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class TokenServiceImplTest {
     @Mock
     private TokenConnector tokenConnector;
 
     @InjectMocks
     private TokenServiceImpl tokenServiceImpl;
-
-    @Mock
-    private UserService userService;
 
     @Test
     void verifyToken(){

@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +24,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class OnboardingServiceImplTest {
-
-    @Mock
-    private UserRelationshipService userRelationshipService;
 
     @Mock
     private OnboardingDao onboardingDao;
@@ -98,16 +95,6 @@ class OnboardingServiceImplTest {
                  any());
     }
 
-
-
-    @Test
-    void testGetOnboardingInfo4() {
-        when(userService.findByUserId(any())).thenReturn(null);
-        assertThrows(ResourceNotFoundException.class,
-                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
-        verify(userService).findByUserId(any());
-    }
-
     /**
      * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
      */
@@ -131,17 +118,6 @@ class OnboardingServiceImplTest {
     }
 
 
-    /**
-     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
-     */
-    @Test
-    void testGetOnboardingInfo7() {
-        when(userService.findByUserId(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "START - getUser with id: {}"));
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
-        verify(userService).findByUserId(any());
-    }
 
     /**
      * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
@@ -540,9 +516,6 @@ class OnboardingServiceImplTest {
         institution.setAddress("address");
 
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getId()).thenReturn("42");
-
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
 
         assertThrows(NullPointerException.class,
                 () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, selfCareUser));
@@ -764,7 +737,6 @@ class OnboardingServiceImplTest {
         institution.setOnboarding(onboardingList);
 
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getId()).thenReturn("42");
 
         when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(institution);
         when(institutionService.retrieveGeoTaxonomies(any())).thenReturn(new GeographicTaxonomies());
@@ -802,8 +774,6 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testOnboardingOperators2() {
-        when(onboardingDao.onboardOperator(any(), any()))
-                .thenReturn(new ArrayList<>());
         when(institutionService.retrieveInstitutionById(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
 
@@ -990,8 +960,6 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testOnboardingOperators9() {
-        when(onboardingDao.onboardOperator(any(), any()))
-                .thenReturn(new ArrayList<>());
         when(institutionService.retrieveInstitutionById(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
 

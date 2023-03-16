@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
@@ -18,13 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -37,7 +36,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class OnboardingControllerTest {
     @InjectMocks
     private OnboardingController onboardingController;
@@ -46,7 +45,7 @@ class OnboardingControllerTest {
     private OnboardingService onboardingService;
 
     @Mock
-    private TokenService tokenService;
+    TokenService tokenService;
 
     @Test
     void onboardingInstitutionOperators() throws Exception {
@@ -101,7 +100,6 @@ class OnboardingControllerTest {
 
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
         BillingRequest billingRequest = new BillingRequest();
@@ -179,7 +177,6 @@ class OnboardingControllerTest {
      */
     @Test
     void testVerifyOnboardingInfo2() throws Exception {
-        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
         SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
                 .formLogin();
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
@@ -212,8 +209,6 @@ class OnboardingControllerTest {
 
         Authentication authentication = mock(Authentication.class);
         when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
-        SecurityContext securityContext = mock(SecurityContext.class);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/onboarding/info")
