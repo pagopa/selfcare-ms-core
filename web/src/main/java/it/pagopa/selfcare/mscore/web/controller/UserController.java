@@ -84,7 +84,7 @@ public class UserController {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
         userRelationshipService.deleteRelationship(relationshipId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     /**

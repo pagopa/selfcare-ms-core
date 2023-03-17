@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class UserMapper {
@@ -49,6 +50,57 @@ public class UserMapper {
 
     private static OnboardedProduct toOnboardedProduct(OnboardedProductEntity entity) {
         OnboardedProduct product = new OnboardedProduct();
+        product.setProductId(entity.getProductId());
+        product.setRole(entity.getRole());
+        product.setTokenId(entity.getTokenId());
+        product.setContract(entity.getContract());
+        product.setEnv(entity.getEnv());
+        product.setRelationshipId(entity.getRelationshipId());
+        product.setProductRole(entity.getProductRole());
+        product.setStatus(entity.getStatus());
+        product.setUpdatedAt(entity.getUpdatedAt());
+        product.setCreatedAt(entity.getCreatedAt());
+        return product;
+    }
+
+    public static UserEntity toUserEntity(OnboardedUser example) {
+        UserEntity user = new UserEntity();
+        if(example.getId()!=null) {
+            user.setId(example.getId());
+        }else{
+            user.setId(UUID.randomUUID().toString());
+        }
+        user.setCreatedAt(example.getCreatedAt());
+        if (example.getBindings() != null) {
+            user.setBindings(toBindingsEntity(example.getBindings()));
+        }
+        return user;
+    }
+
+    private static List<UserBindingEntity> toBindingsEntity(List<UserBinding> bindings) {
+        List<UserBindingEntity> list = new ArrayList<>();
+        for (UserBinding binding : bindings) {
+            UserBindingEntity entity = new UserBindingEntity();
+            entity.setInstitutionId(binding.getInstitutionId());
+            if (binding.getProducts() != null) {
+                entity.setProducts(toOnboardedProductEntity(binding.getProducts()));
+            }
+            list.add(entity);
+        }
+        return list;
+    }
+
+    private static List<OnboardedProductEntity> toOnboardedProductEntity(List<OnboardedProduct> products) {
+        List<OnboardedProductEntity> productList = new ArrayList<>();
+        for (OnboardedProduct product : products) {
+            OnboardedProductEntity entity = toOnboardedProductEntity(product);
+            productList.add(entity);
+        }
+        return productList;
+    }
+
+    private static OnboardedProductEntity toOnboardedProductEntity(OnboardedProduct entity) {
+        OnboardedProductEntity product = new OnboardedProductEntity();
         product.setProductId(entity.getProductId());
         product.setRole(entity.getRole());
         product.setTokenId(entity.getTokenId());

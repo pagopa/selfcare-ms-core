@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class InstitutionMapperTest {
+class MigrationInstitutionMapperTest {
 
     /**
      * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}

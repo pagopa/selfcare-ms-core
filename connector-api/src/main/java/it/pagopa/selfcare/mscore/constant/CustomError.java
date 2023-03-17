@@ -21,6 +21,8 @@ public enum CustomError {
     PRODUCTS_NOT_FOUND_ERROR("0030", "Products not found for institution having internalId %s"),
     ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),
+    ONBOARDING_BILLING_ERROR("0000", "Billing vatNumber and recipientCode are required"),
+    ONBOARDING_PENDING("0000", "There is already an onboarding request for product %s pending"),
     TOKEN_ALREADY_CONSUMED("0040", "Token %s has already consumed"),
     TOKEN_EXPIRED("0040", "Token %s is expired in %s and is status is DELETED"),
     TOKEN_DELETED("0040", "Token %s was DELETED"),
@@ -31,6 +33,7 @@ public enum CustomError {
     RELATIONSHIP_NOT_ACTIVABLE("0007", "Relationship %s cannot be activated"),
     INVALID_STATUS_CHANGE("0000", "Cannot update state from value %s to value %s"),
     RELATIONSHIP_NOT_SUSPENDABLE("0010", "Relationship %s cannot be suspended"),
+    MISSING_QUERY_PARAMETER("0045", "At least one query parameter between [userId, institutionId] must be passed"),
     RELATIONSHIP_NOT_FOUND("0008", "Relationship not found for Institution %s User %s Role %s");
 
     private final String code;

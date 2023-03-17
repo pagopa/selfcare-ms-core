@@ -112,12 +112,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     private OnboardedUser getUser(String userId) {
-        log.info("START - getUser with id: {}", userId);
-        OnboardedUser user = userService.findByUserId(userId);
-        if (user == null) {
-            throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
-        }
-        return user;
+        return userService.findByUserId(userId);
     }
 
     private Institution findInstitutionByOptionalId(String institutionId, String institutionExternalId) {

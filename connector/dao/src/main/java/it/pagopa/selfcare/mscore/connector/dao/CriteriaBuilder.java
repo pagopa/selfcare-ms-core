@@ -35,4 +35,16 @@ public class CriteriaBuilder {
         }
         return this;
     }
+
+    public CriteriaBuilder isIfNotNull(@NonNull String key, @Nullable Object value) {
+        if (value != null) {
+            if (first) {
+                criteria = Criteria.where(key).is(value);
+                first = false;
+            } else {
+                criteria = criteria.and(key).is(value);
+            }
+        }
+        return this;
+    }
 }

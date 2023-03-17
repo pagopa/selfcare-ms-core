@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,5 +43,15 @@ public class TokenUtils {
         tokenUser.setUserId(userToOnboard.getId());
         tokenUser.setRole(userToOnboard.getRole());
         return tokenUser;
+    }
+
+    public static TokenRelationships toTokenRelationships(Token token, List<OnboardedUser> users) {
+        TokenRelationships tokenRelationships = new TokenRelationships();
+        tokenRelationships.setChecksum(token.getChecksum());
+        tokenRelationships.setTokenId(token.getId());
+        tokenRelationships.setInstitutionId(token.getInstitutionId());
+        tokenRelationships.setProductId(token.getProductId());
+        tokenRelationships.setUsers(users);
+        return tokenRelationships;
     }
 }

@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
@@ -238,7 +239,7 @@ public class InstitutionMapper {
         return dataProtectionOfficer;
     }
 
-    private static DataProtectionOfficerResponse toDataProtectionOfficerResponse(DataProtectionOfficer dataProtectionOfficer) {
+    public static DataProtectionOfficerResponse toDataProtectionOfficerResponse(DataProtectionOfficer dataProtectionOfficer) {
         DataProtectionOfficerResponse response = new DataProtectionOfficerResponse();
         if (dataProtectionOfficer != null) {
             response.setPec(dataProtectionOfficer.getPec());
@@ -260,7 +261,7 @@ public class InstitutionMapper {
         return paymentServiceProvider;
     }
 
-    private static PaymentServiceProviderResponse toPaymentServiceProviderResponse(PaymentServiceProvider paymentServiceProvider) {
+    public static PaymentServiceProviderResponse toPaymentServiceProviderResponse(PaymentServiceProvider paymentServiceProvider) {
         PaymentServiceProviderResponse response = new PaymentServiceProviderResponse();
         if (paymentServiceProvider != null) {
             response.setAbiCode(paymentServiceProvider.getAbiCode());
@@ -272,7 +273,7 @@ public class InstitutionMapper {
         return response;
     }
 
-    private static List<Attributes> toAttributes(List<AttributesRequest> attributes) {
+    public static List<Attributes> toAttributes(List<AttributesRequest> attributes) {
         List<Attributes> response = new ArrayList<>();
         if (attributes != null) {
             for (AttributesRequest a : attributes) {
@@ -288,12 +289,14 @@ public class InstitutionMapper {
 
     public static List<AttributesResponse> toAttributeResponse(List<Attributes> attributes) {
         List<AttributesResponse> list = new ArrayList<>();
-        for (Attributes a : attributes) {
-            AttributesResponse response = new AttributesResponse();
-            response.setCode(a.getCode());
-            response.setOrigin(a.getOrigin());
-            response.setDescription(a.getDescription());
-            list.add(response);
+        if (attributes != null && !attributes.isEmpty()) {
+            for (Attributes a : attributes) {
+                AttributesResponse response = new AttributesResponse();
+                response.setCode(a.getCode());
+                response.setOrigin(a.getOrigin());
+                response.setDescription(a.getDescription());
+                list.add(response);
+            }
         }
         return list;
     }
@@ -347,6 +350,67 @@ public class InstitutionMapper {
         }).collect(Collectors.toList());
     }
 
+    public static InstitutionManagementResponse toInstitutionManagementResponse(Institution institution) {
+        InstitutionManagementResponse response = new InstitutionManagementResponse();
+        response.setId(institution.getId());
+        response.setExternalId(institution.getExternalId());
+        response.setOrigin(institution.getOrigin());
+        response.setOriginId(institution.getOriginId());
+        response.setDescription(institution.getDescription());
+        response.setInstitutionType(institution.getInstitutionType());
+        response.setDigitalAddress(institution.getDigitalAddress());
+        response.setAddress(institution.getAddress());
+        response.setZipCode(institution.getZipCode());
+        response.setTaxCode(institution.getTaxCode());
+        if (institution.getOnboarding() != null) {
+            response.setProducts(toProductsMap(institution.getOnboarding(), institution));
+        }
+        if (institution.getGeographicTaxonomies() != null) {
+            response.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
+        }
+        if (institution.getAttributes() != null) {
+            response.setAttributes(toAttributeResponse(institution.getAttributes()));
+        }
+        if (institution.getPaymentServiceProvider() != null) {
+            response.setPaymentServiceProvider(toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
+        }
+        if (institution.getDataProtectionOfficer() != null) {
+            response.setDataProtectionOfficer(toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
+        }
+        response.setRea(institution.getRea());
+        response.setShareCapital(institution.getShareCapital());
+        response.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        response.setSupportEmail(institution.getSupportEmail());
+        response.setSupportPhone(institution.getSupportPhone());
+        response.setImported(institution.isImported());
+        response.setCreatedAt(institution.getCreatedAt());
+        response.setUpdatedAt(institution.getUpdatedAt());
+        return response;
+    }
+
+    public static List<InstitutionManagementResponse> toInstitutionListResponse(List<Institution> institutions) {
+        List<InstitutionManagementResponse> list = new ArrayList<>();
+        for (Institution institution : institutions) {
+            InstitutionManagementResponse response = toInstitutionManagementResponse(institution);
+            list.add(response);
+        }
+        return list;
+    }
+
+    private static Map<String, ProductsManagement> toProductsMap(List<Onboarding> onboarding, Institution institution) {
+        Map<String, ProductsManagement> map = new HashMap<>();
+        if (onboarding != null) {
+            for (Onboarding o : onboarding) {
+                ProductsManagement productsManagement = new ProductsManagement();
+                productsManagement.setProduct(o.getProductId());
+                productsManagement.setPricingPlan(o.getPricingPlan());
+                productsManagement.setBilling(toBillingResponse(o.getBilling(), institution));
+                map.put(o.getProductId(), productsManagement);
+            }
+        }
+        return map;
+    }
+
     public static List<InstitutionResponse> toInstitutionResponseList(List<Institution> institutions) {
         List<InstitutionResponse> responses = new ArrayList<>();
         if (!institutions.isEmpty()) {
@@ -355,5 +419,13 @@ public class InstitutionMapper {
             }
         }
         return responses;
+    }
+
+    public static List<AttributesResponse> toInstitutionAttributeResponse(List<Attributes> attributes, String institutionId) {
+        List<AttributesResponse> list = toAttributeResponse(attributes);
+        if (list.isEmpty()) {
+            throw new ResourceNotFoundException(String.format("Attributes for institution %s not found", institutionId), "0000");
+        }
+        return list;
     }
 }

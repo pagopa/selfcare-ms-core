@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 
@@ -24,6 +25,8 @@ public interface InstitutionService {
 
     Institution retrieveInstitutionProduct(String externalId, String productId);
 
+    List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+
     List<RelationshipInfo> retrieveUserInstitutionRelationships(Institution institution,
                                                            String userId,
                                                            String personId,
@@ -37,6 +40,10 @@ public interface InstitutionService {
     List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution);
 
     GeographicTaxonomies retrieveGeoTaxonomies(String code);
+
+    List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, SearchMode searchMode);
+
+    List<Institution> findInstitutionsByProductId(String productId);
 
     List<Institution> retrieveInstitutionByIds(List<String> ids);
 

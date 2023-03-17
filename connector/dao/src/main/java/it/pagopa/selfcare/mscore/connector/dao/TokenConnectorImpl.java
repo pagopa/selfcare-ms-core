@@ -20,9 +20,9 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.*;
 import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_MANAGER_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_NOT_FOUND;
 
@@ -34,6 +34,11 @@ public class TokenConnectorImpl implements TokenConnector {
 
     public TokenConnectorImpl(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
+    }
+
+    @Override
+    public List<Token> findAll(){
+        return tokenRepository.findAll().stream().map(TokenMapper::convertToToken).collect(Collectors.toList());
     }
 
     @Override
@@ -62,6 +67,12 @@ public class TokenConnectorImpl implements TokenConnector {
     @Override
     public Token save(Token token, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         final TokenEntity entity = convertToTokenEntity(token, geographicTaxonomies);
+        return convertToToken(tokenRepository.save(entity));
+    }
+
+    @Override
+    public Token save(Token token) {
+        final TokenEntity entity = convertToTokenEntity(token, null);
         return convertToToken(tokenRepository.save(entity));
     }
 

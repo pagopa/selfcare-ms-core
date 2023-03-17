@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-class TokenControllerTest {
+class MigrationTokenControllerTest {
 
     @InjectMocks
     private TokenController tokenController;

@@ -4,12 +4,17 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
 
 public interface UserConnector {
+
+    OnboardedUser save(OnboardedUser example);
+
+    List<OnboardedUser> findAll();
 
     void deleteById(String id);
 
@@ -20,10 +25,10 @@ public interface UserConnector {
      *
      * @param userId         id utente
      * @param relationshipId id relationship
-     * @param tokenId        id token
+     * @param token          token
      * @param state          nuovo stato
      */
-    void findAndUpdateState(String userId, @Nullable String relationshipId, @Nullable String tokenId, RelationshipState state);
+    void findAndUpdateState(String userId, @Nullable String relationshipId, @Nullable Token token, RelationshipState state);
 
     void findAndUpdate(OnboardedUser onboardedUser, String id, String institutionId, OnboardedProduct product, UserBinding bindings);
 

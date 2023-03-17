@@ -5,6 +5,8 @@ import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -34,6 +36,11 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
     public InstitutionConnectorImpl(InstitutionRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    public List<Institution> findAll(){
+        return repository.findAll().stream().map(InstitutionMapper::convertToInstitution).collect(Collectors.toList());
     }
 
     @Override
@@ -133,6 +140,22 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
+    public List<Institution> findByGeotaxonomies(List<String> geo, SearchMode searchMode) {
+        Query query = constructQueryWithSearchMode(geo, searchMode);
+        return repository.find(query, InstitutionEntity.class).stream()
+                .map(InstitutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Institution> findByProductId(String productId) {
+        Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId));
+        return repository.find(query, InstitutionEntity.class).stream()
+                .map(InstitutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Institution> findAllByIds(List<String> ids) {
         List<Institution> list = new ArrayList<>();
         repository.findAllById(ids)
@@ -181,6 +204,23 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         return repository.find(query, InstitutionEntity.class).stream()
                 .map(InstitutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
+    }
+
+
+    private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {
+        String geoQuery = InstitutionEntity.Fields.geographicTaxonomies.name()
+                + "." + GeoTaxonomyEntity.Fields.code.name();
+        switch (searchMode){
+            case ALL:
+                return Query.query(Criteria.where(geoQuery).all(geo));
+            case ANY:
+                return Query.query(Criteria.where(geoQuery).in(geo));
+            case EXACT:
+                return Query.query(Criteria.where(geoQuery).all(geo)
+                        .and(InstitutionEntity.Fields.geographicTaxonomies.name()).size(geo.size()));
+            default:
+                throw new InvalidRequestException("Invalid search mode","0000");
+        }
     }
 
     private String constructQuery(String... variables) {

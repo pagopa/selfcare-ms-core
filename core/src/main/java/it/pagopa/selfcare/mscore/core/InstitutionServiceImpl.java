@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -18,9 +19,11 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -166,17 +169,20 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states) {
+        List<Onboarding> onboardingList;
         if (institution.getOnboarding() != null) {
             if (states != null && !states.isEmpty()) {
-                return institution.getOnboarding().stream()
+                onboardingList = institution.getOnboarding().stream()
                         .filter(onboarding -> states.contains(onboarding.getStatus()))
                         .collect(Collectors.toList());
             } else {
-                return institution.getOnboarding();
+                onboardingList = institution.getOnboarding();
             }
-        } else {
-            throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), institution.getId()), PRODUCTS_NOT_FOUND_ERROR.getCode());
+            if (!onboardingList.isEmpty()) {
+                return onboardingList;
+            }
         }
+        throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), institution.getId()), PRODUCTS_NOT_FOUND_ERROR.getCode());
     }
 
     @Override
@@ -187,10 +193,16 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution) {
         log.info("Retrieving geographic taxonomies for institution {}", institution.getId());
-        return institution.getGeographicTaxonomies().stream()
-                .map(InstitutionGeographicTaxonomies::getCode)
-                .map(this::retrieveGeoTaxonomies)
-                .collect(Collectors.toList());
+        if (institution.getGeographicTaxonomies() != null) {
+            List<GeographicTaxonomies> geographicTaxonomies = institution.getGeographicTaxonomies().stream()
+                    .map(InstitutionGeographicTaxonomies::getCode)
+                    .map(this::retrieveGeoTaxonomies)
+                    .collect(Collectors.toList());
+            if (!geographicTaxonomies.isEmpty()) {
+                return geographicTaxonomies;
+            }
+        }
+        throw new ResourceNotFoundException(String.format("GeographicTaonomies for institution %s not found", institution.getId()), "0000");
     }
 
     @Override
@@ -212,6 +224,29 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, SearchMode searchMode) {
+        List<String> geo = Arrays.stream(geoTaxonomies.split(","))
+                .filter(StringUtils::hasText).collect(Collectors.toList());
+        validateGeoTaxonomies(geo, searchMode);
+        return institutionConnector.findByGeotaxonomies(geo, searchMode);
+    }
+
+    private void validateGeoTaxonomies(List<String> geoTaxonomies, SearchMode searchMode) {
+        if (geoTaxonomies.isEmpty() && searchMode != SearchMode.EXACT) {
+            throw new InvalidRequestException("Empty geographic taxonomies filter is valid only when searchMode is exact", "0000");
+        }
+    }
+
+    @Override
+    public List<Institution> findInstitutionsByProductId(String productId) {
+        List<Institution> institutions = institutionConnector.findByProductId(productId);
+        if (institutions.isEmpty()) {
+            throw new ResourceNotFoundException(String.format("Institutions with productId %s not found", productId), "0000");
+        }
+        return institutions;
+    }
+
+    @Override
     public List<Institution> retrieveInstitutionByIds(List<String> ids) {
         return institutionConnector.findAllByIds(ids);
     }
@@ -225,6 +260,17 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
         List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personToFilter, roles, states, products, productRoles);
         return toRelationshipInfo(institutionRelationships, institution);
+    }
+
+    @Override
+    public List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        if (userId != null) {
+            return toRelationshipInfo(userService.retrieveUsers(null, userId, roles, states, products, productRoles), null);
+        } else if (institutionId != null) {
+            Institution institution = retrieveInstitutionById(institutionId);
+            return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution);
+        }
+        throw new InvalidRequestException(MISSING_QUERY_PARAMETER.getMessage(), MISSING_QUERY_PARAMETER.getCode());
     }
 
     public void checkIfAlreadyExists(String externalId) {

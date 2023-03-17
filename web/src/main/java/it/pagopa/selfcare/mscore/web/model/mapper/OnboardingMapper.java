@@ -36,7 +36,7 @@ public class OnboardingMapper {
         return onboardingRequest;
     }
 
-    private static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request){
+    public static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request){
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setInstitutionType(request.getInstitutionType());
         institutionUpdate.setDescription(request.getDescription());

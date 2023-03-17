@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -112,13 +113,7 @@ public class OnboardingDao {
         Map<String, OnboardedProduct> productMap = new HashMap<>();
         try {
             for (UserToOnboard userToOnboard : request.getUsers()) {
-                OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
-                if (onboardedUser != null) {
-                    OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institutionId, request, tokenId);
-                    productMap.put(userToOnboard.getId(), currentProduct);
-                } else {
-                    createNewUser(userToOnboard, institutionId, request, tokenId);
-                }
+                updateOrCreateUser(toUpdate, userToOnboard, institutionId, request, tokenId, productMap);
             }
             log.debug("users to update: {}", toUpdate);
         } catch (Exception e) {
@@ -128,6 +123,16 @@ public class OnboardingDao {
         return productMap;
     }
 
+    private void updateOrCreateUser(List<String> toUpdate, UserToOnboard userToOnboard, String institutionId, OnboardingRequest request, String tokenId, Map<String, OnboardedProduct> productMap) {
+        try {
+            OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
+            OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institutionId, request, tokenId);
+            productMap.put(userToOnboard.getId(), currentProduct);
+        } catch (ResourceNotFoundException e) {
+            createNewUser(userToOnboard, institutionId, request, tokenId);
+        }
+    }
+
     public List<RelationshipInfo> onboardOperator(OnboardingOperatorsRequest request, Institution institution) {
         List<RelationshipInfo> response = new ArrayList<>();
         List<String> toUpdate = new ArrayList<>();
@@ -135,21 +140,23 @@ public class OnboardingDao {
         Map<String, OnboardedProduct> productMap = new HashMap<>();
         try {
             request.getUsers()
-                    .forEach(userToOnboard -> {
-                        OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
-                        if (onboardedUser != null) {
-                            OnboardedProduct currentProduct = updateOperator(response, onboardedUser, userToOnboard, institution, request);
-                            productMap.put(userToOnboard.getId(), currentProduct);
-                        } else {
-                            createOperator(response, userToOnboard, institution, request);
-                        }
-                    });
+                    .forEach(userToOnboard -> updateOrCreateOperator(toUpdate, userToOnboard, response, institution, request, productMap));
             log.debug("users to update: {}", toUpdate);
         } catch (Exception e) {
             List<String> toDelete = usersId.stream().filter(id -> !toUpdate.contains(id)).collect(Collectors.toList());
             rollbackUser(toUpdate, toDelete, request.getInstitutionId(), productMap);
         }
         return response;
+    }
+
+    private void updateOrCreateOperator(List<String> toUpdate, UserToOnboard userToOnboard, List<RelationshipInfo> response, Institution institution, OnboardingOperatorsRequest request, Map<String, OnboardedProduct> productMap) {
+        try {
+            OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
+            OnboardedProduct currentProduct = updateOperator(response, onboardedUser, userToOnboard, institution, request);
+            productMap.put(userToOnboard.getId(), currentProduct);
+        } catch (ResourceNotFoundException e) {
+            createOperator(response, userToOnboard, institution, request);
+        }
     }
 
     private void createNewUser(UserToOnboard user, String institutionId, OnboardingRequest request, String tokenId) {
@@ -168,9 +175,7 @@ public class OnboardingDao {
 
     private OnboardedUser isNewUser(List<String> toUpdate, String userId) {
         OnboardedUser onboardedUser = userConnector.findById(userId);
-        if (onboardedUser != null) {
-            toUpdate.add(onboardedUser.getId());
-        }
+        toUpdate.add(onboardedUser.getId());
         return onboardedUser;
     }
 

@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 
@@ -10,6 +11,8 @@ import java.util.Optional;
 public interface InstitutionConnector {
 
     Institution save(Institution example);
+
+    List<Institution> findAll();
 
     void deleteById(String id);
 
@@ -28,6 +31,10 @@ public interface InstitutionConnector {
     void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
 
     void findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
+
+    List<Institution> findByGeotaxonomies(List<String> geo, SearchMode searchMode);
+
+    List<Institution> findByProductId(String productId);
 
     List<Institution> findAllByIds(List<String> ids);
 

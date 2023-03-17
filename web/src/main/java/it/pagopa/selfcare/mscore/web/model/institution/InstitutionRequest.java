@@ -1,41 +1,38 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import lombok.Data;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
 public class InstitutionRequest {
 
-    @NotEmpty(message = "Description is required")
+    private String id;
+    private String externalId;
+    private Origin origin;
+    private String originId;
     private String description;
-
     private InstitutionType institutionType;
-
-    @NotEmpty(message = "DigitalAddress is required")
     private String digitalAddress;
-
-    @NotEmpty(message = "Address is required")
     private String address;
-
-    @NotEmpty(message = "ZipCode is required")
     private String zipCode;
-
-    @NotNull(message = "TaxCode is required")
     private String taxCode;
-
+    private BillingRequest billing;
+    private List<OnboardingRequest> onboarding;
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesRequest> attributes;
     private PaymentServiceProviderRequest paymentServiceProvider;
     private DataProtectionOfficerRequest dataProtectionOfficer;
-
     private String rea;
     private String shareCapital;
     private String businessRegisterPlace;
     private String supportEmail;
     private String supportPhone;
+    private boolean imported;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
 }

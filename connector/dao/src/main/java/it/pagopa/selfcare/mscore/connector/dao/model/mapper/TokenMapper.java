@@ -134,7 +134,7 @@ public class TokenMapper {
         return response;
     }
 
-    private static List<TokenUser> toTokenUser(List<TokenUserEntity> users) {
+    public static List<TokenUser> toTokenUser(List<TokenUserEntity> users) {
         List<TokenUser> response = new ArrayList<>();
         for (TokenUserEntity user : users) {
             TokenUser tokenUser = new TokenUser();

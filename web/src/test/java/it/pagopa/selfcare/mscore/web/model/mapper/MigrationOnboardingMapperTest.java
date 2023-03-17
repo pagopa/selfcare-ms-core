@@ -17,7 +17,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class OnboardingMapperTest {
+class MigrationOnboardingMapperTest {
 
     /**
      * Method under test: {@link OnboardingMapper#toOnboardingRequest(OnboardingInstitutionRequest)}
