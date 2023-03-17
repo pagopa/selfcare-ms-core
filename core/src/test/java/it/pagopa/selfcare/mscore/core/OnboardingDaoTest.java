@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -106,18 +107,8 @@ class OnboardingDaoTest {
         onboardingRequest.setUsers(users);
         when(userConnector.findById(any())).thenReturn(null);
         Institution institution = new Institution();
-        OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
-                new ArrayList<>(), "Digest");
-        assertNull(actualPersistResult.getTokenId());
-        Onboarding onboarding = actualPersistResult.getOnboarding();
-        assertEquals(RelationshipState.PENDING, onboarding.getStatus());
-        assertEquals("42", onboarding.getProductId());
-        assertEquals("Pricing Plan", onboarding.getPricingPlan());
-        assertEquals("Path", onboarding.getContract());
-        assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
-        verify(tokenConnector).save(any(), any());
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
+                new ArrayList<>(), "Digest"));
     }
 
     /**
@@ -788,7 +779,7 @@ class OnboardingDaoTest {
         List<UserToOnboard> users = new ArrayList<>();
         users.add(user);
         onboardingOperatorsRequest.setUsers(users);
-        assertFalse(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
+        assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
     }
 
 

@@ -37,7 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MigrationOnboardingControllerTest {
+class OnboardingControllerTest {
     @InjectMocks
     private OnboardingController onboardingController;
 

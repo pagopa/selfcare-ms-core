@@ -2,10 +2,19 @@ package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.Contract;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
@@ -14,7 +23,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TokenUtilsTest {
+class TokenUtilsTest {
     /**
      * Method under test: {@link TokenUtils#toToken(OnboardingRequest, Institution, String, OffsetDateTime)}
      */
@@ -197,6 +206,53 @@ public class TokenUtilsTest {
         assertEquals("42", actualConvertToTokenResult.getProductId());
         assertNull(actualConvertToTokenResult.getInstitutionId());
         assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
+    }
+
+    /**
+     * Method under test: {@link TokenUtils#toTokenRelationships(Token, List)}
+     */
+    @Test
+    void testToTokenRelationships() {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate
+                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
+        institutionUpdate.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+        TokenRelationships actualToTokenRelationshipsResult = TokenUtils.toTokenRelationships(token, new ArrayList<>());
+        assertEquals("Checksum", actualToTokenRelationshipsResult.getChecksum());
+        assertEquals("42", actualToTokenRelationshipsResult.getTokenId());
+        assertEquals("42", actualToTokenRelationshipsResult.getProductId());
+        assertEquals("42", actualToTokenRelationshipsResult.getInstitutionId());
     }
 
 }

@@ -95,28 +95,6 @@ class OnboardingServiceImplTest {
                  any());
     }
 
-    /**
-     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
-     */
-    @Test
-    void testGetOnboardingInfo5() {
-        when(userService.findByUserId(any())).thenReturn(null);
-        assertThrows(ResourceNotFoundException.class,
-                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
-        verify(userService).findByUserId(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
-     */
-    @Test
-    void testGetOnboardingInfo6() {
-        when(userService.findByUserId(any())).thenReturn(null);
-        assertThrows(ResourceNotFoundException.class,
-                () -> onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{}, "42"));
-        verify(userService).findByUserId(any());
-    }
-
 
 
     /**

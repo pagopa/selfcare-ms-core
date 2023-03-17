@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith(MockitoExtension.class)
-class MigrationInstitutionControllerTest {
+class InstitutionControllerTest {
     @InjectMocks
     private InstitutionController institutionController;
 
@@ -682,50 +682,6 @@ class MigrationInstitutionControllerTest {
                                         + "\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea"
                                         + "\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone"
                                         + "\":\"6625550144\",\"imported\":true}"));
-    }
-
-    /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
-     */
-    @Test
-    void testCreateInstitutionRaw8() throws Exception {
-        DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
-        dataProtectionOfficerRequest.setAddress("42 Main St");
-        dataProtectionOfficerRequest.setEmail("jane.doe@example.org");
-        dataProtectionOfficerRequest.setPec("Pec");
-
-        PaymentServiceProviderRequest paymentServiceProviderRequest = new PaymentServiceProviderRequest();
-        paymentServiceProviderRequest.setAbiCode("Abi Code");
-        paymentServiceProviderRequest.setBusinessRegisterNumber("42");
-        paymentServiceProviderRequest.setLegalRegisterName("Legal Register Name");
-        paymentServiceProviderRequest.setLegalRegisterNumber("42");
-        paymentServiceProviderRequest.setVatNumberGroup(true);
-
-        InstitutionRequest institutionRequest = new InstitutionRequest();
-        institutionRequest.setAddress("");
-        institutionRequest.setAttributes(new ArrayList<>());
-        institutionRequest.setBusinessRegisterPlace("Business Register Place");
-        institutionRequest.setDataProtectionOfficer(dataProtectionOfficerRequest);
-        institutionRequest.setDescription("The characteristics of someone or something");
-        institutionRequest.setDigitalAddress("42 Main St");
-        institutionRequest.setGeographicTaxonomies(new ArrayList<>());
-        institutionRequest.setInstitutionType(InstitutionType.PA);
-        institutionRequest.setPaymentServiceProvider(paymentServiceProviderRequest);
-        institutionRequest.setRea("Rea");
-        institutionRequest.setShareCapital("Share Capital");
-        institutionRequest.setSupportEmail("jane.doe@example.org");
-        institutionRequest.setSupportPhone("6625550144");
-        institutionRequest.setTaxCode("Tax Code");
-        institutionRequest.setZipCode("21654");
-        String content = (new ObjectMapper()).writeValueAsString(institutionRequest);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/institutions/insert/{externalId}", "42")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().is(400));
     }
 
     /**

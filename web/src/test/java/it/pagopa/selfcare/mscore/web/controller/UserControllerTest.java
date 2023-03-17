@@ -110,7 +110,7 @@ class UserControllerTest {
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     /**
@@ -125,7 +125,7 @@ class UserControllerTest {
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(deleteResult)
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     /**

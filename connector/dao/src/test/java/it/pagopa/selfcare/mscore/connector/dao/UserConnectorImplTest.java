@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -69,9 +70,6 @@ class UserConnectorImplTest {
         verify(userRepository).deleteById(any());
     }
 
-    /**
-     * Method under test: {@link UserConnectorImpl#findAndUpdateState(String, String, String, RelationshipState)}
-     */
     @Test
     void testFindAndUpdateState() {
         UserEntity userEntity = new UserEntity();
@@ -81,7 +79,7 @@ class UserConnectorImplTest {
         userEntity.setUpdatedAt(null);
         when(userRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(userEntity);
-        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateState("42", "42", "42", RelationshipState.PENDING));
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateState("42", "42", new Token(), RelationshipState.PENDING));
     }
 
     @Test

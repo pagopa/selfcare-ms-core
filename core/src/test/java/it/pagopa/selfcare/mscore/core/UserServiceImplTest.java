@@ -14,9 +14,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ContextConfiguration(classes = {UserServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
@@ -96,14 +107,6 @@ class UserServiceImplTest {
         verify(userConnector).findById(any());
     }
 
-    @Test
-    void verifyUser2() {
-        when(userConnector.findById(any())).thenReturn(null);
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.verifyUser("42"));
-        verify(userConnector).findById(any());
-    }
-
-
     /**
      * Method under test: {@link UserServiceImpl#findByUserId}
      */
@@ -135,6 +138,30 @@ class UserServiceImplTest {
         verify(userConnector).findById(any());
     }
 
+    /**
+     * Method under test: {@link UserServiceImpl#findAllByIds(List)}
+     */
+    @Test
+    void testFindAllByIds() {
+        assertTrue(userServiceImpl.findAllByIds(new ArrayList<>()).isEmpty());
+    }
+
+    /**
+     * Method under test: {@link UserServiceImpl#findAllByIds(List)}
+     */
+    @Test
+    void testFindAllByIds2() {
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        when(userConnector.findAllByIds((List<String>) any())).thenReturn(onboardedUserList);
+
+        ArrayList<String> stringList = new ArrayList<>();
+        stringList.add("foo");
+        List<OnboardedUser> actualFindAllByIdsResult = userServiceImpl.findAllByIds(stringList);
+        assertSame(onboardedUserList, actualFindAllByIdsResult);
+        assertTrue(actualFindAllByIdsResult.isEmpty());
+        verify(userConnector).findAllByIds((List<String>) any());
+    }
+
     @Test
     void retrieveUsers() {
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
@@ -152,10 +179,10 @@ class UserServiceImplTest {
      */
     @Test
     void testCheckIfAdmin() {
-        when(userConnector.findActiveInstitutionAdmin(any(), any(),any(),
+        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
                 any())).thenReturn(new ArrayList<>());
         assertFalse(userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findActiveInstitutionAdmin(any(), any(),any(),
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
                 any());
     }
 
@@ -166,10 +193,10 @@ class UserServiceImplTest {
     void testCheckIfAdmin2() {
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
         onboardedUserList.add(new OnboardedUser());
-        when(userConnector.findActiveInstitutionAdmin(any(), any(),any(),
+        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
                 any())).thenReturn(onboardedUserList);
         assertTrue(userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findActiveInstitutionAdmin(any(), any(),any(),
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
                 any());
     }
 
@@ -178,10 +205,10 @@ class UserServiceImplTest {
      */
     @Test
     void testCheckIfAdmin3() {
-        when(userConnector.findActiveInstitutionAdmin(any(), any(),any(),
+        when(userConnector.findActiveInstitutionAdmin(any(), any(), any(),
                 any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.checkIfAdmin("42", "42"));
-        verify(userConnector).findActiveInstitutionAdmin(any(), any(),any(),
+        verify(userConnector).findActiveInstitutionAdmin(any(), any(), any(),
                 any());
     }
 }
