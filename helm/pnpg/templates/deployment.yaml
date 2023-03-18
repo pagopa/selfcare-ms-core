@@ -40,6 +40,8 @@ spec:
                 name: application-insights
             - secretRef:
                 name: common-secrets
+            - secretRef:
+                name: mongo-credentials
             - configMapRef:
                 name: jwt
             - secretRef:
