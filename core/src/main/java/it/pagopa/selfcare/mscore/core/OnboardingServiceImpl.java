@@ -310,11 +310,14 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     private void checkIncompleteOnboarding(Institution institution, OnboardingRequest request) {
-        var tokens = institution.getOnboarding().stream()
-                .filter(o -> o.getProductId().equalsIgnoreCase(request.getProductId())
-                        && (o.getStatus() == RelationshipState.PENDING || o.getStatus() == RelationshipState.TOBEVALIDATED))
-                .map(o -> onboardingDao.getTokenById(o.getTokenId()))
-                .collect(Collectors.toList());
+        List<Token> tokens = new ArrayList<>();
+        if(institution.getOnboarding() != null) {
+            tokens = institution.getOnboarding().stream()
+                    .filter(o -> o.getProductId().equalsIgnoreCase(request.getProductId())
+                            && (o.getStatus() == RelationshipState.PENDING || o.getStatus() == RelationshipState.TOBEVALIDATED))
+                    .map(o -> onboardingDao.getTokenById(o.getTokenId()))
+                    .collect(Collectors.toList());
+        }
         var now = OffsetDateTime.now();
         boolean isIncomplete = false;
         for (var token : tokens) {

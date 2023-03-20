@@ -136,7 +136,7 @@ public class OnboardingController {
     @PostMapping(value = "/complete/{tokenId}")
     public ResponseEntity<Void> completeOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
                                                    @PathVariable(value = "tokenId") String tokenId,
-                                                   @RequestBody MultipartFile contract) {
+                                                   @RequestPart MultipartFile contract) {
         log.info("Confirm onboarding of token identified with {}", tokenId);
         CustomExceptionMessage.setCustomMessage(CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);

@@ -50,14 +50,14 @@ public class EmailService {
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = coreConfig.getDestinationMails() != null ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
             log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailParametersMapper.getOnboardingPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
+            emailConnector.sendMail(mailParametersMapper.getOnboardingPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
             log.info(" onboarding-contract-email Email successful sent");
         } else {
             mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
             log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
+            emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
             log.info("onboarding-complete-email-notification Email successful sent");
         }
     }

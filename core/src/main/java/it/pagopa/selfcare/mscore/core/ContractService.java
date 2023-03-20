@@ -156,7 +156,7 @@ public class ContractService {
     private String buildSignatureReason(Institution institution, OnboardingRequest request) {
         return pagoPaSignatureConfig.getApplyOnboardingTemplateReason()
                 .replace("${institutionName}", institution.getDescription())
-                .replace("${productName}", request.getProductName());
+                .replace("${productName}", request.getProductId());
     }
 
     private void validateSignature(String... errorEnums) {
