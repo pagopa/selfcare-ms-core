@@ -145,7 +145,6 @@ class OnboardingControllerTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenService.verifyToken(org.mockito.Mockito.any())).thenReturn(token);
         SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
                 .formLogin();
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
