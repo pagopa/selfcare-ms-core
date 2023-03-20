@@ -23,8 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.*;
-import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_MANAGER_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 
 @Slf4j
 @Component
@@ -86,16 +85,19 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public Token findAndUpdateToken(String tokenId, RelationshipState status, @Nullable String digest) {
+    public Token findAndUpdateToken(Token token, RelationshipState status, @Nullable String digest) {
         OffsetDateTime now = OffsetDateTime.now();
 
-        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(token.getId()));
         Update updateDefinition = new Update()
                 .set(TokenEntity.Fields.status.name(), status)
                 .set(TokenEntity.Fields.updatedAt.name(), now);
 
         if (digest != null) {
             updateDefinition.set(TokenEntity.Fields.checksum.name(), digest);
+        }
+        if (token.getContractSigned() != null) {
+            updateDefinition.set(TokenEntity.Fields.contractSigned.name(), token.getContractSigned());
         }
         if (status == RelationshipState.DELETED) {
             updateDefinition.set(TokenEntity.Fields.closedAt.name(), now);
@@ -114,6 +116,6 @@ public class TokenConnectorImpl implements TokenConnector {
         return tokenRepository.find(query, TokenEntity.class).stream()
                 .map(TokenMapper::convertToToken)
                 .findFirst()
-                .orElseThrow(() -> new InvalidRequestException("",""));
+                .orElseThrow(() -> new InvalidRequestException(String.format(CONTRACT_NOT_FOUND.getMessage(), institutionId, productId), CONTRACT_NOT_FOUND.getCode()));
     }
 }

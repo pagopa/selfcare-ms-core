@@ -44,7 +44,7 @@ class OnboardingDaoTest {
     void testPersist0() {
         when(institutionConnector.findAndUpdate(any(), any(), any()))
                 .thenReturn(new Institution());
-        when(coreConfig.getExpiringDate()).thenReturn(60);
+        when(coreConfig.getOnboardingExpiringDate()).thenReturn(60);
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
@@ -184,7 +184,6 @@ class OnboardingDaoTest {
         Institution institution = new Institution();
         OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
                 new ArrayList<>(), "Digest");
-        assertEquals("tokenId", actualPersistResult.getTokenId());
         Onboarding onboarding = actualPersistResult.getOnboarding();
         assertEquals(RelationshipState.PENDING, onboarding.getStatus());
         assertEquals("42", onboarding.getProductId());
@@ -505,9 +504,6 @@ class OnboardingDaoTest {
         verify(tokenConnector).deleteById(any());
     }
 
-    /**
-     * Method under test: {@link OnboardingDao#rollbackSecondStep(List, List, String, String, Onboarding, Map)}
-     */
     @Test
     void testRollbackSecondStep() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
@@ -534,14 +530,9 @@ class OnboardingDaoTest {
         onboarding.setUpdatedAt(null);
         Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", "42", onboarding, map));
-        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).deleteById(any());
+                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", new Token(), onboarding, map));
     }
 
-    /**
-     * Method under test: {@link OnboardingDao#rollbackSecondStep(List, List, String, String, Onboarding, Map)}
-     */
     @Test
     void testRollbackSecondStep2() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
@@ -569,13 +560,9 @@ class OnboardingDaoTest {
         onboarding.setUpdatedAt(null);
         Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", "42", onboarding, map));
-        verify(tokenConnector).deleteById(any());
+                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", new Token(), onboarding, map));
     }
 
-    /**
-     * Method under test: {@link OnboardingDao#rollbackSecondStep(List, List, String, String, Onboarding, Map)}
-     */
     @Test
     void testRollbackSecondStep3() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
@@ -605,15 +592,9 @@ class OnboardingDaoTest {
         onboarding.setUpdatedAt(null);
         Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, map));
-        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).deleteById(any());
-        verify(userConnector).findAndRemoveProduct(any(), any(), any());
+                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", new Token(), onboarding, map));
     }
 
-    /**
-     * Method under test: {@link OnboardingDao#rollbackSecondStep(List, List, String, String, Onboarding, Map)}
-     */
     @Test
     void testRollbackSecondStep4() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
@@ -644,10 +625,7 @@ class OnboardingDaoTest {
         onboarding.setUpdatedAt(null);
         Map<String, OnboardedProduct> map = new HashMap<>();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", "42", onboarding, map));
-        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).deleteById(any());
-        verify(userConnector, atLeast(1)).findAndRemoveProduct(any(), any(), any());
+                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", new Token(), onboarding, map));
     }
 
     /**

@@ -871,9 +871,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals(Env.ROOT, actualConstructOperatorProductResult.getEnv());
     }
 
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#constructProduct(UserToOnboard, OnboardingRequest)}
-     */
     @Test
     void testConstructProduct() {
         UserToOnboard userToOnboard = new UserToOnboard();
@@ -892,15 +889,12 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setContract(new Contract());
         OnboardedProduct actualConstructProductResult = OnboardingInstitutionUtils.constructProduct(userToOnboard,
-                onboardingRequest);
+                onboardingRequest, new Institution());
         assertEquals(RelationshipState.ACTIVE, actualConstructProductResult.getStatus());
         assertEquals(PartyRole.MANAGER, actualConstructProductResult.getRole());
         assertEquals(Env.ROOT, actualConstructProductResult.getEnv());
     }
 
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#constructOnboarding(OnboardingRequest)}
-     */
     @Test
     void testConstructOnboarding() {
         Billing billing = new Billing();
@@ -950,7 +944,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest);
+        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest, new Institution());
         assertSame(billing, actualConstructOnboardingResult.getBilling());
         assertEquals("Path", actualConstructOnboardingResult.getContract());
         assertEquals("Pricing Plan", actualConstructOnboardingResult.getPricingPlan());
@@ -958,9 +952,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42", actualConstructOnboardingResult.getProductId());
     }
 
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#constructOnboarding(OnboardingRequest)}
-     */
     @Test
     void testConstructOnboarding4() {
         Billing billing = new Billing();
@@ -1010,7 +1001,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest);
+        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest, new Institution());
         assertSame(billing, actualConstructOnboardingResult.getBilling());
         assertEquals("Path", actualConstructOnboardingResult.getContract());
         assertEquals("Pricing Plan", actualConstructOnboardingResult.getPricingPlan());
@@ -1018,9 +1009,6 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("42", actualConstructOnboardingResult.getProductId());
     }
 
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#constructOnboarding(OnboardingRequest)}
-     */
     @Test
     void testConstructOnboarding5() {
         Billing billing = new Billing();
@@ -1070,7 +1058,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest);
+        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest, new Institution());
         assertSame(billing, actualConstructOnboardingResult.getBilling());
         assertEquals("Path", actualConstructOnboardingResult.getContract());
         assertEquals("Pricing Plan", actualConstructOnboardingResult.getPricingPlan());

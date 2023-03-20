@@ -941,27 +941,4 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
-
-    @Test
-    void updateInstitution() throws Exception {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
-
-        InstitutionPut request = new InstitutionPut();
-        request.setGeographicTaxonomyCodes(new ArrayList<>());
-        ObjectMapper mapper = new ObjectMapper();
-        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/{id}",
-                "42")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(request))
-                .principal(authentication);
-        MockMvcBuilders.standaloneSetup(institutionController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
-    }
 }

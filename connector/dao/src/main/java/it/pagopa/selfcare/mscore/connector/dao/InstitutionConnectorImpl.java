@@ -102,7 +102,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 entity.setDesc(geographicTaxonomies.getDesc());
                 return entity;
             }).collect(Collectors.toList());
-            list.forEach(geoTaxonomyEntity -> update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geoTaxonomyEntity));
+            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name()).each(list);
         }
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);

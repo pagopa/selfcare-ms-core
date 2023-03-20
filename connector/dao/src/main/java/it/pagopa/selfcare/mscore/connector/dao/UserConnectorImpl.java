@@ -160,10 +160,10 @@ public class UserConnectorImpl implements UserConnector {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId))
                 .addCriteria(Criteria.where(UserEntity.Fields.bindings.name())
                         .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
-                                .and(constructQuery(UserBinding.Fields.products.name()))
-                                .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name())).in(roles)
+                                .and(UserBinding.Fields.products.name())
+                                .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roles)
                                 .and(OnboardedProduct.Fields.env.name()).is(Env.ROOT)
-                                .and(OnboardedProduct.Fields.status.name()).in(states)));
+                                .and(OnboardedProduct.Fields.status.name()).in(states))));
 
         return repository.find(query, UserEntity.class).stream()
                 .map(UserMapper::toOnboardedUser)

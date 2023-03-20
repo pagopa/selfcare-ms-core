@@ -21,7 +21,7 @@ public interface TokenConnector {
 
     Token findById(String tokenId);
 
-    Token findAndUpdateToken(String tokenId, RelationshipState state, @Nullable String checksum);
+    Token findAndUpdateToken(Token token, RelationshipState state, @Nullable String checksum);
 
     Token findWithFilter(String institutionId, String productId);
 }

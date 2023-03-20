@@ -42,8 +42,18 @@ spec:
                 name: common-secrets
             - secretRef:
                 name: mongo-credentials
+            - secretRef:
+                name: aruba-sign-service-secrets
+            - secretRef:
+                name: contracts-storage
+            - secretRef:
+                name: onboarding-interceptor-event-secrets
+            - secretRef:
+                name: mail
             - configMapRef:
                 name: jwt
+            - configMapRef:
+                name: aruba-sign-service
             - secretRef:
                 name: uservice-party-process
             - configMapRef:

@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,17 +40,19 @@ public class RelationshipMapper {
     }
 
     private static void addInstitutionOnboardingData(RelationshipInfo info, RelationshipResult relationshipResult) {
-        for (Onboarding onboarding : info.getInstitution().getOnboarding()) {
-            if (onboarding.getProductId().equalsIgnoreCase(info.getOnboardedProduct().getProductId())) {
-                relationshipResult.setPricingPlan(onboarding.getPricingPlan());
-                relationshipResult.setBilling(InstitutionMapper.toBillingResponse(onboarding, info.getInstitution()));
+        if (info.getInstitution().getOnboarding() != null) {
+            for (Onboarding onboarding : info.getInstitution().getOnboarding()) {
+                if (onboarding.getProductId().equalsIgnoreCase(info.getOnboardedProduct().getProductId())) {
+                    relationshipResult.setPricingPlan(onboarding.getPricingPlan());
+                    relationshipResult.setBilling(InstitutionMapper.toBillingResponse(onboarding, info.getInstitution()));
+                }
             }
         }
     }
 
     public static List<RelationshipResult> toRelationshipResultList(List<RelationshipInfo> relationshipInfoList) {
         List<RelationshipResult> relationshipResults = new ArrayList<>();
-        for(RelationshipInfo info : relationshipInfoList){
+        for (RelationshipInfo info : relationshipInfoList) {
             relationshipResults.add(toRelationshipResult(info));
         }
         return relationshipResults;

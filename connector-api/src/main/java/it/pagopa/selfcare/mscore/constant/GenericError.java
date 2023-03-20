@@ -31,7 +31,7 @@ public enum GenericError {
     INVALID_SIGNATURE_TAX_CODE("1004", "The tax code related to signature does not match anyone contained in the relationships"),
     UNABLE_TO_DOWNLOAD_FILE("1102", "Unable to download template %s"),
     INVALID_SIGNATURE("0005", "Signature not valid: %s"),
-    ERROR_DURING_SEND_MAIL("0000", "Error during send mail to %s"),
+    ERROR_DURING_SEND_MAIL("0000", "Error during send mail"),
     ERROR_DURING_UPLOAD_FILE("0000", "Error during upload file %s"),
     ERROR_DURING_DOWNLOAD_FILE("0000", "Error during download file %s"),
     RETRIEVING_USER_RELATIONSHIP_ERROR("0023", "Error while retrieving user relationships"),

@@ -36,7 +36,7 @@ public class OnboardingMapper {
         return onboardingRequest;
     }
 
-    public static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request){
+    private static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request) {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setInstitutionType(request.getInstitutionType());
         institutionUpdate.setDescription(request.getDescription());
@@ -44,10 +44,18 @@ public class OnboardingMapper {
         institutionUpdate.setAddress(request.getAddress());
         institutionUpdate.setTaxCode(request.getTaxCode());
         institutionUpdate.setZipCode(request.getZipCode());
-        institutionUpdate.setPaymentServiceProvider(toPaymentServiceProvider(request.getPaymentServiceProvider()));
-        institutionUpdate.setDataProtectionOfficer(toDataProtectionOfficer(request.getDataProtectionOfficer()));
-        institutionUpdate.setGeographicTaxonomies(request.getGeographicTaxonomyCodes().stream()
-                .map(s -> new InstitutionGeographicTaxonomies(s,null)).collect(Collectors.toList()));
+        if (request.getPaymentServiceProvider() != null) {
+            institutionUpdate.setPaymentServiceProvider(toPaymentServiceProvider(request.getPaymentServiceProvider()));
+        }
+        if (request.getDataProtectionOfficer() != null) {
+            institutionUpdate.setDataProtectionOfficer(toDataProtectionOfficer(request.getDataProtectionOfficer()));
+        }
+        if (request.getGeographicTaxonomyCodes() != null) {
+            var codes = request.getGeographicTaxonomyCodes().stream()
+                    .map(s -> new InstitutionGeographicTaxonomies(s,null))
+                    .collect(Collectors.toList());
+            institutionUpdate.setGeographicTaxonomies(codes);
+        }
         institutionUpdate.setRea(institutionUpdate.getRea());
         institutionUpdate.setShareCapital(institutionUpdate.getShareCapital());
         institutionUpdate.setBusinessRegisterPlace(institutionUpdate.getBusinessRegisterPlace());
@@ -59,8 +67,10 @@ public class OnboardingMapper {
 
     private static Contract toContract(ContractRequest request) {
         Contract contract = new Contract();
-        contract.setPath(request.getPath());
-        contract.setVersion(request.getVersion());
+        if (request != null) {
+            contract.setPath(request.getPath());
+            contract.setVersion(request.getVersion());
+        }
         return contract;
     }
 
@@ -118,6 +128,19 @@ public class OnboardingMapper {
         request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());
         request.setProductId(onboardingInstitutionOperatorsRequest.getProductId());
         request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionOperatorsRequest.getUsers()));
+        return request;
+    }
+
+    public static OnboardingLegalsRequest toOnboardingLegalsRequest(OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest) {
+        OnboardingLegalsRequest request = new OnboardingLegalsRequest();
+        request.setTokenType(TokenType.LEGALS);
+        request.setProductId(onboardingInstitutionLegalsRequest.getProductId());
+        request.setProductName(onboardingInstitutionLegalsRequest.getProductName());
+        request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionLegalsRequest.getUsers()));
+        request.setInstitutionExternalId(onboardingInstitutionLegalsRequest.getInstitutionExternalId());
+        request.setInstitutionId(onboardingInstitutionLegalsRequest.getInstitutionId());
+        request.setContract(toContract(onboardingInstitutionLegalsRequest.getContract()));
+        request.setSignContract(onboardingInstitutionLegalsRequest.isSignContract());
         return request;
     }
 }

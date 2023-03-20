@@ -111,7 +111,7 @@ class TokenConnectorImplTest {
         tokenEntity.setUpdatedAt(null);
         tokenEntity.setUsers(new ArrayList<>());
         when(tokenRepository.findAndModify(any(), any(), any(),any())).thenReturn(tokenEntity);
-        tokenConnectorImpl.findAndUpdateToken("42", RelationshipState.REJECTED, "");
+        tokenConnectorImpl.findAndUpdateToken(new Token(), RelationshipState.REJECTED, "");
         verify(tokenRepository).findAndModify(any(), any(), any(), any());
     }
 
