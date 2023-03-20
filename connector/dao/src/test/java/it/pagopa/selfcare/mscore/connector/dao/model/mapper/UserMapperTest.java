@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntit
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserMapperTest {
     /**
@@ -116,6 +119,90 @@ class UserMapperTest {
         assertTrue(actualToOnboardedUserResult.getBindings().isEmpty());
         assertEquals("42", actualToOnboardedUserResult.getId());
         assertNull(actualToOnboardedUserResult.getCreatedAt());
+    }
+
+    /**
+     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     */
+    @Test
+    void testToUserEntity() {
+        assertNull(UserMapper.toUserEntity(new OnboardedUser()).getCreatedAt());
+    }
+
+    /**
+     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     */
+    @Test
+    void testToUserEntity2() {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        ArrayList<UserBinding> userBindingList = new ArrayList<>();
+        onboardedUser.setBindings(userBindingList);
+        onboardedUser.setId(null);
+        UserEntity actualToUserEntityResult = UserMapper.toUserEntity(onboardedUser);
+        assertNull(actualToUserEntityResult.getCreatedAt());
+    }
+
+    /**
+     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     */
+    @Test
+    void testToUserEntity3() {
+        UserBinding userBinding = new UserBinding();
+        userBinding.setProducts(null);
+
+        UserBinding userBinding1 = new UserBinding();
+        userBinding1.setProducts(null);
+
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("Contract");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(Env.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductRole("Product Role");
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setTokenId("42");
+        onboardedProduct.setUpdatedAt(null);
+
+        ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
+        onboardedProductList.add(onboardedProduct);
+
+        UserBinding userBinding2 = new UserBinding();
+        userBinding2.setProducts(onboardedProductList);
+
+        ArrayList<UserBinding> userBindingList = new ArrayList<>();
+        userBindingList.add(new UserBinding());
+        userBindingList.add(userBinding);
+        userBindingList.add(userBinding1);
+        userBindingList.add(userBinding2);
+
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(userBindingList);
+        onboardedUser.setId(null);
+        UserEntity actualToUserEntityResult = UserMapper.toUserEntity(onboardedUser);
+        List<UserBindingEntity> bindings = actualToUserEntityResult.getBindings();
+        assertEquals(4, bindings.size());
+        assertNull(actualToUserEntityResult.getCreatedAt());
+        UserBindingEntity getResult = bindings.get(3);
+        assertEquals(1, getResult.getProducts().size());
+        assertNull(bindings.get(2).getInstitutionId());
+        assertNull(getResult.getInstitutionId());
+        assertNull(bindings.get(0).getInstitutionId());
+        assertNull(bindings.get(1).getInstitutionId());
+    }
+
+    /**
+     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     */
+    @Test
+    void testToUserEntity4() {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setBindings(null);
+        onboardedUser.setId("foo");
+        UserEntity actualToUserEntityResult = UserMapper.toUserEntity(onboardedUser);
+        assertEquals("foo", actualToUserEntityResult.getId());
+        assertNull(actualToUserEntityResult.getCreatedAt());
     }
 }
 

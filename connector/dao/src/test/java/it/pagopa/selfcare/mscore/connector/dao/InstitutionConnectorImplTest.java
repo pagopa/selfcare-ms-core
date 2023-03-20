@@ -2,10 +2,18 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.AttributesEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.BillingEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -21,10 +29,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@ContextConfiguration(classes = {InstitutionConnectorImpl.class})
 @ExtendWith(MockitoExtension.class)
 class InstitutionConnectorImplTest {
 
@@ -34,6 +58,483 @@ class InstitutionConnectorImplTest {
 
     @Mock
     InstitutionRepository institutionRepository;
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll() {
+        when(institutionRepository.findAll()).thenReturn(new ArrayList<>());
+        assertTrue(institutionConnectorImpl.findAll().isEmpty());
+        verify(institutionRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll2() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.findAll()).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findAll().size());
+        verify(institutionRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll3() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        BillingEntity billingEntity1 = new BillingEntity();
+        billingEntity1.setPublicServices(false);
+        billingEntity1.setRecipientCode("it.pagopa.selfcare.mscore.connector.dao.model.inner.BillingEntity");
+        billingEntity1.setVatNumber("Vat Number");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("17 High St");
+        dataProtectionOfficerEntity1.setEmail("john.smith@example.org");
+        dataProtectionOfficerEntity1
+                .setPec("it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1
+                .setAbiCode("it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("Business Register Number");
+        paymentServiceProviderEntity1
+                .setLegalRegisterName("it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("Legal Register Number");
+        paymentServiceProviderEntity1.setVatNumberGroup(false);
+
+        InstitutionEntity institutionEntity1 = new InstitutionEntity();
+        institutionEntity1.setAddress("17 High St");
+        institutionEntity1.setAttributes(new ArrayList<>());
+        institutionEntity1.setBilling(billingEntity1);
+        institutionEntity1.setBusinessRegisterPlace("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setCreatedAt(null);
+        institutionEntity1.setDataProtectionOfficer(dataProtectionOfficerEntity1);
+        institutionEntity1.setDescription("Description");
+        institutionEntity1.setDigitalAddress("17 High St");
+        institutionEntity1.setExternalId("External Id");
+        institutionEntity1.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity1.setId("Id");
+        institutionEntity1.setImported(false);
+        institutionEntity1.setInstitutionType(InstitutionType.PG);
+        institutionEntity1.setOnboarding(new ArrayList<>());
+        institutionEntity1.setOrigin(Origin.IPA);
+        institutionEntity1.setOriginId("Origin Id");
+        institutionEntity1.setPaymentServiceProvider(paymentServiceProviderEntity1);
+        institutionEntity1.setRea("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setShareCapital("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setSupportEmail("john.smith@example.org");
+        institutionEntity1.setSupportPhone("8605550118");
+        institutionEntity1.setTaxCode("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setUpdatedAt(null);
+        institutionEntity1.setZipCode("OX1 1PT");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity1);
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.findAll()).thenReturn(institutionEntityList);
+        assertEquals(2, institutionConnectorImpl.findAll().size());
+        verify(institutionRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll4() {
+        when(institutionRepository.findAll()).thenThrow(new InvalidRequestException("An error occurred", "Code"));
+        assertThrows(InvalidRequestException.class, () -> institutionConnectorImpl.findAll());
+        verify(institutionRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll5() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        AttributesEntity attributesEntity = new AttributesEntity();
+        attributesEntity.setCode("Code");
+        attributesEntity.setDescription("The characteristics of someone or something");
+        attributesEntity.setOrigin("Origin");
+
+        ArrayList<AttributesEntity> attributesEntityList = new ArrayList<>();
+        attributesEntityList.add(attributesEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(attributesEntityList);
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.findAll()).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findAll().size());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll6() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        GeoTaxonomyEntity geoTaxonomyEntity = new GeoTaxonomyEntity();
+        geoTaxonomyEntity.setCode("Code");
+        geoTaxonomyEntity.setDesc("The characteristics of someone or something");
+
+        ArrayList<GeoTaxonomyEntity> geoTaxonomyEntityList = new ArrayList<>();
+        geoTaxonomyEntityList.add(geoTaxonomyEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(geoTaxonomyEntityList);
+        when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
+
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.findAll()).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findAll().size());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll7() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        BillingEntity billingEntity1 = new BillingEntity();
+        billingEntity1.setPublicServices(true);
+        billingEntity1.setRecipientCode("Recipient Code");
+        billingEntity1.setVatNumber("42");
+
+        OnboardingEntity onboardingEntity = new OnboardingEntity();
+        onboardingEntity.setBilling(billingEntity1);
+        onboardingEntity.setClosedAt(null);
+        onboardingEntity.setContract("Contract");
+        onboardingEntity.setCreatedAt(null);
+        onboardingEntity.setPricingPlan("Pricing Plan");
+        onboardingEntity.setProductId("42");
+        onboardingEntity.setStatus(RelationshipState.PENDING);
+        onboardingEntity.setTokenId("42");
+        onboardingEntity.setUpdatedAt(null);
+
+        ArrayList<OnboardingEntity> onboardingEntityList = new ArrayList<>();
+        onboardingEntityList.add(onboardingEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getOnboarding()).thenReturn(onboardingEntityList);
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.findAll()).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findAll().size());
+        verify(institutionRepository).findAll();
+    }
 
     @Test
     void findById() {
@@ -284,6 +785,1012 @@ class InstitutionConnectorImplTest {
     }
 
     /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies() {
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        assertTrue(institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).isEmpty());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies2() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies3() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        BillingEntity billingEntity1 = new BillingEntity();
+        billingEntity1.setPublicServices(false);
+        billingEntity1.setRecipientCode("it.pagopa.selfcare.mscore.connector.dao.model.inner.BillingEntity");
+        billingEntity1.setVatNumber("Vat Number");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("17 High St");
+        dataProtectionOfficerEntity1.setEmail("john.smith@example.org");
+        dataProtectionOfficerEntity1
+                .setPec("it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1
+                .setAbiCode("it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("Business Register Number");
+        paymentServiceProviderEntity1
+                .setLegalRegisterName("it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("Legal Register Number");
+        paymentServiceProviderEntity1.setVatNumberGroup(false);
+
+        InstitutionEntity institutionEntity1 = new InstitutionEntity();
+        institutionEntity1.setAddress("17 High St");
+        institutionEntity1.setAttributes(new ArrayList<>());
+        institutionEntity1.setBilling(billingEntity1);
+        institutionEntity1.setBusinessRegisterPlace("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setCreatedAt(null);
+        institutionEntity1.setDataProtectionOfficer(dataProtectionOfficerEntity1);
+        institutionEntity1.setDescription("Description");
+        institutionEntity1.setDigitalAddress("17 High St");
+        institutionEntity1.setExternalId("External Id");
+        institutionEntity1.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity1.setId("Id");
+        institutionEntity1.setImported(false);
+        institutionEntity1.setInstitutionType(InstitutionType.PG);
+        institutionEntity1.setOnboarding(new ArrayList<>());
+        institutionEntity1.setOrigin(Origin.IPA);
+        institutionEntity1.setOriginId("Origin Id");
+        institutionEntity1.setPaymentServiceProvider(paymentServiceProviderEntity1);
+        institutionEntity1.setRea("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setShareCapital("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setSupportEmail("john.smith@example.org");
+        institutionEntity1.setSupportPhone("8605550118");
+        institutionEntity1.setTaxCode("it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity");
+        institutionEntity1.setUpdatedAt(null);
+        institutionEntity1.setZipCode("OX1 1PT");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity1);
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(2, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies4() {
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        assertTrue(institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ANY).isEmpty());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies5() {
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        assertTrue(institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.EXACT).isEmpty());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies6() {
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any()))
+                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
+        assertThrows(InvalidRequestException.class,
+                () -> institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL));
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies7() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        AttributesEntity attributesEntity = new AttributesEntity();
+        attributesEntity.setCode("Code");
+        attributesEntity.setDescription("The characteristics of someone or something");
+        attributesEntity.setOrigin("Origin");
+
+        ArrayList<AttributesEntity> attributesEntityList = new ArrayList<>();
+        attributesEntityList.add(attributesEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(attributesEntityList);
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies8() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        GeoTaxonomyEntity geoTaxonomyEntity = new GeoTaxonomyEntity();
+        geoTaxonomyEntity.setCode("Code");
+        geoTaxonomyEntity.setDesc("The characteristics of someone or something");
+
+        ArrayList<GeoTaxonomyEntity> geoTaxonomyEntityList = new ArrayList<>();
+        geoTaxonomyEntityList.add(geoTaxonomyEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(geoTaxonomyEntityList);
+        when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
+     */
+    @Test
+    void testFindByGeotaxonomies9() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        BillingEntity billingEntity1 = new BillingEntity();
+        billingEntity1.setPublicServices(true);
+        billingEntity1.setRecipientCode("Recipient Code");
+        billingEntity1.setVatNumber("42");
+
+        OnboardingEntity onboardingEntity = new OnboardingEntity();
+        onboardingEntity.setBilling(billingEntity1);
+        onboardingEntity.setClosedAt(null);
+        onboardingEntity.setContract("Contract");
+        onboardingEntity.setCreatedAt(null);
+        onboardingEntity.setPricingPlan("Pricing Plan");
+        onboardingEntity.setProductId("42");
+        onboardingEntity.setStatus(RelationshipState.PENDING);
+        onboardingEntity.setTokenId("42");
+        onboardingEntity.setUpdatedAt(null);
+
+        ArrayList<OnboardingEntity> onboardingEntityList = new ArrayList<>();
+        onboardingEntityList.add(onboardingEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getOnboarding()).thenReturn(onboardingEntityList);
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByProductId}
+     */
+    @Test
+    void testFindByProductId() {
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        assertTrue(institutionConnectorImpl.findByProductId("42").isEmpty());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByProductId}
+     */
+    @Test
+    void testFindByProductId2() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode(".");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec(".");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode(".");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName(".");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace(".");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea(".");
+        institutionEntity.setShareCapital(".");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode(".");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByProductId("42").size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByProductId}
+     */
+    @Test
+    void testFindByProductId3() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode(".");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec(".");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode(".");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName(".");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace(".");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea(".");
+        institutionEntity.setShareCapital(".");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode(".");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        BillingEntity billingEntity1 = new BillingEntity();
+        billingEntity1.setPublicServices(false);
+        billingEntity1.setRecipientCode("Recipient Code");
+        billingEntity1.setVatNumber(".");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("17 High St");
+        dataProtectionOfficerEntity1.setEmail("john.smith@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber(".");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber(".");
+        paymentServiceProviderEntity1.setVatNumberGroup(false);
+
+        InstitutionEntity institutionEntity1 = new InstitutionEntity();
+        institutionEntity1.setAddress("17 High St");
+        institutionEntity1.setAttributes(new ArrayList<>());
+        institutionEntity1.setBilling(billingEntity1);
+        institutionEntity1.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity1.setCreatedAt(null);
+        institutionEntity1.setDataProtectionOfficer(dataProtectionOfficerEntity1);
+        institutionEntity1.setDescription(".");
+        institutionEntity1.setDigitalAddress("17 High St");
+        institutionEntity1.setExternalId(".");
+        institutionEntity1.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity1.setId(".");
+        institutionEntity1.setImported(false);
+        institutionEntity1.setInstitutionType(InstitutionType.PG);
+        institutionEntity1.setOnboarding(new ArrayList<>());
+        institutionEntity1.setOrigin(Origin.IPA);
+        institutionEntity1.setOriginId(".");
+        institutionEntity1.setPaymentServiceProvider(paymentServiceProviderEntity1);
+        institutionEntity1.setRea("Rea");
+        institutionEntity1.setShareCapital("Share Capital");
+        institutionEntity1.setSupportEmail("john.smith@example.org");
+        institutionEntity1.setSupportPhone("8605550118");
+        institutionEntity1.setTaxCode("Tax Code");
+        institutionEntity1.setUpdatedAt(null);
+        institutionEntity1.setZipCode("OX1 1PT");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity1);
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(2, institutionConnectorImpl.findByProductId("42").size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByProductId}
+     */
+    @Test
+    void testFindByProductId4() {
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any()))
+                .thenThrow(new InvalidRequestException("An error occurred", "."));
+        assertThrows(InvalidRequestException.class, () -> institutionConnectorImpl.findByProductId("42"));
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByProductId}
+     */
+    @Test
+    void testFindByProductId5() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode(".");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec(".");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode(".");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName(".");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        AttributesEntity attributesEntity = new AttributesEntity();
+        attributesEntity.setCode("Code");
+        attributesEntity.setDescription("The characteristics of someone or something");
+        attributesEntity.setOrigin("Origin");
+
+        ArrayList<AttributesEntity> attributesEntityList = new ArrayList<>();
+        attributesEntityList.add(attributesEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(attributesEntityList);
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace(".");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea(".");
+        institutionEntity.setShareCapital(".");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode(".");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByProductId("42").size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByProductId}
+     */
+    @Test
+    void testFindByProductId6() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode(".");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec(".");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode(".");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName(".");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        GeoTaxonomyEntity geoTaxonomyEntity = new GeoTaxonomyEntity();
+        geoTaxonomyEntity.setCode("Code");
+        geoTaxonomyEntity.setDesc("The characteristics of someone or something");
+
+        ArrayList<GeoTaxonomyEntity> geoTaxonomyEntityList = new ArrayList<>();
+        geoTaxonomyEntityList.add(geoTaxonomyEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(geoTaxonomyEntityList);
+        when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace(".");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea(".");
+        institutionEntity.setShareCapital(".");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode(".");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByProductId("42").size());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByProductId}
+     */
+    @Test
+    void testFindByProductId7() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode(".");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec(".");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode(".");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName(".");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity1 = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity1.setAddress("42 Main St");
+        dataProtectionOfficerEntity1.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity1.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity1 = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity1.setAbiCode("Abi Code");
+        paymentServiceProviderEntity1.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity1.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity1.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity1.setVatNumberGroup(true);
+
+        BillingEntity billingEntity1 = new BillingEntity();
+        billingEntity1.setPublicServices(true);
+        billingEntity1.setRecipientCode("Recipient Code");
+        billingEntity1.setVatNumber("42");
+
+        OnboardingEntity onboardingEntity = new OnboardingEntity();
+        onboardingEntity.setBilling(billingEntity1);
+        onboardingEntity.setClosedAt(null);
+        onboardingEntity.setContract("Contract");
+        onboardingEntity.setCreatedAt(null);
+        onboardingEntity.setPricingPlan("Pricing Plan");
+        onboardingEntity.setProductId("42");
+        onboardingEntity.setStatus(RelationshipState.PENDING);
+        onboardingEntity.setTokenId("42");
+        onboardingEntity.setUpdatedAt(null);
+
+        ArrayList<OnboardingEntity> onboardingEntityList = new ArrayList<>();
+        onboardingEntityList.add(onboardingEntity);
+        InstitutionEntity institutionEntity = mock(InstitutionEntity.class);
+        when(institutionEntity.isImported()).thenReturn(true);
+        when(institutionEntity.getDataProtectionOfficer()).thenReturn(dataProtectionOfficerEntity1);
+        when(institutionEntity.getPaymentServiceProvider()).thenReturn(paymentServiceProviderEntity1);
+        when(institutionEntity.getInstitutionType()).thenReturn(InstitutionType.PA);
+        when(institutionEntity.getOrigin()).thenReturn(Origin.MOCK);
+        when(institutionEntity.getAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getBusinessRegisterPlace()).thenReturn("Business Register Place");
+        when(institutionEntity.getDescription()).thenReturn("The characteristics of someone or something");
+        when(institutionEntity.getDigitalAddress()).thenReturn("42 Main St");
+        when(institutionEntity.getExternalId()).thenReturn("42");
+        when(institutionEntity.getId()).thenReturn("42");
+        when(institutionEntity.getOriginId()).thenReturn("42");
+        when(institutionEntity.getRea()).thenReturn("Rea");
+        when(institutionEntity.getShareCapital()).thenReturn("Share Capital");
+        when(institutionEntity.getSupportEmail()).thenReturn("jane.doe@example.org");
+        when(institutionEntity.getSupportPhone()).thenReturn("6625550144");
+        when(institutionEntity.getTaxCode()).thenReturn("Tax Code");
+        when(institutionEntity.getZipCode()).thenReturn("21654");
+        when(institutionEntity.getCreatedAt()).thenReturn(null);
+        when(institutionEntity.getUpdatedAt()).thenReturn(null);
+        when(institutionEntity.getAttributes()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getGeographicTaxonomies()).thenReturn(new ArrayList<>());
+        when(institutionEntity.getOnboarding()).thenReturn(onboardingEntityList);
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace(".");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea(".");
+        institutionEntity.setShareCapital(".");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode(".");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        ArrayList<InstitutionEntity> institutionEntityList = new ArrayList<>();
+        institutionEntityList.add(institutionEntity);
+        when(institutionRepository.find(org.mockito.Mockito.any(),
+                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
+        assertEquals(1, institutionConnectorImpl.findByProductId("42").size());
+    }
+
+    /**
      * Method under test: {@link InstitutionConnectorImpl#findAllByIds(List)}
      */
     @Test
@@ -381,7 +1888,7 @@ class InstitutionConnectorImplTest {
         institutionEntity.setUpdatedAt(null);
         institutionEntity.setZipCode("21654");
         when(institutionRepository.save(org.mockito.Mockito.any())).thenReturn(institutionEntity);
-        when(institutionRepository.find(org.mockito.Mockito.any(),org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        when(institutionRepository.find(org.mockito.Mockito.any(), org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
         Institution actualSaveOrRetrievePnPgResult = institutionConnectorImpl.saveOrRetrievePnPg(new Institution());
         assertEquals("42 Main St", actualSaveOrRetrievePnPgResult.getAddress());
         assertTrue(actualSaveOrRetrievePnPgResult.isImported());
@@ -468,32 +1975,6 @@ class InstitutionConnectorImplTest {
         when(institutionEntity.getAttributes()).thenReturn(attributesEntityList);
         when(institutionEntity.getGeographicTaxonomies()).thenReturn(new ArrayList<>());
         when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
-        doNothing().when(institutionEntity).setAddress(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setAttributes(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setBilling(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setBusinessRegisterPlace(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setCreatedAt(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity)
-                .setDataProtectionOfficer(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setDescription(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setDigitalAddress(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setExternalId(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setGeographicTaxonomies(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setId(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setImported(anyBoolean());
-        doNothing().when(institutionEntity).setInstitutionType(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setOnboarding(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setOrigin(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setOriginId(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity)
-                .setPaymentServiceProvider(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setRea(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setShareCapital(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setSupportEmail(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setSupportPhone(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setTaxCode(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setUpdatedAt(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setZipCode(org.mockito.Mockito.any());
         institutionEntity.setAddress("42 Main St");
         ArrayList<AttributesEntity> attributesEntityList1 = new ArrayList<>();
         institutionEntity.setAttributes(attributesEntityList1);
@@ -608,32 +2089,6 @@ class InstitutionConnectorImplTest {
         when(institutionEntity.getAttributes()).thenReturn(new ArrayList<>());
         when(institutionEntity.getGeographicTaxonomies()).thenReturn(geoTaxonomyEntityList);
         when(institutionEntity.getOnboarding()).thenReturn(new ArrayList<>());
-        doNothing().when(institutionEntity).setAddress(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setAttributes(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setBilling(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setBusinessRegisterPlace(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setCreatedAt(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity)
-                .setDataProtectionOfficer(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setDescription(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setDigitalAddress(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setExternalId(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setGeographicTaxonomies(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setId(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setImported(anyBoolean());
-        doNothing().when(institutionEntity).setInstitutionType(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setOnboarding(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setOrigin(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setOriginId(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity)
-                .setPaymentServiceProvider(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setRea(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setShareCapital(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setSupportEmail(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setSupportPhone(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setTaxCode(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setUpdatedAt(org.mockito.Mockito.any());
-        doNothing().when(institutionEntity).setZipCode(org.mockito.Mockito.any());
         institutionEntity.setAddress("42 Main St");
         ArrayList<AttributesEntity> attributesEntityList = new ArrayList<>();
         institutionEntity.setAttributes(attributesEntityList);
@@ -787,7 +2242,7 @@ class InstitutionConnectorImplTest {
         institutionEntity.setUpdatedAt(null);
         institutionEntity.setZipCode("21654");
         when(institutionRepository.save(org.mockito.Mockito.any())).thenReturn(institutionEntity);
-        when(institutionRepository.find(org.mockito.Mockito.any(),org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        when(institutionRepository.find(org.mockito.Mockito.any(), org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
         Institution actualSaveOrRetrievePnPgResult = institutionConnectorImpl.saveOrRetrievePnPg(new Institution());
         assertEquals("42 Main St", actualSaveOrRetrievePnPgResult.getAddress());
         assertTrue(actualSaveOrRetrievePnPgResult.isImported());
