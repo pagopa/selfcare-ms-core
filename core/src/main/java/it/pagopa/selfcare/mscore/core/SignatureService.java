@@ -11,6 +11,7 @@ import eu.europa.esig.dss.service.ocsp.OnlineOCSPSource;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.x509.aia.DefaultAIASource;
 import eu.europa.esig.dss.validation.AdvancedSignature;
+import eu.europa.esig.dss.validation.CertificateVerifier;
 import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
@@ -18,7 +19,9 @@ import eu.europa.esig.validationreport.jaxb.SignatureValidationReportType;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,7 +40,7 @@ public class SignatureService {
 
         var trustedListsCertificateSource = new TrustedListsCertificateSource();
 
-        CommonCertificateVerifier certificateVerifier = new CommonCertificateVerifier();
+        CertificateVerifier certificateVerifier = new CommonCertificateVerifier();
         certificateVerifier.setTrustedCertSources(trustedListsCertificateSource);
         certificateVerifier.setAIASource(new DefaultAIASource());
         certificateVerifier.setOcspSource(new OnlineOCSPSource());
@@ -67,7 +70,7 @@ public class SignatureService {
                 Optional.ofNullable(validator.getOriginalDocuments(a.getId())).ifPresent(dssDocuments::addAll);
             }
         }
-        if(!dssDocuments.isEmpty()) {
+        if (dssDocuments.isEmpty()) {
             throw new MsCoreException(ORIGINAL_DOCUMENT_NOT_FOUND.getMessage(), ORIGINAL_DOCUMENT_NOT_FOUND.getCode());
         }
     }
@@ -99,8 +102,8 @@ public class SignatureService {
             signatureValidationReportTypes = reports.getEtsiValidationReportJaxb().getSignatureValidationReport();
         }
         if (signatureValidationReportTypes.isEmpty()
-                || !signatureValidationReportTypes.stream().allMatch(s -> s.getSignatureValidationStatus() != null
-                && Indication.TOTAL_PASSED == s.getSignatureValidationStatus().getMainIndication())) {
+                || (!signatureValidationReportTypes.stream().allMatch(s -> s.getSignatureValidationStatus() != null
+                && Indication.TOTAL_PASSED == s.getSignatureValidationStatus().getMainIndication()))) {
             return INVALID_DOCUMENT_SIGNATURE.getMessage();
         }
         return VALID_CHECK;
@@ -122,13 +125,13 @@ public class SignatureService {
 
     public String verifyManagerTaxCode(Reports reports, List<User> users) {
         List<String> signatureTaxCodes = extractSubjectSNCFs(reports);
-        if(signatureTaxCodes.isEmpty()) {
+        if (signatureTaxCodes.isEmpty()) {
             return TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage();
         }
 
         List<String> taxCodes = extractTaxCode(signatureTaxCodes);
 
-        if(taxCodes.isEmpty() || !isSignedByLegal(users, taxCodes)) {
+        if (taxCodes.isEmpty() || !isSignedByLegal(users, taxCodes)) {
             return INVALID_SIGNATURE_TAX_CODE.getMessage();
         }
         return VALID_CHECK;
@@ -138,7 +141,9 @@ public class SignatureService {
         List<String> taxCode = new ArrayList<>();
         signatureTaxCodes.forEach(s -> {
             Matcher matcher = signatureRegex.matcher(s);
-            taxCode.add(matcher.group(2));
+            if (matcher.matches()) {
+                taxCode.add(matcher.group(2));
+            }
         });
         return taxCode;
     }
@@ -149,14 +154,21 @@ public class SignatureService {
     }
 
     private List<String> extractSubjectSNCFs(Reports reports) {
-        if(reports.getDiagnosticData()!=null) {
+        if (reports.getDiagnosticData() != null && reports.getDiagnosticData().getUsedCertificates() != null) {
             List<String> subjectSNCFs = reports.getDiagnosticData().getUsedCertificates()
                     .stream().map(CertificateWrapper::getSubjectSerialNumber)
-                    .filter(s -> signatureRegex.matcher(s).matches()).collect(Collectors.toList());
+                    .filter(this::serialNumberMatch).collect(Collectors.toList());
             if (!subjectSNCFs.isEmpty()) {
                 return subjectSNCFs;
             }
         }
         return Collections.emptyList();
+    }
+
+    private boolean serialNumberMatch(String s) {
+        if (!StringUtils.isEmpty(s)) {
+            return signatureRegex.matcher(s).matches();
+        }
+        return false;
     }
 }

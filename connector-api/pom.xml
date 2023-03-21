@@ -30,6 +30,10 @@
             <artifactId>spring-kafka</artifactId>
             <version>2.7.3</version>
         </dependency>
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-commons-base</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

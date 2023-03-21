@@ -163,7 +163,7 @@ public class ContractService {
         StringBuilder stringBuilder = new StringBuilder();
         List<String> strings = Arrays.stream(errorEnums).filter(s -> !VALID_CHECK.equals(s)).collect(Collectors.toList());
         if (!strings.isEmpty()) {
-            for (String s : errorEnums) {
+            for (String s : strings) {
                 stringBuilder.append(s);
                 stringBuilder.append("\n");
             }
