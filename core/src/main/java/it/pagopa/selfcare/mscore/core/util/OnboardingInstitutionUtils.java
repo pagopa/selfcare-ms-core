@@ -162,7 +162,7 @@ public class OnboardingInstitutionUtils {
         onboarding.setBilling(request.getBillingRequest());
         onboarding.setPricingPlan(request.getPricingPlan());
         onboarding.setCreatedAt(OffsetDateTime.now());
-
+        onboarding.setUpdatedAt(OffsetDateTime.now());
         if (request.getContract() != null) {
             onboarding.setContract(request.getContract().getPath());
         }
@@ -196,9 +196,6 @@ public class OnboardingInstitutionUtils {
         onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
         onboardedProduct.setProductId(request.getProductId());
         onboardedProduct.setRole(p.getRole());
-        if (request.getContract() != null) {
-            onboardedProduct.setContract(request.getContract().getPath());
-        }
         onboardedProduct.setProductRole(p.getProductRole());
         if (request.getInstitutionUpdate() != null) {
             onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
@@ -206,6 +203,7 @@ public class OnboardingInstitutionUtils {
             onboardedProduct.setStatus(getStatus(institution.getInstitutionType()));
         }
         onboardedProduct.setCreatedAt(OffsetDateTime.now());
+        onboardedProduct.setUpdatedAt(OffsetDateTime.now());
         if (p.getEnv() != null) {
             onboardedProduct.setEnv(p.getEnv());
         }

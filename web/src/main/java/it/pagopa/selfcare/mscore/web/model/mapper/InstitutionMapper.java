@@ -428,4 +428,23 @@ public class InstitutionMapper {
         }
         return list;
     }
+
+    public static List<InstitutionToOnboard> toInstitutionToOnboardList(List<ValidInstitution> validInstitutions) {
+        return validInstitutions.stream()
+                .map(InstitutionMapper::toInstitutionToOnboard)
+                .collect(Collectors.toList());
+    }
+
+    public static InstitutionToOnboard toInstitutionToOnboard(ValidInstitution validInstitutions) {
+        InstitutionToOnboard institution = new InstitutionToOnboard();
+        institution.setDescription(validInstitutions.getDescription());
+        institution.setId(validInstitutions.getId());
+        return institution;
+    }
+
+    public static List<ValidInstitution> toValidInstitutions(List<InstitutionToOnboard> institutions) {
+        return institutions.stream()
+                .map(institutionToOnboard -> new ValidInstitution(institutionToOnboard.getId(), institutionToOnboard.getDescription()))
+                .collect(Collectors.toList());
+    }
 }

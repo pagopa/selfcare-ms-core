@@ -26,6 +26,7 @@ public class TokenUtils {
             token.setContractTemplate(request.getContract().getPath());
         }
         token.setCreatedAt(OffsetDateTime.now());
+        token.setUpdatedAt(OffsetDateTime.now());
         token.setInstitutionId(institution.getId());
         token.setProductId(request.getProductId());
         token.setChecksum(digest);

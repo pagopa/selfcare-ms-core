@@ -1,5 +1,6 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.*;
+import it.pagopa.selfcare.mscore.core.migration.MigrationService;
 import it.pagopa.selfcare.mscore.web.config.SwaggerConfig;
 import it.pagopa.selfcare.mscore.web.config.WebConfig;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,9 @@ class SwaggerConfigTest {
 
     @MockBean
     UserRelationshipService userRelationshipService;
+
+    @MockBean
+    MigrationService migrationService;
 
     @Autowired
     private ObjectMapper objectMapper;

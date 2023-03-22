@@ -211,7 +211,8 @@ public class ExternalController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
     @GetMapping(value = "")
-    public ResponseEntity<List<InstitutionResponse>> retrieveInstitutionByIds(@RequestParam("ids") List<String> ids) {
+    public ResponseEntity<List<InstitutionResponse>> retrieveInstitutionByIds(@ApiParam("${swagger.mscore.institutions.model.internalIds}")
+                                                                                  @RequestParam("ids") List<String> ids) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
         List<Institution> institution = externalService.retrieveInstitutionByIds(ids);
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponseList(institution));

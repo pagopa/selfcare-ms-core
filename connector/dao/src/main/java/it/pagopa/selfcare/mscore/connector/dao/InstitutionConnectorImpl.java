@@ -57,6 +57,16 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
+    public List<String> findByExternalIdAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
+        List<String> externalIds = validInstitutionList.stream().map(ValidInstitution::getId).collect(Collectors.toList());
+        Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId)
+                .and(InstitutionEntity.Fields.externalId.name()).in(externalIds));
+        return repository.find(query, InstitutionEntity.class).stream()
+                .map(InstitutionEntity::getExternalId)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteById(String id) {
         repository.deleteById(id);
     }
@@ -72,7 +82,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public void findAndUpdateStatus(String institutionId, String tokenId, RelationshipState status) {
+    public Institution findAndUpdateStatus(String institutionId, String tokenId, RelationshipState status) {
         OffsetDateTime now = OffsetDateTime.now();
 
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
@@ -83,8 +93,8 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         if (status == RelationshipState.DELETED) {
             update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.closedAt.name()), now);
         }
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
     @Override
@@ -95,22 +105,14 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         if (onboarding != null) {
             update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
         }
-        if (geographicTaxonomiesList != null && !geographicTaxonomiesList.isEmpty()) {
-            List<GeoTaxonomyEntity> list = geographicTaxonomiesList.stream().map(geographicTaxonomies -> {
-                GeoTaxonomyEntity entity = new GeoTaxonomyEntity();
-                entity.setCode(geographicTaxonomies.getCode());
-                entity.setDesc(geographicTaxonomies.getDesc());
-                return entity;
-            }).collect(Collectors.toList());
-            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name()).each(list);
-        }
+        addGeographicTaxonomies(geographicTaxonomiesList, update);
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
     @Override
-    public void findAndUpdateInstitutionData(String institutionId, Token token, Onboarding onboarding, RelationshipState state) {
+    public Institution findAndUpdateInstitutionData(String institutionId, Token token, Onboarding onboarding, RelationshipState state) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
         Update update = new Update();
         update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
@@ -132,11 +134,11 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         if (institutionUpdate != null) {
             Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
             map.forEach(update::set);
-            addGeographicTaxonomies(institutionUpdate, update);
+            addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
         }
 
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
     @Override

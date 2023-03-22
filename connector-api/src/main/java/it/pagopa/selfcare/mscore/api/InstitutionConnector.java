@@ -22,7 +22,7 @@ public interface InstitutionConnector {
 
     Institution findById(String id);
 
-    void findAndUpdateStatus(String id, String tokenId, RelationshipState state);
+    Institution findAndUpdateStatus(String id, String tokenId, RelationshipState state);
 
     Institution findAndUpdate(String id, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomies);
 
@@ -30,7 +30,7 @@ public interface InstitutionConnector {
 
     void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
 
-    void findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
+    Institution findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
 
     List<Institution> findByGeotaxonomies(List<String> geo, SearchMode searchMode);
 
@@ -39,4 +39,6 @@ public interface InstitutionConnector {
     List<Institution> findAllByIds(List<String> ids);
 
     Institution saveOrRetrievePnPg(Institution newInstitution);
+
+    List<String> findByExternalIdAndProductId(List<ValidInstitution> externalIds, String productId);
 }

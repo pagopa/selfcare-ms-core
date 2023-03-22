@@ -1,20 +1,18 @@
 package it.pagopa.selfcare.mscore.model.onboarding;
 
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OnboardingRollback {
+public class OnboardingUpdateRollback {
     private Token token;
-    private Onboarding onboarding;
-    private Map<String, OnboardedProduct> productMap;
+    private List<String> userList;
     private Institution updatedInstitution;
 
 }

@@ -5,14 +5,12 @@ import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,7 +60,7 @@ public class EmailService {
         }
     }
 
-    public String sendCompletedEmail(MultipartFile contract, Token token, List<User> managers, Institution institution, Product product, File logo) {
+    public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo) {
         List<String> destinationMails = new ArrayList<>(getCompleteDestinationMails(institution));
         if (managers != null && !managers.isEmpty()) {
             managers.stream().filter(user -> user.getEmail() != null && !destinationMails.contains(user.getEmail()))
@@ -70,7 +68,6 @@ public class EmailService {
         }
         Map<String, String> mailParameter = mailParametersMapper.getCompleteOnbordingMailParameter(product.getTitle());
         emailConnector.sendMail(mailParametersMapper.getOnboardingCompletePath(), destinationMails, logo, product.getTitle(), mailParameter, "pagopa-logo.png");
-        return fileStorageConnector.uploadContract(token.getId(), contract);
     }
 
     public void sendRejectMail(File logo, Institution institution, Product product) {

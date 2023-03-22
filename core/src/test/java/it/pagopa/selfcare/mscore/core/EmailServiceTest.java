@@ -223,7 +223,7 @@ class EmailServiceTest {
     }
 
     /**
-     * Method under test: {@link EmailService#sendCompletedEmail(MultipartFile, Token, List, Institution, Product, File)}
+     * Method under test: {@link EmailService#sendCompletedEmail(List, Institution, Product, File)}
      */
     @Test
     void testSendCompletedEmail() {
@@ -257,7 +257,7 @@ class EmailServiceTest {
         product.setTitle("Dr");
         when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
         File file = mock(File.class);
-        emailService.sendCompletedEmail(contract, token, managers, institution, product, file);
+        emailService.sendCompletedEmail(managers, institution, product, file);
         assertNotNull(institution);
     }
 
@@ -294,7 +294,7 @@ class EmailServiceTest {
         when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
         when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("42");
         File file = mock(File.class);
-        emailService.sendCompletedEmail(contract, token, managers, institution, product, file);
+        emailService.sendCompletedEmail(managers, institution, product, file);
         assertNotNull(institution);
     }
 

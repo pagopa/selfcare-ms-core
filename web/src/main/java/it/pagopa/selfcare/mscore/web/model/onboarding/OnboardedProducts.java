@@ -8,5 +8,4 @@ import java.util.List;
 @Data
 public class OnboardedProducts {
     private List<InstitutionProduct> products;
-    private Integer total;
 }

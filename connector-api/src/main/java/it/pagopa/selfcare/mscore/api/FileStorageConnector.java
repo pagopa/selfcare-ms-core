@@ -10,4 +10,6 @@ public interface FileStorageConnector {
     String getTemplateFile(String templateName);
 
     String uploadContract(String id, MultipartFile contract);
+
+    void removeContract(String fileName, String tokenId);
 }

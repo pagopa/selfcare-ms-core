@@ -21,6 +21,7 @@ import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -227,37 +228,50 @@ public class ContractService {
     }
 
     public void sendDataLakeNotification(Institution institution, Token token) {
-        NotificationToSend notification = toNotificationToSend(institution, token);
-        try {
-            String msg = mapper.writeValueAsString(notification);
-            sendNotification(msg, token.getId());
-        } catch (JsonProcessingException e) {
-            log.warn("error during send dataLake notification for token {}", notification.getId());
+        if (institution != null) {
+            NotificationToSend notification = toNotificationToSend(institution, token);
+            try {
+                String msg = mapper.writeValueAsString(notification);
+                sendNotification(msg, token.getId());
+            } catch (JsonProcessingException e) {
+                log.warn("error during send dataLake notification for token {}", notification.getId());
+            }
         }
     }
 
     private NotificationToSend toNotificationToSend(Institution institution, Token token) {
         NotificationToSend notification = new NotificationToSend();
         notification.setId(token.getId());
-        notification.setInternalInstitutionID(institution.getId());
+        notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setState(RelationshipState.ACTIVE);
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
-        notification.setInstitution(institution);
+        notification.setCreatedAt(token.getCreatedAt());
+        notification.setUpdatedAt(token.getUpdatedAt());
 
-        if (token.getProductId() != null) {
+        if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
                     .filter(o -> token.getProductId().equalsIgnoreCase(o.getProductId()))
                     .findFirst().orElseThrow(() -> new InvalidRequestException(String.format("Product %s not found", token.getProductId()), "0000"));
             notification.setPricingPlan(onboarding.getPricingPlan());
             notification.setBilling(onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling());
-            if (onboarding.getUpdatedAt() != null) {
-                notification.setUpdatedAt(onboarding.getUpdatedAt());
-            }
+            notification.setInstitution(toInstitutionToNotify(institution));
         }
 
         return notification;
+    }
+
+    private InstitutionToNotify toInstitutionToNotify(Institution institution) {
+        InstitutionToNotify toNotify = new InstitutionToNotify();
+        toNotify.setInstitutionType(institution.getInstitutionType());
+        toNotify.setDescription(institution.getDescription());
+        toNotify.setDigitalAddress(institution.getDigitalAddress());
+        toNotify.setAddress(institution.getAddress());
+        toNotify.setTaxCode(institution.getTaxCode());
+        toNotify.setOrigin(institution.getOrigin());
+        toNotify.setOriginId(institution.getOriginId());
+        return toNotify;
     }
 
     private void sendNotification(String message, String tokenId) {
@@ -277,5 +291,14 @@ public class ContractService {
             }
         });
 
+    }
+
+    public String uploadContract(String tokenId, MultipartFile contract) {
+        return fileStorageConnector.uploadContract(tokenId, contract);
+
+    }
+
+    public void deleteContract(String fileName, String tokenId) {
+        fileStorageConnector.removeContract(fileName, tokenId);
     }
 }

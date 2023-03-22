@@ -222,4 +222,22 @@ public class InstitutionController {
         List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
     }
+
+    /**
+     * The function return a List of Institution that user can onboard
+     *
+     * @param institutions List<CreatePnPgInstitutionRequest>
+     *
+     * @return List
+     * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institutions.valid}", notes = "${swagger.mscore.institutions.valid}")
+    @PostMapping(value = "/onboarded/{productId}")
+    public ResponseEntity<List<InstitutionToOnboard>> getValidInstitutionToOnboard(@RequestBody List<InstitutionToOnboard> institutions,
+                                                                                      @PathVariable(value = "productId") String productId) {
+        List<ValidInstitution> validInstitutions = institutionService.retrieveInstitutionByExternalIds(InstitutionMapper.toValidInstitutions(institutions), productId);
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionToOnboardList(validInstitutions));
+    }
 }

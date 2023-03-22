@@ -224,6 +224,13 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId) {
+        List<String> institutionsExternalId = institutionConnector.findByExternalIdAndProductId(validInstitutionList, productId);
+        validInstitutionList.removeIf(validInstitution -> institutionsExternalId.contains(validInstitution.getId()));
+        return validInstitutionList;
+    }
+
+    @Override
     public List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, SearchMode searchMode) {
         List<String> geo = Arrays.stream(geoTaxonomies.split(","))
                 .filter(StringUtils::hasText).collect(Collectors.toList());

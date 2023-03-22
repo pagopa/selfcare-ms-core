@@ -116,6 +116,7 @@ public class InstitutionMapper {
                 }
                 o.setCreatedAt(onboardingEntity.getCreatedAt());
                 o.setUpdatedAt(onboardingEntity.getUpdatedAt());
+                o.setTokenId(onboardingEntity.getTokenId());
                 list.add(o);
             }
         }
@@ -242,20 +243,22 @@ public class InstitutionMapper {
         return response;
     }
 
-    public static void addGeographicTaxonomies(InstitutionUpdate institutionUpdate, Update update) {
-        if (institutionUpdate.getGeographicTaxonomies() != null && !institutionUpdate.getGeographicTaxonomies().isEmpty()) {
-            List<GeoTaxonomyEntity> list = institutionUpdate.getGeographicTaxonomies().stream().map(geographicTaxonomies -> {
+    public static void addGeographicTaxonomies(List<InstitutionGeographicTaxonomies> taxonomiesList, Update update) {
+        if (taxonomiesList != null && !taxonomiesList.isEmpty()) {
+            List<GeoTaxonomyEntity> list = taxonomiesList.stream().map(geographicTaxonomies -> {
                 GeoTaxonomyEntity entity = new GeoTaxonomyEntity();
                 entity.setCode(geographicTaxonomies.getCode());
                 entity.setDesc(geographicTaxonomies.getDesc());
                 return entity;
             }).collect(Collectors.toList());
-            list.forEach(geoTaxonomyEntity -> update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name(), geoTaxonomyEntity));
-        }
+            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name()).each(list);        }
     }
+
     public static Map<String, Object> getNotNullField(InstitutionUpdate institutionUpdate) {
         Map<String, Object> response = new HashMap<>();
-        response.put(InstitutionUpdate.Fields.institutionType.name(), institutionUpdate.getInstitutionType().name());
+        if(institutionUpdate.getInstitutionType() != null) {
+            response.put(InstitutionUpdate.Fields.institutionType.name(), institutionUpdate.getInstitutionType().name());
+        }
         response.put(InstitutionUpdate.Fields.description.name(), institutionUpdate.getDescription());
         response.put(InstitutionUpdate.Fields.digitalAddress.name(), institutionUpdate.getDigitalAddress());
         response.put(InstitutionUpdate.Fields.address.name(), institutionUpdate.getAddress());

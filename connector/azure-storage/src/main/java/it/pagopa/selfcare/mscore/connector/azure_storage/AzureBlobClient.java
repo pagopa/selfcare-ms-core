@@ -23,8 +23,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_DOWNLOAD_FILE;
-import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_UPLOAD_FILE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @Service
@@ -91,12 +90,8 @@ class AzureBlobClient implements FileStorageConnector {
     @Override
     public String uploadContract(String id, MultipartFile contract) {
         log.info("START - uploadContract for token: {}", id);
-
         String fileName = Paths.get(azureStorageConfig.getContractPath(), id, contract.getOriginalFilename()).toString();
-
-        log.trace("uploadContract");
         log.debug("uploadContract fileName = {}, contentType = {}", fileName, contract.getContentType());
-
         try {
             final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContractsTemplateContainer());
             final CloudBlockBlob blob = blobContainer.getBlockBlobReference(fileName);
@@ -108,6 +103,22 @@ class AzureBlobClient implements FileStorageConnector {
             log.error(String.format(ERROR_DURING_UPLOAD_FILE.getMessage(), fileName), e);
             throw new MsCoreException(String.format(ERROR_DURING_UPLOAD_FILE.getMessage(), fileName),
                     ERROR_DURING_UPLOAD_FILE.getCode());
+        }
+    }
+
+    @Override
+    public void removeContract(String fileName, String tokenId) {
+        log.info("START - deleteContract for token: {}", tokenId);
+
+        try {
+            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContractsTemplateContainer());
+            final CloudBlockBlob blob = blobContainer.getBlockBlobReference(fileName);
+            blob.deleteIfExists();
+            log.info("Deleted {}", fileName);
+        } catch (StorageException | URISyntaxException e) {
+            log.error(String.format(ERROR_DURING_DELETED_FILE.getMessage(), fileName), e);
+            throw new MsCoreException(String.format(ERROR_DURING_DELETED_FILE.getMessage(), fileName),
+                    ERROR_DURING_DELETED_FILE.getCode());
         }
     }
 }

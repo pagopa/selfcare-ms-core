@@ -27,10 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -160,10 +157,16 @@ public class OnboardingServiceImpl implements OnboardingService {
         Product product = onboardingDao.getProductById(token.getProductId());
         contractService.verifySignature(contract, token, managersData);
         File logoFile = contractService.getLogoFile();
-        String fileName = emailService.sendCompletedEmail(contract, token, managersData, institution, product, logoFile);
+        String fileName = contractService.uploadContract(token.getId(), contract);
         token.setContractSigned(fileName);
-        onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
-        contractService.sendDataLakeNotification(institution, token);
+        OnboardingUpdateRollback rollback = onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
+        try {
+            emailService.sendCompletedEmail(managersData, institution, product, logoFile);
+        } catch (Exception e) {
+            onboardingDao.rollbackSecondStepOfUpdate(rollback.getUserList(), rollback.getUpdatedInstitution(), rollback.getToken());
+            contractService.deleteContract(fileName, token.getId());
+        }
+        contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token);
     }
 
     @Override
@@ -311,7 +314,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private void checkIncompleteOnboarding(Institution institution, OnboardingRequest request) {
         List<Token> tokens = new ArrayList<>();
-        if(institution.getOnboarding() != null) {
+        if (institution.getOnboarding() != null) {
             tokens = institution.getOnboarding().stream()
                     .filter(o -> o.getProductId().equalsIgnoreCase(request.getProductId())
                             && (o.getStatus() == RelationshipState.PENDING || o.getStatus() == RelationshipState.TOBEVALIDATED))

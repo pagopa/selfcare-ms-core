@@ -190,11 +190,7 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":null,\"externalId\":null,\"origin\":null,\"originId\":null,\"description\":null,\"institutionType\":null"
-                                        + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"billing\":null,\"onboarding\":null"
-                                        + ",\"geographicTaxonomies\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\""
-                                        + ":null,\"rea\":null,\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\""
-                                        + ":null,\"imported\":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                "{\"imported\":false}"));
     }
 
     /**
@@ -294,11 +290,7 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":null,\"externalId\":null,\"origin\":null,\"originId\":null,\"description\":null,\"institutionType\":null"
-                                        + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"billing\":null,\"onboarding\":null"
-                                        + ",\"geographicTaxonomies\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\""
-                                        + ":null,\"rea\":null,\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\""
-                                        + ":null,\"imported\":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                "{\"imported\":false}"));
     }
 
     /**

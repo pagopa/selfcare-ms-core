@@ -9,7 +9,6 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import org.bson.Document;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.query.Update;
 
@@ -17,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
 
 class InstitutionMapperTest {
     /**
@@ -436,9 +434,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
     }
 
-    /**
-     * Method under test: {@link InstitutionMapper#addGeographicTaxonomies(InstitutionUpdate, Update)}
-     */
     @Test
     void testAddGeographicTaxonomies() {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
@@ -464,7 +459,6 @@ class InstitutionMapperTest {
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
         Update update = new Update();
-        InstitutionMapper.addGeographicTaxonomies(institutionUpdate, update);
         assertEquals("42 Main St", institutionUpdate.getAddress());
         assertTrue(institutionUpdate.isImported());
         assertEquals("21654", institutionUpdate.getZipCode());
@@ -483,9 +477,6 @@ class InstitutionMapperTest {
         assertFalse(update.hasArrayFilters());
     }
 
-    /**
-     * Method under test: {@link InstitutionMapper#addGeographicTaxonomies(InstitutionUpdate, Update)}
-     */
     @Test
     void testAddGeographicTaxonomies2() {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
@@ -511,7 +502,7 @@ class InstitutionMapperTest {
         institutionUpdate.setZipCode("21654");
         institutionUpdate.setGeographicTaxonomies(null);
         Update update = new Update();
-        InstitutionMapper.addGeographicTaxonomies(institutionUpdate, update);
+        InstitutionMapper.addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
         assertEquals("42 Main St", institutionUpdate.getAddress());
         assertTrue(institutionUpdate.isImported());
         assertEquals("21654", institutionUpdate.getZipCode());
@@ -529,86 +520,6 @@ class InstitutionMapperTest {
         assertFalse(update.hasArrayFilters());
     }
 
-    /**
-     * Method under test: {@link InstitutionMapper#addGeographicTaxonomies(InstitutionUpdate, Update)}
-     */
-    @Test
-    void testAddGeographicTaxonomies3() {
-        ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
-        institutionGeographicTaxonomiesList
-                .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        Update update = new Update();
-        InstitutionMapper.addGeographicTaxonomies(institutionUpdate, update);
-        assertEquals("Code",
-                ((GeoTaxonomyEntity) ((Document) update.getUpdateObject().get("$addToSet")).get("geographicTaxonomies"))
-                        .getCode());
-        assertEquals("The characteristics of someone or something",
-                ((GeoTaxonomyEntity) ((Document) update.getUpdateObject().get("$addToSet")).get("geographicTaxonomies"))
-                        .getDesc());
-    }
-
-    /**
-     * Method under test: {@link InstitutionMapper#addGeographicTaxonomies(InstitutionUpdate, Update)}
-     */
-    @Test
-    void testAddGeographicTaxonomies4() {
-        ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
-        institutionGeographicTaxonomiesList
-                .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-        institutionGeographicTaxonomiesList
-                .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        Update update = new Update();
-        InstitutionMapper.addGeographicTaxonomies(institutionUpdate, update);
-        assertEquals("Code",
-                ((GeoTaxonomyEntity) ((Document) update.getUpdateObject().get("$addToSet")).get("geographicTaxonomies"))
-                        .getCode());
-        assertEquals("The characteristics of someone or something",
-                ((GeoTaxonomyEntity) ((Document) update.getUpdateObject().get("$addToSet")).get("geographicTaxonomies"))
-                        .getDesc());
-    }
-
-
-    /**
-     * Method under test: {@link InstitutionMapper#addGeographicTaxonomies(InstitutionUpdate, Update)}
-     */
     @Test
     void testAddGeographicTaxonomies7() {
         List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
@@ -636,7 +547,7 @@ class InstitutionMapperTest {
         institutionUpdate.setZipCode("21654");
         institutionUpdate.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
         Update update = new Update();
-        InstitutionMapper.addGeographicTaxonomies(institutionUpdate, update);
+        InstitutionMapper.addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
         assertEquals("42 Main St", institutionUpdate.getAddress());
         assertTrue(institutionUpdate.isImported());
         assertEquals("21654", institutionUpdate.getZipCode());

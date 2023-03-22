@@ -22,7 +22,6 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
@@ -958,8 +957,6 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testInvalidateOnboarding() {
-        doNothing().when(onboardingDao)
-                .persistForUpdate( any(),any(), any(), any());
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
@@ -1072,12 +1069,9 @@ class OnboardingServiceImplTest {
         product.setStatus(ProductStatus.ACTIVE);
         product.setTitle("Dr");
         when(onboardingDao.getProductById(any())).thenReturn(product);
-        doNothing().when(onboardingDao)
-                .persistForUpdate( any(),any(), any(), any());
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(contractService.getLogoFile())
                 .thenReturn(Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile());
-        doNothing().when(emailService).sendRejectMail(any(),any(), any());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -1148,8 +1142,6 @@ class OnboardingServiceImplTest {
         doNothing().when(onboardingDao)
                 .rollbackSecondStepOfUpdate( any(),any(),  any());
         when(onboardingDao.getProductById(any())).thenReturn(product);
-        doNothing().when(onboardingDao)
-                .persistForUpdate( any(),any(), any(), any());
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(contractService.getLogoFile())
                 .thenReturn(Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile());
