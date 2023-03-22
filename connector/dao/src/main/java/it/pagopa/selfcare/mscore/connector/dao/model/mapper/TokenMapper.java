@@ -115,6 +115,7 @@ public class TokenMapper {
             response.setDataProtectionOfficer(toDataProtectionOfficer(entity.getDataProtectionOfficer()));
         }
 
+        response.setInstitutionType(entity.getInstitutionType());
         response.setRea(entity.getRea());
         response.setShareCapital(entity.getShareCapital());
         response.setBusinessRegisterPlace(entity.getBusinessRegisterPlace());
