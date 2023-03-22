@@ -2,6 +2,8 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -9,6 +11,9 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+
+import java.time.OffsetDateTime;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +26,14 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class UserConnectorImplTest {
@@ -36,6 +48,238 @@ class UserConnectorImplTest {
         UserEntity userEntity = new UserEntity();
         when(userRepository.findById(any())).thenReturn(Optional.of(userEntity));
         assertNotNull(userConnectorImpl.findById("id"));
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave() {
+        UserEntity userEntity = new UserEntity();
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser());
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave2() {
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userBindingEntityList.add(new UserBindingEntity());
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser());
+        List<UserBinding> bindings = actualSaveResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        assertNull(bindings.get(0).getInstitutionId());
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave4() {
+        UserEntity userEntity = new UserEntity();
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser("42", new ArrayList<>(), null));
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave5() {
+        when(userRepository.save(any()))
+                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.save(new OnboardedUser()));
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave6() {
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
+        userBindingEntityList.add(new UserBindingEntity("42", onboardedProductEntityList));
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser());
+        List<UserBinding> bindings = actualSaveResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        UserBinding getResult = bindings.get(0);
+        assertEquals("42", getResult.getInstitutionId());
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave8() {
+        UserEntity userEntity = new UserEntity();
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+
+        ArrayList<UserBinding> userBindingList = new ArrayList<>();
+        userBindingList.add(new UserBinding());
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser("42", userBindingList, null));
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave9() {
+        OnboardedProductEntity onboardedProductEntity = new OnboardedProductEntity();
+        onboardedProductEntity.setContract("Contract");
+        onboardedProductEntity.setCreatedAt(null);
+        onboardedProductEntity.setEnv(Env.ROOT);
+        onboardedProductEntity.setProductId("42");
+        onboardedProductEntity.setProductRole("Product Role");
+        onboardedProductEntity.setRelationshipId("42");
+        onboardedProductEntity.setRole(PartyRole.MANAGER);
+        onboardedProductEntity.setStatus(RelationshipState.PENDING);
+        onboardedProductEntity.setTokenId("42");
+        onboardedProductEntity.setUpdatedAt(null);
+
+        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
+        onboardedProductEntityList.add(onboardedProductEntity);
+        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
+
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userBindingEntityList.add(e);
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser());
+        List<UserBinding> bindings = actualSaveResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        UserBinding getResult = bindings.get(0);
+        assertEquals("42", getResult.getInstitutionId());
+        assertEquals(1, getResult.getProducts().size());
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave10() {
+        UserEntity userEntity = new UserEntity();
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+
+        ArrayList<UserBinding> userBindingList = new ArrayList<>();
+        userBindingList.add(new UserBinding("42", new ArrayList<>()));
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser("42", userBindingList, null));
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        verify(userRepository).save(any());
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#save(OnboardedUser)}
+     */
+    @Test
+    void testSave12() {
+        OnboardedProductEntity onboardedProductEntity = mock(OnboardedProductEntity.class);
+        when(onboardedProductEntity.getRole()).thenReturn(PartyRole.MANAGER);
+        when(onboardedProductEntity.getEnv()).thenReturn(Env.ROOT);
+        when(onboardedProductEntity.getStatus()).thenReturn(RelationshipState.PENDING);
+        when(onboardedProductEntity.getContract()).thenReturn("Contract");
+        when(onboardedProductEntity.getProductId()).thenReturn("42");
+        when(onboardedProductEntity.getProductRole()).thenReturn("Product Role");
+        when(onboardedProductEntity.getRelationshipId()).thenReturn("42");
+        when(onboardedProductEntity.getTokenId()).thenReturn("42");
+        when(onboardedProductEntity.getCreatedAt()).thenReturn(null);
+        when(onboardedProductEntity.getUpdatedAt()).thenReturn(null);
+        onboardedProductEntity.setContract("Contract");
+        onboardedProductEntity.setCreatedAt(null);
+        onboardedProductEntity.setEnv(Env.ROOT);
+        onboardedProductEntity.setProductId("42");
+        onboardedProductEntity.setProductRole("Product Role");
+        onboardedProductEntity.setRelationshipId("42");
+        onboardedProductEntity.setRole(PartyRole.MANAGER);
+        onboardedProductEntity.setStatus(RelationshipState.PENDING);
+        onboardedProductEntity.setTokenId("42");
+        onboardedProductEntity.setUpdatedAt(null);
+
+        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
+        onboardedProductEntityList.add(onboardedProductEntity);
+        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
+
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userBindingEntityList.add(e);
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+        when(userRepository.save(any())).thenReturn(userEntity);
+        OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser());
+        List<UserBinding> bindings = actualSaveResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", actualSaveResult.getId());
+        assertNull(actualSaveResult.getCreatedAt());
+        UserBinding getResult = bindings.get(0);
+        assertEquals("42", getResult.getInstitutionId());
+        assertEquals(1, getResult.getProducts().size());
+        verify(userRepository).save(any());
+        verify(onboardedProductEntity).getRole();
+        verify(onboardedProductEntity).getEnv();
+        verify(onboardedProductEntity).getStatus();
     }
 
     @Test

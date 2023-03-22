@@ -11,7 +11,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OnboardingRollback {
-    private String tokenId;
+    private Token token;
     private Onboarding onboarding;
     private Map<String, OnboardedProduct> productMap;
 

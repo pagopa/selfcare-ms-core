@@ -309,7 +309,7 @@ class InstitutionServiceImplTest {
         Institution institution = new Institution();
         when(institutionConnector.saveOrRetrievePnPg(any())).thenReturn(institution);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         assertSame(institution, (new InstitutionServiceImpl(null, institutionConnector, geoTaxonomiesConnector,
                 userService, new CoreConfig())).createPnPgInstitution("42", "The characteristics of someone or something"));
         verify(institutionConnector).saveOrRetrievePnPg(any());
@@ -557,7 +557,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionProducts() {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
                 userService, new CoreConfig());
         Institution institution = new Institution();
@@ -575,7 +575,7 @@ class InstitutionServiceImplTest {
         Institution institution = new Institution();
         when(institutionConnector.findInstitutionProduct(any(), any())).thenReturn(institution);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         assertSame(institution, (new InstitutionServiceImpl(null, institutionConnector, geoTaxonomiesConnector,
                 userService, new CoreConfig())).retrieveInstitutionProduct("42", "42"));
         verify(institutionConnector).findInstitutionProduct(any(), any());
@@ -587,7 +587,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionGeoTaxonomies2() {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
                 userService, new CoreConfig());
 
@@ -614,7 +614,7 @@ class InstitutionServiceImplTest {
         geographicTaxonomies.setStartDate("2020-03-01");
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
                 userService, new CoreConfig());
 
@@ -717,7 +717,7 @@ class InstitutionServiceImplTest {
         when(institutionConnector.findByGeotaxonomies(any(), any()))
                 .thenReturn(institutionList);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         List<Institution> actualFindInstitutionsByGeoTaxonomiesResult = (new InstitutionServiceImpl(null,
                 institutionConnector, geoTaxonomiesConnector, userService, new CoreConfig()))
                 .findInstitutionsByGeoTaxonomies("Geo Taxonomies", SearchMode.ALL);
@@ -734,7 +734,7 @@ class InstitutionServiceImplTest {
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         when(institutionConnector.findByProductId(any())).thenReturn(new ArrayList<>());
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         assertThrows(ResourceNotFoundException.class, () -> (new InstitutionServiceImpl(null, institutionConnector,
                 geoTaxonomiesConnector, userService, new CoreConfig())).findInstitutionsByProductId("42"));
         verify(institutionConnector).findByProductId(any());
@@ -750,7 +750,7 @@ class InstitutionServiceImplTest {
         ArrayList<Institution> institutionList = new ArrayList<>();
         when(institutionConnector.findAllByIds(any())).thenReturn(institutionList);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null,null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
                 geoTaxonomiesConnector, userService, new CoreConfig());
         List<Institution> actualRetrieveInstitutionByIdsResult = institutionServiceImpl
@@ -831,7 +831,7 @@ class InstitutionServiceImplTest {
     void testRetrieveUserRelationships2() {
 
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
                 userService, new CoreConfig());
         ArrayList<PartyRole> roles = new ArrayList<>();
@@ -1076,7 +1076,7 @@ class InstitutionServiceImplTest {
         when(institutionConnector.findWithFilter(any(), any(), any()))
                 .thenReturn(institutionList);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null);
+        UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
                 geoTaxonomiesConnector, userService, new CoreConfig());
         institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", new ArrayList<>());

@@ -20,6 +20,6 @@ public class CoreConfig {
     private List<String> destinationMails;
     private String institutionAlternativeEmail;
     private boolean sendEmailToInstitution;
-    private Integer expiringDate;
+    private Integer onboardingExpiringDate;
     private boolean infoCamereEnable;
 }

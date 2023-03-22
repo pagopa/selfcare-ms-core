@@ -29,11 +29,11 @@ public class OnboardingRequest {
     private TokenType tokenType;
 
     public Contract getContract() {
-        if (InstitutionType.PG == institutionUpdate.getInstitutionType()
-        || (contract != null && StringUtils.hasText(contract.getPath()))){
+        if ((institutionUpdate != null && InstitutionType.PG == institutionUpdate.getInstitutionType())
+                || (contract != null && StringUtils.hasText(contract.getPath()))) {
             return contract;
-        }else{
-            throw new InvalidRequestException(CONTRACT_PATH_ERROR.getMessage(),CONTRACT_PATH_ERROR.getCode());
+        } else {
+            throw new InvalidRequestException(CONTRACT_PATH_ERROR.getMessage(), CONTRACT_PATH_ERROR.getCode());
         }
     }
 }

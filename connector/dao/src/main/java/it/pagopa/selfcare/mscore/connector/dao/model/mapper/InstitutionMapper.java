@@ -86,6 +86,8 @@ public class InstitutionMapper {
         }
         if (institution.getGeographicTaxonomies() != null) {
             entity.setGeographicTaxonomies(toGeoTaxonomyEntity(institution.getGeographicTaxonomies()));
+        }else{
+            entity.setGeographicTaxonomies(Collections.emptyList());
         }
         if (institution.getDataProtectionOfficer() != null) {
             entity.setDataProtectionOfficer(toDataProtectionOfficerEntity(institution.getDataProtectionOfficer()));

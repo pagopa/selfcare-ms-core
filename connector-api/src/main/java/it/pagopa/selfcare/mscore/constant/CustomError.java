@@ -27,7 +27,7 @@ public enum CustomError {
     TOKEN_EXPIRED("0040", "Token %s is expired in %s and is status is DELETED"),
     TOKEN_DELETED("0040", "Token %s was DELETED"),
     TOKEN_NOT_FOUND("0014", "Token %s not found"),
-    CONTRACT_NOT_FOUND("0015", "Token for institution %s and product %s not found"),
+    CONTRACT_NOT_FOUND("0015", "Token for institution %s and product %s not found or is in invalid status"),
     DOCUMENT_NOT_FOUND("0016", "Document for relationship %s not found"),
     GET_INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s and productId %s"),
     RELATIONSHIP_NOT_ACTIVABLE("0007", "Relationship %s cannot be activated"),

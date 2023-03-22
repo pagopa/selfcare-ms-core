@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class GeographicTaxonomies {
-    private String code; //REQUIRED
-    private String desc; //REQUIRED
+    private String code;
+    private String desc;
     private String region;
     private String province;
     private String provinceAbbreviation;
@@ -13,5 +13,5 @@ public class GeographicTaxonomies {
     private String countryAbbreviation;
     private String startDate;
     private String endDate;
-    private boolean enable; //REQUIRED
+    private boolean enable;
 }

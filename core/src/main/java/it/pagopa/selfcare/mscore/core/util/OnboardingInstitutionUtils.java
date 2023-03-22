@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -40,17 +41,31 @@ public class OnboardingInstitutionUtils {
         log.info("END - checkIfProductAlreadyOnboarded without error");
     }
 
+    public static void validatePaOnboarding(OnboardingRequest request) {
+        if (request.getBillingRequest() == null
+                || StringUtils.isEmpty(request.getBillingRequest().getVatNumber())
+                || StringUtils.isEmpty(request.getBillingRequest().getRecipientCode())) {
+            throw new InvalidRequestException(ONBOARDING_BILLING_ERROR.getCode(), ONBOARDING_BILLING_ERROR.getMessage());
+        }
+    }
+
     public static void validateOverridingData(InstitutionUpdate institutionUpdate, Institution institution) {
         log.info("START - validateOverridingData for institution having externalId: {}", institution.getExternalId());
         if (InstitutionType.PA == institutionUpdate.getInstitutionType()
-                && (!institution.getDescription().equalsIgnoreCase(institutionUpdate.getDescription())
-                || !institution.getTaxCode().equalsIgnoreCase(institutionUpdate.getTaxCode())
-                || !institution.getDigitalAddress().equalsIgnoreCase(institutionUpdate.getDigitalAddress())
-                || !institution.getZipCode().equalsIgnoreCase(institutionUpdate.getZipCode())
-                || !institution.getAddress().equalsIgnoreCase(institutionUpdate.getAddress()))) {
+                && (!validateParameter(institution.getDescription(), institutionUpdate.getDescription())
+                || !validateParameter(institution.getTaxCode(), institutionUpdate.getTaxCode())
+                || !validateParameter(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())
+                || !validateParameter(institution.getZipCode(), institutionUpdate.getZipCode())
+                || !validateParameter(institution.getAddress(), institutionUpdate.getAddress()))){
             throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
         }
         log.info("END - validateOverridingData without error");
+    }
+    private static boolean validateParameter(String startValue, String toValue) {
+        if(!StringUtils.isEmpty(startValue) && !StringUtils.isEmpty(toValue)){
+            return startValue.equalsIgnoreCase(toValue);
+        }
+        return !StringUtils.isEmpty(startValue) || StringUtils.isEmpty(toValue);
     }
 
     public static RelationshipState getStatus(InstitutionType institutionType) {
@@ -77,7 +92,70 @@ public class OnboardingInstitutionUtils {
         }
     }
 
-    public static Onboarding constructOnboarding(OnboardingRequest request) {
+    public static List<String> getValidManagerToOnboard(List<UserToOnboard> users, Token token) {
+        log.info("START - getOnboardingValidManager for users list size: {}", users.size());
+        List<String> response;
+        if (token != null) {
+            response = token.getUsers().stream()
+                    .filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
+                    .map(TokenUser::getUserId)
+                    .collect(Collectors.toList());
+        } else {
+            response = users.stream()
+                    .filter(userToOnboard -> PartyRole.MANAGER == userToOnboard.getRole())
+                    .map(UserToOnboard::getId)
+                    .collect(Collectors.toList());
+        }
+        if (response.isEmpty()) {
+            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+        }
+        return response;
+    }
+
+    public static List<String> getOnboardedValidManager(List<OnboardedUser> users, String institutionId, String productId) {
+        log.info("START - getValidManager for users list size: {}", users.size());
+        List<String> response = new ArrayList<>();
+        for (OnboardedUser onboardedUser : users) {
+            onboardedUser.getBindings().stream()
+                    .filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
+                    .flatMap(userBinding -> userBinding.getProducts().stream())
+                    .filter(product -> productId.equalsIgnoreCase(product.getProductId()) && PartyRole.MANAGER == product.getRole())
+                    .forEach(product -> response.add(onboardedUser.getId()));
+        }
+        if (response.isEmpty()) {
+            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+        }
+        return response;
+    }
+
+    public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest onboardingLegalsRequest) {
+        OnboardingRequest request = new OnboardingRequest();
+        request.setProductId(onboardingLegalsRequest.getProductId());
+        request.setProductName(onboardingLegalsRequest.getProductName());
+        request.setUsers(onboardingLegalsRequest.getUsers());
+        request.setInstitutionExternalId(onboardingLegalsRequest.getInstitutionExternalId());
+        request.setContract(onboardingLegalsRequest.getContract());
+        request.setSignContract(true);
+        request.setTokenType(TokenType.LEGALS);
+        return request;
+    }
+
+    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution) {
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(token.getProductId());
+        onboardingRequest.setProductName(token.getProductId());
+        Contract contract = new Contract();
+        contract.setPath(token.getContractTemplate());
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription(institution.getDescription());
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setSignContract(true);
+
+        return onboardingRequest;
+    }
+
+    public static Onboarding constructOnboarding(OnboardingRequest request, Institution institution) {
         Onboarding onboarding = new Onboarding();
 
         onboarding.setProductId(request.getProductId());
@@ -90,6 +168,8 @@ public class OnboardingInstitutionUtils {
         }
         if (request.getInstitutionUpdate() != null) {
             onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+        } else if (institution.getInstitutionType() != null) {
+            onboarding.setStatus(getStatus(institution.getInstitutionType()));
         }
 
         return onboarding;
@@ -111,7 +191,7 @@ public class OnboardingInstitutionUtils {
         return onboardedProduct;
     }
 
-    public static OnboardedProduct constructProduct(UserToOnboard p, OnboardingRequest request) {
+    public static OnboardedProduct constructProduct(UserToOnboard p, OnboardingRequest request, Institution institution) {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
         onboardedProduct.setProductId(request.getProductId());
@@ -122,6 +202,8 @@ public class OnboardingInstitutionUtils {
         onboardedProduct.setProductRole(p.getProductRole());
         if (request.getInstitutionUpdate() != null) {
             onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+        } else if (institution.getInstitutionType() != null) {
+            onboardedProduct.setStatus(getStatus(institution.getInstitutionType()));
         }
         onboardedProduct.setCreatedAt(OffsetDateTime.now());
         if (p.getEnv() != null) {
