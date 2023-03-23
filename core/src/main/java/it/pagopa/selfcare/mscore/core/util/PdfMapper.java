@@ -25,7 +25,7 @@ public class PdfMapper {
 
     public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         log.info("START - setupCommonData");
-        if (validManager.getEmail() != null) {
+        if (StringUtils.hasText(validManager.getEmail())) {
             Map<String, Object> map = new HashMap<>();
             map.put("institutionName", institution.getDescription());
             map.put("address", institution.getAddress());

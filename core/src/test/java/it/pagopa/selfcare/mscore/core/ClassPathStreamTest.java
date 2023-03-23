@@ -11,5 +11,6 @@ class ClassPathStreamTest {
         assertNull((new ClassPathStream("Path")).getStream());
     }
 
+
 }
 

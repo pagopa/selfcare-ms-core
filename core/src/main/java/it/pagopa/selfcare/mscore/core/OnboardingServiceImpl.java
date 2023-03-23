@@ -146,9 +146,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     @Override
     public void completeOboarding(Token token, MultipartFile contract) {
         checkAndHandleExpiring(token);
-        var ids = token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
-        List<OnboardedUser> onboardedUsers = userService.findAllByIds(ids);
-        List<String> managerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
+        List<String> managerList = getOnboardedValidManager(token);
         List<User> managersData = managerList.stream()
                 .map(user -> userService.retrieveUserFromUserRegistry(user, EnumSet.allOf(User.Fields.class)))
                 .collect(Collectors.toList());
@@ -176,7 +174,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
-        List<String> validManagerList = getOnboardedValidManager(onboardedUsers, token.getInstitutionId(), token.getProductId());
+        List<String> validManagerList = getOnboardedValidManager(token);
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         List<User> delegate = onboardedUsers
                 .stream()

@@ -62,7 +62,7 @@ class ExternalControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[],\"total\":null}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"products\":[]}"));
     }
 
     /**
@@ -98,7 +98,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
-                        .string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
+                        .string("{\"products\":[{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
     }
 
     /**
@@ -152,7 +152,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"products\":[{\"id\":\"?\",\"state\":\"ACTIVE\"},{\"id\":\"42\",\"state\":\"PENDING\"}],\"total\":null}"));
+                                "{\"products\":[{\"id\":\"?\",\"state\":\"ACTIVE\"},{\"id\":\"42\",\"state\":\"PENDING\"}]}"));
     }
 
     /**

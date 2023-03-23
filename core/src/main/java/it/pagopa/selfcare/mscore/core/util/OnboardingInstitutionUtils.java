@@ -107,25 +107,21 @@ public class OnboardingInstitutionUtils {
                     .collect(Collectors.toList());
         }
         if (response.isEmpty()) {
-            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+            throw new InvalidRequestException(MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(), MANAGER_NOT_FOUND_GENERIC_ERROR.getCode());
         }
         return response;
     }
 
-    public static List<String> getOnboardedValidManager(List<OnboardedUser> users, String institutionId, String productId) {
-        log.info("START - getValidManager for users list size: {}", users.size());
-        List<String> response = new ArrayList<>();
-        for (OnboardedUser onboardedUser : users) {
-            onboardedUser.getBindings().stream()
-                    .filter(userBinding -> institutionId.equalsIgnoreCase(userBinding.getInstitutionId()))
-                    .flatMap(userBinding -> userBinding.getProducts().stream())
-                    .filter(product -> productId.equalsIgnoreCase(product.getProductId()) && PartyRole.MANAGER == product.getRole())
-                    .forEach(product -> response.add(onboardedUser.getId()));
+    public static List<String> getOnboardedValidManager(Token token) {
+        List<String> managerList = new ArrayList<>();
+        if(token.getUsers() != null) {
+            managerList = token.getUsers().stream().filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
+                    .map(TokenUser::getUserId).collect(Collectors.toList());
         }
-        if (response.isEmpty()) {
+        if (managerList.isEmpty()) {
             throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
         }
-        return response;
+        return managerList;
     }
 
     public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest onboardingLegalsRequest) {
@@ -166,7 +162,7 @@ public class OnboardingInstitutionUtils {
         if (request.getContract() != null) {
             onboarding.setContract(request.getContract().getPath());
         }
-        if (request.getInstitutionUpdate() != null) {
+        if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
             onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         } else if (institution.getInstitutionType() != null) {
             onboarding.setStatus(getStatus(institution.getInstitutionType()));
@@ -197,7 +193,7 @@ public class OnboardingInstitutionUtils {
         onboardedProduct.setProductId(request.getProductId());
         onboardedProduct.setRole(p.getRole());
         onboardedProduct.setProductRole(p.getProductRole());
-        if (request.getInstitutionUpdate() != null) {
+        if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
             onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
         } else if (institution.getInstitutionType() != null) {
             onboardedProduct.setStatus(getStatus(institution.getInstitutionType()));

@@ -15,19 +15,15 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
-
-
 import java.io.UnsupportedEncodingException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,11 +38,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -84,6 +78,9 @@ class ContractServiceTest {
     void createContractPDF() {
         String contract = "contract";
         User validManager = new User();
+        CertifiedField<String> email = new CertifiedField<>();
+        email.setValue("email");
+        validManager.setEmail(email);
         List<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PSP);
@@ -94,13 +91,16 @@ class ContractServiceTest {
         request.setProductName("42");
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
-       assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies));
+        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies));
     }
 
     @Test
     void createContractPDF1() {
         String contract = "contract";
         User validManager = new User();
+        CertifiedField<String> email = new CertifiedField<>();
+        email.setValue("email");
+        validManager.setEmail(email);
         List<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PSP);
@@ -118,6 +118,9 @@ class ContractServiceTest {
     void createContractPDF2() {
         String contract = "contract";
         User validManager = new User();
+        CertifiedField<String> email = new CertifiedField<>();
+        email.setValue("email");
+        validManager.setEmail(email);
         List<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PSP);
@@ -146,8 +149,9 @@ class ContractServiceTest {
         request.setSignContract(true);
         request.setProductName("42");
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
-        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies));
+        assertThrows(InvalidRequestException.class,
+                () -> contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies),
+                "Manager email not found");
     }
 
     @Test
@@ -169,7 +173,7 @@ class ContractServiceTest {
      * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token)}
      */
     @Test
-    void testSendDataLakeNotification2() {
+    void testSendDataLakeNotification2() throws ExecutionException, InterruptedException {
         ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
         when(producerFactory.transactionCapable()).thenReturn(true);
         KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
@@ -181,7 +185,9 @@ class ContractServiceTest {
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig());
 
         Institution institution = new Institution();
-        institution.setOnboarding(new ArrayList<>());
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("prod");
+        institution.setOnboarding(List.of(onboarding));
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -212,13 +218,13 @@ class ContractServiceTest {
         token.setId("42");
         token.setInstitutionId("42");
         token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
+        token.setProductId("prod");
         token.setStatus(RelationshipState.PENDING);
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        assertThrows(InvalidRequestException.class, () -> contractService.sendDataLakeNotification(institution, token));
-        verify(producerFactory).transactionCapable();
+        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token),
+                "Topic cannot be null");
     }
 
     @Test
@@ -298,6 +304,19 @@ class ContractServiceTest {
         when(file.getInputStream().readAllBytes()).thenReturn(new byte[]{1});
         assertThrows(MsCoreException.class, () -> contractService.verifySignature(file, token, new ArrayList<>()));
 
+    }
+
+    @Test
+    void deleteContract() {
+        doNothing().when(fileStorageConnector).removeContract(any(), any());
+        assertDoesNotThrow(() -> contractService.deleteContract("fileName", "tokenId"));
+    }
+
+    @Test
+    void uploadContract() {
+        when(fileStorageConnector.uploadContract(any(), any())).thenReturn("fileName");
+        MultipartFile file = mock(MultipartFile.class);
+        assertDoesNotThrow(() -> contractService.uploadContract("fileName", file));
     }
 }
 

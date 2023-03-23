@@ -1050,6 +1050,18 @@ class TokenConnectorImplTest {
 
     @Test
     void testFindAndUpdateTokenUser() {
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setCreatedAt(null);
+        token.setExpiringDate(OffsetDateTime.now());
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setProductId("42");
+        token.setStatus(RelationshipState.DELETED);
+        token.setUpdatedAt(null);
+        token.setContractSigned("contractSigned");
+        token.setUsers(new ArrayList<>());
+
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
         tokenEntity.setCreatedAt(null);
@@ -1057,11 +1069,12 @@ class TokenConnectorImplTest {
         tokenEntity.setId("42");
         tokenEntity.setInstitutionId("42");
         tokenEntity.setProductId("42");
-        tokenEntity.setStatus(RelationshipState.PENDING);
+        tokenEntity.setStatus(RelationshipState.DELETED);
         tokenEntity.setUpdatedAt(null);
+        tokenEntity.setContractSigned("contractSigned");
         tokenEntity.setUsers(new ArrayList<>());
         when(tokenRepository.findAndModify(any(), any(), any(), any())).thenReturn(tokenEntity);
-        tokenConnectorImpl.findAndUpdateToken(new Token(), RelationshipState.REJECTED, "");
+        tokenConnectorImpl.findAndUpdateToken(token, RelationshipState.DELETED, "");
         verify(tokenRepository).findAndModify(any(), any(), any(), any());
     }
 

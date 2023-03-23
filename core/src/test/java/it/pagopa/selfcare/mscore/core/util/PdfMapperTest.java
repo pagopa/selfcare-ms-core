@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core.util;
 
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Contract;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PdfMapperTest {
 
@@ -106,9 +108,6 @@ class PdfMapperTest {
      */
     @Test
     void testSetUpCommonData() {
-        CertifiedField<String> certifiedField = new CertifiedField<>();
-        certifiedField.setCertification(Certification.NONE);
-        certifiedField.setValue("42");
 
         CertifiedField<String> certifiedField1 = new CertifiedField<>();
         certifiedField1.setCertification(Certification.NONE);
@@ -119,7 +118,6 @@ class PdfMapperTest {
         certifiedField2.setValue("42");
 
         User user = new User();
-        user.setEmail(certifiedField);
         user.setFamilyName(certifiedField1);
         user.setFiscalCode("Fiscal Code");
         user.setId("42");
@@ -183,7 +181,7 @@ class PdfMapperTest {
         onboardingRequest.setUsers(new ArrayList<>());
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         geographicTaxonomies.add(new InstitutionGeographicTaxonomies());
-        assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, geographicTaxonomies).size());
+        assertThrows(InvalidRequestException.class, () -> PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, geographicTaxonomies));
     }
 
     /**
@@ -750,6 +748,73 @@ class PdfMapperTest {
      * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest)}
      */
     @Test
+    void testSetupProdIOData1() {
+        HashMap<String, Object> stringObjectMap = new HashMap<>();
+
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+
+        User user = new User();
+        user.setEmail(certifiedField);
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+        user.setName(certifiedField2);
+        user.setWorkContacts(new HashMap<>());
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setOrigin(Origin.IPA);
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("C1");
+        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setUsers(new ArrayList<>());
+        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
+        assertEquals(16, stringObjectMap.size());
+    }
+
+    /**
+     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest)}
+     */
+    @Test
     void testSetupProdIOData() {
         HashMap<String, Object> stringObjectMap = new HashMap<>();
 
@@ -774,25 +839,7 @@ class PdfMapperTest {
         user.setWorkContacts(new HashMap<>());
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PA);
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
+        institution.setOrigin(Origin.IPA);
 
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         paymentServiceProvider.setAbiCode("Abi Code");
@@ -801,10 +848,11 @@ class PdfMapperTest {
         paymentServiceProvider.setLegalRegisterNumber("42");
         paymentServiceProvider.setVatNumberGroup(true);
 
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
         institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
@@ -819,11 +867,9 @@ class PdfMapperTest {
         institutionUpdate.setZipCode("21654");
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setPricingPlan("C0");
         onboardingRequest.setProductId("42");
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);

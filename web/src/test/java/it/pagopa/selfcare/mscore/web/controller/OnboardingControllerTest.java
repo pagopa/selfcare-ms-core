@@ -28,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,6 +43,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
 
 
 import static org.mockito.ArgumentMatchers.any;
@@ -111,24 +114,10 @@ class OnboardingControllerTest {
      */
     @Test
     void testApproveOnboarding() throws Exception {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
 
         Token token = new Token();
         token.setChecksum("Checksum");
@@ -139,19 +128,21 @@ class OnboardingControllerTest {
         token.setExpiringDate(null);
         token.setId("42");
         token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
         token.setProductId("42");
         token.setStatus(RelationshipState.PENDING);
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
-                .formLogin();
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+        when(tokenService.verifyToken(any())).thenReturn(token);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/onboarding/approve/{tokenId}", "42")
+                .principal(authentication);
+        MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
+
 
     /**
      * Method under test: {@link OnboardingController#getOnboardingDocument(String)}
@@ -327,6 +318,10 @@ class OnboardingControllerTest {
      */
     @Test
     void testOnboardingInstitutionLegals() throws Exception {
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+
         ContractRequest contractRequest = new ContractRequest();
         contractRequest.setPath("Path");
         contractRequest.setVersion("1.0.2");
@@ -338,15 +333,21 @@ class OnboardingControllerTest {
         onboardingInstitutionLegalsRequest.setProductId("42");
         onboardingInstitutionLegalsRequest.setProductName("Product Name");
         onboardingInstitutionLegalsRequest.setSignContract(true);
-        onboardingInstitutionLegalsRequest.setUsers(new ArrayList<>());
+        Person person = new Person();
+        person.setId("id");
+        onboardingInstitutionLegalsRequest.setUsers(List.of(person));
+
         String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionLegalsRequest);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/legals")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+        MockHttpServletRequestBuilder requestBuilder =
+                MockMvcRequestBuilders.post("/onboarding/legals")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content)
+                        .principal(authentication);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().is(400));
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().is(204));
     }
 
     /**
@@ -374,7 +375,7 @@ class OnboardingControllerTest {
     @Test
     void testOnboardingInstitutionOperators2() throws Exception {
         when(onboardingService.onboardingOperators(org.mockito.Mockito.any(),
-                 org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+                org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -457,7 +458,7 @@ class OnboardingControllerTest {
     @Test
     void testOnboardingInstitutionSubDelegate2() throws Exception {
         when(onboardingService.onboardingOperators(org.mockito.Mockito.any(),
-                 org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+                org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -586,6 +587,23 @@ class OnboardingControllerTest {
                 .build()
                 .perform(headResult);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#completeOnboarding(String, MultipartFile)}
+     */
+    @Test
+    void testCompleteOnboarding() throws Exception {
+        doNothing().when(onboardingService).completeOboarding(any(), any());
+        MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .multipart("/onboarding/complete/{tokenId}",
+                "42")
+                .file(file);
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
 

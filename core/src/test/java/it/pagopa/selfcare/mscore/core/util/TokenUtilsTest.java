@@ -12,11 +12,11 @@ import it.pagopa.selfcare.mscore.model.onboarding.Contract;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
-
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
@@ -57,7 +57,6 @@ class TokenUtilsTest {
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
         institutionUpdate.setShareCapital("Share Capital");
@@ -76,7 +75,10 @@ class TokenUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        Token actualConvertToTokenResult = TokenUtils.toToken(onboardingRequest, new Institution(),
+
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PA);
+        Token actualConvertToTokenResult = TokenUtils.toToken(onboardingRequest, institution,
                 "Digest", OffsetDateTime.now());
         assertEquals("Digest", actualConvertToTokenResult.getChecksum());
         assertEquals(RelationshipState.PENDING, actualConvertToTokenResult.getStatus());
@@ -206,6 +208,15 @@ class TokenUtilsTest {
         assertEquals("42", actualConvertToTokenResult.getProductId());
         assertNull(actualConvertToTokenResult.getInstitutionId());
         assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
+    }
+
+    /**
+     * Method under test: {@link TokenUtils#createDigest(File)}
+     */
+    @Test
+    void testCreateDigest() throws IOException {
+        File tmp = File.createTempFile("file",".txt");
+        Assertions.assertEquals("47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", TokenUtils.createDigest(tmp));
     }
 
     /**

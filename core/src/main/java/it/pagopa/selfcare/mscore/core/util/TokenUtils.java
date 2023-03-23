@@ -30,7 +30,7 @@ public class TokenUtils {
         token.setInstitutionId(institution.getId());
         token.setProductId(request.getProductId());
         token.setChecksum(digest);
-        if (request.getInstitutionUpdate() != null) {
+        if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
             token.setStatus(OnboardingInstitutionUtils.getStatus(request.getInstitutionUpdate().getInstitutionType()));
         } else if (institution.getInstitutionType() != null) {
             token.setStatus(OnboardingInstitutionUtils.getStatus(institution.getInstitutionType()));

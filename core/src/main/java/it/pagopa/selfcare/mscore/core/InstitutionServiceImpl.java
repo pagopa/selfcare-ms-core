@@ -298,7 +298,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         return list;
     }
 
-    private void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution) {
+    protected void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution) {
         if (institution != null) {
             if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
                 for (OnboardedProduct product : binding.getProducts()) {

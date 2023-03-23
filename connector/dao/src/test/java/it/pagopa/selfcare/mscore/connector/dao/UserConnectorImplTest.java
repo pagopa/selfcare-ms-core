@@ -12,14 +12,12 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
-import java.time.OffsetDateTime;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +27,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class UserConnectorImplTest {
     @InjectMocks
     private UserConnectorImpl userConnectorImpl;
@@ -43,11 +42,262 @@ class UserConnectorImplTest {
     @Mock
     private UserRepository userRepository;
 
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll() {
+        when(userRepository.findAll()).thenReturn(new ArrayList<>());
+        assertTrue(userConnectorImpl.findAll().isEmpty());
+        verify(userRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll2() {
+        UserEntity userEntity = new UserEntity();
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+
+        ArrayList<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity);
+        when(userRepository.findAll()).thenReturn(userEntityList);
+        List<OnboardedUser> actualFindAllResult = userConnectorImpl.findAll();
+        assertEquals(1, actualFindAllResult.size());
+        OnboardedUser getResult = actualFindAllResult.get(0);
+        assertEquals("42", getResult.getId());
+        assertNull(getResult.getCreatedAt());
+        verify(userRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll3() {
+        UserEntity userEntity = new UserEntity();
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+
+        UserEntity userEntity1 = new UserEntity();
+        userEntity1.setBindings(new ArrayList<>());
+        userEntity1.setCreatedAt(null);
+        userEntity1.setId("Id");
+        userEntity1.setUpdatedAt(null);
+
+        ArrayList<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity1);
+        userEntityList.add(userEntity);
+        when(userRepository.findAll()).thenReturn(userEntityList);
+        List<OnboardedUser> actualFindAllResult = userConnectorImpl.findAll();
+        assertEquals(2, actualFindAllResult.size());
+        OnboardedUser getResult = actualFindAllResult.get(0);
+        assertEquals("Id", getResult.getId());
+        OnboardedUser getResult1 = actualFindAllResult.get(1);
+        assertEquals("42", getResult1.getId());
+        assertNull(getResult1.getCreatedAt());
+        assertNull(getResult.getCreatedAt());
+        verify(userRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll4() {
+        when(userRepository.findAll()).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findAll());
+        verify(userRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll5() {
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userBindingEntityList.add(new UserBindingEntity());
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+
+        ArrayList<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity);
+        when(userRepository.findAll()).thenReturn(userEntityList);
+        List<OnboardedUser> actualFindAllResult = userConnectorImpl.findAll();
+        assertEquals(1, actualFindAllResult.size());
+        OnboardedUser getResult = actualFindAllResult.get(0);
+        List<UserBinding> bindings = getResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", getResult.getId());
+        assertNull(getResult.getCreatedAt());
+        assertNull(bindings.get(0).getInstitutionId());
+        verify(userRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll6() {
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
+        userBindingEntityList.add(new UserBindingEntity("42", onboardedProductEntityList));
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+
+        ArrayList<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity);
+        when(userRepository.findAll()).thenReturn(userEntityList);
+        List<OnboardedUser> actualFindAllResult = userConnectorImpl.findAll();
+        assertEquals(1, actualFindAllResult.size());
+        OnboardedUser getResult = actualFindAllResult.get(0);
+        List<UserBinding> bindings = getResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", getResult.getId());
+        assertNull(getResult.getCreatedAt());
+        UserBinding getResult1 = bindings.get(0);
+        assertEquals("42", getResult1.getInstitutionId());
+        verify(userRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll8() {
+        OnboardedProductEntity onboardedProductEntity = new OnboardedProductEntity();
+        onboardedProductEntity.setContract("Contract");
+        onboardedProductEntity.setCreatedAt(null);
+        onboardedProductEntity.setEnv(Env.ROOT);
+        onboardedProductEntity.setProductId("42");
+        onboardedProductEntity.setProductRole("Product Role");
+        onboardedProductEntity.setRelationshipId("42");
+        onboardedProductEntity.setRole(PartyRole.MANAGER);
+        onboardedProductEntity.setStatus(RelationshipState.PENDING);
+        onboardedProductEntity.setTokenId("42");
+        onboardedProductEntity.setUpdatedAt(null);
+
+        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
+        onboardedProductEntityList.add(onboardedProductEntity);
+        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
+
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userBindingEntityList.add(e);
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+
+        ArrayList<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity);
+        when(userRepository.findAll()).thenReturn(userEntityList);
+        List<OnboardedUser> actualFindAllResult = userConnectorImpl.findAll();
+        assertEquals(1, actualFindAllResult.size());
+        OnboardedUser getResult = actualFindAllResult.get(0);
+        List<UserBinding> bindings = getResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", getResult.getId());
+        assertNull(getResult.getCreatedAt());
+        UserBinding getResult1 = bindings.get(0);
+        assertEquals("42", getResult1.getInstitutionId());
+        assertEquals(1, getResult1.getProducts().size());
+        verify(userRepository).findAll();
+    }
+
+    /**
+     * Method under test: {@link UserConnectorImpl#findAll()}
+     */
+    @Test
+    void testFindAll9() {
+        OnboardedProductEntity onboardedProductEntity = mock(OnboardedProductEntity.class);
+        when(onboardedProductEntity.getRole()).thenReturn(PartyRole.MANAGER);
+        when(onboardedProductEntity.getEnv()).thenReturn(Env.ROOT);
+        when(onboardedProductEntity.getStatus()).thenReturn(RelationshipState.PENDING);
+        when(onboardedProductEntity.getContract()).thenReturn("Contract");
+        when(onboardedProductEntity.getProductId()).thenReturn("42");
+        when(onboardedProductEntity.getProductRole()).thenReturn("Product Role");
+        when(onboardedProductEntity.getRelationshipId()).thenReturn("42");
+        when(onboardedProductEntity.getTokenId()).thenReturn("42");
+        when(onboardedProductEntity.getCreatedAt()).thenReturn(null);
+        when(onboardedProductEntity.getUpdatedAt()).thenReturn(null);
+        doNothing().when(onboardedProductEntity).setContract(any());
+        doNothing().when(onboardedProductEntity).setCreatedAt(any());
+        doNothing().when(onboardedProductEntity).setEnv(any());
+        doNothing().when(onboardedProductEntity).setProductId(any());
+        doNothing().when(onboardedProductEntity).setProductRole(any());
+        doNothing().when(onboardedProductEntity).setRelationshipId(any());
+        doNothing().when(onboardedProductEntity).setRole(any());
+        doNothing().when(onboardedProductEntity).setStatus(any());
+        doNothing().when(onboardedProductEntity).setTokenId(any());
+        doNothing().when(onboardedProductEntity).setUpdatedAt(any());
+        onboardedProductEntity.setContract("Contract");
+        onboardedProductEntity.setCreatedAt(null);
+        onboardedProductEntity.setEnv(Env.ROOT);
+        onboardedProductEntity.setProductId("42");
+        onboardedProductEntity.setProductRole("Product Role");
+        onboardedProductEntity.setRelationshipId("42");
+        onboardedProductEntity.setRole(PartyRole.MANAGER);
+        onboardedProductEntity.setStatus(RelationshipState.PENDING);
+        onboardedProductEntity.setTokenId("42");
+        onboardedProductEntity.setUpdatedAt(null);
+
+        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
+        onboardedProductEntityList.add(onboardedProductEntity);
+        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
+
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userBindingEntityList.add(e);
+
+        UserEntity userEntity = new UserEntity();
+        userEntity.setBindings(userBindingEntityList);
+        userEntity.setCreatedAt(null);
+        userEntity.setId("42");
+        userEntity.setUpdatedAt(null);
+
+        ArrayList<UserEntity> userEntityList = new ArrayList<>();
+        userEntityList.add(userEntity);
+        when(userRepository.findAll()).thenReturn(userEntityList);
+        List<OnboardedUser> actualFindAllResult = userConnectorImpl.findAll();
+        assertEquals(1, actualFindAllResult.size());
+        OnboardedUser getResult = actualFindAllResult.get(0);
+        List<UserBinding> bindings = getResult.getBindings();
+        assertEquals(1, bindings.size());
+        assertEquals("42", getResult.getId());
+        assertNull(getResult.getCreatedAt());
+        UserBinding getResult1 = bindings.get(0);
+        assertEquals("42", getResult1.getInstitutionId());
+        assertEquals(1, getResult1.getProducts().size());
+    }
+
     @Test
     void findById() {
         UserEntity userEntity = new UserEntity();
         when(userRepository.findById(any())).thenReturn(Optional.of(userEntity));
         assertNotNull(userConnectorImpl.findById("id"));
+    }
+
+    @Test
+    void findById2() {
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findById("id"));
     }
 
     /**
@@ -116,7 +366,8 @@ class UserConnectorImplTest {
     void testSave5() {
         when(userRepository.save(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.save(new OnboardedUser()));
+        OnboardedUser onboardedUser = new OnboardedUser();
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.save(onboardedUser));
         verify(userRepository).save(any());
     }
 
@@ -309,7 +560,7 @@ class UserConnectorImplTest {
      */
     @Test
     void testDeleteById() {
-        doNothing().when(userRepository).deleteById("any");
+        doNothing().when(userRepository).deleteById(any());
         userConnectorImpl.deleteById("42");
         verify(userRepository).deleteById(any());
     }
@@ -321,9 +572,11 @@ class UserConnectorImplTest {
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
+        Token token = new Token();
+        token.setContractSigned("contract signed");
         when(userRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(userEntity);
-        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateState("42", "42", new Token(), RelationshipState.PENDING));
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateState("42", "42", token, RelationshipState.PENDING));
     }
 
     @Test

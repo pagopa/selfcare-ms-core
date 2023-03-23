@@ -3,8 +3,10 @@ package it.pagopa.selfcare.mscore.web.controller;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.core.UserService;
@@ -26,10 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -55,26 +55,16 @@ class ManagementControllerTest {
      */
     @Test
     void testGetInstitutionAttributes() throws Exception {
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders.formLogin();
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(managementController)
+        Institution institution = new Institution();
+        institution.setAttributes(List.of(new Attributes()));
+        institution.setId("id");
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/{id}/attributes", "42");
+        MockMvcBuilders.standaloneSetup(managementController)
                 .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
-    /**
-     * Method under test: {@link ManagementController#getInstitutionAttributes(String)}
-     */
-    @Test
-    void testGetInstitutionAttributes2() throws Exception {
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
-                .formLogin();
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(managementController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     /**
@@ -132,6 +122,22 @@ class ManagementControllerTest {
                                         + "\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail"
                                         + "\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"createdAt\":null,\"updatedAt\":null"
                                         + "}"));
+    }
+
+    /**
+     * Method under test: {@link ManagementController#getInstitutionByGeotaxonomies(String, SearchMode)}
+     */
+    @Test
+    void testGetInstitutionByGeotaxonomies() throws Exception {
+        Object[] uriVars = new Object[]{};
+        String[] values = new String[]{"foo"};
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/bygeotaxonomies", uriVars)
+                .param("geoTaxonomies", values);
+        Object[] controllers = new Object[]{managementController};
+        MockMvcBuilders.standaloneSetup(controllers).build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     /**

@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.AttributesEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.BillingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
@@ -16,6 +15,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,20 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -785,15 +778,130 @@ class InstitutionConnectorImplTest {
     }
 
     /**
+     * Method under test: {@link InstitutionConnectorImpl#findAndUpdateInstitutionData(String, Token, Onboarding, RelationshipState)}
+     */
+    @Test
+    void testFindAndUpdateInstitutionData2() {
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+        when(institutionRepository.findAndModify(org.mockito.Mockito.any(),
+                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
+                org.mockito.Mockito.any())).thenReturn(institutionEntity);
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setClosedAt(null);
+        onboarding.setContract("Contract");
+        onboarding.setCreatedAt(null);
+        onboarding.setPricingPlan("Pricing Plan");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setTokenId("42");
+        onboarding.setUpdatedAt(null);
+        institutionConnectorImpl.findAndUpdateInstitutionData("42", token, onboarding, RelationshipState.DELETED);
+        verify(institutionRepository).findAndModify(org.mockito.Mockito.any(),
+                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
+                org.mockito.Mockito.any());
+    }
+
+    /**
      * Method under test: {@link InstitutionConnectorImpl#findByGeotaxonomies(List, SearchMode)}
      */
     @Test
     void testFindByGeotaxonomies() {
-        when(institutionRepository.find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        when(institutionRepository.find(org.mockito.Mockito.any(), org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
         assertTrue(institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).isEmpty());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -849,8 +957,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -953,8 +1060,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(2, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -962,11 +1068,9 @@ class InstitutionConnectorImplTest {
      */
     @Test
     void testFindByGeotaxonomies4() {
-        when(institutionRepository.find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        when(institutionRepository.find(org.mockito.Mockito.any(),org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
         assertTrue(institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ANY).isEmpty());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -974,11 +1078,9 @@ class InstitutionConnectorImplTest {
      */
     @Test
     void testFindByGeotaxonomies5() {
-        when(institutionRepository.find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        when(institutionRepository.find(org.mockito.Mockito.any(), org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
         assertTrue(institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.EXACT).isEmpty());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),org.mockito.Mockito.any());
     }
 
     /**
@@ -986,13 +1088,12 @@ class InstitutionConnectorImplTest {
      */
     @Test
     void testFindByGeotaxonomies6() {
-        when(institutionRepository.find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any()))
+        when(institutionRepository.find(org.mockito.Mockito.any(), org.mockito.Mockito.any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
+        List<String> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL));
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+                () -> institutionConnectorImpl.findByGeotaxonomies(list, SearchMode.ALL));
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1090,8 +1191,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1188,8 +1288,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),org.mockito.Mockito.any());
     }
 
     /**
@@ -1298,8 +1397,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(1, institutionConnectorImpl.findByGeotaxonomies(new ArrayList<>(), SearchMode.ALL).size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1307,11 +1405,9 @@ class InstitutionConnectorImplTest {
      */
     @Test
     void testFindByProductId() {
-        when(institutionRepository.find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        when(institutionRepository.find(org.mockito.Mockito.any(),org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
         assertTrue(institutionConnectorImpl.findByProductId("42").isEmpty());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1367,8 +1463,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(1, institutionConnectorImpl.findByProductId("42").size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1468,8 +1563,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(2, institutionConnectorImpl.findByProductId("42").size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1481,8 +1575,7 @@ class InstitutionConnectorImplTest {
                 (Class<InstitutionEntity>) org.mockito.Mockito.any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "."));
         assertThrows(InvalidRequestException.class, () -> institutionConnectorImpl.findByProductId("42"));
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1580,8 +1673,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(1, institutionConnectorImpl.findByProductId("42").size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(),org.mockito.Mockito.any());
     }
 
     /**
@@ -1678,8 +1770,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.find(org.mockito.Mockito.any(),
                 (Class<InstitutionEntity>) org.mockito.Mockito.any())).thenReturn(institutionEntityList);
         assertEquals(1, institutionConnectorImpl.findByProductId("42").size());
-        verify(institutionRepository).find(org.mockito.Mockito.any(),
-                (Class<InstitutionEntity>) org.mockito.Mockito.any());
+        verify(institutionRepository).find(org.mockito.Mockito.any(), org.mockito.Mockito.any());
     }
 
     /**
@@ -1799,6 +1890,14 @@ class InstitutionConnectorImplTest {
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         List<String> ids = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class, () -> institutionConnectorImpl.findAllByIds(ids));
+        verify(institutionRepository).findAllById(org.mockito.Mockito.any());
+    }
+
+    @Test
+    void testFindAllByIds2() {
+        when(institutionRepository.findAllById(org.mockito.Mockito.any())).thenReturn(List.of(new InstitutionEntity()));
+        List<String> ids = new ArrayList<>();
+        assertDoesNotThrow(() -> institutionConnectorImpl.findAllByIds(ids));
         verify(institutionRepository).findAllById(org.mockito.Mockito.any());
     }
 
@@ -2265,6 +2364,29 @@ class InstitutionConnectorImplTest {
         assertEquals("The characteristics of someone or something", actualSaveOrRetrievePnPgResult.getDescription());
     }
 
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByExternalIdAndProductId(List, String)}
+     */
+    @Test
+    void testFindByExternalIdAndProductId() {
+        when(institutionRepository.find(org.mockito.Mockito.any(),org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+        assertTrue(institutionConnectorImpl.findByExternalIdAndProductId(new ArrayList<>(), "42").isEmpty());
+        verify(institutionRepository).find( org.mockito.Mockito.any(),org.mockito.Mockito.any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionConnectorImpl#findByExternalIdAndProductId(List, String)}
+     */
+    @Test
+    void testFindByExternalIdAndProductId2() {
+        when(institutionRepository.find( org.mockito.Mockito.any(),org.mockito.Mockito.any()))
+                .thenThrow(new InvalidRequestException("An error occurred", "."));
+        List<ValidInstitution> list = new ArrayList<>();
+        assertThrows(InvalidRequestException.class,
+                () -> institutionConnectorImpl.findByExternalIdAndProductId(list, "42"));
+        verify(institutionRepository).find(org.mockito.Mockito.any(),org.mockito.Mockito.any());
+    }
+
     @Test
     void findAndUpdateStatus() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
@@ -2277,6 +2399,21 @@ class InstitutionConnectorImplTest {
         institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
         when(institutionRepository.findAndModify(any(), any(), any(), any())).thenReturn(institutionEntity);
         institutionConnectorImpl.findAndUpdateStatus("institutionId", "tokenId", RelationshipState.ACTIVE);
+        assertNotNull(institutionEntity);
+    }
+
+    @Test
+    void findAndUpdateStatus2() {
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        List<OnboardingEntity> onboardings = new ArrayList<>();
+        onboardings.add(new OnboardingEntity());
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setOnboarding(onboardings);
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
+        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
+        when(institutionRepository.findAndModify(any(), any(), any(), any())).thenReturn(institutionEntity);
+        institutionConnectorImpl.findAndUpdateStatus("institutionId", "tokenId", RelationshipState.DELETED);
         assertNotNull(institutionEntity);
     }
 
