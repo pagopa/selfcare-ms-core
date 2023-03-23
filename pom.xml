@@ -23,7 +23,7 @@
     </modules>
 
     <properties>
-        <selc-commons.version>2.4.4</selc-commons.version>
+        <selc-commons.version>2.4.6</selc-commons.version>
     </properties>
 
     <dependencyManagement>
