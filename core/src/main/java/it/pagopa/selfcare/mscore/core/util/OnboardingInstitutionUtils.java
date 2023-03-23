@@ -1,25 +1,36 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.onboarding.Contract;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingLegalsRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INVALID_UPDATES;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.PRODUCT_RELATIONSHIP_STATES;
 
@@ -35,7 +46,7 @@ public class OnboardingInstitutionUtils {
                             && RelationshipState.ACTIVE == onboarding.getStatus())
                     .findAny();
             if (optionalOnboarding.isPresent() && !PRODUCT_RELATIONSHIP_STATES.contains(optionalOnboarding.get().getStatus())) {
-                throw new ResourceConflictException(String.format(PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), PRODUCT_ALREADY_ONBOARDED.getCode());
+                throw new ResourceConflictException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
             }
         }
         log.info("END - checkIfProductAlreadyOnboarded without error");
@@ -45,7 +56,7 @@ public class OnboardingInstitutionUtils {
         if (request.getBillingRequest() == null
                 || StringUtils.isEmpty(request.getBillingRequest().getVatNumber())
                 || StringUtils.isEmpty(request.getBillingRequest().getRecipientCode())) {
-            throw new InvalidRequestException(ONBOARDING_BILLING_ERROR.getCode(), ONBOARDING_BILLING_ERROR.getMessage());
+            throw new InvalidRequestException(CustomError.ONBOARDING_BILLING_ERROR.getCode(), CustomError.ONBOARDING_BILLING_ERROR.getMessage());
         }
     }
 
@@ -88,7 +99,7 @@ public class OnboardingInstitutionUtils {
         });
         if (!userList.isEmpty()) {
             List<PartyRole> userRoleList = userList.stream().map(UserToOnboard::getRole).collect(Collectors.toList());
-            throw new InvalidRequestException(String.format(ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userRoleList, ", ")), ROLES_NOT_ADMITTED_ERROR.getCode());
+            throw new InvalidRequestException(String.format(CustomError.ROLES_NOT_ADMITTED_ERROR.getMessage(), StringUtils.join(userRoleList, ", ")), CustomError.ROLES_NOT_ADMITTED_ERROR.getCode());
         }
     }
 
@@ -107,7 +118,7 @@ public class OnboardingInstitutionUtils {
                     .collect(Collectors.toList());
         }
         if (response.isEmpty()) {
-            throw new InvalidRequestException(MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(), MANAGER_NOT_FOUND_GENERIC_ERROR.getCode());
+            throw new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(), CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getCode());
         }
         return response;
     }
@@ -119,7 +130,7 @@ public class OnboardingInstitutionUtils {
                     .map(TokenUser::getUserId).collect(Collectors.toList());
         }
         if (managerList.isEmpty()) {
-            throw new InvalidRequestException(MANAGER_NOT_FOUND_ERROR.getMessage(), MANAGER_NOT_FOUND_ERROR.getCode());
+            throw new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_ERROR.getMessage(), CustomError.MANAGER_NOT_FOUND_ERROR.getCode());
         }
         return managerList;
     }

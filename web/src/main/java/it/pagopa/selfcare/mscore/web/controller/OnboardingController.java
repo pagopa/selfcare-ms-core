@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
@@ -24,13 +25,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @Slf4j
@@ -64,7 +74,7 @@ public class OnboardingController {
                                                      @PathVariable(value = "externalId") String externalId,
                                                      @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                      @PathVariable(value = "productId") String productId) {
-        CustomExceptionMessage.setCustomMessage(ONBOARDING_VERIFICATION_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
         onboardingService.verifyOnboardingInfo(externalId, productId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -91,7 +101,7 @@ public class OnboardingController {
                                                                  @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
                                                                  @RequestParam(value = "states", required = false) String[] states,
                                                                  Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
         String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
         List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, institutionExternalId, states, userId);
         return ResponseEntity.ok().body(OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList));
@@ -113,7 +123,7 @@ public class OnboardingController {
     @PostMapping(value = "/institution")
     public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest request,
                                                       Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -134,7 +144,7 @@ public class OnboardingController {
     public ResponseEntity<Void> completeOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
                                                    @PathVariable(value = "tokenId") String tokenId,
                                                    @RequestPart MultipartFile contract) {
-        CustomExceptionMessage.setCustomMessage(CONFIRM_ONBOARDING_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.completeOboarding(token, contract);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -155,7 +165,7 @@ public class OnboardingController {
     public ResponseEntity<Void> approveOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
                                                   @PathVariable(value = "tokenId") String tokenId,
                                                   Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.approveOnboarding(token, (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -175,7 +185,7 @@ public class OnboardingController {
     @DeleteMapping(value = "/complete/{tokenId}")
     public ResponseEntity<Void> invalidateOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
                                                      @PathVariable(value = "tokenId") String tokenId) {
-        CustomExceptionMessage.setCustomMessage(INVALIDATE_ONBOARDING_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.INVALIDATE_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.invalidateOnboarding(token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -195,7 +205,7 @@ public class OnboardingController {
     @DeleteMapping(value = "/reject/{tokenId}")
     public ResponseEntity<OnboardingInfoResponse> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
                                                                    @PathVariable("tokenId") String tokenId) {
-        CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATION_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.onboardingReject(token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -214,7 +224,7 @@ public class OnboardingController {
     @ApiOperation(value = "${swagger.mscore.onboarding.operator}", notes = "${swagger.mscore.onboarding.operator}")
     @PostMapping(value = "/operators")
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
-        CustomExceptionMessage.setCustomMessage(ONBOARDING_OPERATORS_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATORS_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
@@ -233,7 +243,7 @@ public class OnboardingController {
     @ApiOperation(value = "${swagger.mscore.onboarding.subdelegates}", notes = "${swagger.mscore.onboarding.subdelegates}")
     @PostMapping(value = "/subdelegates")
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
-        CustomExceptionMessage.setCustomMessage(ONBOARDING_SUBDELEGATES_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
@@ -252,7 +262,7 @@ public class OnboardingController {
     @ApiOperation(value = "${swagger.mscore.onboarding.legals}", notes = "${swagger.mscore.onboarding.legals}")
     @PostMapping(value = "/legals")
     public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest request, Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(ONBOARDING_LEGALS_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_LEGALS_ERROR);
         Token token = tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal(), token);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -271,7 +281,7 @@ public class OnboardingController {
     @GetMapping(value = "/relationship/{relationshipId}/document")
     public ResponseEntity<byte[]> getOnboardingDocument(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                         @PathVariable("relationshipId") String relationshipId) {
-        CustomExceptionMessage.setCustomMessage(GETTING_ONBOARDING_INFO_ERROR);
+        CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
         ResourceResponse file = onboardingService.retrieveDocument(relationshipId);
         var headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE);

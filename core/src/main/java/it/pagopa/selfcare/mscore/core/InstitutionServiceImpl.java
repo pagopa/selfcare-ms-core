@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -13,10 +14,21 @@ import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.Attributes;
+import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.*;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -28,7 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
@@ -62,7 +73,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Institution retrieveInstitutionByExternalId(String institutionExternalId) {
         Optional<Institution> opt = institutionConnector.findByExternalId(institutionExternalId);
         if (opt.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), "UNDEFINED", institutionExternalId), INSTITUTION_NOT_FOUND.getCode());
+            throw new ResourceNotFoundException(String.format(CustomError.INSTITUTION_NOT_FOUND.getMessage(), "UNDEFINED", institutionExternalId), CustomError.INSTITUTION_NOT_FOUND.getCode());
         }
         log.info("founded institution having externalId: {}", institutionExternalId);
         return opt.get();
@@ -72,8 +83,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     public void retrieveInstitutionsWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates) {
         List<Institution> list = institutionConnector.findWithFilter(externalId, productId, validRelationshipStates);
         if (list == null || list.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(INSTITUTION_NOT_ONBOARDED.getMessage(), externalId, productId),
-                    INSTITUTION_NOT_ONBOARDED.getCode());
+            throw new ResourceNotFoundException(String.format(CustomError.INSTITUTION_NOT_ONBOARDED.getMessage(), externalId, productId),
+                    CustomError.INSTITUTION_NOT_ONBOARDED.getCode());
         }
     }
 
@@ -143,7 +154,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .findFirst()
                     .ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
                             () -> {
-                                throw new InvalidRequestException(String.format(INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId), INSTITUTION_LEGAL_NOT_FOUND.getCode());
+                                throw new InvalidRequestException(String.format(CustomError.INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId), CustomError.INSTITUTION_LEGAL_NOT_FOUND.getCode());
                             });
 
             NationalRegistriesProfessionalAddress professionalAddress = partyRegistryProxyConnector.getLegalAddress(taxId);
@@ -182,7 +193,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 return onboardingList;
             }
         }
-        throw new ResourceNotFoundException(String.format(PRODUCTS_NOT_FOUND_ERROR.getMessage(), institution.getId()), PRODUCTS_NOT_FOUND_ERROR.getCode());
+        throw new ResourceNotFoundException(String.format(CustomError.PRODUCTS_NOT_FOUND_ERROR.getMessage(), institution.getId()), CustomError.PRODUCTS_NOT_FOUND_ERROR.getCode());
     }
 
     @Override
@@ -219,7 +230,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .map(geo -> new InstitutionGeographicTaxonomies(geo.getCode(), geo.getDesc())).collect(Collectors.toList());
             return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
         } else {
-            throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), RELATIONSHIP_NOT_FOUND.getCode());
+            throw new InvalidRequestException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
         }
     }
 
@@ -277,14 +288,14 @@ public class InstitutionServiceImpl implements InstitutionService {
             Institution institution = retrieveInstitutionById(institutionId);
             return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution);
         }
-        throw new InvalidRequestException(MISSING_QUERY_PARAMETER.getMessage(), MISSING_QUERY_PARAMETER.getCode());
+        throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
     }
 
     public void checkIfAlreadyExists(String externalId) {
         log.info("START - check institution {} already exists", externalId);
         Optional<Institution> opt = institutionConnector.findByExternalId(externalId);
         if (opt.isPresent()) {
-            throw new ResourceConflictException(String.format(CREATE_INSTITUTION_CONFLICT.getMessage(), externalId), CREATE_INSTITUTION_CONFLICT.getCode());
+            throw new ResourceConflictException(String.format(CustomError.CREATE_INSTITUTION_CONFLICT.getMessage(), externalId), CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
         }
     }
 

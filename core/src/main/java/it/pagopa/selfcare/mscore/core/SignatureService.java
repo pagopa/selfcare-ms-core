@@ -22,19 +22,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.DOCUMENT_VALIDATION_FAIL;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_CONTRACT_DIGEST;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_DOCUMENT_SIGNATURE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_SIGNATURE_FORMS;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_SIGNATURE_TAX_CODE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.ORIGINAL_DOCUMENT_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.GenericError.SIGNATURE_VALIDATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.TAX_CODE_NOT_FOUND_IN_SIGNATURE;
 
 @Slf4j
 @Service
 public class SignatureService {
 
     static final String VALID_CHECK = "VALID";
-    private final Pattern signatureRegex = Pattern.compile("(TINIT-)(.*)");
+    private static final Integer CF_MATCHER_GROUP = 2;
+    private static final Pattern signatureRegex = Pattern.compile("(TINIT-)(.*)");
 
     public SignedDocumentValidator createDocumentValidator(byte[] bytes) {
 
@@ -142,7 +155,7 @@ public class SignatureService {
         signatureTaxCodes.forEach(s -> {
             Matcher matcher = signatureRegex.matcher(s);
             if (matcher.matches()) {
-                taxCode.add(matcher.group(2));
+                taxCode.add(matcher.group(CF_MATCHER_GROUP));
             }
         });
         return taxCode;

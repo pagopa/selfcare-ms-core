@@ -12,7 +12,11 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.MANAGER_EMAIL_NOT_FOUND;
@@ -75,14 +79,8 @@ public class PdfMapper {
         map.put("originIdLabelValue", Origin.IPA == institution.getOrigin() ?
                 "|<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>|"
                 : "");
-        if (institution.getPaymentServiceProvider() != null
-                && StringUtils.hasText(institution.getPaymentServiceProvider().getBusinessRegisterNumber())) {
-            map.put("number", institution.getPaymentServiceProvider().getBusinessRegisterNumber());
-            map.put("institutionRegisterLabelValue", "<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${number}</span> </span><span class=\"c1\"></span></li>\n");
-        } else {
-            map.put("institutionRegisterLabelValue", "");
-        }
 
+        addInstitutionRegisterLabelValue(institution, map);
         if (request.getBillingRequest() != null) {
             map.put("institutionRecipientCode", request.getBillingRequest().getRecipientCode());
         }
@@ -97,6 +95,10 @@ public class PdfMapper {
         map.put("institutionShareCapital", Optional.ofNullable(institution.getShareCapital()).orElse(underscore));
         map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institution.getBusinessRegisterPlace()).orElse(underscore));
 
+        addPricingPlan(request, map);
+    }
+
+    private static void addPricingPlan(OnboardingRequest request, Map<String, Object> map) {
         if(StringUtils.hasText(request.getPricingPlan()) && Arrays.stream(PLAN_LIST).anyMatch(s -> s.equalsIgnoreCase(request.getPricingPlan()))){
             map.put("pricingPlanPremium", request.getPricingPlan().replace("C",""));
             map.put("pricingPlanPremiumCheckbox", "X");
@@ -107,10 +109,20 @@ public class PdfMapper {
 
         map.put("pricingPlanPremiumBase", Optional.ofNullable(request.getPricingPlan()).orElse(""));
 
-        if(StringUtils.hasText(request.getPricingPlan()) && request.getPricingPlan().equalsIgnoreCase("C0")){
+        if(StringUtils.hasText(request.getPricingPlan()) && "C0".equalsIgnoreCase(request.getPricingPlan())){
             map.put("pricingPlanPremiumBaseCheckbox", "X");
         }else{
             map.put("pricingPlanPremiumBaseCheckbox", "");
+        }
+    }
+
+    private static void addInstitutionRegisterLabelValue(Institution institution, Map<String, Object> map) {
+        if (institution.getPaymentServiceProvider() != null
+                && StringUtils.hasText(institution.getPaymentServiceProvider().getBusinessRegisterNumber())) {
+            map.put("number", institution.getPaymentServiceProvider().getBusinessRegisterNumber());
+            map.put("institutionRegisterLabelValue", "<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${number}</span> </span><span class=\"c1\"></span></li>\n");
+        } else {
+            map.put("institutionRegisterLabelValue", "");
         }
     }
 

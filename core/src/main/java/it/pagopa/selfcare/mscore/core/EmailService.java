@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.EmailConnector;
-import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
@@ -16,6 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,16 +25,13 @@ public class EmailService {
     private static final String DESTINATION_MAIL_LOG = "destinationMails: {}";
 
     private final EmailConnector emailConnector;
-    private final FileStorageConnector fileStorageConnector;
     private final MailParametersMapper mailParametersMapper;
     private final CoreConfig coreConfig;
 
     public EmailService(EmailConnector emailConnector,
-                        FileStorageConnector fileStorageConnector,
                         MailParametersMapper mailParametersMapper,
                         CoreConfig coreConfig) {
         this.emailConnector = emailConnector;
-        this.fileStorageConnector = fileStorageConnector;
         this.mailParametersMapper = mailParametersMapper;
         this.coreConfig = coreConfig;
     }
@@ -63,8 +60,8 @@ public class EmailService {
     public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo) {
         List<String> destinationMails = new ArrayList<>(getCompleteDestinationMails(institution));
         if (managers != null && !managers.isEmpty()) {
-            managers.stream().filter(user -> user.getEmail() != null && !destinationMails.contains(user.getEmail()))
-                    .forEach(user -> destinationMails.add(user.getEmail()));
+            destinationMails.addAll(managers.stream().filter(user -> user.getEmail() != null && !destinationMails.contains(user.getEmail()))
+                    .map(User::getEmail).collect(Collectors.toList()));
         }
         Map<String, String> mailParameter = mailParametersMapper.getCompleteOnbordingMailParameter(product.getTitle());
         emailConnector.sendMail(mailParametersMapper.getOnboardingCompletePath(), destinationMails, logo, product.getTitle(), mailParameter, "pagopa-logo.png");

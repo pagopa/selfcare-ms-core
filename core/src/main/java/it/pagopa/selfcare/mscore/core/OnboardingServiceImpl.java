@@ -13,7 +13,17 @@ import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingLegalsRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRollback;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingUpdateRollback;
+import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -27,13 +37,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
 import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
@@ -112,7 +123,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         if (InstitutionType.PG == institution.getInstitutionType()) {
             if (request.getUsers().size() == 1) {
-                verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER));
+                OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER));
             } else {
                 throw new InvalidRequestException(CustomError.USERS_SIZE_NOT_ADMITTED.getMessage(), CustomError.USERS_SIZE_NOT_ADMITTED.getCode());
             }
@@ -121,8 +132,8 @@ public class OnboardingServiceImpl implements OnboardingService {
             OnboardingInstitutionUtils.validatePaOnboarding(request);
 
             User user = userService.retrieveUserFromUserRegistry(principal.getId(), EnumSet.allOf(User.Fields.class));
-            verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-            List<String> validManagerList = getValidManagerToOnboard(request.getUsers(), null);
+            OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
+            List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), null);
             User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
 
             List<User> delegate = request.getUsers()
@@ -146,7 +157,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     @Override
     public void completeOboarding(Token token, MultipartFile contract) {
         checkAndHandleExpiring(token);
-        List<String> managerList = getOnboardedValidManager(token);
+        List<String> managerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         List<User> managersData = managerList.stream()
                 .map(user -> userService.retrieveUserFromUserRegistry(user, EnumSet.allOf(User.Fields.class)))
                 .collect(Collectors.toList());
@@ -174,14 +185,14 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
-        List<String> validManagerList = getOnboardedValidManager(token);
+        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         List<User> delegate = onboardedUsers
                 .stream()
                 .filter(onboardedUser -> validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-        OnboardingRequest request = constructOnboardingRequest(token, institution);
+        OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution);
         Product product = onboardingDao.getProductById(token.getProductId());
         String contractTemplate = contractService.extractTemplate(product.getContractTemplatePath());
         File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null);
@@ -218,7 +229,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
-        verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
+        OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
         return onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
     }
@@ -233,8 +244,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<String> toDelete = new ArrayList<>();
 
         User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
-        verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-        List<String> validManagerList = getValidManagerToOnboard(request.getUsers(), token);
+        OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
+        List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), token);
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
 
         List<User> delegate = request.getUsers().stream()
@@ -289,8 +300,8 @@ public class OnboardingServiceImpl implements OnboardingService {
             geographicTaxonomies = request.getInstitutionUpdate().getGeographicTaxonomies().stream
                     ().map(institutionGeographicTaxonomies -> institutionService.retrieveGeoTaxonomies(institutionGeographicTaxonomies.getCode())).collect(Collectors.toList());
             if (geographicTaxonomies.isEmpty()) {
-                throw new ResourceNotFoundException(String.format(GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), request.getInstitutionUpdate().getGeographicTaxonomies()),
-                        GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
+                throw new ResourceNotFoundException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), request.getInstitutionUpdate().getGeographicTaxonomies()),
+                        CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
             }
         }
         return geographicTaxonomies;
@@ -302,7 +313,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             log.info("token {} is expired at {} and now is {}", token.getId(), token.getExpiringDate(), now);
             var institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
             onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null);
-            throw new InvalidRequestException(String.format(TOKEN_EXPIRED.getMessage(), token.getId(), token.getExpiringDate()), TOKEN_EXPIRED.getCode());
+            throw new InvalidRequestException(String.format(CustomError.TOKEN_EXPIRED.getMessage(), token.getId(), token.getExpiringDate()), CustomError.TOKEN_EXPIRED.getCode());
         }
     }
 
@@ -330,7 +341,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
         if (isIncomplete) {
             log.warn("institution {}, there is a pending onboarding request for product {}", institution.getId(), request.getProductId());
-            throw new InvalidRequestException(String.format(ONBOARDING_PENDING.getMessage(), request.getProductId()), ONBOARDING_PENDING.getCode());
+            throw new InvalidRequestException(String.format(CustomError.ONBOARDING_PENDING.getMessage(), request.getProductId()), CustomError.ONBOARDING_PENDING.getCode());
         }
     }
 }

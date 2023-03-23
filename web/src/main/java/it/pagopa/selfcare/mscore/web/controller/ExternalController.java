@@ -12,7 +12,12 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.web.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.institution.CreatePnPgInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPnPgResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -22,12 +27,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_EXTERNAL_ID_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_ID_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_PRODUCTS_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INSTITUTION_BILLING_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INSTITUTION_MANAGER_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.RETRIEVE_GEO_TAXONOMIES_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.RETRIEVING_USER_RELATIONSHIP_ERROR;
 
 @Slf4j
 @RestController

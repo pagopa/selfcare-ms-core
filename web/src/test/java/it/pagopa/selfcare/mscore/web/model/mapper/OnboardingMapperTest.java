@@ -12,8 +12,6 @@ import it.pagopa.selfcare.mscore.web.model.user.Person;
 
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.Disabled;
-
 import org.junit.jupiter.api.Test;
 
 class OnboardingMapperTest {
@@ -40,7 +38,6 @@ class OnboardingMapperTest {
         assertTrue(actualToOnboardingLegalsRequestResult.isSignContract());
         assertEquals("42", actualToOnboardingLegalsRequestResult.getInstitutionExternalId());
         assertEquals("42", actualToOnboardingLegalsRequestResult.getProductId());
-        assertEquals(personList, actualToOnboardingLegalsRequestResult.getUsers());
         assertEquals(TokenType.LEGALS, actualToOnboardingLegalsRequestResult.getTokenType());
         assertEquals("Product Name", actualToOnboardingLegalsRequestResult.getProductName());
         assertEquals("42", actualToOnboardingLegalsRequestResult.getInstitutionId());
@@ -74,36 +71,6 @@ class OnboardingMapperTest {
         assertEquals(TokenType.LEGALS, actualToOnboardingLegalsRequestResult.getTokenType());
         assertEquals("Product Name", actualToOnboardingLegalsRequestResult.getProductName());
         assertEquals("42", actualToOnboardingLegalsRequestResult.getInstitutionId());
-    }
-
-    /**
-     * Method under test: {@link OnboardingMapper#toOnboardingLegalsRequest(OnboardingInstitutionLegalsRequest)}
-     */
-    @Test
-    @Disabled("TODO: Complete this test")
-    void testToOnboardingLegalsRequest3() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.NullPointerException
-        //       at it.pagopa.selfcare.mscore.web.model.mapper.UserMapper.toUserToOnboard(UserMapper.java:23)
-        //       at it.pagopa.selfcare.mscore.web.model.mapper.UserMapper.toUserToOnboard(UserMapper.java:16)
-        //       at it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper.toOnboardingLegalsRequest(OnboardingMapper.java:139)
-        //   See https://diff.blue/R013 to resolve this issue.
-
-        ArrayList<Person> personList = new ArrayList<>();
-        personList.add(null);
-
-        OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest = new OnboardingInstitutionLegalsRequest();
-        onboardingInstitutionLegalsRequest.setInstitutionExternalId("42");
-        onboardingInstitutionLegalsRequest.setInstitutionId("42");
-        onboardingInstitutionLegalsRequest.setProductId("42");
-        onboardingInstitutionLegalsRequest.setProductName("Product Name");
-        onboardingInstitutionLegalsRequest.setSignContract(true);
-        onboardingInstitutionLegalsRequest.setContract(null);
-        onboardingInstitutionLegalsRequest.setUsers(personList);
-        OnboardingMapper.toOnboardingLegalsRequest(onboardingInstitutionLegalsRequest);
     }
 }
 

@@ -26,11 +26,25 @@ import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_ATTRIBUTES_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_EXTERNAL_ID_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_GEOTAXONOMY_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_ID_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_PRODUCTID_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_RELATIONSHIP_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GET_USER_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.VERIFY_TOKEN_FAILED;
+import static it.pagopa.selfcare.mscore.constant.GenericError.VERIFY_USER_ERROR;
 
 @Slf4j
 @RestController

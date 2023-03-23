@@ -3,15 +3,17 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -41,7 +43,7 @@ public class TokenController {
     public ResponseEntity<TokenResponse> verifyToken(@ApiParam("${swagger.mscore.token.tokenId}")
                                                      @PathVariable("tokenId") String tokenId) {
         log.info("Verify token identified with {}", tokenId);
-        CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
+        CustomExceptionMessage.setCustomMessage(GenericError.VERIFY_TOKEN_FAILED);
         tokenService.verifyToken(tokenId);
         return ResponseEntity.ok().body(new TokenResponse(tokenId));
     }
