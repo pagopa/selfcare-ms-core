@@ -544,7 +544,7 @@ class TokenConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link TokenConnectorImpl#save(Token)}
+     * Method under test: {@link TokenConnectorImpl#save(Token, List<InstitutionGeographicTaxonomies>)}
      */
     @Test
     void testSave() {
@@ -633,7 +633,7 @@ class TokenConnectorImplTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        Token actualSaveResult = tokenConnectorImpl.save(token);
+        Token actualSaveResult = tokenConnectorImpl.save(token, null);
         assertEquals("Checksum", actualSaveResult.getChecksum());
         assertNull(actualSaveResult.getUpdatedAt());
         assertEquals(RelationshipState.PENDING, actualSaveResult.getStatus());
@@ -657,7 +657,7 @@ class TokenConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link TokenConnectorImpl#save(Token)}
+     * Method under test: {@link TokenConnectorImpl#save(Token, List<InstitutionGeographicTaxonomies>)}
      */
     @Test
     void testSave2() {
@@ -818,7 +818,7 @@ class TokenConnectorImplTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        Token actualSaveResult = tokenConnectorImpl.save(token);
+        Token actualSaveResult = tokenConnectorImpl.save(token, null);
         assertEquals("Checksum", actualSaveResult.getChecksum());
         assertNull(actualSaveResult.getUpdatedAt());
         assertEquals(RelationshipState.PENDING, actualSaveResult.getStatus());
@@ -841,7 +841,7 @@ class TokenConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link TokenConnectorImpl#save(Token)}
+     * Method under test: {@link TokenConnectorImpl#save(Token, List<InstitutionGeographicTaxonomies>)}
      */
     @Test
     void testSave3() {
@@ -1007,7 +1007,7 @@ class TokenConnectorImplTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        Token actualSaveResult = tokenConnectorImpl.save(token);
+        Token actualSaveResult = tokenConnectorImpl.save(token, null);
         assertEquals("Checksum", actualSaveResult.getChecksum());
         assertNull(actualSaveResult.getUpdatedAt());
         assertEquals(RelationshipState.PENDING, actualSaveResult.getStatus());

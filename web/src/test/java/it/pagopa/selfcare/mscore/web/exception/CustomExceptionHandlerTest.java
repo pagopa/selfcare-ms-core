@@ -150,7 +150,7 @@ class CustomExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, actualHandleExceptionResult.getStatusCode());
         Problem body = actualHandleExceptionResult.getBody();
         assertEquals(1, Objects.requireNonNull(body).getErrors().size());
-        assertEquals("Error while verify user given UserID", body.getDetail());
+        assertEquals("Generic Error", body.getDetail());
         assertEquals(400, body.getStatus().intValue());
     }
 

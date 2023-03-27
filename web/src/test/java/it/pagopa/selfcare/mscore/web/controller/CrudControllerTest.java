@@ -43,9 +43,6 @@ class CrudControllerTest {
     @MockBean
     private MigrationService migrationService;
 
-    /**
-     * Method under test: {@link CrudController#createToken(Token)}
-     */
     @Test
     void testCreateToken() throws Exception {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
@@ -129,21 +126,9 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"type\":\"INSTITUTION\",\"status\":\"PENDING\",\"institutionId\":\"42\",\"productId\":\"42\",\"expiringDate"
-                                        + "\":null,\"checksum\":\"Checksum\",\"contractTemplate\":\"Contract Template\",\"contractSigned\":\"Contract"
-                                        + " Signed\",\"users\":[],\"institutionUpdate\":{\"institutionType\":\"PA\",\"description\":\"The characteristics of"
-                                        + " someone or something\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"taxCode\":\"Tax Code\","
-                                        + "\"zipCode\":\"21654\",\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"Legal Register Name\",\"legalRegisterNumber\":\"42\",\"vatNumberGroup\":true},"
-                                        + "\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},"
-                                        + "\"geographicTaxonomies\":[],\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"businessRegisterPlace\":\"Business"
-                                        + " Register Place\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true},"
-                                        + "\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}"));
+                                "{\"id\":\"42\",\"type\":\"INSTITUTION\",\"status\":\"PENDING\",\"institutionId\":\"42\",\"productId\":\"42\",\"checksum\":\"Checksum\",\"contractTemplate\":\"Contract Template\",\"contractSigned\":\"Contract Signed\",\"users\":[],\"institutionUpdate\":{\"institutionType\":\"PA\",\"description\":\"The characteristics of someone or something\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"taxCode\":\"Tax Code\",\"zipCode\":\"21654\",\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"legalRegisterNumber\":\"42\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"geographicTaxonomies\":[],\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"businessRegisterPlace\":\"Business Register Place\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true}}"));
     }
 
-    /**
-     * Method under test: {@link CrudController#createInstitution(Institution)}
-     */
     @Test
     void testCreateInstitution() throws Exception {
         when(migrationService.createInstitution(any())).thenReturn(new Institution());
@@ -193,9 +178,6 @@ class CrudControllerTest {
                                 "{\"imported\":false}"));
     }
 
-    /**
-     * Method under test: {@link CrudController#createUser(OnboardedUser)}
-     */
     @Test
     void testCreateUser() throws Exception {
         when(migrationService.createUser(any())).thenReturn(new OnboardedUser());
@@ -264,16 +246,7 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"type\":\"INSTITUTION\",\"status\":\"PENDING\",\"institutionId\":\"42\",\"productId\":\"42\",\"expiringDate"
-                                        + "\":null,\"checksum\":\"Checksum\",\"contractTemplate\":\"Contract Template\",\"contractSigned\":\"Contract"
-                                        + " Signed\",\"users\":[],\"institutionUpdate\":{\"institutionType\":\"PA\",\"description\":\"The characteristics of"
-                                        + " someone or something\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"taxCode\":\"Tax Code\","
-                                        + "\"zipCode\":\"21654\",\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"Legal Register Name\",\"legalRegisterNumber\":\"42\",\"vatNumberGroup\":true},"
-                                        + "\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},"
-                                        + "\"geographicTaxonomies\":[],\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"businessRegisterPlace\":\"Business"
-                                        + " Register Place\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true},"
-                                        + "\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}"));
+                                "{\"id\":\"42\",\"type\":\"INSTITUTION\",\"status\":\"PENDING\",\"institutionId\":\"42\",\"productId\":\"42\",\"checksum\":\"Checksum\",\"contractTemplate\":\"Contract Template\",\"contractSigned\":\"Contract Signed\",\"users\":[],\"institutionUpdate\":{\"institutionType\":\"PA\",\"description\":\"The characteristics of someone or something\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"taxCode\":\"Tax Code\",\"zipCode\":\"21654\",\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"legalRegisterNumber\":\"42\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"geographicTaxonomies\":[],\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"businessRegisterPlace\":\"Business Register Place\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true}}"));
     }
 
     /**

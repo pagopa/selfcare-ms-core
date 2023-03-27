@@ -305,7 +305,7 @@ class ManagementControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"checksum\":\"Checksum\"}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"checksum\":\"Checksum\",\"legals\":[]}"));
     }
 
     /**
@@ -612,7 +612,7 @@ class ManagementControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"checksum\":\"Checksum\"}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"checksum\":\"Checksum\",\"legals\":[]}"));
     }
 
     /**

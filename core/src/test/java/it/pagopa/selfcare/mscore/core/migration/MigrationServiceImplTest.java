@@ -84,7 +84,7 @@ class MigrationServiceImplTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.save((Token) any())).thenReturn(token);
+        when(tokenConnector.save(any(), any())).thenReturn(token);
 
         InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
         institutionUpdate1.setAddress("42 Main St");
@@ -121,7 +121,7 @@ class MigrationServiceImplTest {
         token1.setUpdatedAt(null);
         token1.setUsers(new ArrayList<>());
         assertSame(token, migrationServiceImpl.createToken(token1));
-        verify(tokenConnector).save((Token) any());
+        verify(tokenConnector).save(any(), any());
     }
 
     /**
@@ -130,9 +130,9 @@ class MigrationServiceImplTest {
     @Test
     void testCreateInstitution() {
         Institution institution = new Institution();
-        when(institutionConnector.save((Institution) any())).thenReturn(institution);
+        when(institutionConnector.save(any())).thenReturn(institution);
         assertSame(institution, migrationServiceImpl.createInstitution(new Institution()));
-        verify(institutionConnector).save((Institution) any());
+        verify(institutionConnector).save(any());
     }
 
     /**
@@ -141,9 +141,9 @@ class MigrationServiceImplTest {
     @Test
     void testCreateUser() {
         OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.save((OnboardedUser) any())).thenReturn(onboardedUser);
+        when(userConnector.save(any())).thenReturn(onboardedUser);
         assertSame(onboardedUser, migrationServiceImpl.createUser(new OnboardedUser()));
-        verify(userConnector).save((OnboardedUser) any());
+        verify(userConnector).save(any());
     }
 
     /**
@@ -224,9 +224,9 @@ class MigrationServiceImplTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        when(tokenConnector.findById((String) any())).thenReturn(token);
+        when(tokenConnector.findById(any())).thenReturn(token);
         assertSame(token, migrationServiceImpl.findTokenById("42"));
-        verify(tokenConnector).findById((String) any());
+        verify(tokenConnector).findById(any());
     }
 
     /**
@@ -235,9 +235,9 @@ class MigrationServiceImplTest {
     @Test
     void testFindUserById() {
         OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.findById((String) any())).thenReturn(onboardedUser);
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
         assertSame(onboardedUser, migrationServiceImpl.findUserById("42"));
-        verify(userConnector).findById((String) any());
+        verify(userConnector).findById(any());
     }
 
     /**
@@ -246,9 +246,9 @@ class MigrationServiceImplTest {
     @Test
     void testFindInstitutionById() {
         Institution institution = new Institution();
-        when(institutionConnector.findById((String) any())).thenReturn(institution);
+        when(institutionConnector.findById(any())).thenReturn(institution);
         assertSame(institution, migrationServiceImpl.findInstitutionById("42"));
-        verify(institutionConnector).findById((String) any());
+        verify(institutionConnector).findById(any());
     }
 
     /**
@@ -256,9 +256,9 @@ class MigrationServiceImplTest {
      */
     @Test
     void testDeleteToken() {
-        doNothing().when(tokenConnector).deleteById((String) any());
+        doNothing().when(tokenConnector).deleteById(any());
         migrationServiceImpl.deleteToken("42");
-        verify(tokenConnector).deleteById((String) any());
+        verify(tokenConnector).deleteById(any());
     }
 
     /**
@@ -266,9 +266,9 @@ class MigrationServiceImplTest {
      */
     @Test
     void testDeleteInstitution() {
-        doNothing().when(institutionConnector).deleteById((String) any());
+        doNothing().when(institutionConnector).deleteById(any());
         migrationServiceImpl.deleteInstitution("42");
-        verify(institutionConnector).deleteById((String) any());
+        verify(institutionConnector).deleteById(any());
     }
 
     /**
@@ -276,9 +276,9 @@ class MigrationServiceImplTest {
      */
     @Test
     void testDeleteUser() {
-        doNothing().when(userConnector).deleteById((String) any());
+        doNothing().when(userConnector).deleteById(any());
         migrationServiceImpl.deleteUser("42");
-        verify(userConnector).deleteById((String) any());
+        verify(userConnector).deleteById(any());
     }
 }
 

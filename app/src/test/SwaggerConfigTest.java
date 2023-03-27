@@ -74,7 +74,7 @@ class SwaggerConfigTest {
                     String formatted = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(swagger);
                     Path basePath = Paths.get("src/main/resources/swagger/");
                     Files.createDirectories(basePath);
-                    Files.write(basePath.resolve("api-docs.json"), formatted.getBytes());
+                    Files.write(basePath.resolve("api-docs-v1.json"), formatted.getBytes());
                 });
     }
 }
