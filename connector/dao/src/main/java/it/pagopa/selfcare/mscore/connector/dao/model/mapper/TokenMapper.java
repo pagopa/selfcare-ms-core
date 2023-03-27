@@ -86,6 +86,7 @@ public class TokenMapper {
         token.setChecksum(tokenEntity.getChecksum());
         token.setInstitutionId(tokenEntity.getInstitutionId());
         token.setStatus(tokenEntity.getStatus());
+        token.setType(tokenEntity.getType());
         if (tokenEntity.getUsers() != null) {
             token.setUsers(toTokenUser(tokenEntity.getUsers()));
         }
