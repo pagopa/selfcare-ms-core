@@ -174,7 +174,7 @@ class OnboardingServiceImplTest {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC, "START - getUser with id: {}",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - getUser with id: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
@@ -225,7 +225,7 @@ class OnboardingServiceImplTest {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC, "START - getUser with id: {}",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - getUser with id: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
@@ -326,7 +326,7 @@ class OnboardingServiceImplTest {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC,
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC.name(),
                 "START - getUser with id: {}", "The characteristics of someone or something", InstitutionType.PA,
                 "42 Main St", "42 Main St", "21654", "START - getUser with id: {}", billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "START - getUser with id: {}",
@@ -374,7 +374,7 @@ class OnboardingServiceImplTest {
                 "Legal Register Name", "42", true);
 
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42",
-                Origin.MOCK, "42", "The characteristics of someone or something", InstitutionType.PA, "42 Main St",
+                Origin.MOCK.name(), "42", "The characteristics of someone or something", InstitutionType.PA, "42 Main St",
                 "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies, attributes,
                 paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
                 "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
@@ -456,7 +456,7 @@ class OnboardingServiceImplTest {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC,
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC.name(),
                 "START - getUser with id: {}", "The characteristics of someone or something", InstitutionType.PA,
                 "42 Main St", "42 Main St", "21654", "", billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "START - getUser with id: {}",

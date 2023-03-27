@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import lombok.Data;
 import java.time.OffsetDateTime;
@@ -12,7 +11,7 @@ public class InstitutionRequest {
 
     private String id;
     private String externalId;
-    private Origin origin;
+    private String origin;
     private String originId;
     private String description;
     private InstitutionType institutionType;

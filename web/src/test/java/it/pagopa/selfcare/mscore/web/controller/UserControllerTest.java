@@ -165,7 +165,7 @@ class UserControllerTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
-        Institution institution = new Institution("42", "42", Origin.MOCK, "42",
+        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?", "?", "?", "jane.doe@example.org",

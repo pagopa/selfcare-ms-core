@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.web.model.migration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,8 +22,8 @@ public class MigrationInstitution {
     private String id;
     private String externalId;
 
-    @NotNull(message = "Valid value for Origin are: IPA, INFOCAMERE, SELC or STATIC")
-    private Origin origin;
+    @NotNull(message = "Valid value for Origin are: IPA, INFOCAMERE, SELC or static")
+    private String origin;
 
     private String originId;
     private String description;

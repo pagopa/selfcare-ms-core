@@ -479,7 +479,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC.name(),
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing,
@@ -580,7 +580,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC.name(),
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -693,7 +693,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC.name(),
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing1,
@@ -829,7 +829,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC.name(),
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing2,
@@ -928,7 +928,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC.name(),
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", billing2,
@@ -1113,7 +1113,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC, "START - validateOverridingData for institution having externalId: {}",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
                 "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
@@ -1162,7 +1162,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC, "START - validateOverridingData for institution having externalId: {}",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St",
                 "21654", "START - validateOverridingData for institution having externalId: {}", billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider1, new DataProtectionOfficer(), null, null,
@@ -1190,7 +1190,7 @@ class OnboardingInstitutionUtilsTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider1 = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer1 = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC,
+        Institution institution = new Institution("42", "42", Origin.SELC.name(),
                 "START - validateOverridingData for institution having externalId: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "pec@pec.it", "42 Main St", "21654",
                 "taxCode", billing, onboardingList,

@@ -25,7 +25,7 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.MANAGER_EMAIL_NOT_
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class PdfMapper {
 
-    private static final String[] PLAN_LIST = {"C1" , "C2" , "C3" , "C4" , "C5" , "C6" , "C7"};
+    private static final String[] PLAN_LIST = {"C1", "C2", "C3", "C4", "C5", "C6", "C7"};
 
     public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         log.info("START - setupCommonData");
@@ -76,10 +76,11 @@ public class PdfMapper {
         log.info("START - setupProdIOData");
         map.put("institutionTypeCode", retrieveInstitutionType(institution, request).name());
         map.put("pricingPlan", decodePricingPlan(request.getPricingPlan(), request.getProductId()));
-        map.put("originIdLabelValue", Origin.IPA == institution.getOrigin() ?
-                "|<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>|"
-                : "");
-
+        if (StringUtils.hasText(institution.getOrigin())) {
+            map.put("originIdLabelValue", Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin()) ?
+                    "|<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>|"
+                    : "");
+        }
         addInstitutionRegisterLabelValue(institution, map);
         if (request.getBillingRequest() != null) {
             map.put("institutionRecipientCode", request.getBillingRequest().getRecipientCode());
@@ -99,19 +100,19 @@ public class PdfMapper {
     }
 
     private static void addPricingPlan(OnboardingRequest request, Map<String, Object> map) {
-        if(StringUtils.hasText(request.getPricingPlan()) && Arrays.stream(PLAN_LIST).anyMatch(s -> s.equalsIgnoreCase(request.getPricingPlan()))){
-            map.put("pricingPlanPremium", request.getPricingPlan().replace("C",""));
+        if (StringUtils.hasText(request.getPricingPlan()) && Arrays.stream(PLAN_LIST).anyMatch(s -> s.equalsIgnoreCase(request.getPricingPlan()))) {
+            map.put("pricingPlanPremium", request.getPricingPlan().replace("C", ""));
             map.put("pricingPlanPremiumCheckbox", "X");
-        }else{
+        } else {
             map.put("pricingPlanPremium", "");
             map.put("pricingPlanPremiumCheckbox", "");
         }
 
         map.put("pricingPlanPremiumBase", Optional.ofNullable(request.getPricingPlan()).orElse(""));
 
-        if(StringUtils.hasText(request.getPricingPlan()) && "C0".equalsIgnoreCase(request.getPricingPlan())){
+        if (StringUtils.hasText(request.getPricingPlan()) && "C0".equalsIgnoreCase(request.getPricingPlan())) {
             map.put("pricingPlanPremiumBaseCheckbox", "X");
-        }else{
+        } else {
             map.put("pricingPlanPremiumBaseCheckbox", "");
         }
     }
@@ -141,7 +142,7 @@ public class PdfMapper {
         InstitutionType institutionType = InstitutionType.UNKNOWN;
         if (institution.getInstitutionType() != null) {
             institutionType = institution.getInstitutionType();
-        }else if(request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null){
+        } else if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
             institutionType = request.getInstitutionUpdate().getInstitutionType();
         }
         return institutionType;
@@ -168,20 +169,20 @@ public class PdfMapper {
     private static String delegatesToText(List<User> users) {
         StringBuilder builder = new StringBuilder();
         users.forEach(user -> builder
-                        .append("|<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
-                        .append(user.getName()).append(" ")
-                        .append(user.getFamilyName())
-                        .append("&nbsp;</span></p>\n")
-                        .append("|<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
-                        .append(user.getFiscalCode())
-                        .append("</span></p>\n")
-                        .append("|<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
-                        .append("|<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
-                        .append("|<p class=\"c141\"><span class=\"c6\">e-mail: ")
-                        .append(user.getEmail())
-                        .append("&nbsp;</span></p>\n")
-                        .append("|<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
-                        .append("|</br>"));
+                .append("|<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
+                .append(user.getName()).append(" ")
+                .append(user.getFamilyName())
+                .append("&nbsp;</span></p>\n")
+                .append("|<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
+                .append(user.getFiscalCode())
+                .append("</span></p>\n")
+                .append("|<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
+                .append("|<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
+                .append("|<p class=\"c141\"><span class=\"c6\">e-mail: ")
+                .append(user.getEmail())
+                .append("&nbsp;</span></p>\n")
+                .append("|<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
+                .append("|</br>"));
 
         return builder.toString();
     }

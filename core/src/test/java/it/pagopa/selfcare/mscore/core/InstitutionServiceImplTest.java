@@ -533,7 +533,7 @@ class InstitutionServiceImplTest {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42", Origin.SELC, "",
+        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42", Origin.SELC.name(), "",
                 "START - check institution {} already exists", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "START - check institution {} already exists", "START - check institution {} already exists",
@@ -997,7 +997,7 @@ class InstitutionServiceImplTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
                 "Legal Register Name", "42", true);
 
-        Institution institution = new Institution("42", "42", Origin.MOCK, "42",
+        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "Tax Code", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
@@ -1211,7 +1211,7 @@ class InstitutionServiceImplTest {
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer("42 Main St", "jane.doe@example.org",
                 "Pec");
 
-        Institution institution = new Institution("42", "42", Origin.MOCK, "42",
+        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "Tax Code", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
@@ -1231,7 +1231,7 @@ class InstitutionServiceImplTest {
         assertEquals("Business Register Place", institution.getBusinessRegisterPlace());
         assertEquals("42 Main St", institution.getDigitalAddress());
         assertEquals("42", institution.getExternalId());
-        assertEquals(Origin.MOCK, institution.getOrigin());
+        assertEquals(Origin.MOCK.name(), institution.getOrigin());
         assertEquals(InstitutionType.PA, institution.getInstitutionType());
         assertEquals("42", institution.getId());
         assertSame(billing, institution.getBilling());

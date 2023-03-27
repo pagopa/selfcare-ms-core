@@ -39,7 +39,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
     }
 
@@ -72,7 +71,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
     }
 
@@ -114,7 +112,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
         AttributesEntity getResult = attributes1.get(0);
         assertEquals("The characteristics of someone or something", getResult.getDescription());
@@ -151,7 +148,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
         PaymentServiceProviderEntity paymentServiceProvider = actualConvertToInstitutionEntityResult
                 .getPaymentServiceProvider();
@@ -190,7 +186,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
         DataProtectionOfficerEntity dataProtectionOfficer = actualConvertToInstitutionEntityResult
                 .getDataProtectionOfficer();
@@ -228,7 +223,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
     }
 
@@ -266,7 +260,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
         GeoTaxonomyEntity getResult = geographicTaxonomies.get(0);
         assertEquals("The characteristics of someone or something", getResult.getDesc());
@@ -302,8 +295,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
-        assertNull(actualConvertToInstitutionEntityResult.getOriginId());
     }
 
     /**
@@ -319,7 +310,7 @@ class InstitutionMapperTest {
                 "Legal Register Name", "42", true);
 
         InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
-                .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK, "42",
+                .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK.getValue(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
@@ -374,7 +365,7 @@ class InstitutionMapperTest {
                 "Legal Register Name", "42", true);
 
         InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
-                .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK, "42",
+                .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK.getValue(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
@@ -430,7 +421,6 @@ class InstitutionMapperTest {
         assertNull(actualConvertToInstitutionEntityResult.getSupportPhone());
         assertNull(actualConvertToInstitutionEntityResult.getInstitutionType());
         assertNull(actualConvertToInstitutionEntityResult.getDescription());
-        assertNull(actualConvertToInstitutionEntityResult.getOrigin());
         assertNull(actualConvertToInstitutionEntityResult.getOriginId());
     }
 

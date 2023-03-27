@@ -449,7 +449,7 @@ class ExternalControllerTest {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC, "?",
+        when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC.name(), "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -493,7 +493,7 @@ class ExternalControllerTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
         when(externalService.getInstitutionByExternalId(any()))
-                .thenReturn(new Institution("42", "42", Origin.MOCK, "42", "The characteristics of someone or something",
+                .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
@@ -588,7 +588,7 @@ class ExternalControllerTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
 
-        Institution institution = new Institution("42", "42", Origin.SELC, "?", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "?", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing1, onboarding1, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "?", "?", "?",
                 true, OffsetDateTime.now(), OffsetDateTime.now());
@@ -685,7 +685,7 @@ class ExternalControllerTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
-        Institution institution = new Institution("42", "42", Origin.MOCK, "42",
+        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing1, onboarding1, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?", "?", "?", "jane.doe@example.org",

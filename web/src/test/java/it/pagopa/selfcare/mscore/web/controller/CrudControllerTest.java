@@ -153,7 +153,7 @@ class CrudControllerTest {
         institution.setImported(true);
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOnboarding(new ArrayList<>());
-        institution.setOrigin(Origin.MOCK);
+        institution.setOrigin(Origin.MOCK.name());
         institution.setOriginId("42");
         institution
                 .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));

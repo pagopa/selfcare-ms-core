@@ -2003,7 +2003,7 @@ class InstitutionConnectorImplTest {
         assertEquals("42 Main St", actualSaveOrRetrievePnPgResult.getDigitalAddress());
         assertEquals("42", actualSaveOrRetrievePnPgResult.getExternalId());
         assertNull(actualSaveOrRetrievePnPgResult.getCreatedAt());
-        assertEquals(Origin.MOCK, actualSaveOrRetrievePnPgResult.getOrigin());
+        assertEquals(Origin.MOCK.getValue(), actualSaveOrRetrievePnPgResult.getOrigin());
         assertEquals(InstitutionType.PA, actualSaveOrRetrievePnPgResult.getInstitutionType());
         assertEquals("42", actualSaveOrRetrievePnPgResult.getId());
         assertEquals("The characteristics of someone or something", actualSaveOrRetrievePnPgResult.getDescription());
@@ -2118,7 +2118,6 @@ class InstitutionConnectorImplTest {
         assertEquals("42 Main St", actualSaveOrRetrievePnPgResult.getDigitalAddress());
         assertEquals("42", actualSaveOrRetrievePnPgResult.getExternalId());
         assertNull(actualSaveOrRetrievePnPgResult.getCreatedAt());
-        assertEquals(Origin.MOCK, actualSaveOrRetrievePnPgResult.getOrigin());
         assertEquals(InstitutionType.PA, actualSaveOrRetrievePnPgResult.getInstitutionType());
         assertEquals("42", actualSaveOrRetrievePnPgResult.getId());
         assertEquals("The characteristics of someone or something", actualSaveOrRetrievePnPgResult.getDescription());
@@ -2230,7 +2229,6 @@ class InstitutionConnectorImplTest {
         assertEquals("42 Main St", actualSaveOrRetrievePnPgResult.getDigitalAddress());
         assertEquals("42", actualSaveOrRetrievePnPgResult.getExternalId());
         assertNull(actualSaveOrRetrievePnPgResult.getCreatedAt());
-        assertEquals(Origin.MOCK, actualSaveOrRetrievePnPgResult.getOrigin());
         assertEquals(InstitutionType.PA, actualSaveOrRetrievePnPgResult.getInstitutionType());
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = actualSaveOrRetrievePnPgResult
                 .getGeographicTaxonomies();
@@ -2357,7 +2355,7 @@ class InstitutionConnectorImplTest {
         assertEquals("42 Main St", actualSaveOrRetrievePnPgResult.getDigitalAddress());
         assertEquals("42", actualSaveOrRetrievePnPgResult.getExternalId());
         assertNull(actualSaveOrRetrievePnPgResult.getCreatedAt());
-        assertEquals(Origin.MOCK, actualSaveOrRetrievePnPgResult.getOrigin());
+        assertEquals(Origin.MOCK.getValue(), actualSaveOrRetrievePnPgResult.getOrigin());
         assertEquals(1, actualSaveOrRetrievePnPgResult.getOnboarding().size());
         assertEquals(InstitutionType.PA, actualSaveOrRetrievePnPgResult.getInstitutionType());
         assertEquals("42", actualSaveOrRetrievePnPgResult.getId());

@@ -533,7 +533,7 @@ class PdfMapperTest {
         ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC, "START - setupCommonData",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - setupCommonData",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - setupCommonData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
@@ -658,7 +658,7 @@ class PdfMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         PdfMapper.setupPSPData(stringObjectMap, user,
-                new Institution("42", "42", Origin.SELC, "START - setupPSPData", "The characteristics of someone or something",
+                new Institution("42", "42", Origin.SELC.name(), "START - setupPSPData", "The characteristics of someone or something",
                         InstitutionType.GSP, "42 Main St", "42 Main St", "21654", "START - setupPSPData", billing, onboarding,
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", true,
@@ -772,7 +772,7 @@ class PdfMapperTest {
         user.setWorkContacts(new HashMap<>());
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PA);
-        institution.setOrigin(Origin.IPA);
+        institution.setOrigin(Origin.IPA.name());
 
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         paymentServiceProvider.setAbiCode("Abi Code");
@@ -839,7 +839,7 @@ class PdfMapperTest {
         user.setWorkContacts(new HashMap<>());
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PA);
-        institution.setOrigin(Origin.IPA);
+        institution.setOrigin(Origin.IPA.name());
 
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         paymentServiceProvider.setAbiCode("Abi Code");
@@ -909,7 +909,7 @@ class PdfMapperTest {
         ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC, "START - setupProdIOData",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - setupProdIOData",
                 "The characteristics of someone or something", InstitutionType.PT, "42 Main St", "42 Main St", "21654",
                 "START - setupProdIOData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupProdIOData", "START - setupProdIOData",

@@ -82,7 +82,7 @@ public class TokenMapper {
         token.setId(tokenEntity.getId());
         token.setContractTemplate(tokenEntity.getContractTemplate());
         token.setContractSigned(tokenEntity.getContractSigned());
-        token.setContractVersion(token.getContractVersion());
+        token.setContractVersion(tokenEntity.getContractVersion());
         token.setChecksum(tokenEntity.getChecksum());
         token.setInstitutionId(tokenEntity.getInstitutionId());
         token.setStatus(tokenEntity.getStatus());

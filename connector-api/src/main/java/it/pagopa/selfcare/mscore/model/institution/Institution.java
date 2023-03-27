@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,7 @@ public class Institution {
 
     private String id;
     private String externalId;
-    private Origin origin;
+    private String origin;
     private String originId;
     private String description;
     private InstitutionType institutionType;

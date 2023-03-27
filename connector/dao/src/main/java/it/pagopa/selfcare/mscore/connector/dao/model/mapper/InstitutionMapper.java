@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,9 @@ public class InstitutionMapper {
         if (entity != null) {
             institution.setId(entity.getId());
             institution.setExternalId(entity.getExternalId());
-            institution.setOrigin(entity.getOrigin());
+            if(entity.getOrigin() != null) {
+                institution.setOrigin(entity.getOrigin().getValue());
+            }
             institution.setOriginId(entity.getOriginId());
             institution.setDescription(entity.getDescription());
             institution.setInstitutionType(entity.getInstitutionType());
@@ -67,7 +70,9 @@ public class InstitutionMapper {
         entity.setCreatedAt(institution.getCreatedAt());
         entity.setExternalId(institution.getExternalId());
         entity.setDescription(institution.getDescription());
-        entity.setOrigin(institution.getOrigin());
+        if(institution.getOrigin() != null) {
+            entity.setOrigin(Origin.fromValue(institution.getOrigin()));
+        }
         entity.setOriginId(institution.getOriginId());
         entity.setInstitutionType(institution.getInstitutionType());
         entity.setDigitalAddress(institution.getDigitalAddress());
@@ -251,7 +256,8 @@ public class InstitutionMapper {
                 entity.setDesc(geographicTaxonomies.getDesc());
                 return entity;
             }).collect(Collectors.toList());
-            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name()).each(list);        }
+            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name()).each(list);
+        }
     }
 
     public static Map<String, Object> getNotNullField(InstitutionUpdate institutionUpdate) {

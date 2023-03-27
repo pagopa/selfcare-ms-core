@@ -132,7 +132,7 @@ class MigrationInstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, "share capital", "Rea",
                         "mail", "phone", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -176,7 +176,7 @@ class MigrationInstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -216,7 +216,7 @@ class MigrationInstitutionMapperTest {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
+                .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomies, attributesList, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now()));
@@ -1240,7 +1240,7 @@ class MigrationInstitutionMapperTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC, "Ipa Code", "The characteristics of someone or something",
+        Institution institution = new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                 geographicTaxonomies, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
                 "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now());

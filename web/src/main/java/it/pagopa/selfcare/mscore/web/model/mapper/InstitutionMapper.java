@@ -65,8 +65,6 @@ public class InstitutionMapper {
 
         response.setInstitutionId(institution.getId());
         response.setExternalId(institution.getExternalId());
-        response.setOrigin(institution.getOrigin());
-        response.setOriginId(institution.getOriginId());
         response.setDescription(institution.getDescription());
         response.setInstitutionType(institution.getInstitutionType());
         response.setDigitalAddress(institution.getDigitalAddress());
@@ -159,6 +157,8 @@ public class InstitutionMapper {
     public static Institution toInstitution(InstitutionRequest request, String externalId) {
         Institution institution = new Institution();
         institution.setExternalId(externalId);
+        institution.setOrigin(request.getOrigin());
+        institution.setOriginId(request.getOriginId());
         institution.setInstitutionType(request.getInstitutionType());
         institution.setDescription(request.getDescription());
         institution.setAddress(request.getAddress());
@@ -304,7 +304,7 @@ public class InstitutionMapper {
 
     private static List<InstitutionGeographicTaxonomies> toGeographicTaxonomies(List<GeoTaxonomies> request) {
         List<InstitutionGeographicTaxonomies> response = new ArrayList<>();
-        if (request != null) {
+        if (request != null && !request.isEmpty()) {
             for (GeoTaxonomies g : request) {
                 InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies(g.getCode(), g.getDesc());
                 response.add(geographicTaxonomies);

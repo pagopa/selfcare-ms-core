@@ -101,7 +101,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(externalId);
         newInstitution.setInstitutionType(InstitutionType.PA);
-        newInstitution.setOrigin(Origin.IPA);
+        newInstitution.setOrigin(Origin.IPA.getValue());
         newInstitution.setOriginId(institutionProxyInfo.getOriginId());
         newInstitution.setTaxCode(institutionProxyInfo.getTaxCode());
         newInstitution.setAddress(institutionProxyInfo.getAddress());
@@ -129,7 +129,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
-        newInstitution.setOrigin(Origin.INFOCAMERE);
+        newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
         newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
         return institutionConnector.saveOrRetrievePnPg(newInstitution);
     }
@@ -143,7 +143,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
-        newInstitution.setOrigin(Origin.INFOCAMERE);
+        newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
         newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
@@ -172,7 +172,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (institution.getInstitutionType() == null) {
             institution.setInstitutionType(InstitutionType.UNKNOWN);
         }
-        institution.setOrigin(Origin.SELC);
+        institution.setOrigin(Origin.SELC.getValue());
         institution.setOriginId("SELC_" + institution.getExternalId());
         institution.setCreatedAt(OffsetDateTime.now());
         return institutionConnector.save(institution);
