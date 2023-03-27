@@ -20,7 +20,7 @@ import java.io.UnsupportedEncodingException;
 @Component
 public class LogFilter implements Filter {
 
-    private static final int MAX_LENGTH_CONTENT = 150;
+    private static final int MAX_LENGTH_CONTENT = 500;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -42,21 +42,26 @@ public class LogFilter implements Filter {
         ContentCachingResponseWrapper  responseCacheWrapperObject = new ContentCachingResponseWrapper(httpServletResponse);
 
         chain.doFilter(requestCacheWrapperObject, responseCacheWrapperObject);
+        String requestBody = getContentAsString(requestCacheWrapperObject.getContentAsByteArray(), request.getCharacterEncoding(), false);
+        log.info("Request from URI : {} - method: {} - Request body: {}", httpUri, httpMethod, requestBody);
 
         Long endTime = System.currentTimeMillis() - startTime;
-        String requestBody = getContentAsString(requestCacheWrapperObject.getContentAsByteArray(), request.getCharacterEncoding());
-        String responseBody = getContentAsString(responseCacheWrapperObject.getContentAsByteArray(), response.getCharacterEncoding());
-        log.info("Request from URI : {} - method: {} - timelapse: {}ms - Request body {} - Response body {}", httpUri, httpMethod, endTime, MaskDataUtils.maskInformation(requestBody), MaskDataUtils.maskInformation(responseBody));
+        String responseBody = getContentAsString(responseCacheWrapperObject.getContentAsByteArray(), response.getCharacterEncoding(), true);
+        log.info("Response from URI : {} - method: {} - status: {} - timelapse: {}ms - Response body: {}", httpUri, httpMethod, httpServletResponse.getStatus(), endTime, responseBody);
         responseCacheWrapperObject.copyBodyToResponse();
     }
 
-    private String getContentAsString(byte[] buf, String charsetName) {
+    private String getContentAsString(byte[] buf, String charsetName, boolean isResponse) {
         if (buf == null || buf.length == 0) {
-            return "";
+            return "empty";
         }
         try {
             String content = new String(buf, charsetName);
-            return content.substring(0, Math.min(MAX_LENGTH_CONTENT, content.length()));
+            String maskedContent = MaskDataUtils.maskInformation(content);
+            if(isResponse) {
+                return maskedContent.substring(0, Math.min(MAX_LENGTH_CONTENT, maskedContent.length()));
+            }
+            return maskedContent;
         } catch (UnsupportedEncodingException ex) {
             return "Unsupported Encoding";
         }

@@ -27,6 +27,7 @@ public class TokenMapper {
         } else {
             entity.setId(UUID.randomUUID().toString());
         }
+        entity.setContractVersion(token.getContractVersion());
         entity.setContractTemplate(token.getContractTemplate());
         entity.setContractSigned(token.getContractSigned());
         entity.setChecksum(token.getChecksum());
@@ -54,6 +55,8 @@ public class TokenMapper {
 
         if (geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
             entity.setGeographicTaxonomies(toGeoTaxonomyEntity(geographicTaxonomies));
+        }else {
+            entity.setGeographicTaxonomies(new ArrayList<>());
         }
 
         if (institutionUpdate.getPaymentServiceProvider() != null) {
@@ -79,6 +82,7 @@ public class TokenMapper {
         token.setId(tokenEntity.getId());
         token.setContractTemplate(tokenEntity.getContractTemplate());
         token.setContractSigned(tokenEntity.getContractSigned());
+        token.setContractVersion(token.getContractVersion());
         token.setChecksum(tokenEntity.getChecksum());
         token.setInstitutionId(tokenEntity.getInstitutionId());
         token.setStatus(tokenEntity.getStatus());

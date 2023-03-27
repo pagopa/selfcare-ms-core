@@ -70,12 +70,6 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public Token save(Token token) {
-        final TokenEntity entity = convertToTokenEntity(token, null);
-        return convertToToken(tokenRepository.save(entity));
-    }
-
-    @Override
     public Token findById(String tokenId) {
         Optional<Token> opt = tokenRepository.findById(tokenId).map(TokenMapper::convertToToken);
         if (opt.isEmpty()) {

@@ -4,6 +4,7 @@ public enum Origin {
     MOCK,
     IPA,
     INFOCAMERE,
-    SELC
+    SELC,
+    STATIC
     
 }

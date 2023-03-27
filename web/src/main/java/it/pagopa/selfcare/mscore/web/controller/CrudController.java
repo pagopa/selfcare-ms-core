@@ -6,6 +6,10 @@ import it.pagopa.selfcare.mscore.core.migration.MigrationService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.web.model.migration.MigrationInstitution;
+import it.pagopa.selfcare.mscore.web.model.migration.MigrationMapper;
+import it.pagopa.selfcare.mscore.web.model.migration.MigrationOnboardedUser;
+import it.pagopa.selfcare.mscore.web.model.migration.MigrationToken;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,24 +41,24 @@ public class CrudController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.save.token}", notes = "${swagger.mscore.migration.save.token}")
     @PostMapping("/token")
-    public ResponseEntity<Token> createToken(@RequestBody @Valid Token migrationTokenRequest) {
-        Token token = migrationService.createToken(migrationTokenRequest);
+    public ResponseEntity<Token> createToken(@RequestBody @Valid MigrationToken migrationTokenRequest) {
+        Token token = migrationService.createToken(MigrationMapper.toToken(migrationTokenRequest));
         return ResponseEntity.ok().body(token);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.save.institution}", notes = "${swagger.mscore.migration.save.institution}")
     @PostMapping("/institution")
-    public ResponseEntity<Institution> createInstitution(@RequestBody @Valid Institution institutionRequest) {
-        Institution institution =  migrationService.createInstitution(institutionRequest);
+    public ResponseEntity<Institution> createInstitution(@RequestBody @Valid MigrationInstitution institutionRequest) {
+        Institution institution =  migrationService.createInstitution(MigrationMapper.toInstitution(institutionRequest));
         return ResponseEntity.ok().body(institution);
     }
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.save.user}", notes = "${swagger.mscore.migration.save.user}")
     @PostMapping("/user")
-    public ResponseEntity<OnboardedUser> createUser(@RequestBody @Valid OnboardedUser userRequest) {
-        OnboardedUser user = migrationService.createUser(userRequest);
+    public ResponseEntity<OnboardedUser> createUser(@RequestBody @Valid MigrationOnboardedUser userRequest) {
+        OnboardedUser user = migrationService.createUser(MigrationMapper.toOnboardedUser(userRequest));
         return ResponseEntity.ok().body(user);
     }
 

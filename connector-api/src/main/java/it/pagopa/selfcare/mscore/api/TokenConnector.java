@@ -11,8 +11,6 @@ public interface TokenConnector {
 
     List<Token> findAll();
 
-    Token save(Token token);
-
     Token findActiveContract(String institutionId, String userId, String productId);
 
     void deleteById(String id);

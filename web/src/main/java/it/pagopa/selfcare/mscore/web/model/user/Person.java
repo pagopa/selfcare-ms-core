@@ -12,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
 
 @Data
 @Valid
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @NoArgsConstructor
 public class Person {

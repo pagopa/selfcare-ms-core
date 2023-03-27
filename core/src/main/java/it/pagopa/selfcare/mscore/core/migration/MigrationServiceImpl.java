@@ -27,7 +27,11 @@ public class MigrationServiceImpl implements MigrationService {
 
     @Override
     public Token createToken(Token token){
-        return tokenConnector.save(token);
+        if(token.getInstitutionUpdate() != null) {
+            return tokenConnector.save(token, token.getInstitutionUpdate().getGeographicTaxonomies());
+        }else {
+            return tokenConnector.save(token, null);
+        }
     }
 
     @Override

@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationToSend {
     private String id;
     private String internalIstitutionID;

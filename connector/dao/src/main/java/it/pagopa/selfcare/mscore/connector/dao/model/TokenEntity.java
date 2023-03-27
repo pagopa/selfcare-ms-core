@@ -29,6 +29,7 @@ public class TokenEntity {
     private String productId;
     private OffsetDateTime expiringDate;
     private String checksum;
+    private String contractVersion;
     private String contractTemplate;
     private String contractSigned;
     private List<TokenUserEntity> users;
