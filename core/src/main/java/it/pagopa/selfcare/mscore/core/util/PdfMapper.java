@@ -78,7 +78,7 @@ public class PdfMapper {
         map.put("pricingPlan", decodePricingPlan(request.getPricingPlan(), request.getProductId()));
         if (StringUtils.hasText(institution.getOrigin())) {
             map.put("originIdLabelValue", Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin()) ?
-                    "|<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>|"
+                    "<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>"
                     : "");
         }
         addInstitutionRegisterLabelValue(institution, map);
@@ -169,20 +169,21 @@ public class PdfMapper {
     private static String delegatesToText(List<User> users) {
         StringBuilder builder = new StringBuilder();
         users.forEach(user -> builder
-                .append("|<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
+                .append("</br>")
+                .append("<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
                 .append(user.getName()).append(" ")
                 .append(user.getFamilyName())
                 .append("&nbsp;</span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
+                .append("<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
                 .append(user.getFiscalCode())
                 .append("</span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">e-mail: ")
+                .append("<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
+                .append("<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
+                .append("<p class=\"c141\"><span class=\"c6\">e-mail: ")
                 .append(user.getEmail())
                 .append("&nbsp;</span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
-                .append("|</br>"));
+                .append("<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
+                .append("</br>"));
 
         return builder.toString();
     }

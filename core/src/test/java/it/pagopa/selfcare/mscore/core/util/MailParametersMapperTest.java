@@ -41,7 +41,7 @@ class MailParametersMapperTest {
         user.setFamilyName(certifiedField);
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("productId");
-        Map<String, String> map = mailParametersMapper.getOnboardingMailParameter(user, request);
+        Map<String, String> map = mailParametersMapper.getOnboardingMailParameter(user, request, "");
         Assertions.assertNotNull(map);
     }
 
@@ -64,7 +64,7 @@ class MailParametersMapperTest {
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("productId");
         request.setInstitutionUpdate(new InstitutionUpdate());
-        Map<String, String> map = mailParametersMapper.getOnboardingMailNotificationParameter(user, request);
+        Map<String, String> map = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, "");
         Assertions.assertNotNull(map);
     }
 

@@ -16,7 +16,7 @@ public class MailParametersMapper {
     @Autowired
     MailTemplateConfig mailTemplateConfig;
 
-    public Map<String, String> getOnboardingMailParameter(User user, OnboardingRequest request) {
+    public Map<String, String> getOnboardingMailParameter(User user, OnboardingRequest request, String token) {
         Map<String, String> map = new HashMap<>();
         map.put(mailTemplateConfig.getProductName(), request.getProductId());
         if(user.getName()!=null) {
@@ -25,12 +25,14 @@ public class MailParametersMapper {
         if(user.getFamilyName()!=null) {
             map.put(mailTemplateConfig.getUserSurname(), user.getFamilyName());
         }
-        map.put(mailTemplateConfig.getRejectTokenName(), mailTemplateConfig.getRejectTokenPlaceholder());
-        map.put(mailTemplateConfig.getConfirmTokenName(), mailTemplateConfig.getConfirmTokenPlaceholder());
+        StringBuilder confirmLink = new StringBuilder(mailTemplateConfig.getConfirmTokenPlaceholder());
+        StringBuilder rejectLink = new StringBuilder(mailTemplateConfig.getRejectTokenPlaceholder());
+        map.put(mailTemplateConfig.getRejectTokenName(), rejectLink.append(token).toString());
+        map.put(mailTemplateConfig.getConfirmTokenName(), confirmLink.append(token).toString());
         return map;
     }
 
-    public Map<String, String> getOnboardingMailNotificationParameter(User user, OnboardingRequest request) {
+    public Map<String, String> getOnboardingMailNotificationParameter(User user, OnboardingRequest request, String token) {
         Map<String, String> map = new HashMap<>();
         map.put(mailTemplateConfig.getNotificationProductName(), request.getProductName());
         if(user.getName()!=null) {
@@ -42,7 +44,8 @@ public class MailParametersMapper {
         if(request.getInstitutionUpdate()!=null) {
             map.put(mailTemplateConfig.getInstitutionDescription(), request.getInstitutionUpdate().getDescription());
         }
-        map.put(mailTemplateConfig.getConfirmTokenName(), mailTemplateConfig.getConfirmTokenPlaceholder());
+        StringBuilder confirmLink = new StringBuilder(mailTemplateConfig.getConfirmTokenPlaceholder());
+        map.put(mailTemplateConfig.getConfirmTokenName(), confirmLink.append(token).toString());
         return map;
     }
 

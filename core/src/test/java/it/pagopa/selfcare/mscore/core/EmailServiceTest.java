@@ -54,7 +54,7 @@ class EmailServiceTest {
     private FileStorageConnector fileStorageConnector;
 
     /**
-     * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, boolean)}
+     * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, String, boolean)}
      */
     @Test
     void testSendMail() {
@@ -135,7 +135,7 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        emailService.sendMail(pdf, institution, user, onboardingRequest, true);
+        emailService.sendMail(pdf, institution, user, onboardingRequest, "", true);
         assertNotNull(onboardingRequest);
     }
 
@@ -218,7 +218,7 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        emailService.sendMail(pdf, institution, user, onboardingRequest, false);
+        emailService.sendMail(pdf, institution, user, onboardingRequest, "",false);
         assertNotNull(onboardingRequest);
     }
 

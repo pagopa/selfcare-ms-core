@@ -147,7 +147,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             OnboardingRollback rollback = onboardingDao.persist(toUpdate, toDelete, request, institution, institutionGeographicTaxonomies, digest);
             log.info("{} - Digest {}", rollback.getToken().getId(), digest);
             try {
-                emailService.sendMail(pdf, institution, user, request, false);
+                emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false);
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
             }
@@ -200,7 +200,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            emailService.sendMail(pdf, institution, currentUser, request, true);
+            emailService.sendMail(pdf, institution, currentUser, request, token.getId(), true);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -259,7 +259,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            emailService.sendMail(pdf, institution, user, request, false);
+            emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }

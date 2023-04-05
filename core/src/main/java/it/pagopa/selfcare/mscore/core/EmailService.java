@@ -37,18 +37,18 @@ public class EmailService {
     }
 
 
-    public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, boolean isApproved) {
+    public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean isApproved) {
         List<String> destinationMail;
         Map<String, String> mailParameters;
         if (InstitutionType.PA == institution.getInstitutionType() || isApproved) {
-            mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request);
+            mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = coreConfig.getDestinationMails() != null ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
             log.info(DESTINATION_MAIL_LOG, destinationMail);
             emailConnector.sendMail(mailParametersMapper.getOnboardingPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
             log.info(" onboarding-contract-email Email successful sent");
         } else {
-            mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request);
+            mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
             log.info(DESTINATION_MAIL_LOG, destinationMail);
