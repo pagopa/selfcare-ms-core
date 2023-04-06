@@ -11,9 +11,7 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.exception.*;
 import it.pagopa.selfcare.mscore.model.institution.Attributes;
 import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
@@ -117,8 +116,11 @@ public class InstitutionServiceImpl implements InstitutionService {
         attributes.setCode(categoryProxyInfo.getCode());
         attributes.setDescription(categoryProxyInfo.getName());
         newInstitution.setAttributes(List.of(attributes));
-
-        return institutionConnector.save(newInstitution);
+        try{
+            return institutionConnector.save(newInstitution);
+        }catch(Exception e){
+            throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
+        }
     }
 
     @Override
@@ -175,7 +177,11 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setOrigin(Origin.SELC.getValue());
         institution.setOriginId("SELC_" + institution.getExternalId());
         institution.setCreatedAt(OffsetDateTime.now());
-        return institutionConnector.save(institution);
+        try {
+            return institutionConnector.save(institution);
+        } catch (Exception e) {
+            throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
+        }
     }
 
     @Override
@@ -213,7 +219,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 return geographicTaxonomies;
             }
         }
-        throw new ResourceNotFoundException(String.format("GeographicTaonomies for institution %s not found", institution.getId()), "0000");
+        throw new MsCoreException(String.format("GeographicTaonomies for institution %s not found", institution.getId()), "0000");
     }
 
     @Override
@@ -230,7 +236,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .map(geo -> new InstitutionGeographicTaxonomies(geo.getCode(), geo.getDesc())).collect(Collectors.toList());
             return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
         } else {
-            throw new InvalidRequestException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
+            throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
         }
     }
 

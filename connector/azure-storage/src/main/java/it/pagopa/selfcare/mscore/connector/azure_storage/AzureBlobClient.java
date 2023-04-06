@@ -11,6 +11,7 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.connector.azure_storage.config.AzureStorageConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -64,8 +65,14 @@ class AzureBlobClient implements FileStorageConnector {
             response.setFileName(blob.getName());
             response.setMimetype(properties.getContentType());
             return response;
-        } catch (StorageException | URISyntaxException e) {
-            log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName), e);
+        } catch (StorageException e) {
+            if(e.getHttpStatusCode() == 404){
+                throw new ResourceNotFoundException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
+                        ERROR_DURING_DOWNLOAD_FILE.getCode());
+            }
+            throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
+                    ERROR_DURING_DOWNLOAD_FILE.getCode());
+        }catch (URISyntaxException e){
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
         }

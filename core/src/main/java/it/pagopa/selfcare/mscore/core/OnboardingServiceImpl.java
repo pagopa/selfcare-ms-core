@@ -278,7 +278,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 StringUtils.hasText(relationship.getOnboardedProduct().getContract())) {
             return contractService.getFile(relationship.getOnboardedProduct().getContract());
         } else {
-            throw new InvalidRequestException(String.format(DOCUMENT_NOT_FOUND.getMessage(), relationshipId), DOCUMENT_NOT_FOUND.getCode());
+            throw new ResourceNotFoundException(String.format(DOCUMENT_NOT_FOUND.getMessage(), relationshipId), DOCUMENT_NOT_FOUND.getCode());
         }
     }
 

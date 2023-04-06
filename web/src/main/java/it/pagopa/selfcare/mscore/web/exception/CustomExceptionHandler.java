@@ -1,12 +1,9 @@
 package it.pagopa.selfcare.mscore.web.exception;
 
 import it.pagopa.selfcare.mscore.constant.GenericError;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.*;
 import it.pagopa.selfcare.mscore.model.error.Problem;
 import it.pagopa.selfcare.mscore.model.error.ProblemError;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -64,6 +61,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         headers.setContentType(MediaType.APPLICATION_JSON);
         Problem problem = createProblem(request.getRequestURL().toString(), "NOT_FOUND", genericError.getMessage(), ex.getMessage(), HttpStatus.NOT_FOUND.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ResourceForbiddenException.class)
+    public ResponseEntity<Problem> handleResourceNotFoundException(HttpServletRequest request, ResourceForbiddenException ex) {
+        GenericError genericError = retrieveGenericError(request);
+        log.error("ResourceForbiddenException Occured --> URL:{}, MESSAGE:{}, STATUS: {}",request.getRequestURL(), ex.getMessage(), HttpStatus.FORBIDDEN, ex);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        Problem problem = createProblem(request.getRequestURL().toString(), "NOT_FOUND", genericError.getMessage(), ex.getMessage(), HttpStatus.FORBIDDEN.value(), ex.getCode());
+        return new ResponseEntity<>(problem, headers, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(ResourceConflictException.class)

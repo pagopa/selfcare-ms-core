@@ -28,6 +28,7 @@ import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.dss.validation.timestamp.DetachedTimestampValidator;
 import eu.europa.esig.dss.xades.validation.XAdESSignature;
 import eu.europa.esig.validationreport.jaxb.ValidationReportType;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.user.User;
 
@@ -69,7 +70,7 @@ class SignatureServiceTest {
      */
     @Test
     void testIsDocumentSigned() {
-        assertThrows(MsCoreException.class,
+        assertThrows(InvalidRequestException.class,
                 () -> signatureService.isDocumentSigned(new DetachedTimestampValidator(new DigestDocument())));
     }
 
@@ -80,7 +81,7 @@ class SignatureServiceTest {
     void testIsDocumentSigned3() {
         DetachedTimestampValidator detachedTimestampValidator = mock(DetachedTimestampValidator.class);
         when(detachedTimestampValidator.getSignatures()).thenReturn(new ArrayList<>());
-        assertThrows(MsCoreException.class, () -> signatureService.isDocumentSigned(detachedTimestampValidator));
+        assertThrows(InvalidRequestException.class, () -> signatureService.isDocumentSigned(detachedTimestampValidator));
         verify(detachedTimestampValidator).getSignatures();
     }
 
@@ -105,7 +106,7 @@ class SignatureServiceTest {
         SignedDocumentValidator signedDocumentValidator = mock(SignedDocumentValidator.class);
         MsCoreException msCoreException = mock(MsCoreException.class);
         when(signedDocumentValidator.validateDocument()).thenThrow(msCoreException);
-        assertThrows(MsCoreException.class, () -> signatureService.validateDocument(signedDocumentValidator));
+        assertThrows(InvalidRequestException.class, () -> signatureService.validateDocument(signedDocumentValidator));
     }
 
 

@@ -14,7 +14,6 @@ import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
@@ -302,7 +301,7 @@ class ContractServiceTest {
         InputStream inputStream = mock(InputStream.class);
         when(file.getInputStream()).thenReturn(inputStream);
         when(file.getInputStream().readAllBytes()).thenReturn(new byte[]{1});
-        assertThrows(MsCoreException.class, () -> contractService.verifySignature(file, token, new ArrayList<>()));
+        assertThrows(InvalidRequestException.class, () -> contractService.verifySignature(file, token, new ArrayList<>()));
 
     }
 
