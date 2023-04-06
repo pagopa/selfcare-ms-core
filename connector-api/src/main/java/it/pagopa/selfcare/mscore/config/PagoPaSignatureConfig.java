@@ -18,5 +18,6 @@ public class PagoPaSignatureConfig {
     private String location;
     private boolean applyOnboardingEnabled;
     private String applyOnboardingTemplateReason;
+    private boolean verifyEnabled;
 
 }

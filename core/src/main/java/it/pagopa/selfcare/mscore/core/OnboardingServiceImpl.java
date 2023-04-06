@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
@@ -57,19 +58,22 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final UserRelationshipService userRelationshipService;
     private final ContractService contractService;
     private final EmailService emailService;
+    private final PagoPaSignatureConfig pagoPaSignatureConfig;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
-                                 EmailService emailService) {
+                                 EmailService emailService,
+                                 PagoPaSignatureConfig pagoPaSignatureConfig) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
         this.contractService = contractService;
         this.emailService = emailService;
+        this.pagoPaSignatureConfig = pagoPaSignatureConfig;
     }
 
     @Override
@@ -164,7 +168,9 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = onboardingDao.getProductById(token.getProductId());
-        contractService.verifySignature(contract, token, managersData);
+        if(pagoPaSignatureConfig.isVerifyEnabled()) {
+            contractService.verifySignature(contract, token, managersData);
+        }
         File logoFile = contractService.getLogoFile();
         String fileName = contractService.uploadContract(token.getId(), contract);
         token.setContractSigned(fileName);
