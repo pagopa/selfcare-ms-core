@@ -16,7 +16,9 @@ public class User {
     private String fiscalCode;
     private CertifiedField<String> name;
     private CertifiedField<String> familyName;
+    @FieldNameConstants.Exclude
     private CertifiedField<String> email;
+
     private Map<String, WorkContact> workContacts;
 
     public String getName() {

@@ -6,4 +6,8 @@ import lombok.Data;
 @Data
 public class WorkContact {
     private CertifiedField<String> email;
+
+    public String getEmail() {
+        return email != null ? email.getValue() : "";
+    }
 }
