@@ -28,6 +28,7 @@ public class MailTemplateConfig {
     private String confirmTokenPlaceholder;
     private String rejectTokenName;
     private String rejectTokenPlaceholder;
+    private String adminLink;
 
     private String notificationPath;
     private String notificationAdminEmail;

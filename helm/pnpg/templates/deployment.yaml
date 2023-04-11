@@ -47,7 +47,7 @@ spec:
             - secretRef:
                 name: contracts-storage
             - secretRef:
-                name: onboarding-interceptor-event-secrets
+                name: event-secrets
             - secretRef:
                 name: mail
             - configMapRef:

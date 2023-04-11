@@ -44,8 +44,8 @@ public class MailParametersMapper {
         if(request.getInstitutionUpdate()!=null) {
             map.put(mailTemplateConfig.getInstitutionDescription(), request.getInstitutionUpdate().getDescription());
         }
-        StringBuilder confirmLink = new StringBuilder(mailTemplateConfig.getConfirmTokenPlaceholder());
-        map.put(mailTemplateConfig.getConfirmTokenName(), confirmLink.append(token).toString());
+        StringBuilder adminApproveLink = new StringBuilder(mailTemplateConfig.getAdminLink());
+        map.put(mailTemplateConfig.getConfirmTokenName(), adminApproveLink.append(token).toString());
         return map;
     }
 

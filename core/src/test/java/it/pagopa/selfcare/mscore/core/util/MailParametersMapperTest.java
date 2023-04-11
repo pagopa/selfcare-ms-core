@@ -56,6 +56,7 @@ class MailParametersMapperTest {
         when(mailTemplateConfig.getConfirmTokenName()).thenReturn("confirmTokenName");
         when(mailTemplateConfig.getConfirmTokenPlaceholder()).thenReturn("confirmTokenPlaceholder");
         when(mailTemplateConfig.getInstitutionDescription()).thenReturn("institutionDescription");
+        when(mailTemplateConfig.getAdminLink()).thenReturn("institutionDescription");
         User user = new User();
         CertifiedField<String> certifiedField = new CertifiedField<>();
         certifiedField.setValue("42");
