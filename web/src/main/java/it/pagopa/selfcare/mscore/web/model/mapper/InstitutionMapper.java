@@ -240,8 +240,9 @@ public class InstitutionMapper {
     }
 
     public static DataProtectionOfficerResponse toDataProtectionOfficerResponse(DataProtectionOfficer dataProtectionOfficer) {
-        DataProtectionOfficerResponse response = new DataProtectionOfficerResponse();
+        DataProtectionOfficerResponse response = null;
         if (dataProtectionOfficer != null) {
+            response = new DataProtectionOfficerResponse();
             response.setPec(dataProtectionOfficer.getPec());
             response.setEmail(dataProtectionOfficer.getEmail());
             response.setAddress(dataProtectionOfficer.getAddress());
@@ -262,8 +263,9 @@ public class InstitutionMapper {
     }
 
     public static PaymentServiceProviderResponse toPaymentServiceProviderResponse(PaymentServiceProvider paymentServiceProvider) {
-        PaymentServiceProviderResponse response = new PaymentServiceProviderResponse();
+        PaymentServiceProviderResponse response = null;
         if (paymentServiceProvider != null) {
+            response = new PaymentServiceProviderResponse();
             response.setAbiCode(paymentServiceProvider.getAbiCode());
             response.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());
             response.setBusinessRegisterNumber(paymentServiceProvider.getBusinessRegisterNumber());
