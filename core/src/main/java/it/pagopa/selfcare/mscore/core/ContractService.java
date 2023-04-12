@@ -20,7 +20,6 @@ import it.pagopa.selfcare.mscore.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
@@ -161,14 +160,14 @@ public class ContractService {
     }
 
     private void validateSignature(String... errorEnums) {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder(INVALID_SIGNATURE.getMessage());
         List<String> strings = Arrays.stream(errorEnums).filter(s -> !VALID_CHECK.equals(s)).collect(Collectors.toList());
         if (!strings.isEmpty()) {
             for (String s : strings) {
+                stringBuilder.append(" - ");
                 stringBuilder.append(s);
-                stringBuilder.append("\n");
             }
-            throw new MsCoreException(String.format(INVALID_SIGNATURE.getMessage(), stringBuilder), INVALID_SIGNATURE.getCode());
+            throw new InvalidRequestException(stringBuilder.toString(), INVALID_SIGNATURE.getCode());
         }
     }
 
