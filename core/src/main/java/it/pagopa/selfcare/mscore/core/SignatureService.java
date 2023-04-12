@@ -16,7 +16,7 @@ import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.SignatureValidationReportType;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.DOCUMENT_VALIDATION_FAIL;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_CONTRACT_DIGEST;
 import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_DOCUMENT_SIGNATURE;
 import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_SIGNATURE_FORMS;
@@ -65,13 +64,13 @@ public class SignatureService {
             return documentValidator;
         } catch (Exception e) {
             log.error("Error message: {}", e.getMessage(), e);
-            throw new MsCoreException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
+            throw new InvalidRequestException(DOCUMENT_VALIDATION_FAIL.getMessage(), DOCUMENT_VALIDATION_FAIL.getCode());
         }
     }
 
     public void isDocumentSigned(SignedDocumentValidator documentValidator) {
         if (documentValidator.getSignatures().isEmpty()) {
-            throw new MsCoreException(SIGNATURE_VALIDATION_ERROR.getMessage(), SIGNATURE_VALIDATION_ERROR.getCode());
+            throw new InvalidRequestException(SIGNATURE_VALIDATION_ERROR.getMessage(), SIGNATURE_VALIDATION_ERROR.getCode());
         }
     }
 
@@ -84,7 +83,7 @@ public class SignatureService {
             }
         }
         if (dssDocuments.isEmpty()) {
-            throw new MsCoreException(ORIGINAL_DOCUMENT_NOT_FOUND.getMessage(), ORIGINAL_DOCUMENT_NOT_FOUND.getCode());
+            throw new InvalidRequestException(ORIGINAL_DOCUMENT_NOT_FOUND.getMessage(), ORIGINAL_DOCUMENT_NOT_FOUND.getCode());
         }
     }
 
@@ -92,7 +91,7 @@ public class SignatureService {
         try {
             return signedDocumentValidator.validateDocument();
         } catch (Exception e) {
-            throw new MsCoreException(String.format(DOCUMENT_VALIDATION_FAIL.getMessage(), e.getMessage()), DOCUMENT_VALIDATION_FAIL.getCode());
+            throw new InvalidRequestException(String.format(DOCUMENT_VALIDATION_FAIL.getMessage(), e.getMessage()), DOCUMENT_VALIDATION_FAIL.getCode());
         }
     }
 

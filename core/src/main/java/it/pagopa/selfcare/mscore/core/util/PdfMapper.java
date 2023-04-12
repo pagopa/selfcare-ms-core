@@ -29,7 +29,7 @@ public class PdfMapper {
 
     public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         log.info("START - setupCommonData");
-        if (StringUtils.hasText(validManager.getEmail())) {
+        if (validManager.getWorkContacts() != null && validManager.getWorkContacts().containsKey(institution.getId())) {
             Map<String, Object> map = new HashMap<>();
             map.put("institutionName", institution.getDescription());
             map.put("address", institution.getAddress());
@@ -40,8 +40,8 @@ public class PdfMapper {
             map.put("originId", institution.getOriginId() != null ? institution.getOriginId() : "");
             map.put("institutionMail", institution.getDigitalAddress());
             map.put("managerTaxCode", validManager.getFiscalCode());
-            map.put("managerEmail", validManager.getEmail());
-            map.put("delegates", delegatesToText(users));
+            map.put("managerEmail", validManager.getWorkContacts().get(institution.getId()).getEmail());
+            map.put("delegates", delegatesToText(users, institution.getId()));
             map.put("institutionType", decodeInstitutionType(retrieveInstitutionType(institution, request)));
             if (request.getBillingRequest() != null) {
                 map.put("institutionVatNumber", request.getBillingRequest().getVatNumber());
@@ -69,7 +69,9 @@ public class PdfMapper {
             map.put("dataProtectionOfficerEmail", institution.getDataProtectionOfficer().getEmail());
             map.put("dataProtectionOfficerPec", institution.getDataProtectionOfficer().getPec());
         }
-        map.put("managerPEC", validManager.getEmail());
+        if (validManager.getWorkContacts() != null && validManager.getWorkContacts().containsKey(institution.getId())) {
+            map.put("managerPEC", validManager.getWorkContacts().get(institution.getId()).getEmail());
+        }
     }
 
     public static void setupProdIOData(Map<String, Object> map, User validManager, Institution institution, OnboardingRequest request) {
@@ -78,7 +80,7 @@ public class PdfMapper {
         map.put("pricingPlan", decodePricingPlan(request.getPricingPlan(), request.getProductId()));
         if (StringUtils.hasText(institution.getOrigin())) {
             map.put("originIdLabelValue", Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin()) ?
-                    "|<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>|"
+                    "<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>"
                     : "");
         }
         addInstitutionRegisterLabelValue(institution, map);
@@ -166,24 +168,28 @@ public class PdfMapper {
         }
     }
 
-    private static String delegatesToText(List<User> users) {
+    private static String delegatesToText(List<User> users, String institutionId) {
         StringBuilder builder = new StringBuilder();
-        users.forEach(user -> builder
-                .append("|<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
-                .append(user.getName()).append(" ")
-                .append(user.getFamilyName())
-                .append("&nbsp;</span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
-                .append(user.getFiscalCode())
-                .append("</span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">e-mail: ")
-                .append(user.getEmail())
-                .append("&nbsp;</span></p>\n")
-                .append("|<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
-                .append("|</br>"));
-
+        users.forEach(user -> {
+            builder
+                    .append("</br>")
+                    .append("<p class=\"c141\"><span class=\"c6\">Nome e Cognome: ")
+                    .append(user.getName()).append(" ")
+                    .append(user.getFamilyName())
+                    .append("&nbsp;</span></p>\n")
+                    .append("<p class=\"c141\"><span class=\"c6\">Codice Fiscale: ")
+                    .append(user.getFiscalCode())
+                    .append("</span></p>\n")
+                    .append("<p class=\"c141\"><span class=\"c6\">Amm.ne/Ente/Societ&agrave;: </span></p>\n")
+                    .append("<p class=\"c141\"><span class=\"c6\">Qualifica/Posizione: </span></p>\n")
+                    .append("<p class=\"c141\"><span class=\"c6\">e-mail: ");
+            if (user.getWorkContacts() != null && user.getWorkContacts().containsKey(institutionId)) {
+                builder.append(user.getWorkContacts().get(institutionId).getEmail());
+            }
+            builder.append("&nbsp;</span></p>\n")
+                    .append("<p class=\"c141\"><span class=\"c6\">PEC: &nbsp;</span></p>\n")
+                    .append("</br>");
+        });
         return builder.toString();
     }
 }

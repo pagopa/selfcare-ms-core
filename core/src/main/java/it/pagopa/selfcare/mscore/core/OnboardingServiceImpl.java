@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
@@ -57,19 +58,22 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final UserRelationshipService userRelationshipService;
     private final ContractService contractService;
     private final EmailService emailService;
+    private final PagoPaSignatureConfig pagoPaSignatureConfig;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
-                                 EmailService emailService) {
+                                 EmailService emailService,
+                                 PagoPaSignatureConfig pagoPaSignatureConfig) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
         this.contractService = contractService;
         this.emailService = emailService;
+        this.pagoPaSignatureConfig = pagoPaSignatureConfig;
     }
 
     @Override
@@ -147,7 +151,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             OnboardingRollback rollback = onboardingDao.persist(toUpdate, toDelete, request, institution, institutionGeographicTaxonomies, digest);
             log.info("{} - Digest {}", rollback.getToken().getId(), digest);
             try {
-                emailService.sendMail(pdf, institution, user, request, false);
+                emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false);
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
             }
@@ -164,7 +168,9 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = onboardingDao.getProductById(token.getProductId());
-        contractService.verifySignature(contract, token, managersData);
+        if(pagoPaSignatureConfig.isVerifyEnabled()) {
+            contractService.verifySignature(contract, token, managersData);
+        }
         File logoFile = contractService.getLogoFile();
         String fileName = contractService.uploadContract(token.getId(), contract);
         token.setContractSigned(fileName);
@@ -200,7 +206,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            emailService.sendMail(pdf, institution, currentUser, request, true);
+            emailService.sendMail(pdf, institution, currentUser, request, token.getId(), true);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -259,7 +265,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            emailService.sendMail(pdf, institution, user, request, false);
+            emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }
@@ -272,7 +278,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 StringUtils.hasText(relationship.getOnboardedProduct().getContract())) {
             return contractService.getFile(relationship.getOnboardedProduct().getContract());
         } else {
-            throw new InvalidRequestException(String.format(DOCUMENT_NOT_FOUND.getMessage(), relationshipId), DOCUMENT_NOT_FOUND.getCode());
+            throw new ResourceNotFoundException(String.format(DOCUMENT_NOT_FOUND.getMessage(), relationshipId), DOCUMENT_NOT_FOUND.getCode());
         }
     }
 

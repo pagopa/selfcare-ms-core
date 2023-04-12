@@ -2,9 +2,11 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -90,6 +92,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private PagoPaSignatureConfig pagoPaSignatureConfig;
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -1905,7 +1910,7 @@ class OnboardingServiceImplTest {
     @Test
     void testRetrieveDocument() {
         when(userRelationshipService.retrieveRelationship(any())).thenReturn(new RelationshipInfo());
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
+        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
         verify(userRelationshipService).retrieveRelationship(any());
     }
 
@@ -1917,7 +1922,7 @@ class OnboardingServiceImplTest {
         Institution institution = new Institution();
         when(userRelationshipService.retrieveRelationship(any()))
                 .thenReturn(new RelationshipInfo(institution, "42", new OnboardedProduct()));
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
+        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
         verify(userRelationshipService).retrieveRelationship(any());
     }
 

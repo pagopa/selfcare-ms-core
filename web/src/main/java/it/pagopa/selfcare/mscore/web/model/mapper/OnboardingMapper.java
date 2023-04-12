@@ -96,6 +96,7 @@ public class OnboardingMapper {
         OnboardedInstitutionResponse institutionResponse = new OnboardedInstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
+        institutionResponse.setOrigin(institution.getOrigin());
         institutionResponse.setOriginId(institution.getOriginId());
         institutionResponse.setDescription(institution.getDescription());
         institutionResponse.setInstitutionType(institution.getInstitutionType());

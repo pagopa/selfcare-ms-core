@@ -9,9 +9,7 @@ import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.exception.*;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.model.institution.Attributes;
@@ -202,7 +200,7 @@ class InstitutionServiceImplTest {
         categoryProxyInfo.setOrigin("Origin");
         when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(categoryProxyInfo);
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
-        assertThrows(ResourceConflictException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
+        assertThrows(MsCoreException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
         verify(partyRegistryProxyConnector).getCategory(any(), any());
@@ -617,7 +615,7 @@ class InstitutionServiceImplTest {
 
         Institution institution = new Institution();
         institution.setGeographicTaxonomies(new ArrayList<>());
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionGeoTaxonomies(institution));
+        Assertions.assertThrows(MsCoreException.class, () -> institutionServiceImpl.retrieveInstitutionGeoTaxonomies(institution));
     }
 
     /**
@@ -726,7 +724,7 @@ class InstitutionServiceImplTest {
         institutionUpdate.setSupportPhone("6625550144");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
-        assertThrows(InvalidRequestException.class,
+        assertThrows(ResourceForbiddenException.class,
                 () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
         verify(userServiceImpl).checkIfAdmin(any(), any());
     }

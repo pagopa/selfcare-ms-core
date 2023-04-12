@@ -47,7 +47,7 @@ spec:
             - secretRef:
                 name: contracts-storage
             - secretRef:
-                name: onboarding-interceptor-event-secrets
+                name: event-secrets
             - secretRef:
                 name: mail
             - configMapRef:
@@ -57,7 +57,7 @@ spec:
             - secretRef:
                 name: uservice-party-process
             - configMapRef:
-                name: interop-be-party-process
+                name: selfcare-core
             - configMapRef:
                 name: inner-service-url
             - configMapRef:

@@ -18,6 +18,7 @@ public class OnboardedInstitutionResponse {
     private String externalId;
     private String originId;
     private String description;
+    private String origin;
     private InstitutionType institutionType;
     private String digitalAddress;
     private String address;

@@ -14,7 +14,6 @@ import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
@@ -37,7 +36,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,11 +79,16 @@ class ContractServiceTest {
     void createContractPDF() {
         String contract = "contract";
         User validManager = new User();
-        CertifiedField<String> email = new CertifiedField<>();
-        email.setValue("email");
-        validManager.setEmail(email);
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        validManager.setWorkContacts(map);
         List<User> users = new ArrayList<>();
         Institution institution = new Institution();
+        institution.setId("id");
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
@@ -98,11 +104,16 @@ class ContractServiceTest {
     void createContractPDF1() {
         String contract = "contract";
         User validManager = new User();
-        CertifiedField<String> email = new CertifiedField<>();
-        email.setValue("email");
-        validManager.setEmail(email);
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        validManager.setWorkContacts(map);
         List<User> users = new ArrayList<>();
         Institution institution = new Institution();
+        institution.setId("id");
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
@@ -118,12 +129,17 @@ class ContractServiceTest {
     void createContractPDF2() {
         String contract = "contract";
         User validManager = new User();
-        CertifiedField<String> email = new CertifiedField<>();
-        email.setValue("email");
-        validManager.setEmail(email);
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        validManager.setWorkContacts(map);
         List<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PSP);
+        institution.setId("id");
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("prod-pagopa");
@@ -302,7 +318,7 @@ class ContractServiceTest {
         InputStream inputStream = mock(InputStream.class);
         when(file.getInputStream()).thenReturn(inputStream);
         when(file.getInputStream().readAllBytes()).thenReturn(new byte[]{1});
-        assertThrows(MsCoreException.class, () -> contractService.verifySignature(file, token, new ArrayList<>()));
+        assertThrows(InvalidRequestException.class, () -> contractService.verifySignature(file, token, new ArrayList<>()));
 
     }
 

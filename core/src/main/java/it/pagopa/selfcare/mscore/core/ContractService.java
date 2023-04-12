@@ -184,10 +184,10 @@ public class ContractService {
                     signatureService.verifyDigest(validator, token.getChecksum()),
                     signatureService.verifyManagerTaxCode(reports, users)
             );
-        } catch (MsCoreException e) {
+        } catch (InvalidRequestException e) {
             throw e;
         } catch (Exception e) {
-            throw new MsCoreException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
+            throw new InvalidRequestException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
         }
     }
 

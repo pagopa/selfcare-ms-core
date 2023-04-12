@@ -43,9 +43,16 @@ class PdfMapperTest {
         user.setFiscalCode("Fiscal Code");
         user.setId("42");
         user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        user.setWorkContacts(map);
         ArrayList<User> users = new ArrayList<>();
         Institution institution = new Institution();
+        institution.setId("id");
         institution.setInstitutionType(InstitutionType.UNKNOWN);
 
         Billing billing = new Billing();
@@ -207,9 +214,16 @@ class PdfMapperTest {
         user.setFiscalCode("Fiscal Code");
         user.setId("42");
         user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        user.setWorkContacts(map);
         ArrayList<User> users = new ArrayList<>();
         Institution institution = new Institution();
+        institution.setId("id");
         institution.setInstitutionType(InstitutionType.GSP);
 
         Billing billing = new Billing();
@@ -291,7 +305,13 @@ class PdfMapperTest {
         user.setFiscalCode("Fiscal Code");
         user.setId("42");
         user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        user.setWorkContacts(map);
 
         CertifiedField<String> certifiedField3 = new CertifiedField<>();
         certifiedField3.setCertification(Certification.NONE);
@@ -311,11 +331,18 @@ class PdfMapperTest {
         user1.setFiscalCode("START - setupCommonData");
         user1.setId("42");
         user1.setName(certifiedField5);
-        user1.setWorkContacts(new HashMap<>());
+        CertifiedField<String> emailCert2 = new CertifiedField<>();
+        emailCert2.setValue("email");
+        WorkContact workContact2 = new WorkContact();
+        workContact2.setEmail(emailCert2);
+        Map<String, WorkContact> map2 = new HashMap<>();
+        map2.put("id", workContact2);
+       user1.setWorkContacts(map2);
 
         ArrayList<User> userList = new ArrayList<>();
         userList.add(user1);
         Institution institution = new Institution();
+        institution.setId("id");
         institution.setInstitutionType(InstitutionType.SCP);
 
         Billing billing = new Billing();
@@ -398,7 +425,13 @@ class PdfMapperTest {
         user.setFiscalCode("Fiscal Code");
         user.setId("42");
         user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        user.setWorkContacts(map);
 
         CertifiedField<String> certifiedField3 = new CertifiedField<>();
         certifiedField3.setCertification(Certification.NONE);
@@ -418,7 +451,11 @@ class PdfMapperTest {
         user1.setFiscalCode("START - setupCommonData");
         user1.setId("42");
         user1.setName(certifiedField5);
-        user1.setWorkContacts(new HashMap<>());
+        WorkContact workContact1 = new WorkContact();
+        workContact1.setEmail(emailCert);
+        Map<String, WorkContact> map1 = new HashMap<>();
+        map1.put("id", workContact1);
+        user1.setWorkContacts(map1);
 
         CertifiedField<String> certifiedField6 = new CertifiedField<>();
         certifiedField6.setCertification(Certification.NONE);
@@ -438,12 +475,17 @@ class PdfMapperTest {
         user2.setFiscalCode("START - setupCommonData");
         user2.setId("42");
         user2.setName(certifiedField8);
-        user2.setWorkContacts(new HashMap<>());
+        WorkContact workContact2 = new WorkContact();
+        workContact2.setEmail(emailCert);
+        Map<String, WorkContact> map2 = new HashMap<>();
+        map2.put("id", workContact2);
+        user2.setWorkContacts(map2);
 
         ArrayList<User> userList = new ArrayList<>();
         userList.add(user2);
         userList.add(user1);
         Institution institution = new Institution();
+        institution.setId("id");
         institution.setInstitutionType(InstitutionType.PSP);
 
         Billing billing = new Billing();
@@ -526,7 +568,12 @@ class PdfMapperTest {
         user.setFiscalCode("Fiscal Code");
         user.setId("42");
         user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
+        WorkContact workContact1 = new WorkContact();
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        workContact1.setEmail(emailCert);
+        Map<String, WorkContact> map1 = new HashMap<>();
+        map1.put("42", workContact1);
+        user.setWorkContacts(map1);
         ArrayList<User> users = new ArrayList<>();
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
@@ -623,7 +670,7 @@ class PdfMapperTest {
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
         PdfMapper.setupPSPData(stringObjectMap, user, new Institution());
-        assertEquals(1, stringObjectMap.size());
+        assertEquals(0, stringObjectMap.size());
     }
 
     /**
@@ -663,7 +710,7 @@ class PdfMapperTest {
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", true,
                         OffsetDateTime.now(), OffsetDateTime.now()));
-        assertEquals(5, stringObjectMap.size());
+        assertEquals(4, stringObjectMap.size());
     }
 
     /**
@@ -703,7 +750,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setPaymentServiceProvider(paymentServiceProvider);
         PdfMapper.setupPSPData(stringObjectMap, user, institution);
-        assertEquals(5, stringObjectMap.size());
+        assertEquals(4, stringObjectMap.size());
     }
 
     /**
@@ -741,7 +788,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setDataProtectionOfficer(dataProtectionOfficer);
         PdfMapper.setupPSPData(stringObjectMap, user, institution);
-        assertEquals(4, stringObjectMap.size());
+        assertEquals(3, stringObjectMap.size());
     }
 
     /**
@@ -1054,7 +1101,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(15, stringObjectMap.size());
     }
 
     /**
@@ -1139,7 +1186,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(15, stringObjectMap.size());
     }
 }
 
