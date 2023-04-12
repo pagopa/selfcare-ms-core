@@ -149,9 +149,7 @@ class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"institutionUpdate\":{\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,"
-                                        + "\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":"
-                                        + "{\"address\":null,\"email\":null,\"pec\":null},\"imported\":false}}"));
+                                "{\"institutionUpdate\":{\"imported\":false}}"));
     }
 
     /**

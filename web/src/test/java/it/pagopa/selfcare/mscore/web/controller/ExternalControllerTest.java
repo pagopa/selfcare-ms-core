@@ -2,19 +2,12 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.core.ExternalService;
-import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.ExternalService;
+import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.CreatePnPgInstitutionRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -650,9 +643,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
                                 "{\"id\":null,\"from\":null,\"to\":null,\"role\":null,\"product\":null,\"state\":null,\"pricingPlan\":\"?\",\"institutionUpdate"
-                                        + "\":{\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null"
-                                        + ",\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null"
-                                        + ",\"pec\":null},\"imported\":false},\"billing\":{\"vatNumber\":\"42\",\"recipientCode\":\"?\",\"publicServices\":true"
+                                        + "\":{\"imported\":false},\"billing\":{\"vatNumber\":\"42\",\"recipientCode\":\"?\",\"publicServices\":true"
                                         + "},\"createdAt\":null,\"updatedAt\":null}"));
     }
 
