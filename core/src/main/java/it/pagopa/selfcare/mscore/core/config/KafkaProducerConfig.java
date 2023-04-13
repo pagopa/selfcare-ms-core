@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.config;
+package it.pagopa.selfcare.mscore.core.config;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;

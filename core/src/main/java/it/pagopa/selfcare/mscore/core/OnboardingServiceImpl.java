@@ -237,7 +237,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser, Token token) {
         Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(onboardingLegalsRequest);
-        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
+        InstitutionType institutionType = institution.getInstitutionType();
         request.setTokenType(TokenType.LEGALS);
 
         List<String> toUpdate = new ArrayList<>();

@@ -9,11 +9,11 @@ import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -87,11 +87,10 @@ class ContractServiceTest {
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
-        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
-        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
+        InstitutionType institutionType = InstitutionType.PSP;
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
@@ -114,11 +113,10 @@ class ContractServiceTest {
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
-        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-io");
         request.setSignContract(true);
         request.setProductName("42");
-        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
+        InstitutionType institutionType = InstitutionType.PSP;
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
@@ -141,11 +139,10 @@ class ContractServiceTest {
         institution.setId("id");
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
-        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
-        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
+        InstitutionType institutionType = InstitutionType.PSP;
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.isEnabled()).thenReturn(false);
@@ -162,11 +159,10 @@ class ContractServiceTest {
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
-        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
-        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
+        InstitutionType institutionType = InstitutionType.PSP;
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType),

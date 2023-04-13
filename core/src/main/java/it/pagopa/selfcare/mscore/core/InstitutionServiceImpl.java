@@ -156,9 +156,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkIfAlreadyExists(externalId);
-        if (institution.getInstitutionType() == null) {
-            institution.setInstitutionType(InstitutionType.UNKNOWN);
-        }
         institution.setOrigin(Origin.SELC.getValue());
         institution.setOriginId("SELC_" + institution.getExternalId());
         institution.setCreatedAt(OffsetDateTime.now());

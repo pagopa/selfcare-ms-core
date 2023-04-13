@@ -2,14 +2,13 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -42,14 +41,14 @@ public class EmailService {
         List<String> destinationMail;
         Map<String, String> mailParameters;
         if (InstitutionType.PA == institutionType ||
-                (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals(Origin.IPA))
+                (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals("IPA"))
                 || isApproved) {
             mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = coreConfig.getDestinationMails() != null ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
             log.info(DESTINATION_MAIL_LOG, destinationMail);
             emailConnector.sendMail(mailParametersMapper.getOnboardingPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
-            log.info(" onboarding-contract-email Email successful sent");
+            log.info("onboarding-contract-email Email successful sent");
         } else {
             mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);

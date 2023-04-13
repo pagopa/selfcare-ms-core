@@ -16,10 +16,10 @@ import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
@@ -104,13 +104,13 @@ public class ContractService {
         String builder = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "_" + UUID.randomUUID() + "_contratto_interoperabilita.";
         try {
             Path files = Files.createTempFile(builder, ".pdf");
-            Map<String, Object> data = setUpCommonData(validManager, users, institution, request, geographicTaxonomies);
+            Map<String, Object> data = setUpCommonData(validManager, users, institution, request, geographicTaxonomies, institutionType);
             if ("prod-pagopa".equalsIgnoreCase(request.getProductId()) &&
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
             } else if ("prod-io".equalsIgnoreCase(request.getProductId())
                     || "prod-io-premium".equalsIgnoreCase(request.getProductId())) {
-                setupProdIOData(data, validManager, institution, request);
+                setupProdIOData(data, validManager, institution, request, institutionType);
             }
             log.debug("data Map for PDF: {}", data);
             getPDFAsFile(files, contractTemplate, data);
