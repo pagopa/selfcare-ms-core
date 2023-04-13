@@ -6,8 +6,6 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.LegalsResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,9 +16,8 @@ public class TokenMapper {
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setId(tokenRelationships.getTokenId());
         tokenResponse.setChecksum(tokenRelationships.getChecksum());
-        List<LegalsResponse> list = new ArrayList<>();
         for(OnboardedUser user : tokenRelationships.getUsers()){
-             list = user.getBindings().stream()
+            List<LegalsResponse> list  = user.getBindings().stream()
                     .filter(userBinding -> tokenRelationships.getInstitutionId().equalsIgnoreCase(userBinding.getInstitutionId()))
                     .flatMap(userBinding -> userBinding.getProducts().stream())
                     .filter(onboardedProduct -> tokenRelationships.getProductId().equalsIgnoreCase(onboardedProduct.getProductId()))
@@ -32,8 +29,8 @@ public class TokenMapper {
                         legalsResponse.setRole(product.getRole());
                         return legalsResponse;
                     }).collect(Collectors.toList());
+            tokenResponse.getLegals().addAll(list);
         }
-        tokenResponse.setLegals(list);
         return tokenResponse;
     }
 }

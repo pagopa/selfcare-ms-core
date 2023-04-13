@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -13,7 +15,7 @@ import java.util.List;
 public class TokenResponse {
     private String id;
     private String checksum;
-    private List<LegalsResponse> legals;
+    private List<LegalsResponse> legals = new ArrayList<>();
 
     public TokenResponse(String id) {
         this.id = id;
