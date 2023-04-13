@@ -3,6 +3,8 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
@@ -13,9 +15,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,7 +54,7 @@ class EmailServiceTest {
     private FileStorageConnector fileStorageConnector;
 
     /**
-     * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, String, boolean)}
+     * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, String, boolean, InstitutionType)}
      */
     @Test
     void testSendMail() {
@@ -135,7 +135,7 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        emailService.sendMail(pdf, institution, user, onboardingRequest, "", true);
+        emailService.sendMail(pdf, institution, user, onboardingRequest, "", true, InstitutionType.PA);
         assertNotNull(onboardingRequest);
     }
 
@@ -218,7 +218,7 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        emailService.sendMail(pdf, institution, user, onboardingRequest, "",false);
+        emailService.sendMail(pdf, institution, user, onboardingRequest, "",false, InstitutionType.PSP);
         assertNotNull(onboardingRequest);
     }
 

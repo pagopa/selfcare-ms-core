@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
@@ -37,11 +38,12 @@ public class EmailService {
         this.coreConfig = coreConfig;
     }
 
-
-    public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean isApproved) {
+    public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean isApproved, InstitutionType institutionType) {
         List<String> destinationMail;
         Map<String, String> mailParameters;
-        if (InstitutionType.PA == institution.getInstitutionType() || isApproved) {
+        if (InstitutionType.PA == institutionType ||
+                (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals(Origin.IPA))
+                || isApproved) {
             mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = coreConfig.getDestinationMails() != null ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
@@ -85,11 +87,11 @@ public class EmailService {
     }
 
     private List<String> getRejectDestinationMails(Institution institution) {
-        if(coreConfig.getDestinationMails()!=null){
+        if (coreConfig.getDestinationMails() != null) {
             return coreConfig.getDestinationMails();
-        }else if(institution.getDigitalAddress()!=null){
+        } else if (institution.getDigitalAddress() != null) {
             return List.of(institution.getDigitalAddress());
-        }else{
+        } else {
             return List.of(coreConfig.getInstitutionAlternativeEmail());
         }
     }

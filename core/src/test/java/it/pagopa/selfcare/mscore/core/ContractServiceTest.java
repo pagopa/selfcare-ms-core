@@ -9,20 +9,18 @@ import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
-import java.io.UnsupportedEncodingException;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,10 +42,6 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ContractServiceTest {
@@ -92,12 +87,14 @@ class ContractServiceTest {
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
+        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
+        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
-        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies));
+        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
 
     @Test
@@ -117,12 +114,14 @@ class ContractServiceTest {
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
+        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-io");
         request.setSignContract(true);
         request.setProductName("42");
+        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
-        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies));
+        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
 
     @Test
@@ -142,14 +141,16 @@ class ContractServiceTest {
         institution.setId("id");
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
+        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
+        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
         when(pagoPaSignatureConfig.isEnabled()).thenReturn(false);
         when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName}${productName}");
-        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies));
+        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
 
     @Test
@@ -161,12 +162,14 @@ class ContractServiceTest {
         institution.setInstitutionType(InstitutionType.PSP);
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
+        request.getInstitutionUpdate().setInstitutionType(InstitutionType.PSP);
         request.setProductId("prod-pagopa");
         request.setSignContract(true);
         request.setProductName("42");
+        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies),
+                () -> contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType),
                 "Manager email not found");
     }
 
