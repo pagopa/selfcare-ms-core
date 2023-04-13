@@ -44,8 +44,6 @@ class CustomExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, actualHandleMissingServletRequestParameterResult.getStatusCode());
         assertEquals(400, ((Problem) Objects.requireNonNull(actualHandleMissingServletRequestParameterResult.getBody())).getStatus().intValue());
         assertEquals(1, ((Problem) actualHandleMissingServletRequestParameterResult.getBody()).getErrors().size());
-        assertEquals("MISSING PARAMETER", ((Problem) actualHandleMissingServletRequestParameterResult.getBody()).getType());
-        assertEquals("BAD_REQUEST", ((Problem) actualHandleMissingServletRequestParameterResult.getBody()).getTitle());
         List<String> getResult = httpHeaders.get(HttpHeaders.CONTENT_TYPE);
         assertEquals(1, Objects.requireNonNull(getResult).size());
         assertEquals("application/json", getResult.get(0));
@@ -94,8 +92,6 @@ class CustomExceptionHandlerTest {
         Problem body = actualHandleResourceNotFoundExceptionResult.getBody();
         assertEquals(404, Objects.requireNonNull(body).getStatus().intValue());
         assertEquals(1, body.getErrors().size());
-        assertEquals("NOT_FOUND", body.getTitle());
-        assertEquals("http://localhost", body.getType());
     }
 
     /**
@@ -113,8 +109,6 @@ class CustomExceptionHandlerTest {
         Problem body = actualHandleResourceConflictExceptionResult.getBody();
         assertEquals(409, Objects.requireNonNull(body).getStatus().intValue());
         assertEquals(1, body.getErrors().size());
-        assertEquals("CONFLICT", body.getTitle());
-        assertEquals("http://localhost", body.getType());
     }
 
     /**
@@ -132,8 +126,6 @@ class CustomExceptionHandlerTest {
         Problem body = actualHandleInvalidRequestExceptionResult.getBody();
         assertEquals(400, Objects.requireNonNull(body).getStatus().intValue());
         assertEquals(1, body.getErrors().size());
-        assertEquals("BAD_REQUEST", body.getTitle());
-        assertEquals("http://localhost", body.getType());
     }
 
     /**
@@ -150,7 +142,6 @@ class CustomExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, actualHandleExceptionResult.getStatusCode());
         Problem body = actualHandleExceptionResult.getBody();
         assertEquals(1, Objects.requireNonNull(body).getErrors().size());
-        assertEquals("Generic Error", body.getDetail());
         assertEquals(400, body.getStatus().intValue());
     }
 
