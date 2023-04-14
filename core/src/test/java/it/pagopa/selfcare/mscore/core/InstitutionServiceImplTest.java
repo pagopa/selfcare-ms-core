@@ -7,25 +7,12 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.*;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -43,14 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class InstitutionServiceImplTest {
@@ -475,7 +455,7 @@ class InstitutionServiceImplTest {
         assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
-        assertEquals(InstitutionType.UNKNOWN, institution1.getInstitutionType());
+        assertNull(institution1.getInstitutionType());
     }
 
     /**
@@ -515,7 +495,7 @@ class InstitutionServiceImplTest {
         assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
-        assertEquals(InstitutionType.UNKNOWN, institution1.getInstitutionType());
+        assertNull(institution1.getInstitutionType());
     }
 
     /**

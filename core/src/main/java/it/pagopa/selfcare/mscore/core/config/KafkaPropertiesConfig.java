@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.config;
+package it.pagopa.selfcare.mscore.core.config;
 
 import lombok.Data;
 import lombok.ToString;
