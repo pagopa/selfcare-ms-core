@@ -3,70 +3,41 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Contract;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingLegalsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.HashMap;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {OnboardingServiceImpl.class})
 @ExtendWith(MockitoExtension.class)
@@ -791,7 +762,7 @@ class OnboardingServiceImplTest {
         userToOnboard.setRole(PartyRole.MANAGER);
         onboardingRequest.setUsers(List.of(userToOnboard));
         File file = File.createTempFile("test",".txt");
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any())).thenReturn(file);
+        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         OnboardingRollback onboardingRollback = new OnboardingRollback();
         Token token1 =new Token();
         token1.setId("id");
@@ -965,7 +936,7 @@ class OnboardingServiceImplTest {
         institutionUpdate.setDescription("description");
         institutionUpdate.setDigitalAddress("digitalAddress");
         institutionUpdate.setGeographicTaxonomies(List.of(new InstitutionGeographicTaxonomies()));
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setInstitutionType(InstitutionType.PG);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
         institutionUpdate.setShareCapital("Share Capital");
@@ -1147,7 +1118,7 @@ class OnboardingServiceImplTest {
         when(selfCareUser.getId()).thenReturn("42");
         when(onboardingDao.getProductById(any())).thenReturn(new Product());
         File file = File.createTempFile("file", ".txt");
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any())).thenReturn(file);
+        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
     }
@@ -1819,7 +1790,9 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testOnboardingLegals() throws IOException {
-
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PA);
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         CertifiedField<String> certifiedField = new CertifiedField<>();
         certifiedField.setCertification(Certification.NONE);
         certifiedField.setValue("42");
@@ -1896,8 +1869,8 @@ class OnboardingServiceImplTest {
         token.setUsers(List.of(tokenUser));
 
         File file = File.createTempFile("test",".txt");
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any())).thenReturn(file);
-        
+        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
+
         OnboardingRollback onboardingRollback = new OnboardingRollback();
         onboardingRollback.setToken(new Token());
         when(onboardingDao.persistLegals(any(), any(), any(), any(), any())).thenReturn(onboardingRollback);

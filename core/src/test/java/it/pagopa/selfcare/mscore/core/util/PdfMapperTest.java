@@ -1,16 +1,16 @@
 package it.pagopa.selfcare.mscore.core.util;
 
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.*;
+import it.pagopa.selfcare.mscore.model.Certification;
+import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Contract;
 import it.pagopa.selfcare.mscore.model.onboarding.ContractImported;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import org.junit.jupiter.api.Test;
-
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -53,7 +53,6 @@ class PdfMapperTest {
         ArrayList<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setId("id");
-        institution.setInstitutionType(InstitutionType.UNKNOWN);
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -108,10 +107,10 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        assertEquals(13, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>()).size());
+        assertEquals(13, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PA).size());
     }
     /**
-     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List)}
+     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
      */
     @Test
     void testSetUpCommonData() {
@@ -188,11 +187,11 @@ class PdfMapperTest {
         onboardingRequest.setUsers(new ArrayList<>());
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         geographicTaxonomies.add(new InstitutionGeographicTaxonomies());
-        assertThrows(InvalidRequestException.class, () -> PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, geographicTaxonomies));
+        assertThrows(InvalidRequestException.class, () -> PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, geographicTaxonomies, InstitutionType.PA));
     }
 
     /**
-     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List)}
+     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
      */
     @Test
     void testSetUpCommonData2() {
@@ -279,11 +278,11 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        assertEquals(13, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null).size());
+        assertEquals(13, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null, InstitutionType.PA).size());
     }
 
     /**
-     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List)}
+     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
      */
     @Test
     void testSetUpCommonData3() {
@@ -399,11 +398,11 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         assertEquals(13,
-                PdfMapper.setUpCommonData(user, userList, institution, onboardingRequest, new ArrayList<>()).size());
+                PdfMapper.setUpCommonData(user, userList, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PT).size());
     }
 
     /**
-     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List)}
+     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
      */
     @Test
     void testSetUpCommonData4() {
@@ -542,11 +541,11 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         assertEquals(13,
-                PdfMapper.setUpCommonData(user, userList, institution, onboardingRequest, new ArrayList<>()).size());
+                PdfMapper.setUpCommonData(user, userList, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PSP).size());
     }
 
     /**
-     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List)}
+     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
      */
     @Test
     void testSetUpCommonData6() {
@@ -640,7 +639,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         assertEquals(13,
-                PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>()).size());
+                PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PSP).size());
     }
 
     /**
@@ -792,7 +791,7 @@ class PdfMapperTest {
     }
 
     /**
-     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest)}
+     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest, InstitutionType)}
      */
     @Test
     void testSetupProdIOData1() {
@@ -854,12 +853,12 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
+        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
         assertEquals(16, stringObjectMap.size());
     }
 
     /**
-     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest)}
+     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest, InstitutionType)}
      */
     @Test
     void testSetupProdIOData() {
@@ -921,12 +920,12 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
+        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
         assertEquals(16, stringObjectMap.size());
     }
 
     /**
-     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest)}
+     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest, InstitutionType)}
      */
     @Test
     void testSetupProdIOData3() {
@@ -1015,12 +1014,12 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
+        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
         assertEquals(16, stringObjectMap.size());
     }
 
     /**
-     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest)}
+     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest, InstitutionType)}
      */
     @Test
     void testSetupProdIOData4() {
@@ -1100,12 +1099,12 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
+        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
         assertEquals(15, stringObjectMap.size());
     }
 
     /**
-     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest)}
+     * Method under test: {@link PdfMapper#setupProdIOData(Map, User, Institution, OnboardingRequest, InstitutionType)}
      */
     @Test
     void testSetupProdIOData5() {
@@ -1185,7 +1184,7 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest);
+        PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
         assertEquals(15, stringObjectMap.size());
     }
 }

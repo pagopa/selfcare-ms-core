@@ -6,23 +6,9 @@ import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.SearchMode;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.*;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -99,7 +85,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(externalId);
-        newInstitution.setInstitutionType(InstitutionType.PA);
         newInstitution.setOrigin(Origin.IPA.getValue());
         newInstitution.setOriginId(institutionProxyInfo.getOriginId());
         newInstitution.setTaxCode(institutionProxyInfo.getTaxCode());
@@ -171,9 +156,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkIfAlreadyExists(externalId);
-        if (institution.getInstitutionType() == null) {
-            institution.setInstitutionType(InstitutionType.UNKNOWN);
-        }
         institution.setOrigin(Origin.SELC.getValue());
         institution.setOriginId("SELC_" + institution.getExternalId());
         institution.setCreatedAt(OffsetDateTime.now());
