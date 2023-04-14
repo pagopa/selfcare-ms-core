@@ -149,6 +149,7 @@ public class OnboardingInstitutionUtils {
         contract.setPath(token.getContractTemplate());
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setDescription(institution.getDescription());
+        institutionUpdate.setInstitutionType((institution.getInstitutionType()));
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setContract(contract);
         onboardingRequest.setSignContract(true);
