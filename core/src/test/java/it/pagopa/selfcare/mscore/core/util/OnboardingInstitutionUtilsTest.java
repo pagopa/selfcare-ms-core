@@ -1,39 +1,21 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.onboarding.Contract;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingLegalsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OnboardingInstitutionUtilsTest {
 
@@ -1480,6 +1462,134 @@ class OnboardingInstitutionUtilsTest {
         assertEquals("Pricing Plan", actualConstructOnboardingResult.getPricingPlan());
         assertEquals(RelationshipState.TOBEVALIDATED, actualConstructOnboardingResult.getStatus());
         assertEquals("42", actualConstructOnboardingResult.getProductId());
+    }
+    @Test
+    void testConstructOnboarding6() {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Contract contract = new Contract();
+        contract.setPath("Path");
+        contract.setVersion("1.0.2");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Institution institution = new Institution();
+        institution.setOrigin("IPA");
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId("prod-interop");
+        onboardingRequest.setProductName("prod-interop");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setUsers(new ArrayList<>());
+        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest, institution);
+        assertSame(billing, actualConstructOnboardingResult.getBilling());
+        assertEquals("Path", actualConstructOnboardingResult.getContract());
+        assertEquals("Pricing Plan", actualConstructOnboardingResult.getPricingPlan());
+        assertEquals(RelationshipState.PENDING, actualConstructOnboardingResult.getStatus());
+        assertEquals("prod-interop", actualConstructOnboardingResult.getProductId());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "PSP,SELC,prod-io",
+            "PSP,SELC,prod-interop",
+            "PSP,IPA,prod-io",
+            "PSP,IPA,prod-interop",
+            "GSP,SELC,prod-io",
+            "GSP,SELC,prod-interop",
+            "GSP,IPA,prod-io"
+    })
+    void testConstructOnboarding_GSP_prodInterop_originIPA_failingConditions(InstitutionType institutionType, String origin, String productId) {
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Contract contract = new Contract();
+        contract.setPath("Path");
+        contract.setVersion("1.0.2");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setInstitutionType(institutionType);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Institution institution = new Institution();
+        institution.setOrigin(origin);
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId(productId);
+        onboardingRequest.setProductName("prod-interop");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setUsers(new ArrayList<>());
+        Onboarding actualConstructOnboardingResult = OnboardingInstitutionUtils.constructOnboarding(onboardingRequest, institution);
+        assertSame(billing, actualConstructOnboardingResult.getBilling());
+        assertEquals("Path", actualConstructOnboardingResult.getContract());
+        assertEquals("Pricing Plan", actualConstructOnboardingResult.getPricingPlan());
+        assertEquals(RelationshipState.TOBEVALIDATED, actualConstructOnboardingResult.getStatus());
+        assertEquals(productId, actualConstructOnboardingResult.getProductId());
     }
 
 }
