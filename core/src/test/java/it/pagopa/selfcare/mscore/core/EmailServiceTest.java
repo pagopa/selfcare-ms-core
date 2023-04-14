@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -34,8 +35,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class EmailServiceTest {
@@ -49,6 +49,8 @@ class EmailServiceTest {
     @Mock
     private CoreConfig coreConfig;
 
+    @Mock
+    private EmailConnector emailConnector;
 
 
     /**
@@ -393,6 +395,8 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
+        when(mailParametersMapper.getOnboardingNotificationPath()).thenReturn("");
+        doNothing().when(emailConnector).sendMail(any(), any(), any(), any(), any(), any());
         assertDoesNotThrow(() -> emailService.sendMail(pdf, institution, user, onboardingRequest, "",false, institutionType));
     }
 
