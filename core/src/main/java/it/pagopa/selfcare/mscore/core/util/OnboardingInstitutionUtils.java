@@ -1,24 +1,14 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.Env;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.Contract;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingLegalsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,14 +69,18 @@ public class OnboardingInstitutionUtils {
         return !StringUtils.isEmpty(startValue) || StringUtils.isEmpty(toValue);
     }
 
-    public static RelationshipState getStatus(InstitutionType institutionType) {
+    public static RelationshipState getStatus(InstitutionType institutionType, OnboardingRequest request, Institution institution) {
         switch (institutionType) {
             case PA:
                 return RelationshipState.PENDING;
             case PG:
                 return RelationshipState.ACTIVE;
             default:
+                if (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals("IPA")){
+                    return RelationshipState.PENDING;
+                }
                 return RelationshipState.TOBEVALIDATED;
+
         }
     }
 
@@ -174,9 +168,9 @@ public class OnboardingInstitutionUtils {
             onboarding.setContract(request.getContract().getPath());
         }
         if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+            onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType(), request, institution));
         } else if (institution.getInstitutionType() != null) {
-            onboarding.setStatus(getStatus(institution.getInstitutionType()));
+            onboarding.setStatus(getStatus(institution.getInstitutionType(), request, institution));
         }
 
         return onboarding;
@@ -205,9 +199,9 @@ public class OnboardingInstitutionUtils {
         onboardedProduct.setRole(p.getRole());
         onboardedProduct.setProductRole(p.getProductRole());
         if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType()));
+            onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType(), request, institution));
         } else if (institution.getInstitutionType() != null) {
-            onboardedProduct.setStatus(getStatus(institution.getInstitutionType()));
+            onboardedProduct.setStatus(getStatus(institution.getInstitutionType(), request, institution));
         }
         onboardedProduct.setCreatedAt(OffsetDateTime.now());
         onboardedProduct.setUpdatedAt(OffsetDateTime.now());
