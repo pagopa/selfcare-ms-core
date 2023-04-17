@@ -265,16 +265,16 @@ public class InstitutionServiceImpl implements InstitutionService {
             personToFilter = userId;
         }
         List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personToFilter, roles, states, products, productRoles);
-        return toRelationshipInfo(institutionRelationships, institution);
+        return toRelationshipInfo(institutionRelationships, institution, roles, states, products, productRoles);
     }
 
     @Override
     public List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         if (userId != null) {
-            return toRelationshipInfo(userService.retrieveUsers(null, userId, roles, states, products, productRoles), null);
+            return toRelationshipInfo(userService.retrieveUsers(null, userId, roles, states, products, productRoles), null, roles, states, products, productRoles);
         } else if (institutionId != null) {
             Institution institution = retrieveInstitutionById(institutionId);
-            return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution);
+            return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution, roles, states, products, productRoles);
         }
         throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
     }
@@ -287,36 +287,70 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
-    private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution) {
+    private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipInfo> list = new ArrayList<>();
         for (OnboardedUser onboardedUser : institutionRelationships) {
             for (UserBinding binding : onboardedUser.getBindings()) {
-                retrieveAllProduct(list, onboardedUser.getId(), binding, institution);
+                retrieveAllProduct(list, onboardedUser.getId(), binding, institution, roles, states, products, productRoles);
             }
         }
         return list;
     }
 
-    protected void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution) {
+    protected void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         if (institution != null) {
             if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
                 for (OnboardedProduct product : binding.getProducts()) {
+                    if (filterProduct(product, roles, states, products, productRoles)) {
+                        RelationshipInfo relationshipInfo = new RelationshipInfo();
+                        relationshipInfo.setInstitution(institution);
+                        relationshipInfo.setUserId(userId);
+                        relationshipInfo.setOnboardedProduct(product);
+                        list.add(relationshipInfo);
+                    }
+                }
+            }
+        } else {
+            for (OnboardedProduct product : binding.getProducts()) {
+                if (filterProduct(product, roles, states, products, productRoles)) {
+                    Institution inst = retrieveInstitutionById(binding.getInstitutionId());
                     RelationshipInfo relationshipInfo = new RelationshipInfo();
-                    relationshipInfo.setInstitution(institution);
+                    relationshipInfo.setInstitution(inst);
                     relationshipInfo.setUserId(userId);
                     relationshipInfo.setOnboardedProduct(product);
                     list.add(relationshipInfo);
                 }
             }
-        } else {
-            for (OnboardedProduct product : binding.getProducts()) {
-                Institution inst = retrieveInstitutionById(binding.getInstitutionId());
-                RelationshipInfo relationshipInfo = new RelationshipInfo();
-                relationshipInfo.setInstitution(inst);
-                relationshipInfo.setUserId(userId);
-                relationshipInfo.setOnboardedProduct(product);
-                list.add(relationshipInfo);
-            }
         }
     }
+
+    protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+
+        if (roles != null && !roles.isEmpty()) {
+            if (!roles.contains(product.getRole())) {
+                return false;
+            }
+        }
+
+        if (states != null && !states.isEmpty()) {
+            if (!states.contains(product.getStatus())) {
+                return false;
+            }
+        }
+
+        if (products != null && !products.isEmpty()) {
+            if (!products.contains(product.getProductId())) {
+                return false;
+            }
+        }
+
+        if (productRoles != null && !productRoles.isEmpty()) {
+            if (!productRoles.contains(product.getProductRole())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }

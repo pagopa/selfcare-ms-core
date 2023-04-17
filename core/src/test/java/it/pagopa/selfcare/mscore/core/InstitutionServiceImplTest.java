@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -1163,7 +1164,7 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
      */
     @Test
     void testRetrieveAllProduct5() {
@@ -1195,7 +1196,7 @@ class InstitutionServiceImplTest {
                 dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
                 "6625550144", true, null, null);
 
-        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution);
+        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution, null, null, null, null);
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -1218,7 +1219,7 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution)}
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
      */
     @Test
     void testRetrieveAllProduct6() {
@@ -1237,7 +1238,248 @@ class InstitutionServiceImplTest {
         binding.setProducts(List.of(product));
         when(institutionConnector.findById(any())).thenReturn(new Institution());
 
-        Assertions.assertDoesNotThrow(() -> institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, null));
+        Assertions.assertDoesNotThrow(() -> institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, null, null, null, null, null));
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
+     */
+    @Test
+    void testRetrieveAllProduct_filterProduct_allEmpty() {
+
+        GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
+        UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
+
+        InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
+                userService, new CoreConfig());
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        UserBinding binding = new UserBinding();
+        binding.setInstitutionId("42");
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("productId");
+        binding.setProducts(List.of(product));
+        Billing billing = new Billing();
+        ArrayList<Onboarding> onboarding = new ArrayList<>();
+        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        ArrayList<Attributes> attributes = new ArrayList<>();
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
+                "Legal Register Name", "42", true);
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer("42 Main St", "jane.doe@example.org",
+                "Pec");
+
+        /*
+        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
+                "Tax Code", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
+                dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
+                "6625550144", true, null, null);
+         */
+
+        Institution institution = new Institution();
+        institution.setId("42");
+
+        List<PartyRole> roles = Collections.emptyList();
+        List<RelationshipState> states = Collections.emptyList();
+        List<String> products = Collections.emptyList();
+        List<String> productRoles = Collections.emptyList();
+
+        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution, roles, states, products, productRoles);
+
+        assertFalse(relationshipInfoList.isEmpty());
+        assertEquals(relationshipInfoList.get(0).getOnboardedProduct().getProductId(), binding.getProducts().get(0).getProductId());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
+     */
+    @Test
+    void testRetrieveAllProduct_filterProduct_noRoleFound() {
+        // Given
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        UserBinding binding = new UserBinding();
+        binding.setInstitutionId("42");
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("productId");
+        product.setRole(PartyRole.MANAGER);
+        binding.setProducts(List.of(product));
+
+        Institution institution = new Institution();
+        institution.setId("42");
+
+        List<PartyRole> roles = new ArrayList<>();
+        roles.add(PartyRole.DELEGATE);
+        List<RelationshipState> states = Collections.emptyList();
+        List<String> products = Collections.emptyList();
+        List<String> productRoles = Collections.emptyList();
+
+        // When
+        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution, roles, states, products, productRoles);
+
+        // Then
+        assertTrue(relationshipInfoList.isEmpty());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
+     */
+    @Test
+    void testRetrieveAllProduct_filterProduct_noStatesFound() {
+        // Given
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        UserBinding binding = new UserBinding();
+        binding.setInstitutionId("42");
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("productId");
+        product.setRole(PartyRole.DELEGATE);
+        product.setStatus(RelationshipState.SUSPENDED);
+        binding.setProducts(List.of(product));
+
+        Institution institution = new Institution();
+        institution.setId("42");
+
+        List<PartyRole> roles = new ArrayList<>();
+        roles.add(PartyRole.DELEGATE);
+        List<RelationshipState> states = new ArrayList<>();
+        states.add(RelationshipState.ACTIVE);
+        List<String> products = Collections.emptyList();
+        List<String> productRoles = Collections.emptyList();
+
+        // When
+        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution, roles, states, products, productRoles);
+
+        // Then
+        assertTrue(relationshipInfoList.isEmpty());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
+     */
+    @Test
+    void testRetrieveAllProduct_filterProduct_noProductsFound() {
+        // Given
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        UserBinding binding = new UserBinding();
+        binding.setInstitutionId("42");
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("productId");
+        product.setRole(PartyRole.DELEGATE);
+        product.setStatus(RelationshipState.ACTIVE);
+        binding.setProducts(List.of(product));
+
+        Institution institution = new Institution();
+        institution.setId("42");
+
+        List<PartyRole> roles = new ArrayList<>();
+        roles.add(PartyRole.DELEGATE);
+        List<RelationshipState> states = new ArrayList<>();
+        states.add(RelationshipState.ACTIVE);
+        List<String> products = new ArrayList<>();
+        products.add("productIdNotFound");
+        List<String> productRoles = Collections.emptyList();
+
+        // When
+        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution, roles, states, products, productRoles);
+
+        // Then
+        assertTrue(relationshipInfoList.isEmpty());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
+     */
+    @Test
+    void testRetrieveAllProduct_filterProduct_noProductRolesFound() {
+        // Given
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        UserBinding binding = new UserBinding();
+        binding.setInstitutionId("42");
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("productId");
+        product.setRole(PartyRole.DELEGATE);
+        product.setStatus(RelationshipState.ACTIVE);
+        product.setProductRole("Operator API");
+        binding.setProducts(List.of(product));
+
+        Institution institution = new Institution();
+        institution.setId("42");
+
+        List<PartyRole> roles = new ArrayList<>();
+        roles.add(PartyRole.DELEGATE);
+        List<RelationshipState> states = new ArrayList<>();
+        states.add(RelationshipState.ACTIVE);
+        List<String> products = new ArrayList<>();
+        products.add("productId");
+        List<String> productRoles = new ArrayList<>();
+        productRoles.add("Role not found");
+
+        // When
+        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution, roles, states, products, productRoles);
+
+        // Then
+        assertTrue(relationshipInfoList.isEmpty());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(List, String, UserBinding, Institution, List, List, List, List)}
+     */
+    @Test
+    void testRetrieveAllProduct_filterProduct_found() {
+        // Given
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        UserBinding binding = new UserBinding();
+        binding.setInstitutionId("42");
+        OnboardedProduct product1 = new OnboardedProduct();
+        product1.setProductId("productId1");
+        product1.setRole(PartyRole.DELEGATE);
+        product1.setStatus(RelationshipState.ACTIVE);
+        product1.setProductRole("Operator API");
+        OnboardedProduct product2 = new OnboardedProduct();
+        product2.setProductId("productId2");
+        product2.setRole(PartyRole.OPERATOR);
+        product2.setStatus(RelationshipState.SUSPENDED);
+        product2.setProductRole("Operatore API");
+        OnboardedProduct product3 = new OnboardedProduct();
+        product3.setProductId("productId3");
+        product3.setRole(PartyRole.DELEGATE);
+        product3.setStatus(RelationshipState.ACTIVE);
+        product3.setProductRole("Operator API");
+        OnboardedProduct product4 = new OnboardedProduct();
+        product4.setProductId("productId4");
+        product4.setRole(PartyRole.DELEGATE);
+        product4.setStatus(RelationshipState.ACTIVE);
+        product4.setProductRole("Amministratore");
+        binding.setProducts(List.of(product1, product2, product3, product4));
+
+        Institution institution = new Institution();
+        institution.setId("42");
+
+        List<PartyRole> roles = new ArrayList<>();
+        roles.add(PartyRole.OPERATOR);
+        roles.add(PartyRole.DELEGATE);
+        List<RelationshipState> states = new ArrayList<>();
+        states.add(RelationshipState.ACTIVE);
+        states.add(RelationshipState.SUSPENDED);
+        List<String> products = new ArrayList<>();
+        products.add("productId2");
+        products.add("productId4");
+        List<String> productRoles = new ArrayList<>();
+        productRoles.add("Operatore API");
+        productRoles.add("Amministratore");
+
+        // When
+        institutionServiceImpl.retrieveAllProduct(relationshipInfoList, "42", binding, institution, roles, states, products, productRoles);
+
+        // Then
+        assertTrue(relationshipInfoList.size() == 2);
+        assertEquals(binding.getProducts().get(1).getRole(), relationshipInfoList.get(0).getOnboardedProduct().getRole());
+        assertEquals(binding.getProducts().get(1).getStatus(), relationshipInfoList.get(0).getOnboardedProduct().getStatus());
+        assertEquals(binding.getProducts().get(1).getProductId(), relationshipInfoList.get(0).getOnboardedProduct().getProductId());
+        assertEquals(binding.getProducts().get(1).getProductRole(), relationshipInfoList.get(0).getOnboardedProduct().getProductRole());
+        assertEquals(binding.getProducts().get(3).getRole(), relationshipInfoList.get(1).getOnboardedProduct().getRole());
+        assertEquals(binding.getProducts().get(3).getStatus(), relationshipInfoList.get(1).getOnboardedProduct().getStatus());
+        assertEquals(binding.getProducts().get(3).getProductId(), relationshipInfoList.get(1).getOnboardedProduct().getProductId());
+        assertEquals(binding.getProducts().get(3).getProductRole(), relationshipInfoList.get(1).getOnboardedProduct().getProductRole());
     }
 
     /**
@@ -1327,6 +1569,12 @@ class InstitutionServiceImplTest {
                 geoTaxonomiesConnector, userService, new CoreConfig());
         institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", new ArrayList<>());
         verify(institutionConnector).findWithFilter(any(), any(), any());
+    }
+
+    private Institution initializeInstitution(Integer bias) {
+        Institution institution = new Institution();
+
+        return institution;
     }
 }
 
