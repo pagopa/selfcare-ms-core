@@ -60,7 +60,8 @@ public class PdfMapper {
             map.put("vatNumberGroup", institution.getPaymentServiceProvider().isVatNumberGroup() ? "partita iva di gruppo" : "");
             map.put("institutionRegister", institution.getPaymentServiceProvider().getBusinessRegisterNumber());
             map.put("institutionAbi", institution.getPaymentServiceProvider().getAbiCode());
-        } else if (institution.getDataProtectionOfficer() != null) {
+        }
+        if (institution.getDataProtectionOfficer() != null) {
             map.put("dataProtectionOfficerAddress", institution.getDataProtectionOfficer().getAddress());
             map.put("dataProtectionOfficerEmail", institution.getDataProtectionOfficer().getEmail());
             map.put("dataProtectionOfficerPec", institution.getDataProtectionOfficer().getPec());
