@@ -301,15 +301,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         List<RelationshipInfo> list = new ArrayList<>();
         if (institution != null) {
             if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
-                for (OnboardedProduct product : binding.getProducts()) {
-                    if (filterProduct(product, roles, states, products, productRoles)) {
-                        RelationshipInfo relationshipInfo = new RelationshipInfo();
-                        relationshipInfo.setInstitution(institution);
-                        relationshipInfo.setUserId(userId);
-                        relationshipInfo.setOnboardedProduct(product);
-                        list.add(relationshipInfo);
-                    }
-                }
+                list.addAll(createRelationshipInfoList(userId, binding, institution, roles, states, products, productRoles));
             }
         } else {
             for (OnboardedProduct product : binding.getProducts()) {
@@ -326,6 +318,21 @@ public class InstitutionServiceImpl implements InstitutionService {
         return list;
     }
 
+    protected List<RelationshipInfo> createRelationshipInfoList(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<RelationshipInfo> list = new ArrayList<>();
+        for (OnboardedProduct product : binding.getProducts()) {
+            if (filterProduct(product, roles, states, products, productRoles)) {
+                RelationshipInfo relationshipInfo = new RelationshipInfo();
+                relationshipInfo.setInstitution(institution);
+                relationshipInfo.setUserId(userId);
+                relationshipInfo.setOnboardedProduct(product);
+                list.add(relationshipInfo);
+            }
+        }
+        return list;
+    }
+
+
     protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
 
         if (roles != null && !roles.isEmpty() && !roles.contains(product.getRole())) {
@@ -340,11 +347,8 @@ public class InstitutionServiceImpl implements InstitutionService {
             return false;
         }
 
-        if (productRoles != null && !productRoles.isEmpty() && !productRoles.contains(product.getProductRole())) {
-            return false;
-        }
+        return !(productRoles != null && !productRoles.isEmpty() && !productRoles.contains(product.getProductRole()));
 
-        return true;
     }
 
 }
