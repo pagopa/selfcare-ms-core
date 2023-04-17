@@ -298,10 +298,10 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     protected List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<RelationshipInfo> list = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         if (institution != null) {
             if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
-                list = binding.getProducts().stream()
+                relationshipInfoList = binding.getProducts().stream()
                         .filter(product -> filterProduct(product, roles, states, products, productRoles))
                         .map(product -> {
                             RelationshipInfo relationshipInfo = new RelationshipInfo();
@@ -315,16 +315,16 @@ public class InstitutionServiceImpl implements InstitutionService {
         } else {
             for (OnboardedProduct product : binding.getProducts()) {
                 if (filterProduct(product, roles, states, products, productRoles)) {
-                    Institution inst = retrieveInstitutionById(binding.getInstitutionId());
+                    Institution retrievedInstitution = retrieveInstitutionById(binding.getInstitutionId());
                     RelationshipInfo relationshipInfo = new RelationshipInfo();
-                    relationshipInfo.setInstitution(inst);
+                    relationshipInfo.setInstitution(retrievedInstitution);
                     relationshipInfo.setUserId(userId);
                     relationshipInfo.setOnboardedProduct(product);
-                    list.add(relationshipInfo);
+                    relationshipInfoList.add(relationshipInfo);
                 }
             }
         }
-        return list;
+        return relationshipInfoList;
     }
 
     protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
