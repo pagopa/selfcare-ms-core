@@ -709,7 +709,7 @@ class PdfMapperTest {
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", true,
                         OffsetDateTime.now(), OffsetDateTime.now()));
-        assertEquals(4, stringObjectMap.size());
+        assertEquals(7, stringObjectMap.size());
     }
 
     /**
