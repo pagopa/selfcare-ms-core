@@ -291,13 +291,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         List<RelationshipInfo> list = new ArrayList<>();
         for (OnboardedUser onboardedUser : institutionRelationships) {
             for (UserBinding binding : onboardedUser.getBindings()) {
-                retrieveAllProduct(list, onboardedUser.getId(), binding, institution, roles, states, products, productRoles);
+                list.addAll(retrieveAllProduct(onboardedUser.getId(), binding, institution, roles, states, products, productRoles));
             }
         }
         return list;
     }
 
-    protected void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+    protected List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<RelationshipInfo> list = new ArrayList<>();
         if (institution != null) {
             if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
                 for (OnboardedProduct product : binding.getProducts()) {
@@ -322,32 +323,25 @@ public class InstitutionServiceImpl implements InstitutionService {
                 }
             }
         }
+        return list;
     }
 
     protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
 
-        if (roles != null && !roles.isEmpty()) {
-            if (!roles.contains(product.getRole())) {
-                return false;
-            }
+        if (roles != null && !roles.isEmpty() && !roles.contains(product.getRole())) {
+            return false;
         }
 
-        if (states != null && !states.isEmpty()) {
-            if (!states.contains(product.getStatus())) {
-                return false;
-            }
+        if (states != null && !states.isEmpty() && !states.contains(product.getStatus())) {
+            return false;
         }
 
-        if (products != null && !products.isEmpty()) {
-            if (!products.contains(product.getProductId())) {
-                return false;
-            }
+        if (products != null && !products.isEmpty() && !products.contains(product.getProductId())) {
+            return false;
         }
 
-        if (productRoles != null && !productRoles.isEmpty()) {
-            if (!productRoles.contains(product.getProductRole())) {
-                return false;
-            }
+        if (productRoles != null && !productRoles.isEmpty() && !productRoles.contains(product.getProductRole())) {
+            return false;
         }
 
         return true;
