@@ -1,17 +1,19 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.*;
+import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toDataProtectionOfficer;
+import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toPaymentServiceProvider;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
@@ -122,6 +124,8 @@ public class OnboardingMapper {
         institutionResponse.setProductInfo(productInfo);
         institutionResponse.setBusinessData(new BusinessData(institution.getRea(), institution.getShareCapital(), institution.getBusinessRegisterPlace()));
         institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail(), institution.getSupportPhone()));
+        institutionResponse.setPaymentServiceProvider(InstitutionMapper.toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
+        institutionResponse.setDataProtectionOfficer(InstitutionMapper.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
         return institutionResponse;
     }
     public static OnboardingOperatorsRequest toOnboardingOperatorRequest(OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
@@ -144,4 +148,5 @@ public class OnboardingMapper {
         request.setSignContract(onboardingInstitutionLegalsRequest.isSignContract());
         return request;
     }
+
 }

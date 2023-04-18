@@ -1,22 +1,18 @@
 package it.pagopa.selfcare.mscore.core.util;
 
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.MANAGER_EMAIL_NOT_FOUND;
@@ -27,7 +23,7 @@ public class PdfMapper {
 
     private static final String[] PLAN_LIST = {"C1", "C2", "C3", "C4", "C5", "C6", "C7"};
 
-    public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
+    public static Map<String, Object> setUpCommonData(User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
         log.info("START - setupCommonData");
         if (validManager.getWorkContacts() != null && validManager.getWorkContacts().containsKey(institution.getId())) {
             Map<String, Object> map = new HashMap<>();
@@ -42,7 +38,7 @@ public class PdfMapper {
             map.put("managerTaxCode", validManager.getFiscalCode());
             map.put("managerEmail", validManager.getWorkContacts().get(institution.getId()).getEmail());
             map.put("delegates", delegatesToText(users, institution.getId()));
-            map.put("institutionType", decodeInstitutionType(retrieveInstitutionType(institution, request)));
+            map.put("institutionType", decodeInstitutionType(institutionType));
             if (request.getBillingRequest() != null) {
                 map.put("institutionVatNumber", request.getBillingRequest().getVatNumber());
             } else {
@@ -64,7 +60,8 @@ public class PdfMapper {
             map.put("vatNumberGroup", institution.getPaymentServiceProvider().isVatNumberGroup() ? "partita iva di gruppo" : "");
             map.put("institutionRegister", institution.getPaymentServiceProvider().getBusinessRegisterNumber());
             map.put("institutionAbi", institution.getPaymentServiceProvider().getAbiCode());
-        } else if (institution.getDataProtectionOfficer() != null) {
+        }
+        if (institution.getDataProtectionOfficer() != null) {
             map.put("dataProtectionOfficerAddress", institution.getDataProtectionOfficer().getAddress());
             map.put("dataProtectionOfficerEmail", institution.getDataProtectionOfficer().getEmail());
             map.put("dataProtectionOfficerPec", institution.getDataProtectionOfficer().getPec());
@@ -74,9 +71,9 @@ public class PdfMapper {
         }
     }
 
-    public static void setupProdIOData(Map<String, Object> map, User validManager, Institution institution, OnboardingRequest request) {
+    public static void setupProdIOData(Map<String, Object> map, User validManager, Institution institution, OnboardingRequest request, InstitutionType institutionType) {
         log.info("START - setupProdIOData");
-        map.put("institutionTypeCode", retrieveInstitutionType(institution, request).name());
+        map.put("institutionTypeCode", institutionType);
         map.put("pricingPlan", decodePricingPlan(request.getPricingPlan(), request.getProductId()));
         if (StringUtils.hasText(institution.getOrigin())) {
             map.put("originIdLabelValue", Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin()) ?
@@ -89,10 +86,10 @@ public class PdfMapper {
         }
 
         String underscore = "_______________";
-        map.put("GPSinstitutionName", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? institution.getDescription() : underscore);
-        map.put("GPSmanagerName", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getName() : underscore);
-        map.put("GPSmanagerSurname", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getFamilyName() : underscore);
-        map.put("GPSmanagerTaxCode", InstitutionType.GSP == retrieveInstitutionType(institution, request) ? validManager.getFiscalCode() : underscore);
+        map.put("GPSinstitutionName", InstitutionType.GSP == institutionType ? institution.getDescription() : underscore);
+        map.put("GPSmanagerName", InstitutionType.GSP == institutionType ? validManager.getName() : underscore);
+        map.put("GPSmanagerSurname", InstitutionType.GSP == institutionType ? validManager.getFamilyName() : underscore);
+        map.put("GPSmanagerTaxCode", InstitutionType.GSP == institutionType ? validManager.getFiscalCode() : underscore);
 
         map.put("institutionREA", Optional.ofNullable(institution.getRea()).orElse(underscore));
         map.put("institutionShareCapital", Optional.ofNullable(institution.getShareCapital()).orElse(underscore));
@@ -138,16 +135,6 @@ public class PdfMapper {
         } else {
             return "PREMIUM";
         }
-    }
-
-    private static InstitutionType retrieveInstitutionType(Institution institution, OnboardingRequest request) {
-        InstitutionType institutionType = InstitutionType.UNKNOWN;
-        if (institution.getInstitutionType() != null) {
-            institutionType = institution.getInstitutionType();
-        } else if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            institutionType = request.getInstitutionUpdate().getInstitutionType();
-        }
-        return institutionType;
     }
 
     private static String decodeInstitutionType(InstitutionType institutionType) {

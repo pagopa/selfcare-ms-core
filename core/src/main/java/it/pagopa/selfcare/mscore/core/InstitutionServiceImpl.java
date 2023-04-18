@@ -6,23 +6,9 @@ import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.SearchMode;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.*;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -99,7 +85,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(externalId);
-        newInstitution.setInstitutionType(InstitutionType.PA);
         newInstitution.setOrigin(Origin.IPA.getValue());
         newInstitution.setOriginId(institutionProxyInfo.getOriginId());
         newInstitution.setTaxCode(institutionProxyInfo.getTaxCode());
@@ -171,9 +156,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkIfAlreadyExists(externalId);
-        if (institution.getInstitutionType() == null) {
-            institution.setInstitutionType(InstitutionType.UNKNOWN);
-        }
         institution.setOrigin(Origin.SELC.getValue());
         institution.setOriginId("SELC_" + institution.getExternalId());
         institution.setCreatedAt(OffsetDateTime.now());
@@ -283,16 +265,16 @@ public class InstitutionServiceImpl implements InstitutionService {
             personToFilter = userId;
         }
         List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personToFilter, roles, states, products, productRoles);
-        return toRelationshipInfo(institutionRelationships, institution);
+        return toRelationshipInfo(institutionRelationships, institution, roles, states, products, productRoles);
     }
 
     @Override
     public List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         if (userId != null) {
-            return toRelationshipInfo(userService.retrieveUsers(null, userId, roles, states, products, productRoles), null);
+            return toRelationshipInfo(userService.retrieveUsers(null, userId, roles, states, products, productRoles), null, roles, states, products, productRoles);
         } else if (institutionId != null) {
             Institution institution = retrieveInstitutionById(institutionId);
-            return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution);
+            return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution, roles, states, products, productRoles);
         }
         throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
     }
@@ -305,36 +287,62 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
-    private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution) {
+    private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipInfo> list = new ArrayList<>();
         for (OnboardedUser onboardedUser : institutionRelationships) {
             for (UserBinding binding : onboardedUser.getBindings()) {
-                retrieveAllProduct(list, onboardedUser.getId(), binding, institution);
+                list.addAll(retrieveAllProduct(onboardedUser.getId(), binding, institution, roles, states, products, productRoles));
             }
         }
         return list;
     }
 
-    protected void retrieveAllProduct(List<RelationshipInfo> list, String userId, UserBinding binding, Institution institution) {
+    protected List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         if (institution != null) {
             if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
-                for (OnboardedProduct product : binding.getProducts()) {
-                    RelationshipInfo relationshipInfo = new RelationshipInfo();
-                    relationshipInfo.setInstitution(institution);
-                    relationshipInfo.setUserId(userId);
-                    relationshipInfo.setOnboardedProduct(product);
-                    list.add(relationshipInfo);
-                }
+                relationshipInfoList = binding.getProducts().stream()
+                        .filter(product -> filterProduct(product, roles, states, products, productRoles))
+                        .map(product -> {
+                            RelationshipInfo relationshipInfo = new RelationshipInfo();
+                            relationshipInfo.setInstitution(institution);
+                            relationshipInfo.setUserId(userId);
+                            relationshipInfo.setOnboardedProduct(product);
+                            return relationshipInfo;
+                        })
+                        .collect(Collectors.toList());
             }
         } else {
             for (OnboardedProduct product : binding.getProducts()) {
-                Institution inst = retrieveInstitutionById(binding.getInstitutionId());
-                RelationshipInfo relationshipInfo = new RelationshipInfo();
-                relationshipInfo.setInstitution(inst);
-                relationshipInfo.setUserId(userId);
-                relationshipInfo.setOnboardedProduct(product);
-                list.add(relationshipInfo);
+                if (filterProduct(product, roles, states, products, productRoles)) {
+                    Institution retrievedInstitution = retrieveInstitutionById(binding.getInstitutionId());
+                    RelationshipInfo relationshipInfo = new RelationshipInfo();
+                    relationshipInfo.setInstitution(retrievedInstitution);
+                    relationshipInfo.setUserId(userId);
+                    relationshipInfo.setOnboardedProduct(product);
+                    relationshipInfoList.add(relationshipInfo);
+                }
             }
         }
+        return relationshipInfoList;
     }
+
+    protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+
+        if (roles != null && !roles.isEmpty() && !roles.contains(product.getRole())) {
+            return false;
+        }
+
+        if (states != null && !states.isEmpty() && !states.contains(product.getStatus())) {
+            return false;
+        }
+
+        if (products != null && !products.isEmpty() && !products.contains(product.getProductId())) {
+            return false;
+        }
+
+        return !(productRoles != null && !productRoles.isEmpty() && !productRoles.contains(product.getProductRole()));
+
+    }
+
 }

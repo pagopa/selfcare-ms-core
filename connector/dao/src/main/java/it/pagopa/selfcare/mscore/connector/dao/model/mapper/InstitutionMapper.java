@@ -298,7 +298,6 @@ public class InstitutionMapper {
             response.put(constructProtectionOfficerInnerField(DataProtectionOfficer.Fields.email.name()),
                     institutionUpdate.getDataProtectionOfficer().getEmail());
         }
-        response.put(InstitutionUpdate.Fields.dataProtectionOfficer.name(), institutionUpdate.getDataProtectionOfficer());
 
         response.values().removeIf(Objects::isNull);
         return response;

@@ -4,11 +4,7 @@ import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -35,9 +31,9 @@ public class TokenUtils {
         token.setProductId(request.getProductId());
         token.setChecksum(digest);
         if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            token.setStatus(OnboardingInstitutionUtils.getStatus(request.getInstitutionUpdate().getInstitutionType()));
+            token.setStatus(OnboardingInstitutionUtils.getStatus(request.getInstitutionUpdate().getInstitutionType(), request, institution));
         } else if (institution.getInstitutionType() != null) {
-            token.setStatus(OnboardingInstitutionUtils.getStatus(institution.getInstitutionType()));
+            token.setStatus(OnboardingInstitutionUtils.getStatus(institution.getInstitutionType(), request, institution));
         }
         token.setInstitutionUpdate(request.getInstitutionUpdate());
         token.setUsers(request.getUsers().stream().map(TokenUtils::toTokenUser).collect(Collectors.toList()));

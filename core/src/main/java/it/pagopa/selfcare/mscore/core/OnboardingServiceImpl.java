@@ -4,6 +4,9 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
@@ -12,25 +15,12 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingLegalsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRollback;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingUpdateRollback;
-import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -110,6 +100,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
+        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         request.setTokenType(TokenType.INSTITUTION);
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, request);
@@ -125,7 +116,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<String> toUpdate = new ArrayList<>();
         List<String> toDelete = new ArrayList<>();
 
-        if (InstitutionType.PG == institution.getInstitutionType()) {
+        if (InstitutionType.PG == institutionType) {
             if (request.getUsers().size() == 1) {
                 OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER));
             } else {
@@ -146,12 +137,12 @@ public class OnboardingServiceImpl implements OnboardingService {
                     .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, institutionGeographicTaxonomies);
+            File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, institutionGeographicTaxonomies, institutionType);
             String digest = TokenUtils.createDigest(pdf);
             OnboardingRollback rollback = onboardingDao.persist(toUpdate, toDelete, request, institution, institutionGeographicTaxonomies, digest);
             log.info("{} - Digest {}", rollback.getToken().getId(), digest);
             try {
-                emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false);
+                emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false, institutionType);
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
             }
@@ -186,6 +177,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void approveOnboarding(Token token, SelfCareUser selfCareUser) {
+
         checkAndHandleExpiring(token);
         User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
 
@@ -199,14 +191,15 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution);
+        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         Product product = onboardingDao.getProductById(token.getProductId());
         String contractTemplate = contractService.extractTemplate(product.getContractTemplatePath());
-        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null);
+        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
         String digest = TokenUtils.createDigest(pdf);
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            emailService.sendMail(pdf, institution, currentUser, request, token.getId(), true);
+            emailService.sendMail(pdf, institution, currentUser, request, token.getId(), true, institutionType);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -244,6 +237,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser, Token token) {
         Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(onboardingLegalsRequest);
+        InstitutionType institutionType = institution.getInstitutionType();
         request.setTokenType(TokenType.LEGALS);
 
         List<String> toUpdate = new ArrayList<>();
@@ -260,12 +254,12 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .collect(Collectors.toList());
 
         String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
-        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null);
+        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
         String digest = createDigest(pdf);
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false);
+            emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false, institutionType);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }
