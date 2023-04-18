@@ -53,6 +53,14 @@ ingress:
       paths:
         - path: /ms-core/v1/(.*)
           pathType: ImplementationSpecific
+    - host: "uat01.pnpg.internal.uat.selfcare.pagopa.it"
+      paths:
+        - path: /ms-core/v1/(.*)
+          pathType: ImplementationSpecific
+    - host: "prod01.pnpg.internal.prod.selfcare.pagopa.it"
+      paths:
+        - path: /ms-core/v1/(.*)
+          pathType: ImplementationSpecific
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
