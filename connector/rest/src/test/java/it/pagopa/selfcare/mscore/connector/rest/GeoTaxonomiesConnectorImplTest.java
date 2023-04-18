@@ -23,18 +23,18 @@ class GeoTaxonomiesConnectorImplTest {
     @Test
     void testGetExtByCode() {
         GeographicTaxonomiesResponse geographicTaxonomiesResponse = new GeographicTaxonomiesResponse();
-        geographicTaxonomiesResponse.setGeotax_id("Code");
+        geographicTaxonomiesResponse.setGeotaxId("Code");
         geographicTaxonomiesResponse.setCountry("GB");
-        geographicTaxonomiesResponse.setCountry_abbreviation("GB");
+        geographicTaxonomiesResponse.setCountryAbbreviation("GB");
         geographicTaxonomiesResponse.setDescription("The characteristics of someone or something");
         geographicTaxonomiesResponse.setEnable(true);
-        geographicTaxonomiesResponse.setIstat_code("");
-        geographicTaxonomiesResponse.setProvince_id("Province");
-        geographicTaxonomiesResponse.setProvince_abbreviation("Province Abbreviation");
-        geographicTaxonomiesResponse.setRegion_id("us-east-2");
+        geographicTaxonomiesResponse.setIstatCode("");
+        geographicTaxonomiesResponse.setProvinceId("Province");
+        geographicTaxonomiesResponse.setProvinceAbbreviation("Province Abbreviation");
+        geographicTaxonomiesResponse.setRegionId("us-east-2");
         when(geoTaxonomiesRestClient.getExtByCode(any())).thenReturn(geographicTaxonomiesResponse);
         GeographicTaxonomies actualExtByCode = geoTaxonomiesConnectorImpl.getExtByCode("Code");
-        assertEquals("Code", actualExtByCode.getGeotax_id());
+        assertEquals("Code", actualExtByCode.getGeotaxId());
         assertTrue(actualExtByCode.isEnable());
         assertEquals("The characteristics of someone or something", actualExtByCode.getDescription());
         verify(geoTaxonomiesRestClient).getExtByCode(any());
@@ -43,18 +43,18 @@ class GeoTaxonomiesConnectorImplTest {
     @Test
     void testGetExtByCode2() {
         GeographicTaxonomiesResponse geographicTaxonomiesResponse = new GeographicTaxonomiesResponse();
-        geographicTaxonomiesResponse.setGeotax_id("Code");
+        geographicTaxonomiesResponse.setGeotaxId("Code");
         geographicTaxonomiesResponse.setCountry("GB");
-        geographicTaxonomiesResponse.setCountry_abbreviation("GB");
+        geographicTaxonomiesResponse.setCountryAbbreviation("GB");
         geographicTaxonomiesResponse.setDescription("The characteristics of someone or something");
         geographicTaxonomiesResponse.setEnable(false);
-        geographicTaxonomiesResponse.setIstat_code("");
-        geographicTaxonomiesResponse.setProvince_id("Province");
-        geographicTaxonomiesResponse.setProvince_abbreviation("Province Abbreviation");
-        geographicTaxonomiesResponse.setRegion_id("us-east-2");
+        geographicTaxonomiesResponse.setIstatCode("");
+        geographicTaxonomiesResponse.setProvinceId("Province");
+        geographicTaxonomiesResponse.setProvinceAbbreviation("Province Abbreviation");
+        geographicTaxonomiesResponse.setRegionId("us-east-2");
         when(geoTaxonomiesRestClient.getExtByCode(any())).thenReturn(geographicTaxonomiesResponse);
         GeographicTaxonomies actualExtByCode = geoTaxonomiesConnectorImpl.getExtByCode("Code");
-        assertEquals("Code", actualExtByCode.getGeotax_id());
+        assertEquals("Code", actualExtByCode.getGeotaxId());
         assertFalse(actualExtByCode.isEnable());
         assertEquals("The characteristics of someone or something", actualExtByCode.getDescription());
         verify(geoTaxonomiesRestClient).getExtByCode(any());

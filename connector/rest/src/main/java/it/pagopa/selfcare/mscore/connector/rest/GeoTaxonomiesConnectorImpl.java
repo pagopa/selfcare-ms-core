@@ -33,14 +33,14 @@ public class GeoTaxonomiesConnectorImpl implements GeoTaxonomiesConnector {
     private GeographicTaxonomies toGeoTaxonomies(GeographicTaxonomiesResponse result) {
         GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
         geographicTaxonomies.setDescription(result.getDescription());
-        geographicTaxonomies.setGeotax_id(result.getGeotax_id());
+        geographicTaxonomies.setGeotaxId(result.getGeotaxId());
         geographicTaxonomies.setEnable(result.isEnable());
-        geographicTaxonomies.setRegion_id(result.getRegion_id());
-        geographicTaxonomies.setProvince_id(result.getProvince_id());
-        geographicTaxonomies.setProvince_abbreviation(result.getProvince_abbreviation());
+        geographicTaxonomies.setRegionId(result.getRegionId());
+        geographicTaxonomies.setProvinceId(result.getProvinceId());
+        geographicTaxonomies.setProvinceAbbreviation(result.getProvinceAbbreviation());
         geographicTaxonomies.setCountry(result.getCountry());
-        geographicTaxonomies.setCountry_abbreviation(result.getCountry_abbreviation());
-        geographicTaxonomies.setIstat_code(result.getIstat_code());
+        geographicTaxonomies.setCountryAbbreviation(result.getCountryAbbreviation());
+        geographicTaxonomies.setIstatCode(result.getIstatCode());
         return geographicTaxonomies;
     }
 }

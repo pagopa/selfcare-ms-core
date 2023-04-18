@@ -605,15 +605,15 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionGeoTaxonomies4() {
         GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-        geographicTaxonomies.setGeotax_id("Code");
+        geographicTaxonomies.setGeotaxId("Code");
         geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountry_abbreviation("GB");
+        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDescription("The characteristics of someone or something");
         geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setIstat_code("");
-        geographicTaxonomies.setProvince_id("Province");
-        geographicTaxonomies.setProvince_abbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion_id("us-east-2");
+        geographicTaxonomies.setIstatCode("");
+        geographicTaxonomies.setProvinceId("Province");
+        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
+        geographicTaxonomies.setRegionId("us-east-2");
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
         UserServiceImpl userService = new UserServiceImpl(null, null);
@@ -1514,15 +1514,15 @@ class InstitutionServiceImplTest {
     @Test
     void testGetGeoTaxonomies() {
         GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-        geographicTaxonomies.setGeotax_id("Code");
+        geographicTaxonomies.setGeotaxId("Code");
         geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountry_abbreviation("GB");
+        geographicTaxonomies.setCountryAbbreviation("GB");
         geographicTaxonomies.setDescription("The characteristics of someone or something");
         geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setIstat_code("");
-        geographicTaxonomies.setProvince_id("Province");
-        geographicTaxonomies.setProvince_abbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion_id("us-east-2");
+        geographicTaxonomies.setIstatCode("");
+        geographicTaxonomies.setProvinceId("Province");
+        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
+        geographicTaxonomies.setRegionId("us-east-2");
         when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
         assertSame(geographicTaxonomies, institutionServiceImpl.retrieveGeoTaxonomies("Code"));
         verify(geoTaxonomiesConnector).getExtByCode(any());

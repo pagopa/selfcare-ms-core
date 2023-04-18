@@ -1,16 +1,23 @@
 package it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class GeographicTaxonomiesResponse {
-    private String geotax_id; //REQUIRED
-    private String description; //REQUIRED
-    private String istat_code;
-    private String province_id;
-    private String province_abbreviation;
-    private String region_id;
+    @JsonProperty("geotax_id")
+    private String geotaxId; //REQUIRED
+    private String description;
+    @JsonProperty("istat_code")//REQUIRED
+    private String istatCode;
+    @JsonProperty("province_id")
+    private String provinceId;
+    @JsonProperty("province_abbreviation")
+    private String provinceAbbreviation;
+    @JsonProperty("region_id")
+    private String regionId;
     private String country;
-    private String country_abbreviation;
+    @JsonProperty("country_abbreviation")
+    private String countryAbbreviation;
     private boolean enable; //REQUIRED
 }
