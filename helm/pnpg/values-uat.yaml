@@ -1,10 +1,19 @@
 image:
-  repository: selcuacr.azurecr.io/selfcaremscore
+  repository: selcucommonacr.azurecr.io/selfcaremscore
   tag: 0.0.1-SNAPSHOT
 
 ingress:
   annotations:
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://uat.selfcare.pagopa.it,http://localhost:3000"
+  tls:
+    - hosts:
+        - uat01.pnpg.internal.uat.selfcare.pagopa.it
+      secretName: uat01-pnpg-internal-uat-selfcare-pagopa-it
+  hosts:
+    - host: "uat01.pnpg.internal.uat.selfcare.pagopa.it"
+      paths:
+        - path: /ms-core/v1/(.*)
+          pathType: ImplementationSpecific
 
 autoscaling:
   enabled: false

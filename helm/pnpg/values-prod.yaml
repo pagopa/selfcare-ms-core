@@ -1,11 +1,20 @@
 image:
-  repository: selcpacr.azurecr.io/selfcaremscore
+  repository: selcpcommonacr.azurecr.io/selfcaremscore
   pullPolicy: Always # TODO change me in IfNotPresent when each build will have a different tag
   tag: 0.0.1-SNAPSHOT
 
 ingress:
   annotations:
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://selfcare.pagopa.it"
+  tls:
+    - hosts:
+        - prod01.pnpg.internal.prod.selfcare.pagopa.it
+      secretName: prod01-pnpg-internal-prod-selfcare-pagopa-it
+  hosts:
+    - host: "prod01.pnpg.internal.prod.selfcare.pagopa.it"
+      paths:
+        - path: /ms-core/v1/(.*)
+          pathType: ImplementationSpecific
 
 autoscaling:
   enabled: false

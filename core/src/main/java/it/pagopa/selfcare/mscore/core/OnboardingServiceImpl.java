@@ -111,7 +111,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies = new ArrayList<>();
         if (!geographicTaxonomies.isEmpty()) {
             institutionGeographicTaxonomies = geographicTaxonomies.stream()
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getCode(), geo.getDesc()))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
                     .collect(Collectors.toList());
         }
         List<String> toUpdate = new ArrayList<>();
