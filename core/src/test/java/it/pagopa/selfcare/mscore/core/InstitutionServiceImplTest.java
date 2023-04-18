@@ -605,16 +605,15 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionGeoTaxonomies4() {
         GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setGeotax_id("Code");
         geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
-        geographicTaxonomies.setDesc("The characteristics of someone or something");
+        geographicTaxonomies.setCountry_abbreviation("GB");
+        geographicTaxonomies.setDescription("The characteristics of someone or something");
         geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
+        geographicTaxonomies.setIstat_code("");
+        geographicTaxonomies.setProvince_id("Province");
+        geographicTaxonomies.setProvince_abbreviation("Province Abbreviation");
+        geographicTaxonomies.setRegion_id("us-east-2");
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
         UserServiceImpl userService = new UserServiceImpl(null, null);
@@ -1515,16 +1514,15 @@ class InstitutionServiceImplTest {
     @Test
     void testGetGeoTaxonomies() {
         GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
-        geographicTaxonomies.setCode("Code");
+        geographicTaxonomies.setGeotax_id("Code");
         geographicTaxonomies.setCountry("GB");
-        geographicTaxonomies.setCountryAbbreviation("GB");
-        geographicTaxonomies.setDesc("The characteristics of someone or something");
+        geographicTaxonomies.setCountry_abbreviation("GB");
+        geographicTaxonomies.setDescription("The characteristics of someone or something");
         geographicTaxonomies.setEnable(true);
-        geographicTaxonomies.setEndDate("2020-03-01");
-        geographicTaxonomies.setProvince("Province");
-        geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomies.setRegion("us-east-2");
-        geographicTaxonomies.setStartDate("2020-03-01");
+        geographicTaxonomies.setIstat_code("");
+        geographicTaxonomies.setProvince_id("Province");
+        geographicTaxonomies.setProvince_abbreviation("Province Abbreviation");
+        geographicTaxonomies.setRegion_id("us-east-2");
         when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
         assertSame(geographicTaxonomies, institutionServiceImpl.retrieveGeoTaxonomies("Code"));
         verify(geoTaxonomiesConnector).getExtByCode(any());
