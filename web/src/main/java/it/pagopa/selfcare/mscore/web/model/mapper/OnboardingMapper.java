@@ -80,13 +80,15 @@ public class OnboardingMapper {
         OnboardingInfoResponse response = new OnboardingInfoResponse();
         response.setUserId(userId);
         List<OnboardedInstitutionResponse> institutionResponseList = new ArrayList<>();
-        for (OnboardingInfo onboardingInfo : onboardingInfos) {
-            Institution institution = onboardingInfo.getInstitution();
-            List<Onboarding> onboardingList = institution.getOnboarding();
-            for (Onboarding onboarding : onboardingList) {
-                OnboardedProduct product = onboardingInfo.getOnboardedProducts().get(onboarding.getProductId());
-                if (product != null) {
-                    institutionResponseList.add(constructOnboardedInstitutionResponse(institution, product, onboarding));
+        if(!onboardingInfos.isEmpty()) {
+            for (OnboardingInfo onboardingInfo : onboardingInfos) {
+                Institution institution = onboardingInfo.getInstitution();
+                List<Onboarding> onboardingList = institution.getOnboarding();
+                for (Onboarding onboarding : onboardingList) {
+                    OnboardedProduct product = onboardingInfo.getOnboardedProducts().get(onboarding.getProductId());
+                    if (product != null) {
+                        institutionResponseList.add(constructOnboardedInstitutionResponse(institution, product, onboarding));
+                    }
                 }
             }
         }
