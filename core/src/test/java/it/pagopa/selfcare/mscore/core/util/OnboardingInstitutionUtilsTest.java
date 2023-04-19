@@ -356,7 +356,14 @@ class OnboardingInstitutionUtilsTest {
         institutionUpdate.setSupportPhone("6625550144");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
-
+        Institution institution = new Institution();
+        institution.setBilling(new Billing());
+        List<Onboarding> onboardingList = new ArrayList<>();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setTokenId("42");
+        onboardingList.add(onboarding);
+        institution.setOnboarding(onboardingList);
         Token token = new Token();
         token.setChecksum("Checksum");
         token.setClosedAt(null);
@@ -373,7 +380,7 @@ class OnboardingInstitutionUtilsTest {
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
         OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
-                .constructOnboardingRequest(token, new Institution());
+                .constructOnboardingRequest(token, institution);
         assertTrue(actualConstructOnboardingRequestResult.isSignContract());
         assertEquals("42", actualConstructOnboardingRequestResult.getProductName());
         assertEquals("42", actualConstructOnboardingRequestResult.getProductId());
@@ -381,7 +388,57 @@ class OnboardingInstitutionUtilsTest {
         assertNull(actualConstructOnboardingRequestResult.getInstitutionUpdate().getDescription());
     }
 
-
+    @Test
+    void testConstructOnboardingRequest3() {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate
+                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+        Institution institution = new Institution();
+        institution.setBilling(new Billing());
+        List<Onboarding> onboardingList = new ArrayList<>();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setTokenId("43");
+        onboardingList.add(onboarding);
+        institution.setOnboarding(onboardingList);
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+        OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
+                .constructOnboardingRequest(token, institution);
+        assertTrue(actualConstructOnboardingRequestResult.isSignContract());
+        assertEquals("42", actualConstructOnboardingRequestResult.getProductName());
+        assertEquals("42", actualConstructOnboardingRequestResult.getProductId());
+        assertEquals("Contract Template", actualConstructOnboardingRequestResult.getContract().getPath());
+        assertNull(actualConstructOnboardingRequestResult.getInstitutionUpdate().getDescription());
+    }
     /**
      * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
      */
