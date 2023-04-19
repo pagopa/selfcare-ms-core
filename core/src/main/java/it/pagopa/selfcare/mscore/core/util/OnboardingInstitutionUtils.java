@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -153,9 +154,20 @@ public class OnboardingInstitutionUtils {
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setContract(contract);
         onboardingRequest.setSignContract(true);
-
+        onboardingRequest.setBillingRequest(retriveBilling(token, institution));
         return onboardingRequest;
     }
+
+    private static Billing retriveBilling(Token token, Institution institution) {
+        for(Onboarding onboarding: institution.getOnboarding()){
+            if(onboarding.getTokenId().equals(token.getId())) {
+                return onboarding.getBilling();
+            }
+        }
+
+        return institution.getBilling();
+    }
+
 
     public static Onboarding constructOnboarding(OnboardingRequest request, Institution institution) {
         Onboarding onboarding = new Onboarding();

@@ -28,10 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -76,26 +73,30 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         List<RelationshipState> relationshipStateList = OnboardingInfoUtils.getRelationShipStateList(states);
         List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
-        OnboardedUser currentUser = getUser(userId);
-        List<UserBinding> userBindings = OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(currentUser.getBindings(), relationshipStateList);
-        if (StringUtils.hasText(institutionId) || StringUtils.hasText(institutionExternalId)) {
-            Institution onboardedInstitution = findInstitutionByOptionalId(institutionId, institutionExternalId);
-            UserBinding institutionUserBinding = userBindings.stream().filter(userBinding -> onboardedInstitution.getId().equalsIgnoreCase(userBinding.getInstitutionId()))
-                    .findAny().orElseThrow(() -> new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode()));
-            OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(institutionUserBinding, onboardedInstitution, relationshipStateList);
-            Map<String, OnboardedProduct> productMap = institutionUserBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y));
-            onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, productMap));
-        } else {
-            userBindings.forEach(userBinding -> {
-                Institution onboardedInstitution = institutionService.retrieveInstitutionById(userBinding.getInstitutionId());
-                OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(userBinding, onboardedInstitution, relationshipStateList);
-                onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, userBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y))));
-            });
+        try {
+            OnboardedUser currentUser = getUser(userId);
+            List<UserBinding> userBindings = OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(currentUser.getBindings(), relationshipStateList);
+            if (StringUtils.hasText(institutionId) || StringUtils.hasText(institutionExternalId)) {
+                Institution onboardedInstitution = findInstitutionByOptionalId(institutionId, institutionExternalId);
+                UserBinding institutionUserBinding = userBindings.stream().filter(userBinding -> onboardedInstitution.getId().equalsIgnoreCase(userBinding.getInstitutionId()))
+                        .findAny().orElseThrow(() -> new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode()));
+                OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(institutionUserBinding, onboardedInstitution, relationshipStateList);
+                Map<String, OnboardedProduct> productMap = institutionUserBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y));
+                onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, productMap));
+            } else {
+                userBindings.forEach(userBinding -> {
+                    Institution onboardedInstitution = institutionService.retrieveInstitutionById(userBinding.getInstitutionId());
+                    OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(userBinding, onboardedInstitution, relationshipStateList);
+                    onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, userBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y))));
+                });
+            }
+            if (onboardingInfoList.isEmpty()) {
+                throw new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode());
+            }
+            return onboardingInfoList;
+        } catch (ResourceNotFoundException e) {
+            return Collections.emptyList();
         }
-        if (onboardingInfoList.isEmpty()) {
-            throw new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode());
-        }
-        return onboardingInfoList;
     }
 
     @Override
@@ -110,7 +111,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies = new ArrayList<>();
         if (!geographicTaxonomies.isEmpty()) {
             institutionGeographicTaxonomies = geographicTaxonomies.stream()
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getCode(), geo.getDesc()))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
                     .collect(Collectors.toList());
         }
         List<String> toUpdate = new ArrayList<>();
@@ -159,7 +160,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = onboardingDao.getProductById(token.getProductId());
-        if(pagoPaSignatureConfig.isVerifyEnabled()) {
+        if (pagoPaSignatureConfig.isVerifyEnabled()) {
             contractService.verifySignature(contract, token, managersData);
         }
         File logoFile = contractService.getLogoFile();

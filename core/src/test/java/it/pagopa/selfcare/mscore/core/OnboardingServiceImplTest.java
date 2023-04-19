@@ -45,7 +45,6 @@ class OnboardingServiceImplTest {
 
     @Mock
     private ContractService contractService;
-
     @Mock
     private EmailService emailService;
 
@@ -1095,7 +1094,14 @@ class OnboardingServiceImplTest {
         institutionUpdate.setSupportPhone("6625550144");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
-
+        Institution institution = new Institution();
+        institution.setBilling(new Billing());
+        List<Onboarding> onboardingList = new ArrayList<>();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setTokenId("42");
+        onboardingList.add(onboarding);
+        institution.setOnboarding(onboardingList);
         Token token = new Token();
         token.setChecksum("Checksum");
         token.setClosedAt(null);
@@ -1119,7 +1125,85 @@ class OnboardingServiceImplTest {
         when(onboardingDao.getProductById(any())).thenReturn(new Product());
         File file = File.createTempFile("file", ".txt");
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
+    }
+
+    @Test
+    void testApproveOnboarding2() throws IOException {
+
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+
+        User user = new User();
+        user.setEmail(certifiedField);
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+        user.setName(certifiedField2);
+        user.setWorkContacts(new HashMap<>());
+        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user);
+        when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate
+                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+        Institution institution = new Institution();
+        institution.setBilling(new Billing());
+        List<Onboarding> onboardingList = new ArrayList<>();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setTokenId("43");
+        onboardingList.add(onboarding);
+        institution.setOnboarding(onboardingList);
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId("id");
+        tokenUser.setRole(PartyRole.MANAGER);
+        token.setUsers(List.of(tokenUser));
+        SelfCareUser selfCareUser = mock(SelfCareUser.class);
+        when(selfCareUser.getId()).thenReturn("42");
+        when(onboardingDao.getProductById(any())).thenReturn(new Product());
+        File file = File.createTempFile("file", ".txt");
+        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
     }
 
