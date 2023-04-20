@@ -13,5 +13,5 @@ public interface GeoTaxonomiesRestClient {
 
     @GetMapping(value = "${rest-client.geo-taxonomies.getByCode.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    GeographicTaxonomiesResponse getExtByCode(@PathVariable(value = "code") String code);
+    GeographicTaxonomiesResponse getExtByCode(@PathVariable(value = "geotax_id") String code);
 }
