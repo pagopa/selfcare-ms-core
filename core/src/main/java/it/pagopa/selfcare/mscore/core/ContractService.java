@@ -270,6 +270,7 @@ public class ContractService {
         toNotify.setTaxCode(institution.getTaxCode());
         toNotify.setOrigin(institution.getOrigin());
         toNotify.setOriginId(institution.getOriginId());
+        toNotify.setZipCode(institution.getZipCode());
         return toNotify;
     }
 

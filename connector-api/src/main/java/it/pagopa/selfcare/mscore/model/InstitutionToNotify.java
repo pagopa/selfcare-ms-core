@@ -16,4 +16,6 @@ public class InstitutionToNotify {
     private String taxCode;
     private String origin;
     private String originId;
+    private String zipCode;
+
 }
