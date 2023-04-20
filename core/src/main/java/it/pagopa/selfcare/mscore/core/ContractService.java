@@ -272,6 +272,7 @@ public class ContractService {
         toNotify.setOrigin(institution.getOrigin());
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
+        toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
         return toNotify;
     }
 
