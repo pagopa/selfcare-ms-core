@@ -229,6 +229,7 @@ public class ContractService {
     public void sendDataLakeNotification(Institution institution, Token token) {
         if (institution != null) {
             NotificationToSend notification = toNotificationToSend(institution, token);
+            log.debug("Notification to send to the data lake notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
                 sendNotification(msg, token.getId());
@@ -270,6 +271,7 @@ public class ContractService {
         toNotify.setTaxCode(institution.getTaxCode());
         toNotify.setOrigin(institution.getOrigin());
         toNotify.setOriginId(institution.getOriginId());
+        toNotify.setZipCode(institution.getZipCode());
         return toNotify;
     }
 
