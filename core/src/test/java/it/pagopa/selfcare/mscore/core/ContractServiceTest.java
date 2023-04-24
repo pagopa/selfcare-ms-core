@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
+import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.ValidationReportType;
@@ -195,7 +196,7 @@ class ContractServiceTest {
         PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
         CoreConfig coreConfig = new CoreConfig();
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
-        SignatureService signatureService = new SignatureService();
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig());
 
@@ -263,7 +264,7 @@ class ContractServiceTest {
         PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
         CoreConfig coreConfig = new CoreConfig();
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
-        SignatureService signatureService = new SignatureService();
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         assertEquals("Template File", (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig())).extractTemplate("Path"));
         verify(fileStorageConnector).getTemplateFile((String) any());
@@ -294,7 +295,7 @@ class ContractServiceTest {
         PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
         CoreConfig coreConfig = new CoreConfig();
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
-        SignatureService signatureService = new SignatureService();
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         assertSame(resourceResponse, (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig())).getFile("Path"));
         verify(fileStorageConnector).getFile((String) any());
