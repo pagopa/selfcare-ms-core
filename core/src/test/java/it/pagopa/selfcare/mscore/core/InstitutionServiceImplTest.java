@@ -334,6 +334,27 @@ class InstitutionServiceImplTest {
         institutionByLegal.setBusinessTaxId("42");
 
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
+        Institution institutionResult = institutionServiceImpl.createPgInstitution("42", "42", false, selfCareUser);
+        assertSame(institution, institutionResult);
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
+     */
+    @Test
+    void testCreatePgInstitution2() {
+        Institution institution = new Institution();
+        when(coreConfig.isInfoCamereEnable()).thenReturn(true);
+        List<InstitutionByLegal> list = new ArrayList<>();
+        InstitutionByLegal institutionByLegal = new InstitutionByLegal();
+        institutionByLegal.setBusinessName("START - check institution {} already exists");
+        institutionByLegal.setBusinessTaxId("42");
+        list.add(institutionByLegal);
+        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(list);
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
+
+        SelfCareUser selfCareUser = mock(SelfCareUser.class);
         assertSame(institution, institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
     }
 
@@ -1173,7 +1194,6 @@ class InstitutionServiceImplTest {
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
                 userService, new CoreConfig());
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1195,7 +1215,7 @@ class InstitutionServiceImplTest {
                 dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
                 "6625550144", true, null, null);
 
-        relationshipInfoList = institutionServiceImpl.retrieveAllProduct("42", binding, institution, null, null, null, null);
+        List<RelationshipInfo> relationshipInfoList = institutionServiceImpl.retrieveAllProduct("42", binding, institution, null, null, null, null);
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -1229,7 +1249,6 @@ class InstitutionServiceImplTest {
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector, geoTaxonomiesConnector,
                 userService, new CoreConfig());
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("43");
         OnboardedProduct product = new OnboardedProduct();
@@ -1251,22 +1270,12 @@ class InstitutionServiceImplTest {
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
                 userService, new CoreConfig());
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
         product.setProductId("productId");
         binding.setProducts(List.of(product));
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer("42 Main St", "jane.doe@example.org",
-                "Pec");
-
         Institution institution = new Institution();
         institution.setId("42");
 
@@ -1287,7 +1296,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noRoleFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1317,7 +1326,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noStatesFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1349,7 +1358,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noProductsFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1382,7 +1391,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noProductRolesFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1417,7 +1426,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_institutionNull_filterProduct_noProductsFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1452,7 +1461,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_found() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product1 = new OnboardedProduct();

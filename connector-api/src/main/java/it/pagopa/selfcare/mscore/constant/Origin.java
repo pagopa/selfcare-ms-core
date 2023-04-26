@@ -12,6 +12,7 @@ public enum Origin {
     IPA("IPA"),
     SELC("SELC"),
     UNKNOWN("UNKNOWN"),
+    ADE("ADE"),
     INFOCAMERE("INFOCAMERE");
 
     private final String value;

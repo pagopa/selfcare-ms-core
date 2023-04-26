@@ -130,25 +130,29 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
-        newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
         newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
-        if (existsInRegistry && coreConfig.isInfoCamereEnable()) {
-            List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
-            institutionByLegal.stream()
-                    .filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
-                    .findFirst()
-                    .ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
-                            () -> {
-                                throw new InvalidRequestException(String.format(CustomError.INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId), CustomError.INSTITUTION_LEGAL_NOT_FOUND.getCode());
-                            });
+        if (existsInRegistry){
+            if(coreConfig.isInfoCamereEnable()) {
+                List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
+                institutionByLegal.stream()
+                        .filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
+                        .findFirst()
+                        .ifPresentOrElse(institution -> newInstitution.setDescription(institution.getBusinessName()),
+                                () -> {
+                                    throw new InvalidRequestException(String.format(CustomError.INSTITUTION_LEGAL_NOT_FOUND.getMessage(), taxId), CustomError.INSTITUTION_LEGAL_NOT_FOUND.getCode());
+                                });
 
-            NationalRegistriesProfessionalAddress professionalAddress = partyRegistryProxyConnector.getLegalAddress(taxId);
-            if (professionalAddress != null) {
-                newInstitution.setAddress(professionalAddress.getAddress());
-                newInstitution.setZipCode(professionalAddress.getZip());
+                NationalRegistriesProfessionalAddress professionalAddress = partyRegistryProxyConnector.getLegalAddress(taxId);
+                if (professionalAddress != null) {
+                    newInstitution.setAddress(professionalAddress.getAddress());
+                    newInstitution.setZipCode(professionalAddress.getZip());
+                }
             }
+            newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
+        }else{
+            newInstitution.setOrigin(Origin.ADE.getValue());
         }
         return institutionConnector.save(newInstitution);
     }
@@ -314,7 +318,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             }
         } else {
             for (OnboardedProduct product : binding.getProducts()) {
-                if (filterProduct(product, roles, states, products, productRoles)) {
+                if (Boolean.TRUE.equals(filterProduct(product, roles, states, products, productRoles))) {
                     Institution retrievedInstitution = retrieveInstitutionById(binding.getInstitutionId());
                     RelationshipInfo relationshipInfo = new RelationshipInfo();
                     relationshipInfo.setInstitution(retrievedInstitution);
