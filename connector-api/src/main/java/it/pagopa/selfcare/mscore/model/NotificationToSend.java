@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.model.institution.Billing;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -23,5 +24,6 @@ public class NotificationToSend {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
+    private List<UserToNotify> users;
 
 }
