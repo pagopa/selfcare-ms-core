@@ -102,12 +102,15 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomiesList) {
+    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomiesList, String description) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
         Update update = new Update();
         update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
         if (onboarding != null) {
             update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
+        }
+        if(description != null){
+            update.set(InstitutionEntity.Fields.description.name(), description);
         }
         addGeographicTaxonomies(geographicTaxonomiesList, update);
 
