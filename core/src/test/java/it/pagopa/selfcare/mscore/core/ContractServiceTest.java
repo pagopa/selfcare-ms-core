@@ -9,6 +9,7 @@ import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
@@ -70,6 +71,9 @@ class ContractServiceTest {
 
     @Mock
     private KafkaPropertiesConfig kafkaPropertiesConfig;
+
+    @Mock
+    private UserRegistryConnector userRegistryConnector;
 
     @Test
     void createContractPDF() {
@@ -197,8 +201,9 @@ class ContractServiceTest {
         CoreConfig coreConfig = new CoreConfig();
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig());
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector);
 
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
@@ -265,8 +270,9 @@ class ContractServiceTest {
         CoreConfig coreConfig = new CoreConfig();
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         assertEquals("Template File", (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig())).extractTemplate("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector)).extractTemplate("Path"));
         verify(fileStorageConnector).getTemplateFile((String) any());
         verify(producerFactory).transactionCapable();
     }
@@ -296,8 +302,9 @@ class ContractServiceTest {
         CoreConfig coreConfig = new CoreConfig();
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         assertSame(resourceResponse, (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig())).getFile("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector)).getFile("Path"));
         verify(fileStorageConnector).getFile((String) any());
         verify(producerFactory).transactionCapable();
     }
