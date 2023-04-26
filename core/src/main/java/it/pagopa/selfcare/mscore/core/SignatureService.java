@@ -48,9 +48,14 @@ public class SignatureService {
     private static final Integer CF_MATCHER_GROUP = 2;
     private static final Pattern signatureRegex = Pattern.compile("(TINIT-)(.*)");
 
-    public SignedDocumentValidator createDocumentValidator(byte[] bytes) {
+    private final TrustedListsCertificateSource trustedListsCertificateSource;
 
-        var trustedListsCertificateSource = new TrustedListsCertificateSource();
+    public SignatureService(TrustedListsCertificateSource trustedListsCertificateSource) {
+        this.trustedListsCertificateSource = trustedListsCertificateSource;
+    }
+
+
+    public SignedDocumentValidator createDocumentValidator(byte[] bytes) {
 
         CertificateVerifier certificateVerifier = new CommonCertificateVerifier();
         certificateVerifier.setTrustedCertSources(trustedListsCertificateSource);

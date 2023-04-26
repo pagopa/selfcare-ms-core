@@ -21,6 +21,7 @@ import eu.europa.esig.dss.enumerations.MaskGenerationFunction;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DigestDocument;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
+import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.validation.AdvancedSignature;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.TokenIdentifierProvider;
@@ -43,6 +44,7 @@ import org.apache.batik.dom.GenericDocumentType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -58,12 +60,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {SignatureService.class})
+@ContextConfiguration(classes = {SignatureService.class, TrustedListsCertificateSource.class})
 @ExtendWith(SpringExtension.class)
 class SignatureServiceTest {
     @InjectMocks
     private SignatureService signatureService;
-
 
     /**
      * Method under test: {@link SignatureService#isDocumentSigned(SignedDocumentValidator)}
