@@ -7,6 +7,7 @@ import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.ValidationReportType;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
@@ -17,11 +18,13 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,10 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -206,6 +206,7 @@ class ContractServiceTest {
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector);
 
         Institution institution = new Institution();
+        institution.setId("InstitutionId");
         Onboarding onboarding = new Onboarding();
         onboarding.setProductId("prod");
         institution.setOnboarding(List.of(onboarding));
@@ -229,6 +230,9 @@ class ContractServiceTest {
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
 
+        TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
+        TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
+
         Token token = new Token();
         token.setChecksum("Checksum");
         token.setClosedAt(null);
@@ -243,9 +247,43 @@ class ContractServiceTest {
         token.setStatus(RelationshipState.PENDING);
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
+        token.setUsers(List.of(tokenUser1, tokenUser2));
+
+        User user1 = new User();
+        user1.setId(tokenUser1.getUserId());
+        user1.setName(createCertifiedField_certified("User1Name"));
+        user1.setFamilyName(createCertifiedField_certified("User1FamilyName"));
+        user1.setFiscalCode("FiscalCode1");
+        Map<String, WorkContact> workContacts1 = new HashMap<>();
+        workContacts1.put("NotFoundInstitutionId", createWorkContact("user1workemailNotFound@examepl.com"));
+        workContacts1.put(institution.getId(), createWorkContact("user1workEmail@example.com"));
+        user1.setWorkContacts(workContacts1);
+
+        User user2 = new User();
+        user2.setId(tokenUser1.getUserId());
+        user2.setName(createCertifiedField_uncertified("User2Name"));
+        user2.setFamilyName(createCertifiedField_certified("User2FamilyName"));
+        user2.setFiscalCode("FiscalCode2");
+        Map<String, WorkContact> workContacts2 = new HashMap<>();
+        workContacts2.put(institution.getId(), createWorkContact("user2workEmail@example.com"));
+        workContacts2.put("NotFoundInstitutionId", createWorkContact("user2workemailNotFound@examepl.com"));
+        workContacts2.put("NotFoundInstitutionId2", createWorkContact("user2workemailNotFound2@examepl.com"));
+        user2.setWorkContacts(workContacts2);
+
+        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
+                .thenReturn(user1);
+        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
+                .thenReturn(user2);
+
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token),
                 "Topic cannot be null");
+
+        verify(userRegistryConnector, times(1))
+                .getUserByInternalId(tokenUser1.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
+        verify(userRegistryConnector, times(1))
+                .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
+        verifyNoMoreInteractions(userRegistryConnector);
+
     }
 
     @Test
@@ -340,6 +378,26 @@ class ContractServiceTest {
         when(fileStorageConnector.uploadContract(any(), any())).thenReturn("fileName");
         MultipartFile file = mock(MultipartFile.class);
         assertDoesNotThrow(() -> contractService.uploadContract("fileName", file));
+    }
+
+    private WorkContact createWorkContact(String workContactEmail) {
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(createCertifiedField_certified(workContactEmail));
+        return workContact;
+    }
+
+    private CertifiedField<String> createCertifiedField_certified(String fieldValue) {
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.SPID);
+        certifiedField.setValue(fieldValue);
+        return certifiedField;
+    }
+
+    private CertifiedField<String> createCertifiedField_uncertified(String fieldValue) {
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue(fieldValue);
+        return certifiedField;
     }
 }
 
