@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class NotificationToSend {
+
     private String id;
     private String internalIstitutionID;
     private String product;
@@ -21,5 +22,6 @@ public class NotificationToSend {
     private Billing billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private OffsetDateTime closedAt;
 
 }

@@ -249,6 +249,7 @@ public class ContractService {
         notification.setOnboardingTokenId(token.getId());
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(token.getUpdatedAt());
+        notification.setClosedAt(token.getClosedAt());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
