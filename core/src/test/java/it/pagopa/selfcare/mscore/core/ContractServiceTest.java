@@ -303,16 +303,16 @@ class ContractServiceTest {
     }
 
     @Test
-    void verifySignature() throws IOException {
+    void shouldThrowErrorWhenVerifySignatureThrowException() throws IOException {
         SignedDocumentValidator signedDocumentValidator = mock(SignedDocumentValidator.class);
         when(signatureService.createDocumentValidator(any())).thenReturn(signedDocumentValidator);
         doNothing().when(signatureService).isDocumentSigned(any());
         doNothing().when(signatureService).verifyOriginalDocument(any());
         when(signatureService.validateDocument(any())).thenReturn(new Reports(new XmlDiagnosticData(), new XmlDetailedReport(), new XmlSimpleReport(), new ValidationReportType()));
-        when(signatureService.verifySignatureForm(any())).thenReturn("path");
-        when(signatureService.verifySignature(any())).thenReturn("path");
-        when(signatureService.verifyDigest(any(), any())).thenReturn("path");
-        when(signatureService.verifyManagerTaxCode(any(), any())).thenReturn("path");
+        doNothing().when(signatureService).verifySignatureForm(any());
+        doNothing().when(signatureService).verifySignature(any());
+        doNothing().when(signatureService).verifyDigest(any(), any());
+        doThrow(InvalidRequestException.class).when(signatureService).verifyManagerTaxCode(any(), any());
         MultipartFile file = mock(MultipartFile.class);
         Token token = new Token();
         InputStream inputStream = mock(InputStream.class);
