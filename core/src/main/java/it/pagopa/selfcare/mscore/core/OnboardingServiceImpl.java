@@ -188,7 +188,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         List<User> delegate = onboardedUsers
                 .stream()
-                .filter(onboardedUser -> validManagerList.contains(onboardedUser.getId()))
+                .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution);
@@ -313,7 +313,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         if (isTokenExpired(token, now)) {
             log.info("token {} is expired at {} and now is {}", token.getId(), token.getExpiringDate(), now);
             var institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-            onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null);
+            onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
             throw new InvalidRequestException(String.format(CustomError.TOKEN_EXPIRED.getMessage(), token.getId(), token.getExpiringDate()), CustomError.TOKEN_EXPIRED.getCode());
         }
     }

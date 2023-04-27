@@ -27,7 +27,7 @@ public interface InstitutionConnector {
 
     Institution findAndUpdateStatus(String id, String tokenId, RelationshipState state);
 
-    Institution findAndUpdate(String id, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomies);
+    Institution findAndUpdate(String id, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomies, String description);
 
     Institution findInstitutionProduct(String externalId, String productId);
 

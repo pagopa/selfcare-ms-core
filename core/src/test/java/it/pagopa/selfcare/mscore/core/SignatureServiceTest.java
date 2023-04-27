@@ -21,6 +21,7 @@ import eu.europa.esig.dss.enumerations.MaskGenerationFunction;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DigestDocument;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
+import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.validation.AdvancedSignature;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.TokenIdentifierProvider;
@@ -43,6 +44,7 @@ import org.apache.batik.dom.GenericDocumentType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -50,20 +52,19 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_DOCUMENT_SIGNATURE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.TAX_CODE_NOT_FOUND_IN_SIGNATURE;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {SignatureService.class})
+@ContextConfiguration(classes = {SignatureService.class, TrustedListsCertificateSource.class})
 @ExtendWith(SpringExtension.class)
 class SignatureServiceTest {
     @InjectMocks
     private SignatureService signatureService;
-
 
     /**
      * Method under test: {@link SignatureService#isDocumentSigned(SignedDocumentValidator)}
@@ -116,7 +117,7 @@ class SignatureServiceTest {
     @Test
     void testVerifySignatureForm() {
         DetachedTimestampValidator detachedTimestampValidator = new DetachedTimestampValidator(new DigestDocument());
-        assertEquals("VALID", signatureService.verifySignatureForm(detachedTimestampValidator));
+        assertDoesNotThrow(() -> signatureService.verifySignatureForm(detachedTimestampValidator));
         assertTrue(detachedTimestampValidator.getSignatures().isEmpty());
     }
 
@@ -126,7 +127,7 @@ class SignatureServiceTest {
     @Test
     void testVerifySignatureForm2() {
         DetachedTimestampValidator detachedTimestampValidator = new DetachedTimestampValidator(mock(DSSDocument.class));
-        assertEquals("VALID", signatureService.verifySignatureForm(detachedTimestampValidator));
+        assertDoesNotThrow(() -> signatureService.verifySignatureForm(detachedTimestampValidator));
         assertTrue(detachedTimestampValidator.getSignatures().isEmpty());
     }
 
@@ -138,7 +139,7 @@ class SignatureServiceTest {
     void testVerifySignatureForm3() {
         DetachedTimestampValidator detachedTimestampValidator = new DetachedTimestampValidator(new DigestDocument());
         detachedTimestampValidator.setTokenIdentifierProvider(mock(TokenIdentifierProvider.class));
-        assertEquals("VALID", signatureService.verifySignatureForm(detachedTimestampValidator));
+        assertDoesNotThrow(() -> signatureService.verifySignatureForm(detachedTimestampValidator));
         assertTrue(detachedTimestampValidator.getSignatures().isEmpty());
     }
 
@@ -149,7 +150,7 @@ class SignatureServiceTest {
     void testVerifySignatureForm5() {
         SignedDocumentValidator signedDocumentValidator = mock(SignedDocumentValidator.class);
         when(signedDocumentValidator.getSignatures()).thenReturn(new ArrayList<>());
-        assertEquals("VALID", signatureService.verifySignatureForm(signedDocumentValidator));
+        assertDoesNotThrow(() -> signatureService.verifySignatureForm(signedDocumentValidator));
         verify(signedDocumentValidator).getSignatures();
     }
 
@@ -165,8 +166,8 @@ class SignatureServiceTest {
                 new BindableElement("VALID", new SVG12OMDocument(dt, new SVG12DOMImplementation()), "VALID", "VALID")));
         SignedDocumentValidator signedDocumentValidator = mock(SignedDocumentValidator.class);
         when(signedDocumentValidator.getSignatures()).thenReturn(advancedSignatureList);
-        assertEquals("Only CAdES signature form is admitted. Invalid signatures forms detected: [XAdES]",
-                signatureService.verifySignatureForm(signedDocumentValidator));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifySignatureForm(signedDocumentValidator),
+                "Only CAdES signature form is admitted. Invalid signatures forms detected: [XAdES]");
         verify(signedDocumentValidator).getSignatures();
     }
 
@@ -187,8 +188,8 @@ class SignatureServiceTest {
                 new BindableElement("VALID", new SVG12OMDocument(dt1, new SVG12DOMImplementation()), "VALID", "VALID")));
         SignedDocumentValidator signedDocumentValidator = mock(SignedDocumentValidator.class);
         when(signedDocumentValidator.getSignatures()).thenReturn(advancedSignatureList);
-        assertEquals("Only CAdES signature form is admitted. Invalid signatures forms detected: [XAdES, XAdES]",
-                signatureService.verifySignatureForm(signedDocumentValidator));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifySignatureForm(signedDocumentValidator),
+                "Only CAdES signature form is admitted. Invalid signatures forms detected: [XAdES, XAdES]");
         verify(signedDocumentValidator).getSignatures();
     }
 
@@ -202,8 +203,7 @@ class SignatureServiceTest {
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(diagnosticDataJaxb, detailedReport, simpleReport, new ValidationReportType());
 
-        assertEquals("Document signature is invalid", signatureService.verifySignature(reports));
-
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifySignature(reports), INVALID_DOCUMENT_SIGNATURE.getMessage());
     }
 
     /**
@@ -213,8 +213,8 @@ class SignatureServiceTest {
     void testVerifySignature2() {
         XmlDiagnosticData diagnosticDataJaxb = new XmlDiagnosticData();
         XmlDetailedReport detailedReport = new XmlDetailedReport();
-        assertEquals("Document signature is invalid", signatureService
-                .verifySignature(new Reports(diagnosticDataJaxb, detailedReport, new XmlSimpleReport(), null)));
+        assertThrows(InvalidRequestException.class, () -> signatureService
+                .verifySignature(new Reports(diagnosticDataJaxb, detailedReport, new XmlSimpleReport(), null)), INVALID_DOCUMENT_SIGNATURE.getMessage());
     }
 
     /**
@@ -226,8 +226,8 @@ class SignatureServiceTest {
         XmlDetailedReport detailedReport = new XmlDetailedReport();
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(diagnosticDataJaxb, detailedReport, simpleReport, new ValidationReportType());
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifySignature(reports), INVALID_DOCUMENT_SIGNATURE.getMessage());
 
-        assertEquals("Document signature is invalid", signatureService.verifySignature(reports));
         List<OrphanCertificateTokenWrapper> expectedSignatureValidationReport = reports.getDiagnosticData()
                 .getAllOrphanCertificateObjects();
         assertEquals(expectedSignatureValidationReport,
@@ -245,7 +245,7 @@ class SignatureServiceTest {
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(xmlDiagnosticData, detailedReport, simpleReport, new ValidationReportType());
 
-        assertEquals("Document signature is invalid", signatureService.verifySignature(reports));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifySignature(reports), INVALID_DOCUMENT_SIGNATURE.getMessage());
     }
 
     /**
@@ -258,7 +258,8 @@ class SignatureServiceTest {
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(diagnosticDataJaxb, detailedReport, simpleReport, new ValidationReportType());
 
-        assertEquals("Document signature is invalid", signatureService.verifySignature(reports));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifySignature(reports), INVALID_DOCUMENT_SIGNATURE.getMessage());
+
         List<OrphanCertificateTokenWrapper> expectedSignatureValidationReport = reports.getDiagnosticData()
                 .getAllOrphanCertificateObjects();
         assertEquals(expectedSignatureValidationReport,
@@ -271,7 +272,7 @@ class SignatureServiceTest {
     @Test
     void testVerifyDigest() {
         DetachedTimestampValidator detachedTimestampValidator = new DetachedTimestampValidator(new DigestDocument());
-        assertEquals("VALID", signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
+        assertDoesNotThrow(() -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
         assertTrue(detachedTimestampValidator.getSignatures().isEmpty());
     }
 
@@ -282,7 +283,7 @@ class SignatureServiceTest {
     void testVerifyDigest2() {
         DetachedTimestampValidator detachedTimestampValidator = new DetachedTimestampValidator(
                 mock(DigestDocument.class));
-        assertEquals("VALID", signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
+        assertDoesNotThrow(() -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
         assertTrue(detachedTimestampValidator.getSignatures().isEmpty());
     }
 
@@ -293,7 +294,7 @@ class SignatureServiceTest {
     void testVerifyDigest3() {
         DetachedTimestampValidator detachedTimestampValidator = new DetachedTimestampValidator(new DigestDocument());
         detachedTimestampValidator.setTokenIdentifierProvider(mock(TokenIdentifierProvider.class));
-        assertEquals("VALID", signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
+        assertDoesNotThrow(() -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
         assertTrue(detachedTimestampValidator.getSignatures().isEmpty());
     }
 
@@ -305,7 +306,7 @@ class SignatureServiceTest {
     void testVerifyDigest5() {
         DetachedTimestampValidator detachedTimestampValidator = mock(DetachedTimestampValidator.class);
         when(detachedTimestampValidator.getSignatures()).thenReturn(new ArrayList<>());
-        assertEquals("VALID", signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
+        assertDoesNotThrow(() -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
         verify(detachedTimestampValidator).getSignatures();
     }
 
@@ -322,7 +323,7 @@ class SignatureServiceTest {
         DetachedTimestampValidator detachedTimestampValidator = mock(DetachedTimestampValidator.class);
         when(detachedTimestampValidator.getOriginalDocuments((String) any())).thenReturn(new ArrayList<>());
         when(detachedTimestampValidator.getSignatures()).thenReturn(advancedSignatureList);
-        assertEquals("Invalid file digest", signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
+        assertThrows( InvalidRequestException.class, () -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"), "Invalid file digest" );
         verify(detachedTimestampValidator).getSignatures();
         verify(detachedTimestampValidator).getOriginalDocuments((String) any());
     }
@@ -340,7 +341,7 @@ class SignatureServiceTest {
         DetachedTimestampValidator detachedTimestampValidator = mock(DetachedTimestampValidator.class);
         when(detachedTimestampValidator.getOriginalDocuments((String) any())).thenReturn(new ArrayList<>());
         when(detachedTimestampValidator.getSignatures()).thenReturn(advancedSignatureList);
-        assertEquals("Invalid file digest", signatureService.verifyDigest(detachedTimestampValidator, "Checksum"));
+        assertThrows( InvalidRequestException.class, () -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"), "Invalid file digest");
         verify(detachedTimestampValidator).getSignatures();
         verify(detachedTimestampValidator).getOriginalDocuments((String) any());
         verify(xAdESSignature).getId();
@@ -356,9 +357,8 @@ class SignatureServiceTest {
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(diagnosticDataJaxb, detailedReport, simpleReport, new ValidationReportType());
 
-        ArrayList<User> userList = new ArrayList<>();
-        assertEquals("No tax code has been found in digital signature",
-                signatureService.verifyManagerTaxCode(reports, userList));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyManagerTaxCode(reports, new ArrayList<>()),
+                TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage());
     }
 
     /**
@@ -370,10 +370,11 @@ class SignatureServiceTest {
         XmlDetailedReport detailedReport = new XmlDetailedReport();
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(diagnosticDataJaxb, detailedReport, simpleReport, new ValidationReportType());
-
         ArrayList<User> userList = new ArrayList<>();
-        assertEquals("No tax code has been found in digital signature",
-                signatureService.verifyManagerTaxCode(reports, userList));
+
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyManagerTaxCode(reports, userList),
+                TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage());
+
         assertEquals(userList, reports.getDiagnosticDataJaxb().getUsedCertificates());
     }
 
@@ -388,9 +389,8 @@ class SignatureServiceTest {
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(xmlDiagnosticData, detailedReport, simpleReport, new ValidationReportType());
 
-        ArrayList<User> userList = new ArrayList<>();
-        assertEquals("No tax code has been found in digital signature",
-                signatureService.verifyManagerTaxCode(reports, userList));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyManagerTaxCode(reports, new ArrayList<>()),
+                TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage());
     }
 
     /**
@@ -404,8 +404,9 @@ class SignatureServiceTest {
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(xmlDiagnosticData, detailedReport, simpleReport, new ValidationReportType());
 
-        assertEquals("No tax code has been found in digital signature",
-                signatureService.verifyManagerTaxCode(reports, new ArrayList<>()));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyManagerTaxCode(reports, new ArrayList<>()),
+                TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage());
+
         verify(xmlDiagnosticData).getUsedCertificates();
     }
 
@@ -603,8 +604,9 @@ class SignatureServiceTest {
         XmlSimpleReport simpleReport = new XmlSimpleReport();
         Reports reports = new Reports(xmlDiagnosticData, detailedReport, simpleReport, new ValidationReportType());
 
-        assertEquals("No tax code has been found in digital signature",
-                signatureService.verifyManagerTaxCode(reports, new ArrayList<>()));
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyManagerTaxCode(reports, new ArrayList<>()),
+                TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage());
+
         verify(xmlDiagnosticData).getUsedCertificates();
     }
 
@@ -615,8 +617,10 @@ class SignatureServiceTest {
     void testVerifyManagerTaxCode9() {
         Reports reports = mock(Reports.class);
         when(reports.getDiagnosticData()).thenReturn(null);
-        assertEquals("No tax code has been found in digital signature",
-                signatureService.verifyManagerTaxCode(reports, new ArrayList<>()));
+
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyManagerTaxCode(reports, new ArrayList<>()),
+                TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage());
+
         verify(reports).getDiagnosticData();
     }
 }

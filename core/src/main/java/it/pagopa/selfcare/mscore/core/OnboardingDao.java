@@ -97,7 +97,7 @@ public class OnboardingDao {
             if (RelationshipState.ACTIVE == token.getStatus()) {
                 institutionConnector.findAndUpdateInstitutionData(institution.getId(), token, onboarding, null);
             } else {
-                institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
+                institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies, null);
             }
         } catch (Exception e) {
             log.warn("can not update institution {}", institution.getId(), e);
