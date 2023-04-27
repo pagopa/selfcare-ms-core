@@ -220,7 +220,16 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .stream()
                     .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
                     .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription())).collect(Collectors.toList());
-            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies);
+            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, null);
+        } else {
+            throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
+        }
+    }
+
+    @Override
+    public Institution updateInstitutionDescription(String institutionId, String description, String userId) {
+        if (userService.checkIfAdmin(userId, institutionId)) {
+            return institutionConnector.findAndUpdate(institutionId, null, null, description);
         } else {
             throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
         }

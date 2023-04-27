@@ -45,6 +45,9 @@ class InstitutionServiceImplTest {
     private PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     @Mock
+    private UserService userService;
+
+    @Mock
     private GeoTaxonomiesConnector geoTaxonomiesConnector;
 
     @Mock
@@ -759,42 +762,6 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testRetrieveInstitutionByExternalIds3() {
-        //   Diffblue Cover was unable to write a Spring test,
-        //   so wrote a non-Spring test instead.
-        //   Reason: R026 Failed to create Spring context.
-        //   Attempt to initialize test context failed with
-        //   java.lang.IllegalStateException: Failed to load ApplicationContext
-        //       at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-        //       at java.util.Spliterators$ArraySpliterator.tryAdvance(Spliterators.java:958)
-        //       at java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:127)
-        //       at java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:502)
-        //       at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:488)
-        //       at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-        //       at java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
-        //       at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        //       at java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:543)
-        //   org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [it.pagopa.selfcare.mscore.config.CoreConfig]; nested exception is java.io.FileNotFoundException: class path resource [config/core-config.properties] cannot be opened because it does not exist
-        //       at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-        //       at java.util.Spliterators$ArraySpliterator.tryAdvance(Spliterators.java:958)
-        //       at java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:127)
-        //       at java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:502)
-        //       at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:488)
-        //       at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-        //       at java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
-        //       at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        //       at java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:543)
-        //   java.io.FileNotFoundException: class path resource [config/core-config.properties] cannot be opened because it does not exist
-        //       at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-        //       at java.util.Spliterators$ArraySpliterator.tryAdvance(Spliterators.java:958)
-        //       at java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:127)
-        //       at java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:502)
-        //       at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:488)
-        //       at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-        //       at java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
-        //       at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        //       at java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:543)
-        //   See https://diff.blue/R026 to resolve this issue.
-
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         when(institutionConnector.findByExternalIdAndProductId(any(),
                 any()))
@@ -1215,7 +1182,6 @@ class InstitutionServiceImplTest {
                 dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
                 "6625550144", true, null, null);
 
-        List<RelationshipInfo> relationshipInfoList = institutionServiceImpl.retrieveAllProduct("42", binding, institution, null, null, null, null);
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -1276,6 +1242,7 @@ class InstitutionServiceImplTest {
         OnboardedProduct product = new OnboardedProduct();
         product.setProductId("productId");
         binding.setProducts(List.of(product));
+
         Institution institution = new Institution();
         institution.setId("42");
 
@@ -1603,6 +1570,19 @@ class InstitutionServiceImplTest {
                 geoTaxonomiesConnector, userService, new CoreConfig());
         institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", new ArrayList<>());
         verify(institutionConnector).findWithFilter(any(), any(), any());
+    }
+
+    @Test
+    void testUpdateInstitutionDescription(){
+        when(userService.checkIfAdmin(any(), any())).thenReturn(true);
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(new Institution());
+        assertDoesNotThrow(() -> institutionServiceImpl.updateInstitutionDescription("42", "42", "userId"));
+    }
+
+    @Test
+    void testUpdateInstitutionDescriptionException(){
+        when(userService.checkIfAdmin(any(), any())).thenReturn(false);
+        assertThrows(ResourceForbiddenException.class, () -> institutionServiceImpl.updateInstitutionDescription("42", "42", "userId"));
     }
 
     private Institution initializeInstitution(Integer bias) {
