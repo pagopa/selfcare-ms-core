@@ -59,7 +59,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
-import static it.pagopa.selfcare.mscore.core.SignatureService.VALID_CHECK;
 import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 
 @Slf4j
@@ -164,30 +163,18 @@ public class ContractService {
                 .replace("${productName}", request.getProductId());
     }
 
-    private void validateSignature(String... errorEnums) {
-        StringBuilder stringBuilder = new StringBuilder(INVALID_SIGNATURE.getMessage());
-        List<String> strings = Arrays.stream(errorEnums).filter(s -> !VALID_CHECK.equals(s)).collect(Collectors.toList());
-        if (!strings.isEmpty()) {
-            for (String s : strings) {
-                stringBuilder.append(" - ");
-                stringBuilder.append(s);
-            }
-            throw new InvalidRequestException(stringBuilder.toString(), INVALID_SIGNATURE.getCode());
-        }
-    }
-
     public void verifySignature(MultipartFile contract, Token token, List<User> users) {
         try {
             SignedDocumentValidator validator = signatureService.createDocumentValidator(contract.getInputStream().readAllBytes());
             signatureService.isDocumentSigned(validator);
             signatureService.verifyOriginalDocument(validator);
             Reports reports = signatureService.validateDocument(validator);
-            validateSignature(
-                    signatureService.verifySignatureForm(validator),
-                    signatureService.verifySignature(reports),
-                    signatureService.verifyDigest(validator, token.getChecksum()),
-                    signatureService.verifyManagerTaxCode(reports, users)
-            );
+
+            signatureService.verifySignatureForm(validator);
+            signatureService.verifySignature(reports);
+            signatureService.verifyDigest(validator, token.getChecksum());
+            signatureService.verifyManagerTaxCode(reports, users);
+
         } catch (InvalidRequestException e) {
             throw e;
         } catch (Exception e) {
