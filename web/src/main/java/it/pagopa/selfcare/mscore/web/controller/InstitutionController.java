@@ -167,6 +167,30 @@ public class InstitutionController {
     }
 
     /**
+     * The function Update the description of corresponding institution given internal institution id
+     *
+     * @param institutionId  String
+     * @param description String
+     *
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 400, Message: bad request, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution.update}", notes = "${swagger.mscore.institution.update}")
+    @PutMapping(value = "/{id}/description")
+    public ResponseEntity<InstitutionResponse> updateInstitutionDescription(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                 @PathVariable("id") String institutionId,
+                                                                 @RequestParam("description") String description,
+                                                                 Authentication authentication) {
+
+        CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        Institution saved = institutionService.updateInstitutionDescription(institutionId, description, selfCareUser.getId());
+        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
+    }
+
+    /**
      * The function return geographic taxonomies related to institution
      *
      * @param id String

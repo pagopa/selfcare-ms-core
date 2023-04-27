@@ -79,7 +79,7 @@ class OnboardingDaoTest {
 
     @Test
     void testPersist0() {
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenReturn(new Institution());
         when(coreConfig.getOnboardingExpiringDate()).thenReturn(60);
         Token token = new Token();
@@ -156,7 +156,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testPersist() {
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenReturn(new Institution());
         Token token = new Token();
         token.setId("tokenId");
@@ -230,8 +230,7 @@ class OnboardingDaoTest {
         assertEquals("Pricing Plan", onboarding.getPricingPlan());
         assertEquals("Path", onboarding.getContract());
         assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(tokenConnector).save(any(), any());
     }
 
@@ -241,7 +240,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist2() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -305,8 +304,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -318,7 +316,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist3() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"))
                 .when(tokenConnector)
@@ -384,8 +382,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
     }
@@ -396,7 +393,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist6() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -460,8 +457,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -473,7 +469,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist7() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -537,8 +533,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, list, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -1969,8 +1964,9 @@ class OnboardingDaoTest {
         when(productConnector.getProductById(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
         CoreConfig config = new CoreConfig();
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, config);
         assertThrows(InvalidRequestException.class,
-                () -> (new OnboardingDao(null, null, null, productConnector, coreConfig)).getProductById("42"));
+                () -> onboardingDao.getProductById("42"));
         verify(productConnector).getProductById(any());
     }
 

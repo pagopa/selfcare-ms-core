@@ -1,6 +1,6 @@
 image:
   repository: selcucommonacr.azurecr.io/selfcaremscore
-  tag: 0.0.1-SNAPSHOT
+  tag: 1.0-SNAPSHOT
 
 ingress:
   annotations:
@@ -9,6 +9,11 @@ ingress:
     - hosts:
         - uat01.pnpg.internal.uat.selfcare.pagopa.it
       secretName: uat01-pnpg-internal-uat-selfcare-pagopa-it
+  hosts:
+    - host: "uat01.pnpg.internal.uat.selfcare.pagopa.it"
+      paths:
+        - path: /ms-core/v1/(.*)
+          pathType: ImplementationSpecific
 
 autoscaling:
   enabled: false
