@@ -114,6 +114,9 @@ public class InstitutionMapper {
                 productInfo.setId(productId);
                 productInfo.setCreatedAt(product.getCreatedAt());
                 productInfo.setRole(product.getProductRole());
+                if (product.getRole() != null) {
+                    institutionManagerResponse.setRole(product.getRole().name());
+                }
                 institutionManagerResponse.setProduct(productInfo);
                 institutionManagerResponse.setState(product.getStatus());
                 institutionManagerResponse.setCreatedAt(product.getCreatedAt());
