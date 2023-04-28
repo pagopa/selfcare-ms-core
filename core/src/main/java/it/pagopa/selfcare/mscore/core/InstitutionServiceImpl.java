@@ -294,9 +294,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     public void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt) {
         log.trace("updateCreatedAt start");
         log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, productId, createdAt);
-        Assert.hasText(institutionId, "");
-        Assert.hasText(productId, "");
-        Assert.notNull(createdAt, "");
+        Assert.hasText(institutionId, "An institution ID is required.");
+        Assert.hasText(productId, "A product ID is required.");
+        Assert.notNull(createdAt, "A createdAt date is required.");
 
         Institution updatedInstitution = institutionConnector.updateOnboardedProductCreatedAt(institutionId, productId, createdAt);
         String tokenId = updatedInstitution.getOnboarding().stream()
