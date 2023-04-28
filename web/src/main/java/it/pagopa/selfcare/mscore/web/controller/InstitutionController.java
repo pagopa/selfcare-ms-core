@@ -243,7 +243,8 @@ public class InstitutionController {
      * @param institutionId String
      * @param productId     String
      * @param createdAt     OffsetDateTime
-     * @return * Code: 200, Message: successful operation
+     * @return no content
+     * * Code: 200, Message: successful operation
      * * Code: 404, Message: Institution or Token or UserBinding not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
