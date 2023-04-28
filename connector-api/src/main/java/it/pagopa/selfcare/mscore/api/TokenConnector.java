@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomi
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.springframework.lang.Nullable;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface TokenConnector {
@@ -22,4 +23,6 @@ public interface TokenConnector {
     Token findAndUpdateToken(Token token, RelationshipState state, @Nullable String checksum);
 
     Token findWithFilter(String institutionId, String productId);
+
+    Token updateTokenCreatedAt(String tokenId, OffsetDateTime createdAt);
 }

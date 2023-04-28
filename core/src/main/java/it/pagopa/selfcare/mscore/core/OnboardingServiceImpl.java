@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
@@ -173,7 +174,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             onboardingDao.rollbackSecondStepOfUpdate(rollback.getUserList(), rollback.getUpdatedInstitution(), rollback.getToken());
             contractService.deleteContract(fileName, token.getId());
         }
-        contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token);
+        contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token, QueueEvent.ADD);
     }
 
     @Override

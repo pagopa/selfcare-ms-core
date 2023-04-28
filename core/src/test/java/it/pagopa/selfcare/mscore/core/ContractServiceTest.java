@@ -17,6 +17,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -186,7 +187,7 @@ class ContractServiceTest {
     }
 
     /**
-     * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token)}
+     * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token, QueueEvent)}
      */
     @Test
     void testSendDataLakeNotification2() throws ExecutionException, InterruptedException {
@@ -239,7 +240,7 @@ class ContractServiceTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
-        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token),
+        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
     }
 

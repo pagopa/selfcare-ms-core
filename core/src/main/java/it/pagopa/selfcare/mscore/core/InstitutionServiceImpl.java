@@ -2,19 +2,21 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
-import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.*;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
@@ -33,20 +35,29 @@ import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_D
 public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionConnector institutionConnector;
+    private final TokenConnector tokenConnector;
+    private final UserConnector userConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final GeoTaxonomiesConnector geoTaxonomiesConnector;
     private final UserService userService;
     private final CoreConfig coreConfig;
+    private final ContractService contractService;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
                                   GeoTaxonomiesConnector geoTaxonomiesConnector,
-                                  UserService userService, CoreConfig coreConfig) {
+                                  UserService userService, CoreConfig coreConfig,
+                                  TokenConnector tokenConnector,
+                                  UserConnector userConnector,
+                                  ContractService contractService) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.geoTaxonomiesConnector = geoTaxonomiesConnector;
         this.userService = userService;
         this.coreConfig = coreConfig;
+        this.tokenConnector = tokenConnector;
+        this.userConnector = userConnector;
+        this.contractService = contractService;
     }
 
     @Override
@@ -277,6 +288,27 @@ public class InstitutionServiceImpl implements InstitutionService {
             return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution, roles, states, products, productRoles);
         }
         throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
+    }
+
+    @Override
+    public void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt) {
+        log.trace("updateCreatedAt start");
+        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, productId, createdAt);
+        Assert.hasText(institutionId, "");
+        Assert.hasText(productId, "");
+        Assert.notNull(createdAt, "");
+
+        Institution updatedInstitution = institutionConnector.updateOnboardedProductCreatedAt(institutionId, productId, createdAt);
+        String tokenId = updatedInstitution.getOnboarding().stream()
+                .filter(onboarding -> onboarding.getProductId().equals(productId))
+                .findFirst().get().getTokenId();
+        Token updatedToken = tokenConnector.updateTokenCreatedAt(tokenId, createdAt);
+        List<String> usersId = updatedToken.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
+        userConnector.updateUserBindingCreatedAt(institutionId, productId, usersId, createdAt);
+
+        contractService.sendDataLakeNotification(updatedInstitution, updatedToken, QueueEvent.UPDATE);
+
+        log.trace("updateCreatedAt end");
     }
 
     public void checkIfAlreadyExists(String externalId) {

@@ -23,6 +23,7 @@ import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -226,9 +227,9 @@ public class ContractService {
         }
     }
 
-    public void sendDataLakeNotification(Institution institution, Token token) {
+    public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
         if (institution != null) {
-            NotificationToSend notification = toNotificationToSend(institution, token);
+            NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
             log.debug("Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
@@ -239,9 +240,13 @@ public class ContractService {
         }
     }
 
-    private NotificationToSend toNotificationToSend(Institution institution, Token token) {
+    private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
-        notification.setId(token.getId());
+        if (queueEvent.equals(QueueEvent.ADD)) {
+            notification.setId(token.getId());
+        } else {
+            notification.setId(UUID.randomUUID().toString());
+        }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setState(RelationshipState.ACTIVE);

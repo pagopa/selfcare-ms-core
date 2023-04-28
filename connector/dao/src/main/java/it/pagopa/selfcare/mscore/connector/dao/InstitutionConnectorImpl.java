@@ -3,16 +3,13 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -212,11 +209,28 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Institution updateOnboardedProductCreatedAt(String institutionId, String productId, OffsetDateTime createdAt) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+
+        Update update = new Update();
+        update.set(constructQuery(CURRENT_ONBOARDING_REFER, OnboardingEntity.Fields.createdAt.name()), createdAt)
+                .set(constructQuery(CURRENT_ONBOARDING_REFER, OnboardingEntity.Fields.updatedAt.name()), OffsetDateTime.now())
+                .filterArray(Criteria.where(CURRENT_ONBOARDING + OnboardingEntity.Fields.productId.name()).is(productId));
+
+        Update updateInstitutionEntityUpdatedAt = new Update();
+        updateInstitutionEntityUpdatedAt.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
+        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, updateInstitutionEntityUpdatedAt, findAndModifyOptions, InstitutionEntity.class));
+    }
+
 
     private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {
         String geoQuery = InstitutionEntity.Fields.geographicTaxonomies.name()
                 + "." + GeoTaxonomyEntity.Fields.code.name();
-        switch (searchMode){
+        switch (searchMode) {
             case ALL:
                 return Query.query(Criteria.where(geoQuery).all(geo));
             case ANY:
@@ -225,7 +239,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 return Query.query(Criteria.where(geoQuery).all(geo)
                         .and(InstitutionEntity.Fields.geographicTaxonomies.name()).size(geo.size()));
             default:
-                throw new InvalidRequestException("Invalid search mode","0000");
+                throw new InvalidRequestException("Invalid search mode", "0000");
         }
     }
 
