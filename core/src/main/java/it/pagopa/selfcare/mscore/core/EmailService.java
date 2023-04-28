@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -24,17 +25,26 @@ public class EmailService {
 
     private static final String MAIL_PARAMETER_LOG = "mailParameters: {}";
     private static final String DESTINATION_MAIL_LOG = "destinationMails: {}";
+    public static final String PAGOPA_LOGO_FILENAME = "pagopa-logo.png";
 
     private final EmailConnector emailConnector;
     private final MailParametersMapper mailParametersMapper;
     private final CoreConfig coreConfig;
+    private final MailTemplateConfig mailTemplateConfig;
 
     public EmailService(EmailConnector emailConnector,
                         MailParametersMapper mailParametersMapper,
-                        CoreConfig coreConfig) {
+                        CoreConfig coreConfig,
+                        MailTemplateConfig mailTemplateConfig) {
         this.emailConnector = emailConnector;
         this.mailParametersMapper = mailParametersMapper;
         this.coreConfig = coreConfig;
+        this.mailTemplateConfig = mailTemplateConfig;
+    }
+
+    //TODO refactor templateName
+    public void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName) {
+        emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, "simpleMail", templateParameters, fileName);
     }
 
     public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean isApproved, InstitutionType institutionType) {
@@ -47,7 +57,7 @@ public class EmailService {
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = coreConfig.getDestinationMails() != null ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
             log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailParametersMapper.getOnboardingPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
+            emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
             log.info("onboarding-contract-email Email successful sent");
         } else {
             mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);

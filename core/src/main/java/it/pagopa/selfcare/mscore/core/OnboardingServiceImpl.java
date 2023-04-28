@@ -7,15 +7,14 @@ import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -47,13 +46,16 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final EmailService emailService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
 
+    private final OnboardingInstitutionStrategyFactory institutionStrategyFactory;
+
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
                                  EmailService emailService,
-                                 PagoPaSignatureConfig pagoPaSignatureConfig) {
+                                 PagoPaSignatureConfig pagoPaSignatureConfig,
+                                 OnboardingInstitutionStrategyFactory institutionStrategyFactory) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
@@ -61,6 +63,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.contractService = contractService;
         this.emailService = emailService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
+        this.institutionStrategyFactory = institutionStrategyFactory;
     }
 
     @Override
@@ -101,53 +104,18 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
-        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
-        request.setTokenType(TokenType.INSTITUTION);
-        Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
-        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, request);
-        checkIncompleteOnboarding(institution, request);
-        OnboardingInstitutionUtils.validateOverridingData(request.getInstitutionUpdate(), institution);
-        List<GeographicTaxonomies> geographicTaxonomies = getGeographicTaxonomy(request);
-        List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies = new ArrayList<>();
-        if (!geographicTaxonomies.isEmpty()) {
-            institutionGeographicTaxonomies = geographicTaxonomies.stream()
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
-                    .collect(Collectors.toList());
-        }
-        List<String> toUpdate = new ArrayList<>();
-        List<String> toDelete = new ArrayList<>();
 
-        if (InstitutionType.PG == institutionType) {
-            if (request.getUsers().size() == 1) {
-                OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER));
-            } else {
-                throw new InvalidRequestException(CustomError.USERS_SIZE_NOT_ADMITTED.getMessage(), CustomError.USERS_SIZE_NOT_ADMITTED.getCode());
-            }
-            onboardingDao.persist(toUpdate, toDelete, request, institution, institutionGeographicTaxonomies, null);
-        } else {
-            OnboardingInstitutionUtils.validatePaOnboarding(request);
+        institutionStrategyFactory
+                .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType())
+                .onboardingInstitution(request, principal);
+    }
 
-            User user = userService.retrieveUserFromUserRegistry(principal.getId(), EnumSet.allOf(User.Fields.class));
-            OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-            List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), null);
-            User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+    @Override
+    public void onboardingInstitutionComplete(OnboardingRequest request, SelfCareUser principal) {
 
-            List<User> delegate = request.getUsers()
-                    .stream()
-                    .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
-                    .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
-
-            String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, institutionGeographicTaxonomies, institutionType);
-            String digest = TokenUtils.createDigest(pdf);
-            OnboardingRollback rollback = onboardingDao.persist(toUpdate, toDelete, request, institution, institutionGeographicTaxonomies, digest);
-            log.info("{} - Digest {}", rollback.getToken().getId(), digest);
-            try {
-                emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false, institutionType);
-            } catch (Exception e) {
-                onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
-            }
-        }
+        institutionStrategyFactory
+                .retrieveOnboardingInstitutionStrategyWithoutContract(request.getInstitutionUpdate().getInstitutionType())
+                .onboardingInstitution(request, principal);
     }
 
     @Override
@@ -294,23 +262,9 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
-    private List<GeographicTaxonomies> getGeographicTaxonomy(OnboardingRequest request) {
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        if (request.getInstitutionUpdate().getGeographicTaxonomies() != null &&
-                !request.getInstitutionUpdate().getGeographicTaxonomies().isEmpty()) {
-            geographicTaxonomies = request.getInstitutionUpdate().getGeographicTaxonomies().stream
-                    ().map(institutionGeographicTaxonomies -> institutionService.retrieveGeoTaxonomies(institutionGeographicTaxonomies.getCode())).collect(Collectors.toList());
-            if (geographicTaxonomies.isEmpty()) {
-                throw new ResourceNotFoundException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), request.getInstitutionUpdate().getGeographicTaxonomies()),
-                        CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
-            }
-        }
-        return geographicTaxonomies;
-    }
-
     public void checkAndHandleExpiring(Token token) {
         var now = OffsetDateTime.now();
-        if (isTokenExpired(token, now)) {
+        if (TokenUtils.isTokenExpired(token, now)) {
             log.info("token {} is expired at {} and now is {}", token.getId(), token.getExpiringDate(), now);
             var institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
             onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
@@ -318,31 +272,4 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
-    private boolean isTokenExpired(Token token, OffsetDateTime now) {
-        return token.getExpiringDate() != null && (now.isEqual(token.getExpiringDate()) || now.isAfter(token.getExpiringDate()));
-    }
-
-    private void checkIncompleteOnboarding(Institution institution, OnboardingRequest request) {
-        List<Token> tokens = new ArrayList<>();
-        if (institution.getOnboarding() != null) {
-            tokens = institution.getOnboarding().stream()
-                    .filter(o -> o.getProductId().equalsIgnoreCase(request.getProductId())
-                            && (o.getStatus() == RelationshipState.PENDING || o.getStatus() == RelationshipState.TOBEVALIDATED))
-                    .map(o -> onboardingDao.getTokenById(o.getTokenId()))
-                    .collect(Collectors.toList());
-        }
-        var now = OffsetDateTime.now();
-        boolean isIncomplete = false;
-        for (var token : tokens) {
-            if (isTokenExpired(token, now)) {
-                onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null);
-            } else {
-                isIncomplete = true;
-            }
-        }
-        if (isIncomplete) {
-            log.warn("institution {}, there is a pending onboarding request for product {}", institution.getId(), request.getProductId());
-            throw new InvalidRequestException(String.format(CustomError.ONBOARDING_PENDING.getMessage(), request.getProductId()), CustomError.ONBOARDING_PENDING.getCode());
-        }
-    }
 }

@@ -64,6 +64,8 @@ class OnboardingControllerTest {
     @Mock
     TokenService tokenService;
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
     @Test
     void onboardingInstitutionOperators() throws Exception {
         OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
@@ -184,16 +186,32 @@ class OnboardingControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string(""));
     }
 
+
     /**
      * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
      */
     @Test
-    void testOnboardingInstitution() throws Exception {
+    void shouldOnboardInstitutionWithoutContract() throws Exception {
 
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
 
+        String content = objectMapper.writeValueAsString(createOnboardingInstitutionRequest());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/onboarding/institution/complete")
+                .principal(authentication)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    private OnboardingInstitutionRequest createOnboardingInstitutionRequest() {
         BillingRequest billingRequest = new BillingRequest();
         billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
@@ -236,7 +254,20 @@ class OnboardingControllerTest {
         onboardingInstitutionRequest.setProductId("42");
         onboardingInstitutionRequest.setProductName("Product Name");
 
-        String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionRequest);
+        return onboardingInstitutionRequest;
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
+     */
+    @Test
+    void testOnboardingInstitution() throws Exception {
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        String content = objectMapper.writeValueAsString(createOnboardingInstitutionRequest());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/onboarding/institution")
