@@ -102,18 +102,18 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomiesList, String description) {
+    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomiesList, InstitutionUpdate institutionUpdate) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
         Update update = new Update();
         update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
         if (onboarding != null) {
             update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
         }
-        if(description != null){
-            update.set(InstitutionEntity.Fields.description.name(), description);
+        if (institutionUpdate != null) {
+            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
+            map.forEach(update::set);
         }
         addGeographicTaxonomies(geographicTaxonomiesList, update);
-
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
