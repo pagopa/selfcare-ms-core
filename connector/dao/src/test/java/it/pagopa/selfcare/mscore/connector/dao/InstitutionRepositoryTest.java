@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DataMongoTest
 @EnableAutoConfiguration
 @ContextConfiguration(classes = {InstitutionEntity.class, OnboardingEntity.class, InstitutionRepository.class, DaoConfigTest.class})
-public class InstitutionRepositoryTest {
+class InstitutionRepositoryTest {
 
     @Autowired
     private InstitutionRepository repository;
