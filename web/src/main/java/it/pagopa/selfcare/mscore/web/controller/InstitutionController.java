@@ -13,12 +13,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.web.model.institution.CreatePgInstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionToOnboard;
-import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -162,7 +157,7 @@ public class InstitutionController {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut), selfCareUser.getId());
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut, null), selfCareUser.getId());
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
@@ -170,7 +165,7 @@ public class InstitutionController {
      * The function Update the description of corresponding institution given internal institution id
      *
      * @param institutionId  String
-     * @param description String
+     * @param pgInstitutionPut PgInstitutionPut
      *
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
@@ -178,15 +173,15 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.update}", notes = "${swagger.mscore.institution.update}")
-    @PutMapping(value = "/{id}/description")
-    public ResponseEntity<InstitutionResponse> updateInstitutionDescription(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+    @PutMapping(value = "/pg/{id}")
+    public ResponseEntity<InstitutionResponse> updatePgInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @PathVariable("id") String institutionId,
-                                                                 @RequestParam("description") String description,
+                                                                 @RequestBody PgInstitutionPut pgInstitutionPut,
                                                                  Authentication authentication) {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitutionDescription(institutionId, description, selfCareUser.getId());
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut) ,selfCareUser.getId());
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

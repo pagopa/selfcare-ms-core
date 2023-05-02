@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
@@ -101,9 +98,9 @@ public class InstitutionServiceImpl implements InstitutionService {
         attributes.setCode(categoryProxyInfo.getCode());
         attributes.setDescription(categoryProxyInfo.getName());
         newInstitution.setAttributes(List.of(attributes));
-        try{
+        try {
             return institutionConnector.save(newInstitution);
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
     }
@@ -133,8 +130,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
-        if (existsInRegistry){
-            if(coreConfig.isInfoCamereEnable()) {
+        if (existsInRegistry) {
+            if (coreConfig.isInfoCamereEnable()) {
                 List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
                 institutionByLegal.stream()
                         .filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
@@ -151,7 +148,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 }
             }
             newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
-        }else{
+        } else {
             newInstitution.setOrigin(Origin.ADE.getValue());
         }
         return institutionConnector.save(newInstitution);
@@ -216,23 +213,21 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
         if (userService.checkIfAdmin(userId, institutionId)) {
-            List<InstitutionGeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomies()
-                    .stream()
-                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription())).collect(Collectors.toList());
-            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, null);
+            List<InstitutionGeographicTaxonomies> geographicTaxonomies = retrieveGeographicTaxonomies(institutionUpdate);
+            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
         } else {
             throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
         }
     }
 
-    @Override
-    public Institution updateInstitutionDescription(String institutionId, String description, String userId) {
-        if (userService.checkIfAdmin(userId, institutionId)) {
-            return institutionConnector.findAndUpdate(institutionId, null, null, description);
-        } else {
-            throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
+    private List<InstitutionGeographicTaxonomies> retrieveGeographicTaxonomies(InstitutionUpdate institutionUpdate) {
+        if (institutionUpdate.getGeographicTaxonomies() != null) {
+            return institutionUpdate.getGeographicTaxonomies()
+                    .stream()
+                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription())).collect(Collectors.toList());
         }
+        return Collections.emptyList();
     }
 
     @Override

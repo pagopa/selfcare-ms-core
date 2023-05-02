@@ -57,5 +57,4 @@ public interface InstitutionService {
 
     List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId);
 
-    Institution updateInstitutionDescription(String institutionId, String description, String id);
 }

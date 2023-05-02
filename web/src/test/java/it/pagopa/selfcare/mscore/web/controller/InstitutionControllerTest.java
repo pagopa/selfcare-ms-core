@@ -945,7 +945,7 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#updateInstitutionDescription(String, String, Authentication)}
+     * Method under test: {@link InstitutionController#updatePgInstitution(String, PgInstitutionPut, Authentication)} (String, PgInstitutionPut, Authentication)}
      */
     @Test
     void testUpdateInstitutionDescription() throws Exception {
@@ -954,9 +954,13 @@ class InstitutionControllerTest {
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
 
-        when(institutionService.updateInstitutionDescription(any(), any(), any())).thenReturn(new Institution());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/42/description")
-                .param("description", "description")
+        PgInstitutionPut pgInstitutionPut = new PgInstitutionPut();
+        pgInstitutionPut.setDescription("desc");
+        pgInstitutionPut.setDigitalAddress("digitalAddress");
+        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/pg/42")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(pgInstitutionPut))
                 .principal(authentication);
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
