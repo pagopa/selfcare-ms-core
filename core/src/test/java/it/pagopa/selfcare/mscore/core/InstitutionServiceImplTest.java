@@ -1473,7 +1473,7 @@ class InstitutionServiceImplTest {
         relationshipInfoList = institutionServiceImpl.retrieveAllProduct("42", binding, institution, roles, states, products, productRoles);
 
         // Then
-        assertTrue(relationshipInfoList.size() == 2);
+        assertEquals(2, relationshipInfoList.size());
         assertEquals(binding.getProducts().get(1).getRole(), relationshipInfoList.get(0).getOnboardedProduct().getRole());
         assertEquals(binding.getProducts().get(1).getStatus(), relationshipInfoList.get(0).getOnboardedProduct().getStatus());
         assertEquals(binding.getProducts().get(1).getProductId(), relationshipInfoList.get(0).getOnboardedProduct().getProductId());
@@ -1576,13 +1576,13 @@ class InstitutionServiceImplTest {
     void testUpdateInstitutionDescription(){
         when(userService.checkIfAdmin(any(), any())).thenReturn(true);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(new Institution());
-        assertDoesNotThrow(() -> institutionServiceImpl.updateInstitutionDescription("42", "42", "userId"));
+        assertDoesNotThrow(() -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
     }
 
     @Test
     void testUpdateInstitutionDescriptionException(){
         when(userService.checkIfAdmin(any(), any())).thenReturn(false);
-        assertThrows(ResourceForbiddenException.class, () -> institutionServiceImpl.updateInstitutionDescription("42", "42", "userId"));
+        assertThrows(ResourceForbiddenException.class, () -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
     }
 
     private Institution initializeInstitution(Integer bias) {

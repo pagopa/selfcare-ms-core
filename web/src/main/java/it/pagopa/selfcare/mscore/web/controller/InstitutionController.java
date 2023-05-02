@@ -173,7 +173,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.update}", notes = "${swagger.mscore.institution.update}")
-    @PostMapping(value = "/pg/{id}")
+    @PutMapping(value = "/pg/{id}")
     public ResponseEntity<InstitutionResponse> updatePgInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @PathVariable("id") String institutionId,
                                                                  @RequestBody PgInstitutionPut pgInstitutionPut,
