@@ -189,7 +189,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         List<User> delegate = onboardedUsers
                 .stream()
-                .filter(onboardedUser -> validManagerList.contains(onboardedUser.getId()))
+                .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution);

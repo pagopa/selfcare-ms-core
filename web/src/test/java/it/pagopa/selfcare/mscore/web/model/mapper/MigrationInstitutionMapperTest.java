@@ -2,36 +2,13 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.Env;
-import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionProduct;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPut;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderResponse;
-
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
@@ -39,10 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MigrationInstitutionMapperTest {
 
@@ -1284,7 +1258,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate() {
@@ -1292,11 +1266,23 @@ class MigrationInstitutionMapperTest {
         List<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
         stringList.add(new InstitutionGeographicTaxonomies());
         institutionPut.setGeographicTaxonomyCodes(stringList.stream().map(InstitutionGeographicTaxonomies::getCode).collect(Collectors.toList()));
-        assertEquals(stringList, InstitutionMapper.toInstitutionUpdate(institutionPut).getGeographicTaxonomies());
+        assertEquals(stringList, InstitutionMapper.toInstitutionUpdate(institutionPut, null).getGeographicTaxonomies());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
+     */
+    @Test
+    void testToInstitutionUpdatePG() {
+        PgInstitutionPut institutionPut = new PgInstitutionPut();
+        institutionPut.setDescription("description");
+        institutionPut.setDigitalAddress("digitalAddress");
+        assertEquals("description", InstitutionMapper.toInstitutionUpdate(null, institutionPut).getDescription());
+        assertEquals("digitalAddress", InstitutionMapper.toInstitutionUpdate(null, institutionPut).getDigitalAddress());
+    }
+
+    /**
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate3() {
@@ -1305,7 +1291,7 @@ class MigrationInstitutionMapperTest {
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(stringList);
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut)
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut, null)
                 .getGeographicTaxonomies();
         assertEquals(1, geographicTaxonomies.size());
         InstitutionGeographicTaxonomies getResult = geographicTaxonomies.get(0);
@@ -1314,7 +1300,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate4() {
@@ -1324,7 +1310,7 @@ class MigrationInstitutionMapperTest {
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(stringList);
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut)
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut, null)
                 .getGeographicTaxonomies();
         assertEquals(2, geographicTaxonomies.size());
         InstitutionGeographicTaxonomies getResult = geographicTaxonomies.get(1);
