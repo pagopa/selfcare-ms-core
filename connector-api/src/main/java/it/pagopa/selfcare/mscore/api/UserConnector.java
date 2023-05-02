@@ -47,6 +47,6 @@ public interface UserConnector {
 
     List<OnboardedUser> findAllByIds(List<String> users);
 
-    void updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
+    List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
 
 }

@@ -205,7 +205,9 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public void updateUserBindingCreatedAt(String institutionId, String productId, List<String> usersId, OffsetDateTime createdAt) {
+    public List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> usersId, OffsetDateTime createdAt) {
+        List<OnboardedUser> updatedUsersBindings = new ArrayList<>();
+
         usersId.forEach(userId -> {
             Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
 
@@ -220,8 +222,10 @@ public class UserConnectorImpl implements UserConnector {
 
             FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
             repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
-            repository.findAndModify(query, updateUserEntityUpdatedAt, findAndModifyOptions, UserEntity.class);
+            updatedUsersBindings.add(UserMapper.toOnboardedUser(repository.findAndModify(query, updateUserEntityUpdatedAt, findAndModifyOptions, UserEntity.class)));
         });
+
+        return updatedUsersBindings;
     }
 
     private Criteria constructElemMatch(String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> productRoles, List<String> products) {

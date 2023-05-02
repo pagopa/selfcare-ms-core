@@ -1,45 +1,31 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.AttributesEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.BillingEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.SearchMode;
-import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.test.context.ContextConfiguration;
-
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {InstitutionConnectorImpl.class})
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +37,15 @@ class InstitutionConnectorImplTest {
 
     @Mock
     InstitutionRepository institutionRepository;
+
+    @Captor
+    ArgumentCaptor<Query> queryArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Update> updateArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<FindAndModifyOptions> findAndModifyOptionsArgumentCaptor;
 
     /**
      * Method under test: {@link InstitutionConnectorImpl#findAll()}
@@ -2429,4 +2424,43 @@ class InstitutionConnectorImplTest {
         institutionConnectorImpl.findAndRemoveOnboarding("institutionId", new Onboarding());
         assertNotNull(institutionEntity);
     }
+
+    @Test
+    void updateOnboardedProductCreatedAt() {
+        // Given
+        String institutionIdMock = "InstitutionIdMock";
+        String productIdMock = "ProductIdMock";
+        OffsetDateTime createdAt = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        InstitutionEntity updatedInstitutionMock = mockInstance(new InstitutionEntity());
+        OnboardingEntity onboardingEntityMock = mockInstance(new OnboardingEntity());
+        onboardingEntityMock.setProductId(productIdMock);
+        updatedInstitutionMock.setOnboarding(List.of(onboardingEntityMock));
+        updatedInstitutionMock.setId(institutionIdMock);
+        updatedInstitutionMock.setInstitutionType(InstitutionType.PA);
+        updatedInstitutionMock.setOrigin(Origin.IPA);
+        when(institutionRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedInstitutionMock);
+        // When
+        Institution result = institutionConnectorImpl.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAt);
+        // Then
+        assertNotNull(result);
+        assertEquals(result.getId(), institutionIdMock);
+        verify(institutionRepository, times(2))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(InstitutionEntity.class));
+        List<Query> capturedQuery = queryArgumentCaptor.getAllValues();
+        assertEquals(2, capturedQuery.size());
+        assertSame(capturedQuery.get(0).getQueryObject().get(InstitutionEntity.Fields.id.name()), institutionIdMock);
+        assertSame(capturedQuery.get(1).getQueryObject().get(InstitutionEntity.Fields.id.name()), institutionIdMock);
+        assertEquals(2, updateArgumentCaptor.getAllValues().size());
+        Update updateOnboardedProduct = updateArgumentCaptor.getAllValues().get(0);
+        Update updateInstitutionEntityUpdatedAt = updateArgumentCaptor.getAllValues().get(1);
+        assertEquals(1, updateOnboardedProduct.getArrayFilters().size());
+        assertTrue(updateInstitutionEntityUpdatedAt.getArrayFilters().isEmpty());
+        assertTrue(updateInstitutionEntityUpdatedAt.getUpdateObject().get("$set").toString().contains(InstitutionEntity.Fields.updatedAt.name()));
+        assertTrue(updateOnboardedProduct.getUpdateObject().get("$set").toString().contains("onboarding.$[current].createdAt") &&
+                updateOnboardedProduct.getUpdateObject().get("$set").toString().contains("onboarding.$[current].updatedAt") &&
+                updateOnboardedProduct.getUpdateObject().get("$set").toString().contains(createdAt.toString()));
+        verifyNoMoreInteractions(institutionRepository);
+    }
+
 }
