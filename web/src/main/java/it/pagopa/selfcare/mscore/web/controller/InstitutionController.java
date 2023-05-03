@@ -19,21 +19,16 @@ import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -51,7 +46,6 @@ public class InstitutionController {
      * The function persist PA institution
      *
      * @param externalId String
-     *
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: InstitutionResponse
      * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
@@ -74,7 +68,6 @@ public class InstitutionController {
      *
      * @param externalId  String
      * @param institution InstitutionRequest
-     *
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 400, Message: Bad Request, DataType: Problem
@@ -95,7 +88,6 @@ public class InstitutionController {
      * The function persist PG institution
      *
      * @param request CreatePgInstitutionRequest
-     *
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: InstitutionResponse
      * * Code: 400, Message: Bad Request, DataType: Problem
@@ -117,7 +109,6 @@ public class InstitutionController {
      *
      * @param institutionId String
      * @param states        List<String>
-     *
      * @return OnboardedProducts
      * * Code: 200, Message: successful operation, DataType: OnboardedProducts
      * * Code: 400, Message: Bad Request, DataType: Problem
@@ -142,7 +133,6 @@ public class InstitutionController {
      *
      * @param institutionId  String
      * @param institutionPut InstitutionPut
-     *
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 400, Message: bad request, DataType: Problem
@@ -164,9 +154,8 @@ public class InstitutionController {
     /**
      * The function Update the description of corresponding institution given internal institution id
      *
-     * @param institutionId  String
+     * @param institutionId    String
      * @param pgInstitutionPut PgInstitutionPut
-     *
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 400, Message: bad request, DataType: Problem
@@ -175,13 +164,13 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institution.update}", notes = "${swagger.mscore.institution.update}")
     @PutMapping(value = "/pg/{id}")
     public ResponseEntity<InstitutionResponse> updatePgInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                 @PathVariable("id") String institutionId,
-                                                                 @RequestBody PgInstitutionPut pgInstitutionPut,
-                                                                 Authentication authentication) {
+                                                                   @PathVariable("id") String institutionId,
+                                                                   @RequestBody PgInstitutionPut pgInstitutionPut,
+                                                                   Authentication authentication) {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut) ,selfCareUser.getId());
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut), selfCareUser.getId());
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
@@ -189,7 +178,6 @@ public class InstitutionController {
      * The function return geographic taxonomies related to institution
      *
      * @param id String
-     *
      * @return List
      * * Code: 200, Message: successful operation, DataType: List<GeographicTaxonomies></GeographicTaxonomies>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
@@ -210,7 +198,6 @@ public class InstitutionController {
      * The function return an institution given institution internal id
      *
      * @param id String
-     *
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
@@ -234,7 +221,6 @@ public class InstitutionController {
      * @param states        String[]
      * @param products      String[]
      * @param productRoles  String[]
-     *
      * @return List
      * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
@@ -261,7 +247,6 @@ public class InstitutionController {
      * The function return a List of Institution that user can onboard
      *
      * @param institutions List<CreatePnPgInstitutionRequest>
-     *
      * @return List
      * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
@@ -270,8 +255,38 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institutions.valid}", notes = "${swagger.mscore.institutions.valid}")
     @PostMapping(value = "/onboarded/{productId}")
     public ResponseEntity<List<InstitutionToOnboard>> getValidInstitutionToOnboard(@RequestBody List<InstitutionToOnboard> institutions,
-                                                                                      @PathVariable(value = "productId") String productId) {
+                                                                                   @PathVariable(value = "productId") String productId) {
         List<ValidInstitution> validInstitutions = institutionService.retrieveInstitutionByExternalIds(InstitutionMapper.toValidInstitutions(institutions), productId);
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionToOnboardList(validInstitutions));
     }
+
+    /**
+     * The function updates the field createdAt of the OnboardedProduct, the related Token and UserBindings for the given institution-product pair
+     *
+     * @param institutionId String
+     * @param productId     String
+     * @param createdAt     OffsetDateTime
+     * @return no content
+     * * Code: 200, Message: successful operation
+     * * Code: 404, Message: Institution or Token or UserBinding not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institutions.updateCreatedAt}", notes = "${swagger.mscore.institutions.updateCreatedAt}")
+    @PutMapping(value = "/{institutionId}/products/{productId}/createdAt")
+    public ResponseEntity<Void> updateCreatedAt(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                @PathVariable("institutionId") String institutionId,
+                                                @ApiParam("${swagger.mscore.product.model.id}")
+                                                @PathVariable("productId") String productId,
+                                                @ApiParam("${swagger.mscore.institutions.model.createdAt}")
+                                                @RequestParam(value = "createdAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime createdAt) {
+        log.trace("updateCreatedAt start");
+        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, productId, createdAt);
+        if (createdAt.compareTo(OffsetDateTime.now()) > 0) {
+            throw new ValidationException("Invalid createdAt date: the createdAt date must be prior to the current date.");
+        }
+        institutionService.updateCreatedAt(institutionId, productId, createdAt);
+        log.trace("updateCreatedAt end");
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }

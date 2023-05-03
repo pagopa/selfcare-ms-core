@@ -2,19 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.diagnostic.OrphanCertificateTokenWrapper;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlBasicSignature;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlCertificate;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlDigestAlgoAndValue;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlMRACertificateMapping;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlOID;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlOriginalThirdCountryQcStatementsMapping;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlPSD2QcInfo;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlQcCompliance;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlQcEuLimitValue;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlQcSSCD;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlQcStatements;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlSigningCertificate;
+import eu.europa.esig.dss.diagnostic.jaxb.*;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
 import eu.europa.esig.dss.enumerations.MaskGenerationFunction;
@@ -32,11 +20,6 @@ import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.user.User;
-
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-
 import org.apache.batik.anim.dom.BindableElement;
 import org.apache.batik.anim.dom.SVG12DOMImplementation;
 import org.apache.batik.anim.dom.SVG12OMDocument;
@@ -44,21 +27,20 @@ import org.apache.batik.dom.GenericDocumentType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.math.BigInteger;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_DOCUMENT_SIGNATURE;
 import static it.pagopa.selfcare.mscore.constant.GenericError.TAX_CODE_NOT_FOUND_IN_SIGNATURE;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {SignatureService.class, TrustedListsCertificateSource.class})
 @ExtendWith(SpringExtension.class)
@@ -323,7 +305,7 @@ class SignatureServiceTest {
         DetachedTimestampValidator detachedTimestampValidator = mock(DetachedTimestampValidator.class);
         when(detachedTimestampValidator.getOriginalDocuments((String) any())).thenReturn(new ArrayList<>());
         when(detachedTimestampValidator.getSignatures()).thenReturn(advancedSignatureList);
-        assertThrows( InvalidRequestException.class, () -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"), "Invalid file digest" );
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"), "Invalid file digest");
         verify(detachedTimestampValidator).getSignatures();
         verify(detachedTimestampValidator).getOriginalDocuments((String) any());
     }
@@ -341,7 +323,7 @@ class SignatureServiceTest {
         DetachedTimestampValidator detachedTimestampValidator = mock(DetachedTimestampValidator.class);
         when(detachedTimestampValidator.getOriginalDocuments((String) any())).thenReturn(new ArrayList<>());
         when(detachedTimestampValidator.getSignatures()).thenReturn(advancedSignatureList);
-        assertThrows( InvalidRequestException.class, () -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"), "Invalid file digest");
+        assertThrows(InvalidRequestException.class, () -> signatureService.verifyDigest(detachedTimestampValidator, "Checksum"), "Invalid file digest");
         verify(detachedTimestampValidator).getSignatures();
         verify(detachedTimestampValidator).getOriginalDocuments((String) any());
         verify(xAdESSignature).getId();

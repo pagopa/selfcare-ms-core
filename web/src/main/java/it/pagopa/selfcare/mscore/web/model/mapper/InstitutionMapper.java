@@ -150,7 +150,7 @@ public class InstitutionMapper {
 
     public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institutionPut, PgInstitutionPut pgInstitution) {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        if(pgInstitution != null){
+        if (pgInstitution != null) {
             institutionUpdate.setDescription(pgInstitution.getDescription());
             institutionUpdate.setDigitalAddress(pgInstitution.getDigitalAddress());
         }

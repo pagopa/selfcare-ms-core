@@ -16,18 +16,13 @@ import eu.europa.esig.dss.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.SignatureValidationReportType;
-import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -102,7 +97,7 @@ public class SignatureService {
                 .collect(Collectors.joining(","));
 
         if (!StringUtils.isBlank(signatureFormErrors)) {
-            throw new InvalidRequestException(String.format(INVALID_SIGNATURE_FORMS.getMessage(),signatureFormErrors),
+            throw new InvalidRequestException(String.format(INVALID_SIGNATURE_FORMS.getMessage(), signatureFormErrors),
                     INVALID_SIGNATURE_FORMS.getCode());
         }
     }
