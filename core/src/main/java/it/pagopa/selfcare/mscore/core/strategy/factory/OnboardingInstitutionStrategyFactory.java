@@ -62,13 +62,13 @@ public class OnboardingInstitutionStrategyFactory {
         if (InstitutionType.PG == institutionType) {
 
             digestOnboardingInstitutionStrategy = ignore -> {};
-            persitOnboardingInstitutionStrategy = verifyOneUserAndPersist();
+            persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = ignore -> {};
 
         } else {
 
             digestOnboardingInstitutionStrategy = uploadContractAndPerformDigest();
-            persitOnboardingInstitutionStrategy = retrieveManagerAndDelegateAndPersist();
+            persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
         }
 
@@ -78,7 +78,7 @@ public class OnboardingInstitutionStrategyFactory {
                 emailsOnboardingInstitutionStrategy);
     }
 
-    public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategyWithoutContract(InstitutionType institutionType) {
+    public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(InstitutionType institutionType) {
 
         Consumer<OnboardingInstitutionStrategyInput> verifyAndFillInstitutionAttributeStrategy = verifyAndFillInstitutionAttributeStrategy();
         Consumer<OnboardingInstitutionStrategyInput> digestOnboardingInstitutionStrategy = ignore -> {};
@@ -88,12 +88,12 @@ public class OnboardingInstitutionStrategyFactory {
 
         if (InstitutionType.PG == institutionType) {
 
-            persitOnboardingInstitutionStrategy = verifyOneUserAndPersist();
+            persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = ignore -> {};
 
         } else {
 
-            persitOnboardingInstitutionStrategy = retrieveManagerAndDelegateAndPersist();
+            persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithContractComplete();
             emailsOnboardingInstitutionStrategy = sendEmailWithLogoOrRollback();
         }
 
@@ -103,7 +103,7 @@ public class OnboardingInstitutionStrategyFactory {
                 emailsOnboardingInstitutionStrategy);
     }
 
-    private Consumer<OnboardingInstitutionStrategyInput> verifyOneUserAndPersist() {
+    private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndPersistWithDigest() {
         return input -> {
 
             if (input.getRequest().getUsers().size() != 1) {
@@ -117,7 +117,9 @@ public class OnboardingInstitutionStrategyFactory {
     }
 
 
-    private Consumer<OnboardingInstitutionStrategyInput> retrieveManagerAndDelegateAndPersist() {
+
+
+    private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return input -> {
 
             OnboardingInstitutionUtils.validatePaOnboarding(input.getRequest());
@@ -125,6 +127,19 @@ public class OnboardingInstitutionStrategyFactory {
             OnboardingInstitutionUtils.verifyUsers(input.getRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persist(input.getToUpdate(), input.getToDelete(), input.getRequest(), input.getInstitution(), input.getInstitutionGeographicTaxonomies(), input.getDigest());
+            input.setOnboardingRollback(onboardingRollback);
+        };
+    }
+
+
+    private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
+        return input -> {
+
+            OnboardingInstitutionUtils.validatePaOnboarding(input.getRequest());
+
+            OnboardingInstitutionUtils.verifyUsers(input.getRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
+
+            OnboardingRollback onboardingRollback = onboardingDao.persistComplete(input.getToUpdate(), input.getToDelete(), input.getRequest(), input.getInstitution(), input.getInstitutionGeographicTaxonomies(), input.getDigest());
             input.setOnboardingRollback(onboardingRollback);
         };
     }

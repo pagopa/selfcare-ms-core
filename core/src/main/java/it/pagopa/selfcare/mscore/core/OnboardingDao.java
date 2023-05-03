@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INVALID_STATUS_CHANGE;
@@ -64,6 +61,54 @@ public class OnboardingDao {
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
         Onboarding onboarding = updateInstitution(request, institution, geographicTaxonomies, token);
         Map<String, OnboardedProduct> productMap = createUsers(toUpdate, toDelete, request, institution, token, onboarding);
+        return new OnboardingRollback(token, onboarding, productMap, null);
+    }
+
+
+
+    public OnboardingRollback persistComplete(List<String> toUpdate,
+                                      List<String> toDelete,
+                                      OnboardingRequest request,
+                                      Institution institution,
+                                      List<InstitutionGeographicTaxonomies> geographicTaxonomies,
+                                      String digest) {
+
+        log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
+
+        Token token = TokenUtils.toToken(request, institution, digest, null);
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setContractSigned(request.getContractFilePath());
+        token = tokenConnector.save(token, geographicTaxonomies);
+
+        log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
+
+        Onboarding onboarding = constructOnboarding(request, institution);
+        onboarding.setTokenId(token.getId());
+        onboarding.setContract(request.getContractFilePath());
+        onboarding.setStatus(RelationshipState.ACTIVE);
+
+        try {
+            log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
+            institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(institution.getId(), token.getInstitutionUpdate(), onboarding);
+        } catch (Exception e) {
+            log.warn("can not update institution {}", institution.getId(), e);
+            rollbackFirstStep(token, institution.getId(), onboarding);
+        }
+
+        List<String> usersId = request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList());
+        Map<String, OnboardedProduct> productMap = new HashMap<>();
+        try {
+
+            for (UserToOnboard userToOnboard : request.getUsers()) {
+                updateOrCreateUserWithState(toUpdate, userToOnboard, institution, request, token.getId(), RelationshipState.ACTIVE)
+                        .ifPresent(onboardedProduct -> productMap.put(userToOnboard.getId(), onboardedProduct));
+            }
+            log.debug("users to update: {}", toUpdate);
+        } catch (Exception e) {
+            toDelete.addAll(usersId.stream().filter(id -> !toUpdate.contains(id)).collect(Collectors.toList()));
+            rollbackSecondStep(toUpdate, toDelete, institution.getId(), token, onboarding, productMap);
+        }
+
         return new OnboardingRollback(token, onboarding, productMap, null);
     }
 
@@ -202,6 +247,24 @@ public class OnboardingDao {
         } catch (ResourceNotFoundException e) {
             createNewUser(userToOnboard, institution, request, tokenId);
         }
+    }
+
+    private Optional<OnboardedProduct> updateOrCreateUserWithState(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, RelationshipState state) {
+        try {
+            OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
+
+            OnboardedProduct product = constructProduct(userToOnboard, request, institution);
+            product.setTokenId(tokenId);
+            product.setStatus(state);
+            UserBinding binding = new UserBinding(institution.getId(), List.of(product));
+            userConnector.findAndUpdate(onboardedUser, userToOnboard.getId(), institution.getId(), product, binding);
+
+            return Optional.of(product);
+        } catch (ResourceNotFoundException e) {
+            createNewUser(userToOnboard, institution, request, tokenId);
+        }
+
+        return Optional.empty();
     }
 
     public List<RelationshipInfo> onboardOperator(OnboardingOperatorsRequest request, Institution institution) {

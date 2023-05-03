@@ -262,9 +262,9 @@ public class OnboardingInstitutionStrategyTest {
         Token token1 =new Token();
         token1.setId("id");
         onboardingRollback.setToken(token1);
-        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+        when(onboardingDao.persistComplete(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
 
-        assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategyWithoutContract(institutionUpdate.getInstitutionType())
+        assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(institutionUpdate.getInstitutionType())
                 .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
     }
 

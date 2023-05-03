@@ -114,7 +114,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     public void onboardingInstitutionComplete(OnboardingRequest request, SelfCareUser principal) {
 
         institutionStrategyFactory
-                .retrieveOnboardingInstitutionStrategyWithoutContract(request.getInstitutionUpdate().getInstitutionType())
+                .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType())
                 .onboardingInstitution(request, principal);
     }
 

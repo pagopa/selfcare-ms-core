@@ -1568,7 +1568,7 @@ class OnboardingServiceImplTest {
     @Test
     void shouldOnboardingInstitutionComplete() {
         OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContract(any()))
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(any()))
                 .thenReturn(mockInstitutionStrategy);
         doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
 

@@ -115,6 +115,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
+    //TODO refactor: new onboarding (onboarding != null) and updates on onboarding (state and token != null) cause conflicts
     @Override
     public Institution findAndUpdateInstitutionData(String institutionId, Token token, Onboarding onboarding, RelationshipState state) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
@@ -135,6 +136,25 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
             update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.contract.name()), token.getContractSigned());
         }
         InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
+        if (institutionUpdate != null) {
+            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
+            map.forEach(update::set);
+            addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
+        }
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
+    }
+
+
+
+    @Override
+    public Institution findAndUpdateInstitutionDataWithNewOnboarding(String institutionId, InstitutionUpdate institutionUpdate, Onboarding onboarding) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+        Update update = new Update();
+        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
+
         if (institutionUpdate != null) {
             Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
             map.forEach(update::set);
