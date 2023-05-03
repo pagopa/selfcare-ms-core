@@ -272,7 +272,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions.updateCreatedAt}", notes = "${swagger.mscore.institutions.updateCreatedAt}")
-    @PutMapping(value = "/{institutionId}/product/{productId}/createdAt")
+    @PutMapping(value = "/{institutionId}/products/{productId}/createdAt")
     public ResponseEntity<Void> updateCreatedAt(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                 @PathVariable("institutionId") String institutionId,
                                                 @ApiParam("${swagger.mscore.product.model.id}")
