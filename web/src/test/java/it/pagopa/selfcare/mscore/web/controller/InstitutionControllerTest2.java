@@ -44,7 +44,7 @@ class InstitutionControllerTest2 {
         String createdAtString = createdAtMock.toString();
         // When
         mvc.perform(MockMvcRequestBuilders
-                        .put(BASE_URL + "/{institutionId}/product/{productId}/createdAt", institutionIdMock, productIdMock)
+                        .put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
                         .param("createdAt", createdAtString)
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE))

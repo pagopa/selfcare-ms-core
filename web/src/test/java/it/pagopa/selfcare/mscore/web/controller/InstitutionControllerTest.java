@@ -1026,7 +1026,7 @@ class InstitutionControllerTest {
         String createdAtString = "2020-11-01T02:15:30+01:00";
         OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
         // When
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/product/{productId}/createdAt", institutionIdMock, productIdMock)
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
                 .param("createdAt", createdAtString);
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
