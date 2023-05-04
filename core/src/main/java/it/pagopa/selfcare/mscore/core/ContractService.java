@@ -258,16 +258,7 @@ public class ContractService {
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(token.getUpdatedAt());
         notification.setClosedAt(token.getClosedAt());
-        notification.setZipCode(token.getInstitutionUpdate().getZipCode());
-        notification.setPaymentServiceProvider(token.getInstitutionUpdate().getPaymentServiceProvider());
 
-        try {
-            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
-            notification.setIstatCode(institutionProxyInfo.getIstatCode());
-        } catch (MsCoreException | ResourceNotFoundException e) {
-            log.debug("Searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
-            notification.setIstatCode(null);
-        }
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
@@ -294,6 +285,13 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        try {
+            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
+            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+        } catch (MsCoreException | ResourceNotFoundException e) {
+            log.debug("Searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+            toNotify.setIstatCode(null);
+        }
         return toNotify;
     }
 

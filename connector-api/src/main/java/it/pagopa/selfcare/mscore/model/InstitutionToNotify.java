@@ -20,5 +20,6 @@ public class InstitutionToNotify {
     private String originId;
     private String zipCode;
     private PaymentServiceProvider paymentServiceProvider;
+    private String istatCode;
 
 }

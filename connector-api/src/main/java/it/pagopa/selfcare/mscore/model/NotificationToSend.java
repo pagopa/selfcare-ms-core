@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
@@ -26,8 +25,5 @@ public class NotificationToSend {
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
     private List<UserToNotify> users;
-    private PaymentServiceProvider paymentServiceProvider;
-    private String zipCode;
-    private String istatCode;
 
 }
