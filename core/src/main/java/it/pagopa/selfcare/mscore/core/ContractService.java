@@ -10,6 +10,7 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.utils.crypto.model.SignatureInformation;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
@@ -231,7 +232,7 @@ public class ContractService {
     public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
         if (institution != null) {
             NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
-            log.debug("Notification to send to the data lake, notification: {}", notification);
+            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
                 sendNotification(msg, token.getId());
@@ -256,6 +257,8 @@ public class ContractService {
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(token.getUpdatedAt());
         notification.setClosedAt(token.getClosedAt());
+        notification.setZipCode(token.getInstitutionUpdate().getZipCode());
+        notification.setPaymentServiceProvider(token.getInstitutionUpdate().getPaymentServiceProvider());
 
         try {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
