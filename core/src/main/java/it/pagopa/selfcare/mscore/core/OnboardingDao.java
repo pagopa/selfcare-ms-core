@@ -229,7 +229,7 @@ public class OnboardingDao {
         Map<String, OnboardedProduct> productMap = new HashMap<>();
         try {
             for (UserToOnboard userToOnboard : request.getUsers()) {
-                updateOrCreateUser(toUpdate, userToOnboard, institution, request, token.getId(), productMap);
+                updateOrCreateUserToOnboard(toUpdate, userToOnboard, institution, request, token.getId(), productMap);
             }
             log.debug("users to update: {}", toUpdate);
         } catch (Exception e) {
@@ -239,7 +239,7 @@ public class OnboardingDao {
         return productMap;
     }
 
-    private void updateOrCreateUser(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, Map<String, OnboardedProduct> productMap) {
+    private void updateOrCreateUserToOnboard(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, Map<String, OnboardedProduct> productMap) {
         try {
             OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
             OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institution, request, tokenId);

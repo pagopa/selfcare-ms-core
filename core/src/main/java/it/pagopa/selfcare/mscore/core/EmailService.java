@@ -42,7 +42,6 @@ public class EmailService {
         this.mailTemplateConfig = mailTemplateConfig;
     }
 
-    //TODO refactor templateName
     public void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName) {
         emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, "simpleMail", templateParameters, fileName);
     }

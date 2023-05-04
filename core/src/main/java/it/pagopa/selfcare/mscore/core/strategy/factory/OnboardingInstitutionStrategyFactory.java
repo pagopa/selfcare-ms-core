@@ -104,15 +104,17 @@ public class OnboardingInstitutionStrategyFactory {
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndPersistWithDigest() {
-        return input -> {
+        return strategyInput -> {
 
-            if (input.getRequest().getUsers().size() != 1) {
+            if (strategyInput.getRequest().getUsers().size() != 1) {
                 throw new InvalidRequestException(CustomError.USERS_SIZE_NOT_ADMITTED.getMessage(), CustomError.USERS_SIZE_NOT_ADMITTED.getCode());
             }
 
-            OnboardingInstitutionUtils.verifyUsers(input.getRequest().getUsers(), List.of(PartyRole.MANAGER));
-            OnboardingRollback onboardingRollback = onboardingDao.persist(input.getToUpdate(), input.getToDelete(), input.getRequest(), input.getInstitution(), input.getInstitutionGeographicTaxonomies(), input.getDigest());
-            input.setOnboardingRollback(onboardingRollback);
+            OnboardingInstitutionUtils.verifyUsers(strategyInput.getRequest().getUsers(), List.of(PartyRole.MANAGER));
+            OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(),
+                    strategyInput.getToDelete(), strategyInput.getRequest(), strategyInput.getInstitution(),
+                    strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getDigest());
+            strategyInput.setOnboardingRollback(onboardingRollback);
         };
     }
 
@@ -120,91 +122,91 @@ public class OnboardingInstitutionStrategyFactory {
 
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
-        return input -> {
+        return strategyInput -> {
 
-            OnboardingInstitutionUtils.validatePaOnboarding(input.getRequest());
+            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getRequest());
 
-            OnboardingInstitutionUtils.verifyUsers(input.getRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
+            OnboardingInstitutionUtils.verifyUsers(strategyInput.getRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
-            OnboardingRollback onboardingRollback = onboardingDao.persist(input.getToUpdate(), input.getToDelete(), input.getRequest(), input.getInstitution(), input.getInstitutionGeographicTaxonomies(), input.getDigest());
-            input.setOnboardingRollback(onboardingRollback);
+            OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getDigest());
+            strategyInput.setOnboardingRollback(onboardingRollback);
         };
     }
 
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
-        return input -> {
+        return strategyInput -> {
 
-            OnboardingInstitutionUtils.validatePaOnboarding(input.getRequest());
+            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getRequest());
 
-            OnboardingInstitutionUtils.verifyUsers(input.getRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
+            OnboardingInstitutionUtils.verifyUsers(strategyInput.getRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
-            OnboardingRollback onboardingRollback = onboardingDao.persistComplete(input.getToUpdate(), input.getToDelete(), input.getRequest(), input.getInstitution(), input.getInstitutionGeographicTaxonomies(), input.getDigest());
-            input.setOnboardingRollback(onboardingRollback);
+            OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getDigest());
+            strategyInput.setOnboardingRollback(onboardingRollback);
         };
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> uploadContractAndPerformDigest() {
-        return input -> {
+        return strategyInput -> {
 
-            List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(input.getRequest().getUsers(), null);
+            List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(strategyInput.getRequest().getUsers(), null);
             User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
 
-            List<User> delegate = input.getRequest().getUsers()
+            List<User> delegates = strategyInput.getRequest().getUsers()
                     .stream()
                     .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
                     .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
-            String contractTemplate = contractService.extractTemplate(input.getRequest().getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, input.getInstitution(), input.getRequest(), input.getInstitutionGeographicTaxonomies(), input.getInstitution().getInstitutionType());
+            String contractTemplate = contractService.extractTemplate(strategyInput.getRequest().getContract().getPath());
+            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getRequest(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getInstitution().getInstitutionType());
             String digest = TokenUtils.createDigest(pdf);
 
-            input.setDigest(digest);
-            input.setPdf(pdf);
+            strategyInput.setDigest(digest);
+            strategyInput.setPdf(pdf);
         };
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> sendEmailWithDigestOrRollback() {
-        return input -> {
+        return strategyInput -> {
             try {
-                User user = userService.retrieveUserFromUserRegistry(input.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
-                emailService.sendMail(input.getPdf(), input.getInstitution(), user, input.getRequest(), input.getOnboardingRollback().getToken().getId(), false, input.getInstitution().getInstitutionType());
+                User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
+                emailService.sendMail(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false, strategyInput.getInstitution().getInstitutionType());
             } catch (Exception e) {
-                onboardingDao.rollbackSecondStep(input.getToUpdate(), input.getToDelete(), input.getInstitution().getId(),
-                        input.getOnboardingRollback().getToken(), input.getOnboardingRollback().getOnboarding(), input.getOnboardingRollback().getProductMap());
+                onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
+                        strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
             }
         };
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> sendEmailWithLogoOrRollback() {
-        return input -> {
+        return strategyInput -> {
             try {
 
-                if(input.getRequest().getInstitutionUpdate().isImported()) {
+                if(strategyInput.getRequest().getInstitutionUpdate().isImported()) {
 
-                    List<String> destinationMail = Objects.nonNull(coreConfig.getDestinationMails())
+                    List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails())
                             ? coreConfig.getDestinationMails()
-                            : List.of(input.getInstitution().getDigitalAddress());
+                            : List.of(strategyInput.getInstitution().getDigitalAddress());
 
                     File logoFile = contractService.getLogoFile();
 
-                    emailService.sendAutocompleteMail(destinationMail, new HashMap<>(), logoFile, EmailService.PAGOPA_LOGO_FILENAME);
+                    emailService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, EmailService.PAGOPA_LOGO_FILENAME);
                 }
             } catch (Exception e) {
-                onboardingDao.rollbackSecondStep(input.getToUpdate(), input.getToDelete(), input.getInstitution().getId(),
-                        input.getOnboardingRollback().getToken(), input.getOnboardingRollback().getOnboarding(), input.getOnboardingRollback().getProductMap());
+                onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
+                        strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
             }
         };
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyAndFillInstitutionAttributeStrategy() {
-        return input -> {
-            input.getRequest().setTokenType(TokenType.INSTITUTION);
-            Institution institution = institutionService.retrieveInstitutionByExternalId(input.getRequest().getInstitutionExternalId());
-            OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, input.getRequest());
-            checkIncompleteOnboarding(institution, input.getRequest());
-            OnboardingInstitutionUtils.validateOverridingData(input.getRequest().getInstitutionUpdate(), institution);
-            List<GeographicTaxonomies> geographicTaxonomies = getGeographicTaxonomy(input.getRequest());
+        return strategyInput -> {
+            strategyInput.getRequest().setTokenType(TokenType.INSTITUTION);
+            Institution institution = institutionService.retrieveInstitutionByExternalId(strategyInput.getRequest().getInstitutionExternalId());
+            OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, strategyInput.getRequest());
+            checkIncompleteOnboarding(institution, strategyInput.getRequest());
+            OnboardingInstitutionUtils.validateOverridingData(strategyInput.getRequest().getInstitutionUpdate(), institution);
+            List<GeographicTaxonomies> geographicTaxonomies = getGeographicTaxonomy(strategyInput.getRequest());
             List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies = new ArrayList<>();
             if (!geographicTaxonomies.isEmpty()) {
                 institutionGeographicTaxonomies = geographicTaxonomies.stream()
@@ -212,8 +214,8 @@ public class OnboardingInstitutionStrategyFactory {
                         .collect(Collectors.toList());
             }
 
-            input.setInstitution(institution);
-            input.setInstitutionGeographicTaxonomies(institutionGeographicTaxonomies);
+            strategyInput.setInstitution(institution);
+            strategyInput.setInstitutionGeographicTaxonomies(institutionGeographicTaxonomies);
         };
     }
 

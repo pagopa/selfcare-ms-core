@@ -115,7 +115,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
-    //TODO refactor: new onboarding (onboarding != null) and updates on onboarding (state and token != null) cause conflicts
+    //TODO[SELC-2286]: refactor new onboarding (onboarding != null) and updates on onboarding (state and token != null) cause conflicts
     @Override
     public Institution findAndUpdateInstitutionData(String institutionId, Token token, Onboarding onboarding, RelationshipState state) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
