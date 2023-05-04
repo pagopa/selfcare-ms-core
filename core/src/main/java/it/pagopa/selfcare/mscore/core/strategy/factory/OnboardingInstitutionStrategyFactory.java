@@ -230,6 +230,8 @@ public class OnboardingInstitutionStrategyFactory {
         }
         var now = OffsetDateTime.now();
         boolean isIncomplete = false;
+        
+        /* set state DELETE for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
         for (var token : tokens) {
             if (TokenUtils.isTokenExpired(token, now)) {
                 onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null);
