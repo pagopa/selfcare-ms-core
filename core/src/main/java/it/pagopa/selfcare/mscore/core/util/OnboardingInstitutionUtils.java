@@ -98,6 +98,17 @@ public class OnboardingInstitutionUtils {
         }
     }
 
+    public static String getValidManagerId(List<UserToOnboard> users) {
+        log.debug("START - getOnboardingValidManager for users list size: {}", users.size());
+
+        return users.stream()
+            .filter(userToOnboard -> PartyRole.MANAGER == userToOnboard.getRole())
+            .map(UserToOnboard::getId)
+            .findAny()
+            .orElseThrow(() -> new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(),
+                    CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getCode()));
+    }
+
     public static List<String> getValidManagerToOnboard(List<UserToOnboard> users, Token token) {
         log.info("START - getOnboardingValidManager for users list size: {}", users.size());
         List<String> response;

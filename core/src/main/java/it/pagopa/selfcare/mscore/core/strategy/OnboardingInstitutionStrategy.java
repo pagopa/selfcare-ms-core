@@ -32,7 +32,7 @@ public class OnboardingInstitutionStrategy {
 
         OnboardingInstitutionStrategyInput institutionStrategyInput = OnboardingInstitutionStrategyInput.builder()
                 .principal(principal)
-                .request(request)
+                .onboardingRequest(request)
                 .toDelete(new ArrayList<>())
                 .toUpdate(new ArrayList<>())
                 .build();

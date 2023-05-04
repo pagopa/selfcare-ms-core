@@ -15,7 +15,7 @@ import java.util.List;
 @Builder
 public class OnboardingInstitutionStrategyInput {
 
-    private OnboardingRequest request;
+    private OnboardingRequest onboardingRequest;
     private SelfCareUser principal;
 
     private List<String> toUpdate;
