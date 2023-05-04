@@ -25,6 +25,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -263,8 +264,8 @@ public class ContractService {
         try {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
             notification.setIstatCode(institutionProxyInfo.getIstatCode());
-        } catch (MsCoreException e) {
-            log.debug("Searching institution {} on IPA, {} {} ", institution.getExternalId(), e.getCode(), e.getMessage());
+        } catch (MsCoreException | ResourceNotFoundException e) {
+            log.debug("Searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
             notification.setIstatCode(null);
         }
 

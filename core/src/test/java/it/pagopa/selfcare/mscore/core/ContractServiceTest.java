@@ -20,6 +20,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -31,8 +32,11 @@ import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -302,8 +306,12 @@ class ContractServiceTest {
     /**
      * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token, QueueEvent)}
      */
-    @Test
-    void testSendDataLakeNotification_notOnIpa() throws ExecutionException, InterruptedException {
+    @ParameterizedTest
+    @ValueSource(classes = {
+            MsCoreException.class,
+            ResourceNotFoundException.class
+    })
+    void testSendDataLakeNotification_notOnIpa(Class<?> clazz) throws ExecutionException, InterruptedException {
         ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
         when(producerFactory.transactionCapable()).thenReturn(true);
         KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
@@ -383,12 +391,14 @@ class ContractServiceTest {
         workContacts2.put("NotFoundInstitutionId2", createWorkContact("user2workemailNotFound2@examepl.com"));
         user2.setWorkContacts(workContacts2);
 
+        Exception exceptionMock = (Exception) Mockito.mock(clazz);
+
         when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
                 .thenReturn(user1);
         when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
                 .thenReturn(user2);
         when(partyRegistryProxyConnector.getInstitutionById(any()))
-                .thenThrow(MsCoreException.class);
+                .thenThrow(exceptionMock);
 
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
