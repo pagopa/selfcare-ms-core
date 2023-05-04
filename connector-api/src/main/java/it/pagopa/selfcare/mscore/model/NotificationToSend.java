@@ -25,5 +25,6 @@ public class NotificationToSend {
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
     private List<UserToNotify> users;
+    private String istatCode;
 
 }
