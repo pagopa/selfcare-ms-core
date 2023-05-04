@@ -20,12 +20,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,8 +36,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
+@ContextConfiguration(classes = {InstitutionController.class})
 @ExtendWith(MockitoExtension.class)
 class InstitutionControllerTest {
+
+    private static final String BASE_URL = "/institutions";
+
     @InjectMocks
     private InstitutionController institutionController;
 
@@ -269,7 +275,7 @@ class InstitutionControllerTest {
      */
     @Test
     void testCreateInstitutionRaw() throws Exception {
-        when(institutionService.createInstitutionRaw( any(), any())).thenReturn(new Institution());
+        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -629,7 +635,7 @@ class InstitutionControllerTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
-        when(institutionService.createInstitutionRaw( any(), any()))
+        when(institutionService.createInstitutionRaw(any(), any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
@@ -689,7 +695,7 @@ class InstitutionControllerTest {
      */
     @Test
     void testCreateInstitutionRaw9() throws Exception {
-        when(institutionService.createInstitutionRaw( any(), any())).thenReturn(new Institution());
+        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
 
         AttributesRequest attributesRequest = new AttributesRequest();
         attributesRequest.setCode("?");
@@ -745,7 +751,7 @@ class InstitutionControllerTest {
      */
     @Test
     void testCreateInstitutionRaw10() throws Exception {
-        when(institutionService.createInstitutionRaw( any(), any())).thenReturn(new Institution());
+        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -801,7 +807,7 @@ class InstitutionControllerTest {
     @Test
     void testRetrieveInstitutionProducts() throws Exception {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionService.retrieveInstitutionProducts( any(), any()))
+        when(institutionService.retrieveInstitutionProducts(any(), any()))
                 .thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
@@ -836,7 +842,7 @@ class InstitutionControllerTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionService.retrieveInstitutionProducts( any(), any()))
+        when(institutionService.retrieveInstitutionProducts(any(), any()))
                 .thenReturn(onboardingList);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
@@ -889,7 +895,7 @@ class InstitutionControllerTest {
         onboardingList.add(onboarding1);
         onboardingList.add(onboarding);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionService.retrieveInstitutionProducts( any(), any()))
+        when(institutionService.retrieveInstitutionProducts(any(), any()))
                 .thenReturn(onboardingList);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/products", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
@@ -908,7 +914,7 @@ class InstitutionControllerTest {
     @Test
     void testRetrieveInstitutionGeoTaxonomies() throws Exception {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionService.retrieveInstitutionGeoTaxonomies( any())).thenReturn(new ArrayList<>());
+        when(institutionService.retrieveInstitutionGeoTaxonomies(any())).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}/geotaxonomies",
                 "42");
         MockMvcBuilders.standaloneSetup(institutionController)
@@ -940,5 +946,95 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#updatePgInstitution(String, PgInstitutionPut, Authentication)} (String, PgInstitutionPut, Authentication)}
+     */
+    @Test
+    void testUpdateInstitutionDescription() throws Exception {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
+
+        PgInstitutionPut pgInstitutionPut = new PgInstitutionPut();
+        pgInstitutionPut.setDescription("desc");
+        pgInstitutionPut.setDigitalAddress("digitalAddress");
+        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/pg/42")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(pgInstitutionPut))
+                .principal(authentication);
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    @Test
+    void testUpdateInstitution() throws Exception {
+
+        InstitutionPut institutionPut = new InstitutionPut();
+        institutionPut.setGeographicTaxonomyCodes(new ArrayList<>());
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
+
+        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/42")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(institutionPut))
+                .principal(authentication);
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    @Test
+    void testGetValidInstitutionToOnboard() throws Exception {
+        InstitutionToOnboard institution = new InstitutionToOnboard();
+        List<InstitutionToOnboard> list = new ArrayList<>();
+        list.add(institution);
+        List<ValidInstitution> validInstitutions = new ArrayList<>();
+        ValidInstitution validInstitution = new ValidInstitution();
+        validInstitutions.add(validInstitution);
+        when(institutionService.retrieveInstitutionByExternalIds(any(), any())).thenReturn(validInstitutions);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/institutions/onboarded/{productId}", "42")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(list));
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#updateCreatedAt(String, String, java.time.OffsetDateTime)}
+     */
+    @Test
+    void updateCreatedAt() throws Exception {
+        // Given
+        String institutionIdMock = "institutionId";
+        String productIdMock = "productId";
+        String createdAtString = "2020-11-01T02:15:30+01:00";
+        OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
+                .param("createdAt", createdAtString);
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        // Then
+        verify(institutionService, times(1))
+                .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+        verifyNoMoreInteractions(institutionService);
     }
 }

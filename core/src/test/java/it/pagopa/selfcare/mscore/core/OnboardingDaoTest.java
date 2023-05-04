@@ -6,37 +6,19 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.onboarding.Contract;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,19 +27,13 @@ import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class OnboardingDaoTest {
@@ -79,7 +55,7 @@ class OnboardingDaoTest {
 
     @Test
     void testPersist0() {
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenReturn(new Institution());
         when(coreConfig.getOnboardingExpiringDate()).thenReturn(60);
         Token token = new Token();
@@ -226,7 +202,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testPersist() {
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenReturn(new Institution());
         Token token = new Token();
         token.setId("tokenId");
@@ -300,8 +276,7 @@ class OnboardingDaoTest {
         assertEquals("Pricing Plan", onboarding.getPricingPlan());
         assertEquals("Path", onboarding.getContract());
         assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(tokenConnector).save(any(), any());
     }
 
@@ -311,7 +286,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist2() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -375,8 +350,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -388,7 +362,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist3() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"))
                 .when(tokenConnector)
@@ -454,8 +428,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
     }
@@ -466,7 +439,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist6() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -530,8 +503,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -543,7 +515,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist7() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -607,8 +579,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, list, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -2039,8 +2010,9 @@ class OnboardingDaoTest {
         when(productConnector.getProductById(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
         CoreConfig config = new CoreConfig();
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, config);
         assertThrows(InvalidRequestException.class,
-                () -> (new OnboardingDao(null, null, null, productConnector, coreConfig)).getProductById("42"));
+                () -> onboardingDao.getProductById("42"));
         verify(productConnector).getProductById(any());
     }
 
