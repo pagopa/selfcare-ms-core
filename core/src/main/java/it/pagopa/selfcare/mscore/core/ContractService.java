@@ -289,7 +289,7 @@ public class ContractService {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
             toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
         } catch (MsCoreException | ResourceNotFoundException e) {
-            log.debug("Searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+            log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
             toNotify.setIstatCode(null);
         }
         return toNotify;
