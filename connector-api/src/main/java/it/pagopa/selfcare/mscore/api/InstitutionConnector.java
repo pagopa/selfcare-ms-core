@@ -2,12 +2,10 @@ package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +25,7 @@ public interface InstitutionConnector {
 
     Institution findAndUpdateStatus(String id, String tokenId, RelationshipState state);
 
-    Institution findAndUpdate(String id, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomies, String description);
+    Institution findAndUpdate(String id, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionUpdate institutionUpdate);
 
     Institution findInstitutionProduct(String externalId, String productId);
 
@@ -44,4 +42,6 @@ public interface InstitutionConnector {
     Institution saveOrRetrievePnPg(Institution newInstitution);
 
     List<String> findByExternalIdAndProductId(List<ValidInstitution> externalIds, String productId);
+
+    Institution updateOnboardedProductCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);
 }

@@ -20,6 +20,7 @@ import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -190,7 +191,7 @@ class ContractServiceTest {
     }
 
     /**
-     * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token)}
+     * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token, QueueEvent)}
      */
     @Test
     void testSendDataLakeNotification2() throws ExecutionException, InterruptedException {
@@ -275,7 +276,7 @@ class ContractServiceTest {
         when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
                 .thenReturn(user2);
 
-        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token),
+        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
         verify(userRegistryConnector, times(1))
@@ -283,6 +284,62 @@ class ContractServiceTest {
         verify(userRegistryConnector, times(1))
                 .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
         verifyNoMoreInteractions(userRegistryConnector);
+    }
+
+    @Test
+    void testSendDataLakeNotification_updateQueueEvent() throws ExecutionException, InterruptedException {
+        ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
+        when(producerFactory.transactionCapable()).thenReturn(true);
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
+        CoreConfig coreConfig = new CoreConfig();
+        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector);
+
+        Institution institution = new Institution();
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("prod");
+        institution.setOnboarding(List.of(onboarding));
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate
+                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId("prod");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE),
+                "Topic cannot be null");
 
     }
 

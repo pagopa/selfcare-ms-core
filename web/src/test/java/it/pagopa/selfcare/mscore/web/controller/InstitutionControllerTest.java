@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ContextConfiguration(classes = {InstitutionController.class})
 @ExtendWith(MockitoExtension.class)
 class InstitutionControllerTest {
+
+    private static final String BASE_URL = "/institutions";
+
     @InjectMocks
     private InstitutionController institutionController;
 
@@ -945,7 +949,7 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#updateInstitutionDescription(String, String, Authentication)}
+     * Method under test: {@link InstitutionController#updatePgInstitution(String, PgInstitutionPut, Authentication)} (String, PgInstitutionPut, Authentication)}
      */
     @Test
     void testUpdateInstitutionDescription() throws Exception {
@@ -954,9 +958,13 @@ class InstitutionControllerTest {
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
 
-        when(institutionService.updateInstitutionDescription(any(), any(), any())).thenReturn(new Institution());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/42/description")
-                .param("description", "description")
+        PgInstitutionPut pgInstitutionPut = new PgInstitutionPut();
+        pgInstitutionPut.setDescription("desc");
+        pgInstitutionPut.setDigitalAddress("digitalAddress");
+        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/pg/42")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(pgInstitutionPut))
                 .principal(authentication);
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
@@ -1005,5 +1013,28 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#updateCreatedAt(String, String, java.time.OffsetDateTime)}
+     */
+    @Test
+    void updateCreatedAt() throws Exception {
+        // Given
+        String institutionIdMock = "institutionId";
+        String productIdMock = "productId";
+        String createdAtString = "2020-11-01T02:15:30+01:00";
+        OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
+                .param("createdAt", createdAtString);
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        // Then
+        verify(institutionService, times(1))
+                .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+        verifyNoMoreInteractions(institutionService);
     }
 }

@@ -10,7 +10,6 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
-import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.utils.crypto.model.SignatureInformation;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
@@ -25,6 +24,7 @@ import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
@@ -55,10 +55,14 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
 import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 
 @Slf4j
@@ -218,10 +222,10 @@ public class ContractService {
         }
     }
 
-    public void sendDataLakeNotification(Institution institution, Token token) {
+    public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
         if (institution != null) {
-            NotificationToSend notification = toNotificationToSend(institution, token);
-            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
+            NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
+            log.debug("Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
                 sendNotification(msg, token.getId());
@@ -231,9 +235,13 @@ public class ContractService {
         }
     }
 
-    private NotificationToSend toNotificationToSend(Institution institution, Token token) {
+    private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
-        notification.setId(token.getId());
+        if (queueEvent.equals(QueueEvent.ADD)) {
+            notification.setId(token.getId());
+        } else {
+            notification.setId(UUID.randomUUID().toString());
+        }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setState(RelationshipState.ACTIVE);

@@ -1,38 +1,35 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserConnectorImplTest {
@@ -41,6 +38,15 @@ class UserConnectorImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Captor
+    ArgumentCaptor<Query> queryArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Update> updateArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<FindAndModifyOptions> findAndModifyOptionsArgumentCaptor;
 
     /**
      * Method under test: {@link UserConnectorImpl#findAll()}
@@ -876,6 +882,52 @@ class UserConnectorImplTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> userConnectorImpl.findAndRemoveProduct("42", "42", onboardedProduct));
         verify(userRepository).findAndModify(any(), any(), any(), any());
+    }
+
+    @Test
+    void updateOnboardedProductCreatedAt() {
+        // Given
+        String institutionIdMock = "InstitutionIdMock";
+        String productIdMock = "ProductIdMock";
+        List<String> usersIdMock = List.of("UserId2");
+        OffsetDateTime createdAt = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+
+        UserBindingEntity userBindingEntityMock1 = mockInstance(new UserBindingEntity());
+        userBindingEntityMock1.setProducts(List.of(mockInstance(new OnboardedProductEntity())));
+        OnboardedProductEntity onboardedProductEntity1 = mockInstance(new OnboardedProductEntity());
+        OnboardedProductEntity onboardedProductEntity2 = mockInstance(new OnboardedProductEntity());
+        onboardedProductEntity2.setProductId(productIdMock);
+        OnboardedProductEntity onboardedProductEntity3 = mockInstance(new OnboardedProductEntity(), 3);
+        UserBindingEntity userBindingEntityMock2 = mockInstance(new UserBindingEntity());
+        userBindingEntityMock2.setInstitutionId(institutionIdMock);
+        userBindingEntityMock2.setProducts(List.of(onboardedProductEntity1, onboardedProductEntity2, onboardedProductEntity3));
+        UserEntity updatedUserEntityMock = mockInstance(new UserEntity());
+        OnboardingEntity onboardingEntityMock = mockInstance(new OnboardingEntity());
+        onboardingEntityMock.setProductId(productIdMock);
+
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedUserEntityMock);
+        // When
+        List<OnboardedUser> result = userConnectorImpl.updateUserBindingCreatedAt(institutionIdMock, productIdMock, usersIdMock, createdAt);
+        // Then
+        assertFalse(result.isEmpty());
+        assertEquals(usersIdMock.size(), result.size());
+        verify(userRepository, times(2))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(UserEntity.class));
+        List<Query> capturedQuery = queryArgumentCaptor.getAllValues();
+        assertEquals(2, capturedQuery.size());
+        assertSame(capturedQuery.get(0).getQueryObject().get(UserEntity.Fields.id.name()), usersIdMock.get(0));
+        assertSame(capturedQuery.get(1).getQueryObject().get(UserEntity.Fields.id.name()), usersIdMock.get(0));
+        assertEquals(2, updateArgumentCaptor.getAllValues().size());
+        Update updateUserBindingCreatedAt = updateArgumentCaptor.getAllValues().get(0);
+        Update updateUserEntityUpdatedAt = updateArgumentCaptor.getAllValues().get(1);
+        assertEquals(2, updateUserBindingCreatedAt.getArrayFilters().size());
+        assertTrue(updateUserEntityUpdatedAt.getArrayFilters().isEmpty());
+        assertTrue(updateUserEntityUpdatedAt.getUpdateObject().get("$set").toString().contains(InstitutionEntity.Fields.updatedAt.name()));
+        assertTrue(updateUserBindingCreatedAt.getUpdateObject().get("$set").toString().contains("bindings.$[currentUserBinding].products.$[current].createdAt") &&
+                updateUserBindingCreatedAt.getUpdateObject().get("$set").toString().contains("bindings.$[currentUserBinding].products.$[current].updatedAt") &&
+                updateUserBindingCreatedAt.getUpdateObject().get("$set").toString().contains(createdAt.toString()));
+        verifyNoMoreInteractions(userRepository);
     }
 
 }

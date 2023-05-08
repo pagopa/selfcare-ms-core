@@ -50,6 +50,8 @@ spec:
                 name: event-secrets
             - secretRef:
                 name: mail
+            - secretRef:
+                name: geotaxonomy-secrets
             - configMapRef:
                 name: jwt
             - configMapRef:
