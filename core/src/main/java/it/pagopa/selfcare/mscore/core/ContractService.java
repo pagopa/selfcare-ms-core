@@ -10,11 +10,13 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.utils.crypto.model.SignatureInformation;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
@@ -22,12 +24,15 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -79,6 +84,7 @@ public class ContractService {
     private final ObjectMapper mapper;
 
     private final UserRegistryConnector userRegistryConnector;
+    private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     public ContractService(PagoPaSignatureConfig pagoPaSignatureConfig,
                            FileStorageConnector fileStorageConnector,
@@ -87,7 +93,8 @@ public class ContractService {
                            SignatureService signatureService,
                            KafkaTemplate<String, String> kafkaTemplate,
                            KafkaPropertiesConfig kafkaPropertiesConfig,
-                           UserRegistryConnector userRegistryConnector) {
+                           UserRegistryConnector userRegistryConnector,
+                           PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
         this.fileStorageConnector = fileStorageConnector;
@@ -105,6 +112,7 @@ public class ContractService {
         });
         mapper.registerModule(simpleModule);
         this.userRegistryConnector = userRegistryConnector;
+        this.partyRegistryProxyConnector = partyRegistryProxyConnector;
     }
 
     public File createContractPDF(String contractTemplate, User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
@@ -225,7 +233,7 @@ public class ContractService {
     public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
         if (institution != null) {
             NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
-            log.debug("Notification to send to the data lake, notification: {}", notification);
+            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
                 sendNotification(msg, token.getId());
@@ -250,6 +258,7 @@ public class ContractService {
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(token.getUpdatedAt());
         notification.setClosedAt(token.getClosedAt());
+
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
@@ -276,6 +285,13 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        try {
+            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
+            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+        } catch (MsCoreException | ResourceNotFoundException e) {
+            log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+            toNotify.setIstatCode(null);
+        }
         return toNotify;
     }
 

@@ -16,4 +16,5 @@ public class ProxyInstitutionResponse {
     private String address;
     private String zipCode;
     private String origin;
+    private String istatCode;
 }
