@@ -16,7 +16,6 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
@@ -214,12 +213,11 @@ class ContractServiceTest {
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
 
-        Institution institution = new Institution();
-        institution.setId("InstitutionId");
-        institution.setOrigin("IPA");
-        institution.setExternalId("InstitutionExternalId");
-        Onboarding onboarding = new Onboarding();
+        Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
         InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
@@ -227,20 +225,11 @@ class ContractServiceTest {
         TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
         TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setClosedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
+        Token token = mockInstance(new Token());
         token.setProductId("prod");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
 
         User user1 = new User();
@@ -307,12 +296,11 @@ class ContractServiceTest {
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
 
-        Institution institution = new Institution();
-        institution.setId("InstitutionId");
-        institution.setExternalId("InstitutionExternalId");
-        institution.setOrigin("IPA");
-        Onboarding onboarding = new Onboarding();
+        Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
         InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
@@ -320,20 +308,11 @@ class ContractServiceTest {
         TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
         TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setClosedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
+        Token token = mockInstance(new Token());
         token.setProductId("prod");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
 
         User user1 = new User();
@@ -392,9 +371,11 @@ class ContractServiceTest {
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
                 pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
 
-        Institution institution = new Institution();
-        Onboarding onboarding = new Onboarding();
+        Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
         InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
@@ -402,20 +383,11 @@ class ContractServiceTest {
         TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
         TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setClosedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
+        Token token = mockInstance(new Token());
         token.setProductId("prod");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
 
         User user1 = new User();
