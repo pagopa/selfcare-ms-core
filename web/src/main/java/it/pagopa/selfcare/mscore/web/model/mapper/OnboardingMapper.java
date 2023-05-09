@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toDataProtectionOfficer;
@@ -34,6 +35,9 @@ public class OnboardingMapper {
             onboardingRequest.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionRequest.getUsers()));
         if (onboardingInstitutionRequest.getInstitutionUpdate() != null)
             onboardingRequest.setInstitutionUpdate(toInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate()));
+
+        onboardingRequest.setContractFilePath(Objects.nonNull(onboardingInstitutionRequest.getContractImported())
+            ? onboardingInstitutionRequest.getContractImported().getFilePath() : null);
 
         return onboardingRequest;
     }
