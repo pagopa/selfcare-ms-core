@@ -63,7 +63,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Institution"
+                "$ref": "#/components/schemas/MigrationInstitution"
               }
             }
           }
@@ -313,7 +313,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Token"
+                "$ref": "#/components/schemas/MigrationToken"
               }
             }
           }
@@ -563,7 +563,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OnboardedUser"
+                "$ref": "#/components/schemas/MigrationOnboardedUser"
               }
             }
           }
@@ -1083,18 +1083,18 @@
             "in": "query",
             "description": "states",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "enum": [
-                  "ACTIVE",
-                  "DELETED",
-                  "PENDING",
-                  "REJECTED",
-                  "SUSPENDED",
-                  "TOBEVALIDATED"
-                ]
-              }
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "DELETED",
+                "PENDING",
+                "REJECTED",
+                "SUSPENDED",
+                "TOBEVALIDATED"
+              ]
             }
           }
         ],
@@ -1315,16 +1315,16 @@
             "in": "query",
             "description": "roles",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "enum": [
-                  "DELEGATE",
-                  "MANAGER",
-                  "OPERATOR",
-                  "SUB_DELEGATE"
-                ]
-              }
+              "type": "string",
+              "enum": [
+                "DELEGATE",
+                "MANAGER",
+                "OPERATOR",
+                "SUB_DELEGATE"
+              ]
             }
           },
           {
@@ -1332,18 +1332,18 @@
             "in": "query",
             "description": "states",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "enum": [
-                  "ACTIVE",
-                  "DELETED",
-                  "PENDING",
-                  "REJECTED",
-                  "SUSPENDED",
-                  "TOBEVALIDATED"
-                ]
-              }
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "DELETED",
+                "PENDING",
+                "REJECTED",
+                "SUSPENDED",
+                "TOBEVALIDATED"
+              ]
             }
           },
           {
@@ -1351,11 +1351,10 @@
             "in": "query",
             "description": "products",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "type": "string"
             }
           },
           {
@@ -1363,11 +1362,10 @@
             "in": "query",
             "description": "productRoles",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "type": "string"
             }
           }
         ],
@@ -1649,6 +1647,86 @@
         ]
       }
     },
+    "/institutions/pg/{id}": {
+      "put": {
+        "tags": [
+          "Institution"
+        ],
+        "summary": "update institution data of given institution",
+        "description": "update institution data of given institution",
+        "operationId": "updatePgInstitutionUsingPUT",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The internal identifier of the institution",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PgInstitutionPut"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
     "/institutions/{externalId}": {
       "post": {
         "tags": [
@@ -1784,8 +1862,8 @@
         "tags": [
           "Institution"
         ],
-        "summary": "update geographic taxonomy of given institution",
-        "description": "update geographic taxonomy of given institution",
+        "summary": "update institution data of given institution",
+        "description": "update institution data of given institution",
         "operationId": "updateInstitutionUsingPUT",
         "parameters": [
           {
@@ -2003,17 +2081,15 @@
             "style": "form",
             "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "enum": [
-                  "ACTIVE",
-                  "DELETED",
-                  "PENDING",
-                  "REJECTED",
-                  "SUSPENDED",
-                  "TOBEVALIDATED"
-                ]
-              }
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "DELETED",
+                "PENDING",
+                "REJECTED",
+                "SUSPENDED",
+                "TOBEVALIDATED"
+              ]
             }
           }
         ],
@@ -2092,16 +2168,16 @@
             "in": "query",
             "description": "roles",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "enum": [
-                  "DELEGATE",
-                  "MANAGER",
-                  "OPERATOR",
-                  "SUB_DELEGATE"
-                ]
-              }
+              "type": "string",
+              "enum": [
+                "DELEGATE",
+                "MANAGER",
+                "OPERATOR",
+                "SUB_DELEGATE"
+              ]
             }
           },
           {
@@ -2109,18 +2185,18 @@
             "in": "query",
             "description": "states",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "enum": [
-                  "ACTIVE",
-                  "DELETED",
-                  "PENDING",
-                  "REJECTED",
-                  "SUSPENDED",
-                  "TOBEVALIDATED"
-                ]
-              }
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "DELETED",
+                "PENDING",
+                "REJECTED",
+                "SUSPENDED",
+                "TOBEVALIDATED"
+              ]
             }
           },
           {
@@ -2128,11 +2204,10 @@
             "in": "query",
             "description": "products",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "type": "string"
             }
           },
           {
@@ -2140,11 +2215,10 @@
             "in": "query",
             "description": "productRoles",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "type": "string"
             }
           }
         ],
@@ -3070,11 +3144,10 @@
             "in": "query",
             "description": "List of Relationship state for filter products",
             "required": false,
+            "style": "form",
+            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "type": "string"
             }
           }
         ],
@@ -4122,34 +4195,31 @@
         "title": "GeographicTaxonomies",
         "type": "object",
         "properties": {
-          "code": {
-            "type": "string"
-          },
           "country": {
             "type": "string"
           },
-          "countryAbbreviation": {
+          "country_abbreviation": {
             "type": "string"
           },
-          "desc": {
+          "description": {
             "type": "string"
           },
           "enable": {
             "type": "boolean"
           },
-          "endDate": {
+          "geotax_id": {
             "type": "string"
           },
-          "province": {
+          "istat_code": {
             "type": "string"
           },
-          "provinceAbbreviation": {
+          "province_abbreviation": {
             "type": "string"
           },
-          "region": {
+          "province_id": {
             "type": "string"
           },
-          "startDate": {
+          "region_id": {
             "type": "string"
           }
         }
@@ -4209,8 +4279,7 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "onboarding": {
@@ -4220,13 +4289,7 @@
             }
           },
           "origin": {
-            "type": "string",
-            "enum": [
-              "INFOCAMERE",
-              "IPA",
-              "MOCK",
-              "SELC"
-            ]
+            "type": "string"
           },
           "originId": {
             "type": "string"
@@ -4288,17 +4351,18 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "origin": {
             "type": "string",
             "enum": [
+              "ADE",
               "INFOCAMERE",
               "IPA",
-              "MOCK",
-              "SELC"
+              "SELC",
+              "UNKNOWN",
+              "static"
             ]
           },
           "originId": {
@@ -4391,18 +4455,11 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "origin": {
-            "type": "string",
-            "enum": [
-              "INFOCAMERE",
-              "IPA",
-              "MOCK",
-              "SELC"
-            ]
+            "type": "string"
           },
           "originId": {
             "type": "string"
@@ -4585,8 +4642,7 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "onboarding": {
@@ -4596,13 +4652,7 @@
             }
           },
           "origin": {
-            "type": "string",
-            "enum": [
-              "INFOCAMERE",
-              "IPA",
-              "MOCK",
-              "SELC"
-            ]
+            "type": "string"
           },
           "originId": {
             "type": "string"
@@ -4682,8 +4732,7 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "origin": {
@@ -4763,8 +4812,7 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "paymentServiceProvider": {
@@ -4826,8 +4874,7 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "paymentServiceProvider": {
@@ -4889,8 +4936,7 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
           },
           "paymentServiceProvider": {
@@ -4946,6 +4992,192 @@
           }
         }
       },
+      "MigrationInstitution": {
+        "title": "MigrationInstitution",
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attributes"
+            }
+          },
+          "billing": {
+            "$ref": "#/components/schemas/Billing"
+          },
+          "businessRegisterPlace": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataProtectionOfficer": {
+            "$ref": "#/components/schemas/DataProtectionOfficer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "digitalAddress": {
+            "type": "string"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "geographicTaxonomies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstitutionGeographicTaxonomies"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "imported": {
+            "type": "boolean"
+          },
+          "institutionType": {
+            "type": "string",
+            "enum": [
+              "GSP",
+              "PA",
+              "PG",
+              "PSP",
+              "PT",
+              "SCP"
+            ]
+          },
+          "onboarding": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Onboarding"
+            }
+          },
+          "origin": {
+            "type": "string"
+          },
+          "originId": {
+            "type": "string"
+          },
+          "paymentServiceProvider": {
+            "$ref": "#/components/schemas/PaymentServiceProvider"
+          },
+          "rea": {
+            "type": "string"
+          },
+          "shareCapital": {
+            "type": "string"
+          },
+          "supportEmail": {
+            "type": "string"
+          },
+          "supportPhone": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "zipCode": {
+            "type": "string"
+          }
+        }
+      },
+      "MigrationOnboardedUser": {
+        "title": "MigrationOnboardedUser",
+        "type": "object",
+        "properties": {
+          "bindings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserBinding"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "MigrationToken": {
+        "title": "MigrationToken",
+        "type": "object",
+        "properties": {
+          "checksum": {
+            "type": "string"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contractSigned": {
+            "type": "string"
+          },
+          "contractTemplate": {
+            "type": "string"
+          },
+          "contractVersion": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiringDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string"
+          },
+          "institutionId": {
+            "type": "string"
+          },
+          "institutionUpdate": {
+            "$ref": "#/components/schemas/InstitutionUpdate"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DELETED",
+              "PENDING",
+              "REJECTED",
+              "SUSPENDED",
+              "TOBEVALIDATED"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "INSTITUTION",
+              "LEGALS"
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenUser"
+            }
+          }
+        }
+      },
       "OnboardedInstitutionResponse": {
         "title": "OnboardedInstitutionResponse",
         "type": "object",
@@ -4964,6 +5196,9 @@
           },
           "businessData": {
             "$ref": "#/components/schemas/BusinessData"
+          },
+          "dataProtectionOfficer": {
+            "$ref": "#/components/schemas/DataProtectionOfficerResponse"
           },
           "description": {
             "type": "string"
@@ -4991,12 +5226,17 @@
               "PG",
               "PSP",
               "PT",
-              "SCP",
-              "UNKNOWN"
+              "SCP"
             ]
+          },
+          "origin": {
+            "type": "string"
           },
           "originId": {
             "type": "string"
+          },
+          "paymentServiceProvider": {
+            "$ref": "#/components/schemas/PaymentServiceProviderResponse"
           },
           "pricingPlan": {
             "type": "string"
@@ -5416,13 +5656,22 @@
           }
         }
       },
+      "PgInstitutionPut": {
+        "title": "PgInstitutionPut",
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "digitalAddress": {
+            "type": "string"
+          }
+        }
+      },
       "Problem": {
         "title": "Problem",
         "type": "object",
         "properties": {
-          "detail": {
-            "type": "string"
-          },
           "errors": {
             "type": "array",
             "items": {
@@ -5432,12 +5681,6 @@
           "status": {
             "type": "integer",
             "format": "int32"
-          },
-          "title": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
           }
         }
       },
@@ -5573,6 +5816,9 @@
             "type": "string"
           },
           "contractTemplate": {
+            "type": "string"
+          },
+          "contractVersion": {
             "type": "string"
           },
           "createdAt": {

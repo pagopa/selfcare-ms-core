@@ -2,24 +2,25 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
-import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
+import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.*;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -45,10 +47,22 @@ class InstitutionServiceImplTest {
     private PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     @Mock
+    private UserService userService;
+
+    @Mock
     private GeoTaxonomiesConnector geoTaxonomiesConnector;
 
     @Mock
     private CoreConfig coreConfig;
+
+    @Mock
+    private ContractService contractService;
+
+    @Mock
+    private TokenConnector tokenConnector;
+
+    @Mock
+    private UserConnector userConnector;
 
     /**
      * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionById(String)}
@@ -294,7 +308,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         assertSame(institution, (new InstitutionServiceImpl(null, institutionConnector, geoTaxonomiesConnector,
-                userService, new CoreConfig())).createPnPgInstitution("42", "The characteristics of someone or something"));
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService)).createPnPgInstitution("42", "The characteristics of someone or something"));
         verify(institutionConnector).saveOrRetrievePnPg(any());
     }
 
@@ -332,6 +346,27 @@ class InstitutionServiceImplTest {
         InstitutionByLegal institutionByLegal = new InstitutionByLegal();
         institutionByLegal.setBusinessName("START - check institution {} already exists");
         institutionByLegal.setBusinessTaxId("42");
+
+        SelfCareUser selfCareUser = mock(SelfCareUser.class);
+        Institution institutionResult = institutionServiceImpl.createPgInstitution("42", "42", false, selfCareUser);
+        assertSame(institution, institutionResult);
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
+     */
+    @Test
+    void testCreatePgInstitution2() {
+        Institution institution = new Institution();
+        when(coreConfig.isInfoCamereEnable()).thenReturn(true);
+        List<InstitutionByLegal> list = new ArrayList<>();
+        InstitutionByLegal institutionByLegal = new InstitutionByLegal();
+        institutionByLegal.setBusinessName("START - check institution {} already exists");
+        institutionByLegal.setBusinessTaxId("42");
+        list.add(institutionByLegal);
+        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(list);
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         assertSame(institution, institutionServiceImpl.createPgInstitution("42", "42", true, selfCareUser));
@@ -542,7 +577,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userService, new CoreConfig());
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.PENDING);
@@ -560,7 +595,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userService, new CoreConfig());
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.PENDING);
@@ -580,7 +615,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         assertSame(institution, (new InstitutionServiceImpl(null, institutionConnector, geoTaxonomiesConnector,
-                userService, new CoreConfig())).retrieveInstitutionProduct("42", "42"));
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService)).retrieveInstitutionProduct("42", "42"));
         verify(institutionConnector).findInstitutionProduct(any(), any());
     }
 
@@ -592,7 +627,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userService, new CoreConfig());
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
         Institution institution = new Institution();
         institution.setGeographicTaxonomies(new ArrayList<>());
@@ -618,7 +653,7 @@ class InstitutionServiceImplTest {
         when(geoTaxonomiesConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userService, new CoreConfig());
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList.add(new InstitutionGeographicTaxonomies(
@@ -641,7 +676,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userServiceImpl = mock(UserServiceImpl.class);
         when(userServiceImpl.checkIfAdmin(any(), any())).thenReturn(true);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userServiceImpl, new CoreConfig());
+                userServiceImpl, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
@@ -680,7 +715,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userServiceImpl = mock(UserServiceImpl.class);
         when(userServiceImpl.checkIfAdmin(any(), any())).thenReturn(false);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userServiceImpl, new CoreConfig());
+                userServiceImpl, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
@@ -723,7 +758,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, new CoreConfig());
+                geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         List<ValidInstitution> actualRetrieveInstitutionByExternalIdsResult = institutionServiceImpl
                 .retrieveInstitutionByExternalIds(validInstitutionList, "42");
@@ -738,42 +773,6 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testRetrieveInstitutionByExternalIds3() {
-        //   Diffblue Cover was unable to write a Spring test,
-        //   so wrote a non-Spring test instead.
-        //   Reason: R026 Failed to create Spring context.
-        //   Attempt to initialize test context failed with
-        //   java.lang.IllegalStateException: Failed to load ApplicationContext
-        //       at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-        //       at java.util.Spliterators$ArraySpliterator.tryAdvance(Spliterators.java:958)
-        //       at java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:127)
-        //       at java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:502)
-        //       at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:488)
-        //       at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-        //       at java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
-        //       at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        //       at java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:543)
-        //   org.springframework.beans.factory.BeanDefinitionStoreException: Failed to parse configuration class [it.pagopa.selfcare.mscore.config.CoreConfig]; nested exception is java.io.FileNotFoundException: class path resource [config/core-config.properties] cannot be opened because it does not exist
-        //       at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-        //       at java.util.Spliterators$ArraySpliterator.tryAdvance(Spliterators.java:958)
-        //       at java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:127)
-        //       at java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:502)
-        //       at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:488)
-        //       at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-        //       at java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
-        //       at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        //       at java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:543)
-        //   java.io.FileNotFoundException: class path resource [config/core-config.properties] cannot be opened because it does not exist
-        //       at java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-        //       at java.util.Spliterators$ArraySpliterator.tryAdvance(Spliterators.java:958)
-        //       at java.util.stream.ReferencePipeline.forEachWithCancel(ReferencePipeline.java:127)
-        //       at java.util.stream.AbstractPipeline.copyIntoWithCancel(AbstractPipeline.java:502)
-        //       at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:488)
-        //       at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-        //       at java.util.stream.FindOps$FindOp.evaluateSequential(FindOps.java:150)
-        //       at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        //       at java.util.stream.ReferencePipeline.findFirst(ReferencePipeline.java:543)
-        //   See https://diff.blue/R026 to resolve this issue.
-
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         when(institutionConnector.findByExternalIdAndProductId(any(),
                 any()))
@@ -782,7 +781,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, new CoreConfig());
+                geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         validInstitutionList.add(new ValidInstitution("42", "The characteristics of someone or something"));
@@ -808,7 +807,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, new CoreConfig());
+                geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         validInstitutionList.add(new ValidInstitution("42", "The characteristics of someone or something"));
@@ -837,7 +836,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, new CoreConfig());
+                geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         validInstitutionList.add(new ValidInstitution("42", "The characteristics of someone or something"));
@@ -861,7 +860,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         List<Institution> actualFindInstitutionsByGeoTaxonomiesResult = (new InstitutionServiceImpl(null,
-                institutionConnector, geoTaxonomiesConnector, userService, new CoreConfig()))
+                institutionConnector, geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService))
                 .findInstitutionsByGeoTaxonomies("Geo Taxonomies", SearchMode.ALL);
         assertSame(institutionList, actualFindInstitutionsByGeoTaxonomiesResult);
         assertTrue(actualFindInstitutionsByGeoTaxonomiesResult.isEmpty());
@@ -874,7 +873,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionService = (new InstitutionServiceImpl(null,
-                institutionConnector, geoTaxonomiesConnector, userService, new CoreConfig()));
+                institutionConnector, geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService));
         assertThrows(InvalidRequestException.class, () -> institutionService.findInstitutionsByGeoTaxonomies("", SearchMode.ALL));
     }
 
@@ -888,7 +887,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionService = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, coreConfig);
+                geoTaxonomiesConnector, userService, coreConfig, mock(TokenConnector.class), mock(UserConnector.class), contractService);
         assertThrows(ResourceNotFoundException.class, () -> institutionService.findInstitutionsByProductId("42"));
     }
 
@@ -904,7 +903,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         assertDoesNotThrow(() -> (new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, coreConfig)).findInstitutionsByProductId("42"));
+                geoTaxonomiesConnector, userService, coreConfig, mock(TokenConnector.class), mock(UserConnector.class), contractService)).findInstitutionsByProductId("42"));
     }
 
 
@@ -919,7 +918,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, new CoreConfig());
+                geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         List<Institution> actualRetrieveInstitutionByIdsResult = institutionServiceImpl
                 .retrieveInstitutionByIds(new ArrayList<>());
         assertSame(institutionList, actualRetrieveInstitutionByIdsResult);
@@ -937,7 +936,7 @@ class InstitutionServiceImplTest {
                 any(), any(), any())).thenReturn(new ArrayList<>());
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userServiceImpl, new CoreConfig());
+                userServiceImpl, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         Institution institution = new Institution();
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
@@ -967,7 +966,7 @@ class InstitutionServiceImplTest {
                 any(), any(), any())).thenReturn(onboardedUserList);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userServiceImpl, new CoreConfig());
+                userServiceImpl, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         Billing billing = new Billing();
         ArrayList<Onboarding> onboarding = new ArrayList<>();
         ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
@@ -1000,7 +999,7 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userService, new CoreConfig());
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
         ArrayList<String> products = new ArrayList<>();
@@ -1019,7 +1018,7 @@ class InstitutionServiceImplTest {
                 any(), any(), any())).thenReturn(new ArrayList<>());
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userServiceImpl, new CoreConfig());
+                userServiceImpl, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
         ArrayList<String> products = new ArrayList<>();
@@ -1045,7 +1044,7 @@ class InstitutionServiceImplTest {
                 any(), any(), any())).thenReturn(onboardedUserList);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userServiceImpl, new CoreConfig());
+                userServiceImpl, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
         ArrayList<String> products = new ArrayList<>();
@@ -1074,7 +1073,7 @@ class InstitutionServiceImplTest {
                 any(), any(), any())).thenReturn(onboardedUserList);
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userServiceImpl, new CoreConfig());
+                userServiceImpl, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
         ArrayList<String> products = new ArrayList<>();
@@ -1097,7 +1096,7 @@ class InstitutionServiceImplTest {
                 any(), any(), any())).thenReturn(new ArrayList<>());
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, new CoreConfig());
+                geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
         ArrayList<String> products = new ArrayList<>();
@@ -1172,8 +1171,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userService, new CoreConfig());
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1195,7 +1193,6 @@ class InstitutionServiceImplTest {
                 dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
                 "6625550144", true, null, null);
 
-        relationshipInfoList = institutionServiceImpl.retrieveAllProduct("42", binding, institution, null, null, null, null);
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -1228,8 +1225,7 @@ class InstitutionServiceImplTest {
         UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector, geoTaxonomiesConnector,
-                userService, new CoreConfig());
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("43");
         OnboardedProduct product = new OnboardedProduct();
@@ -1250,22 +1246,13 @@ class InstitutionServiceImplTest {
         UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
 
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, null, geoTaxonomiesConnector,
-                userService, new CoreConfig());
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+                userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
         product.setProductId("productId");
         binding.setProducts(List.of(product));
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer("42 Main St", "jane.doe@example.org",
-                "Pec");
 
         Institution institution = new Institution();
         institution.setId("42");
@@ -1287,7 +1274,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noRoleFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1317,7 +1304,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noStatesFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1349,7 +1336,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noProductsFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1382,7 +1369,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_noProductRolesFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1417,7 +1404,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_institutionNull_filterProduct_noProductsFound() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product = new OnboardedProduct();
@@ -1452,7 +1439,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_found() {
         // Given
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");
         OnboardedProduct product1 = new OnboardedProduct();
@@ -1497,7 +1484,7 @@ class InstitutionServiceImplTest {
         relationshipInfoList = institutionServiceImpl.retrieveAllProduct("42", binding, institution, roles, states, products, productRoles);
 
         // Then
-        assertTrue(relationshipInfoList.size() == 2);
+        assertEquals(2, relationshipInfoList.size());
         assertEquals(binding.getProducts().get(1).getRole(), relationshipInfoList.get(0).getOnboardedProduct().getRole());
         assertEquals(binding.getProducts().get(1).getStatus(), relationshipInfoList.get(0).getOnboardedProduct().getStatus());
         assertEquals(binding.getProducts().get(1).getProductId(), relationshipInfoList.get(0).getOnboardedProduct().getProductId());
@@ -1591,15 +1578,128 @@ class InstitutionServiceImplTest {
         GeoTaxonomiesConnector geoTaxonomiesConnector = mock(GeoTaxonomiesConnector.class);
         UserServiceImpl userService = new UserServiceImpl(null, null);
         InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(null, institutionConnector,
-                geoTaxonomiesConnector, userService, new CoreConfig());
+                geoTaxonomiesConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         institutionServiceImpl.retrieveInstitutionsWithFilter("42", "42", new ArrayList<>());
         verify(institutionConnector).findWithFilter(any(), any(), any());
     }
 
-    private Institution initializeInstitution(Integer bias) {
-        Institution institution = new Institution();
-
-        return institution;
+    @Test
+    void testUpdateInstitutionDescription() {
+        when(userService.checkIfAdmin(any(), any())).thenReturn(true);
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(new Institution());
+        assertDoesNotThrow(() -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
     }
+
+    @Test
+    void testUpdateInstitutionDescriptionException() {
+        when(userService.checkIfAdmin(any(), any())).thenReturn(false);
+        assertThrows(ResourceForbiddenException.class, () -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
+    }
+
+    @Test
+    void updateCreatedAt() {
+        // Given
+        String institutionIdMock = "institutionIdMock";
+        String productIdMock = "productId";
+        OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+
+        Onboarding onboardingMock1 = mockInstance(new Onboarding());
+        onboardingMock1.setStatus(RelationshipState.ACTIVE);
+        onboardingMock1.setClosedAt(null);
+        onboardingMock1.setCreatedAt(OffsetDateTime.parse("2023-11-01T02:15:30+01:00"));
+        Onboarding onboardingMock2 = mockInstance(new Onboarding());
+        onboardingMock2.setProductId(productIdMock);
+        onboardingMock2.setTokenId("222e4444-e99b-11d3-a446-422114890100");
+        onboardingMock2.setStatus(RelationshipState.ACTIVE);
+        onboardingMock2.setClosedAt(null);
+        onboardingMock1.setCreatedAt(OffsetDateTime.parse("2020-11-01T02:15:30+01:00"));
+        Onboarding onboardingMock3 = mockInstance(new Onboarding());
+        onboardingMock3.setStatus(RelationshipState.ACTIVE);
+        onboardingMock3.setClosedAt(null);
+        onboardingMock1.setCreatedAt(OffsetDateTime.parse("2022-12-11T02:15:30+01:00"));
+
+        Institution updatedInstitutionMock = mockInstance(new Institution());
+        updatedInstitutionMock.setId("123e4567-e89b-12d3-a456-426614174000");
+        updatedInstitutionMock.setExternalId("00099991238");
+        updatedInstitutionMock.setDigitalAddress("DigitalAddress@example.com");
+        updatedInstitutionMock.setInstitutionType(InstitutionType.PA);
+        updatedInstitutionMock.setTaxCode(updatedInstitutionMock.getExternalId());
+        updatedInstitutionMock.setOnboarding(List.of(onboardingMock1, onboardingMock2, onboardingMock3));
+        updatedInstitutionMock.setGeographicTaxonomies(Collections.emptyList());
+        updatedInstitutionMock.setPaymentServiceProvider(null);
+        updatedInstitutionMock.setDataProtectionOfficer(null);
+        updatedInstitutionMock.setImported(false);
+        updatedInstitutionMock.setCreatedAt(OffsetDateTime.parse("2019-11-01T02:15:30+01:00"));
+        updatedInstitutionMock.setUpdatedAt(OffsetDateTime.now());
+
+        TokenUser tokenUserMock1 = mockInstance(new TokenUser());
+        tokenUserMock1.setUserId("999e9999-e89b-12d3-a456-426614174000");
+        TokenUser tokenUserMock2 = mockInstance(new TokenUser());
+        tokenUserMock2.setUserId("321e9876-e89b-12d3-a456-426614174000");
+        tokenUserMock2.setRole(PartyRole.DELEGATE);
+
+        Token updatedTokenMock = mockInstance(new Token());
+        updatedTokenMock.setId(updatedInstitutionMock.getOnboarding().get(1).getTokenId());
+        updatedTokenMock.setUsers(List.of(tokenUserMock1, tokenUserMock2));
+
+        when(institutionConnector.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock))
+                .thenReturn(updatedInstitutionMock);
+        when(tokenConnector.updateTokenCreatedAt(updatedTokenMock.getId(), createdAtMock))
+                .thenReturn(updatedTokenMock);
+
+        // When
+        institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+        // Then
+        verify(institutionConnector, times(1))
+                .updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+        verify(tokenConnector, times(1))
+                .updateTokenCreatedAt(updatedTokenMock.getId(), createdAtMock);
+        verify(userConnector, times(1))
+                .updateUserBindingCreatedAt(institutionIdMock, productIdMock, List.of(tokenUserMock1.getUserId(), tokenUserMock2.getUserId()), createdAtMock);
+        verify(contractService, times(1))
+                .sendDataLakeNotification(updatedInstitutionMock, updatedTokenMock, QueueEvent.UPDATE);
+        verifyNoMoreInteractions(institutionConnector, tokenConnector, userConnector, contractService);
+    }
+
+    @Test
+    void updateCreatedAt_nullInstitutionId() {
+        // Given
+        String productIdMock = "productId";
+        OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        // When
+        Executable executable = () -> institutionServiceImpl.updateCreatedAt(null, productIdMock, createdAtMock);
+        // Then
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("An institution ID is required.", illegalArgumentException.getMessage());
+        verifyNoInteractions(institutionConnector, tokenConnector, userConnector);
+    }
+
+    @Test
+    void updateCreatedAt_nullProductId() {
+        // Given
+        String institutionIdMock = "institutionId";
+        OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        // When
+        Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, null, createdAtMock);
+        // Then
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A product ID is required.", illegalArgumentException.getMessage());
+        verifyNoInteractions(institutionConnector, tokenConnector, userConnector);
+    }
+
+    @Test
+    void updateCreatedAt_nullCreatedAt() {
+        // Given
+        String institutionIdMock = "institutionId";
+        String productIdMock = "producttId";
+        // When
+        Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, null);
+        // Then
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A createdAt date is required.", illegalArgumentException.getMessage());
+        verifyNoInteractions(institutionConnector, tokenConnector, userConnector);
+
+    }
+
 }
 

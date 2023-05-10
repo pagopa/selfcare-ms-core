@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.InstitutionUpdateEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
@@ -13,12 +14,13 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomi
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.OffsetDateTime;
@@ -26,16 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class TokenConnectorImplTest {
@@ -45,6 +41,15 @@ class TokenConnectorImplTest {
 
     @Mock
     TokenRepository tokenRepository;
+
+    @Captor
+    ArgumentCaptor<Query> queryArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Update> updateArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<FindAndModifyOptions> findAndModifyOptionsArgumentCaptor;
 
     /**
      * Method under test: {@link TokenConnectorImpl#findAll()}
@@ -1086,5 +1091,31 @@ class TokenConnectorImplTest {
         when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
         Token tokens = tokenConnectorImpl.findWithFilter("42", "42");
         Assertions.assertEquals("507f1f77bcf86cd799439011", tokens.getId());
+    }
+
+    @Test
+    void updateOnboardedProductCreatedAt() {
+        // Given
+        String tokenIdMock = "tokenIdMock";
+        OffsetDateTime createdAt = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        TokenEntity updatedTokenMock = mockInstance(new TokenEntity());
+        updatedTokenMock.setId(tokenIdMock);
+        when(tokenRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedTokenMock);
+        // When
+        Token result = tokenConnectorImpl.updateTokenCreatedAt(tokenIdMock, createdAt);
+        // Then
+        assertNotNull(result);
+        assertEquals(result.getId(), tokenIdMock);
+        verify(tokenRepository, times(1))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertSame(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()), tokenIdMock);
+        assertSame(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()), tokenIdMock);
+        Update capturedUpdate = updateArgumentCaptor.getValue();
+        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains("updatedAt") &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains("updatedAt") &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(createdAt.toString()));
+        verifyNoMoreInteractions(tokenRepository);
     }
 }

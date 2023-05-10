@@ -10,25 +10,34 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.utils.crypto.model.SignatureInformation;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -51,14 +60,14 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
-import static it.pagopa.selfcare.mscore.core.SignatureService.VALID_CHECK;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
 import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 
 @Slf4j
@@ -74,13 +83,18 @@ public class ContractService {
     private final KafkaPropertiesConfig kafkaPropertiesConfig;
     private final ObjectMapper mapper;
 
+    private final UserRegistryConnector userRegistryConnector;
+    private final PartyRegistryProxyConnector partyRegistryProxyConnector;
+
     public ContractService(PagoPaSignatureConfig pagoPaSignatureConfig,
                            FileStorageConnector fileStorageConnector,
                            CoreConfig coreConfig,
                            Pkcs7HashSignService pkcs7HashSignService,
                            SignatureService signatureService,
                            KafkaTemplate<String, String> kafkaTemplate,
-                           KafkaPropertiesConfig kafkaPropertiesConfig) {
+                           KafkaPropertiesConfig kafkaPropertiesConfig,
+                           UserRegistryConnector userRegistryConnector,
+                           PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
         this.fileStorageConnector = fileStorageConnector;
@@ -97,6 +111,8 @@ public class ContractService {
             }
         });
         mapper.registerModule(simpleModule);
+        this.userRegistryConnector = userRegistryConnector;
+        this.partyRegistryProxyConnector = partyRegistryProxyConnector;
     }
 
     public File createContractPDF(String contractTemplate, User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
@@ -159,30 +175,18 @@ public class ContractService {
                 .replace("${productName}", request.getProductId());
     }
 
-    private void validateSignature(String... errorEnums) {
-        StringBuilder stringBuilder = new StringBuilder(INVALID_SIGNATURE.getMessage());
-        List<String> strings = Arrays.stream(errorEnums).filter(s -> !VALID_CHECK.equals(s)).collect(Collectors.toList());
-        if (!strings.isEmpty()) {
-            for (String s : strings) {
-                stringBuilder.append(" - ");
-                stringBuilder.append(s);
-            }
-            throw new InvalidRequestException(stringBuilder.toString(), INVALID_SIGNATURE.getCode());
-        }
-    }
-
     public void verifySignature(MultipartFile contract, Token token, List<User> users) {
         try {
             SignedDocumentValidator validator = signatureService.createDocumentValidator(contract.getInputStream().readAllBytes());
             signatureService.isDocumentSigned(validator);
             signatureService.verifyOriginalDocument(validator);
             Reports reports = signatureService.validateDocument(validator);
-            validateSignature(
-                    signatureService.verifySignatureForm(validator),
-                    signatureService.verifySignature(reports),
-                    signatureService.verifyDigest(validator, token.getChecksum()),
-                    signatureService.verifyManagerTaxCode(reports, users)
-            );
+
+            signatureService.verifySignatureForm(validator);
+            signatureService.verifySignature(reports);
+            signatureService.verifyDigest(validator, token.getChecksum());
+            signatureService.verifyManagerTaxCode(reports, users);
+
         } catch (InvalidRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -226,10 +230,10 @@ public class ContractService {
         }
     }
 
-    public void sendDataLakeNotification(Institution institution, Token token) {
+    public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
         if (institution != null) {
-            NotificationToSend notification = toNotificationToSend(institution, token);
-            log.debug("Notification to send to the data lake, notification: {}", notification);
+            NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
+            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
                 sendNotification(msg, token.getId());
@@ -239,9 +243,13 @@ public class ContractService {
         }
     }
 
-    private NotificationToSend toNotificationToSend(Institution institution, Token token) {
+    private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
-        notification.setId(token.getId());
+        if (queueEvent.equals(QueueEvent.ADD)) {
+            notification.setId(token.getId());
+        } else {
+            notification.setId(UUID.randomUUID().toString());
+        }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setState(RelationshipState.ACTIVE);
@@ -251,6 +259,7 @@ public class ContractService {
         notification.setUpdatedAt(token.getUpdatedAt());
         notification.setClosedAt(token.getClosedAt());
 
+
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
                     .filter(o -> token.getProductId().equalsIgnoreCase(o.getProductId()))
@@ -259,6 +268,8 @@ public class ContractService {
             notification.setBilling(onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling());
             notification.setInstitution(toInstitutionToNotify(institution));
         }
+
+        notification.setUsers(token.getUsers().stream().map(tokenUser -> toUserToNotify(tokenUser, institution.getId())).collect(Collectors.toList()));
 
         return notification;
     }
@@ -274,7 +285,25 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        try {
+            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
+            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+        } catch (MsCoreException | ResourceNotFoundException e) {
+            log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+            toNotify.setIstatCode(null);
+        }
         return toNotify;
+    }
+
+    private UserToNotify toUserToNotify(TokenUser tokenUser, String institutionId) {
+        UserToNotify userToNotify = new UserToNotify();
+        User user = userRegistryConnector.getUserByInternalId(tokenUser.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
+        userToNotify.setName(user.getName());
+        userToNotify.setFamilyName(user.getFamilyName());
+        userToNotify.setFiscalCode(user.getFiscalCode());
+        userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
+        userToNotify.setRole(tokenUser.getRole());
+        return userToNotify;
     }
 
     private void sendNotification(String message, String tokenId) {

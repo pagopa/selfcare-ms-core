@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -14,7 +15,6 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
@@ -142,7 +142,7 @@ public class OnboardingDao {
             if (RelationshipState.ACTIVE == token.getStatus()) {
                 institutionConnector.findAndUpdateInstitutionData(institution.getId(), token, onboarding, null);
             } else {
-                institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies);
+                institutionConnector.findAndUpdate(institution.getId(), onboarding, geographicTaxonomies, null);
             }
         } catch (Exception e) {
             log.warn("can not update institution {}", institution.getId(), e);

@@ -3,10 +3,10 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.*;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 
 @Slf4j
@@ -112,4 +113,17 @@ public class TokenConnectorImpl implements TokenConnector {
                 .findFirst()
                 .orElseThrow(() -> new InvalidRequestException(String.format(CONTRACT_NOT_FOUND.getMessage(), institutionId, productId), CONTRACT_NOT_FOUND.getCode()));
     }
+
+    @Override
+    public Token updateTokenCreatedAt(String tokenId, OffsetDateTime createdAt) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
+
+        Update update = new Update();
+        update.set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now())
+                .set(TokenEntity.Fields.createdAt.name(), createdAt);
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        return TokenMapper.convertToToken(tokenRepository.findAndModify(query, update, findAndModifyOptions, TokenEntity.class));
+    }
+
 }

@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.springframework.lang.Nullable;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface UserConnector {
@@ -45,4 +46,7 @@ public interface UserConnector {
     void findAndRemoveProduct(String userId, String institutionId, OnboardedProduct product);
 
     List<OnboardedUser> findAllByIds(List<String> users);
+
+    List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
+
 }

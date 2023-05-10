@@ -11,5 +11,7 @@ import org.springframework.context.annotation.PropertySource;
 @Import({RestClientBaseConfig.class})
 @EnableFeignClients(clients = GeoTaxonomiesRestClient.class)
 @PropertySource("classpath:config/geo-taxonomies-rest-client.properties")
-class GeoTaxonomiesRestClientConfig {
+
+public class GeoTaxonomiesRestClientConfig {
+
 }

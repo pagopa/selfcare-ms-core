@@ -3,17 +3,13 @@ package it.pagopa.selfcare.mscore.connector.rest;
 import feign.FeignException;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.LegalFilter;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -110,6 +106,7 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
         info.setAddress(response.getAddress());
         info.setZipCode(response.getZipCode());
         info.setOrigin(response.getOrigin());
+        info.setIstatCode(response.getIstatCode());
         return info;
     }
 
