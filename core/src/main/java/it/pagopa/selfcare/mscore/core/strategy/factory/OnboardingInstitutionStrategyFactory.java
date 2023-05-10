@@ -158,7 +158,7 @@ public class OnboardingInstitutionStrategyFactory {
                     .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(strategyInput.getOnboardingRequest().getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getInstitution().getInstitutionType());
+            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
             String digest = TokenUtils.createDigest(pdf);
 
             strategyInput.setDigest(digest);
@@ -170,7 +170,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
-                emailService.sendMail(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false, strategyInput.getInstitution().getInstitutionType());
+                emailService.sendMail(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false, strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
