@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
@@ -50,6 +51,27 @@ class TokenServiceImplTest {
         tokenMock.setUsers(List.of(mockInstance(new TokenUser())));
         tokenMock.setStatus(RelationshipState.PENDING);
         tokenMock.setExpiringDate(OffsetDateTime.now().plusDays(60));
+
+        when(tokenConnector.findById(any()))
+                .thenReturn(tokenMock);
+        // When
+        Token result = tokenServiceImpl.verifyToken(tokenMock.getId());
+        // Then
+        assertNotNull(result);
+        reflectionEqualsByName(tokenMock, result);
+
+        verify(tokenConnector, times(1))
+                .findById(tokenMock.getId());
+        verifyNoMoreInteractions(institutionConnector, onboardingDao);
+    }
+
+    @Test
+    void verifyToken_nullExpiringDate() {
+        // Given
+        Token tokenMock = mockInstance(new Token());
+        tokenMock.setUsers(List.of(mockInstance(new TokenUser())));
+        tokenMock.setStatus(RelationshipState.PENDING);
+        tokenMock.setExpiringDate(null);
 
         when(tokenConnector.findById(any()))
                 .thenReturn(tokenMock);
@@ -102,6 +124,50 @@ class TokenServiceImplTest {
         // Given
         Token tokenMock = mockInstance(new Token());
         tokenMock.setStatus(RelationshipState.REJECTED);
+
+        when(tokenConnector.findById(any()))
+                .thenReturn(tokenMock);
+        // When
+        Executable executable = () -> tokenServiceImpl.verifyToken(tokenMock.getId());
+        // Then
+        ResourceConflictException resourceConflictException = assertThrows(ResourceConflictException.class, executable);
+        assertEquals(String.format(TOKEN_ALREADY_CONSUMED.getMessage(), tokenMock.getId()), resourceConflictException.getMessage());
+        assertEquals(TOKEN_ALREADY_CONSUMED.getCode(), resourceConflictException.getCode());
+
+        verify(tokenConnector, times(1))
+                .findById(tokenMock.getId());
+        verifyNoMoreInteractions(tokenConnector);
+        verifyNoInteractions(institutionConnector, onboardingDao);
+    }
+
+    @Test
+    void verifyToken_tokenAlreadyConsumed_nullUsers() {
+        // Given
+        Token tokenMock = mockInstance(new Token());
+        tokenMock.setStatus(RelationshipState.PENDING);
+        tokenMock.setUsers(null);
+
+        when(tokenConnector.findById(any()))
+                .thenReturn(tokenMock);
+        // When
+        Executable executable = () -> tokenServiceImpl.verifyToken(tokenMock.getId());
+        // Then
+        ResourceConflictException resourceConflictException = assertThrows(ResourceConflictException.class, executable);
+        assertEquals(String.format(TOKEN_ALREADY_CONSUMED.getMessage(), tokenMock.getId()), resourceConflictException.getMessage());
+        assertEquals(TOKEN_ALREADY_CONSUMED.getCode(), resourceConflictException.getCode());
+
+        verify(tokenConnector, times(1))
+                .findById(tokenMock.getId());
+        verifyNoMoreInteractions(tokenConnector);
+        verifyNoInteractions(institutionConnector, onboardingDao);
+    }
+
+    @Test
+    void verifyToken_tokenAlreadyConsumed_emptyUsers() {
+        // Given
+        Token tokenMock = mockInstance(new Token());
+        tokenMock.setStatus(RelationshipState.TOBEVALIDATED);
+        tokenMock.setUsers(Collections.emptyList());
 
         when(tokenConnector.findById(any()))
                 .thenReturn(tokenMock);
