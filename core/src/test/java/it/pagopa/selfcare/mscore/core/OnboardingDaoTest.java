@@ -127,6 +127,76 @@ class OnboardingDaoTest {
                 list, "Digest"));
     }
 
+
+    /**
+     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
+     */
+    @Test
+    void testPersistComplete() {
+        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
+                .thenReturn(new Institution());
+
+        Token token = new Token();
+        token.setId("tokenId");
+        when(tokenConnector.save(any(), any())).thenReturn(token);
+
+        ArrayList<String> toUpdate = new ArrayList<>();
+        ArrayList<String> toDelete = new ArrayList<>();
+
+        Billing billing = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
+        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setContractFilePath("/example");
+
+        UserToOnboard user = new UserToOnboard();
+        List<UserToOnboard> users = new ArrayList<>();
+        users.add(user);
+        onboardingRequest.setUsers(users);
+
+        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
+
+        OnboardingRollback actualPersistResult = onboardingDao.persistComplete(toUpdate, toDelete, onboardingRequest, new Institution(),
+                new ArrayList<>(), null);
+
+        Onboarding onboarding = actualPersistResult.getOnboarding();
+        assertEquals(RelationshipState.ACTIVE, onboarding.getStatus());
+        assertEquals("42", onboarding.getProductId());
+        assertEquals("Pricing Plan", onboarding.getPricingPlan());
+        assertEquals(onboardingRequest.getContractFilePath(), onboarding.getContract());
+        assertSame(billing, onboarding.getBilling());
+        verify(institutionConnector).findAndUpdateInstitutionDataWithNewOnboarding(any(), any(),
+                any());
+        verify(tokenConnector).save(any(), any());
+    }
+
     /**
      * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
      */

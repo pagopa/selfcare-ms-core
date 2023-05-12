@@ -33,6 +33,8 @@ public interface InstitutionConnector {
 
     Institution findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
 
+    Institution findAndUpdateInstitutionDataWithNewOnboarding(String institutionId, InstitutionUpdate institutionUpdate, Onboarding onboarding);
+
     List<Institution> findByGeotaxonomies(List<String> geo, SearchMode searchMode);
 
     List<Institution> findByProductId(String productId);

@@ -18,6 +18,8 @@ public class MailTemplateConfig {
     private String completeSelfcarePlaceholder;
     private String completeSelfcareName;
 
+    private String autocompletePath;
+
     private String path;
     private String userName;
     private String userSurname;

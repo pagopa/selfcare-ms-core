@@ -65,4 +65,8 @@ public class TokenUtils {
         tokenRelationships.setUsers(users);
         return tokenRelationships;
     }
+
+    public static boolean isTokenExpired(Token token, OffsetDateTime now) {
+        return token.getExpiringDate() != null && (now.isEqual(token.getExpiringDate()) || now.isAfter(token.getExpiringDate()));
+    }
 }

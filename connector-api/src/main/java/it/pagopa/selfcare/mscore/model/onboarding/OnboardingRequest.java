@@ -27,6 +27,7 @@ public class OnboardingRequest {
 
     private boolean signContract = true;
     private TokenType tokenType;
+    private String contractFilePath;
 
     public Contract getContract() {
         if ((institutionUpdate != null && InstitutionType.PG == institutionUpdate.getInstitutionType())

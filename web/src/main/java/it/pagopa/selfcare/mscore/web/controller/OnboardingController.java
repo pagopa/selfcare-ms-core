@@ -129,6 +129,26 @@ public class OnboardingController {
     }
 
     /**
+     * The function persist onboarding data without contract
+     *
+     * @param request OnboardingInstitutionRequest
+     * @return no content
+     * <p>
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.onboarding.institution.complete}", notes = "${swagger.mscore.onboarding.institution.complete}")
+    @PostMapping(value = "/institution/complete")
+    public ResponseEntity<Void> onboardingInstitutionComplete(@RequestBody @Valid OnboardingInstitutionRequest request,
+                                                      Authentication authentication) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
+        onboardingService.onboardingInstitutionComplete(OnboardingMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
      * The function complete onboarding request
      *
      * @param tokenId String

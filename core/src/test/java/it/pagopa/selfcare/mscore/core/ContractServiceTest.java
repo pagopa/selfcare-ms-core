@@ -10,14 +10,16 @@ import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -29,8 +31,11 @@ import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -43,6 +48,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -203,51 +209,27 @@ class ContractServiceTest {
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
 
-        Institution institution = new Institution();
-        institution.setId("InstitutionId");
-        Onboarding onboarding = new Onboarding();
+        Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
 
         TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
         TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setClosedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
+        Token token = mockInstance(new Token());
         token.setProductId("prod");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
 
         User user1 = new User();
@@ -271,10 +253,15 @@ class ContractServiceTest {
         workContacts2.put("NotFoundInstitutionId2", createWorkContact("user2workemailNotFound2@examepl.com"));
         user2.setWorkContacts(workContacts2);
 
+        InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
+        institutionProxyInfoMock.setTaxCode(institution.getExternalId());
+
         when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
                 .thenReturn(user1);
         when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
                 .thenReturn(user2);
+        when(partyRegistryProxyConnector.getInstitutionById(any()))
+                .thenReturn(institutionProxyInfoMock);
 
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
@@ -283,7 +270,91 @@ class ContractServiceTest {
                 .getUserByInternalId(tokenUser1.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
         verify(userRegistryConnector, times(1))
                 .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
-        verifyNoMoreInteractions(userRegistryConnector);
+        verify(partyRegistryProxyConnector, times(1))
+                .getInstitutionById(institution.getExternalId());
+        verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
+    }
+
+    /**
+     * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token, QueueEvent)}
+     */
+    @ParameterizedTest
+    @ValueSource(classes = {
+            MsCoreException.class,
+            ResourceNotFoundException.class
+    })
+    void testSendDataLakeNotification_notOnIpa(Class<?> clazz) throws ExecutionException, InterruptedException {
+        ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
+        when(producerFactory.transactionCapable()).thenReturn(true);
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
+        CoreConfig coreConfig = new CoreConfig();
+        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
+
+        Onboarding onboarding = mockInstance(new Onboarding());
+        onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
+        institution.setOnboarding(List.of(onboarding));
+
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
+
+        TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
+        TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
+
+        Token token = mockInstance(new Token());
+        token.setProductId("prod");
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setClosedAt(null);
+        token.setUsers(List.of(tokenUser1, tokenUser2));
+
+        User user1 = new User();
+        user1.setId(tokenUser1.getUserId());
+        user1.setName(createCertifiedField_certified("User1Name"));
+        user1.setFamilyName(createCertifiedField_certified("User1FamilyName"));
+        user1.setFiscalCode("FiscalCode1");
+        Map<String, WorkContact> workContacts1 = new HashMap<>();
+        workContacts1.put("NotFoundInstitutionId", createWorkContact("user1workemailNotFound@examepl.com"));
+        workContacts1.put(institution.getId(), createWorkContact("user1workEmail@example.com"));
+        user1.setWorkContacts(workContacts1);
+
+        User user2 = new User();
+        user2.setId(tokenUser1.getUserId());
+        user2.setName(createCertifiedField_uncertified("User2Name"));
+        user2.setFamilyName(createCertifiedField_certified("User2FamilyName"));
+        user2.setFiscalCode("FiscalCode2");
+        Map<String, WorkContact> workContacts2 = new HashMap<>();
+        workContacts2.put(institution.getId(), createWorkContact("user2workEmail@example.com"));
+        workContacts2.put("NotFoundInstitutionId", createWorkContact("user2workemailNotFound@examepl.com"));
+        workContacts2.put("NotFoundInstitutionId2", createWorkContact("user2workemailNotFound2@examepl.com"));
+        user2.setWorkContacts(workContacts2);
+
+        Exception exceptionMock = (Exception) Mockito.mock(clazz);
+
+        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
+                .thenReturn(user1);
+        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
+                .thenReturn(user2);
+        when(partyRegistryProxyConnector.getInstitutionById(any()))
+                .thenThrow(exceptionMock);
+
+        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
+                "Topic cannot be null");
+
+        verify(userRegistryConnector, times(1))
+                .getUserByInternalId(tokenUser1.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
+        verify(userRegistryConnector, times(1))
+                .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
+        verify(partyRegistryProxyConnector, times(1))
+                .getInstitutionById(institution.getExternalId());
+        verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
 
     @Test
@@ -296,51 +367,69 @@ class ContractServiceTest {
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
 
-        Institution institution = new Institution();
-        Onboarding onboarding = new Onboarding();
+        Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setClosedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
+        TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
+        TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
+
+        Token token = mockInstance(new Token());
         token.setProductId("prod");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setClosedAt(null);
+        token.setUsers(List.of(tokenUser1, tokenUser2));
+
+        User user1 = new User();
+        user1.setId(tokenUser1.getUserId());
+        user1.setName(createCertifiedField_certified("User1Name"));
+        user1.setFamilyName(createCertifiedField_certified("User1FamilyName"));
+        user1.setFiscalCode("FiscalCode1");
+        Map<String, WorkContact> workContacts1 = new HashMap<>();
+        workContacts1.put("NotFoundInstitutionId", createWorkContact("user1workemailNotFound@examepl.com"));
+        workContacts1.put(institution.getId(), createWorkContact("user1workEmail@example.com"));
+        user1.setWorkContacts(workContacts1);
+
+        User user2 = new User();
+        user2.setId(tokenUser1.getUserId());
+        user2.setName(createCertifiedField_uncertified("User2Name"));
+        user2.setFamilyName(createCertifiedField_certified("User2FamilyName"));
+        user2.setFiscalCode("FiscalCode2");
+        Map<String, WorkContact> workContacts2 = new HashMap<>();
+        workContacts2.put(institution.getId(), createWorkContact("user2workEmail@example.com"));
+        workContacts2.put("NotFoundInstitutionId", createWorkContact("user2workemailNotFound@examepl.com"));
+        workContacts2.put("NotFoundInstitutionId2", createWorkContact("user2workemailNotFound2@examepl.com"));
+        user2.setWorkContacts(workContacts2);
+
+        InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
+        institutionProxyInfoMock.setTaxCode(institution.getExternalId());
+
+        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
+                .thenReturn(user1);
+        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
+                .thenReturn(user2);
+        when(partyRegistryProxyConnector.getInstitutionById(any()))
+                .thenReturn(institutionProxyInfoMock);
+
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE),
                 "Topic cannot be null");
 
+        verify(userRegistryConnector, times(1))
+                .getUserByInternalId(tokenUser1.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
+        verify(userRegistryConnector, times(1))
+                .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
+        verify(partyRegistryProxyConnector, times(1))
+                .getInstitutionById(institution.getExternalId());
     }
 
     @Test
@@ -366,8 +455,9 @@ class ContractServiceTest {
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         assertEquals("Template File", (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector)).extractTemplate("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector)).extractTemplate("Path"));
         verify(fileStorageConnector).getTemplateFile((String) any());
         verify(producerFactory).transactionCapable();
     }
@@ -398,8 +488,9 @@ class ContractServiceTest {
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         assertSame(resourceResponse, (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector)).getFile("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector)).getFile("Path"));
         verify(fileStorageConnector).getFile((String) any());
         verify(producerFactory).transactionCapable();
     }

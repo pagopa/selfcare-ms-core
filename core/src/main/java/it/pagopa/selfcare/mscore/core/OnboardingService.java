@@ -21,6 +21,8 @@ public interface OnboardingService {
 
     void onboardingInstitution(OnboardingRequest request, SelfCareUser principal);
 
+    void onboardingInstitutionComplete(OnboardingRequest request, SelfCareUser principal);
+
     void completeOboarding(Token token, MultipartFile contract);
 
     void invalidateOnboarding(Token token);
