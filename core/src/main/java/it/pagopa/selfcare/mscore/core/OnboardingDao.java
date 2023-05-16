@@ -87,9 +87,12 @@ public class OnboardingDao {
         onboarding.setContract(request.getContractFilePath());
         onboarding.setStatus(RelationshipState.ACTIVE);
 
+        Institution institutionUpdated = null;
+
         try {
             log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
-            institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(institution.getId(), token.getInstitutionUpdate(), onboarding);
+            institutionUpdated = institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(institution.getId(),
+                    token.getInstitutionUpdate(), onboarding);
         } catch (Exception e) {
             log.warn("can not update institution {}", institution.getId(), e);
             rollbackFirstStep(token, institution.getId(), onboarding);
@@ -109,7 +112,7 @@ public class OnboardingDao {
             rollbackSecondStep(toUpdate, toDelete, institution.getId(), token, onboarding, productMap);
         }
 
-        return new OnboardingRollback(token, onboarding, productMap, null);
+        return new OnboardingRollback(token, onboarding, productMap, institutionUpdated);
     }
 
     public OnboardingRollback persistLegals(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, String digest) {
