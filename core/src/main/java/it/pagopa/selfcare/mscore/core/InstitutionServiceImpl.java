@@ -2,7 +2,10 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.api.*;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.*;
@@ -35,21 +38,18 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-    private final GeoTaxonomiesConnector geoTaxonomiesConnector;
     private final UserService userService;
     private final CoreConfig coreConfig;
     private final ContractService contractService;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
-                                  GeoTaxonomiesConnector geoTaxonomiesConnector,
                                   UserService userService, CoreConfig coreConfig,
                                   TokenConnector tokenConnector,
                                   UserConnector userConnector,
                                   ContractService contractService) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
-        this.geoTaxonomiesConnector = geoTaxonomiesConnector;
         this.userService = userService;
         this.coreConfig = coreConfig;
         this.tokenConnector = tokenConnector;
@@ -218,7 +218,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public GeographicTaxonomies retrieveGeoTaxonomies(String code) {
-        return geoTaxonomiesConnector.getExtByCode(code);
+        return partyRegistryProxyConnector.getExtByCode(code);
     }
 
     @Override

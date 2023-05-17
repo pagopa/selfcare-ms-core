@@ -7,6 +7,7 @@ import lombok.Data;
 public class GeographicTaxonomies {
     @JsonProperty("geotax_id")
     private String geotaxId; //REQUIRED
+    @JsonProperty("desc")
     private String description;
     @JsonProperty("istat_code")//REQUIRED
     private String istatCode;
@@ -16,8 +17,10 @@ public class GeographicTaxonomies {
     private String provinceAbbreviation;
     @JsonProperty("region_id")
     private String regionId;
+    @JsonProperty("country")
     private String country;
     @JsonProperty("country_abbreviation")
     private String countryAbbreviation;
+    @JsonProperty("enabled")
     private boolean enable; //REQUIRED
 }
