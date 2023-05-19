@@ -6,7 +6,9 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +49,8 @@ class InstitutionControllerTest {
 
     @Mock
     private InstitutionService institutionService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void getUserInstitutionRelationships() throws Exception {
@@ -146,6 +150,49 @@ class InstitutionControllerTest {
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#createInstitutionByExternalId(String)}
+     */
+    @Test
+    void shouldCreateInstitutionFromIpa() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+
+        when(institutionService.createInstitutionFromIpa(any(), any(), any())).thenReturn(institution);
+
+        InstitutionFromIpaPost institutionFromIpaPost = new InstitutionFromIpaPost();
+        institutionFromIpaPost.setTaxCode("123456");
+        institutionFromIpaPost.setSubunitType(InstitutionPaSubunitType.AOO);
+        institutionFromIpaPost.setSubunitCode("1234");
+        String content = objectMapper.writeValueAsString(institutionFromIpaPost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#createInstitutionByExternalId(String)}
+     */
+    @Test
+    void shouldThrowValidationExceptionWhenCreateInstitutionFromIpaWithoutTax() throws Exception {
+
+        String content = objectMapper.writeValueAsString(new InstitutionFromIpaPost());
+
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     /**

@@ -17,6 +17,8 @@ public interface InstitutionConnector {
 
     void deleteById(String id);
 
+    Optional<Institution> findByTaxCodeAndSubunitTypeAndCode(String taxtCode, String subunitType, String subunitCode);
+
     Optional<Institution> findByExternalId(String externalId);
 
     List<Institution> findWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);

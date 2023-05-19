@@ -30,6 +30,8 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -40,6 +42,31 @@ public class InstitutionController {
 
     public InstitutionController(InstitutionService institutionService) {
         this.institutionService = institutionService;
+    }
+    /**
+     * The function create an institution retriving values from IPA
+     *
+     * @param institutionFromIpaPost InstitutionPost
+     * @return InstitutionResponse
+     * * Code: 201, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.create.from-ipa}", notes = "${swagger.mscore.institution.create.from-ipa}")
+    @PostMapping(value = "/from-ipa/")
+    public ResponseEntity<InstitutionResponse> createInstitutionFromIpa( @RequestBody @Valid InstitutionFromIpaPost institutionFromIpaPost) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
+
+        if ((Objects.nonNull(institutionFromIpaPost.getSubunitType()) && Objects.isNull(institutionFromIpaPost.getSubunitCode())) ||
+                (Objects.isNull(institutionFromIpaPost.getSubunitType()) && Objects.nonNull(institutionFromIpaPost.getSubunitCode()))) {
+            throw new ValidationException("subunitCode and subunitType must both be evaluated.");
+        }
+
+        Institution saved = institutionService.createInstitutionFromIpa(institutionFromIpaPost.getTaxCode(),
+                institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode());
+        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
     /**
