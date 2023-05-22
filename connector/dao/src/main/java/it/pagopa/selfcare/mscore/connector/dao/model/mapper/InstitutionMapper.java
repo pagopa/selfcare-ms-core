@@ -256,7 +256,7 @@ public class InstitutionMapper {
                 entity.setDesc(geographicTaxonomies.getDesc());
                 return entity;
             }).collect(Collectors.toList());
-            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name()).each(list);
+            update.set(InstitutionEntity.Fields.geographicTaxonomies.name(), list);
         }
     }
 
