@@ -17,6 +17,8 @@ public class NotificationToSend {
     private String product;
     private RelationshipState state;
     private String filePath;
+    private String fileName;
+    private String contentType;
     private String onboardingTokenId;
     private String pricingPlan;
     private InstitutionToNotify institution;
@@ -25,5 +27,6 @@ public class NotificationToSend {
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
     private List<UserToNotify> users;
+    private QueueEvent notificationType;
 
 }
