@@ -61,14 +61,11 @@ public class OnboardingInstitutionStrategyFactory {
         Consumer<OnboardingInstitutionStrategyInput> emailsOnboardingInstitutionStrategy;
 
         if (InstitutionType.PG == institutionType) {
-
             digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = ignore -> {};
-
         } else {
-
-            digestOnboardingInstitutionStrategy = uploadContractAndPerformDigest();
+            digestOnboardingInstitutionStrategy = createContractAndPerformDigest();
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
         }
@@ -147,7 +144,7 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private Consumer<OnboardingInstitutionStrategyInput> uploadContractAndPerformDigest() {
+    private Consumer<OnboardingInstitutionStrategyInput> createContractAndPerformDigest() {
         return strategyInput -> {
 
             String validManagerId = OnboardingInstitutionUtils.getValidManagerId(strategyInput.getOnboardingRequest().getUsers());
