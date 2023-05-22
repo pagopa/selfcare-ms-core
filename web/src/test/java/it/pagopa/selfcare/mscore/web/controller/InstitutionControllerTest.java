@@ -10,11 +10,14 @@ import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -50,7 +53,30 @@ class InstitutionControllerTest {
     @Mock
     private InstitutionService institutionService;
 
+    @Spy
+    private OnboardingResourceMapper onboardingResourceMapper = new OnboardingResourceMapperImpl();
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void shouldGetOnboardingsInstitutionByProductId() throws Exception {
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("example");
+
+        when(institutionService.getOnboardingInstitutionByProductId(any(), any()))
+                .thenReturn(List.of(onboarding));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/{institutionId}/onboardings?productId{productId}", "42", onboarding.getProductId());
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "[{\"productId\":\"example\",\"tokenId\":null,\"status\":null,\"contract\":null,\"pricingPlan\":null,\"billing\":null,\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}]"));
+    }
 
     @Test
     void getUserInstitutionRelationships() throws Exception {

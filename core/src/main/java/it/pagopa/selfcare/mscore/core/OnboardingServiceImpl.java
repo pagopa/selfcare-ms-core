@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
@@ -49,6 +50,8 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private final OnboardingInstitutionStrategyFactory institutionStrategyFactory;
 
+    private final InstitutionConnector institutionConnector;
+
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  UserService userService,
@@ -56,7 +59,8 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  ContractService contractService,
                                  EmailService emailService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
-                                 OnboardingInstitutionStrategyFactory institutionStrategyFactory) {
+                                 OnboardingInstitutionStrategyFactory institutionStrategyFactory,
+                                 InstitutionConnector institutionConnector) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
@@ -65,11 +69,21 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.emailService = emailService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.institutionStrategyFactory = institutionStrategyFactory;
+        this.institutionConnector = institutionConnector;
     }
 
     @Override
     public void verifyOnboardingInfo(String externalId, String productId) {
         institutionService.retrieveInstitutionsWithFilter(externalId, productId, UtilEnumList.VALID_RELATIONSHIP_STATES);
+    }
+
+    @Override
+    public void verifyOnboardingInfoSubunit(String taxCode, String subunitCode, String productId) {
+        Boolean existsOnboardingValid = institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(taxCode, subunitCode, productId, UtilEnumList.VALID_RELATIONSHIP_STATES);
+        if (existsOnboardingValid) {
+            throw new ResourceNotFoundException(String.format(CustomError.INSTITUTION_NOT_ONBOARDED.getMessage(), taxCode, productId),
+                    CustomError.INSTITUTION_NOT_ONBOARDED.getCode());
+        }
     }
 
     @Override

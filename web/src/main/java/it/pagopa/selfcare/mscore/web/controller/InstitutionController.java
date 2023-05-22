@@ -15,6 +15,7 @@ import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -32,6 +33,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,9 +41,12 @@ import java.util.Optional;
 @Slf4j
 public class InstitutionController {
     private final InstitutionService institutionService;
+    private final OnboardingResourceMapper onboardingResourceMapper;
 
-    public InstitutionController(InstitutionService institutionService) {
+    public InstitutionController(InstitutionService institutionService,
+                                 OnboardingResourceMapper onboardingResourceMapper) {
         this.institutionService = institutionService;
+        this.onboardingResourceMapper = onboardingResourceMapper;
     }
     /**
      * The function create an institution retriving values from IPA
@@ -268,6 +273,30 @@ public class InstitutionController {
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
         List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
+    }
+
+
+
+    /**
+     * Get list of onboarding for a certain productId
+     *
+     * @param institutionId String
+     * @param productId      String
+     * @return List
+     * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
+    @GetMapping(value = "/{institutionId}/onboardings")
+    public ResponseEntity<List<OnboardingResponse>> getOnboardingsInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                                    @PathVariable("institutionId") String institutionId,
+                                                                                    @RequestParam(value = "productId", required = false) String productId) {
+        CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
+        List<Onboarding> onboardings = institutionService.getOnboardingInstitutionByProductId(institutionId, productId);
+        return ResponseEntity.ok().body(onboardings.stream()
+                        .map(onboardingResourceMapper::toResponse)
+                        .collect(Collectors.toList()));
     }
 
     /**

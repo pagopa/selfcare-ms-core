@@ -20,7 +20,6 @@ import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -613,11 +612,11 @@ class InstitutionServiceImplTest {
     void testRetrieveInstitutionProduct2() {
 
         Institution institution = new Institution();
-        when(institutionConnector.findInstitutionProduct(any(), any())).thenReturn(institution);
+        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(institution);
 
 
         assertSame(institution, institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
-        verify(institutionConnector).findInstitutionProduct(any(), any());
+        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
     }
 
     /**
@@ -743,7 +742,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionByExternalIds2() {
 
-        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(List.of());
+        when(institutionConnector.findByExternalIdsAndProductId(any(), any())).thenReturn(List.of());
 
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         List<ValidInstitution> actualRetrieveInstitutionByExternalIdsResult = institutionServiceImpl
@@ -751,7 +750,7 @@ class InstitutionServiceImplTest {
 
         assertSame(validInstitutionList, actualRetrieveInstitutionByExternalIdsResult);
         assertTrue(actualRetrieveInstitutionByExternalIdsResult.isEmpty());
-        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
+        verify(institutionConnector).findByExternalIdsAndProductId(any(), any());
     }
 
     /**
@@ -760,7 +759,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionByExternalIds3() {
 
-        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(List.of());
+        when(institutionConnector.findByExternalIdsAndProductId(any(), any())).thenReturn(List.of());
 
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         validInstitutionList.add(new ValidInstitution("42", "The characteristics of someone or something"));
@@ -768,7 +767,7 @@ class InstitutionServiceImplTest {
                 .retrieveInstitutionByExternalIds(validInstitutionList, "42");
         assertSame(validInstitutionList, actualRetrieveInstitutionByExternalIdsResult);
         assertEquals(1, actualRetrieveInstitutionByExternalIdsResult.size());
-        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
+        verify(institutionConnector).findByExternalIdsAndProductId(any(), any());
     }
 
     /**
@@ -778,7 +777,7 @@ class InstitutionServiceImplTest {
     void testRetrieveInstitutionByExternalIds4() {
 
 
-        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(new ArrayList<>());
+        when(institutionConnector.findByExternalIdsAndProductId(any(), any())).thenReturn(new ArrayList<>());
 
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         validInstitutionList.add(new ValidInstitution("42", "The characteristics of someone or something"));
@@ -787,7 +786,7 @@ class InstitutionServiceImplTest {
                 .retrieveInstitutionByExternalIds(validInstitutionList, "42");
         assertSame(validInstitutionList, actualRetrieveInstitutionByExternalIdsResult);
         assertEquals(2, actualRetrieveInstitutionByExternalIdsResult.size());
-        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
+        verify(institutionConnector).findByExternalIdsAndProductId(any(), any());
     }
 
     /**
@@ -799,7 +798,7 @@ class InstitutionServiceImplTest {
         ArrayList<String> stringList = new ArrayList<>();
         stringList.add("42");
 
-        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(stringList);
+        when(institutionConnector.findByExternalIdsAndProductId(any(), any())).thenReturn(stringList);
 
         ArrayList<ValidInstitution> validInstitutionList = new ArrayList<>();
         validInstitutionList.add(new ValidInstitution("42", "The characteristics of someone or something"));
@@ -807,7 +806,7 @@ class InstitutionServiceImplTest {
                 .retrieveInstitutionByExternalIds(validInstitutionList, "42");
         assertSame(validInstitutionList, actualRetrieveInstitutionByExternalIdsResult);
         assertTrue(actualRetrieveInstitutionByExternalIdsResult.isEmpty());
-        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
+        verify(institutionConnector).findByExternalIdsAndProductId(any(), any());
     }
 
     /**
@@ -1016,9 +1015,9 @@ class InstitutionServiceImplTest {
     @Test
     void testGetInstitutionProduct() {
         Institution institution = new Institution();
-        when(institutionConnector.findInstitutionProduct(any(), any())).thenReturn(institution);
+        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(institution);
         assertSame(institution, institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
-        verify(institutionConnector).findInstitutionProduct(any(), any());
+        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
     }
 
     /**
@@ -1026,10 +1025,10 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testGetInstitutionProduct2() {
-        when(institutionConnector.findInstitutionProduct(any(), any()))
+        when(institutionConnector.findByExternalIdAndProductId(any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
-        verify(institutionConnector).findInstitutionProduct(any(), any());
+        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
     }
 
     /**

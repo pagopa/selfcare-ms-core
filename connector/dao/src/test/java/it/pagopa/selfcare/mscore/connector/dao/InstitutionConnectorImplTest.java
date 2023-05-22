@@ -1906,7 +1906,7 @@ class InstitutionConnectorImplTest {
     @Test
     void testFindInstitutionProduct() {
         when(institutionRepository.find(any(), any())).thenReturn(new ArrayList<>());
-        assertThrows(ResourceNotFoundException.class, () -> institutionConnectorImpl.findInstitutionProduct("externalId", "productId"));
+        assertThrows(ResourceNotFoundException.class, () -> institutionConnectorImpl.findByExternalIdAndProductId("externalId", "productId"));
     }
 
     @Test
@@ -2358,17 +2358,17 @@ class InstitutionConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionConnectorImpl#findByExternalIdAndProductId(List, String)}
+     * Method under test: {@link InstitutionConnectorImpl#findByExternalIdsAndProductId(List, String)}
      */
     @Test
     void testFindByExternalIdAndProductId() {
         when(institutionRepository.find(org.mockito.Mockito.any(),org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
-        assertTrue(institutionConnectorImpl.findByExternalIdAndProductId(new ArrayList<>(), "42").isEmpty());
+        assertTrue(institutionConnectorImpl.findByExternalIdsAndProductId(new ArrayList<>(), "42").isEmpty());
         verify(institutionRepository).find( org.mockito.Mockito.any(),org.mockito.Mockito.any());
     }
 
     /**
-     * Method under test: {@link InstitutionConnectorImpl#findByExternalIdAndProductId(List, String)}
+     * Method under test: {@link InstitutionConnectorImpl#findByExternalIdsAndProductId(List, String)}
      */
     @Test
     void testFindByExternalIdAndProductId2() {
@@ -2376,7 +2376,7 @@ class InstitutionConnectorImplTest {
                 .thenThrow(new InvalidRequestException("An error occurred", "."));
         List<ValidInstitution> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
-                () -> institutionConnectorImpl.findByExternalIdAndProductId(list, "42"));
+                () -> institutionConnectorImpl.findByExternalIdsAndProductId(list, "42"));
         verify(institutionRepository).find(org.mockito.Mockito.any(),org.mockito.Mockito.any());
     }
 

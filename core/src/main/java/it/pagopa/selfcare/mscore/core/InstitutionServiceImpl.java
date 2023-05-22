@@ -64,6 +64,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public List<Onboarding> getOnboardingInstitutionByProductId(String institutionId, String productId) {
+        return institutionConnector.findOnboardingByIdAndProductId(institutionId, productId)
+                .getOnboarding();
+    }
+
+    @Override
     public Institution retrieveInstitutionById(String id) {
         return institutionConnector.findById(id);
     }
@@ -91,7 +97,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
 
-        checkIfAlreadyExists(taxCode, subunitType, subunitCode);
+        checkIfAlreadyExists(taxCode, subunitCode);
 
         InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(taxCode);
 
@@ -220,7 +226,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution retrieveInstitutionProduct(String externalId, String productId) {
-        return institutionConnector.findInstitutionProduct(externalId, productId);
+        return institutionConnector.findByExternalIdAndProductId(externalId, productId);
     }
 
     @Override
@@ -265,7 +271,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId) {
-        List<String> institutionsExternalId = institutionConnector.findByExternalIdAndProductId(validInstitutionList, productId);
+        List<String> institutionsExternalId = institutionConnector.findByExternalIdsAndProductId(validInstitutionList, productId);
         validInstitutionList.removeIf(validInstitution -> institutionsExternalId.contains(validInstitution.getId()));
         return validInstitutionList;
     }
@@ -341,13 +347,12 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.trace("updateCreatedAt end");
     }
 
-    public void checkIfAlreadyExists(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
+    public void checkIfAlreadyExists(String taxCode, String subunitCode) {
         log.info("START - check institution {} already exists", taxCode);
-        String subunitTypeString = Objects.nonNull(subunitType) ?subunitType.name() : null;
-        Optional<Institution> optInstituion = institutionConnector.findByTaxCodeAndSubunitTypeAndCode(taxCode, subunitTypeString, subunitCode);
+        Optional<Institution> optInstituion = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
         if(optInstituion.isPresent())
             throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitType, subunitCode),
+                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
                     CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
     }
 

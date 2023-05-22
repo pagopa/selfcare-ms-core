@@ -58,7 +58,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<String> findByExternalIdAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
+    public List<String> findByExternalIdsAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
         List<String> externalIds = validInstitutionList.stream().map(ValidInstitution::getId).collect(Collectors.toList());
         Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId)
                 .and(InstitutionEntity.Fields.externalId.name()).in(externalIds));
@@ -190,7 +190,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findInstitutionProduct(String externalId, String productId) {
+    public Institution findByExternalIdAndProductId(String externalId, String productId) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.externalId.name()).is(externalId)
                 .and(constructQuery(Onboarding.Fields.productId.name())).is(productId));
 
@@ -198,6 +198,11 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .map(InstitutionMapper::convertToInstitution)
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_BILLING_ERROR.getMessage(), externalId, productId),
                         GET_INSTITUTION_BILLING_ERROR.getCode()));
+    }
+
+    @Override
+    public Institution findOnboardingByIdAndProductId(String institutionId, String productId) {
+        return InstitutionMapper.convertToInstitution(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId));
     }
 
     @Override
@@ -213,14 +218,24 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Optional<Institution> findByTaxCodeAndSubunitTypeAndCode(String taxtCode, String subunitType, String subunitCode) {
+    public Optional<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode) {
         return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode)
-                                .and(InstitutionEntity.Fields.subunitType.name()).is(subunitType)
                                 .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
                         ),
                         InstitutionEntity.class).stream()
                 .map(InstitutionMapper::convertToInstitution)
                 .findFirst();
+    }
+
+    @Override
+    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, String subunitCode, String productId, List<RelationshipState> validRelationshipStates) {
+        return repository.exists(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode)
+                                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode))
+                                .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                                        .elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)
+                                                .and(Onboarding.Fields.status.name()).in(validRelationshipStates)))
+                        ,
+                        InstitutionEntity.class);
     }
 
     @Override

@@ -17,6 +17,8 @@ public interface OnboardingService {
 
     void verifyOnboardingInfo(String externalId, String productId);
 
+    void verifyOnboardingInfoSubunit(String taxCode, String subunitCode, String productId);
+
     List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId);
 
     void onboardingInstitution(OnboardingRequest request, SelfCareUser principal);

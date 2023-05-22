@@ -15,6 +15,8 @@ import java.util.Optional;
 
 public interface InstitutionService {
 
+    List<Onboarding> getOnboardingInstitutionByProductId(String institutionId, String productId);
+
     Institution retrieveInstitutionById(String id);
 
     Institution retrieveInstitutionByExternalId(String institutionExternalId);

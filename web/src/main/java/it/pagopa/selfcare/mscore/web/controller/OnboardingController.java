@@ -69,6 +69,32 @@ public class OnboardingController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+
+    /**
+     * The function verify onboarding status of given product and subunit of institution
+     *
+     * @param taxCode String
+     * @param subunitCode String
+     * @param productId  String
+     * @return no content
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.onboarding.verify.subunit}", notes = "${swagger.mscore.onboarding.verify.subunit}")
+    @RequestMapping(method = {RequestMethod.HEAD}, value = "/")
+    public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.externalId}")
+                                                     @RequestParam(value = "taxCode") String taxCode,
+                                                     @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
+                                                     @RequestParam(value = "subunitCode", required = false) String subunitCode,
+                                                     @ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                     @RequestParam(value = "productId") String productId) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
+        onboardingService.verifyOnboardingInfoSubunit(taxCode, subunitCode, productId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     /**
      * The function return onboardingInfo
      *
