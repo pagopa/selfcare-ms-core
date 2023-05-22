@@ -45,7 +45,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
@@ -231,6 +234,7 @@ class ContractServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
+        token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());
@@ -256,20 +260,12 @@ class ContractServiceTest {
         InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
         institutionProxyInfoMock.setTaxCode(institution.getExternalId());
 
-        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
-                .thenReturn(user1);
-        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
-                .thenReturn(user2);
         when(partyRegistryProxyConnector.getInstitutionById(any()))
                 .thenReturn(institutionProxyInfoMock);
 
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
-        verify(userRegistryConnector, times(1))
-                .getUserByInternalId(tokenUser1.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
-        verify(userRegistryConnector, times(1))
-                .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
         verify(partyRegistryProxyConnector, times(1))
                 .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
@@ -314,6 +310,7 @@ class ContractServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
+        token.setContractSigned("");
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());
@@ -338,20 +335,12 @@ class ContractServiceTest {
 
         Exception exceptionMock = (Exception) Mockito.mock(clazz);
 
-        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
-                .thenReturn(user1);
-        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
-                .thenReturn(user2);
         when(partyRegistryProxyConnector.getInstitutionById(any()))
                 .thenThrow(exceptionMock);
 
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
-        verify(userRegistryConnector, times(1))
-                .getUserByInternalId(tokenUser1.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
-        verify(userRegistryConnector, times(1))
-                .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
         verify(partyRegistryProxyConnector, times(1))
                 .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
@@ -385,10 +374,11 @@ class ContractServiceTest {
 
         Token token = mockInstance(new Token());
         token.setProductId("prod");
-        token.setStatus(RelationshipState.ACTIVE);
+        token.setStatus(RelationshipState.DELETED);
         token.setInstitutionUpdate(institutionUpdate);
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
+        token.setContractSigned(null);
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());
@@ -414,20 +404,12 @@ class ContractServiceTest {
         InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
         institutionProxyInfoMock.setTaxCode(institution.getExternalId());
 
-        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId1"), any()))
-                .thenReturn(user1);
-        when(userRegistryConnector.getUserByInternalId(eq("tokenUserId2"), any()))
-                .thenReturn(user2);
         when(partyRegistryProxyConnector.getInstitutionById(any()))
                 .thenReturn(institutionProxyInfoMock);
 
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE),
                 "Topic cannot be null");
 
-        verify(userRegistryConnector, times(1))
-                .getUserByInternalId(tokenUser1.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
-        verify(userRegistryConnector, times(1))
-                .getUserByInternalId(tokenUser2.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
         verify(partyRegistryProxyConnector, times(1))
                 .getInstitutionById(institution.getExternalId());
     }

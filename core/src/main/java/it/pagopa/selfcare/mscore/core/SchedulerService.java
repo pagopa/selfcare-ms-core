@@ -1,10 +1,12 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.mscore.api.ConfigConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.SchedulerConfig;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.Config;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -25,6 +27,7 @@ public class SchedulerService {
 
     private final TokenConnector tokenConnector;
     private final InstitutionConnector institutionConnector;
+    private final ConfigConnector configConnector;
 
     private final SchedulerConfig schedulerConfig;
 
@@ -32,12 +35,14 @@ public class SchedulerService {
     public SchedulerService(ContractService contractService,
                             SchedulerConfig schedulerConfig,
                             TokenConnector tokenConnector,
-                            InstitutionConnector institutionConnector) {
+                            InstitutionConnector institutionConnector,
+                            ConfigConnector configConnector) {
         log.info("Initializing {}...", SchedulerService.class.getSimpleName());
         this.contractService = contractService;
         this.schedulerConfig = schedulerConfig;
         this.tokenConnector = tokenConnector;
         this.institutionConnector = institutionConnector;
+        this.configConnector = configConnector;
     }
 
 
@@ -45,18 +50,23 @@ public class SchedulerService {
     public void regenerateQueueNotifications() {
         log.trace("regenerateQueueNotifications start");
 
-        //System.out.println("Running the scheduler + " + schedulerConfig.getFixedDelay());
-        System.out.println("SCHEDULER RUNNING...");
-        System.out.println("ENVIRONMENT VARIABLE: " + System.getenv("SCHEDULER"));
+        Config regenerateQueueConfiguration = null;
+        try {
+            regenerateQueueConfiguration = configConnector.findById("KafkaScheduler");
+        } catch (ResourceNotFoundException exception) {
+            log.error("Error while retrieving kafka queue regeneration configuration, {}", exception.getMessage());
+        }
 
-        if (System.getenv("SCHEDULER") != null && System.getenv("SCHEDULER").equals("true")) {
-            log.info("Regenerating notification on queue...");
-            Boolean nextPage = true;
-            Integer page = 0;
+        //To regenerate all the message on the kafka queue, you need to modify the Config entity, set value of the "enableKafkaScheduler" field to true, directly on mongoDB and if needs be you can also modify the value of "productFilter"
+        if (regenerateQueueConfiguration != null && regenerateQueueConfiguration.isEnableKafkaScheduler()) {
+            log.debug("Regenerating notification on queue with product filter {}", regenerateQueueConfiguration.getProductFilter());
+
+            configConnector.resetConfiguration("KafkaScheduler");
+
+            boolean nextPage = true;
+            int page = 0;
             do {
-                List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), System.getenv("SCHEDULER_REGENERATE_QUEUE_NOTIFICATION_PRODUCT_FILTER"), page);
-
-                System.out.println("TOKEN SIZE: " + tokens.size());
+                List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page);
 
                 tokens.forEach(token -> {
                     try {
@@ -71,32 +81,14 @@ public class SchedulerService {
                 });
 
                 page += 1;
-
                 if (tokens.size() < 100)
                     nextPage = false;
 
             } while (nextPage);
         }
 
-        log.info("Next scheduled check at {}", getNextScheduledCheck());
+        log.info("Next scheduled check at {}", OffsetDateTime.now().plusSeconds(schedulerConfig.getFixedDelay() / 1000));
         log.trace("regenerateQueueNotifications end");
-    }
-
-    private OffsetDateTime getNextScheduledCheck() {
-        Long seconds = schedulerConfig.getFixedDelay() / 1000;
-
-        if (seconds < 60) {
-            return OffsetDateTime.now().plusSeconds(seconds);
-        }
-
-        Long minutes = seconds / 60;
-
-        if (minutes < 60) {
-            return OffsetDateTime.now().plusMinutes(minutes);
-        }
-
-        Long hours = minutes / 60;
-        return OffsetDateTime.now().plusHours(hours);
     }
 
 }

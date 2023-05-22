@@ -318,7 +318,7 @@ public class ContractService {
             return "";
         }
 
-        String[] tokenContractSignedSplit = tokenContractSigned.split(tokenId);
+        String[] tokenContractSignedSplit = tokenContractSigned.split(tokenId.concat("/"));
         if (tokenContractSignedSplit.length > 1) {
             return tokenContractSignedSplit[1];
         }
