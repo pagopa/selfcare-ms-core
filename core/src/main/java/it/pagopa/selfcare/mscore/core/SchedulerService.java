@@ -47,9 +47,9 @@ public class SchedulerService {
 
         //System.out.println("Running the scheduler + " + schedulerConfig.getFixedDelay());
         System.out.println("SCHEDULER RUNNING...");
-        System.out.println("ENVIRONMENT VARIABLE: " + System.getenv("SCHEDULER_REGENERATE_QUEUE_NOTIFICATION_ENABLED"));
+        System.out.println("ENVIRONMENT VARIABLE: " + System.getenv("SCHEDULER"));
 
-        if (System.getenv("SCHEDULER_REGENERATE_QUEUE_NOTIFICATION_ENABLED") != null && System.getenv("SCHEDULER_REGENERATE_QUEUE_NOTIFICATION_ENABLED").equals("true")) {
+        if (System.getenv("SCHEDULER") != null && System.getenv("SCHEDULER").equals("true")) {
             log.info("Regenerating notification on queue...");
             Boolean nextPage = true;
             Integer page = 0;
