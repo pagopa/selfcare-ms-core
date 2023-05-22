@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -46,7 +46,8 @@ public class SchedulerService {
         log.trace("regenerateQueueNotifications start");
 
         //System.out.println("Running the scheduler + " + schedulerConfig.getFixedDelay());
-
+        System.out.println("SCHEDULER RUNNING...");
+        System.out.println("ENVIRONMENT VARIABLE: " + System.getenv("SCHEDULER_REGENERATE_QUEUE_NOTIFICATION_ENABLED"));
 
         if (System.getenv("SCHEDULER_REGENERATE_QUEUE_NOTIFICATION_ENABLED") != null && System.getenv("SCHEDULER_REGENERATE_QUEUE_NOTIFICATION_ENABLED").equals("true")) {
             log.info("Regenerating notification on queue...");
@@ -77,14 +78,25 @@ public class SchedulerService {
             } while (nextPage);
         }
 
+        log.info("Next scheduled check at {}", getNextScheduledCheck());
+        log.trace("regenerateQueueNotifications end");
+    }
 
-        try {
-            TimeUnit.SECONDS.sleep(30);
-        } catch (InterruptedException e) {
-            log.error("Error while waiting: " + e.getMessage());
+    private OffsetDateTime getNextScheduledCheck() {
+        Long seconds = schedulerConfig.getFixedDelay() / 1000;
+
+        if (seconds < 60) {
+            return OffsetDateTime.now().plusSeconds(seconds);
         }
 
-        log.trace("regenerateQueueNotifications end");
+        Long minutes = seconds / 60;
+
+        if (minutes < 60) {
+            return OffsetDateTime.now().plusMinutes(minutes);
+        }
+
+        Long hours = minutes / 60;
+        return OffsetDateTime.now().plusHours(hours);
     }
 
 }
