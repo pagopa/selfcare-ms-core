@@ -52,7 +52,7 @@ public class SchedulerService {
 
         Config regenerateQueueConfiguration = null;
         try {
-            regenerateQueueConfiguration = configConnector.findById("KafkaScheduler");
+            regenerateQueueConfiguration = configConnector.findById(schedulerConfig.getKafkaRegenerateConfigName());
         } catch (ResourceNotFoundException exception) {
             log.error("Error while retrieving kafka queue regeneration configuration, {}", exception.getMessage());
         }
@@ -61,7 +61,7 @@ public class SchedulerService {
         if (regenerateQueueConfiguration != null && regenerateQueueConfiguration.isEnableKafkaScheduler()) {
             log.debug("Regenerating notification on queue with product filter {}", regenerateQueueConfiguration.getProductFilter());
 
-            configConnector.resetConfiguration("KafkaScheduler");
+            configConnector.resetConfiguration(schedulerConfig.getKafkaRegenerateConfigName());
 
             boolean nextPage = true;
             int page = 0;

@@ -19,6 +19,9 @@ public class SchedulerConfig implements SchedulingConfigurer {
     @Value("${scheduler.fixed-delay.delay}")
     private Long fixedDelay;
 
+    @Value("${scheduler.kafka-regenerate-config.name}")
+    private String kafkaRegenerateConfigName;
+
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
@@ -30,6 +33,10 @@ public class SchedulerConfig implements SchedulingConfigurer {
 
     public Long getFixedDelay() {
         return fixedDelay;
+    }
+
+    public String getKafkaRegenerateConfigName() {
+        return kafkaRegenerateConfigName;
     }
 
 }
