@@ -34,7 +34,7 @@ public enum CustomError {
     RELATIONSHIP_NOT_SUSPENDABLE("0010", "Relationship %s cannot be suspended"),
     MISSING_QUERY_PARAMETER("0045", "At least one query parameter between [userId, institutionId] must be passed"),
     RELATIONSHIP_NOT_FOUND("0008", "Relationship not found for Institution %s, User %s and Role %s"),
-    CONFIG_NOT_FOUND("0000", "Cannot find Config using configId %s and externalInstitutionId %s");
+    CONFIG_NOT_FOUND("0000", "Cannot find Config using configId %s");
 
     private final String code;
     private final String detail;

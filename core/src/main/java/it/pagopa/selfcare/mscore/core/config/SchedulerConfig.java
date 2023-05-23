@@ -19,7 +19,7 @@ public class SchedulerConfig implements SchedulingConfigurer {
     @Value("${scheduler.fixed-delay.delay}")
     private Long fixedDelay;
 
-    @Value("${scheduler.kafka-regenerate-config.name}")
+    @Value("${scheduler.regenerate-kafka-config.name}")
     private String kafkaRegenerateConfigName;
 
     @Override

@@ -121,7 +121,7 @@ class SchedulerServiceTest {
     @Test
     void regenerateQueueNotifcations_moreThanOnePage() {
         // Given
-        Config configMock = MockUtils.createConfigMock(true, "");
+        Config configMock = MockUtils.createConfigMock(true, null);
         List<Token> tokensMockPageOne = MockUtils.createTokenListMock(100, 0, RelationshipState.ACTIVE, InstitutionType.PA);
         List<Institution> institutionsMockPageOne = MockUtils.createInstitutionListMock(100, 0, RelationshipState.ACTIVE, InstitutionType.PA);
         List<Token> tokensMockPageTwo = MockUtils.createTokenListMock(21, 100, RelationshipState.ACTIVE, InstitutionType.PA);
@@ -189,7 +189,7 @@ class SchedulerServiceTest {
     @Test
     void regenerateQueueNotifcations_institutionNotFound() {
         // Given
-        Config configMock = MockUtils.createConfigMock(true, "");
+        Config configMock = MockUtils.createConfigMock(true, "prod-io");
         List<Token> tokensMock = MockUtils.createTokenListMock(1, 0, RelationshipState.ACTIVE, InstitutionType.GSP);
 
         when(configConnector.findById(any()))
