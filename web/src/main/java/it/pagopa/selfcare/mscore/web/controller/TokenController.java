@@ -5,15 +5,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.TokenService;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
+import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -46,5 +46,29 @@ public class TokenController {
         CustomExceptionMessage.setCustomMessage(GenericError.VERIFY_TOKEN_FAILED);
         tokenService.verifyToken(tokenId);
         return ResponseEntity.ok().body(new TokenResponse(tokenId));
+    }
+
+    /**
+     * Retrieves the onboarding token for a given institution and product
+     *
+     * @param institutionId institution's unique identifier
+     * @param productId product's unique identifier
+     * @return The token
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Token not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.token.api.getToken}")
+    @GetMapping(value = "/tokens/token")
+    public TokenResource getToken(@ApiParam("${swagger.mscore.institution.model.id}")@RequestParam(value = "institutionId")String institutionId,
+                                  @ApiParam("${swagger.mscore.product.model.id}")@RequestParam(value = "productId")String productId){
+        log.trace("getToken start");
+        log.debug("getToken institutionId = {}, productId = {}", institutionId, productId);
+        Token token = tokenService.getToken(institutionId, productId);
+        TokenResource result = TokenMapper.toResource(token);
+        log.debug("getToken result = {}", result);
+        log.trace("getToken end");
+        return result;
     }
 }

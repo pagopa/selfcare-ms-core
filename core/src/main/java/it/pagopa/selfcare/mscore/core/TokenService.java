@@ -11,4 +11,6 @@ public interface TokenService {
 
     TokenRelationships retrieveToken(String tokenId);
 
+    Token getToken(String institutionId, String productId);
+
 }
