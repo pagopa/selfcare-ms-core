@@ -48,6 +48,34 @@ public class InstitutionController {
         this.institutionService = institutionService;
         this.onboardingResourceMapper = onboardingResourceMapper;
     }
+
+    /**
+     * Gets institutions filtering by taxCode and/or subunitCode
+     *
+     * @param taxCode String
+     * @param subunitCode String
+     * @return OnboardedProducts
+     * * Code: 200, Message: successful operation, DataType: OnboardedProducts
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 404, Message: Products not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
+    @GetMapping(value = "/")
+    public ResponseEntity<InstitutionsResponse> getInstitutions(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
+                                                             @RequestParam(value = "taxCode") String taxCode,
+                                                             @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
+                                                             @RequestParam(value = "subunitCode", required = false) String subunitCode) {
+
+        CustomExceptionMessage.setCustomMessage(GenericError.GET_INSTITUTION_BY_ID_ERROR);
+        List<Institution> institutions = institutionService.getInstitutions(taxCode, subunitCode);
+        InstitutionsResponse institutionsResponse = new InstitutionsResponse();
+        institutionsResponse.setInstitutions(institutions.stream()
+                        .map(InstitutionMapper::toInstitutionResponse)
+                .collect(Collectors.toList()));
+        return ResponseEntity.ok(institutionsResponse);
+    }
+
     /**
      * The function create an institution retriving values from IPA
      *

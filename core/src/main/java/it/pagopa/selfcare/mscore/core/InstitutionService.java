@@ -21,6 +21,8 @@ public interface InstitutionService {
 
     Institution retrieveInstitutionByExternalId(String institutionExternalId);
 
+    List<Institution> getInstitutions(String taxCode, String subunitCode);
+
     Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode);
 
     Institution createInstitutionByExternalId(String externalId);

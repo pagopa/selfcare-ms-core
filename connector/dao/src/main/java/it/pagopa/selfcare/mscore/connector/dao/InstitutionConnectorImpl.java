@@ -218,13 +218,13 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Optional<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode) {
+    public List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode) {
         return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode)
                                 .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
                         ),
                         InstitutionEntity.class).stream()
                 .map(InstitutionMapper::convertToInstitution)
-                .findFirst();
+                .collect(Collectors.toList());
     }
 
     @Override

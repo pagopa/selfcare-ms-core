@@ -17,7 +17,7 @@ public interface InstitutionConnector {
 
     void deleteById(String id);
 
-    Optional<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode);
+    List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode);
 
     Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, String subunitCode, String productId, List<RelationshipState> validRelationshipStates);
 

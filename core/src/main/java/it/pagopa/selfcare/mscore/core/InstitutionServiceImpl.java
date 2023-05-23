@@ -9,9 +9,14 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
+import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
+import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.*;
+import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -46,13 +51,16 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionMapper institutionMapper;
 
+    private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
+
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
                                   UserService userService, CoreConfig coreConfig,
                                   TokenConnector tokenConnector,
                                   UserConnector userConnector,
                                   ContractService contractService,
-                                  InstitutionMapper institutionMapper) {
+                                  InstitutionMapper institutionMapper,
+                                  CreateInstitutionStrategyFactory createInstitutionStrategyFactory) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.userService = userService;
@@ -61,6 +69,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         this.userConnector = userConnector;
         this.contractService = contractService;
         this.institutionMapper = institutionMapper;
+        this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
     }
 
     @Override
@@ -93,34 +102,27 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
+    @Override
+    public List<Institution> getInstitutions(String taxCode, String subunitCode) {
+        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+    }
+
 
     @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
-
-        checkIfAlreadyExists(taxCode, subunitCode);
-
-        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(taxCode);
-
-        Institution newInstitution = null;
-
-        if(InstitutionPaSubunitType.AOO.equals(subunitType)) {
-            return null;
-        } else if(InstitutionPaSubunitType.UO.equals(subunitType)) {
-            return null;
-        } else {
-            return createInstitutionByInstitutionProxy(institutionProxyInfo, taxCode);
-        }
-
+        return createInstitutionStrategyFactory.createInstitutionStrategy(subunitType)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(taxCode)
+                        .subunitCode(subunitCode)
+                        .subunitType(subunitType)
+                        .build());
     }
     @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
 
         InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(externalId);
-        return createInstitutionByInstitutionProxy(institutionProxyInfo, externalId);
-    }
 
-    private Institution createInstitutionByInstitutionProxy(InstitutionProxyInfo institutionProxyInfo, String externalId) {
         log.debug("institution from proxy: {}", institutionProxyInfo);
         log.info("getInstitution {}", institutionProxyInfo.getId());
         CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
@@ -347,15 +349,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.trace("updateCreatedAt end");
     }
 
-    public void checkIfAlreadyExists(String taxCode, String subunitCode) {
-        log.info("START - check institution {} already exists", taxCode);
-        Optional<Institution> optInstituion = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
-        if(optInstituion.isPresent())
-            throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
-                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
-    }
-
     public void checkIfAlreadyExists(String externalId) {
         log.info("START - check institution {} already exists", externalId);
         Optional<Institution> opt = institutionConnector.findByExternalId(externalId);
@@ -364,6 +357,15 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
+
+    private void checkIfAlreadyExists(String taxCode, String subunitCode) {
+        /* check if institution exists */
+        List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+        if(!institutions.isEmpty())
+            throw new ResourceConflictException(String
+                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
+                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
+    }
     private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipInfo> list = new ArrayList<>();
         for (OnboardedUser onboardedUser : institutionRelationships) {

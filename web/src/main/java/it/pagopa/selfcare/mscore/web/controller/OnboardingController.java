@@ -82,9 +82,9 @@ public class OnboardingController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.verify.subunit}", notes = "${swagger.mscore.onboarding.verify.subunit}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
     @RequestMapping(method = {RequestMethod.HEAD}, value = "/")
-    public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.externalId}")
+    public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
                                                      @RequestParam(value = "taxCode") String taxCode,
                                                      @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
                                                      @RequestParam(value = "subunitCode", required = false) String subunitCode,

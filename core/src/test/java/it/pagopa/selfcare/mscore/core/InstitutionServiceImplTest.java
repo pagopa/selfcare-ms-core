@@ -68,6 +68,32 @@ class InstitutionServiceImplTest {
     private InstitutionMapper institutionMapper = new InstitutionMapperImpl();
 
 
+    private static final InstitutionProxyInfo dummyInstitutionProxyInfo;
+    private static final CategoryProxyInfo dummyCategoryProxyInfo;
+
+    static {
+        dummyInstitutionProxyInfo = new InstitutionProxyInfo();
+        dummyInstitutionProxyInfo.setAddress("42 Main St");
+        dummyInstitutionProxyInfo.setAoo("Aoo");
+        dummyInstitutionProxyInfo.setCategory("Category");
+        dummyInstitutionProxyInfo.setDescription("The characteristics of someone or something");
+        dummyInstitutionProxyInfo.setDigitalAddress("42 Main St");
+        dummyInstitutionProxyInfo.setId("42");
+        dummyInstitutionProxyInfo.setO("foo");
+        dummyInstitutionProxyInfo.setOrigin("Origin");
+        dummyInstitutionProxyInfo.setOriginId("42");
+        dummyInstitutionProxyInfo.setOu("Ou");
+        dummyInstitutionProxyInfo.setTaxCode("Tax Code");
+        dummyInstitutionProxyInfo.setZipCode("21654");
+
+        dummyCategoryProxyInfo = new CategoryProxyInfo();
+        dummyCategoryProxyInfo.setCode("Code");
+        dummyCategoryProxyInfo.setKind("Kind");
+        dummyCategoryProxyInfo.setName("Name");
+        dummyCategoryProxyInfo.setOrigin("Origin");
+    }
+
+
     /**
      * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionById(String)}
      */
@@ -126,7 +152,7 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionServiceImpl#createInstitutionByExternalId(String)}
      */
     @Test
-    void testCreateInstitutionByExternalId() {
+    void shouldThrowExceptionOnCreateInstitutionByExternalIdWhenInstitutionFounded() {
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
         assertThrows(ResourceConflictException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
         verify(institutionConnector).findByExternalId(any());
@@ -141,25 +167,9 @@ class InstitutionServiceImplTest {
         when(institutionConnector.save(any())).thenReturn(institution);
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
-        InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
-        institutionProxyInfo.setAddress("42 Main St");
-        institutionProxyInfo.setAoo("Aoo");
-        institutionProxyInfo.setCategory("Category");
-        institutionProxyInfo.setDescription("The characteristics of someone or something");
-        institutionProxyInfo.setDigitalAddress("42 Main St");
-        institutionProxyInfo.setId("42");
-        institutionProxyInfo.setO("foo");
-        institutionProxyInfo.setOrigin("Origin");
-        institutionProxyInfo.setOriginId("42");
-        institutionProxyInfo.setOu("Ou");
-        institutionProxyInfo.setTaxCode("Tax Code");
-        institutionProxyInfo.setZipCode("21654");
+        InstitutionProxyInfo institutionProxyInfo = dummyInstitutionProxyInfo;
+        CategoryProxyInfo categoryProxyInfo = dummyCategoryProxyInfo;
 
-        CategoryProxyInfo categoryProxyInfo = new CategoryProxyInfo();
-        categoryProxyInfo.setCode("Code");
-        categoryProxyInfo.setKind("Kind");
-        categoryProxyInfo.setName("Name");
-        categoryProxyInfo.setOrigin("Origin");
         when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(categoryProxyInfo);
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
         assertSame(institution, institutionServiceImpl.createInstitutionByExternalId("42"));
@@ -173,30 +183,14 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionServiceImpl#createInstitutionByExternalId(String)}
      */
     @Test
-    void testCreateInstitutionByExternalId3() {
+    void shouldThrowExceptionOnCreationInstitutionByExternalIdWhenSaveAlreadyExists() {
         when(institutionConnector.save(any()))
                 .thenThrow(new ResourceConflictException("An error occurred", "START - check institution {} already exists"));
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
 
-        InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
-        institutionProxyInfo.setAddress("42 Main St");
-        institutionProxyInfo.setAoo("Aoo");
-        institutionProxyInfo.setCategory("Category");
-        institutionProxyInfo.setDescription("The characteristics of someone or something");
-        institutionProxyInfo.setDigitalAddress("42 Main St");
-        institutionProxyInfo.setId("42");
-        institutionProxyInfo.setO("foo");
-        institutionProxyInfo.setOrigin("Origin");
-        institutionProxyInfo.setOriginId("42");
-        institutionProxyInfo.setOu("Ou");
-        institutionProxyInfo.setTaxCode("Tax Code");
-        institutionProxyInfo.setZipCode("21654");
+        InstitutionProxyInfo institutionProxyInfo = dummyInstitutionProxyInfo;
+        CategoryProxyInfo categoryProxyInfo = dummyCategoryProxyInfo;
 
-        CategoryProxyInfo categoryProxyInfo = new CategoryProxyInfo();
-        categoryProxyInfo.setCode("Code");
-        categoryProxyInfo.setKind("Kind");
-        categoryProxyInfo.setName("Name");
-        categoryProxyInfo.setOrigin("Origin");
         when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(categoryProxyInfo);
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
         assertThrows(MsCoreException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
@@ -206,59 +200,12 @@ class InstitutionServiceImplTest {
         verify(partyRegistryProxyConnector).getInstitutionById(any());
     }
 
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionByExternalId(String)}
-     */
-    @Test
-    void testCreateInstitutionByExternalId4() {
-        InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
-        institutionProxyInfo.setAddress("42 Main St");
-        institutionProxyInfo.setAoo("Aoo");
-        institutionProxyInfo.setCategory("Category");
-        institutionProxyInfo.setDescription("The characteristics of someone or something");
-        institutionProxyInfo.setDigitalAddress("42 Main St");
-        institutionProxyInfo.setId("42");
-        institutionProxyInfo.setO("foo");
-        institutionProxyInfo.setOrigin("Origin");
-        institutionProxyInfo.setOriginId("42");
-        institutionProxyInfo.setOu("Ou");
-        institutionProxyInfo.setTaxCode("Tax Code");
-        institutionProxyInfo.setZipCode("21654");
-
-        CategoryProxyInfo categoryProxyInfo = new CategoryProxyInfo();
-        categoryProxyInfo.setCode("Code");
-        categoryProxyInfo.setKind("Kind");
-        categoryProxyInfo.setName("Name");
-        categoryProxyInfo.setOrigin("Origin");
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
-        assertThrows(ResourceConflictException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
-        verify(institutionConnector).findByExternalId(any());
-    }
 
     /**
      * Method under test: {@link InstitutionServiceImpl#createInstitutionByExternalId(String)}
      */
     @Test
-    void testCreateInstitutionByExternalId5() {
-        InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
-        institutionProxyInfo.setAddress("42 Main St");
-        institutionProxyInfo.setAoo("Aoo");
-        institutionProxyInfo.setCategory("Category");
-        institutionProxyInfo.setDescription("The characteristics of someone or something");
-        institutionProxyInfo.setDigitalAddress("42 Main St");
-        institutionProxyInfo.setId("42");
-        institutionProxyInfo.setO("foo");
-        institutionProxyInfo.setOrigin("Origin");
-        institutionProxyInfo.setOriginId("42");
-        institutionProxyInfo.setOu("Ou");
-        institutionProxyInfo.setTaxCode("Tax Code");
-        institutionProxyInfo.setZipCode("21654");
-
-        CategoryProxyInfo categoryProxyInfo = new CategoryProxyInfo();
-        categoryProxyInfo.setCode("Code");
-        categoryProxyInfo.setKind("Kind");
-        categoryProxyInfo.setName("Name");
-        categoryProxyInfo.setOrigin("Origin");
+    void shouldThrowExceptionOnCreationInstitutionByExternalIdIfAlreadyExists() {
         when(institutionConnector.findByExternalId(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "START - check institution {} already exists"));
         assertThrows(InvalidRequestException.class, () -> institutionServiceImpl.createInstitutionByExternalId("42"));
@@ -270,25 +217,9 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testCreateInstitutionByExternalId6() {
-        InstitutionProxyInfo institutionProxyInfo = new InstitutionProxyInfo();
-        institutionProxyInfo.setAddress("42 Main St");
-        institutionProxyInfo.setAoo("Aoo");
-        institutionProxyInfo.setCategory("Category");
-        institutionProxyInfo.setDescription("The characteristics of someone or something");
-        institutionProxyInfo.setDigitalAddress("42 Main St");
-        institutionProxyInfo.setId("42");
-        institutionProxyInfo.setO("foo");
-        institutionProxyInfo.setOrigin("Origin");
-        institutionProxyInfo.setOriginId("42");
-        institutionProxyInfo.setOu("Ou");
-        institutionProxyInfo.setTaxCode("Tax Code");
-        institutionProxyInfo.setZipCode("21654");
+        InstitutionProxyInfo institutionProxyInfo = dummyInstitutionProxyInfo;
+        CategoryProxyInfo categoryProxyInfo = dummyCategoryProxyInfo;
 
-        CategoryProxyInfo categoryProxyInfo = new CategoryProxyInfo();
-        categoryProxyInfo.setCode("Code");
-        categoryProxyInfo.setKind("Kind");
-        categoryProxyInfo.setName("Name");
-        categoryProxyInfo.setOrigin("Origin");
         when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(categoryProxyInfo);
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(institutionProxyInfo);
         Institution institution = new Institution();
