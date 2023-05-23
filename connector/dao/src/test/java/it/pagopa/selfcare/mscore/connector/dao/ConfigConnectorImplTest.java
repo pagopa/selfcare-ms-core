@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {ConfigConnectorImpl.class})
 @ExtendWith(MockitoExtension.class)
-public class ConfigConnectorImplTest {
+class ConfigConnectorImplTest {
 
     @InjectMocks
     ConfigConnectorImpl configConnector;
@@ -106,8 +106,7 @@ public class ConfigConnectorImplTest {
         configEntity.setId("KafkaScheduler");
         configEntity.setProductFilter("");
         configEntity.setEnableKafkaScheduler(true);
-        Optional<ConfigEntity> optionalConfigEntity = Optional.of(configEntity);
-        return optionalConfigEntity;
+        return Optional.of(configEntity);
     }
 
 }

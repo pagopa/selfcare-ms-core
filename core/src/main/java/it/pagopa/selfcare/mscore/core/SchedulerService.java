@@ -59,7 +59,7 @@ public class SchedulerService {
 
         //To regenerate all the message on the kafka queue, you need to modify the Config entity, set value of the "enableKafkaScheduler" field to true, directly on mongoDB and if needs be you can also modify the value of "productFilter"
         if (regenerateQueueConfiguration != null && regenerateQueueConfiguration.isEnableKafkaScheduler()) {
-            log.debug("Regenerating notification on queue with product filter {}", (regenerateQueueConfiguration.getProductFilter() == null || regenerateQueueConfiguration.getProductFilter().isBlank() ? "null" : regenerateQueueConfiguration.getProductFilter()));
+            log.debug("Regenerating notification on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
 
             configConnector.resetConfiguration(schedulerConfig.getKafkaRegenerateConfigName());
 
@@ -68,17 +68,7 @@ public class SchedulerService {
             do {
                 List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page);
 
-                tokens.forEach(token -> {
-                    try {
-                        Institution institution = institutionConnector.findById(token.getInstitutionId());
-                        contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
-                        if (!token.getStatus().equals(RelationshipState.ACTIVE)) {
-                            contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
-                        }
-                    } catch (ResourceNotFoundException exception) {
-                        log.error("Error while fetching institution for token {}, {}", token.getId(), exception.getMessage());
-                    }
-                });
+                sendDataLakeNotifications(tokens);
 
                 page += 1;
                 if (tokens.size() < 100)
@@ -89,6 +79,24 @@ public class SchedulerService {
 
         log.info("Next scheduled check at {}", OffsetDateTime.now().plusSeconds(schedulerConfig.getFixedDelay() / 1000));
         log.trace("regenerateQueueNotifications end");
+    }
+
+    private String retrieveProductFilter(String productFilter) {
+        return productFilter == null || productFilter.isBlank() ? "null" : productFilter;
+    }
+
+    private void sendDataLakeNotifications(List<Token> tokens) {
+        tokens.forEach(token -> {
+            try {
+                Institution institution = institutionConnector.findById(token.getInstitutionId());
+                contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
+                if (!token.getStatus().equals(RelationshipState.ACTIVE)) {
+                    contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
+                }
+            } catch (ResourceNotFoundException exception) {
+                log.error("Error while fetching institution for token {}, {}", token.getId(), exception.getMessage());
+            }
+        });
     }
 
 }

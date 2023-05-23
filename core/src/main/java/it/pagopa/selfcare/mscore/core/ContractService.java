@@ -275,8 +275,6 @@ public class ContractService {
             notification.setInstitution(toInstitutionToNotify(institution));
         }
 
-        //notification.setUsers(token.getUsers().stream().map(tokenUser -> toUserToNotify(tokenUser, institution.getId())).collect(Collectors.toList()));
-
         return notification;
     }
 
