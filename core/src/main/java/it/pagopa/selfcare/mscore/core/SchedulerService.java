@@ -91,5 +91,4 @@ public class SchedulerService {
         log.trace("regenerateQueueNotifications end");
     }
 
-
 }
