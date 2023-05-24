@@ -124,8 +124,11 @@ public class ContractService {
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
             } else if ("prod-io".equalsIgnoreCase(request.getProductId())
-                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())) {
+                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())
+                    || "prod-io-sign".equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
+            } else if ("prod-pn".equalsIgnoreCase(request.getProductId())){
+                setupProdPNData(data, institution, request);
             }
             log.debug("data Map for PDF: {}", data);
             getPDFAsFile(files, contractTemplate, data);
@@ -135,6 +138,7 @@ public class ContractService {
             throw new InvalidRequestException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
         }
     }
+
 
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
         log.info("START - signContract for pdf: {}", pdf.getName());
