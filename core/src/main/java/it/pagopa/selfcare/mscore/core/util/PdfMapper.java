@@ -98,6 +98,14 @@ public class PdfMapper {
         addPricingPlan(request, map);
     }
 
+    public static void setupProdPNData(Map<String, Object> map, Institution institution, OnboardingRequest request) {
+        log.info("START - setupProdPNData");
+        addInstitutionRegisterLabelValue(institution, map);
+        if (request.getBillingRequest() != null) {
+            map.put("institutionRecipientCode", request.getBillingRequest().getRecipientCode());
+        }
+    }
+
     private static void addPricingPlan(OnboardingRequest request, Map<String, Object> map) {
         if (StringUtils.hasText(request.getPricingPlan()) && Arrays.stream(PLAN_LIST).anyMatch(s -> s.equalsIgnoreCase(request.getPricingPlan()))) {
             map.put("pricingPlanPremium", request.getPricingPlan().replace("C", ""));

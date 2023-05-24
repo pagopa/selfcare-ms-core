@@ -32,6 +32,7 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -110,7 +111,6 @@ class ContractServiceTest {
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
-
     @Test
     void createContractPDF1() {
         String contract = "contract";
@@ -136,9 +136,14 @@ class ContractServiceTest {
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
+    @ParameterizedTest
+    @CsvSource(value = {
+            "prod-io-sign",
+            "prod-pagopa",
+            "prod-pn"
 
-    @Test
-    void createContractPDF2() {
+    })
+    void createContractPDF2(String productId) {
         String contract = "contract";
         User validManager = new User();
         CertifiedField<String> emailCert = new CertifiedField<>();
@@ -154,7 +159,7 @@ class ContractServiceTest {
         institution.setId("id");
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
-        request.setProductId("prod-pagopa");
+        request.setProductId(productId);
         request.setSignContract(true);
         request.setProductName("42");
         InstitutionType institutionType = InstitutionType.PSP;

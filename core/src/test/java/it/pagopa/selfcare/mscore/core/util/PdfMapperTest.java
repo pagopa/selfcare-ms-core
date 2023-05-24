@@ -1187,5 +1187,61 @@ class PdfMapperTest {
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
         assertEquals(15, stringObjectMap.size());
     }
+    @Test
+    void testSetupProdPNData() {
+        HashMap<String, Object> stringObjectMap = new HashMap<>();
+
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+
+        User user = new User();
+        user.setEmail(certifiedField);
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+        user.setName(certifiedField2);
+        user.setWorkContacts(new HashMap<>());
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setOrigin(Origin.IPA.name());
+
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Billing billing = new Billing();
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("C1");
+        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setUsers(new ArrayList<>());
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.getBillingRequest().setRecipientCode("42");
+        PdfMapper.setupProdPNData(stringObjectMap, institution, onboardingRequest);
+        assertEquals(2, stringObjectMap.size());
+    }
 }
 
