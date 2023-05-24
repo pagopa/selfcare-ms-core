@@ -74,8 +74,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<Onboarding> getOnboardingInstitutionByProductId(String institutionId, String productId) {
-        return institutionConnector.findOnboardingByIdAndProductId(institutionId, productId)
-                .getOnboarding();
+        return institutionConnector.findOnboardingByIdAndProductId(institutionId, productId);
     }
 
     @Override

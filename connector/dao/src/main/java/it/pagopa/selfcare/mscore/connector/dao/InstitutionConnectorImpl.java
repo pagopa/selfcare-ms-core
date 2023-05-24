@@ -201,8 +201,16 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findOnboardingByIdAndProductId(String institutionId, String productId) {
-        return InstitutionMapper.convertToInstitution(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId));
+    public List<Onboarding> findOnboardingByIdAndProductId(String institutionId, String productId) {
+
+        Optional<InstitutionEntity> optionalInstitution =  Objects.nonNull(productId)
+            ? Optional
+                .ofNullable(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId))
+            : repository.findById(institutionId);
+        return optionalInstitution
+                .map(InstitutionMapper::convertToInstitution)
+                .map(Institution::getOnboarding)
+                .orElse(List.of());
     }
 
     @Override
@@ -228,14 +236,19 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, String subunitCode, String productId, List<RelationshipState> validRelationshipStates) {
-        return repository.exists(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode)
-                                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode))
+    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> optSubunitCode,
+                                                                        Optional<String> optProductId, List<RelationshipState> validRelationshipStates) {
+
+        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode);
+        optSubunitCode.ifPresent(code -> criteriaInstitution.and(InstitutionEntity.Fields.subunitCode.name()).is(code));
+
+        Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(validRelationshipStates);
+        optProductId.ifPresent(productId -> criteriaOnboarding.and(Onboarding.Fields.productId.name()).is(productId));
+
+        return repository.exists(Query.query(criteriaInstitution)
                                 .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
-                                        .elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)
-                                                .and(Onboarding.Fields.status.name()).in(validRelationshipStates)))
-                        ,
-                        InstitutionEntity.class);
+                                        .elemMatch(criteriaOnboarding))
+                        , InstitutionEntity.class);
     }
 
     @Override

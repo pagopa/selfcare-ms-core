@@ -79,8 +79,9 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void verifyOnboardingInfoSubunit(String taxCode, String subunitCode, String productId) {
-        Boolean existsOnboardingValid = institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(taxCode, subunitCode, productId, UtilEnumList.VALID_RELATIONSHIP_STATES);
-        if (existsOnboardingValid) {
+        Boolean existsOnboardingValid = institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(taxCode,
+                Optional.ofNullable(subunitCode),  Optional.ofNullable(productId), UtilEnumList.VALID_RELATIONSHIP_STATES);
+        if (!existsOnboardingValid) {
             throw new ResourceNotFoundException(String.format(CustomError.INSTITUTION_NOT_ONBOARDED.getMessage(), taxCode, productId),
                     CustomError.INSTITUTION_NOT_ONBOARDED.getCode());
         }

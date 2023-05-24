@@ -96,7 +96,7 @@ class OnboardingServiceImplTest {
     @Test
     void shouldNothingWhenVerifyOnboardingInfoSubunit() {
         when(institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any()))
-                .thenReturn(false);
+                .thenReturn(true);
         onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example");
         verify(institutionConnector).existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any());
     }

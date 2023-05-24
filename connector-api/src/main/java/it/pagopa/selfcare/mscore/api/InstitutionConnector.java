@@ -19,7 +19,7 @@ public interface InstitutionConnector {
 
     List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode);
 
-    Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, String subunitCode, String productId, List<RelationshipState> validRelationshipStates);
+    Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> subunitCode, Optional<String> productId, List<RelationshipState> validRelationshipStates);
 
     Optional<Institution> findByExternalId(String externalId);
 
@@ -33,7 +33,7 @@ public interface InstitutionConnector {
 
     Institution findByExternalIdAndProductId(String externalId, String productId);
 
-    Institution findOnboardingByIdAndProductId(String externalId, String productId);
+    List<Onboarding> findOnboardingByIdAndProductId(String externalId, String productId);
 
     void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
 

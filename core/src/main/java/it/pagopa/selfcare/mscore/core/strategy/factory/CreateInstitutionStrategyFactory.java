@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -114,7 +115,9 @@ public class CreateInstitutionStrategyFactory {
 
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
-            newInstitution.setOrigin(areaOrganizzativaOmogenea.getOrigin().name());
+            newInstitution.setOrigin(Optional.ofNullable(areaOrganizzativaOmogenea.getOrigin())
+                    .map(Origin::name)
+                    .orElse(null));
             newInstitution.setCreatedAt(OffsetDateTime.now());
 
             Attributes attributes = new Attributes();
@@ -146,7 +149,9 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setTaxCode( unitaOrganizzativa.getCodiceFiscaleEnte() );
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
-            newInstitution.setOrigin(unitaOrganizzativa.getOrigin().name());
+            newInstitution.setOrigin(Optional.ofNullable(unitaOrganizzativa.getOrigin())
+                    .map(Origin::name)
+                    .orElse(null));
             newInstitution.setCreatedAt(OffsetDateTime.now());
 
             Attributes attributes = new Attributes();

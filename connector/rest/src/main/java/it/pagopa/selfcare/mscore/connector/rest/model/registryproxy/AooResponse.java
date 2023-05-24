@@ -1,6 +1,9 @@
 package it.pagopa.selfcare.mscore.connector.rest.model.registryproxy;
 
 import it.pagopa.selfcare.mscore.constant.Origin;
+import lombok.Data;
+
+@Data
 public class AooResponse {
 
     private String id;
