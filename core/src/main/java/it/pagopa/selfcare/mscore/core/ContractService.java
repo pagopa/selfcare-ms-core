@@ -124,7 +124,8 @@ public class ContractService {
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
             } else if ("prod-io".equalsIgnoreCase(request.getProductId())
-                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())) {
+                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())
+                    || "prod-io-sign".equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
             }
             log.debug("data Map for PDF: {}", data);
