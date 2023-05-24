@@ -262,8 +262,7 @@ public class ContractService {
         }
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
-        // TODO: persist the proper contentType (related to the contract) in the database, it should be application/json for onboarding made through the autocomplete api and it should be application/octet-stream or the proper type for onboardings made through the frontend
-        notification.setContentType("application/octet-stream");
+        notification.setContentType(token.getContentType() == null ? "application/octet-stream" : token.getContentType());
 
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {

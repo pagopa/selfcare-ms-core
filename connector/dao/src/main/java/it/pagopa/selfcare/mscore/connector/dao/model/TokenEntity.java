@@ -33,6 +33,7 @@ public class TokenEntity {
     private String contractVersion;
     private String contractTemplate;
     private String contractSigned;
+    private String contentType;
     private List<TokenUserEntity> users;
     private InstitutionUpdateEntity institutionUpdate;
     @Indexed

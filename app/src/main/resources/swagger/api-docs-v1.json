@@ -5343,23 +5343,26 @@
         "title" : "Token",
         "type" : "object",
         "properties" : {
-          "checksum" : {
-            "type" : "string"
+          "checksum": {
+            "type": "string"
           },
-          "closedAt" : {
-            "type" : "string",
-            "format" : "date-time"
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
           },
-          "contractSigned" : {
-            "type" : "string"
+          "contentType": {
+            "type": "string"
           },
-          "contractTemplate" : {
-            "type" : "string"
+          "contractSigned": {
+            "type": "string"
           },
-          "contractVersion" : {
-            "type" : "string"
+          "contractTemplate": {
+            "type": "string"
           },
-          "createdAt" : {
+          "contractVersion": {
+            "type": "string"
+          },
+          "createdAt": {
             "type" : "string",
             "format" : "date-time"
           },

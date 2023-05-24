@@ -1073,6 +1073,7 @@ class TokenConnectorImplTest {
         token.setUpdatedAt(null);
         token.setContractSigned("contractSigned");
         token.setUsers(new ArrayList<>());
+        token.setContentType("application/octet-stream");
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");

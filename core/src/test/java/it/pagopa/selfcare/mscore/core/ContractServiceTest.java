@@ -235,6 +235,7 @@ class ContractServiceTest {
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
+        token.setContentType("application/json");
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());
@@ -379,6 +380,7 @@ class ContractServiceTest {
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned(null);
+        token.setContentType(null);
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());
