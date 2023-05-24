@@ -5,6 +5,8 @@ import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.OffsetDateTime;
+
 @Data
 @Document("Config")
 @FieldNameConstants(asEnum = true)
@@ -16,5 +18,7 @@ public class ConfigEntity {
     private String productFilter;
 
     private boolean enableKafkaScheduler;
+
+    private OffsetDateTime lastRequestDate;
 
 }

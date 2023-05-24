@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.mscore.connector.dao.mockUtils.MockUtils;
 import it.pagopa.selfcare.mscore.connector.dao.model.ConfigEntity;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Config;
@@ -43,7 +44,7 @@ class ConfigConnectorImplTest {
     void findById() {
         // Given
         String configId = "KafkaScheduler";
-        Optional<ConfigEntity> configEntityMock = createConfig();
+        Optional<ConfigEntity> configEntityMock = Optional.of(MockUtils.createConfig());
 
         when(configRepository.findById(any()))
                 .thenReturn(configEntityMock);
@@ -99,14 +100,6 @@ class ConfigConnectorImplTest {
         assertTrue(update.getUpdateObject().get("$set").toString().contains(ConfigEntity.Fields.productFilter.name()) &&
                 update.getUpdateObject().get("$set").toString().contains(ConfigEntity.Fields.enableKafkaScheduler.name()));
         verifyNoMoreInteractions(configRepository);
-    }
-
-    private Optional<ConfigEntity> createConfig() {
-        ConfigEntity configEntity = new ConfigEntity();
-        configEntity.setId("KafkaScheduler");
-        configEntity.setProductFilter("");
-        configEntity.setEnableKafkaScheduler(true);
-        return Optional.of(configEntity);
     }
 
 }
