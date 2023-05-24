@@ -21,7 +21,7 @@ public class OnboardingInstitutionStrategyInput {
     private List<String> toUpdate;
     private List<String>  toDelete;
     private Institution institution;
-    private List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies;
+    private List<InstitutionGeographicTaxonomies> institutionUpdateGeographicTaxonomies;
 
     private File pdf;
     private String digest;
