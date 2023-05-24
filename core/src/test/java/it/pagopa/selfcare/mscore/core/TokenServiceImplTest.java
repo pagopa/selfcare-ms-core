@@ -254,5 +254,19 @@ class TokenServiceImplTest {
         verifyNoInteractions(userService);
     }
 
+    @Test
+    void getToken(){
+        //given
+        String institutionId = "institutionId";
+        String productId = "productId";
+        Token token = mockInstance(new Token());
+        when(tokenConnector.findWithFilter(anyString(), anyString())).thenReturn(token);
+        //when
+        Token result = tokenServiceImpl.getToken(institutionId, productId);
+        //then
+        assertEquals(token, result);
+        verify(tokenConnector, times(1)).findWithFilter(institutionId, productId);
+    }
+
 }
 

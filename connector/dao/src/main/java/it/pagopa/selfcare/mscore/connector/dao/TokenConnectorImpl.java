@@ -10,6 +10,9 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -18,6 +21,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -124,6 +128,22 @@ public class TokenConnectorImpl implements TokenConnector {
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return TokenMapper.convertToToken(tokenRepository.findAndModify(query, update, findAndModifyOptions, TokenEntity.class));
+    }
+
+    @Override
+    public List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer page) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.status.name()).in(statuses));
+
+        Pageable pageable = PageRequest.of(page, 100, Sort.by(TokenEntity.Fields.createdAt.name()));
+
+        if (productId != null && !productId.isBlank()) {
+            query.addCriteria(Criteria.where(TokenEntity.Fields.productId.name()).is(productId));
+        }
+
+        return tokenRepository.find(query, pageable, TokenEntity.class)
+                .stream()
+                .map(TokenMapper::convertToToken)
+                .collect(Collectors.toList());
     }
 
 }

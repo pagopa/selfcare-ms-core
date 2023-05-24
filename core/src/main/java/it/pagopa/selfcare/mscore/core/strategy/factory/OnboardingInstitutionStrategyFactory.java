@@ -111,7 +111,7 @@ public class OnboardingInstitutionStrategyFactory {
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER));
             OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(),
                     strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(),
-                    strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getDigest());
+                    strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
             strategyInput.setOnboardingRollback(onboardingRollback);
         };
     }
@@ -126,7 +126,7 @@ public class OnboardingInstitutionStrategyFactory {
 
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
-            OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getDigest());
+            OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
             strategyInput.setOnboardingRollback(onboardingRollback);
         };
     }
@@ -139,7 +139,7 @@ public class OnboardingInstitutionStrategyFactory {
 
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
-            OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getDigest());
+            OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
             strategyInput.setOnboardingRollback(onboardingRollback);
         };
     }
@@ -156,7 +156,7 @@ public class OnboardingInstitutionStrategyFactory {
                     .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(strategyInput.getOnboardingRequest().getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
             String digest = TokenUtils.createDigest(pdf);
 
             strategyInput.setDigest(digest);
@@ -218,7 +218,8 @@ public class OnboardingInstitutionStrategyFactory {
             }
 
             strategyInput.setInstitution(institution);
-            strategyInput.setInstitutionGeographicTaxonomies(institutionGeographicTaxonomies);
+            strategyInput.setInstitutionUpdateGeographicTaxonomies(institutionGeographicTaxonomies);
+
         };
     }
 

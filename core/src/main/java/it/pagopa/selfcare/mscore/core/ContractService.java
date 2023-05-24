@@ -64,7 +64,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
@@ -247,17 +246,24 @@ public class ContractService {
         NotificationToSend notification = new NotificationToSend();
         if (queueEvent.equals(QueueEvent.ADD)) {
             notification.setId(token.getId());
+            notification.setState(RelationshipState.ACTIVE);
         } else {
             notification.setId(UUID.randomUUID().toString());
+            notification.setState(token.getStatus());
         }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
-        notification.setState(RelationshipState.ACTIVE);
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(token.getUpdatedAt());
-        notification.setClosedAt(token.getClosedAt());
+        if (token.getStatus().equals(RelationshipState.DELETED)) {
+            notification.setClosedAt(token.getClosedAt());
+        }
+        notification.setNotificationType(queueEvent);
+        notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
+        // TODO: persist the proper contentType (related to the contract) in the database, it should be application/json for onboarding made through the autocomplete api and it should be application/octet-stream or the proper type for onboardings made through the frontend
+        notification.setContentType("application/octet-stream");
 
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
@@ -268,8 +274,6 @@ public class ContractService {
             notification.setBilling(onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling());
             notification.setInstitution(toInstitutionToNotify(institution));
         }
-
-        notification.setUsers(token.getUsers().stream().map(tokenUser -> toUserToNotify(tokenUser, institution.getId())).collect(Collectors.toList()));
 
         return notification;
     }
@@ -304,6 +308,20 @@ public class ContractService {
         userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
         userToNotify.setRole(tokenUser.getRole());
         return userToNotify;
+    }
+
+    private String retrieveFileName(String tokenContractSigned, String tokenId) {
+
+        if (tokenContractSigned == null) {
+            return "";
+        }
+
+        String[] tokenContractSignedSplit = tokenContractSigned.split(tokenId.concat("/"));
+        if (tokenContractSignedSplit.length > 1) {
+            return tokenContractSignedSplit[1];
+        }
+
+        return "";
     }
 
     private void sendNotification(String message, String tokenId) {
