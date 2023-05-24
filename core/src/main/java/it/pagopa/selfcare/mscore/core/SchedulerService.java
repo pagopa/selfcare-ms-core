@@ -50,31 +50,34 @@ public class SchedulerService {
     public void regenerateQueueNotifications() {
         log.trace("regenerateQueueNotifications start");
 
-        Config regenerateQueueConfiguration = null;
-        try {
-            regenerateQueueConfiguration = configConnector.findById(schedulerConfig.getKafkaRegenerateConfigName());
-        } catch (ResourceNotFoundException exception) {
-            log.error("Error while retrieving kafka queue regeneration configuration, {}", exception.getMessage());
-        }
+        if (schedulerConfig.getRegnerateKafkaQueueEnabled()) {
 
-        //To regenerate all the message on the kafka queue, you need to modify the Config entity, set value of the "enableKafkaScheduler" field to true, directly on mongoDB and if needs be you can also modify the value of "productFilter"
-        if (regenerateQueueConfiguration != null && regenerateQueueConfiguration.isEnableKafkaScheduler()) {
-            log.debug("Regenerating notifications on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
+            Config regenerateQueueConfiguration = null;
+            try {
+                regenerateQueueConfiguration = configConnector.findById(schedulerConfig.getRegenerateKafkaQueueConfigName());
+            } catch (ResourceNotFoundException exception) {
+                log.error("Error while retrieving kafka queue regeneration configuration, {}", exception.getMessage());
+            }
 
-            configConnector.resetConfiguration(schedulerConfig.getKafkaRegenerateConfigName());
+            //To regenerate all the message on the kafka queue, you need to modify the Config entity, set value of the "enableKafkaScheduler" field to true, directly on mongoDB and if needs be you can also modify the value of "productFilter"
+            if (regenerateQueueConfiguration != null && regenerateQueueConfiguration.isEnableKafkaScheduler()) {
+                log.debug("Regenerating notifications on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
 
-            boolean nextPage = true;
-            int page = 0;
-            do {
-                List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page);
+                configConnector.resetConfiguration(schedulerConfig.getRegenerateKafkaQueueConfigName());
 
-                sendDataLakeNotifications(tokens);
+                boolean nextPage = true;
+                int page = 0;
+                do {
+                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page);
 
-                page += 1;
-                if (tokens.size() < 100)
-                    nextPage = false;
+                    sendDataLakeNotifications(tokens);
 
-            } while (nextPage);
+                    page += 1;
+                    if (tokens.size() < 100)
+                        nextPage = false;
+
+                } while (nextPage);
+            }
         }
 
         log.info("Next scheduled check at {}", OffsetDateTime.now().plusSeconds(schedulerConfig.getFixedDelay() / 1000));
