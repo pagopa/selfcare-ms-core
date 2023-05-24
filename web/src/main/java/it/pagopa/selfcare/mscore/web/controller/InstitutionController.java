@@ -317,14 +317,16 @@ public class InstitutionController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
     @GetMapping(value = "/{institutionId}/onboardings")
-    public ResponseEntity<List<OnboardingResponse>> getOnboardingsInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+    public ResponseEntity<OnboardingsResponse> getOnboardingsInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                                     @PathVariable("institutionId") String institutionId,
                                                                                     @RequestParam(value = "productId", required = false) String productId) {
         CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
         List<Onboarding> onboardings = institutionService.getOnboardingInstitutionByProductId(institutionId, productId);
-        return ResponseEntity.ok().body(onboardings.stream()
-                        .map(onboardingResourceMapper::toResponse)
-                        .collect(Collectors.toList()));
+        OnboardingsResponse onboardingsResponse = new OnboardingsResponse();
+        onboardingsResponse.setOnboardings(onboardings.stream()
+                .map(onboardingResourceMapper::toResponse)
+                .collect(Collectors.toList()));
+        return ResponseEntity.ok().body(onboardingsResponse);
     }
 
     /**

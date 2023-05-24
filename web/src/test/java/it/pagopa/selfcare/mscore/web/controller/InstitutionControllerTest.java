@@ -75,7 +75,7 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "[{\"productId\":\"example\",\"tokenId\":null,\"status\":null,\"contract\":null,\"pricingPlan\":null,\"billing\":null,\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}]"));
+                                "{\"onboardings\":[{\"productId\":\"example\",\"tokenId\":null,\"status\":null,\"contract\":null,\"pricingPlan\":null,\"billing\":null,\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}]}"));
     }
 
     @Test
