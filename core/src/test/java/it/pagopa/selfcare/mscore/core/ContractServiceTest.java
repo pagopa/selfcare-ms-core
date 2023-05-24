@@ -197,6 +197,34 @@ class ContractServiceTest {
     void createContractPDF4() {
         String contract = "contract";
         User validManager = new User();
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        validManager.setWorkContacts(map);
+        List<User> users = new ArrayList<>();
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PSP);
+        institution.setId("id");
+        institution.setDescription("42");
+        OnboardingRequest request = new OnboardingRequest();
+        request.setProductId("prod-pn");
+        request.setSignContract(true);
+        request.setProductName("42");
+        InstitutionType institutionType = InstitutionType.PSP;
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
+        when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(true);
+        when(pagoPaSignatureConfig.isEnabled()).thenReturn(false);
+        when(pagoPaSignatureConfig.getApplyOnboardingTemplateReason()).thenReturn("${institutionName}${productName}");
+        assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
+    }
+
+    @Test
+    void createContractPDF5() {
+        String contract = "contract";
+        User validManager = new User();
         List<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PSP);
