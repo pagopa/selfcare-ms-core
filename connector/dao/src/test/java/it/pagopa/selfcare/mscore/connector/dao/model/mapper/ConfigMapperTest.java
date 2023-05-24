@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConfigMapperTest {
+class ConfigMapperTest {
 
     @Test
     void convertToConfig() {
