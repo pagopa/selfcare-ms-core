@@ -22,6 +22,12 @@ public class MongoCustomConnectorImpl implements MongoCustomConnector {
         this.mongoOperations = mongoOperations;
     }
 
+
+    @Override
+    public <O> boolean exists(Query query, Class<O> outputType) {
+        return mongoOperations.exists(query, outputType);
+    }
+
     @Override
     public <O> List<O> find(Query query, Class<O> outputType) {
         return mongoOperations.find(query, outputType);
