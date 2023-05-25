@@ -16,4 +16,5 @@ public interface MongoCustomConnector {
 
     <O> O findAndModify(Query query, UpdateDefinition updateDefinition, FindAndModifyOptions findAndModifyOptions, Class<O> outputType);
 
+    <O> O findUserInstitutionAggregation(String userId, Class<O> outputType, String fromCollection, String toCollection);
 }

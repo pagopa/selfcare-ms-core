@@ -1,10 +1,12 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -65,9 +67,9 @@ public class UserMapper {
 
     public static UserEntity toUserEntity(OnboardedUser example) {
         UserEntity user = new UserEntity();
-        if(example.getId()!=null) {
+        if (example.getId() != null) {
             user.setId(example.getId());
-        }else{
+        } else {
             user.setId(UUID.randomUUID().toString());
         }
         user.setCreatedAt(example.getCreatedAt());
@@ -112,5 +114,17 @@ public class UserMapper {
         product.setUpdatedAt(entity.getUpdatedAt());
         product.setCreatedAt(entity.getCreatedAt());
         return product;
+    }
+
+    public static UserInstitutionAggregation toUserInstitutionAggregation(UserInstitutionAggregationEntity entity) {
+        UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
+        userInstitutionAggregation.setId(entity.getId());
+        if (entity.getBindings() != null && !entity.getBindings().isEmpty()) {
+            userInstitutionAggregation.setBindings(toBindings(entity.getBindings()));
+        }
+        if (entity.getInstitutions() != null && !entity.getInstitutions().isEmpty()) {
+            userInstitutionAggregation.setInstitutions(InstitutionMapper.convertToInstitutionList(entity.getInstitutions()));
+        }
+        return userInstitutionAggregation;
     }
 }
