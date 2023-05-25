@@ -130,6 +130,24 @@ class MockUtilsTest {
     }
 
     @Test
+    void createInstitutionMock_nullBias() {
+        // Given
+        RelationshipState statusMock = RelationshipState.SUSPENDED;
+        InstitutionType institutionTypeMock = InstitutionType.GSP;
+        // When
+        Institution result = MockUtils.createInstitutionMock(null, statusMock, institutionTypeMock);
+        // Then
+        assertNotNull(result);
+        assertEquals("InstitutionId", result.getId());
+        assertEquals("InstitutionExternalId", result.getExternalId());
+        assertEquals("Description", result.getDescription());
+        assertEquals("DigitalAddress", result.getDigitalAddress());
+        assertEquals("SupportEmail", result.getSupportEmail());
+        assertEquals(statusMock, result.getOnboarding().get(0).getStatus());
+        assertEquals(institutionTypeMock, result.getInstitutionType());
+    }
+
+    @Test
     void createInsituttionMock_nullBias() {
         // Given
         Integer numberOfInstitutionsMock = 30;

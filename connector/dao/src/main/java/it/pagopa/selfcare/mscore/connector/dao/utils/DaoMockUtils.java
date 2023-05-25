@@ -13,28 +13,28 @@ import java.time.OffsetDateTime;
 public class DaoMockUtils {
 
     public static ConfigEntity createConfigEntityMock() {
-        ConfigEntity configEntity = new ConfigEntity();
-        configEntity.setId("KafkaScheduler");
-        configEntity.setProductFilter("");
-        configEntity.setEnableKafkaScheduler(true);
-        return configEntity;
+        ConfigEntity configEntityMock = new ConfigEntity();
+        configEntityMock.setId("KafkaScheduler");
+        configEntityMock.setProductFilter("");
+        configEntityMock.setEnableKafkaScheduler(true);
+        return configEntityMock;
     }
 
     public static TokenEntity createTokenEntityMock(Integer bias, RelationshipState status) {
-        TokenEntity tokenMock = new TokenEntity();
-        tokenMock.setId("TokenId" + (bias == null ? "" : bias));
-        tokenMock.setType(TokenType.INSTITUTION);
-        tokenMock.setStatus(status);
-        tokenMock.setInstitutionId("InstitutionId" + (bias == null ? "" : bias));
-        tokenMock.setProductId("ProductId" + (bias == null ? "" : bias));
-        tokenMock.setExpiringDate(OffsetDateTime.now().plusDays(60));
-        tokenMock.setChecksum("Checksum");
-        tokenMock.setContractVersion("ContractVersion");
-        tokenMock.setContractTemplate("ContractTemplate");
-        tokenMock.setContractSigned("ContractPath/" + tokenMock.getId() + "/FileName");
-        tokenMock.setCreatedAt(OffsetDateTime.now().minusDays(2));
-        tokenMock.setUpdatedAt(OffsetDateTime.now().minusDays(1));
-        tokenMock.setClosedAt((status.equals(RelationshipState.DELETED) ? OffsetDateTime.now() : null));
-        return tokenMock;
+        TokenEntity tokenEntityMock = new TokenEntity();
+        tokenEntityMock.setId("TokenId" + (bias == null ? "" : bias));
+        tokenEntityMock.setType(TokenType.INSTITUTION);
+        tokenEntityMock.setStatus(status);
+        tokenEntityMock.setInstitutionId("InstitutionId" + (bias == null ? "" : bias));
+        tokenEntityMock.setProductId("ProductId" + (bias == null ? "" : bias));
+        tokenEntityMock.setExpiringDate(OffsetDateTime.now().plusDays(60));
+        tokenEntityMock.setChecksum("Checksum");
+        tokenEntityMock.setContractVersion("ContractVersion");
+        tokenEntityMock.setContractTemplate("ContractTemplate");
+        tokenEntityMock.setContractSigned("ContractPath/" + tokenEntityMock.getId() + "/FileName");
+        tokenEntityMock.setCreatedAt(OffsetDateTime.now().minusDays(2));
+        tokenEntityMock.setUpdatedAt(OffsetDateTime.now().minusDays(1));
+        tokenEntityMock.setClosedAt((status.equals(RelationshipState.DELETED) ? OffsetDateTime.now() : null));
+        return tokenEntityMock;
     }
 }
