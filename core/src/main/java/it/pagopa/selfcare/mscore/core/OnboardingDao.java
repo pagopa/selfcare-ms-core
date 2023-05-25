@@ -18,6 +18,7 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -78,6 +79,7 @@ public class OnboardingDao {
         Token token = TokenUtils.toToken(request, institution, digest, null);
         token.setStatus(RelationshipState.ACTIVE);
         token.setContractSigned(request.getContractFilePath());
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
         token = tokenConnector.save(token, geographicTaxonomies);
 
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
@@ -122,6 +124,8 @@ public class OnboardingDao {
     }
 
     public OnboardingUpdateRollback persistForUpdate(Token token, Institution institution, RelationshipState toState, String digest) {
+        log.trace("persistForUpdate start");
+        log.debug("persistForUpdate token = {}, institution = {}, toState = {}, digest = {}", token, institution, toState, digest);
         OnboardingUpdateRollback rollback = new OnboardingUpdateRollback();
         if (isValidStateChangeForToken(token.getStatus(), toState)) {
             rollback.setToken(updateToken(token, toState, digest));
@@ -131,6 +135,7 @@ public class OnboardingDao {
                 rollback.setUpdatedInstitution(updateInstitutionState(institution, token, toState));
             }
             rollback.setUserList(updateUsersState(institution, token, toState));
+            log.trace("persistForUpdate end");
             return rollback;
         } else {
             throw new InvalidRequestException(String.format(INVALID_STATUS_CHANGE.getMessage(), token.getStatus(), toState), INVALID_STATUS_CHANGE.getCode());
