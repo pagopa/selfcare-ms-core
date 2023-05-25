@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
-import static it.pagopa.selfcare.mscore.connector.dao.mockUtils.MockUtils.createInstitutionEntity;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -2466,7 +2465,7 @@ class InstitutionConnectorImplTest {
 
     @Test
     void shouldFindOnboardingByIdAndProductId() {
-        InstitutionEntity institutionEntity = createInstitutionEntity();
+        InstitutionEntity institutionEntity = new InstitutionEntity();
         institutionEntity.setOnboarding(List.of(new OnboardingEntity()));
         when(institutionRepository.findByInstitutionIdAndOnboardingProductId(anyString(), anyString()))
                 .thenReturn(institutionEntity);
@@ -2479,7 +2478,7 @@ class InstitutionConnectorImplTest {
 
     @Test
     void shouldFindOnboardingByIdAndProductIdIfProductIsNull() {
-        InstitutionEntity institutionEntity = createInstitutionEntity();
+        InstitutionEntity institutionEntity = new InstitutionEntity();
         institutionEntity.setOnboarding(List.of(new OnboardingEntity()));
         when(institutionRepository.findById(anyString()))
                 .thenReturn(Optional.of(institutionEntity));
@@ -2492,7 +2491,7 @@ class InstitutionConnectorImplTest {
 
     @Test
     void shouldFindByTaxCodeAndSubunitCode() {
-        InstitutionEntity institutionEntity = createInstitutionEntity();
+        InstitutionEntity institutionEntity = new InstitutionEntity();
 
         when(institutionRepository.find(any(), any()))
                 .thenReturn(List.of(institutionEntity));
