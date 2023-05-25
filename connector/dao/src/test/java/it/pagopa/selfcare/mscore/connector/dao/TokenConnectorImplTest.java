@@ -18,6 +18,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -25,6 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +54,9 @@ class TokenConnectorImplTest {
 
     @Captor
     ArgumentCaptor<FindAndModifyOptions> findAndModifyOptionsArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Pageable> pageableArgumentCaptor;
 
     /**
      * Method under test: {@link TokenConnectorImpl#findAll()}
@@ -1117,5 +1124,105 @@ class TokenConnectorImplTest {
                 capturedUpdate.getUpdateObject().get("$set").toString().contains("updatedAt") &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(createdAt.toString()));
         verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findByStatusAndProductId() {
+        // Given
+        EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
+        String productId = "prod-io";
+        Integer pageNumber = 0;
+        List<TokenEntity> tokenEntities = List.of(createTokenMock(null, RelationshipState.ACTIVE, InstitutionType.PA));
+        Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
+
+        doReturn(tokenEntityPage)
+                .when(tokenRepository)
+                .find(any(), any(), any());
+        // When
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(tokenRepository, times(1))
+                .find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertEquals(productId, capturedQuery.getQueryObject().get(TokenEntity.Fields.productId.name()));
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.status.name()).toString().contains(status.toString()));
+        Pageable capturedPage = pageableArgumentCaptor.getValue();
+        assertEquals(pageNumber, capturedPage.getPageNumber());
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findByStatusAndProductId_productIdNull() {
+        // Given
+        EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
+        Integer pageNumber = 0;
+        List<TokenEntity> tokenEntities = List.of(createTokenMock(null, RelationshipState.ACTIVE, InstitutionType.PA));
+        Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
+
+        doReturn(tokenEntityPage)
+                .when(tokenRepository)
+                .find(any(), any(), any());
+        // When
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, null, pageNumber);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(tokenRepository, times(1))
+                .find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertFalse(capturedQuery.getQueryObject().toString().contains(TokenEntity.Fields.productId.name()));
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.status.name()).toString().contains(status.toString()));
+        Pageable capturedPage = pageableArgumentCaptor.getValue();
+        assertEquals(pageNumber, capturedPage.getPageNumber());
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findByStatusAndProductId_productIdBlank() {
+        // Given
+        EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
+        String productId = "";
+        Integer pageNumber = 0;
+        List<TokenEntity> tokenEntities = List.of(createTokenMock(null, RelationshipState.ACTIVE, InstitutionType.PA));
+        Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
+
+        doReturn(tokenEntityPage)
+                .when(tokenRepository)
+                .find(any(), any(), any());
+        // When
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(tokenRepository, times(1))
+                .find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertFalse(capturedQuery.getQueryObject().toString().contains(TokenEntity.Fields.productId.name()));
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.status.name()).toString().contains(status.toString()));
+        Pageable capturedPage = pageableArgumentCaptor.getValue();
+        assertEquals(pageNumber, capturedPage.getPageNumber());
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    private TokenEntity createTokenMock(Integer bias, RelationshipState status, InstitutionType institutionType) {
+        TokenEntity tokenMock = new TokenEntity();
+        tokenMock.setId("TokenId" + (bias == null ? "" : bias));
+        tokenMock.setType(TokenType.INSTITUTION);
+        tokenMock.setStatus(status);
+        tokenMock.setInstitutionId("InstitutionId" + (bias == null ? "" : bias));
+        tokenMock.setProductId("ProductId" + (bias == null ? "" : bias));
+        tokenMock.setExpiringDate(OffsetDateTime.now().plusDays(60));
+        tokenMock.setChecksum("Checksum");
+        tokenMock.setContractVersion("ContractVersion");
+        tokenMock.setContractTemplate("ContractTemplate");
+        tokenMock.setContractSigned("ContractPath/" + tokenMock.getId() + "/FileName");
+        //tokenMock.setUsers(List.of(createTokenUserMock(1, PartyRole.MANAGER), createTokenUserMock(2, PartyRole.DELEGATE)));
+        //tokenMock.setInstitutionUpdate(createInstitutionUpdateMock(bias, institutionType));
+        tokenMock.setCreatedAt(OffsetDateTime.now().minusDays(2));
+        tokenMock.setUpdatedAt(OffsetDateTime.now().minusDays(1));
+        tokenMock.setClosedAt((status.equals(RelationshipState.DELETED) ? OffsetDateTime.now() : null));
+        return tokenMock;
     }
 }

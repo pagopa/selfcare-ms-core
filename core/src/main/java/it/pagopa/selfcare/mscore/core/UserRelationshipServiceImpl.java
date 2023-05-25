@@ -1,17 +1,19 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import static it.pagopa.selfcare.mscore.constant.CustomError.*;
-import static it.pagopa.selfcare.mscore.constant.CustomError.RELATIONSHIP_ID_NOT_FOUND;
 
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+
+@Slf4j
 @Service
 public class UserRelationshipServiceImpl implements UserRelationshipService {
 

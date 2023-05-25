@@ -59,7 +59,7 @@ public class OnboardingDao {
                                       String digest) {
         Token token = createToken(request, institution, digest, coreConfig.getOnboardingExpiringDate(), geographicTaxonomies);
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
-        Onboarding onboarding = updateInstitution(request, institution, geographicTaxonomies, token);
+        Onboarding onboarding = updateInstitution(request, institution, null, token);
         Map<String, OnboardedProduct> productMap = createUsers(toUpdate, toDelete, request, institution, token, onboarding);
         return new OnboardingRollback(token, onboarding, productMap, null);
     }

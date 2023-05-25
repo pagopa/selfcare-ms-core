@@ -593,6 +593,8 @@ class OnboardingServiceImplTest {
         Onboarding onboarding = new Onboarding();
         onboarding.setBilling(new Billing());
         onboarding.setTokenId("42");
+        onboarding.setPricingPlan("C3");
+        onboarding.setProductId("42");
         onboardingList.add(onboarding);
         institution.setOnboarding(onboardingList);
         Token token = new Token();
@@ -655,6 +657,8 @@ class OnboardingServiceImplTest {
         Onboarding onboarding = new Onboarding();
         onboarding.setBilling(new Billing());
         onboarding.setTokenId("43");
+        onboarding.setPricingPlan("C3");
+        onboarding.setProductId("42");
         onboardingList.add(onboarding);
         institution.setOnboarding(onboardingList);
         Token token = new Token();
