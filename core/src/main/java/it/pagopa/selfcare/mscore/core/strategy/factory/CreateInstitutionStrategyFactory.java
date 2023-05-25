@@ -109,8 +109,8 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setOriginId( areaOrganizzativaOmogenea.getId() );
             newInstitution.setDescription( areaOrganizzativaOmogenea.getDenominazioneAoo() );
             newInstitution.setDigitalAddress( areaOrganizzativaOmogenea.getMail1() );
-            //newInstitution.setAddress( areaOrganizzativaOmogenea.getAddress() );
-            //newInstitution.setZipCode( areaOrganizzativaOmogenea.getZipCode() );
+            newInstitution.setAddress( areaOrganizzativaOmogenea.getIndirizzo() );
+            newInstitution.setZipCode( areaOrganizzativaOmogenea.getCAP() );
             newInstitution.setTaxCode( areaOrganizzativaOmogenea.getCodiceFiscaleEnte() );
 
 
@@ -144,8 +144,8 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setOriginId( unitaOrganizzativa.getId() );
             newInstitution.setDescription( unitaOrganizzativa.getDescrizioneUo() );
             newInstitution.setDigitalAddress( unitaOrganizzativa.getMail1() );
-            //newInstitution.setAddress( unitaOrganizzativa.getAddress() );
-            //newInstitution.setZipCode( unitaOrganizzativa.getZipCode() );
+            newInstitution.setAddress( unitaOrganizzativa.getIndirizzo() );
+            newInstitution.setZipCode( unitaOrganizzativa.getCAP() );
             newInstitution.setTaxCode( unitaOrganizzativa.getCodiceFiscaleEnte() );
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
