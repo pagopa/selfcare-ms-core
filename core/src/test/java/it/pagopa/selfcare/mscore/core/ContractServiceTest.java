@@ -38,6 +38,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -240,6 +241,7 @@ class ContractServiceTest {
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());
@@ -384,6 +386,7 @@ class ContractServiceTest {
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned(null);
+        token.setContentType(null);
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());

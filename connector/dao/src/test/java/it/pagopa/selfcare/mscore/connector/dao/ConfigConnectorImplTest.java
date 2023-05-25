@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
-import it.pagopa.selfcare.mscore.connector.dao.mockUtils.MockUtils;
 import it.pagopa.selfcare.mscore.connector.dao.model.ConfigEntity;
+import it.pagopa.selfcare.mscore.connector.dao.utils.DaoMockUtils;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Config;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class ConfigConnectorImplTest {
     void findById() {
         // Given
         String configId = "KafkaScheduler";
-        Optional<ConfigEntity> configEntityMock = Optional.of(MockUtils.createConfig());
+        Optional<ConfigEntity> configEntityMock = Optional.of(DaoMockUtils.createConfigEntityMock());
 
         when(configRepository.findById(any()))
                 .thenReturn(configEntityMock);

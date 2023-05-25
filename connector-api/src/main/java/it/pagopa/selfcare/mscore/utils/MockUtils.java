@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.core;
+package it.pagopa.selfcare.mscore.utils;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
@@ -8,14 +8,17 @@ import it.pagopa.selfcare.mscore.model.Config;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class MockUtils {
 
-    static Config createConfigMock(boolean enabled, String productFilter) {
+    public static Config createConfigMock(boolean enabled, String productFilter) {
         Config configMock = new Config();
         configMock.setId("KafkaScheduler");
         configMock.setEnableKafkaScheduler(enabled);
@@ -23,7 +26,7 @@ public class MockUtils {
         return configMock;
     }
 
-    static Token createTokenMock(Integer bias, RelationshipState status, InstitutionType institutionType) {
+    public static Token createTokenMock(Integer bias, RelationshipState status, InstitutionType institutionType) {
         Token tokenMock = new Token();
         tokenMock.setId("TokenId" + (bias == null ? "" : bias));
         tokenMock.setType(TokenType.INSTITUTION);
@@ -35,6 +38,7 @@ public class MockUtils {
         tokenMock.setContractVersion("ContractVersion");
         tokenMock.setContractTemplate("ContractTemplate");
         tokenMock.setContractSigned("ContractPath/" + tokenMock.getId() + "/FileName");
+        tokenMock.setContentType("application/pdf");
         tokenMock.setUsers(List.of(createTokenUserMock(1, PartyRole.MANAGER), createTokenUserMock(2, PartyRole.DELEGATE)));
         tokenMock.setInstitutionUpdate(createInstitutionUpdateMock(bias, institutionType));
         tokenMock.setCreatedAt(OffsetDateTime.now().minusDays(2));
@@ -43,7 +47,7 @@ public class MockUtils {
         return tokenMock;
     }
 
-    static List<Token> createTokenListMock(Integer numberOfTokens, Integer startingBias, RelationshipState status, InstitutionType institutionType) {
+    public static List<Token> createTokenListMock(Integer numberOfTokens, Integer startingBias, RelationshipState status, InstitutionType institutionType) {
         List<Token> tokensMock = new ArrayList<>();
 
         numberOfTokens += startingBias;
@@ -54,11 +58,11 @@ public class MockUtils {
         return tokensMock;
     }
 
-    static TokenUser createTokenUserMock(Integer bias, PartyRole partyRole) {
+    public static TokenUser createTokenUserMock(Integer bias, PartyRole partyRole) {
         return new TokenUser("TokenUserId" + (bias == null ? "" : bias), partyRole);
     }
 
-    static InstitutionUpdate createInstitutionUpdateMock(Integer bias, InstitutionType institutionType) {
+    public static InstitutionUpdate createInstitutionUpdateMock(Integer bias, InstitutionType institutionType) {
         InstitutionUpdate institutionUpdateMock = new InstitutionUpdate();
         institutionUpdateMock.setInstitutionType(institutionType);
         institutionUpdateMock.setDescription("Description" + (bias == null ? "" : bias));
@@ -72,15 +76,15 @@ public class MockUtils {
         return institutionUpdateMock;
     }
 
-    static InstitutionGeographicTaxonomies createInstitutionGeographicTaxonomiesMock(Integer bias) {
+    public static InstitutionGeographicTaxonomies createInstitutionGeographicTaxonomiesMock(Integer bias) {
         return new InstitutionGeographicTaxonomies("InstitutionGeographicTaxonomiesCode" + (bias == null ? "" : bias), "InstitutionGeographicTaxonomiesDesc" + (bias == null ? "" : bias));
     }
 
-    static Institution createInstitutionMock(Integer bias, RelationshipState status, InstitutionType institutionType) {
+    public static Institution createInstitutionMock(Integer bias, RelationshipState status, InstitutionType institutionType) {
         Institution institutionMock = new Institution();
         institutionMock.setId("InstitutionId" + (bias == null ? "" : bias));
         institutionMock.setExternalId("InstitutionExternalId" + (bias == null ? "" : bias));
-        institutionMock.setId("Origin");
+        institutionMock.setOrigin("Origin");
         institutionMock.setOriginId("OriginId");
         institutionMock.setDescription("Description" + (bias == null ? "" : bias));
         institutionMock.setInstitutionType(institutionType);
@@ -97,7 +101,7 @@ public class MockUtils {
         return institutionMock;
     }
 
-    static List<Institution> createInstitutionListMock(Integer numberOfInstitutions, Integer startingBias, RelationshipState status, InstitutionType institutionType) {
+    public static List<Institution> createInstitutionListMock(Integer numberOfInstitutions, Integer startingBias, RelationshipState status, InstitutionType institutionType) {
         List<Institution> institutionListMock = new ArrayList<>();
 
         numberOfInstitutions += startingBias;
@@ -108,7 +112,7 @@ public class MockUtils {
         return institutionListMock;
     }
 
-    static Billing createBilling(Integer bias) {
+    public static Billing createBilling(Integer bias) {
         Billing billingMock = new Billing();
         billingMock.setVatNumber("VatNumber" + (bias == null ? "" : bias));
         billingMock.setRecipientCode("RecipientCode" + (bias == null ? "" : bias));
@@ -116,7 +120,7 @@ public class MockUtils {
         return billingMock;
     }
 
-    static Onboarding createOnboarding(Integer bias, RelationshipState status) {
+    public static Onboarding createOnboarding(Integer bias, RelationshipState status) {
         Onboarding onboardingMock = new Onboarding();
         onboardingMock.setTokenId("TokenId" + (bias == null ? "" : bias));
         onboardingMock.setStatus(status);

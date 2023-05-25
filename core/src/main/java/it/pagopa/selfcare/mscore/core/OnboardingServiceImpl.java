@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
@@ -15,7 +16,6 @@ import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
@@ -122,6 +122,8 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void completeOboarding(Token token, MultipartFile contract) {
+        log.trace("completeOnboarding start");
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOboarding token = {} contract = {}", token, contract);
         checkAndHandleExpiring(token);
         List<String> managerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         List<User> managersData = managerList.stream()
@@ -136,6 +138,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         File logoFile = contractService.getLogoFile();
         String fileName = contractService.uploadContract(token.getId(), contract);
         token.setContractSigned(fileName);
+        token.setContentType(contract.getContentType());
         OnboardingUpdateRollback rollback = onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
         try {
             emailService.sendCompletedEmail(managersData, institution, product, logoFile);
@@ -144,6 +147,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             contractService.deleteContract(fileName, token.getId());
         }
         contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token, QueueEvent.ADD);
+        log.trace("completeOboarding end");
     }
 
     @Override
