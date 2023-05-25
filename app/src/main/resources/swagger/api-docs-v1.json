@@ -5363,14 +5363,14 @@
             "type": "string"
           },
           "createdAt": {
-            "type" : "string",
-            "format" : "date-time"
+            "type": "string",
+            "format": "date-time"
           },
-          "expiringDate" : {
-            "type" : "string",
-            "format" : "date-time"
+          "expiringDate": {
+            "type": "string",
+            "format": "date-time"
           },
-          "id" : {
+          "id": {
             "type" : "string"
           },
           "institutionId" : {
