@@ -58,13 +58,14 @@ public class OnboardingInstitutionUtils {
                 || !validateParameter(institution.getTaxCode(), institutionUpdate.getTaxCode())
                 || !validateParameter(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())
                 || !validateParameter(institution.getZipCode(), institutionUpdate.getZipCode())
-                || !validateParameter(institution.getAddress(), institutionUpdate.getAddress()))){
+                || !validateParameter(institution.getAddress(), institutionUpdate.getAddress()))) {
             throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
         }
         log.info("END - validateOverridingData without error");
     }
+
     private static boolean validateParameter(String startValue, String toValue) {
-        if(!StringUtils.isEmpty(startValue) && !StringUtils.isEmpty(toValue)){
+        if (!StringUtils.isEmpty(startValue) && !StringUtils.isEmpty(toValue)) {
             return startValue.equalsIgnoreCase(toValue);
         }
         return !StringUtils.isEmpty(startValue) || StringUtils.isEmpty(toValue);
@@ -77,7 +78,7 @@ public class OnboardingInstitutionUtils {
             case PG:
                 return RelationshipState.ACTIVE;
             default:
-                if (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals("IPA")){
+                if (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals("IPA")) {
                     return RelationshipState.PENDING;
                 }
                 return RelationshipState.TOBEVALIDATED;
@@ -102,11 +103,11 @@ public class OnboardingInstitutionUtils {
         log.debug("START - getOnboardingValidManager for users list size: {}", users.size());
 
         return users.stream()
-            .filter(userToOnboard -> PartyRole.MANAGER == userToOnboard.getRole())
-            .map(UserToOnboard::getId)
-            .findAny()
-            .orElseThrow(() -> new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(),
-                    CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getCode()));
+                .filter(userToOnboard -> PartyRole.MANAGER == userToOnboard.getRole())
+                .map(UserToOnboard::getId)
+                .findAny()
+                .orElseThrow(() -> new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(),
+                        CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getCode()));
     }
 
     public static List<String> getValidManagerToOnboard(List<UserToOnboard> users, Token token) {
@@ -131,7 +132,7 @@ public class OnboardingInstitutionUtils {
 
     public static List<String> getOnboardedValidManager(Token token) {
         List<String> managerList = new ArrayList<>();
-        if(token.getUsers() != null) {
+        if (token.getUsers() != null) {
             managerList = token.getUsers().stream().filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
                     .map(TokenUser::getUserId).collect(Collectors.toList());
         }
@@ -157,6 +158,7 @@ public class OnboardingInstitutionUtils {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setProductId(token.getProductId());
         onboardingRequest.setProductName(token.getProductId());
+        onboardingRequest.setPricingPlan(retrivePricingPlan(token, institution, onboardingRequest));
         Contract contract = new Contract();
         contract.setPath(token.getContractTemplate());
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
@@ -169,9 +171,18 @@ public class OnboardingInstitutionUtils {
         return onboardingRequest;
     }
 
+    private static String retrivePricingPlan(Token token, Institution institution, OnboardingRequest onboardingRequest) {
+        institution.getOnboarding().stream()
+                .filter(onboarding -> onboarding.getTokenId().equals(token.getId())
+                        && onboarding.getProductId().equals(token.getProductId()))
+                .map(Onboarding::getPricingPlan)
+                .forEach(onboardingRequest::setPricingPlan);
+        return onboardingRequest.getPricingPlan();
+    }
+
     private static Billing retriveBilling(Token token, Institution institution) {
-        for(Onboarding onboarding: institution.getOnboarding()){
-            if(onboarding.getTokenId().equals(token.getId())) {
+        for (Onboarding onboarding : institution.getOnboarding()) {
+            if (onboarding.getTokenId().equals(token.getId())) {
                 return onboarding.getBilling();
             }
         }
