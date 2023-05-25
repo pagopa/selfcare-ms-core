@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
@@ -74,6 +75,9 @@ class OnboardingServiceImplTest {
     @Mock
     private OnboardingInstitutionStrategyFactory institutionStrategyFactory;
 
+    @Mock
+    private InstitutionConnector institutionConnector;
+
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
      */
@@ -84,6 +88,17 @@ class OnboardingServiceImplTest {
         onboardingServiceImpl.verifyOnboardingInfo("42", "42");
         verify(institutionService).retrieveInstitutionsWithFilter(any(), any(),
                 any());
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfoSubunit(String, String, String)}
+     */
+    @Test
+    void shouldNothingWhenVerifyOnboardingInfoSubunit() {
+        when(institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any()))
+                .thenReturn(true);
+        onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example");
+        verify(institutionConnector).existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any());
     }
 
     /**

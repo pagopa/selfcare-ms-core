@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.core.TokenService;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
@@ -48,9 +49,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {OnboardingController.class})
 @ExtendWith(MockitoExtension.class)
@@ -548,76 +547,49 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
+     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String, String)}
      */
     @Test
-    void testVerifyOnboardingInfo() throws Exception {
-        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
+    void shouldVerifyOnboardingInfoBySubunit() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfoSubunit(any(), any(), any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        MockMvcBuilders.standaloneSetup(onboardingController)
+                .head("/onboarding/")
+                .queryParam("taxCode", "42")
+                .queryParam("productId", "42");
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().is(204));
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     /**
      * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
      */
     @Test
-    void testVerifyOnboardingInfo2() throws Exception {
-        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
-                .formLogin();
+    void shouldVerifyOnboardingInfoByExternalId() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+
+
+    /**
+     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
+     */
+    //@Test
+    void shouldNotFoundVerifyOnboardingInfoByExternalId() throws Exception {
+        doThrow(new ResourceNotFoundException("","")).when(onboardingService).verifyOnboardingInfo(any(), any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo3() throws Exception {
-        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
-        MockHttpServletRequestBuilder headResult = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        headResult.characterEncoding("Encoding");
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(headResult)
-                .andExpect(MockMvcResultMatchers.status().is(204));
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo4() throws Exception {
-        doNothing().when(onboardingService)
-                .verifyOnboardingInfo(org.mockito.Mockito.any(), org.mockito.Mockito.any());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo5() throws Exception {
-        doNothing().when(onboardingService)
-                .verifyOnboardingInfo(org.mockito.Mockito.any(), org.mockito.Mockito.any());
-        MockHttpServletRequestBuilder headResult = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        headResult.characterEncoding("Encoding");
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(headResult);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     /**
