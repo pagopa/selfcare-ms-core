@@ -57,6 +57,7 @@ public class PdfMapper {
         log.info("START - setupPSPData");
         if (institution.getPaymentServiceProvider() != null) {
             map.put("legalRegisterNumber", institution.getPaymentServiceProvider().getLegalRegisterNumber());
+            map.put("legalRegisterName", institution.getPaymentServiceProvider().getLegalRegisterName());
             map.put("vatNumberGroup", institution.getPaymentServiceProvider().isVatNumberGroup() ? "partita iva di gruppo" : "");
             map.put("institutionRegister", institution.getPaymentServiceProvider().getBusinessRegisterNumber());
             map.put("institutionAbi", institution.getPaymentServiceProvider().getAbiCode());
