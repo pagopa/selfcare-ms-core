@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 })
 @EnableOpenApi
 @EnableWebMvc
-@ComponentScan(basePackages = "it.pagopa.selfcare.mscore.web.controller")
+@ComponentScan(basePackages = {"it.pagopa.selfcare.mscore.web.controller","it.pagopa.selfcare.mscore.web.model"})
 @TestPropertySource(locations = "classpath:config/application.yml")
 class SwaggerConfigTest {
 
