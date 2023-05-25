@@ -35,6 +35,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INFO_INSTITUTION_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
@@ -94,22 +95,24 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<RelationshipState> relationshipStateList = OnboardingInfoUtils.getRelationShipStateList(states);
         List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
         try {
-            OnboardedUser currentUser = getUser(userId);
-            List<UserBinding> userBindings = OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(currentUser.getBindings(), relationshipStateList);
+            UserInstitutionAggregation userInstitutionAggregation = getUserInstitutionAggregation(userId);
+            List<UserBinding> userBindings = OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(userInstitutionAggregation.getBindings(), relationshipStateList);
+
             if (StringUtils.hasText(institutionId) || StringUtils.hasText(institutionExternalId)) {
-                Institution onboardedInstitution = findInstitutionByOptionalId(institutionId, institutionExternalId);
-                UserBinding institutionUserBinding = userBindings.stream().filter(userBinding -> onboardedInstitution.getId().equalsIgnoreCase(userBinding.getInstitutionId()))
-                        .findAny().orElseThrow(() -> new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode()));
-                OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(institutionUserBinding, onboardedInstitution, relationshipStateList);
-                Map<String, OnboardedProduct> productMap = institutionUserBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y));
-                onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, productMap));
-            } else {
-                userBindings.forEach(userBinding -> {
-                    Institution onboardedInstitution = institutionService.retrieveInstitutionById(userBinding.getInstitutionId());
-                    OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(userBinding, onboardedInstitution, relationshipStateList);
-                    onboardingInfoList.add(new OnboardingInfo(onboardedInstitution, userBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y))));
-                });
+                userInstitutionAggregation.getInstitutions().stream().filter(institution ->
+                                institution.getId().equalsIgnoreCase(institutionId) || institution.getExternalId().equalsIgnoreCase(institutionExternalId))
+                        .findFirst().ifPresent(institution -> userBindings.removeIf(userBinding -> !institution.getId().equalsIgnoreCase(userBinding.getInstitutionId())));
             }
+
+            userBindings.forEach(userBinding -> userInstitutionAggregation.getInstitutions()
+                    .stream()
+                    .filter(institution -> institution.getId().equalsIgnoreCase(userBinding.getInstitutionId()))
+                    .findFirst()
+                    .ifPresent(institution -> {
+                        OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(userBinding, institution, relationshipStateList);
+                        onboardingInfoList.add(new OnboardingInfo(institution, userBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y))));
+                    }));
+
             if (onboardingInfoList.isEmpty()) {
                 throw new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode());
             }
@@ -271,16 +274,12 @@ public class OnboardingServiceImpl implements OnboardingService {
         onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
     }
 
-    private OnboardedUser getUser(String userId) {
-        return userService.findByUserId(userId);
-    }
-
-    private Institution findInstitutionByOptionalId(String institutionId, String institutionExternalId) {
-        if (StringUtils.hasText(institutionId)) {
-            return institutionService.retrieveInstitutionById(institutionId);
-        } else {
-            return institutionService.retrieveInstitutionByExternalId(institutionExternalId);
+    private UserInstitutionAggregation getUserInstitutionAggregation(String userId) {
+        UserInstitutionAggregation userInstitutionAggregation = userService.findUserInstitutionAggregation(userId);
+        if (userInstitutionAggregation == null) {
+            throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), userId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
         }
+        return userInstitutionAggregation;
     }
 
     public void checkAndHandleExpiring(Token token) {

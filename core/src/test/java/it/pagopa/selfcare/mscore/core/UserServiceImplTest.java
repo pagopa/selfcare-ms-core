@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.User;
 
 import java.util.EnumSet;
@@ -273,6 +274,14 @@ class UserServiceImplTest {
         assertTrue(userServiceImpl.checkIfAdmin("42", "42"));
         verify(userConnector).findActiveInstitutionAdmin( any(),  any(), any(),
                 any());
+    }
+
+    @Test
+    void findUserInstitutionAggregation() {
+        UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
+        userInstitutionAggregation.setId("id");
+        when(userConnector.findUserInstitutionAggregation("42")).thenReturn(userInstitutionAggregation);
+        Assertions.assertDoesNotThrow(() -> userServiceImpl.findUserInstitutionAggregation("42"));
     }
 }
 

@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
@@ -930,4 +931,14 @@ class UserConnectorImplTest {
         verifyNoMoreInteractions(userRepository);
     }
 
+    @Test
+    void findUserInstitutionAggregation() {
+        UserInstitutionAggregationEntity entity = new UserInstitutionAggregationEntity();
+        entity.setInstitutions(List.of(mock(InstitutionEntity.class)));
+        entity.setBindings(List.of(mock(UserBindingEntity.class)));
+        entity.setId("UserId");
+        when(userRepository.findUserInstitutionAggregation(any(), any(), any(), any()))
+                .thenReturn(mockInstance(new UserInstitutionAggregationEntity()));
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findUserInstitutionAggregation("UserId"));
+    }
 }
