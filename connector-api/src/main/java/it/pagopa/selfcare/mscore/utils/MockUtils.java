@@ -8,11 +8,14 @@ import it.pagopa.selfcare.mscore.model.Config;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class MockUtils {
 
     public static Config createConfigMock(boolean enabled, String productFilter) {
@@ -81,7 +84,7 @@ public class MockUtils {
         Institution institutionMock = new Institution();
         institutionMock.setId("InstitutionId" + (bias == null ? "" : bias));
         institutionMock.setExternalId("InstitutionExternalId" + (bias == null ? "" : bias));
-        institutionMock.setId("Origin");
+        institutionMock.setOrigin("Origin");
         institutionMock.setOriginId("OriginId");
         institutionMock.setDescription("Description" + (bias == null ? "" : bias));
         institutionMock.setInstitutionType(institutionType);

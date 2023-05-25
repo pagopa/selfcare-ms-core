@@ -1068,7 +1068,7 @@ class TokenConnectorImplTest {
         Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.DELETED, InstitutionType.PSP);
         RelationshipState statusMock = RelationshipState.DELETED;
         String digestMock = "digestMock";
-        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.DELETED, InstitutionType.PSP);
+        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.DELETED);
 
         when(tokenRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(updatedTokenMock);
@@ -1101,7 +1101,7 @@ class TokenConnectorImplTest {
         tokenMock.setContractSigned(null);
         tokenMock.setContentType(null);
         RelationshipState statusMock = RelationshipState.PENDING;
-        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.PENDING, InstitutionType.GSP);
+        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.PENDING);
 
         when(tokenRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(updatedTokenMock);
@@ -1162,7 +1162,7 @@ class TokenConnectorImplTest {
         EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
         String productId = "prod-io";
         Integer pageNumber = 0;
-        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE, InstitutionType.PA));
+        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE));
         Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
 
         doReturn(tokenEntityPage)
@@ -1188,7 +1188,7 @@ class TokenConnectorImplTest {
         // Given
         EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
         Integer pageNumber = 0;
-        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE, InstitutionType.PA));
+        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE));
         Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
 
         doReturn(tokenEntityPage)
@@ -1215,7 +1215,7 @@ class TokenConnectorImplTest {
         EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
         String productId = "";
         Integer pageNumber = 0;
-        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE, InstitutionType.PA));
+        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE));
         Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
 
         doReturn(tokenEntityPage)

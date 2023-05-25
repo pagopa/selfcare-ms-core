@@ -2,15 +2,17 @@ package it.pagopa.selfcare.mscore.connector.dao.utils;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.ConfigEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 
+@NoArgsConstructor(access = AccessLevel.NONE)
 public class DaoMockUtils {
 
-    public static ConfigEntity createConfig() {
+    public static ConfigEntity createConfigEntityMock() {
         ConfigEntity configEntity = new ConfigEntity();
         configEntity.setId("KafkaScheduler");
         configEntity.setProductFilter("");
@@ -18,7 +20,7 @@ public class DaoMockUtils {
         return configEntity;
     }
 
-    public static TokenEntity createTokenEntityMock(Integer bias, RelationshipState status, InstitutionType institutionType) {
+    public static TokenEntity createTokenEntityMock(Integer bias, RelationshipState status) {
         TokenEntity tokenMock = new TokenEntity();
         tokenMock.setId("TokenId" + (bias == null ? "" : bias));
         tokenMock.setType(TokenType.INSTITUTION);

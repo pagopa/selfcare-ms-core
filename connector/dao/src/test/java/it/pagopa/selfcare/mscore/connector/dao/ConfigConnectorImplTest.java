@@ -44,7 +44,7 @@ class ConfigConnectorImplTest {
     void findById() {
         // Given
         String configId = "KafkaScheduler";
-        Optional<ConfigEntity> configEntityMock = Optional.of(DaoMockUtils.createConfig());
+        Optional<ConfigEntity> configEntityMock = Optional.of(DaoMockUtils.createConfigEntityMock());
 
         when(configRepository.findById(any()))
                 .thenReturn(configEntityMock);

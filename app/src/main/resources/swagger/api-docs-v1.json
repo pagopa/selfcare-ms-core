@@ -5371,23 +5371,30 @@
             "format": "date-time"
           },
           "id": {
-            "type" : "string"
+            "type": "string"
           },
-          "institutionId" : {
-            "type" : "string"
+          "institutionId": {
+            "type": "string"
           },
-          "institutionUpdate" : {
-            "$ref" : "#/components/schemas/InstitutionUpdate"
+          "institutionUpdate": {
+            "$ref": "#/components/schemas/InstitutionUpdate"
           },
-          "productId" : {
-            "type" : "string"
+          "productId": {
+            "type": "string"
           },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DELETED",
+              "PENDING",
+              "REJECTED",
+              "SUSPENDED",
+              "TOBEVALIDATED"
+            ]
           },
-          "type" : {
-            "type" : "string",
+          "type": {
+            "type": "string",
             "enum" : [ "INSTITUTION", "LEGALS" ]
           },
           "updatedAt" : {

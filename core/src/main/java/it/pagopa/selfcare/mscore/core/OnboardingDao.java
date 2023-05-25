@@ -18,6 +18,7 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -78,7 +79,7 @@ public class OnboardingDao {
         Token token = TokenUtils.toToken(request, institution, digest, null);
         token.setStatus(RelationshipState.ACTIVE);
         token.setContractSigned(request.getContractFilePath());
-        token.setContentType("application/json");
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
         token = tokenConnector.save(token, geographicTaxonomies);
 
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());

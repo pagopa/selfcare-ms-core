@@ -12,7 +12,7 @@ class ConfigMapperTest {
     @Test
     void convertToConfig() {
         // Given
-        ConfigEntity entity = DaoMockUtils.createConfig();
+        ConfigEntity entity = DaoMockUtils.createConfigEntityMock();
         // When
         Config result = ConfigMapper.convertToConfig(entity);
         // Then
