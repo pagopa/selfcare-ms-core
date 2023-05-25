@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
+import static it.pagopa.selfcare.mscore.connector.dao.mockUtils.MockUtils.createInstitutionEntity;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -2461,6 +2462,56 @@ class InstitutionConnectorImplTest {
                 updateOnboardedProduct.getUpdateObject().get("$set").toString().contains("onboarding.$[current].updatedAt") &&
                 updateOnboardedProduct.getUpdateObject().get("$set").toString().contains(createdAt.toString()));
         verifyNoMoreInteractions(institutionRepository);
+    }
+
+    @Test
+    void shouldFindOnboardingByIdAndProductId() {
+        InstitutionEntity institutionEntity = createInstitutionEntity();
+        institutionEntity.setOnboarding(List.of(new OnboardingEntity()));
+        when(institutionRepository.findByInstitutionIdAndOnboardingProductId(anyString(), anyString()))
+                .thenReturn(institutionEntity);
+
+        List<Onboarding> onboardings = institutionConnectorImpl
+                .findOnboardingByIdAndProductId("example", "example");
+
+        assertFalse(onboardings.isEmpty());
+    }
+
+    @Test
+    void shouldFindOnboardingByIdAndProductIdIfProductIsNull() {
+        InstitutionEntity institutionEntity = createInstitutionEntity();
+        institutionEntity.setOnboarding(List.of(new OnboardingEntity()));
+        when(institutionRepository.findById(anyString()))
+                .thenReturn(Optional.of(institutionEntity));
+
+        List<Onboarding> onboardings = institutionConnectorImpl
+                .findOnboardingByIdAndProductId("example", null);
+
+        assertFalse(onboardings.isEmpty());
+    }
+
+    @Test
+    void shouldFindByTaxCodeAndSubunitCode() {
+        InstitutionEntity institutionEntity = createInstitutionEntity();
+
+        when(institutionRepository.find(any(), any()))
+                .thenReturn(List.of(institutionEntity));
+
+        List<Institution> onboardings = institutionConnectorImpl
+                .findByTaxCodeAndSubunitCode("example", "example");
+
+        assertFalse(onboardings.isEmpty());
+    }
+
+    @Test
+    void shouldExistsByTaxCodeAndSubunitCodeAndProductAndStatusList() {
+
+        when(institutionRepository.exists(any(), any())).thenReturn(Boolean.TRUE);
+
+        Boolean exists = institutionConnectorImpl.existsByTaxCodeAndSubunitCodeAndProductAndStatusList("example",
+                Optional.of("example"), Optional.of("example"), List.of());
+
+        assertTrue(exists);
     }
 
 }
