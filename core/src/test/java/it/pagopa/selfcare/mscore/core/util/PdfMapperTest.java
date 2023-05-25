@@ -709,7 +709,7 @@ class PdfMapperTest {
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", true,
                         OffsetDateTime.now(), OffsetDateTime.now()));
-        assertEquals(7, stringObjectMap.size());
+        assertEquals(8, stringObjectMap.size());
     }
 
     /**
@@ -749,7 +749,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setPaymentServiceProvider(paymentServiceProvider);
         PdfMapper.setupPSPData(stringObjectMap, user, institution);
-        assertEquals(4, stringObjectMap.size());
+        assertEquals(5, stringObjectMap.size());
     }
 
     /**
