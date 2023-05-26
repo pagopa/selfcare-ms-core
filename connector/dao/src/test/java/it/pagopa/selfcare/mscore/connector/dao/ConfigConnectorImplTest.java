@@ -52,8 +52,8 @@ class ConfigConnectorImplTest {
                 .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(ConfigEntity.class));
         List<Query> capturedQuery = queryArgumentCaptor.getAllValues();
         assertEquals(1, capturedQuery.size());
-        assertEquals(capturedQuery.get(0).getQueryObject().get(ConfigEntity.Fields.id.name()), configId);
-        assertEquals(capturedQuery.get(0).getQueryObject().get(ConfigEntity.Fields.enableKafkaScheduler.name()), true);
+        assertEquals(configId, capturedQuery.get(0).getQueryObject().get(ConfigEntity.Fields.id.name()));
+        assertEquals(true, capturedQuery.get(0).getQueryObject().get(ConfigEntity.Fields.enableKafkaScheduler.name()));
         assertEquals(1, updateArgumentCaptor.getAllValues().size());
         Update update = updateArgumentCaptor.getAllValues().get(0);
         assertTrue(update.getUpdateObject().get("$set").toString().contains(ConfigEntity.Fields.productFilter.name()) &&
