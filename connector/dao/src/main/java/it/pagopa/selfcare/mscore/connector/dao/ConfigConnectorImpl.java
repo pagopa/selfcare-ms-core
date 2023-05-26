@@ -33,7 +33,7 @@ public class ConfigConnectorImpl implements ConfigConnector {
                 .set(ConfigEntity.Fields.productFilter.name(), "")
                 .set(ConfigEntity.Fields.lastRequestDate.name(), OffsetDateTime.now());
 
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         ConfigEntity result = repository.findAndModify(query, update, findAndModifyOptions, ConfigEntity.class);
         return ConfigMapper.convertToConfig(result);
     }
