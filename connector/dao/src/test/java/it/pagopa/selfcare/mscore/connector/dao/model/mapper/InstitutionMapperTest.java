@@ -9,10 +9,12 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -554,6 +556,12 @@ class InstitutionMapperTest {
         assertSame(dataProtectionOfficer, institutionUpdate.getDataProtectionOfficer());
         assertTrue(institutionUpdate.getGeographicTaxonomies().isEmpty());
         assertFalse(update.hasArrayFilters());
+    }
+
+    @Test
+    void convertToInstitutionList() {
+        InstitutionEntity entity = new InstitutionEntity();
+        Assertions.assertDoesNotThrow(() -> InstitutionMapper.convertToInstitutionList(Collections.singletonList(entity)));
     }
 }
 

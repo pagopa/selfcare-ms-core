@@ -10,10 +10,13 @@ import java.util.List;
 
 public interface MongoCustomConnector {
 
+    <O> boolean exists(Query query, Class<O> outputType);
+
     <O> List<O> find(Query query, Class<O> outputType);
 
     <O> Page<O> find(Query query, Pageable pageable, Class<O> outputType);
 
     <O> O findAndModify(Query query, UpdateDefinition updateDefinition, FindAndModifyOptions findAndModifyOptions, Class<O> outputType);
 
+    <O> O findUserInstitutionAggregation(String userId, Class<O> outputType, String fromCollection, String toCollection);
 }

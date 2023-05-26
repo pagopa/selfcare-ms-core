@@ -57,6 +57,7 @@ public class PdfMapper {
         log.info("START - setupPSPData");
         if (institution.getPaymentServiceProvider() != null) {
             map.put("legalRegisterNumber", institution.getPaymentServiceProvider().getLegalRegisterNumber());
+            map.put("legalRegisterName", institution.getPaymentServiceProvider().getLegalRegisterName());
             map.put("vatNumberGroup", institution.getPaymentServiceProvider().isVatNumberGroup() ? "partita iva di gruppo" : "");
             map.put("institutionRegister", institution.getPaymentServiceProvider().getBusinessRegisterNumber());
             map.put("institutionAbi", institution.getPaymentServiceProvider().getAbiCode());
@@ -96,6 +97,14 @@ public class PdfMapper {
         map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institution.getBusinessRegisterPlace()).orElse(underscore));
 
         addPricingPlan(request, map);
+    }
+
+    public static void setupProdPNData(Map<String, Object> map, Institution institution, OnboardingRequest request) {
+        log.info("START - setupProdPNData");
+        addInstitutionRegisterLabelValue(institution, map);
+        if (request.getBillingRequest() != null) {
+            map.put("institutionRecipientCode", request.getBillingRequest().getRecipientCode());
+        }
     }
 
     private static void addPricingPlan(OnboardingRequest request, Map<String, Object> map) {

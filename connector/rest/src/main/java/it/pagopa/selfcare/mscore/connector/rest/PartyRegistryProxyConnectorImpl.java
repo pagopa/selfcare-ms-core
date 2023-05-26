@@ -4,10 +4,14 @@ import feign.FeignException;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapper;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapper;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
+import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,9 +27,13 @@ import static it.pagopa.selfcare.mscore.constant.CustomError.CREATE_INSTITUTION_
 public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnector {
 
     private final PartyRegistryProxyRestClient restClient;
+    private final AooMapper aooMapper;
+    private final UoMapper uoMapper;
 
-    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient) {
+    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper) {
         this.restClient = restClient;
+        this.aooMapper = aooMapper;
+        this.uoMapper = uoMapper;
     }
 
     @Override
@@ -126,6 +134,24 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
         GeographicTaxonomiesResponse result = restClient.getExtByCode(code);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getExtByCode result = {}", result);
         return toGeoTaxonomies(result);
+    }
+
+    @Override
+    public AreaOrganizzativaOmogenea getAooById(String aooId) {
+        log.debug("getAooById id = {}", aooId);
+        Assert.hasText(aooId, "Code is required");
+        AooResponse result = restClient.getAooById(aooId);
+        log.debug("getAooById id = {}", aooId);
+        return aooMapper.toEntity(result);
+    }
+
+    @Override
+    public UnitaOrganizzativa getUoById(String uoId) {
+        log.debug("getUoById id = {}", uoId);
+        Assert.hasText(uoId, "Code is required");
+        UoResponse result = restClient.getUoById(uoId);
+        log.debug("getUoById id = {}", uoId);
+        return uoMapper.toEntity(result);
     }
 
     private GeographicTaxonomies toGeoTaxonomies(GeographicTaxonomiesResponse result) {

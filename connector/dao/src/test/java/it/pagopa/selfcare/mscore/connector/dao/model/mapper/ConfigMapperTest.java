@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
-import it.pagopa.selfcare.mscore.connector.dao.mockUtils.MockUtils;
 import it.pagopa.selfcare.mscore.connector.dao.model.ConfigEntity;
+import it.pagopa.selfcare.mscore.connector.dao.utils.DaoMockUtils;
 import it.pagopa.selfcare.mscore.model.Config;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ class ConfigMapperTest {
     @Test
     void convertToConfig() {
         // Given
-        ConfigEntity entity = MockUtils.createConfig();
+        ConfigEntity entity = DaoMockUtils.createConfigEntityMock();
         // When
         Config result = ConfigMapper.convertToConfig(entity);
         // Then

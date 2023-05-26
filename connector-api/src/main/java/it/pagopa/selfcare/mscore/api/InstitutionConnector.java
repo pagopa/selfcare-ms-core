@@ -17,6 +17,10 @@ public interface InstitutionConnector {
 
     void deleteById(String id);
 
+    List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode);
+
+    Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> subunitCode, Optional<String> productId, List<RelationshipState> validRelationshipStates);
+
     Optional<Institution> findByExternalId(String externalId);
 
     List<Institution> findWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
@@ -27,7 +31,9 @@ public interface InstitutionConnector {
 
     Institution findAndUpdate(String id, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionUpdate institutionUpdate);
 
-    Institution findInstitutionProduct(String externalId, String productId);
+    Institution findByExternalIdAndProductId(String externalId, String productId);
+
+    List<Onboarding> findOnboardingByIdAndProductId(String externalId, String productId);
 
     void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
 
@@ -43,7 +49,7 @@ public interface InstitutionConnector {
 
     Institution saveOrRetrievePnPg(Institution newInstitution);
 
-    List<String> findByExternalIdAndProductId(List<ValidInstitution> externalIds, String productId);
+    List<String> findByExternalIdsAndProductId(List<ValidInstitution> externalIds, String productId);
 
     Institution updateOnboardedProductCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);
 }

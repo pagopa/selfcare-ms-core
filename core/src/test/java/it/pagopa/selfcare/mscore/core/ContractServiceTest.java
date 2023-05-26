@@ -32,11 +32,13 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -110,7 +112,6 @@ class ContractServiceTest {
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
-
     @Test
     void createContractPDF1() {
         String contract = "contract";
@@ -136,9 +137,14 @@ class ContractServiceTest {
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
+    @ParameterizedTest
+    @CsvSource(value = {
+            "prod-io-sign",
+            "prod-pagopa",
+            "prod-pn"
 
-    @Test
-    void createContractPDF2() {
+    })
+    void createContractPDF2(String productId) {
         String contract = "contract";
         User validManager = new User();
         CertifiedField<String> emailCert = new CertifiedField<>();
@@ -154,7 +160,7 @@ class ContractServiceTest {
         institution.setId("id");
         institution.setDescription("42");
         OnboardingRequest request = new OnboardingRequest();
-        request.setProductId("prod-pagopa");
+        request.setProductId(productId);
         request.setSignContract(true);
         request.setProductName("42");
         InstitutionType institutionType = InstitutionType.PSP;
@@ -235,6 +241,7 @@ class ContractServiceTest {
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());
@@ -379,6 +386,7 @@ class ContractServiceTest {
         token.setClosedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned(null);
+        token.setContentType(null);
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());

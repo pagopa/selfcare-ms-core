@@ -58,7 +58,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<String> findByExternalIdAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
+    public List<String> findByExternalIdsAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
         List<String> externalIds = validInstitutionList.stream().map(ValidInstitution::getId).collect(Collectors.toList());
         Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId)
                 .and(InstitutionEntity.Fields.externalId.name()).in(externalIds));
@@ -190,7 +190,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findInstitutionProduct(String externalId, String productId) {
+    public Institution findByExternalIdAndProductId(String externalId, String productId) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.externalId.name()).is(externalId)
                 .and(constructQuery(Onboarding.Fields.productId.name())).is(productId));
 
@@ -198,6 +198,19 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .map(InstitutionMapper::convertToInstitution)
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_BILLING_ERROR.getMessage(), externalId, productId),
                         GET_INSTITUTION_BILLING_ERROR.getCode()));
+    }
+
+    @Override
+    public List<Onboarding> findOnboardingByIdAndProductId(String institutionId, String productId) {
+
+        Optional<InstitutionEntity> optionalInstitution =  Objects.nonNull(productId)
+            ? Optional
+                .ofNullable(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId))
+            : repository.findById(institutionId);
+        return optionalInstitution
+                .map(InstitutionMapper::convertToInstitution)
+                .map(Institution::getOnboarding)
+                .orElse(List.of());
     }
 
     @Override
@@ -210,6 +223,32 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
+    }
+
+    @Override
+    public List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode) {
+        return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode)
+                                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
+                        ),
+                        InstitutionEntity.class).stream()
+                .map(InstitutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> optSubunitCode,
+                                                                        Optional<String> optProductId, List<RelationshipState> validRelationshipStates) {
+
+        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode);
+        optSubunitCode.ifPresent(code -> criteriaInstitution.and(InstitutionEntity.Fields.subunitCode.name()).is(code));
+
+        Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(validRelationshipStates);
+        optProductId.ifPresent(productId -> criteriaOnboarding.and(Onboarding.Fields.productId.name()).is(productId));
+
+        return repository.exists(Query.query(criteriaInstitution)
+                                .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                                        .elemMatch(criteriaOnboarding))
+                        , InstitutionEntity.class);
     }
 
     @Override

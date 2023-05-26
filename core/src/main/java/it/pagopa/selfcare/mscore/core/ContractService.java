@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
+import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -106,7 +107,7 @@ public class ContractService {
         simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {
             @Override
             public void serialize(OffsetDateTime offsetDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                jsonGenerator.writeString(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(offsetDateTime));
+                jsonGenerator.writeString(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(offsetDateTime));
             }
         });
         mapper.registerModule(simpleModule);
@@ -124,8 +125,11 @@ public class ContractService {
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
             } else if ("prod-io".equalsIgnoreCase(request.getProductId())
-                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())) {
+                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())
+                    || "prod-io-sign".equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
+            } else if ("prod-pn".equalsIgnoreCase(request.getProductId())){
+                setupProdPNData(data, institution, request);
             }
             log.debug("data Map for PDF: {}", data);
             getPDFAsFile(files, contractTemplate, data);
@@ -135,6 +139,7 @@ public class ContractService {
             throw new InvalidRequestException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
         }
     }
+
 
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
         log.info("START - signContract for pdf: {}", pdf.getName());
@@ -262,8 +267,7 @@ public class ContractService {
         }
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
-        // TODO: persist the proper contentType (related to the contract) in the database, it should be application/json for onboarding made through the autocomplete api and it should be application/octet-stream or the proper type for onboardings made through the frontend
-        notification.setContentType("application/octet-stream");
+        notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
 
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
