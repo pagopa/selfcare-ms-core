@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +39,9 @@ public class OnboardingMapper {
 
         onboardingRequest.setContractFilePath(Objects.nonNull(onboardingInstitutionRequest.getContractImported())
             ? onboardingInstitutionRequest.getContractImported().getFilePath() : null);
+
+        onboardingRequest.setContractCreatedAt(Objects.nonNull(onboardingInstitutionRequest.getContractImported())
+            ? onboardingInstitutionRequest.getContractImported().getCreatedAt() : null);
 
         return onboardingRequest;
     }
