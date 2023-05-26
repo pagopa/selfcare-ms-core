@@ -4,8 +4,6 @@ import it.pagopa.selfcare.mscore.model.Config;
 
 public interface ConfigConnector {
 
-    Config findById(String id);
-
-    void resetConfiguration(String id);
+    Config findAndUpdate(String id);
 
 }

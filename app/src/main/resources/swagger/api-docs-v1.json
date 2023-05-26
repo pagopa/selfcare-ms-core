@@ -5766,16 +5766,19 @@
           },
           "type": {
             "type": "string",
-            "enum" : [ "INSTITUTION", "LEGALS" ]
+            "enum": [
+              "INSTITUTION",
+              "LEGALS"
+            ]
           },
-          "updatedAt" : {
-            "type" : "string",
-            "format" : "date-time"
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           },
-          "users" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/TokenUser"
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenUser"
             }
           }
         }
