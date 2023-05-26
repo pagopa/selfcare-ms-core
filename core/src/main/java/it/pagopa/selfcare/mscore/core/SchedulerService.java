@@ -52,18 +52,11 @@ public class SchedulerService {
 
         if (schedulerConfig.getRegnerateKafkaQueueEnabled()) {
 
-            Config regenerateQueueConfiguration = null;
-            try {
-                regenerateQueueConfiguration = configConnector.findById(schedulerConfig.getRegenerateKafkaQueueConfigName());
-            } catch (ResourceNotFoundException exception) {
-                log.error("Error while retrieving kafka queue regeneration configuration, {}", exception.getMessage());
-            }
+            Config regenerateQueueConfiguration = configConnector.findAndUpdate(schedulerConfig.getRegenerateKafkaQueueConfigName());
 
             //To regenerate all the message on the kafka queue, you need to modify the Config entity, set value of the "enableKafkaScheduler" field to true, directly on mongoDB and if needs be you can also modify the value of "productFilter"
-            if (regenerateQueueConfiguration != null && regenerateQueueConfiguration.isEnableKafkaScheduler()) {
+            if (regenerateQueueConfiguration != null) {
                 log.debug("Regenerating notifications on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
-
-                configConnector.resetConfiguration(schedulerConfig.getRegenerateKafkaQueueConfigName());
 
                 boolean nextPage = true;
                 int page = 0;
