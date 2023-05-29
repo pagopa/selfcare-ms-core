@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -387,7 +388,7 @@ class MigrationOnboardingMapperTest {
         List<Attributes> attributes = new ArrayList<>();
         attributes.add(new Attributes());
         institution.setAttributes(attributes);
-        OnboardingInfo e = new OnboardingInfo(institution, new HashMap<>());
+        OnboardingInfo e = new OnboardingInfo("id", institution, new UserInstitutionBinding());
 
         ArrayList<OnboardingInfo> onboardingInfoList = new ArrayList<>();
         onboardingInfoList.add(e);
@@ -424,7 +425,10 @@ class MigrationOnboardingMapperTest {
 
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
-        OnboardingInfo e = new OnboardingInfo(institution, new HashMap<>());
+        UserInstitutionBinding userInstitutionBinding = new UserInstitutionBinding();
+        userInstitutionBinding.setInstitutionId("id");
+        userInstitutionBinding.setProducts(new OnboardedProduct());
+        OnboardingInfo e = new OnboardingInfo("id", institution, userInstitutionBinding);
 
         ArrayList<OnboardingInfo> onboardingInfoList = new ArrayList<>();
         onboardingInfoList.add(e);
@@ -480,15 +484,16 @@ class MigrationOnboardingMapperTest {
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
 
-        HashMap<String, OnboardedProduct> stringOnboardedProductMap = new HashMap<>();
-        stringOnboardedProductMap.put("42", onboardedProduct);
-        OnboardingInfo e = new OnboardingInfo(institution, stringOnboardedProductMap);
+        UserInstitutionBinding userInstitutionBinding = new UserInstitutionBinding();
+        userInstitutionBinding.setInstitutionId("id");
+        userInstitutionBinding.setProducts(new OnboardedProduct());
+        OnboardingInfo e = new OnboardingInfo("id", institution, userInstitutionBinding);
 
         ArrayList<OnboardingInfo> onboardingInfoList = new ArrayList<>();
         onboardingInfoList.add(e);
         OnboardingInfoResponse actualToOnboardingInfoResponseResult = OnboardingMapper.toOnboardingInfoResponse("foo",
                 onboardingInfoList);
-        assertEquals(1, actualToOnboardingInfoResponseResult.getInstitutions().size());
+        assertEquals(0, actualToOnboardingInfoResponseResult.getInstitutions().size());
         assertEquals("foo", actualToOnboardingInfoResponseResult.getUserId());
     }
 
@@ -531,15 +536,16 @@ class MigrationOnboardingMapperTest {
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
 
-        HashMap<String, OnboardedProduct> stringOnboardedProductMap = new HashMap<>();
-        stringOnboardedProductMap.put("42", onboardedProduct);
-        OnboardingInfo e = new OnboardingInfo(toInstitutionResult, stringOnboardedProductMap);
+        UserInstitutionBinding userInstitutionBinding = new UserInstitutionBinding();
+        userInstitutionBinding.setInstitutionId("id");
+        userInstitutionBinding.setProducts(new OnboardedProduct());
+        OnboardingInfo e = new OnboardingInfo("id", toInstitutionResult, userInstitutionBinding);
 
         ArrayList<OnboardingInfo> onboardingInfoList = new ArrayList<>();
         onboardingInfoList.add(e);
         OnboardingInfoResponse actualToOnboardingInfoResponseResult = OnboardingMapper.toOnboardingInfoResponse("foo",
                 onboardingInfoList);
-        assertEquals(1, actualToOnboardingInfoResponseResult.getInstitutions().size());
+        assertEquals(0, actualToOnboardingInfoResponseResult.getInstitutions().size());
         assertEquals("foo", actualToOnboardingInfoResponseResult.getUserId());
     }
 

@@ -1,7 +1,7 @@
-package it.pagopa.selfcare.mscore.connector.dao.model;
+package it.pagopa.selfcare.mscore.connector.dao.model.aggregation;
 
 
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
@@ -20,6 +20,6 @@ public class UserInstitutionAggregationEntity {
 
     @Id
     private String id;
-    private List<UserBindingEntity> bindings;
+    private UserInstitutionBindingEntity bindings;
     private List<InstitutionEntity> institutions;
 }

@@ -3,13 +3,15 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.UserInstitutionAggregationEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -935,10 +937,12 @@ class UserConnectorImplTest {
     void findUserInstitutionAggregation() {
         UserInstitutionAggregationEntity entity = new UserInstitutionAggregationEntity();
         entity.setInstitutions(List.of(mock(InstitutionEntity.class)));
-        entity.setBindings(List.of(mock(UserBindingEntity.class)));
+        entity.setBindings(mock(UserInstitutionBindingEntity.class));
         entity.setId("UserId");
-        when(userRepository.findUserInstitutionAggregation(any(), any(), any(), any()))
-                .thenReturn(mockInstance(new UserInstitutionAggregationEntity()));
-        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findUserInstitutionAggregation("UserId"));
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("UserId");
+        when(userRepository.findUserInstitutionAggregation(any(), any()))
+                .thenReturn(List.of(mockInstance(new UserInstitutionAggregationEntity())));
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findUserInstitutionAggregation(filter));
     }
 }
