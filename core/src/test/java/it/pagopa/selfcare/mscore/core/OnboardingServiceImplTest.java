@@ -293,7 +293,6 @@ class OnboardingServiceImplTest {
         token.setUsers(List.of(tokenUser));
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getId()).thenReturn("42");
-        when(onboardingDao.getProductById(any())).thenReturn(new Product());
         File file = File.createTempFile("file", ".txt");
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
@@ -357,7 +356,6 @@ class OnboardingServiceImplTest {
         token.setUsers(List.of(tokenUser));
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getId()).thenReturn("42");
-        when(onboardingDao.getProductById(any())).thenReturn(new Product());
         File file = File.createTempFile("file", ".txt");
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);

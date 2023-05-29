@@ -185,8 +185,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution);
         InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
-        Product product = onboardingDao.getProductById(token.getProductId());
-        String contractTemplate = contractService.extractTemplate(product.getContractTemplatePath());
+        String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
         File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
         String digest = TokenUtils.createDigest(pdf);
         log.info("Digest {}", digest);
