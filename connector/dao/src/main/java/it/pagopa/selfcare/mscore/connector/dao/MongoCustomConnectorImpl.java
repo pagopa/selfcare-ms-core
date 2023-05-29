@@ -84,7 +84,7 @@ public class MongoCustomConnectorImpl implements MongoCustomConnector {
     }
 
     private MatchOperation checkIfInstitutionIdIsPresent(UserInstitutionFilter filter) {
-        return Aggregation.match(Criteria.where(BINDINGS + "." + INSTITUTION_ID).is(filter.getInstitutionId()));
+        return Aggregation.match(Criteria.where("bindings." + INSTITUTION_ID).is(filter.getInstitutionId()));
     }
 
     private void checkIfExternalIdIsPresent(UserInstitutionFilter filter, GraphLookupOperation.GraphLookupOperationBuilder graphLookupOperation) {
