@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
@@ -66,6 +67,32 @@ public class OnboardingController {
                                                      @PathVariable(value = "productId") String productId) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
         onboardingService.verifyOnboardingInfo(externalId, productId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+
+    /**
+     * The function verify onboarding status of given product and subunit of institution
+     *
+     * @param taxCode String
+     * @param subunitCode String
+     * @param productId  String
+     * @return no content
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
+    @RequestMapping(method = {RequestMethod.HEAD}, value = "/")
+    public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
+                                                     @RequestParam(value = "taxCode") String taxCode,
+                                                     @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
+                                                     @RequestParam(value = "subunitCode", required = false) String subunitCode,
+                                                     @ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                     @RequestParam(value = "productId") String productId) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
+        onboardingService.verifyOnboardingInfoSubunit(taxCode, subunitCode, productId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -135,8 +162,11 @@ public class OnboardingController {
     @PostMapping(value = "/institution/complete")
     public ResponseEntity<Void> onboardingInstitutionComplete(@RequestBody @Valid OnboardingInstitutionRequest request,
                                                       Authentication authentication) {
+        log.trace("onboardingInstitutionComplete start");
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "onboardingInstitutionComplete request = {}", request);
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         onboardingService.onboardingInstitutionComplete(OnboardingMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
+        log.trace("onboardingInstitutionComplete end");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -156,9 +186,12 @@ public class OnboardingController {
     public ResponseEntity<Void> completeOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
                                                    @PathVariable(value = "tokenId") String tokenId,
                                                    @RequestPart MultipartFile contract) {
+        log.trace("completeOnboarding start");
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding tokenId = {}, contract = {}", tokenId, contract);
         CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.completeOboarding(token, contract);
+        log.trace("completeOnboarding end");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

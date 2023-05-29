@@ -11,6 +11,7 @@ import it.pagopa.selfcare.mscore.model.Config;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.utils.MockUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,31 +42,33 @@ class SchedulerServiceTest {
     private SchedulerConfig schedulerConfig;
 
     @Test
-    void regenerateQueueNotifcations_configNotFound() {
+    void regenerateQueueNotifcations_notEnabled() {
         // Given
-        when(configConnector.findById(any()))
-                .thenThrow(ResourceNotFoundException.class);
+        when(schedulerConfig.getRegnerateKafkaQueueEnabled()).thenReturn(false);
         // When
         scheduler.regenerateQueueNotifications();
         // Then
-        verify(configConnector, times(1))
-                .findById(schedulerConfig.getKafkaRegenerateConfigName());
+        verify(schedulerConfig, times(1))
+                .getRegnerateKafkaQueueEnabled();
 
-        verifyNoMoreInteractions(tokenConnector, institutionConnector, contractService);
+        verifyNoInteractions(tokenConnector, institutionConnector, contractService);
     }
 
     @Test
-    void regenerateQueueNotifcations_configNotEnabled() {
+    void regenerateQueueNotifcations_configNotFound() {
         // Given
-        Config configMock = MockUtils.createConfigMock(false, "prod-io");
+        when(schedulerConfig.getRegnerateKafkaQueueEnabled()).thenReturn(true);
+        when(schedulerConfig.getRegenerateKafkaQueueConfigName()).thenReturn("SchedulerId");
 
-        when(configConnector.findById(any()))
-                .thenReturn(configMock);
+        when(configConnector.findAndUpdate(any()))
+                .thenReturn(null);
         // When
         scheduler.regenerateQueueNotifications();
         // Then
+        verify(schedulerConfig, times(1))
+                .getRegnerateKafkaQueueEnabled();
         verify(configConnector, times(1))
-                .findById(schedulerConfig.getKafkaRegenerateConfigName());
+                .findAndUpdate(schedulerConfig.getRegenerateKafkaQueueConfigName());
 
         verifyNoMoreInteractions(tokenConnector, institutionConnector, contractService);
     }
@@ -73,17 +76,18 @@ class SchedulerServiceTest {
     @Test
     void regenerateQueueNotifcations_onePage() {
         // Given
+        String schedulerId = "SchedulerId";
         Config configMock = MockUtils.createConfigMock(true, "");
         List<Token> tokensMock = MockUtils.createTokenListMock(40, 0, RelationshipState.ACTIVE, InstitutionType.PA);
         tokensMock.addAll(MockUtils.createTokenListMock(7, 40, RelationshipState.DELETED, InstitutionType.PA));
         List<Institution> institutionsMock = MockUtils.createInstitutionListMock(40, 0, RelationshipState.ACTIVE, InstitutionType.GSP);
         institutionsMock.addAll(MockUtils.createInstitutionListMock(7, 40, RelationshipState.DELETED, InstitutionType.GSP));
 
-        when(configConnector.findById(any()))
+        when(schedulerConfig.getRegnerateKafkaQueueEnabled()).thenReturn(true);
+        when(schedulerConfig.getRegenerateKafkaQueueConfigName()).thenReturn(schedulerId);
+
+        when(configConnector.findAndUpdate(any()))
                 .thenReturn(configMock);
-        doNothing()
-                .when(configConnector)
-                .resetConfiguration(any());
         doReturn(tokensMock)
                 .when(tokenConnector)
                 .findByStatusAndProductId(any(), any(), any());
@@ -99,10 +103,10 @@ class SchedulerServiceTest {
         // When
         scheduler.regenerateQueueNotifications();
         // Then
+        verify(schedulerConfig, times(1))
+                .getRegnerateKafkaQueueEnabled();
         verify(configConnector, times(1))
-                .findById(schedulerConfig.getKafkaRegenerateConfigName());
-        verify(configConnector, times(1))
-                .resetConfiguration(schedulerConfig.getKafkaRegenerateConfigName());
+                .findAndUpdate(schedulerId);
         verify(tokenConnector, times(1))
                 .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
         for (int i = 0; i < tokensMock.size(); i++) {
@@ -121,17 +125,18 @@ class SchedulerServiceTest {
     @Test
     void regenerateQueueNotifcations_moreThanOnePage() {
         // Given
+        String schedulerId = "SchedulerId";
         Config configMock = MockUtils.createConfigMock(true, null);
         List<Token> tokensMockPageOne = MockUtils.createTokenListMock(100, 0, RelationshipState.ACTIVE, InstitutionType.PA);
         List<Institution> institutionsMockPageOne = MockUtils.createInstitutionListMock(100, 0, RelationshipState.ACTIVE, InstitutionType.PA);
         List<Token> tokensMockPageTwo = MockUtils.createTokenListMock(21, 100, RelationshipState.ACTIVE, InstitutionType.PA);
         List<Institution> institutionsMockPageTwo = MockUtils.createInstitutionListMock(21, 100, RelationshipState.ACTIVE, InstitutionType.PA);
 
-        when(configConnector.findById(any()))
+        when(schedulerConfig.getRegnerateKafkaQueueEnabled()).thenReturn(true);
+        when(schedulerConfig.getRegenerateKafkaQueueConfigName()).thenReturn(schedulerId);
+
+        when(configConnector.findAndUpdate(any()))
                 .thenReturn(configMock);
-        doNothing()
-                .when(configConnector)
-                .resetConfiguration(any());
         doReturn(tokensMockPageOne)
                 .when(tokenConnector)
                 .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
@@ -155,10 +160,10 @@ class SchedulerServiceTest {
         // When
         scheduler.regenerateQueueNotifications();
         // Then
+        verify(schedulerConfig, times(1))
+                .getRegnerateKafkaQueueEnabled();
         verify(configConnector, times(1))
-                .findById(schedulerConfig.getKafkaRegenerateConfigName());
-        verify(configConnector, times(1))
-                .resetConfiguration(schedulerConfig.getKafkaRegenerateConfigName());
+                .findAndUpdate(schedulerId);
         verify(tokenConnector, times(1))
                 .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
         verify(tokenConnector, times(1))
@@ -189,14 +194,15 @@ class SchedulerServiceTest {
     @Test
     void regenerateQueueNotifcations_institutionNotFound() {
         // Given
+        String schedulerId = "SchedulerId";
         Config configMock = MockUtils.createConfigMock(true, "prod-io");
         List<Token> tokensMock = MockUtils.createTokenListMock(1, 0, RelationshipState.ACTIVE, InstitutionType.GSP);
 
-        when(configConnector.findById(any()))
+        when(schedulerConfig.getRegnerateKafkaQueueEnabled()).thenReturn(true);
+        when(schedulerConfig.getRegenerateKafkaQueueConfigName()).thenReturn("SchedulerId");
+
+        when(configConnector.findAndUpdate(any()))
                 .thenReturn(configMock);
-        doNothing()
-                .when(configConnector)
-                .resetConfiguration(any());
         doReturn(tokensMock)
                 .when(tokenConnector)
                 .findByStatusAndProductId(any(), any(), any());
@@ -205,10 +211,10 @@ class SchedulerServiceTest {
         // When
         scheduler.regenerateQueueNotifications();
         // Then
+        verify(schedulerConfig, times(1))
+                .getRegnerateKafkaQueueEnabled();
         verify(configConnector, times(1))
-                .findById(schedulerConfig.getKafkaRegenerateConfigName());
-        verify(configConnector, times(1))
-                .resetConfiguration(schedulerConfig.getKafkaRegenerateConfigName());
+                .findAndUpdate(schedulerId);
         verify(tokenConnector, times(1))
                 .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
         verify(institutionConnector, times(1))

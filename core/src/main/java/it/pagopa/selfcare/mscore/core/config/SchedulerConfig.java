@@ -19,8 +19,11 @@ public class SchedulerConfig implements SchedulingConfigurer {
     @Value("${scheduler.fixed-delay.delay}")
     private Long fixedDelay;
 
-    @Value("${scheduler.regenerate-kafka-config.name}")
-    private String kafkaRegenerateConfigName;
+    @Value("${scheduler.regenerate-kafka-queue-config.name}")
+    private String regenerateKafkaQueueConfigName;
+
+    @Value("${scheduler.regenerate-kafka-queue.enabled}")
+    private boolean regnerateKafkaQueueEnabled;
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -35,8 +38,12 @@ public class SchedulerConfig implements SchedulingConfigurer {
         return fixedDelay;
     }
 
-    public String getKafkaRegenerateConfigName() {
-        return kafkaRegenerateConfigName;
+    public String getRegenerateKafkaQueueConfigName() {
+        return regenerateKafkaQueueConfigName;
+    }
+
+    public boolean getRegnerateKafkaQueueEnabled() {
+        return regnerateKafkaQueueEnabled;
     }
 
 }

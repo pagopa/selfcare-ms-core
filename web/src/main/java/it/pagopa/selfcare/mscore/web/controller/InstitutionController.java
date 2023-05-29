@@ -15,6 +15,7 @@ import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -30,6 +31,9 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -37,9 +41,65 @@ import java.util.List;
 @Slf4j
 public class InstitutionController {
     private final InstitutionService institutionService;
+    private final OnboardingResourceMapper onboardingResourceMapper;
 
-    public InstitutionController(InstitutionService institutionService) {
+    public InstitutionController(InstitutionService institutionService,
+                                 OnboardingResourceMapper onboardingResourceMapper) {
         this.institutionService = institutionService;
+        this.onboardingResourceMapper = onboardingResourceMapper;
+    }
+
+    /**
+     * Gets institutions filtering by taxCode and/or subunitCode
+     *
+     * @param taxCode String
+     * @param subunitCode String
+     * @return OnboardedProducts
+     * * Code: 200, Message: successful operation, DataType: OnboardedProducts
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 404, Message: Products not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
+    @GetMapping(value = "/")
+    public ResponseEntity<InstitutionsResponse> getInstitutions(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
+                                                             @RequestParam(value = "taxCode") String taxCode,
+                                                             @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
+                                                             @RequestParam(value = "subunitCode", required = false) String subunitCode) {
+
+        CustomExceptionMessage.setCustomMessage(GenericError.GET_INSTITUTION_BY_ID_ERROR);
+        List<Institution> institutions = institutionService.getInstitutions(taxCode, subunitCode);
+        InstitutionsResponse institutionsResponse = new InstitutionsResponse();
+        institutionsResponse.setInstitutions(institutions.stream()
+                        .map(InstitutionMapper::toInstitutionResponse)
+                .collect(Collectors.toList()));
+        return ResponseEntity.ok(institutionsResponse);
+    }
+
+    /**
+     * The function create an institution retriving values from IPA
+     *
+     * @param institutionFromIpaPost InstitutionPost
+     * @return InstitutionResponse
+     * * Code: 201, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.create.from-ipa}", notes = "${swagger.mscore.institution.create.from-ipa}")
+    @PostMapping(value = "/from-ipa/")
+    public ResponseEntity<InstitutionResponse> createInstitutionFromIpa( @RequestBody @Valid InstitutionFromIpaPost institutionFromIpaPost) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
+
+        if ((Objects.nonNull(institutionFromIpaPost.getSubunitType()) && Objects.isNull(institutionFromIpaPost.getSubunitCode())) ||
+                (Objects.isNull(institutionFromIpaPost.getSubunitType()) && Objects.nonNull(institutionFromIpaPost.getSubunitCode()))) {
+            throw new ValidationException("subunitCode and subunitType must both be evaluated.");
+        }
+
+        Institution saved = institutionService.createInstitutionFromIpa(institutionFromIpaPost.getTaxCode(),
+                institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode());
+        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
     /**
@@ -241,6 +301,32 @@ public class InstitutionController {
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
         List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
+    }
+
+
+
+    /**
+     * Get list of onboarding for a certain productId
+     *
+     * @param institutionId String
+     * @param productId      String
+     * @return List
+     * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
+     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
+    @GetMapping(value = "/{institutionId}/onboardings")
+    public ResponseEntity<OnboardingsResponse> getOnboardingsInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                                    @PathVariable("institutionId") String institutionId,
+                                                                                    @RequestParam(value = "productId", required = false) String productId) {
+        CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
+        List<Onboarding> onboardings = institutionService.getOnboardingInstitutionByProductId(institutionId, productId);
+        OnboardingsResponse onboardingsResponse = new OnboardingsResponse();
+        onboardingsResponse.setOnboardings(onboardings.stream()
+                .map(onboardingResourceMapper::toResponse)
+                .collect(Collectors.toList()));
+        return ResponseEntity.ok().body(onboardingsResponse);
     }
 
     /**

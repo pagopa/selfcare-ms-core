@@ -1230,6 +1230,130 @@
         } ]
       }
     },
+    "/institutions/" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "Gets institutions filtering by taxCode and/or subunitCode",
+        "description" : "Gets institutions filtering by taxCode and/or subunitCode",
+        "operationId" : "getInstitutionsUsingGET",
+        "parameters" : [ {
+          "name" : "taxCode",
+          "in" : "query",
+          "description" : "${swagger.mscore.institutions.model.taxCode}",
+          "required" : true,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "subunitCode",
+          "in" : "query",
+          "description" : "${swagger.mscore.institutions.model.subunitCode}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionsResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/institutions/from-ipa/" : {
+      "post" : {
+        "tags" : [ "Institution" ],
+        "summary" : "${swagger.mscore.institution.create.from-ipa}",
+        "description" : "${swagger.mscore.institution.create.from-ipa}",
+        "operationId" : "createInstitutionFromIpaUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionFromIpaPost"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/insert/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
@@ -1972,6 +2096,68 @@
         } ]
       }
     },
+    "/institutions/{institutionId}/onboardings" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "${swagger.mscore.institution.info}",
+        "description" : "${swagger.mscore.institution.info}",
+        "operationId" : "getOnboardingsInstitutionUsingGET",
+        "parameters" : [ {
+          "name" : "institutionId",
+          "in" : "path",
+          "description" : "The internal identifier of the institution",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "query",
+          "description" : "productId",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardingsResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/{institutionId}/products/{productId}/createdAt" : {
       "put" : {
         "tags" : [ "Institution" ],
@@ -2588,6 +2774,70 @@
         } ]
       }
     },
+    "/onboarding/" : {
+      "head" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "verify if onboardedProduct is already onboarded for institution",
+        "description" : "verify if onboardedProduct is already onboarded for institution",
+        "operationId" : "verifyOnboardingInfoUsingHEAD",
+        "parameters" : [ {
+          "name" : "taxCode",
+          "in" : "query",
+          "description" : "${swagger.mscore.institutions.model.taxCode}",
+          "required" : true,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "subunitCode",
+          "in" : "query",
+          "description" : "${swagger.mscore.institutions.model.subunitCode}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "query",
+          "description" : "Product's unique identifier",
+          "required" : true,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/onboarding/approve/{tokenId}" : {
       "post" : {
         "tags" : [ "Onboarding" ],
@@ -2958,7 +3208,7 @@
         "tags" : [ "Onboarding" ],
         "summary" : "verify if onboardedProduct is already onboarded for institution",
         "description" : "verify if onboardedProduct is already onboarded for institution",
-        "operationId" : "verifyOnboardingInfoUsingHEAD",
+        "operationId" : "verifyOnboardingInfoUsingHEAD_1",
         "parameters" : [ {
           "name" : "externalId",
           "in" : "path",
@@ -4036,6 +4286,22 @@
           }
         }
       },
+      "InstitutionFromIpaPost" : {
+        "title" : "InstitutionFromIpaPost",
+        "type" : "object",
+        "properties" : {
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
+            "type" : "string",
+            "enum" : [ "AOO", "EC", "UO" ]
+          },
+          "taxCode" : {
+            "type" : "string"
+          }
+        }
+      },
       "InstitutionGeographicTaxonomies" : {
         "title" : "InstitutionGeographicTaxonomies",
         "type" : "object",
@@ -4563,6 +4829,18 @@
           }
         }
       },
+      "InstitutionsResponse" : {
+        "title" : "InstitutionsResponse",
+        "type" : "object",
+        "properties" : {
+          "institutions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InstitutionResponse"
+            }
+          }
+        }
+      },
       "LegalsResponse" : {
         "title" : "LegalsResponse",
         "type" : "object",
@@ -5069,6 +5347,10 @@
           "contract" : {
             "$ref" : "#/components/schemas/Contract"
           },
+          "contractCreatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "contractFilePath" : {
             "type" : "string"
           },
@@ -5098,6 +5380,54 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/UserToOnboard"
+            }
+          }
+        }
+      },
+      "OnboardingResponse" : {
+        "title" : "OnboardingResponse",
+        "type" : "object",
+        "properties" : {
+          "billing" : {
+            "$ref" : "#/components/schemas/BillingResponse"
+          },
+          "closedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "contract" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "pricingPlan" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/RelationshipResponse"
+          },
+          "tokenId" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "OnboardingsResponse" : {
+        "title" : "OnboardingsResponse",
+        "type" : "object",
+        "properties" : {
+          "onboardings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OnboardingResponse"
             }
           }
         }
@@ -5269,6 +5599,51 @@
           }
         }
       },
+      "RelationshipResponse" : {
+        "title" : "RelationshipResponse",
+        "type" : "object",
+        "properties" : {
+          "billingResponse" : {
+            "$ref" : "#/components/schemas/BillingResponse"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "from" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "institutionUpdate" : {
+            "$ref" : "#/components/schemas/InstitutionUpdateResponse"
+          },
+          "pricingPlan" : {
+            "type" : "string"
+          },
+          "product" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string"
+          },
+          "state" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          },
+          "to" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
       "RelationshipResult" : {
         "title" : "RelationshipResult",
         "type" : "object",
@@ -5350,6 +5725,9 @@
             "type" : "string",
             "format" : "date-time"
           },
+          "contentType" : {
+            "type" : "string"
+          },
           "contractSigned" : {
             "type" : "string"
           },
@@ -5383,18 +5761,21 @@
             "type" : "string",
             "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           },
-          "type" : {
-            "type" : "string",
-            "enum" : [ "INSTITUTION", "LEGALS" ]
+          "type": {
+            "type": "string",
+            "enum": [
+              "INSTITUTION",
+              "LEGALS"
+            ]
           },
-          "updatedAt" : {
-            "type" : "string",
-            "format" : "date-time"
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           },
-          "users" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/TokenUser"
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenUser"
             }
           }
         }
