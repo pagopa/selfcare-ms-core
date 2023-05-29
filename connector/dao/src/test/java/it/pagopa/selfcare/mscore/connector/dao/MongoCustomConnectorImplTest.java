@@ -86,5 +86,29 @@ class MongoCustomConnectorImplTest {
 
     }
 
+    @Test
+    void findUserAndInstitutionWithInstitutionId() {
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getUniqueMappedResult()).thenReturn(new Object());
+        when(mongoOperations.aggregate((Aggregation) any(), anyString(), any())).thenReturn(results);
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("userId");
+        filter.setInstitutionId("institutionId");
+        Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation(filter, UserInstitutionAggregation.class));
+
+    }
+
+    @Test
+    void findUserAndInstitutionWithExternalId() {
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getUniqueMappedResult()).thenReturn(new Object());
+        when(mongoOperations.aggregate((Aggregation) any(), anyString(), any())).thenReturn(results);
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("userId");
+        filter.setExternalId("externalId");
+        Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation(filter, UserInstitutionAggregation.class));
+
+    }
+
 }
 
