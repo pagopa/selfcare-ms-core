@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
@@ -40,6 +41,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -252,10 +254,36 @@ class OnboardingServiceImplTest {
         user.setId("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
-        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user);
+        User onboardedUser = new User();
+        onboardedUser.setEmail(certifiedField);
+        onboardedUser.setFamilyName(certifiedField1);
+        onboardedUser.setFiscalCode("Fiscal Code3");
+        onboardedUser.setId("42");
+        onboardedUser.setName(certifiedField2);
+        onboardedUser.setWorkContacts(new HashMap<>());
+        User manager = new User();
+        manager.setEmail(certifiedField);
+        manager.setFamilyName(certifiedField1);
+        manager.setFiscalCode("Fiscal Code3");
+        manager.setId("42");
+        manager.setName(certifiedField2);
+        manager.setWorkContacts(new HashMap<>());
+
+        List<User> delegate = new ArrayList<>();
+        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user).thenReturn(manager).thenReturn(onboardedUser);
         when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+
+        Contract contract = new Contract();
+        contract.setPath("Contract Template");
+        OnboardingRequest request = new OnboardingRequest();
+        request.setProductId("42");
+        request.setContract(contract);
+        request.setPricingPlan("C3");
+        request.setProductName("42");
+        request.setInstitutionUpdate(new InstitutionUpdate());
+        request.setBillingRequest(new Billing());
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -285,13 +313,26 @@ class OnboardingServiceImplTest {
         tokenUser.setUserId("id");
         tokenUser.setRole(PartyRole.MANAGER);
         token.setUsers(List.of(tokenUser));
+
+        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
+
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getId()).thenReturn("42");
-        when(onboardingDao.getProductById(any())).thenReturn(new Product());
         File file = File.createTempFile("file", ".txt");
+        when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class));
+        verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
+        verify(contractService, times(1)).extractTemplate(token.getContractTemplate());
+        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegate, institution, request, null, null);
+        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
+        verifyNoMoreInteractions(onboardingDao);
+        verify(emailService, times(1)).sendMail(file, institution, user, request, token.getId(), true, null);
     }
 
     @Test
@@ -316,17 +357,50 @@ class OnboardingServiceImplTest {
         user.setId("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
-        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user);
-        when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
+        User delegate = new User();
+        delegate.setEmail(certifiedField);
+        delegate.setFamilyName(certifiedField1);
+        delegate.setFiscalCode("Fiscal Code3");
+        delegate.setId("43");
+        delegate.setName(certifiedField2);
+        delegate.setWorkContacts(new HashMap<>());
+        User manager = new User();
+        manager.setEmail(certifiedField);
+        manager.setFamilyName(certifiedField1);
+        manager.setFiscalCode("Fiscal Code3");
+        manager.setId("44");
+        manager.setName(certifiedField2);
+        manager.setWorkContacts(new HashMap<>());
+        List<User> delegateList = new ArrayList<>();
+        delegateList.add(delegate);
+        delegateList.add(delegate);
+
+        OnboardedUser onboardedUser1 = new OnboardedUser();
+        OnboardedUser onboardedUser2 = new OnboardedUser();
+        onboardedUser1.setId(manager.getId());
+        onboardedUser2.setId(delegate.getId());
+
+        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user).thenReturn(manager).thenReturn(delegate);
+        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser1, onboardedUser2));
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+
+        Contract contract = new Contract();
+        contract.setPath("Contract Template");
+        OnboardingRequest request = new OnboardingRequest();
+        request.setProductId("42");
+        request.setContract(contract);
+        request.setPricingPlan("C3");
+        request.setProductName("42");
+        request.setInstitutionUpdate(new InstitutionUpdate());
+        request.setBillingRequest(new Billing());
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
         List<Onboarding> onboardingList = new ArrayList<>();
         Onboarding onboarding = new Onboarding();
         onboarding.setBilling(new Billing());
-        onboarding.setTokenId("43");
+        onboarding.setTokenId("42");
         onboarding.setPricingPlan("C3");
         onboarding.setProductId("42");
         onboardingList.add(onboarding);
@@ -349,13 +423,27 @@ class OnboardingServiceImplTest {
         tokenUser.setUserId("id");
         tokenUser.setRole(PartyRole.MANAGER);
         token.setUsers(List.of(tokenUser));
+
+        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
+
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getId()).thenReturn("42");
-        when(onboardingDao.getProductById(any())).thenReturn(new Product());
         File file = File.createTempFile("file", ".txt");
+        when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
+
+        doThrow(RuntimeException.class).when(emailService).sendMail(any(), any(), any(), any(), any(), anyBoolean(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId(), EnumSet.allOf(User.Fields.class));
+        verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
+        verify(contractService, times(1)).extractTemplate(token.getContractTemplate());
+        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegateList, institution, request, null, null);
+        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
+        verify(onboardingDao, times(1)).rollbackSecondStepOfUpdate((List.of(tokenUser.getUserId())), institution, token);
     }
 
     /**
