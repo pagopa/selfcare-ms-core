@@ -16,10 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INVALID_UPDATES;
@@ -71,14 +68,26 @@ public class OnboardingInstitutionUtils {
         return !StringUtils.isEmpty(startValue) || StringUtils.isEmpty(toValue);
     }
 
-    public static RelationshipState getStatus(InstitutionType institutionType, OnboardingRequest request, Institution institution) {
+    public static RelationshipState getStatus(InstitutionUpdate institutionUpdate, InstitutionType institutionType, String institutionOrigin, String productId) {
+        if (Objects.nonNull(institutionUpdate) && Objects.nonNull(institutionUpdate.getInstitutionType())) {
+            return getStatusByInstitutionType(institutionUpdate.getInstitutionType(), productId, institutionOrigin);
+        }
+
+        if (Objects.nonNull(institutionType)) {
+            return getStatusByInstitutionType(institutionType, productId, institutionOrigin);
+        }
+
+        return null;
+    }
+
+    private static RelationshipState getStatusByInstitutionType(InstitutionType institutionType, String productId, String institutionOrigin) {
         switch (institutionType) {
             case PA:
                 return RelationshipState.PENDING;
             case PG:
                 return RelationshipState.ACTIVE;
             default:
-                if (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals("IPA")) {
+                if (InstitutionType.GSP == institutionType && "prod-interop".equals(productId) && "IPA".equals(institutionOrigin)) {
                     return RelationshipState.PENDING;
                 }
                 return RelationshipState.TOBEVALIDATED;
@@ -202,19 +211,17 @@ public class OnboardingInstitutionUtils {
         if (request.getContract() != null) {
             onboarding.setContract(request.getContract().getPath());
         }
-        if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            onboarding.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType(), request, institution));
-        } else if (institution.getInstitutionType() != null) {
-            onboarding.setStatus(getStatus(institution.getInstitutionType(), request, institution));
-        }
+
+        onboarding.setStatus(getStatus(request.getInstitutionUpdate(),
+                institution.getInstitutionType(), institution.getOrigin(), request.getProductId()));
 
         return onboarding;
     }
 
-    public static OnboardedProduct constructOperatorProduct(UserToOnboard user, OnboardingOperatorsRequest request) {
+    public static OnboardedProduct constructOperatorProduct(UserToOnboard user, String productId) {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
-        onboardedProduct.setProductId(request.getProductId());
+        onboardedProduct.setProductId(productId);
         onboardedProduct.setRole(user.getRole());
         onboardedProduct.setProductRole(user.getProductRole());
         onboardedProduct.setStatus(RelationshipState.ACTIVE);
@@ -227,21 +234,19 @@ public class OnboardingInstitutionUtils {
         return onboardedProduct;
     }
 
-    public static OnboardedProduct constructProduct(UserToOnboard p, OnboardingRequest request, Institution institution) {
+    public static OnboardedProduct constructProduct(UserToOnboard userToOnboard, OnboardingRequest request, Institution institution) {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
         onboardedProduct.setProductId(request.getProductId());
-        onboardedProduct.setRole(p.getRole());
-        onboardedProduct.setProductRole(p.getProductRole());
-        if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate().getInstitutionType(), request, institution));
-        } else if (institution.getInstitutionType() != null) {
-            onboardedProduct.setStatus(getStatus(institution.getInstitutionType(), request, institution));
-        }
+        onboardedProduct.setRole(userToOnboard.getRole());
+        onboardedProduct.setProductRole(userToOnboard.getProductRole());
+        onboardedProduct.setStatus(getStatus(request.getInstitutionUpdate(),
+                institution.getInstitutionType(), institution.getOrigin(), request.getProductId()));
+
         onboardedProduct.setCreatedAt(OffsetDateTime.now());
         onboardedProduct.setUpdatedAt(OffsetDateTime.now());
-        if (p.getEnv() != null) {
-            onboardedProduct.setEnv(p.getEnv());
+        if (userToOnboard.getEnv() != null) {
+            onboardedProduct.setEnv(userToOnboard.getEnv());
         }
         return onboardedProduct;
     }
