@@ -1,12 +1,14 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.UserInstitutionAggregationEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class UserMapper {
@@ -116,15 +119,28 @@ public class UserMapper {
         return product;
     }
 
-    public static UserInstitutionAggregation toUserInstitutionAggregation(UserInstitutionAggregationEntity entity) {
+    public static List<UserInstitutionAggregation> toUserInstitutionAggregation(List<UserInstitutionAggregationEntity> entity) {
+        return entity.stream().map(UserMapper::constructUserInstitutionAggregation).collect(Collectors.toList());
+    }
+
+    private static UserInstitutionAggregation constructUserInstitutionAggregation(UserInstitutionAggregationEntity entity) {
         UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
         userInstitutionAggregation.setId(entity.getId());
-        if (entity.getBindings() != null && !entity.getBindings().isEmpty()) {
-            userInstitutionAggregation.setBindings(toBindings(entity.getBindings()));
+        if (entity.getBindings() != null) {
+            userInstitutionAggregation.setBindings(toBinding(entity.getBindings()));
         }
         if (entity.getInstitutions() != null && !entity.getInstitutions().isEmpty()) {
             userInstitutionAggregation.setInstitutions(InstitutionMapper.convertToInstitutionList(entity.getInstitutions()));
         }
         return userInstitutionAggregation;
+    }
+
+    private static UserInstitutionBinding toBinding(UserInstitutionBindingEntity bindings) {
+        UserInstitutionBinding binding = new UserInstitutionBinding();
+        binding.setInstitutionId(bindings.getInstitutionId());
+        if (bindings.getProducts() != null) {
+            binding.setProducts(toOnboardedProduct(bindings.getProducts()));
+        }
+        return binding;
     }
 }

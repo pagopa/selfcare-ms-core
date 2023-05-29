@@ -17,12 +17,13 @@ import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -31,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
@@ -82,8 +82,8 @@ public class OnboardingServiceImpl implements OnboardingService {
     @Override
     public void verifyOnboardingInfoSubunit(String taxCode, String subunitCode, String productId) {
         Boolean existsOnboardingValid = institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(taxCode,
-                Optional.ofNullable(subunitCode),  Optional.ofNullable(productId), UtilEnumList.VALID_RELATIONSHIP_STATES);
-        if (!existsOnboardingValid) {
+                Optional.ofNullable(subunitCode), Optional.ofNullable(productId), UtilEnumList.VALID_RELATIONSHIP_STATES);
+        if (Boolean.FALSE.equals(existsOnboardingValid)) {
             throw new ResourceNotFoundException(String.format(CustomError.INSTITUTION_NOT_ONBOARDED.getMessage(), taxCode, productId),
                     CustomError.INSTITUTION_NOT_ONBOARDED.getCode());
         }
@@ -95,23 +95,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<RelationshipState> relationshipStateList = OnboardingInfoUtils.getRelationShipStateList(states);
         List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
         try {
-            UserInstitutionAggregation userInstitutionAggregation = getUserInstitutionAggregation(userId);
-            List<UserBinding> userBindings = OnboardingInfoUtils.getUserInstitutionsWithProductStatusIn(userInstitutionAggregation.getBindings(), relationshipStateList);
-
-            if (StringUtils.hasText(institutionId) || StringUtils.hasText(institutionExternalId)) {
-                userInstitutionAggregation.getInstitutions().stream().filter(institution ->
-                                institution.getId().equalsIgnoreCase(institutionId) || institution.getExternalId().equalsIgnoreCase(institutionExternalId))
-                        .findFirst().ifPresent(institution -> userBindings.removeIf(userBinding -> !institution.getId().equalsIgnoreCase(userBinding.getInstitutionId())));
-            }
-
-            userBindings.forEach(userBinding -> userInstitutionAggregation.getInstitutions()
-                    .stream()
-                    .filter(institution -> institution.getId().equalsIgnoreCase(userBinding.getInstitutionId()))
-                    .findFirst()
-                    .ifPresent(institution -> {
-                        OnboardingInfoUtils.findOnboardingLinkedToProductWithStateIn(userBinding, institution, relationshipStateList);
-                        onboardingInfoList.add(new OnboardingInfo(institution, userBinding.getProducts().stream().collect(Collectors.toMap(OnboardedProduct::getProductId, Function.identity(), (x, y) -> y))));
-                    }));
+            List<UserInstitutionAggregation> userInstitutionAggregation = getUserInstitutionAggregation(userId, institutionId, institutionExternalId, relationshipStateList);
+            userInstitutionAggregation.forEach(userBinding -> onboardingInfoList.add(new OnboardingInfo(userId, userBinding.getInstitutions().get(0), userBinding.getBindings())));
 
             if (onboardingInfoList.isEmpty()) {
                 throw new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode());
@@ -274,9 +259,11 @@ public class OnboardingServiceImpl implements OnboardingService {
         onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
     }
 
-    private UserInstitutionAggregation getUserInstitutionAggregation(String userId) {
-        UserInstitutionAggregation userInstitutionAggregation = userService.findUserInstitutionAggregation(userId);
-        if (userInstitutionAggregation == null) {
+    private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String institutionId, String externalId, List<RelationshipState> relationshipStates) {
+        List<String> states = relationshipStates.stream().map(Enum::name).collect(Collectors.toList());
+        UserInstitutionFilter filter = new UserInstitutionFilter(userId, institutionId, externalId, states);
+        List<UserInstitutionAggregation> userInstitutionAggregation = userService.findUserInstitutionAggregation(filter);
+        if (userInstitutionAggregation == null || userInstitutionAggregation.isEmpty()) {
             throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), userId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
         }
         return userInstitutionAggregation;

@@ -6,8 +6,9 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.User;
 
 import java.util.EnumSet;
@@ -280,8 +281,10 @@ class UserServiceImplTest {
     void findUserInstitutionAggregation() {
         UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
         userInstitutionAggregation.setId("id");
-        when(userConnector.findUserInstitutionAggregation("42")).thenReturn(userInstitutionAggregation);
-        Assertions.assertDoesNotThrow(() -> userServiceImpl.findUserInstitutionAggregation("42"));
+        when(userConnector.findUserInstitutionAggregation(any())).thenReturn(List.of(userInstitutionAggregation));
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("id");
+        Assertions.assertDoesNotThrow(() -> userServiceImpl.findUserInstitutionAggregation(filter));
     }
 }
 

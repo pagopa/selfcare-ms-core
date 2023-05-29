@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -18,5 +19,5 @@ public interface MongoCustomConnector {
 
     <O> O findAndModify(Query query, UpdateDefinition updateDefinition, FindAndModifyOptions findAndModifyOptions, Class<O> outputType);
 
-    <O> O findUserInstitutionAggregation(String userId, Class<O> outputType, String fromCollection, String toCollection);
+    <O> List<O> findUserInstitutionAggregation(UserInstitutionFilter filter, Class<O> outputType);
 }
