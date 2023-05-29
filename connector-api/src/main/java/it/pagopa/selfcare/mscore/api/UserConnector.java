@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.springframework.lang.Nullable;
 
@@ -49,4 +50,5 @@ public interface UserConnector {
 
     List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
 
+    UserInstitutionAggregation findUserInstitutionAggregation(String userId);
 }

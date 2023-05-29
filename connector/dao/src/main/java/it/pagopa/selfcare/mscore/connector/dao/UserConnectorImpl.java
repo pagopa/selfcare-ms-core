@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserMapper;
@@ -12,6 +13,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -226,6 +228,11 @@ public class UserConnectorImpl implements UserConnector {
         });
 
         return updatedUsersBindings;
+    }
+
+    @Override
+    public UserInstitutionAggregation findUserInstitutionAggregation(String userId) {
+        return UserMapper.toUserInstitutionAggregation(repository.findUserInstitutionAggregation(userId, UserInstitutionAggregationEntity.class, "User", "Institution"));
     }
 
     private Criteria constructElemMatch(String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> productRoles, List<String> products) {

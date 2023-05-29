@@ -310,4 +310,8 @@ public class InstitutionMapper {
     private static String constructPaymentInnerField(String name) {
         return InstitutionUpdate.Fields.businessRegisterPlace.name() + "." + name;
     }
+
+    public static List<Institution> convertToInstitutionList(List<InstitutionEntity> institutions) {
+        return institutions.stream().map(InstitutionMapper::convertToInstitution).collect(Collectors.toList());
+    }
 }

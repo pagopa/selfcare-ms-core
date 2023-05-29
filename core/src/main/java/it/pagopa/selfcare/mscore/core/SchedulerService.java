@@ -50,31 +50,27 @@ public class SchedulerService {
     public void regenerateQueueNotifications() {
         log.trace("regenerateQueueNotifications start");
 
-        Config regenerateQueueConfiguration = null;
-        try {
-            regenerateQueueConfiguration = configConnector.findById(schedulerConfig.getKafkaRegenerateConfigName());
-        } catch (ResourceNotFoundException exception) {
-            log.error("Error while retrieving kafka queue regeneration configuration, {}", exception.getMessage());
-        }
+        if (schedulerConfig.getRegnerateKafkaQueueEnabled()) {
 
-        //To regenerate all the message on the kafka queue, you need to modify the Config entity, set value of the "enableKafkaScheduler" field to true, directly on mongoDB and if needs be you can also modify the value of "productFilter"
-        if (regenerateQueueConfiguration != null && regenerateQueueConfiguration.isEnableKafkaScheduler()) {
-            log.debug("Regenerating notifications on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
+            Config regenerateQueueConfiguration = configConnector.findAndUpdate(schedulerConfig.getRegenerateKafkaQueueConfigName());
 
-            configConnector.resetConfiguration(schedulerConfig.getKafkaRegenerateConfigName());
+            //To regenerate all the message on the kafka queue, you need to modify the Config entity, set value of the "enableKafkaScheduler" field to true, directly on mongoDB and if needs be you can also modify the value of "productFilter"
+            if (regenerateQueueConfiguration != null) {
+                log.debug("Regenerating notifications on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
 
-            boolean nextPage = true;
-            int page = 0;
-            do {
-                List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page);
+                boolean nextPage = true;
+                int page = 0;
+                do {
+                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page);
 
-                sendDataLakeNotifications(tokens);
+                    sendDataLakeNotifications(tokens);
 
-                page += 1;
-                if (tokens.size() < 100)
-                    nextPage = false;
+                    page += 1;
+                    if (tokens.size() < 100)
+                        nextPage = false;
 
-            } while (nextPage);
+                } while (nextPage);
+            }
         }
 
         log.info("Next scheduled check at {}", OffsetDateTime.now().plusSeconds(schedulerConfig.getFixedDelay() / 1000));
