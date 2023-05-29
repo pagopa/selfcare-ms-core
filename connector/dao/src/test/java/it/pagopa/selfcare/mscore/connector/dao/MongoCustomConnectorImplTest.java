@@ -1,5 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,10 +80,9 @@ class MongoCustomConnectorImplTest {
         AggregationResults<Object> results = mock(AggregationResults.class);
         when(results.getUniqueMappedResult()).thenReturn(new Object());
         when(mongoOperations.aggregate((Aggregation) any(), anyString(), any())).thenReturn(results);
-        Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation("fiscalCode",
-                Object.class,
-                "User",
-                "Institution"));
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("userId");
+        Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation(filter, UserInstitutionAggregation.class));
 
     }
 

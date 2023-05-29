@@ -84,18 +84,15 @@ public class OnboardingMapper {
         OnboardingInfoResponse response = new OnboardingInfoResponse();
         response.setUserId(userId);
         List<OnboardedInstitutionResponse> institutionResponseList = new ArrayList<>();
-        if(!onboardingInfos.isEmpty()) {
-            for (OnboardingInfo onboardingInfo : onboardingInfos) {
-                Institution institution = onboardingInfo.getInstitution();
-                List<Onboarding> onboardingList = institution.getOnboarding();
-                for (Onboarding onboarding : onboardingList) {
-                    OnboardedProduct product = onboardingInfo.getOnboardedProducts().get(onboarding.getProductId());
-                    if (product != null) {
-                        institutionResponseList.add(constructOnboardedInstitutionResponse(institution, product, onboarding));
-                    }
-                }
-            }
-        }
+        onboardingInfos.forEach(onboardingInfo ->
+                onboardingInfo.getInstitution().getOnboarding().stream()
+                        .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(onboardingInfo.getBinding().getProducts().getProductId())
+                                && onboarding.getStatus().equals(onboardingInfo.getBinding().getProducts().getStatus()))
+                        .findFirst()
+                        .ifPresent(onboarding -> institutionResponseList.add(constructOnboardedInstitutionResponse(onboardingInfo.getInstitution(),
+                                onboardingInfo.getBinding().getProducts(),
+                                onboarding)))
+        );
         response.setInstitutions(institutionResponseList);
         return response;
     }
@@ -134,6 +131,7 @@ public class OnboardingMapper {
         institutionResponse.setDataProtectionOfficer(InstitutionMapper.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
         return institutionResponse;
     }
+
     public static OnboardingOperatorsRequest toOnboardingOperatorRequest(OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
         OnboardingOperatorsRequest request = new OnboardingOperatorsRequest();
         request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());

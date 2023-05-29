@@ -1,7 +1,6 @@
-package it.pagopa.selfcare.mscore.model.onboarding;
+package it.pagopa.selfcare.mscore.model.aggregation;
 
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 public class UserInstitutionAggregation {
     private String id;
-    private List<UserBinding> bindings;
+    private UserInstitutionBinding bindings;
     private List<Institution> institutions;
 }

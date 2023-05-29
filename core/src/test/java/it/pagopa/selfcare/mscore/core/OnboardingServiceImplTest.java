@@ -11,13 +11,14 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -175,28 +176,21 @@ class OnboardingServiceImplTest {
         onboardedProduct.setStatus(RelationshipState.PENDING);
         onboardedProduct.setUpdatedAt(null);
 
-        ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
-        onboardedProductList.add(onboardedProduct);
-
-        UserBinding userBinding = new UserBinding();
+        UserInstitutionBinding userBinding = new UserInstitutionBinding();
         userBinding.setInstitutionId("42");
-        userBinding.setProducts(onboardedProductList);
-
-        ArrayList<UserBinding> userBindingList = new ArrayList<>();
-        userBindingList.add(userBinding);
+        userBinding.setProducts(onboardedProduct);
 
         UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
         userInstitutionAggregation.setId("42");
-        userInstitutionAggregation.setBindings(userBindingList);
+        userInstitutionAggregation.setBindings(userBinding);
         userInstitutionAggregation.setInstitutions(List.of(institution));
-        when(userService.findUserInstitutionAggregation(any())).thenReturn(userInstitutionAggregation);
+        when(userService.findUserInstitutionAggregation(any())).thenReturn(List.of(userInstitutionAggregation));
         List<OnboardingInfo> actualOnboardingInfo = onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{},
                 "42");
         assertEquals(1, actualOnboardingInfo.size());
         OnboardingInfo getResult = actualOnboardingInfo.get(0);
         Institution institution1 = getResult.getInstitution();
         assertSame(institution, institution1);
-        assertEquals(1, getResult.getOnboardedProducts().size());
         List<Onboarding> onboarding1 = institution1.getOnboarding();
         assertTrue(onboarding1.isEmpty());
     }
