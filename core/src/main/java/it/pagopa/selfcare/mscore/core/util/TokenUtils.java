@@ -30,11 +30,8 @@ public class TokenUtils {
         token.setInstitutionId(institution.getId());
         token.setProductId(request.getProductId());
         token.setChecksum(digest);
-        if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            token.setStatus(OnboardingInstitutionUtils.getStatus(request.getInstitutionUpdate().getInstitutionType(), request, institution));
-        } else if (institution.getInstitutionType() != null) {
-            token.setStatus(OnboardingInstitutionUtils.getStatus(institution.getInstitutionType(), request, institution));
-        }
+        token.setStatus(OnboardingInstitutionUtils.getStatus(request.getInstitutionUpdate(),
+                institution.getInstitutionType(), institution.getOrigin(), request.getProductId()));
         token.setInstitutionUpdate(request.getInstitutionUpdate());
         token.setUsers(request.getUsers().stream().map(TokenUtils::toTokenUser).collect(Collectors.toList()));
         token.setExpiringDate(expiringDate);

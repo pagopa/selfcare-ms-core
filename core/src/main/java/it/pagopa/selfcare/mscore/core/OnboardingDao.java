@@ -76,10 +76,13 @@ public class OnboardingDao {
 
         log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
 
+        OffsetDateTime createdAt = Objects.nonNull(request.getContractCreatedAt()) ? request.getContractCreatedAt() : OffsetDateTime.now();
+
         Token token = TokenUtils.toToken(request, institution, digest, null);
         token.setStatus(RelationshipState.ACTIVE);
         token.setContractSigned(request.getContractFilePath());
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        token.setCreatedAt(createdAt);
         token = tokenConnector.save(token, geographicTaxonomies);
 
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
@@ -88,7 +91,7 @@ public class OnboardingDao {
         onboarding.setTokenId(token.getId());
         onboarding.setContract(request.getContractFilePath());
         onboarding.setStatus(RelationshipState.ACTIVE);
-
+        onboarding.setCreatedAt(createdAt);
         Institution institutionUpdated = null;
 
         try {
@@ -105,7 +108,7 @@ public class OnboardingDao {
         try {
 
             for (UserToOnboard userToOnboard : request.getUsers()) {
-                updateOrCreateUserWithState(toUpdate, userToOnboard, institution, request, token.getId(), RelationshipState.ACTIVE)
+                createOrAddOnboardedProductUser(toUpdate, userToOnboard, institution, request, token.getId(), createdAt)
                         .ifPresent(onboardedProduct -> productMap.put(userToOnboard.getId(), onboardedProduct));
             }
             log.debug("users to update: {}", toUpdate);
@@ -214,7 +217,7 @@ public class OnboardingDao {
     }
 
     private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request);
+        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
         UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
         userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
@@ -257,13 +260,14 @@ public class OnboardingDao {
         }
     }
 
-    private Optional<OnboardedProduct> updateOrCreateUserWithState(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, RelationshipState state) {
+    private Optional<OnboardedProduct> createOrAddOnboardedProductUser(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, OffsetDateTime createdAt) {
         try {
             OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
 
             OnboardedProduct product = constructProduct(userToOnboard, request, institution);
             product.setTokenId(tokenId);
-            product.setStatus(state);
+            product.setStatus(RelationshipState.ACTIVE);
+            product.setCreatedAt(createdAt);
             UserBinding binding = new UserBinding(institution.getId(), List.of(product));
             userConnector.findAndUpdate(onboardedUser, userToOnboard.getId(), institution.getId(), product, binding);
 
@@ -310,7 +314,7 @@ public class OnboardingDao {
     }
 
     private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request);
+        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
         UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
         userConnector.findAndCreate(user.getId(), binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));

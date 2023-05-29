@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -253,6 +254,8 @@ public class OnboardingInstitutionStrategyTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
+        onboardingRequest.setContractCreatedAt(OffsetDateTime.now());
+
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setId("id");
         userToOnboard.setRole(PartyRole.MANAGER);
