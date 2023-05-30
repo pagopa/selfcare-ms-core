@@ -174,7 +174,7 @@ class OnboardingServiceImplTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - getUser with id: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
+                "START - getUser with id: {}", null, null, billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
                 "true", true, OffsetDateTime.now(), OffsetDateTime.now());
 
@@ -225,7 +225,7 @@ class OnboardingServiceImplTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - getUser with id: {}",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
+                "START - getUser with id: {}", null, null, billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
                 "START - getUser with id: {}", true, OffsetDateTime.now(), OffsetDateTime.now());
 
@@ -326,7 +326,7 @@ class OnboardingServiceImplTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC.name(),
                 "START - getUser with id: {}", "The characteristics of someone or something", InstitutionType.PA,
-                "42 Main St", "42 Main St", "21654", "START - getUser with id: {}", billing, onboarding, geographicTaxonomies,
+                "42 Main St", "42 Main St", "21654", "START - getUser with id: {}", null, null, billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "START - getUser with id: {}",
                 "START - getUser with id: {}", "START - getUser with id: {}", true, OffsetDateTime.now(), OffsetDateTime.now()));
 
@@ -373,7 +373,7 @@ class OnboardingServiceImplTest {
 
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42",
                 Origin.MOCK.name(), "42", "The characteristics of someone or something", InstitutionType.PA, "42 Main St",
-                "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies, attributes,
+                "42 Main St", "21654", "Tax Code", null, null, billing, onboarding, geographicTaxonomies, attributes,
                 paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
                 "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
 
@@ -456,7 +456,7 @@ class OnboardingServiceImplTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution("42", "42", Origin.SELC.name(),
                 "START - getUser with id: {}", "The characteristics of someone or something", InstitutionType.PA,
-                "42 Main St", "42 Main St", "21654", "", billing, onboarding, geographicTaxonomies,
+                "42 Main St", "42 Main St", "21654", "", null, null, billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "START - getUser with id: {}",
                 "START - getUser with id: {}", "START - getUser with id: {}", true, OffsetDateTime.now(), OffsetDateTime.now()));
 

@@ -581,7 +581,7 @@ class PdfMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - setupCommonData",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "START - setupCommonData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
+                "START - setupCommonData", null, null, billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
                 "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now());
 
@@ -705,7 +705,7 @@ class PdfMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         PdfMapper.setupPSPData(stringObjectMap, user,
                 new Institution("42", "42", Origin.SELC.name(), "START - setupPSPData", "The characteristics of someone or something",
-                        InstitutionType.GSP, "42 Main St", "42 Main St", "21654", "START - setupPSPData", billing, onboarding,
+                        InstitutionType.GSP, "42 Main St", "42 Main St", "21654", "START - setupPSPData", null, null, billing, onboarding,
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", true,
                         OffsetDateTime.now(), OffsetDateTime.now()));
@@ -957,7 +957,7 @@ class PdfMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - setupProdIOData",
                 "The characteristics of someone or something", InstitutionType.PT, "42 Main St", "42 Main St", "21654",
-                "START - setupProdIOData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
+                "START - setupProdIOData", null, null,billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupProdIOData", "START - setupProdIOData",
                 "START - setupProdIOData", true, OffsetDateTime.now(), OffsetDateTime.now());
 

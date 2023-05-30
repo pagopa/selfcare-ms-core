@@ -443,7 +443,7 @@ class ExternalControllerTest {
         ArrayList<Attributes> attributes = new ArrayList<>();
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC.name(), "?",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null,
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now()));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
@@ -487,7 +487,7 @@ class ExternalControllerTest {
 
         when(externalService.getInstitutionByExternalId(any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
@@ -582,7 +582,7 @@ class ExternalControllerTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
 
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "?", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing1, onboarding1, geographicTaxonomies,
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing1, onboarding1, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "?", "?", "?",
                 true, OffsetDateTime.now(), OffsetDateTime.now());
         institution.setId("?");
@@ -677,7 +677,7 @@ class ExternalControllerTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
         Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
+                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null,
                 billing1, onboarding1, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?", "?", "?", "jane.doe@example.org",
                 "6625550144", true, null, null);

@@ -142,7 +142,7 @@ class InstitutionControllerTest {
 
         when(institutionService.retrieveInstitutionById(any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}", "42");
@@ -310,7 +310,7 @@ class InstitutionControllerTest {
 
         when(institutionService.createInstitutionByExternalId(any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/institutions/{externalId}", "42");
@@ -710,7 +710,7 @@ class InstitutionControllerTest {
 
         when(institutionService.createInstitutionRaw(any(), any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
 

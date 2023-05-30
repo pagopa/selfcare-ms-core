@@ -355,7 +355,7 @@ class InstitutionMapperTest {
 
         Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "Tax Code", billing1, onboarding1, geographicTaxonomies, attributes, paymentServiceProvider,
+                "Tax Code", null, null, billing1, onboarding1, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                 "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null);
         institution.setOnboarding(onboardingList);
@@ -971,7 +971,7 @@ class InstitutionMapperTest {
         InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
                 .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
+                        "Tax Code", null, null, billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                         "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
@@ -1028,7 +1028,7 @@ class InstitutionMapperTest {
         InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
                 .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
+                        "Tax Code", null, null, billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
                         "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
@@ -1070,7 +1070,7 @@ class InstitutionMapperTest {
         InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
                 .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing, onboardingList, institutionGeographicTaxonomiesList, attributes,
+                        "Tax Code", null, null, billing, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
                         "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
@@ -1118,7 +1118,7 @@ class InstitutionMapperTest {
         InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
                 .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing, onboardingList, geographicTaxonomies, attributesList, paymentServiceProvider,
+                        "Tax Code", null, null, billing, onboardingList, geographicTaxonomies, attributesList, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                         "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
@@ -1187,7 +1187,7 @@ class InstitutionMapperTest {
                 "Legal Register Name", "42", true);
 
         institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", null, null, billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                 "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
@@ -1224,7 +1224,7 @@ class InstitutionMapperTest {
                 "Legal Register Name", "42", true);
 
         Institution e = new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList,
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", null, null, billing1, onboardingList,
                 geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                 "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null);
@@ -1249,7 +1249,7 @@ class InstitutionMapperTest {
                 "Legal Register Name", "42", true);
 
         Institution e = new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", null, null, billing, onboarding,
                 institutionGeographicTaxonomiesList, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                 "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null);
@@ -1278,7 +1278,7 @@ class InstitutionMapperTest {
                 "Legal Register Name", "42", true);
 
         Institution e = new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", null, null, billing, onboarding,
                 geographicTaxonomies, attributesList, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                 "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null);

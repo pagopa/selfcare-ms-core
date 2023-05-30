@@ -312,7 +312,7 @@ class InstitutionMapperTest {
         InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
                 .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK.getValue(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
+                        "Tax Code", null, null, billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
                         "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
         assertEquals("42 Main St", actualConvertToInstitutionEntityResult.getAddress());
@@ -367,7 +367,7 @@ class InstitutionMapperTest {
         InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
                 .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK.getValue(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
+                        "Tax Code", null, null, billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
                         "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
         assertEquals("42 Main St", actualConvertToInstitutionEntityResult.getAddress());

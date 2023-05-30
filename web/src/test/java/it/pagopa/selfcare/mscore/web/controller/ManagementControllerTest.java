@@ -102,7 +102,7 @@ class ManagementControllerTest {
 
         when(institutionService.retrieveInstitutionByExternalId(any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -174,7 +174,7 @@ class ManagementControllerTest {
 
         when(institutionService.retrieveInstitutionById(any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/management/institutions/{id}", "42");
@@ -248,7 +248,7 @@ class ManagementControllerTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
         institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?",
                 "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         when(institutionService.findInstitutionsByProductId(any())).thenReturn(institutionList);
@@ -425,7 +425,7 @@ class ManagementControllerTest {
 
         when(institutionService.retrieveInstitutionByExternalId(any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -481,7 +481,7 @@ class ManagementControllerTest {
 
         when(institutionService.retrieveInstitutionById(any()))
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
                         "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/management/institutions/{id}", "42");
@@ -555,7 +555,7 @@ class ManagementControllerTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
         institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
+                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", null, null, billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?",
                 "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
         when(institutionService.findInstitutionsByProductId(any())).thenReturn(institutionList);

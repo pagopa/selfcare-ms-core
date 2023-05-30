@@ -83,6 +83,7 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
             newInstitution.setOrigin(Origin.IPA.getValue());
             newInstitution.setCreatedAt(OffsetDateTime.now());
+            newInstitution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
             Attributes attributes = new Attributes();
             attributes.setOrigin(categoryProxyInfo.getOrigin());
@@ -112,6 +113,8 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setAddress( areaOrganizzativaOmogenea.getIndirizzo() );
             newInstitution.setZipCode( areaOrganizzativaOmogenea.getCAP() );
             newInstitution.setTaxCode( areaOrganizzativaOmogenea.getCodiceFiscaleEnte() );
+            newInstitution.setSubunitCode(strategyInput.getSubunitCode());
+            newInstitution.setSubunitType(InstitutionPaSubunitType.AOO.name());
 
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
@@ -147,6 +150,8 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setAddress( unitaOrganizzativa.getIndirizzo() );
             newInstitution.setZipCode( unitaOrganizzativa.getCAP() );
             newInstitution.setTaxCode( unitaOrganizzativa.getCodiceFiscaleEnte() );
+            newInstitution.setSubunitCode(strategyInput.getSubunitCode());
+            newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
             newInstitution.setOrigin(Optional.ofNullable(unitaOrganizzativa.getOrigin())
