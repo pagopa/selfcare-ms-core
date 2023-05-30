@@ -483,7 +483,7 @@ class InstitutionServiceImplTest {
                 "START - check institution {} already exists", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
                 null, null, "START - check institution {} already exists", "START - check institution {} already exists",
-                "START - check institution {} already exists", true, OffsetDateTime.now(), OffsetDateTime.now()), "42"));
+                "START - check institution {} already exists", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null), "42"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
     }
@@ -850,7 +850,7 @@ class InstitutionServiceImplTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "Tax Code", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null);
+                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
 
         assertTrue(institutionServiceImpl
                 .retrieveUserInstitutionRelationships(institution, "42", "42", List.of(), List.of(), List.of(), List.of())
@@ -992,7 +992,7 @@ class InstitutionServiceImplTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "Tax Code", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
-                "6625550144", true, null, null);
+                "6625550144", true, null, null, null, null);
 
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());

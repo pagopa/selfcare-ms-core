@@ -583,7 +583,7 @@ class PdfMapperTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - setupCommonData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
-                "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now());
+                "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -708,7 +708,7 @@ class PdfMapperTest {
                         InstitutionType.GSP, "42 Main St", "42 Main St", "21654", "START - setupPSPData", billing, onboarding,
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
                         "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", true,
-                        OffsetDateTime.now(), OffsetDateTime.now()));
+                        OffsetDateTime.now(), OffsetDateTime.now(), null, null));
         assertEquals(8, stringObjectMap.size());
     }
 
@@ -959,7 +959,7 @@ class PdfMapperTest {
                 "The characteristics of someone or something", InstitutionType.PT, "42 Main St", "42 Main St", "21654",
                 "START - setupProdIOData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupProdIOData", "START - setupProdIOData",
-                "START - setupProdIOData", true, OffsetDateTime.now(), OffsetDateTime.now());
+                "START - setupProdIOData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);

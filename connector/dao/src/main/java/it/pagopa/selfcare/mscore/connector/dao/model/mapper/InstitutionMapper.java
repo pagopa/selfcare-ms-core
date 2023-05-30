@@ -79,6 +79,8 @@ public class InstitutionMapper {
         entity.setAddress(institution.getAddress());
         entity.setZipCode(institution.getZipCode());
         entity.setTaxCode(institution.getTaxCode());
+        entity.setSubunitType(institution.getSubunitType());
+        entity.setSubunitCode(institution.getSubunitCode());
         entity.setRea(institution.getRea());
         entity.setShareCapital(institution.getShareCapital());
         entity.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
