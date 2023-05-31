@@ -104,7 +104,7 @@ class ManagementControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/management/external/institutions/{externalId}", "42");
         MockMvcBuilders.standaloneSetup(managementController)
@@ -176,7 +176,7 @@ class ManagementControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/management/institutions/{id}", "42");
         MockMvcBuilders.standaloneSetup(managementController)
                 .build()
@@ -250,7 +250,7 @@ class ManagementControllerTest {
         institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?",
-                "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         when(institutionService.findInstitutionsByProductId(any())).thenReturn(institutionList);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/product/{productId}", "42");
@@ -427,7 +427,7 @@ class ManagementControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/management/external/institutions/{externalId}", "42");
         MockMvcBuilders.standaloneSetup(managementController)
@@ -483,7 +483,7 @@ class ManagementControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/management/institutions/{id}", "42");
         MockMvcBuilders.standaloneSetup(managementController)
                 .build()
@@ -557,7 +557,7 @@ class ManagementControllerTest {
         institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?",
-                "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         when(institutionService.findInstitutionsByProductId(any())).thenReturn(institutionList);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/external/institutions/product/{productId}", "42");

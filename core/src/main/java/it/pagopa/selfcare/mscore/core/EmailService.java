@@ -42,8 +42,8 @@ public class EmailService {
         this.mailTemplateConfig = mailTemplateConfig;
     }
 
-    public void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName) {
-        emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, "simpleMail", templateParameters, fileName);
+    public void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName, String productId) {
+        emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, productId, templateParameters, fileName);
     }
 
     public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean isApproved, InstitutionType institutionType) {

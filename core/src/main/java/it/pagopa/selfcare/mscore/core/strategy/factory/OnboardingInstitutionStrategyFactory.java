@@ -188,7 +188,7 @@ public class OnboardingInstitutionStrategyFactory {
 
                     File logoFile = contractService.getLogoFile();
 
-                    emailService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, EmailService.PAGOPA_LOGO_FILENAME);
+                    emailService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, EmailService.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductId());
                 }
 
                 //[TODO https://pagopa.atlassian.net/wiki/spaces/SCP/pages/710901785/RFC+Proposta+per+gestione+asincrona+degli+eventi]
