@@ -2,26 +2,35 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.api.GeoTaxonomiesConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
+import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
+import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.*;
+import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
@@ -33,20 +42,39 @@ import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_D
 public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionConnector institutionConnector;
+    private final TokenConnector tokenConnector;
+    private final UserConnector userConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-    private final GeoTaxonomiesConnector geoTaxonomiesConnector;
     private final UserService userService;
     private final CoreConfig coreConfig;
+    private final ContractService contractService;
+
+    private final InstitutionMapper institutionMapper;
+
+    private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
-                                  GeoTaxonomiesConnector geoTaxonomiesConnector,
-                                  UserService userService, CoreConfig coreConfig) {
+                                  UserService userService, CoreConfig coreConfig,
+                                  TokenConnector tokenConnector,
+                                  UserConnector userConnector,
+                                  ContractService contractService,
+                                  InstitutionMapper institutionMapper,
+                                  CreateInstitutionStrategyFactory createInstitutionStrategyFactory) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
-        this.geoTaxonomiesConnector = geoTaxonomiesConnector;
         this.userService = userService;
         this.coreConfig = coreConfig;
+        this.tokenConnector = tokenConnector;
+        this.userConnector = userConnector;
+        this.contractService = contractService;
+        this.institutionMapper = institutionMapper;
+        this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
+    }
+
+    @Override
+    public List<Onboarding> getOnboardingInstitutionByProductId(String institutionId, String productId) {
+        return institutionConnector.findOnboardingByIdAndProductId(institutionId, productId);
     }
 
     @Override
@@ -74,26 +102,35 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public List<Institution> getInstitutions(String taxCode, String subunitCode) {
+        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+    }
+
+
+    @Override
+    public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
+        return createInstitutionStrategyFactory.createInstitutionStrategy(subunitType)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(taxCode)
+                        .subunitCode(subunitCode)
+                        .subunitType(subunitType)
+                        .build());
+    }
+    @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
 
         InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(externalId);
+
         log.debug("institution from proxy: {}", institutionProxyInfo);
         log.info("getInstitution {}", institutionProxyInfo.getId());
         CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
         log.info("category from proxy: {}", categoryProxyInfo);
 
-        Institution newInstitution = new Institution();
+        Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
+
         newInstitution.setExternalId(externalId);
         newInstitution.setOrigin(Origin.IPA.getValue());
-        newInstitution.setOriginId(institutionProxyInfo.getOriginId());
-        newInstitution.setTaxCode(institutionProxyInfo.getTaxCode());
-        newInstitution.setAddress(institutionProxyInfo.getAddress());
-        newInstitution.setZipCode(institutionProxyInfo.getZipCode());
-
-        newInstitution.setDescription(institutionProxyInfo.getDescription());
-        newInstitution.setDigitalAddress(institutionProxyInfo.getDigitalAddress());
-
         newInstitution.setCreatedAt(OffsetDateTime.now());
 
         Attributes attributes = new Attributes();
@@ -101,9 +138,9 @@ public class InstitutionServiceImpl implements InstitutionService {
         attributes.setCode(categoryProxyInfo.getCode());
         attributes.setDescription(categoryProxyInfo.getName());
         newInstitution.setAttributes(List.of(attributes));
-        try{
+        try {
             return institutionConnector.save(newInstitution);
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
     }
@@ -133,8 +170,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
 
         //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
-        if (existsInRegistry){
-            if(coreConfig.isInfoCamereEnable()) {
+        if (existsInRegistry) {
+            if (coreConfig.isInfoCamereEnable()) {
                 List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
                 institutionByLegal.stream()
                         .filter(i -> taxId.equalsIgnoreCase(i.getBusinessTaxId()))
@@ -151,7 +188,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 }
             }
             newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
-        }else{
+        } else {
             newInstitution.setOrigin(Origin.ADE.getValue());
         }
         return institutionConnector.save(newInstitution);
@@ -190,7 +227,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution retrieveInstitutionProduct(String externalId, String productId) {
-        return institutionConnector.findInstitutionProduct(externalId, productId);
+        return institutionConnector.findByExternalIdAndProductId(externalId, productId);
     }
 
     @Override
@@ -210,34 +247,32 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public GeographicTaxonomies retrieveGeoTaxonomies(String code) {
-        return geoTaxonomiesConnector.getExtByCode(code);
+        return partyRegistryProxyConnector.getExtByCode(code);
     }
 
     @Override
     public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
         if (userService.checkIfAdmin(userId, institutionId)) {
-            List<InstitutionGeographicTaxonomies> geographicTaxonomies = institutionUpdate.getGeographicTaxonomies()
-                    .stream()
-                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription())).collect(Collectors.toList());
-            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, null);
+            List<InstitutionGeographicTaxonomies> geographicTaxonomies = retrieveGeographicTaxonomies(institutionUpdate);
+            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
         } else {
             throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
         }
     }
 
-    @Override
-    public Institution updateInstitutionDescription(String institutionId, String description, String userId) {
-        if (userService.checkIfAdmin(userId, institutionId)) {
-            return institutionConnector.findAndUpdate(institutionId, null, null, description);
-        } else {
-            throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
+    private List<InstitutionGeographicTaxonomies> retrieveGeographicTaxonomies(InstitutionUpdate institutionUpdate) {
+        if (institutionUpdate.getGeographicTaxonomies() != null) {
+            return institutionUpdate.getGeographicTaxonomies()
+                    .stream()
+                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription())).collect(Collectors.toList());
         }
+        return Collections.emptyList();
     }
 
     @Override
     public List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId) {
-        List<String> institutionsExternalId = institutionConnector.findByExternalIdAndProductId(validInstitutionList, productId);
+        List<String> institutionsExternalId = institutionConnector.findByExternalIdsAndProductId(validInstitutionList, productId);
         validInstitutionList.removeIf(validInstitution -> institutionsExternalId.contains(validInstitution.getId()));
         return validInstitutionList;
     }
@@ -292,6 +327,27 @@ public class InstitutionServiceImpl implements InstitutionService {
         throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
     }
 
+    @Override
+    public void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt) {
+        log.trace("updateCreatedAt start");
+        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, productId, createdAt);
+        Assert.hasText(institutionId, "An institution ID is required.");
+        Assert.hasText(productId, "A product ID is required.");
+        Assert.notNull(createdAt, "A createdAt date is required.");
+
+        Institution updatedInstitution = institutionConnector.updateOnboardedProductCreatedAt(institutionId, productId, createdAt);
+        String tokenId = updatedInstitution.getOnboarding().stream()
+                .filter(onboarding -> onboarding.getProductId().equals(productId))
+                .findFirst().get().getTokenId();
+        Token updatedToken = tokenConnector.updateTokenCreatedAt(tokenId, createdAt);
+        List<String> usersId = updatedToken.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
+        userConnector.updateUserBindingCreatedAt(institutionId, productId, usersId, createdAt);
+
+        contractService.sendDataLakeNotification(updatedInstitution, updatedToken, QueueEvent.UPDATE);
+
+        log.trace("updateCreatedAt end");
+    }
+
     public void checkIfAlreadyExists(String externalId) {
         log.info("START - check institution {} already exists", externalId);
         Optional<Institution> opt = institutionConnector.findByExternalId(externalId);
@@ -300,6 +356,15 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
+
+    private void checkIfAlreadyExists(String taxCode, String subunitCode) {
+        /* check if institution exists */
+        List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+        if(!institutions.isEmpty())
+            throw new ResourceConflictException(String
+                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
+                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
+    }
     private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipInfo> list = new ArrayList<>();
         for (OnboardedUser onboardedUser : institutionRelationships) {
@@ -310,7 +375,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         return list;
     }
 
-    protected List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
+    @Override
+    public List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         if (institution != null) {
             if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {

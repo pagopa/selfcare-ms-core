@@ -3,39 +3,30 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -79,6 +70,32 @@ public class OnboardingController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+
+    /**
+     * The function verify onboarding status of given product and subunit of institution
+     *
+     * @param taxCode String
+     * @param subunitCode String
+     * @param productId  String
+     * @return no content
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
+    @RequestMapping(method = {RequestMethod.HEAD}, value = "/")
+    public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
+                                                     @RequestParam(value = "taxCode") String taxCode,
+                                                     @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
+                                                     @RequestParam(value = "subunitCode", required = false) String subunitCode,
+                                                     @ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                     @RequestParam(value = "productId") String productId) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
+        onboardingService.verifyOnboardingInfoSubunit(taxCode, subunitCode, productId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     /**
      * The function return onboardingInfo
      *
@@ -104,7 +121,9 @@ public class OnboardingController {
         CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
         String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
         List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, institutionExternalId, states, userId);
-        return ResponseEntity.ok().body(OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList));
+        OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
+        log.debug("onboardingInfo result = {}", onboardingInfoResponse);
+        return ResponseEntity.ok().body(onboardingInfoResponse);
     }
 
 
@@ -129,6 +148,29 @@ public class OnboardingController {
     }
 
     /**
+     * The function persist onboarding data without contract
+     *
+     * @param request OnboardingInstitutionRequest
+     * @return no content
+     * <p>
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.onboarding.institution.complete}", notes = "${swagger.mscore.onboarding.institution.complete}")
+    @PostMapping(value = "/institution/complete")
+    public ResponseEntity<Void> onboardingInstitutionComplete(@RequestBody @Valid OnboardingInstitutionRequest request,
+                                                      Authentication authentication) {
+        log.trace("onboardingInstitutionComplete start");
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "onboardingInstitutionComplete request = {}", request);
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
+        onboardingService.onboardingInstitutionComplete(OnboardingMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
+        log.trace("onboardingInstitutionComplete end");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    /**
      * The function complete onboarding request
      *
      * @param tokenId String
@@ -144,9 +186,12 @@ public class OnboardingController {
     public ResponseEntity<Void> completeOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
                                                    @PathVariable(value = "tokenId") String tokenId,
                                                    @RequestPart MultipartFile contract) {
+        log.trace("completeOnboarding start");
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding tokenId = {}, contract = {}", tokenId, contract);
         CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
         onboardingService.completeOboarding(token, contract);
+        log.trace("completeOnboarding end");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

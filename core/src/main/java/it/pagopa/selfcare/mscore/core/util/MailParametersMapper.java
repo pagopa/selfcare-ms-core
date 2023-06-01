@@ -49,10 +49,6 @@ public class MailParametersMapper {
         return map;
     }
 
-    public String getOnboardingPath() {
-        return mailTemplateConfig.getPath();
-    }
-
     public String getOnboardingNotificationPath() {
         return mailTemplateConfig.getNotificationPath();
     }

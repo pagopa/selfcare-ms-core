@@ -79,6 +79,8 @@ public class InstitutionMapper {
         entity.setAddress(institution.getAddress());
         entity.setZipCode(institution.getZipCode());
         entity.setTaxCode(institution.getTaxCode());
+        entity.setSubunitType(institution.getSubunitType());
+        entity.setSubunitCode(institution.getSubunitCode());
         entity.setRea(institution.getRea());
         entity.setShareCapital(institution.getShareCapital());
         entity.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
@@ -256,7 +258,7 @@ public class InstitutionMapper {
                 entity.setDesc(geographicTaxonomies.getDesc());
                 return entity;
             }).collect(Collectors.toList());
-            update.addToSet(InstitutionEntity.Fields.geographicTaxonomies.name()).each(list);
+            update.set(InstitutionEntity.Fields.geographicTaxonomies.name(), list);
         }
     }
 
@@ -309,5 +311,9 @@ public class InstitutionMapper {
 
     private static String constructPaymentInnerField(String name) {
         return InstitutionUpdate.Fields.businessRegisterPlace.name() + "." + name;
+    }
+
+    public static List<Institution> convertToInstitutionList(List<InstitutionEntity> institutions) {
+        return institutions.stream().map(InstitutionMapper::convertToInstitution).collect(Collectors.toList());
     }
 }

@@ -8,8 +8,10 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toDataProtectionOfficer;
@@ -34,6 +36,12 @@ public class OnboardingMapper {
             onboardingRequest.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionRequest.getUsers()));
         if (onboardingInstitutionRequest.getInstitutionUpdate() != null)
             onboardingRequest.setInstitutionUpdate(toInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate()));
+
+        onboardingRequest.setContractFilePath(Objects.nonNull(onboardingInstitutionRequest.getContractImported())
+            ? onboardingInstitutionRequest.getContractImported().getFilePath() : null);
+
+        onboardingRequest.setContractCreatedAt(Objects.nonNull(onboardingInstitutionRequest.getContractImported())
+            ? onboardingInstitutionRequest.getContractImported().getCreatedAt() : null);
 
         return onboardingRequest;
     }
@@ -80,18 +88,15 @@ public class OnboardingMapper {
         OnboardingInfoResponse response = new OnboardingInfoResponse();
         response.setUserId(userId);
         List<OnboardedInstitutionResponse> institutionResponseList = new ArrayList<>();
-        if(!onboardingInfos.isEmpty()) {
-            for (OnboardingInfo onboardingInfo : onboardingInfos) {
-                Institution institution = onboardingInfo.getInstitution();
-                List<Onboarding> onboardingList = institution.getOnboarding();
-                for (Onboarding onboarding : onboardingList) {
-                    OnboardedProduct product = onboardingInfo.getOnboardedProducts().get(onboarding.getProductId());
-                    if (product != null) {
-                        institutionResponseList.add(constructOnboardedInstitutionResponse(institution, product, onboarding));
-                    }
-                }
-            }
-        }
+        onboardingInfos.forEach(onboardingInfo ->
+                onboardingInfo.getInstitution().getOnboarding().stream()
+                        .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(onboardingInfo.getBinding().getProducts().getProductId())
+                                && onboarding.getStatus().equals(onboardingInfo.getBinding().getProducts().getStatus()))
+                        .findFirst()
+                        .ifPresent(onboarding -> institutionResponseList.add(constructOnboardedInstitutionResponse(onboardingInfo.getInstitution(),
+                                onboardingInfo.getBinding().getProducts(),
+                                onboarding)))
+        );
         response.setInstitutions(institutionResponseList);
         return response;
     }
@@ -130,6 +135,7 @@ public class OnboardingMapper {
         institutionResponse.setDataProtectionOfficer(InstitutionMapper.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
         return institutionResponse;
     }
+
     public static OnboardingOperatorsRequest toOnboardingOperatorRequest(OnboardingInstitutionOperatorsRequest onboardingInstitutionOperatorsRequest) {
         OnboardingOperatorsRequest request = new OnboardingOperatorsRequest();
         request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());

@@ -2,20 +2,23 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import feign.FeignException;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.Institutions;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapper;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapperImpl;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapper;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapperImpl;
+import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
+import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -31,6 +34,27 @@ class PartyRegistryProxyConnectorImplTest {
 
     @Mock
     private PartyRegistryProxyRestClient partyRegistryProxyRestClient;
+
+    @Spy
+    private AooMapper aooMapper = new AooMapperImpl();
+
+    @Spy
+    private UoMapper uoMapper = new UoMapperImpl();
+
+    private final static AooResponse aooResponse;
+    private final static UoResponse uoResponse;
+
+    static {
+        aooResponse = new AooResponse();
+        aooResponse.setCodAoo("codAoo");
+        aooResponse.setId("id");
+        aooResponse.setOrigin(Origin.IPA);
+
+        uoResponse = new UoResponse();
+        uoResponse.setCodiceUniUo("codiceUniUo");
+        uoResponse.setId("id");
+        uoResponse.setOrigin(Origin.IPA);
+    }
 
     /**
      * Method under test: {@link PartyRegistryProxyConnectorImpl#getInstitutionById(String)}
@@ -435,5 +459,69 @@ class PartyRegistryProxyConnectorImplTest {
         assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getInstitutionById("id"));
         verify(partyRegistryProxyRestClient).getInstitutionById(any());
     }
+
+
+    @Test
+    void testGetExtByCode() {
+        GeographicTaxonomiesResponse geographicTaxonomiesResponse = new GeographicTaxonomiesResponse();
+        geographicTaxonomiesResponse.setGeotaxId("Code");
+        geographicTaxonomiesResponse.setCountry("GB");
+        geographicTaxonomiesResponse.setCountryAbbreviation("GB");
+        geographicTaxonomiesResponse.setDescription("The characteristics of someone or something");
+        geographicTaxonomiesResponse.setEnable(true);
+        geographicTaxonomiesResponse.setIstatCode("");
+        geographicTaxonomiesResponse.setProvinceId("Province");
+        geographicTaxonomiesResponse.setProvinceAbbreviation("Province Abbreviation");
+        geographicTaxonomiesResponse.setRegionId("us-east-2");
+        when(partyRegistryProxyRestClient.getExtByCode(any())).thenReturn(geographicTaxonomiesResponse);
+        GeographicTaxonomies actualExtByCode = partyRegistryProxyConnectorImpl.getExtByCode("Code");
+        assertEquals("Code", actualExtByCode.getGeotaxId());
+        assertTrue(actualExtByCode.isEnable());
+        assertEquals("The characteristics of someone or something", actualExtByCode.getDescription());
+        verify(partyRegistryProxyRestClient).getExtByCode(any());
+    }
+
+    @Test
+    void testGetExtByCode2() {
+        GeographicTaxonomiesResponse geographicTaxonomiesResponse = new GeographicTaxonomiesResponse();
+        geographicTaxonomiesResponse.setGeotaxId("Code");
+        geographicTaxonomiesResponse.setCountry("GB");
+        geographicTaxonomiesResponse.setCountryAbbreviation("GB");
+        geographicTaxonomiesResponse.setDescription("The characteristics of someone or something");
+        geographicTaxonomiesResponse.setEnable(false);
+        geographicTaxonomiesResponse.setIstatCode("");
+        geographicTaxonomiesResponse.setProvinceId("Province");
+        geographicTaxonomiesResponse.setProvinceAbbreviation("Province Abbreviation");
+        geographicTaxonomiesResponse.setRegionId("us-east-2");
+        when(partyRegistryProxyRestClient.getExtByCode(any())).thenReturn(geographicTaxonomiesResponse);
+        GeographicTaxonomies actualExtByCode = partyRegistryProxyConnectorImpl.getExtByCode("Code");
+        assertEquals("Code", actualExtByCode.getGeotaxId());
+        assertFalse(actualExtByCode.isEnable());
+        assertEquals("The characteristics of someone or something", actualExtByCode.getDescription());
+        verify(partyRegistryProxyRestClient).getExtByCode(any());
+    }
+
+    @Test
+    void shouldGetAoo() {
+        when(partyRegistryProxyRestClient.getAooById(anyString()))
+                .thenReturn(aooResponse);
+
+        AreaOrganizzativaOmogenea aoo = partyRegistryProxyConnectorImpl.getAooById("example");
+        assertEquals(aoo.getCodAoo(), aooResponse.getCodAoo());
+        assertEquals(aoo.getId(), aooResponse.getId());
+        assertEquals(aoo.getOrigin(), aooResponse.getOrigin());
+    }
+
+    @Test
+    void shouldGetUo() {
+        when(partyRegistryProxyRestClient.getUoById(anyString()))
+                .thenReturn(uoResponse);
+
+        UnitaOrganizzativa uo = partyRegistryProxyConnectorImpl.getUoById("example");
+        assertEquals(uo.getCodiceUniUo(), uoResponse.getCodiceUniUo());
+        assertEquals(uo.getId(), uoResponse.getId());
+        assertEquals(uo.getOrigin(), uoResponse.getOrigin());
+    }
+
 }
 

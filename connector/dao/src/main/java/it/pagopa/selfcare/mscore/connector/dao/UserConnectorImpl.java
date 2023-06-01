@@ -3,15 +3,19 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserMapper;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -21,12 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
@@ -206,6 +205,35 @@ public class UserConnectorImpl implements UserConnector {
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true).returnNew(true);
         repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+    }
+
+    @Override
+    public List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> usersId, OffsetDateTime createdAt) {
+        List<OnboardedUser> updatedUsersBindings = new ArrayList<>();
+
+        usersId.forEach(userId -> {
+            Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
+
+            Update update = new Update();
+            update.set(constructQuery(CURRENT_USER_BINDING_REF, UserBindingEntity.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProductEntity.Fields.createdAt.name()), createdAt)
+                    .set(constructQuery(CURRENT_USER_BINDING_REF, UserBindingEntity.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProductEntity.Fields.updatedAt.name()), OffsetDateTime.now())
+                    .filterArray(Criteria.where(CURRENT_USER_BINDING + UserBindingEntity.Fields.institutionId.name()).is(institutionId))
+                    .filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProductEntity.Fields.productId.name()).is(productId));
+
+            Update updateUserEntityUpdatedAt = new Update();
+            updateUserEntityUpdatedAt.set(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+
+            FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+            repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+            updatedUsersBindings.add(UserMapper.toOnboardedUser(repository.findAndModify(query, updateUserEntityUpdatedAt, findAndModifyOptions, UserEntity.class)));
+        });
+
+        return updatedUsersBindings;
+    }
+
+    @Override
+    public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter){
+        return UserMapper.toUserInstitutionAggregation(repository.findUserInstitutionAggregation(filter, UserInstitutionAggregationEntity.class));
     }
 
     private Criteria constructElemMatch(String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> productRoles, List<String> products) {

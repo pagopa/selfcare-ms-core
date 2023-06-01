@@ -3,7 +3,9 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -24,5 +26,5 @@ public interface UserService {
 
     User retrieveUserFromUserRegistry(String userId, EnumSet<User.Fields> fields);
 
-    OnboardedUser createUser(String userId);
+    List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 }

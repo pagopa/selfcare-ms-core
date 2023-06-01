@@ -3,16 +3,13 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -61,7 +58,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<String> findByExternalIdAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
+    public List<String> findByExternalIdsAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
         List<String> externalIds = validInstitutionList.stream().map(ValidInstitution::getId).collect(Collectors.toList());
         Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId)
                 .and(InstitutionEntity.Fields.externalId.name()).in(externalIds));
@@ -102,22 +99,23 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomiesList, String description) {
+    public Institution findAndUpdate(String institutionId, Onboarding onboarding, List<InstitutionGeographicTaxonomies> geographicTaxonomiesList, InstitutionUpdate institutionUpdate) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
         Update update = new Update();
         update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
         if (onboarding != null) {
             update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
         }
-        if(description != null){
-            update.set(InstitutionEntity.Fields.description.name(), description);
+        if (institutionUpdate != null) {
+            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
+            map.forEach(update::set);
         }
         addGeographicTaxonomies(geographicTaxonomiesList, update);
-
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
+    //TODO[SELC-2286]: refactor new onboarding (onboarding != null) and updates on onboarding (state and token != null) cause conflicts
     @Override
     public Institution findAndUpdateInstitutionData(String institutionId, Token token, Onboarding onboarding, RelationshipState state) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
@@ -138,6 +136,25 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
             update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.contract.name()), token.getContractSigned());
         }
         InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
+        if (institutionUpdate != null) {
+            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
+            map.forEach(update::set);
+            addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
+        }
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
+    }
+
+
+
+    @Override
+    public Institution findAndUpdateInstitutionDataWithNewOnboarding(String institutionId, InstitutionUpdate institutionUpdate, Onboarding onboarding) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+        Update update = new Update();
+        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
+
         if (institutionUpdate != null) {
             Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
             map.forEach(update::set);
@@ -173,7 +190,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution findInstitutionProduct(String externalId, String productId) {
+    public Institution findByExternalIdAndProductId(String externalId, String productId) {
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.externalId.name()).is(externalId)
                 .and(constructQuery(Onboarding.Fields.productId.name())).is(productId));
 
@@ -181,6 +198,19 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .map(InstitutionMapper::convertToInstitution)
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_BILLING_ERROR.getMessage(), externalId, productId),
                         GET_INSTITUTION_BILLING_ERROR.getCode()));
+    }
+
+    @Override
+    public List<Onboarding> findOnboardingByIdAndProductId(String institutionId, String productId) {
+
+        Optional<InstitutionEntity> optionalInstitution =  Objects.nonNull(productId)
+            ? Optional
+                .ofNullable(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId))
+            : repository.findById(institutionId);
+        return optionalInstitution
+                .map(InstitutionMapper::convertToInstitution)
+                .map(Institution::getOnboarding)
+                .orElse(List.of());
     }
 
     @Override
@@ -193,6 +223,32 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
+    }
+
+    @Override
+    public List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode) {
+        return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode)
+                                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
+                        ),
+                        InstitutionEntity.class).stream()
+                .map(InstitutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> optSubunitCode,
+                                                                        Optional<String> optProductId, List<RelationshipState> validRelationshipStates) {
+
+        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode);
+        optSubunitCode.ifPresent(code -> criteriaInstitution.and(InstitutionEntity.Fields.subunitCode.name()).is(code));
+
+        Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(validRelationshipStates);
+        optProductId.ifPresent(productId -> criteriaOnboarding.and(Onboarding.Fields.productId.name()).is(productId));
+
+        return repository.exists(Query.query(criteriaInstitution)
+                                .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                                        .elemMatch(criteriaOnboarding))
+                        , InstitutionEntity.class);
     }
 
     @Override
@@ -215,11 +271,28 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Institution updateOnboardedProductCreatedAt(String institutionId, String productId, OffsetDateTime createdAt) {
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+
+        Update update = new Update();
+        update.set(constructQuery(CURRENT_ONBOARDING_REFER, OnboardingEntity.Fields.createdAt.name()), createdAt)
+                .set(constructQuery(CURRENT_ONBOARDING_REFER, OnboardingEntity.Fields.updatedAt.name()), OffsetDateTime.now())
+                .filterArray(Criteria.where(CURRENT_ONBOARDING + OnboardingEntity.Fields.productId.name()).is(productId));
+
+        Update updateInstitutionEntityUpdatedAt = new Update();
+        updateInstitutionEntityUpdatedAt.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
+        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, updateInstitutionEntityUpdatedAt, findAndModifyOptions, InstitutionEntity.class));
+    }
+
 
     private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {
         String geoQuery = InstitutionEntity.Fields.geographicTaxonomies.name()
                 + "." + GeoTaxonomyEntity.Fields.code.name();
-        switch (searchMode){
+        switch (searchMode) {
             case ALL:
                 return Query.query(Criteria.where(geoQuery).all(geo));
             case ANY:
@@ -228,7 +301,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 return Query.query(Criteria.where(geoQuery).all(geo)
                         .and(InstitutionEntity.Fields.geographicTaxonomies.name()).size(geo.size()));
             default:
-                throw new InvalidRequestException("Invalid search mode","0000");
+                throw new InvalidRequestException("Invalid search mode", "0000");
         }
     }
 

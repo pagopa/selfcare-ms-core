@@ -16,6 +16,7 @@ import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
@@ -23,11 +24,15 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -38,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
+import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -55,10 +61,13 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
 import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 
 @Slf4j
@@ -75,6 +84,7 @@ public class ContractService {
     private final ObjectMapper mapper;
 
     private final UserRegistryConnector userRegistryConnector;
+    private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     public ContractService(PagoPaSignatureConfig pagoPaSignatureConfig,
                            FileStorageConnector fileStorageConnector,
@@ -83,7 +93,8 @@ public class ContractService {
                            SignatureService signatureService,
                            KafkaTemplate<String, String> kafkaTemplate,
                            KafkaPropertiesConfig kafkaPropertiesConfig,
-                           UserRegistryConnector userRegistryConnector) {
+                           UserRegistryConnector userRegistryConnector,
+                           PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
         this.fileStorageConnector = fileStorageConnector;
@@ -96,11 +107,12 @@ public class ContractService {
         simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {
             @Override
             public void serialize(OffsetDateTime offsetDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                jsonGenerator.writeString(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(offsetDateTime));
+                jsonGenerator.writeString(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(offsetDateTime));
             }
         });
         mapper.registerModule(simpleModule);
         this.userRegistryConnector = userRegistryConnector;
+        this.partyRegistryProxyConnector = partyRegistryProxyConnector;
     }
 
     public File createContractPDF(String contractTemplate, User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
@@ -113,8 +125,11 @@ public class ContractService {
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
             } else if ("prod-io".equalsIgnoreCase(request.getProductId())
-                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())) {
+                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())
+                    || "prod-io-sign".equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
+            } else if ("prod-pn".equalsIgnoreCase(request.getProductId())){
+                setupProdPNData(data, institution, request);
             }
             log.debug("data Map for PDF: {}", data);
             getPDFAsFile(files, contractTemplate, data);
@@ -124,6 +139,7 @@ public class ContractService {
             throw new InvalidRequestException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
         }
     }
+
 
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
         log.info("START - signContract for pdf: {}", pdf.getName());
@@ -218,9 +234,9 @@ public class ContractService {
         }
     }
 
-    public void sendDataLakeNotification(Institution institution, Token token) {
+    public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
         if (institution != null) {
-            NotificationToSend notification = toNotificationToSend(institution, token);
+            NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
@@ -231,17 +247,28 @@ public class ContractService {
         }
     }
 
-    private NotificationToSend toNotificationToSend(Institution institution, Token token) {
+    private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
-        notification.setId(token.getId());
+        if (queueEvent.equals(QueueEvent.ADD)) {
+            notification.setId(token.getId());
+            notification.setState(RelationshipState.ACTIVE);
+        } else {
+            notification.setId(UUID.randomUUID().toString());
+            notification.setState(token.getStatus());
+        }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
-        notification.setState(RelationshipState.ACTIVE);
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(token.getUpdatedAt());
-        notification.setClosedAt(token.getClosedAt());
+        if (token.getStatus().equals(RelationshipState.DELETED)) {
+            notification.setClosedAt(token.getClosedAt());
+        }
+        notification.setNotificationType(queueEvent);
+        notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
+        notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
+
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
@@ -251,8 +278,6 @@ public class ContractService {
             notification.setBilling(onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling());
             notification.setInstitution(toInstitutionToNotify(institution));
         }
-
-        notification.setUsers(token.getUsers().stream().map(tokenUser -> toUserToNotify(tokenUser, institution.getId())).collect(Collectors.toList()));
 
         return notification;
     }
@@ -268,6 +293,13 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        try {
+            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
+            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+        } catch (MsCoreException | ResourceNotFoundException e) {
+            log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+            toNotify.setIstatCode(null);
+        }
         return toNotify;
     }
 
@@ -280,6 +312,20 @@ public class ContractService {
         userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
         userToNotify.setRole(tokenUser.getRole());
         return userToNotify;
+    }
+
+    private String retrieveFileName(String tokenContractSigned, String tokenId) {
+
+        if (tokenContractSigned == null) {
+            return "";
+        }
+
+        String[] tokenContractSignedSplit = tokenContractSigned.split(tokenId.concat("/"));
+        if (tokenContractSignedSplit.length > 1) {
+            return tokenContractSignedSplit[1];
+        }
+
+        return "";
     }
 
     private void sendNotification(String message, String tokenId) {

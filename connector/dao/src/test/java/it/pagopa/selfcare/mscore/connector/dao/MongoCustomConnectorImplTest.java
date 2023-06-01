@@ -1,5 +1,8 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -7,6 +10,8 @@ import org.mockito.Mock;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
@@ -17,6 +22,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -61,11 +68,46 @@ class MongoCustomConnectorImplTest {
         Object a = new Object();
         List<Object> list = new ArrayList<>();
         list.add(a);
-        when(mongoOperations.findAndModify(any(),any(),any(), (Class<Object>) any())).thenReturn(list);
+        when(mongoOperations.findAndModify(any(), any(), any(), (Class<Object>) any())).thenReturn(list);
         Query query = new Query();
         UpdateDefinition updateDefinition = new Update();
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         assertNotNull(mongoCustomConnector.findAndModify(query, updateDefinition, findAndModifyOptions, Object.class));
+    }
+
+    @Test
+    void findUserAndInstitution() {
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getUniqueMappedResult()).thenReturn(new Object());
+        when(mongoOperations.aggregate((Aggregation) any(), anyString(), any())).thenReturn(results);
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("userId");
+        Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation(filter, UserInstitutionAggregation.class));
+
+    }
+
+    @Test
+    void findUserAndInstitutionWithInstitutionId() {
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getUniqueMappedResult()).thenReturn(new Object());
+        when(mongoOperations.aggregate((Aggregation) any(), anyString(), any())).thenReturn(results);
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("userId");
+        filter.setInstitutionId("institutionId");
+        Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation(filter, UserInstitutionAggregation.class));
+
+    }
+
+    @Test
+    void findUserAndInstitutionWithExternalId() {
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getUniqueMappedResult()).thenReturn(new Object());
+        when(mongoOperations.aggregate((Aggregation) any(), anyString(), any())).thenReturn(results);
+        UserInstitutionFilter filter = new UserInstitutionFilter();
+        filter.setUserId("userId");
+        filter.setExternalId("externalId");
+        Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation(filter, UserInstitutionAggregation.class));
+
     }
 
 }

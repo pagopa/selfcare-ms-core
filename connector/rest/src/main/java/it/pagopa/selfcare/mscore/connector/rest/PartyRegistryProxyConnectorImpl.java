@@ -1,21 +1,21 @@
 package it.pagopa.selfcare.mscore.connector.rest;
 
 import feign.FeignException;
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.LegalFilter;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapper;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapper;
+import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
+import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +27,13 @@ import static it.pagopa.selfcare.mscore.constant.CustomError.CREATE_INSTITUTION_
 public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnector {
 
     private final PartyRegistryProxyRestClient restClient;
+    private final AooMapper aooMapper;
+    private final UoMapper uoMapper;
 
-    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient) {
+    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper) {
         this.restClient = restClient;
+        this.aooMapper = aooMapper;
+        this.uoMapper = uoMapper;
     }
 
     @Override
@@ -110,6 +114,7 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
         info.setAddress(response.getAddress());
         info.setZipCode(response.getZipCode());
         info.setOrigin(response.getOrigin());
+        info.setIstatCode(response.getIstatCode());
         return info;
     }
 
@@ -120,5 +125,46 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
         info.setKind(response.getKind());
         info.setOrigin(response.getOrigin());
         return info;
+    }
+
+    @Override
+    public GeographicTaxonomies getExtByCode(String code) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getExtByCode code = {}", code);
+        Assert.hasText(code, "Code is required");
+        GeographicTaxonomiesResponse result = restClient.getExtByCode(code);
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getExtByCode result = {}", result);
+        return toGeoTaxonomies(result);
+    }
+
+    @Override
+    public AreaOrganizzativaOmogenea getAooById(String aooId) {
+        log.debug("getAooById id = {}", aooId);
+        Assert.hasText(aooId, "Code is required");
+        AooResponse result = restClient.getAooById(aooId);
+        log.debug("getAooById id = {}", aooId);
+        return aooMapper.toEntity(result);
+    }
+
+    @Override
+    public UnitaOrganizzativa getUoById(String uoId) {
+        log.debug("getUoById id = {}", uoId);
+        Assert.hasText(uoId, "Code is required");
+        UoResponse result = restClient.getUoById(uoId);
+        log.debug("getUoById id = {}", uoId);
+        return uoMapper.toEntity(result);
+    }
+
+    private GeographicTaxonomies toGeoTaxonomies(GeographicTaxonomiesResponse result) {
+        GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+        geographicTaxonomies.setDescription(result.getDescription());
+        geographicTaxonomies.setGeotaxId(result.getGeotaxId());
+        geographicTaxonomies.setEnable(result.isEnable());
+        geographicTaxonomies.setRegionId(result.getRegionId());
+        geographicTaxonomies.setProvinceId(result.getProvinceId());
+        geographicTaxonomies.setProvinceAbbreviation(result.getProvinceAbbreviation());
+        geographicTaxonomies.setCountry(result.getCountry());
+        geographicTaxonomies.setCountryAbbreviation(result.getCountryAbbreviation());
+        geographicTaxonomies.setIstatCode(result.getIstatCode());
+        return geographicTaxonomies;
     }
 }

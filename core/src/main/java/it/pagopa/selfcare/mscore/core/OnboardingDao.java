@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -14,18 +15,15 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INVALID_STATUS_CHANGE;
@@ -62,9 +60,64 @@ public class OnboardingDao {
                                       String digest) {
         Token token = createToken(request, institution, digest, coreConfig.getOnboardingExpiringDate(), geographicTaxonomies);
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
-        Onboarding onboarding = updateInstitution(request, institution, geographicTaxonomies, token);
+        Onboarding onboarding = updateInstitution(request, institution, null, token);
         Map<String, OnboardedProduct> productMap = createUsers(toUpdate, toDelete, request, institution, token, onboarding);
         return new OnboardingRollback(token, onboarding, productMap, null);
+    }
+
+
+
+    public OnboardingRollback persistComplete(List<String> toUpdate,
+                                      List<String> toDelete,
+                                      OnboardingRequest request,
+                                      Institution institution,
+                                      List<InstitutionGeographicTaxonomies> geographicTaxonomies,
+                                      String digest) {
+
+        log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
+
+        OffsetDateTime createdAt = Objects.nonNull(request.getContractCreatedAt()) ? request.getContractCreatedAt() : OffsetDateTime.now();
+
+        Token token = TokenUtils.toToken(request, institution, digest, null);
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setContractSigned(request.getContractFilePath());
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        token.setCreatedAt(createdAt);
+        token = tokenConnector.save(token, geographicTaxonomies);
+
+        log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());
+
+        Onboarding onboarding = constructOnboarding(request, institution);
+        onboarding.setTokenId(token.getId());
+        onboarding.setContract(request.getContractFilePath());
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        onboarding.setCreatedAt(createdAt);
+        Institution institutionUpdated = null;
+
+        try {
+            log.debug("add onboarding {} to institution {}", onboarding, institution.getExternalId());
+            institutionUpdated = institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(institution.getId(),
+                    token.getInstitutionUpdate(), onboarding);
+        } catch (Exception e) {
+            log.warn("can not update institution {}", institution.getId(), e);
+            rollbackFirstStep(token, institution.getId(), onboarding);
+        }
+
+        List<String> usersId = request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList());
+        Map<String, OnboardedProduct> productMap = new HashMap<>();
+        try {
+
+            for (UserToOnboard userToOnboard : request.getUsers()) {
+                createOrAddOnboardedProductUser(toUpdate, userToOnboard, institution, request, token.getId(), createdAt)
+                        .ifPresent(onboardedProduct -> productMap.put(userToOnboard.getId(), onboardedProduct));
+            }
+            log.debug("users to update: {}", toUpdate);
+        } catch (Exception e) {
+            toDelete.addAll(usersId.stream().filter(id -> !toUpdate.contains(id)).collect(Collectors.toList()));
+            rollbackSecondStep(toUpdate, toDelete, institution.getId(), token, onboarding, productMap);
+        }
+
+        return new OnboardingRollback(token, onboarding, productMap, institutionUpdated);
     }
 
     public OnboardingRollback persistLegals(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, String digest) {
@@ -74,6 +127,8 @@ public class OnboardingDao {
     }
 
     public OnboardingUpdateRollback persistForUpdate(Token token, Institution institution, RelationshipState toState, String digest) {
+        log.trace("persistForUpdate start");
+        log.debug("persistForUpdate token = {}, institution = {}, toState = {}, digest = {}", token, institution, toState, digest);
         OnboardingUpdateRollback rollback = new OnboardingUpdateRollback();
         if (isValidStateChangeForToken(token.getStatus(), toState)) {
             rollback.setToken(updateToken(token, toState, digest));
@@ -83,6 +138,7 @@ public class OnboardingDao {
                 rollback.setUpdatedInstitution(updateInstitutionState(institution, token, toState));
             }
             rollback.setUserList(updateUsersState(institution, token, toState));
+            log.trace("persistForUpdate end");
             return rollback;
         } else {
             throw new InvalidRequestException(String.format(INVALID_STATUS_CHANGE.getMessage(), token.getStatus(), toState), INVALID_STATUS_CHANGE.getCode());
@@ -161,7 +217,7 @@ public class OnboardingDao {
     }
 
     private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request);
+        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
         UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
         userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
@@ -184,7 +240,7 @@ public class OnboardingDao {
         Map<String, OnboardedProduct> productMap = new HashMap<>();
         try {
             for (UserToOnboard userToOnboard : request.getUsers()) {
-                updateOrCreateUser(toUpdate, userToOnboard, institution, request, token.getId(), productMap);
+                updateOrCreateUserToOnboard(toUpdate, userToOnboard, institution, request, token.getId(), productMap);
             }
             log.debug("users to update: {}", toUpdate);
         } catch (Exception e) {
@@ -194,7 +250,7 @@ public class OnboardingDao {
         return productMap;
     }
 
-    private void updateOrCreateUser(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, Map<String, OnboardedProduct> productMap) {
+    private void updateOrCreateUserToOnboard(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, Map<String, OnboardedProduct> productMap) {
         try {
             OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
             OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institution, request, tokenId);
@@ -202,6 +258,25 @@ public class OnboardingDao {
         } catch (ResourceNotFoundException e) {
             createNewUser(userToOnboard, institution, request, tokenId);
         }
+    }
+
+    private Optional<OnboardedProduct> createOrAddOnboardedProductUser(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, OffsetDateTime createdAt) {
+        try {
+            OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
+
+            OnboardedProduct product = constructProduct(userToOnboard, request, institution);
+            product.setTokenId(tokenId);
+            product.setStatus(RelationshipState.ACTIVE);
+            product.setCreatedAt(createdAt);
+            UserBinding binding = new UserBinding(institution.getId(), List.of(product));
+            userConnector.findAndUpdate(onboardedUser, userToOnboard.getId(), institution.getId(), product, binding);
+
+            return Optional.of(product);
+        } catch (ResourceNotFoundException e) {
+            createNewUser(userToOnboard, institution, request, tokenId);
+        }
+
+        return Optional.empty();
     }
 
     public List<RelationshipInfo> onboardOperator(OnboardingOperatorsRequest request, Institution institution) {
@@ -239,7 +314,7 @@ public class OnboardingDao {
     }
 
     private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request);
+        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
         UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
         userConnector.findAndCreate(user.getId(), binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));

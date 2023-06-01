@@ -6,13 +6,18 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -27,6 +32,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,11 +44,39 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ContextConfiguration(classes = {InstitutionController.class})
 @ExtendWith(MockitoExtension.class)
 class InstitutionControllerTest {
+
+    private static final String BASE_URL = "/institutions";
+
     @InjectMocks
     private InstitutionController institutionController;
 
     @Mock
     private InstitutionService institutionService;
+
+    @Spy
+    private OnboardingResourceMapper onboardingResourceMapper = new OnboardingResourceMapperImpl();
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Test
+    void shouldGetOnboardingsInstitutionByProductId() throws Exception {
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("example");
+
+        when(institutionService.getOnboardingInstitutionByProductId(any(), any()))
+                .thenReturn(List.of(onboarding));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/{institutionId}/onboardings?productId{productId}", "42", onboarding.getProductId());
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"onboardings\":[{\"productId\":\"example\",\"tokenId\":null,\"status\":null,\"contract\":null,\"pricingPlan\":null,\"billing\":null,\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}]}"));
+    }
 
     @Test
     void getUserInstitutionRelationships() throws Exception {
@@ -110,7 +144,7 @@ class InstitutionControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
@@ -142,6 +176,49 @@ class InstitutionControllerTest {
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#createInstitutionByExternalId(String)}
+     */
+    @Test
+    void shouldCreateInstitutionFromIpa() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+
+        when(institutionService.createInstitutionFromIpa(any(), any(), any())).thenReturn(institution);
+
+        InstitutionFromIpaPost institutionFromIpaPost = new InstitutionFromIpaPost();
+        institutionFromIpaPost.setTaxCode("123456");
+        institutionFromIpaPost.setSubunitType(InstitutionPaSubunitType.AOO);
+        institutionFromIpaPost.setSubunitCode("1234");
+        String content = objectMapper.writeValueAsString(institutionFromIpaPost);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#createInstitutionByExternalId(String)}
+     */
+    @Test
+    void shouldThrowValidationExceptionWhenCreateInstitutionFromIpaWithoutTax() throws Exception {
+
+        String content = objectMapper.writeValueAsString(new InstitutionFromIpaPost());
+
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
     /**
@@ -235,7 +312,7 @@ class InstitutionControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/institutions/{externalId}", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
@@ -635,7 +712,7 @@ class InstitutionControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -945,7 +1022,7 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#updateInstitutionDescription(String, String, Authentication)}
+     * Method under test: {@link InstitutionController#updatePgInstitution(String, PgInstitutionPut, Authentication)} (String, PgInstitutionPut, Authentication)}
      */
     @Test
     void testUpdateInstitutionDescription() throws Exception {
@@ -954,9 +1031,13 @@ class InstitutionControllerTest {
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
 
-        when(institutionService.updateInstitutionDescription(any(), any(), any())).thenReturn(new Institution());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/42/description")
-                .param("description", "description")
+        PgInstitutionPut pgInstitutionPut = new PgInstitutionPut();
+        pgInstitutionPut.setDescription("desc");
+        pgInstitutionPut.setDigitalAddress("digitalAddress");
+        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/pg/42")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(pgInstitutionPut))
                 .principal(authentication);
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
@@ -1005,5 +1086,28 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#updateCreatedAt(String, String, java.time.OffsetDateTime)}
+     */
+    @Test
+    void updateCreatedAt() throws Exception {
+        // Given
+        String institutionIdMock = "institutionId";
+        String productIdMock = "productId";
+        String createdAtString = "2020-11-01T02:15:30+01:00";
+        OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
+                .param("createdAt", createdAtString);
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+        // Then
+        verify(institutionService, times(1))
+                .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+        verifyNoMoreInteractions(institutionService);
     }
 }

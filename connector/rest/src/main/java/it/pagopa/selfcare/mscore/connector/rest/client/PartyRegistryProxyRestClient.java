@@ -1,17 +1,10 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalRequest;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -33,4 +26,16 @@ public interface PartyRegistryProxyRestClient {
     @GetMapping(value = "${rest-client.party-registry-proxy.getLegalAddress.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     NationalRegistriesProfessionalAddress getLegalAddress(@RequestParam(value = "taxId") String taxId);
+
+    @GetMapping(value = "${rest-client.party-registry-proxy.geo-taxonomies.getByCode.path}", consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    GeographicTaxonomiesResponse getExtByCode(@PathVariable(value = "geotax_id") String code);
+
+    @GetMapping(value = "${rest-client.party-registry-proxy.aoo.getByCode.path}", consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    AooResponse getAooById(@PathVariable(value = "aooId") String aooId);
+
+    @GetMapping(value = "${rest-client.party-registry-proxy.uo.getByCode.path}", consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    UoResponse getUoById(@PathVariable(value = "uoId") String uoId);
 }

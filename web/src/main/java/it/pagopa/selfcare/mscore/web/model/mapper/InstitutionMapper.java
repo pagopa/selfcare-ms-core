@@ -114,6 +114,9 @@ public class InstitutionMapper {
                 productInfo.setId(productId);
                 productInfo.setCreatedAt(product.getCreatedAt());
                 productInfo.setRole(product.getProductRole());
+                if (product.getRole() != null) {
+                    institutionManagerResponse.setRole(product.getRole().name());
+                }
                 institutionManagerResponse.setProduct(productInfo);
                 institutionManagerResponse.setState(product.getStatus());
                 institutionManagerResponse.setCreatedAt(product.getCreatedAt());
@@ -145,10 +148,14 @@ public class InstitutionMapper {
         institutionManagerResponse.setInstitutionUpdate(institutionUpdate);
     }
 
-    public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institution) {
+    public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institutionPut, PgInstitutionPut pgInstitution) {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        if (institution.getGeographicTaxonomyCodes() != null) {
-            institutionUpdate.setGeographicTaxonomies(institution.getGeographicTaxonomyCodes()
+        if (pgInstitution != null) {
+            institutionUpdate.setDescription(pgInstitution.getDescription());
+            institutionUpdate.setDigitalAddress(pgInstitution.getDigitalAddress());
+        }
+        if (institutionPut != null && institutionPut.getGeographicTaxonomyCodes() != null) {
+            institutionUpdate.setGeographicTaxonomies(institutionPut.getGeographicTaxonomyCodes()
                     .stream().map(s -> new InstitutionGeographicTaxonomies(s, null)).collect(Collectors.toList()));
         }
         return institutionUpdate;

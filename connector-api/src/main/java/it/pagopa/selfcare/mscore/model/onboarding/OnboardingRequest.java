@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CONTRACT_PATH_ERROR;
@@ -27,6 +28,8 @@ public class OnboardingRequest {
 
     private boolean signContract = true;
     private TokenType tokenType;
+    private String contractFilePath;
+    private OffsetDateTime contractCreatedAt;
 
     public Contract getContract() {
         if ((institutionUpdate != null && InstitutionType.PG == institutionUpdate.getInstitutionType())

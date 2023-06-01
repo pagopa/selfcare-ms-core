@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
@@ -42,6 +43,9 @@ class EmailServiceTest {
 
     @InjectMocks
     private EmailService emailService;
+
+    @Mock
+    private MailTemplateConfig mailTemplateConfig;
 
     @Mock
     private MailParametersMapper mailParametersMapper;
@@ -135,6 +139,7 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
+
         emailService.sendMail(pdf, institution, user, onboardingRequest, "", true, InstitutionType.PA);
         assertNotNull(onboardingRequest);
     }

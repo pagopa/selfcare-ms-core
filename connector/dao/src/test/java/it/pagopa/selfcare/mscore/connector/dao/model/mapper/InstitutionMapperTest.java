@@ -9,10 +9,12 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -314,7 +316,7 @@ class InstitutionMapperTest {
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
+                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         assertEquals("42 Main St", actualConvertToInstitutionEntityResult.getAddress());
         assertTrue(actualConvertToInstitutionEntityResult.isImported());
         assertEquals("21654", actualConvertToInstitutionEntityResult.getZipCode());
@@ -369,7 +371,7 @@ class InstitutionMapperTest {
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null));
+                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
         assertEquals("42 Main St", actualConvertToInstitutionEntityResult.getAddress());
         assertTrue(actualConvertToInstitutionEntityResult.isImported());
         assertEquals("21654", actualConvertToInstitutionEntityResult.getZipCode());
@@ -554,6 +556,12 @@ class InstitutionMapperTest {
         assertSame(dataProtectionOfficer, institutionUpdate.getDataProtectionOfficer());
         assertTrue(institutionUpdate.getGeographicTaxonomies().isEmpty());
         assertFalse(update.hasArrayFilters());
+    }
+
+    @Test
+    void convertToInstitutionList() {
+        InstitutionEntity entity = new InstitutionEntity();
+        Assertions.assertDoesNotThrow(() -> InstitutionMapper.convertToInstitutionList(Collections.singletonList(entity)));
     }
 }
 

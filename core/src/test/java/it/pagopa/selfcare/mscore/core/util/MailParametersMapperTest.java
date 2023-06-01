@@ -70,12 +70,6 @@ class MailParametersMapperTest {
     }
 
     @Test
-    void getOnboardingPath(){
-        when(mailTemplateConfig.getPath()).thenReturn("path");
-        Assertions.assertNotNull(mailParametersMapper.getOnboardingPath());
-    }
-
-    @Test
     void getOnboardingNotificationPath(){
         when(mailTemplateConfig.getNotificationPath()).thenReturn("path");
         Assertions.assertNotNull(mailParametersMapper.getOnboardingNotificationPath());

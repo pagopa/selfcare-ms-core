@@ -167,7 +167,7 @@ class UserControllerTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?", "?", "?", "jane.doe@example.org",
-                "6625550144", true, null, null);
+                "6625550144", true, null, null, null, null);
         institution.setSupportPhone("8605550118");
         institution.setSupportEmail("john.smith@example.org");
         institution.setBusinessRegisterPlace("U");

@@ -39,4 +39,7 @@ public class Institution {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
+    private String subunitCode;
+    private String subunitType;
+
 }

@@ -5,8 +5,9 @@ import lombok.Data;
 
 @Data
 public class GeographicTaxonomiesResponse {
-    @JsonProperty("geotax_id")
+    @JsonProperty("code")
     private String geotaxId; //REQUIRED
+    @JsonProperty("desc")
     private String description;
     @JsonProperty("istat_code")//REQUIRED
     private String istatCode;

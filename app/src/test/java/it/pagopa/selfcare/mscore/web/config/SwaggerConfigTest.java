@@ -1,8 +1,8 @@
+package it.pagopa.selfcare.mscore.web.config;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.*;
 import it.pagopa.selfcare.mscore.core.migration.MigrationService;
-import it.pagopa.selfcare.mscore.web.config.SwaggerConfig;
-import it.pagopa.selfcare.mscore.web.config.WebConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 })
 @EnableOpenApi
 @EnableWebMvc
-@ComponentScan(basePackages = "it.pagopa.selfcare.mscore.web.controller")
+@ComponentScan(basePackages = {"it.pagopa.selfcare.mscore.web.controller","it.pagopa.selfcare.mscore.web.model"})
 @TestPropertySource(locations = "classpath:config/application.yml")
 class SwaggerConfigTest {
 

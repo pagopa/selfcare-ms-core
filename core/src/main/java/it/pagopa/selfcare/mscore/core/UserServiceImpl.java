@@ -5,7 +5,9 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public OnboardedUser createUser(String userId) {
-        return userConnector.findAndCreate(userId, null);
+    public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
+        return userConnector.findUserInstitutionAggregation(filter);
     }
 }
