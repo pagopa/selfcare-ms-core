@@ -26,24 +26,24 @@ import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.PRODUCT_RELATIONS
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingInstitutionUtils {
 
-    public static void checkIfProductAlreadyOnboarded(Institution institution, OnboardingRequest request) {
-        log.info("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", institution.getExternalId(), request.getProductId());
+    public static void checkIfProductAlreadyOnboarded(Institution institution, String productId) {
+        log.info("START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}", institution.getExternalId(), productId);
         if (institution.getOnboarding() != null) {
             Optional<Onboarding> optionalOnboarding = institution.getOnboarding().stream()
-                    .filter(onboarding -> request.getProductId().equalsIgnoreCase(onboarding.getProductId())
+                    .filter(onboarding -> productId.equalsIgnoreCase(onboarding.getProductId())
                             && RelationshipState.ACTIVE == onboarding.getStatus())
                     .findAny();
             if (optionalOnboarding.isPresent() && !PRODUCT_RELATIONSHIP_STATES.contains(optionalOnboarding.get().getStatus())) {
-                throw new ResourceConflictException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), request.getProductId(), institution.getExternalId()), CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
+                throw new ResourceConflictException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), productId, institution.getExternalId()), CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
             }
         }
         log.info("END - checkIfProductAlreadyOnboarded without error");
     }
 
-    public static void validatePaOnboarding(OnboardingRequest request) {
-        if (request.getBillingRequest() == null
-                || StringUtils.isEmpty(request.getBillingRequest().getVatNumber())
-                || StringUtils.isEmpty(request.getBillingRequest().getRecipientCode())) {
+    public static void validatePaOnboarding(Billing billing) {
+        if (billing == null
+                || StringUtils.isEmpty(billing.getVatNumber())
+                || StringUtils.isEmpty(billing.getRecipientCode())) {
             throw new InvalidRequestException(CustomError.ONBOARDING_BILLING_ERROR.getCode(), CustomError.ONBOARDING_BILLING_ERROR.getMessage());
         }
     }
