@@ -92,8 +92,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> createInstitutionFromIpa( @RequestBody @Valid InstitutionFromIpaPost institutionFromIpaPost) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
-        if ((Objects.nonNull(institutionFromIpaPost.getSubunitType()) && Objects.isNull(institutionFromIpaPost.getSubunitCode())) ||
-                (Objects.isNull(institutionFromIpaPost.getSubunitType()) && Objects.nonNull(institutionFromIpaPost.getSubunitCode()))) {
+        if (Objects.isNull(institutionFromIpaPost.getSubunitType()) && Objects.nonNull(institutionFromIpaPost.getSubunitCode())) {
             throw new ValidationException("subunitCode and subunitType must both be evaluated.");
         }
 
