@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -54,7 +55,8 @@ public class EmailService {
                 || isApproved) {
             mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            destinationMail = coreConfig.getDestinationMails() != null ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
+            destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
+                    ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
             log.info(DESTINATION_MAIL_LOG, destinationMail);
             emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
             log.info("onboarding-contract-email Email successful sent");
