@@ -134,6 +134,10 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
+
+        /* check if onboarding ACTIVE already exists */
+        institutionService.retrieveInstitutionsWithFilter(institution.getExternalId(), token.getProductId(), UtilEnumList.VALID_RELATIONSHIP_STATES);
+
         Product product = onboardingDao.getProductById(token.getProductId());
         if (pagoPaSignatureConfig.isVerifyEnabled()) {
             contractService.verifySignature(contract, token, managersData);
