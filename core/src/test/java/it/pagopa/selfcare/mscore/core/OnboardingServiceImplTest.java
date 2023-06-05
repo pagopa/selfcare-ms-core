@@ -207,7 +207,7 @@ class OnboardingServiceImplTest {
         Token token = TestUtils.dummyToken();
 
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        doThrow(ResourceNotFoundException.class).when(institutionService).retrieveInstitutionsWithFilter(any(), any(), any());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of(new Institution()));
 
         Assertions.assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.completeOboarding(token,
                 new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
@@ -224,7 +224,7 @@ class OnboardingServiceImplTest {
 
         when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        doNothing().when(institutionService).retrieveInstitutionsWithFilter(any(), any(), any());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
 
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOboarding(token,
                 new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));

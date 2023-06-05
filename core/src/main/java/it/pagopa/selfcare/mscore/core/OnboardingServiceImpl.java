@@ -5,10 +5,7 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
@@ -135,8 +132,12 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
 
-        /* check if onboarding ACTIVE already exists */
-        institutionService.retrieveInstitutionsWithFilter(institution.getExternalId(), token.getProductId(), UtilEnumList.VALID_RELATIONSHIP_STATES);
+        /* check if onboarding ACTIVE already exists for product */
+        List<Institution> list = institutionConnector.findWithFilter(institution.getExternalId(), token.getProductId(), UtilEnumList.VALID_RELATIONSHIP_STATES);
+        if (list != null && !list.isEmpty()) {
+            throw new ResourceNotFoundException(String.format(GenericError.INSTITUTION_NOT_ONBOARDED.getMessage(), institution.getExternalId(), token.getProductId()),
+                    GenericError.INSTITUTION_NOT_ONBOARDED.getCode());
+        }
 
         Product product = onboardingDao.getProductById(token.getProductId());
         if (pagoPaSignatureConfig.isVerifyEnabled()) {

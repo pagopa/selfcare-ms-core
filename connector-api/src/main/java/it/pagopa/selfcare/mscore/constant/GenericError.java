@@ -19,6 +19,8 @@ public enum GenericError {
     SIGNATURE_NOT_FOUND("002-1007", "No signature found"),
     SIGNATURE_VALIDATION_ERROR("002-1004", "The tax code related to signature does not match anyone contained in the relationships"),
     ORIGINAL_DOCUMENT_NOT_FOUND("002-1008", "Original document information not found"),
+
+    INSTITUTION_NOT_ONBOARDED("002-1009", "Institution having externalId %s has already onboarded for product %s"),
     DOCUMENT_VALIDATION_FAIL("002-1000", "Error trying to validate document, due: %s"),
     INVALID_SIGNATURE_FORMS("002-1003", "Only CAdES signature form is admitted. Invalid signatures forms detected: %s"),
     INVALIDATE_ONBOARDING_ERROR("0022", "Error while invalidating onboarding"),
