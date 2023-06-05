@@ -179,7 +179,7 @@ public class OnboardingInstitutionStrategyFactory {
 
                 if(strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
 
-                    List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails())
+                    List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                             ? coreConfig.getDestinationMails()
                             : List.of(strategyInput.getInstitution().getDigitalAddress());
 
