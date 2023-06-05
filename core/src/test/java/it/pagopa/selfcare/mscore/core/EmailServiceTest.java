@@ -65,6 +65,7 @@ class EmailServiceTest {
         when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
         Institution institution = new Institution();
+        institution.setDigitalAddress("example@pec.it");
 
         User user = new User();
 
@@ -232,6 +233,7 @@ class EmailServiceTest {
         when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
         Institution institution = new Institution();
+        institution.setDigitalAddress("example@pec.it");
 
         User user = new User();
 
