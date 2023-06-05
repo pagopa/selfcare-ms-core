@@ -14,12 +14,9 @@ import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRollback;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.springframework.stereotype.Component;
 
@@ -122,7 +119,7 @@ public class OnboardingInstitutionStrategyFactory {
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
 
-            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest());
+            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
 
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
@@ -135,7 +132,7 @@ public class OnboardingInstitutionStrategyFactory {
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
 
-            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest());
+            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
 
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
@@ -182,7 +179,7 @@ public class OnboardingInstitutionStrategyFactory {
 
                 if(strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
 
-                    List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails())
+                    List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                             ? coreConfig.getDestinationMails()
                             : List.of(strategyInput.getInstitution().getDigitalAddress());
 
@@ -206,59 +203,50 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             strategyInput.getOnboardingRequest().setTokenType(TokenType.INSTITUTION);
             Institution institution = institutionService.retrieveInstitutionByExternalId(strategyInput.getOnboardingRequest().getInstitutionExternalId());
-            OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, strategyInput.getOnboardingRequest());
-            checkIncompleteOnboarding(institution, strategyInput.getOnboardingRequest());
+
+            /* check onboaring validation */
+            OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, strategyInput.getOnboardingRequest().getProductId());
+            deleteTokenExpired(institution, strategyInput.getOnboardingRequest().getProductId());
             OnboardingInstitutionUtils.validateOverridingData(strategyInput.getOnboardingRequest().getInstitutionUpdate(), institution);
-            List<GeographicTaxonomies> geographicTaxonomies = getGeographicTaxonomy(strategyInput.getOnboardingRequest());
-            List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies = new ArrayList<>();
-            if (!geographicTaxonomies.isEmpty()) {
-                institutionGeographicTaxonomies = geographicTaxonomies.stream()
-                        .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
-                        .collect(Collectors.toList());
-            }
 
             strategyInput.setInstitution(institution);
-            strategyInput.setInstitutionUpdateGeographicTaxonomies(institutionGeographicTaxonomies);
 
+            /* retrieve geographic taxonomies */
+            List<InstitutionGeographicTaxonomies> institutionGeographicTaxonomies =
+                    retrieveGeographicTaxonomy(strategyInput.getOnboardingRequest().getInstitutionUpdate().getGeographicTaxonomies());
+            strategyInput.setInstitutionUpdateGeographicTaxonomies(institutionGeographicTaxonomies);
         };
     }
 
-    private void checkIncompleteOnboarding(Institution institution, OnboardingRequest request) {
-        List<Token> tokens = new ArrayList<>();
-        if (institution.getOnboarding() != null) {
-            tokens = institution.getOnboarding().stream()
-                    .filter(o -> o.getProductId().equalsIgnoreCase(request.getProductId())
-                            && (o.getStatus() == RelationshipState.PENDING || o.getStatus() == RelationshipState.TOBEVALIDATED))
-                    .map(o -> onboardingDao.getTokenById(o.getTokenId()))
-                    .collect(Collectors.toList());
-        }
-        var now = OffsetDateTime.now();
-        boolean isIncomplete = false;
+    private void deleteTokenExpired(Institution institution, String productId) {
+        if(Objects.nonNull(institution.getOnboarding())) {
 
-        /* set state DELETE for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
-        for (var token : tokens) {
-            if (TokenUtils.isTokenExpired(token, now)) {
-                onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null);
-            } else {
-                isIncomplete = true;
-            }
-        }
-        if (isIncomplete) {
-            throw new InvalidRequestException(String.format(CustomError.ONBOARDING_PENDING.getMessage(), request.getProductId()), CustomError.ONBOARDING_PENDING.getCode());
+            /* set state DELETE for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
+            institution.getOnboarding().stream()
+                    .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(productId)
+                            && (onboarding.getStatus() == RelationshipState.PENDING || onboarding.getStatus() == RelationshipState.TOBEVALIDATED))
+                    .map(onboarding -> onboardingDao.getTokenById(onboarding.getTokenId()))
+                    .filter(TokenUtils::isTokenExpired)
+                    .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null));
         }
     }
 
-    private List<GeographicTaxonomies> getGeographicTaxonomy(OnboardingRequest request) {
-        List<GeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        if (request.getInstitutionUpdate().getGeographicTaxonomies() != null &&
-                !request.getInstitutionUpdate().getGeographicTaxonomies().isEmpty()) {
-            geographicTaxonomies = request.getInstitutionUpdate().getGeographicTaxonomies().stream
-                    ().map(institutionGeographicTaxonomies -> institutionService.retrieveGeoTaxonomies(institutionGeographicTaxonomies.getCode())).collect(Collectors.toList());
-            if (geographicTaxonomies.isEmpty()) {
-                throw new ResourceNotFoundException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), request.getInstitutionUpdate().getGeographicTaxonomies()),
-                        CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
-            }
+    private List<InstitutionGeographicTaxonomies> retrieveGeographicTaxonomy(List<InstitutionGeographicTaxonomies> geographicTaxonomieDtos) {
+        if (Objects.isNull(geographicTaxonomieDtos) || geographicTaxonomieDtos.isEmpty()) {
+            return List.of();
         }
+
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = geographicTaxonomieDtos.stream()
+                    .map(InstitutionGeographicTaxonomies::getCode)
+                    .map(institutionService::retrieveGeoTaxonomies)
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
+                    .collect(Collectors.toList());
+
+        if (geographicTaxonomies.size() != geographicTaxonomieDtos.size()) {
+            throw new ResourceNotFoundException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geographicTaxonomieDtos),
+                    CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
+        }
+
         return geographicTaxonomies;
     }
 

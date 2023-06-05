@@ -269,9 +269,9 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     public void checkAndHandleExpiring(Token token) {
-        var now = OffsetDateTime.now();
-        if (TokenUtils.isTokenExpired(token, now)) {
-            log.info("token {} is expired at {} and now is {}", token.getId(), token.getExpiringDate(), now);
+
+        if (TokenUtils.isTokenExpired(token)) {
+            log.info("token {} is expired at {}", token.getId(), token.getExpiringDate());
             var institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
             onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
             throw new InvalidRequestException(String.format(CustomError.TOKEN_EXPIRED.getMessage(), token.getId(), token.getExpiringDate()), CustomError.TOKEN_EXPIRED.getCode());

@@ -18,7 +18,7 @@ public enum CustomError {
     CREATE_INSTITUTION_IPA_CONFLICT("0038", "Institution having taxCode %s and subunitCode %s already exists"),
     CREATE_INSTITUTION_NOT_FOUND("0039", "Institution having externalId %s not exists in registry"),
     ONBOARDING_INVALID_UPDATES("0046", "Cannot perform data overrides on institution having external id %s"),
-    GEO_TAXONOMY_CODE_NOT_FOUND("0049", "Error on retrieve geographic taxonomy code %s: %s"),
+    GEO_TAXONOMY_CODE_NOT_FOUND("0049", "Error on retrieve geographic taxonomy code: %s"),
     PRODUCTS_NOT_FOUND_ERROR("0030", "Products not found for institution having internalId %s"),
     ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),

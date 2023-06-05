@@ -445,7 +445,7 @@ class OnboardingInstitutionUtilsTest {
         assertNull(actualConstructOnboardingRequestResult.getInstitutionUpdate().getDescription());
     }
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, String)}
      */
     @Test
     void testCheckIfProductAlreadyOnboarded() {
@@ -499,7 +499,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest);
+        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest.getProductId());
         assertFalse(institution.isImported());
         assertSame(billing, onboardingRequest.getBillingRequest());
         assertTrue(onboardingRequest.isSignContract());
@@ -513,7 +513,7 @@ class OnboardingInstitutionUtilsTest {
 
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, String)}
      */
     @Test
     void testCheckIfProductAlreadyOnboarded3() {
@@ -581,7 +581,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest);
+        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest.getProductId());
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -591,7 +591,7 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, String)}
      */
     @Test
     void testCheckIfProductAlreadyOnboarded4() {
@@ -682,7 +682,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest);
+        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest.getProductId());
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -703,7 +703,7 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, String)}
      */
     @Test
     void testCheckIfProductAlreadyOnboarded5() {
@@ -795,7 +795,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest);
+        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest.getProductId());
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -817,7 +817,7 @@ class OnboardingInstitutionUtilsTest {
 
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, String)}
      */
     @Test
     void testCheckIfProductAlreadyOnboarded8() {
@@ -931,7 +931,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest);
+        OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest.getProductId());
         assertEquals("42 Main St", institution.getAddress());
         assertTrue(institution.isImported());
         assertEquals("21654", institution.getZipCode());
@@ -951,7 +951,7 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#checkIfProductAlreadyOnboarded(Institution, String)}
      */
     @Test
     void testCheckIfProductAlreadyOnboarded9() {
@@ -1011,12 +1011,12 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(ResourceConflictException.class,
-                () -> OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest),
+                () -> OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest.getProductId()),
                 "Product 42 already onboarded for institution having externalId 42");
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#validatePaOnboarding(OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#validatePaOnboarding(Billing)}
      */
     @Test
     void testValidatePaOnboarding() {
@@ -1060,7 +1060,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.validatePaOnboarding(onboardingRequest);
+        OnboardingInstitutionUtils.validatePaOnboarding(onboardingRequest.getBillingRequest());
         assertSame(billing, onboardingRequest.getBillingRequest());
         assertTrue(onboardingRequest.isSignContract());
         assertSame(contract, onboardingRequest.getContract());
@@ -1073,7 +1073,7 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#validatePaOnboarding(OnboardingRequest)}
+     * Method under test: {@link OnboardingInstitutionUtils#validatePaOnboarding(Billing)}
      */
     @Test
     void testValidatePaOnboarding4() {
@@ -1117,7 +1117,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validatePaOnboarding(onboardingRequest));
+                () -> OnboardingInstitutionUtils.validatePaOnboarding(onboardingRequest.getBillingRequest()));
     }
 
     /**
