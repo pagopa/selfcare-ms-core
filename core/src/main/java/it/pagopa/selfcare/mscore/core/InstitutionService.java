@@ -11,7 +11,6 @@ import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface InstitutionService {
 
@@ -59,7 +58,7 @@ public interface InstitutionService {
 
     Institution createPnPgInstitution(String taxId, String description);
 
-    Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
+    Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate);
 
     List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId);
 

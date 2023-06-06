@@ -1034,7 +1034,7 @@ class InstitutionControllerTest {
         PgInstitutionPut pgInstitutionPut = new PgInstitutionPut();
         pgInstitutionPut.setDescription("desc");
         pgInstitutionPut.setDigitalAddress("digitalAddress");
-        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
+        when(institutionService.updateInstitution(any(), any())).thenReturn(new Institution());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/pg/42")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(pgInstitutionPut))
@@ -1051,16 +1051,13 @@ class InstitutionControllerTest {
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(new ArrayList<>());
-        Authentication authentication = Mockito.mock(Authentication.class);
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
 
-        when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
+        when(institutionService.updateInstitution(any(), any())).thenReturn(new Institution());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/42")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(institutionPut))
-                .principal(authentication);
+                .content(new ObjectMapper().writeValueAsString(institutionPut));
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder)

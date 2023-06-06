@@ -32,7 +32,6 @@ import javax.validation.ValidationException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -201,12 +200,11 @@ public class InstitutionController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @PathVariable("id") String institutionId,
-                                                                 @RequestBody InstitutionPut institutionPut,
-                                                                 Authentication authentication) {
+                                                                 @RequestBody InstitutionPut institutionPut
+                                                                 ) {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
-        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut, null), selfCareUser.getId());
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut, null));
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
@@ -229,7 +227,7 @@ public class InstitutionController {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut), selfCareUser.getId());
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut));
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

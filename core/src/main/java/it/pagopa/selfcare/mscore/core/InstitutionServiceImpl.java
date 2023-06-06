@@ -251,7 +251,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
+    public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate) {
             List<InstitutionGeographicTaxonomies> geographicTaxonomies = retrieveGeographicTaxonomies(institutionUpdate);
             return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
     }

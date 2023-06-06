@@ -597,7 +597,7 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#updateInstitution(String, InstitutionUpdate, String)}
+     * Method under test: {@link InstitutionService#updateInstitution(String, InstitutionUpdate)}
      */
     @Test
     void testUpdateInstitution6() {
@@ -630,7 +630,7 @@ class InstitutionServiceImplTest {
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
         assertThrows(ResourceNotFoundException.class,
-                () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
+                () -> institutionServiceImpl.updateInstitution("42", institutionUpdate));
         verify(partyRegistryProxyConnector).getExtByCode(any());
     }
 
@@ -1345,7 +1345,7 @@ class InstitutionServiceImplTest {
     @Test
     void testUpdateInstitutionDescription() {
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(new Institution());
-        assertDoesNotThrow(() -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
+        assertDoesNotThrow(() -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate()));
     }
 
 
