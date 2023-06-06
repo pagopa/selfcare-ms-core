@@ -209,7 +209,7 @@ class OnboardingServiceImplTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of(new Institution()));
 
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.completeOboarding(token,
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.completeOboarding(token,
                 new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
     }
 
