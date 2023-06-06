@@ -32,7 +32,6 @@ import javax.validation.ValidationException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -202,7 +201,8 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @PathVariable("id") String institutionId,
                                                                  @RequestBody InstitutionPut institutionPut,
-                                                                 Authentication authentication) {
+                                                                 Authentication authentication
+                                                                 ) {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
@@ -229,7 +229,7 @@ public class InstitutionController {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut), selfCareUser.getId());
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut), "42");
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

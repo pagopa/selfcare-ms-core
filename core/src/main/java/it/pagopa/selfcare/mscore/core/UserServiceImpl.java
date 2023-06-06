@@ -4,18 +4,16 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
-import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
-
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 
 @Service
 @Slf4j
@@ -53,8 +51,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkIfAdmin(String userId, String institutionId) {
-        return !userConnector.findActiveInstitutionAdmin(userId, institutionId, ADMIN_PARTY_ROLE, List.of(RelationshipState.ACTIVE)).isEmpty();
+    public boolean checkIfInstitutionUser(String userId, String institutionId) {
+        return !userConnector.findActiveInstitutionUser(userId, institutionId).isEmpty();
     }
 
     @Override

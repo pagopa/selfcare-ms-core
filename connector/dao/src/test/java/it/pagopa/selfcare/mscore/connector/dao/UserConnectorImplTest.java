@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
@@ -697,18 +698,18 @@ class UserConnectorImplTest {
     }
 
     /**
-     * Method under test: {@link UserConnectorImpl#findActiveInstitutionAdmin(String, String, List, List)}
+     * Method under test: {@link UserConnector#findActiveInstitutionUser(String, String)}
      */
     @Test
     void testFindAdminWithFilter() {
         when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
         ArrayList<PartyRole> roles = new ArrayList<>();
-        assertTrue(userConnectorImpl.findActiveInstitutionAdmin("42", "42", roles, new ArrayList<>()).isEmpty());
+        assertTrue(userConnectorImpl.findActiveInstitutionUser("42", "42").isEmpty());
         verify(userRepository).find(any(), any());
     }
 
     /**
-     * Method under test: {@link UserConnectorImpl#findActiveInstitutionAdmin(String, String, List, List)}
+     * Method under test: {@link UserConnector#findActiveInstitutionUser(String, String)}
      */
     @Test
     void testFindAdminWithFilter4() {
@@ -717,7 +718,7 @@ class UserConnectorImplTest {
         ArrayList<PartyRole> roles = new ArrayList<>();
         List<RelationshipState> states = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
-                () -> userConnectorImpl.findActiveInstitutionAdmin("42", "42", roles, states));
+                () -> userConnectorImpl.findActiveInstitutionUser("42", "42"));
         verify(userRepository).find(any(), any());
     }
 
