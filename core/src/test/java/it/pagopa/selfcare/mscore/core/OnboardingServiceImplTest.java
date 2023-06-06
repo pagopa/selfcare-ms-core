@@ -197,34 +197,35 @@ class OnboardingServiceImplTest {
         assertTrue(onboarding1.isEmpty());
     }
 
+
     /**
      * Method under test: {@link OnboardingServiceImpl#completeOboarding(Token, MultipartFile)}
      */
     @Test
-    void testCompleteOboarding() {
+    void shouldThrowExceptionCompleteOnboarding() {
 
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        Token token = TestUtils.dummyToken();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setClosedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        TokenUser user = new TokenUser();
-        user.setUserId("id");
-        user.setRole(PartyRole.MANAGER);
-        token.setUsers(List.of(user));
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of(new Institution()));
+
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.completeOboarding(token,
+                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#completeOboarding(Token, MultipartFile)}
+     */
+    @Test
+    void testCompleteOnboarding() {
+
+        Token token = TestUtils.dummyToken();
+        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
 
         when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
+
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOboarding(token,
                 new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
     }
