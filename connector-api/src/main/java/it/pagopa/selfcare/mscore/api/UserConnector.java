@@ -2,12 +2,12 @@ package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import org.springframework.lang.Nullable;
 
 import java.time.OffsetDateTime;
@@ -39,7 +39,7 @@ public interface UserConnector {
 
     OnboardedUser findAndCreate(String id, UserBinding binding);
 
-    List<OnboardedUser> findActiveInstitutionAdmin(String userId, String institutionId, List<PartyRole> adminPartyRole, List<RelationshipState> active);
+    List<OnboardedUser> findActiveInstitutionUser(String userId, String institutionId);
 
     List<OnboardedUser> findWithFilter(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 
