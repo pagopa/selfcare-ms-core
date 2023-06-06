@@ -200,11 +200,13 @@ public class InstitutionController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<InstitutionResponse> updateInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @PathVariable("id") String institutionId,
-                                                                 @RequestBody InstitutionPut institutionPut
+                                                                 @RequestBody InstitutionPut institutionPut,
+                                                                 Authentication authentication
                                                                  ) {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut, null));
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut, null), selfCareUser.getId());
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 
@@ -227,7 +229,7 @@ public class InstitutionController {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut));
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(null, pgInstitutionPut), "42");
         return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
     }
 

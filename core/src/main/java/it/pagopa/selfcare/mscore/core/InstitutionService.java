@@ -58,7 +58,7 @@ public interface InstitutionService {
 
     Institution createPnPgInstitution(String taxId, String description);
 
-    Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate);
+    Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
 
     List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId);
 

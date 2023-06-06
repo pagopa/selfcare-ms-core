@@ -10,12 +10,12 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -155,14 +155,10 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findActiveInstitutionAdmin(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states) {
+    public List<OnboardedUser> findActiveInstitutionUser(String userId, String institutionId) {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId))
                 .addCriteria(Criteria.where(UserEntity.Fields.bindings.name())
-                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
-                                .and(UserBinding.Fields.products.name())
-                                .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roles)
-                                .and(OnboardedProduct.Fields.env.name()).is(Env.ROOT)
-                                .and(OnboardedProduct.Fields.status.name()).in(states))));
+                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)));
 
         return repository.find(query, UserEntity.class).stream()
                 .map(UserMapper::toOnboardedUser)

@@ -12,10 +12,7 @@ import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.exception.*;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -251,9 +248,13 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate) {
+    public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
+        if (userService.checkIfInstitutionUser(userId, institutionId)) {
             List<InstitutionGeographicTaxonomies> geographicTaxonomies = retrieveGeographicTaxonomies(institutionUpdate);
             return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
+        } else {
+            throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
+        }
     }
 
     private List<InstitutionGeographicTaxonomies> retrieveGeographicTaxonomies(InstitutionUpdate institutionUpdate) {
