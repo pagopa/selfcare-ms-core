@@ -135,7 +135,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         /* check if onboarding ACTIVE already exists for product */
         List<Institution> list = institutionConnector.findWithFilter(institution.getExternalId(), token.getProductId(), UtilEnumList.VALID_RELATIONSHIP_STATES);
         if (list != null && !list.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(GenericError.INSTITUTION_NOT_ONBOARDED.getMessage(), institution.getExternalId(), token.getProductId()),
+            throw new InvalidRequestException(String.format(GenericError.INSTITUTION_NOT_ONBOARDED.getMessage(), institution.getExternalId(), token.getProductId()),
                     GenericError.INSTITUTION_NOT_ONBOARDED.getCode());
         }
 
