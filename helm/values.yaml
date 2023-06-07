@@ -4,7 +4,7 @@
 
 namespace: selc
 
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: selcdacr.azurecr.io/selfcaremscore
