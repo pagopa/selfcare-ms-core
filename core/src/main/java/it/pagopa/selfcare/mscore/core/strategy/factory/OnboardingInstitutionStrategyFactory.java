@@ -21,8 +21,10 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -185,7 +187,7 @@ public class OnboardingInstitutionStrategyFactory {
 
                     File logoFile = contractService.getLogoFile();
 
-                    emailService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, EmailService.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductId());
+                    emailService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, EmailService.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
                 }
 
                 //[TODO https://pagopa.atlassian.net/wiki/spaces/SCP/pages/710901785/RFC+Proposta+per+gestione+asincrona+degli+eventi]

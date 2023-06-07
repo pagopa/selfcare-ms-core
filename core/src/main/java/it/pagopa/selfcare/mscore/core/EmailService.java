@@ -43,8 +43,8 @@ public class EmailService {
         this.mailTemplateConfig = mailTemplateConfig;
     }
 
-    public void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName, String productId) {
-        emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, productId, templateParameters, fileName);
+    public void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName, String productName) {
+        emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, productName, templateParameters, fileName);
     }
 
     public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean isApproved, InstitutionType institutionType) {
@@ -58,14 +58,14 @@ public class EmailService {
             destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                     ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
             log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
+            emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
             log.info("onboarding-contract-email Email successful sent");
         } else {
             mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
             destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
             log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, pdf, request.getProductId(), mailParameters, request.getProductId() + "_accordo_adesione.pdf");
+            emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
             log.info("onboarding-complete-email-notification Email successful sent");
         }
     }
