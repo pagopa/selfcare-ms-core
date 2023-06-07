@@ -22,16 +22,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -56,16 +54,40 @@ class EmailServiceTest {
     @Mock
     private EmailConnector emailConnector;
 
+    /**
+     * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, String, boolean, InstitutionType)}
+     */
+    @Test
+    void testSendAutocompleteMail() {
+        Institution institution = new Institution();
+        institution.setDigitalAddress("example@pec.it");
+        File file = Mockito.mock(File.class);
+        String fileName= "42";
+        List<String> destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
+                ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
+
+        when(coreConfig.getDestinationMails()).thenReturn(destinationMail);
+
+
+        emailService.sendAutocompleteMail(destinationMail, new HashMap<>(), file, fileName, "App IO");
+        verify(emailConnector, times(1)).sendMail(any(), any(), any(), any(), any(), any());
+    }
 
     /**
      * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, String, boolean, InstitutionType)}
      */
     @Test
     void testSendMail() {
-        when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
+
+
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
         Institution institution = new Institution();
         institution.setDigitalAddress("example@pec.it");
+
+        List<String> destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
+                ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
+
+        when(coreConfig.getDestinationMails()).thenReturn(destinationMail);
 
         User user = new User();
 
