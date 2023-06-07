@@ -594,7 +594,7 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#updateInstitution(String, InstitutionUpdate, String)}
+     * Method under test: {@link InstitutionService#updateInstitution(String, InstitutionUpdate, String)}
      */
     @Test
     void testUpdateInstitution6() {
@@ -602,8 +602,7 @@ class InstitutionServiceImplTest {
         when(partyRegistryProxyConnector.getExtByCode(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
 
-        when(userService.checkIfAdmin(any(), any())).thenReturn(true);
-
+        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(true);
 
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
@@ -630,7 +629,7 @@ class InstitutionServiceImplTest {
         assertThrows(ResourceNotFoundException.class,
                 () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
         verify(partyRegistryProxyConnector).getExtByCode(any());
-        verify(userService).checkIfAdmin(any(), any());
+        verify(userService).checkIfInstitutionUser(any(), any());
     }
 
     /**
@@ -638,7 +637,7 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testUpdateInstitution7() {
-        when(userService.checkIfAdmin(any(), any())).thenReturn(false);
+        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(false);
 
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
@@ -664,7 +663,7 @@ class InstitutionServiceImplTest {
         institutionUpdate.setZipCode("21654");
         assertThrows(ResourceForbiddenException.class,
                 () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
-        verify(userService).checkIfAdmin(any(), any());
+        verify(userService).checkIfInstitutionUser(any(), any());
     }
 
     /**
@@ -1375,14 +1374,14 @@ class InstitutionServiceImplTest {
 
     @Test
     void testUpdateInstitutionDescription() {
-        when(userService.checkIfAdmin(any(), any())).thenReturn(true);
+        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(true);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(new Institution());
         assertDoesNotThrow(() -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
     }
 
     @Test
     void testUpdateInstitutionDescriptionException() {
-        when(userService.checkIfAdmin(any(), any())).thenReturn(false);
+        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(false);
         assertThrows(ResourceForbiddenException.class, () -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
     }
 

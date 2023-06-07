@@ -11,7 +11,6 @@ import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface InstitutionService {
 
