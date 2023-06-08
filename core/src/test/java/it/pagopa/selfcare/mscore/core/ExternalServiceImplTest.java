@@ -139,7 +139,7 @@ class ExternalServiceImplTest {
                 Origin.MOCK.name(), "42", "The characteristics of someone or something", InstitutionType.PA, "42 Main St",
                 "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies, attributes,
                 paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null, null));
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -166,7 +166,7 @@ class ExternalServiceImplTest {
                 Origin.MOCK.name(), "42", "The characteristics of someone or something", InstitutionType.PA, "42 Main St",
                 "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies, attributes,
                 paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null, null));
         when(userService.findOnboardedManager(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
         assertThrows(InvalidRequestException.class, () -> externalServiceImpl.retrieveInstitutionManager("42", "42"));

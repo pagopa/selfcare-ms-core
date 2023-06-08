@@ -109,7 +109,7 @@ class MigrationInstitutionMapperTest {
                 .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, "share capital", "Rea",
-                        "mail", "phone", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null));
+                        "mail", "phone", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123"));
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
@@ -153,7 +153,7 @@ class MigrationInstitutionMapperTest {
                 .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null));
+                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123"));
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
@@ -193,7 +193,7 @@ class MigrationInstitutionMapperTest {
                 .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                         geographicTaxonomies, attributesList, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null));
+                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123"));
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
@@ -1217,8 +1217,7 @@ class MigrationInstitutionMapperTest {
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
                 geographicTaxonomies, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
-                "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
-
+                "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
         InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
                 .toInstitutionUpdateResponse(institution);
         assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getAddress());

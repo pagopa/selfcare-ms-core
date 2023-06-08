@@ -34,6 +34,9 @@ public class InstitutionMapper {
         institutionResponse.setSupportEmail(institution.getSupportEmail());
         institutionResponse.setSupportPhone(institution.getSupportPhone());
         institutionResponse.setImported(institution.isImported());
+        institutionResponse.setSubunitType(institution.getSubunitType());
+        institutionResponse.setSubunitCode(institution.getSubunitCode());
+        institutionResponse.setAooParentCode(institution.getAooParentCode());
         if (institution.getGeographicTaxonomies() != null)
             institutionResponse.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
         if (institution.getAttributes() != null)
@@ -72,6 +75,10 @@ public class InstitutionMapper {
         response.setZipCode(institution.getZipCode());
         response.setTaxCode(institution.getTaxCode());
 
+        response.setSubunitCode(institution.getSubunitCode());
+        response.setSubunitType(institution.getSubunitType());
+        response.setAooParentCode(institution.getAooParentCode());
+
         for (Onboarding onboarding : institution.getOnboarding()) {
             if (productId.equalsIgnoreCase(onboarding.getProductId())) {
                 response.setBilling(toBillingResponse(onboarding.getBilling(), institution));
@@ -103,7 +110,12 @@ public class InstitutionMapper {
         institutionUpdate.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
         institutionUpdate.setSupportEmail(institution.getSupportEmail());
         institutionUpdate.setSupportPhone(institution.getSupportPhone());
-        institution.setImported(institution.isImported());
+        institutionUpdate.setImported(institution.isImported());
+
+        institutionUpdate.setSubunitCode(institution.getSubunitCode());
+        institutionUpdate.setSubunitType(institution.getSubunitType());
+        institutionUpdate.setAooParentCode(institution.getAooParentCode());
+
         return institutionUpdate;
     }
 
@@ -142,6 +154,9 @@ public class InstitutionMapper {
         institutionUpdate.setSupportEmail(institution.getSupportEmail());
         institutionUpdate.setSupportPhone(institution.getSupportPhone());
         institutionUpdate.setImported(institution.isImported());
+        institutionUpdate.setSubunitCode(institution.getSubunitCode());
+        institutionUpdate.setSubunitType(institution.getSubunitType());
+        institutionUpdate.setAooParentCode(institution.getAooParentCode());
         if (institution.getGeographicTaxonomies() != null) {
             institutionUpdate.setGeographicTaxonomyCodes(convertToGeoString(institution.getGeographicTaxonomies()));
         }
@@ -395,6 +410,11 @@ public class InstitutionMapper {
         response.setImported(institution.isImported());
         response.setCreatedAt(institution.getCreatedAt());
         response.setUpdatedAt(institution.getUpdatedAt());
+
+        response.setSubunitCode(institution.getSubunitCode());
+        response.setAooParentCode(institution.getAooParentCode());
+        response.setSubunitType(institution.getSubunitType());
+
         return response;
     }
 

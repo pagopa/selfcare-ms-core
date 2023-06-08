@@ -8,7 +8,6 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -133,6 +132,11 @@ public class OnboardingMapper {
         institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail(), institution.getSupportPhone()));
         institutionResponse.setPaymentServiceProvider(InstitutionMapper.toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
         institutionResponse.setDataProtectionOfficer(InstitutionMapper.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
+
+        institutionResponse.setSubunitCode(institution.getSubunitCode());
+        institutionResponse.setSubunitType(institution.getSubunitType());
+        institutionResponse.setAooParentCode(institution.getAooParentCode());
+
         return institutionResponse;
     }
 
