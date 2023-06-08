@@ -357,7 +357,7 @@ class InstitutionMapperTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "Tax Code", billing1, onboarding1, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123");
         institution.setOnboarding(onboardingList);
 
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
@@ -973,7 +973,7 @@ class InstitutionMapperTest {
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123"));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
         assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
@@ -1030,7 +1030,7 @@ class InstitutionMapperTest {
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123"));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
         assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
@@ -1072,7 +1072,7 @@ class InstitutionMapperTest {
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123"));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
         assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
@@ -1120,7 +1120,7 @@ class InstitutionMapperTest {
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing, onboardingList, geographicTaxonomies, attributesList, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123"));
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
         assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
@@ -1190,7 +1190,7 @@ class InstitutionMapperTest {
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
                 geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123"));
         assertEquals(1, InstitutionMapper.toInstitutionListResponse(institutionList).size());
     }
 
@@ -1227,7 +1227,7 @@ class InstitutionMapperTest {
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList,
                 geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123");
 
         ArrayList<Institution> institutionList = new ArrayList<>();
         institutionList.add(e);
@@ -1252,7 +1252,7 @@ class InstitutionMapperTest {
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
                 institutionGeographicTaxonomiesList, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123");
 
         ArrayList<Institution> institutionList = new ArrayList<>();
         institutionList.add(e);
@@ -1281,7 +1281,7 @@ class InstitutionMapperTest {
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
                 geographicTaxonomies, attributesList, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123");
 
         ArrayList<Institution> institutionList = new ArrayList<>();
         institutionList.add(e);

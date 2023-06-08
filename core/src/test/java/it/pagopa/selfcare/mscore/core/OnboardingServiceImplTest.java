@@ -170,7 +170,7 @@ class OnboardingServiceImplTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                 "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
-                "true", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                "true", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "AOO","AA123");
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("START - getUser with id: {}");

@@ -18,4 +18,8 @@ public class InstitutionBillingResponse {
     private String taxCode;
     private String pricingPlan;
     private BillingResponse billing;
+
+    private String subunitCode;
+    private String subunitType;
+    private String aooParentCode;
 }

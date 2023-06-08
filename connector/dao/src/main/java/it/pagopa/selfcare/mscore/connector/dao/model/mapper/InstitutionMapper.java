@@ -56,6 +56,10 @@ public class InstitutionMapper {
             institution.setSupportEmail(entity.getSupportEmail());
             institution.setSupportPhone(entity.getSupportPhone());
             institution.setImported(entity.isImported());
+
+            institution.setSubunitCode(entity.getSubunitCode());
+            institution.setSubunitType(entity.getSubunitType());
+            institution.setAooParentCode(entity.getAooParentCode());
         }
         return institution;
     }
@@ -81,6 +85,7 @@ public class InstitutionMapper {
         entity.setTaxCode(institution.getTaxCode());
         entity.setSubunitType(institution.getSubunitType());
         entity.setSubunitCode(institution.getSubunitCode());
+        entity.setAooParentCode(institution.getAooParentCode());
         entity.setRea(institution.getRea());
         entity.setShareCapital(institution.getShareCapital());
         entity.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
