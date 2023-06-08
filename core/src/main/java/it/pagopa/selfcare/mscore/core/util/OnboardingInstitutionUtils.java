@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -163,10 +164,10 @@ public class OnboardingInstitutionUtils {
         return request;
     }
 
-    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution) {
+    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution, Product product) {
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setProductId(token.getProductId());
-        onboardingRequest.setProductName(token.getProductId());
+        onboardingRequest.setProductName(product.getTitle());
         onboardingRequest.setPricingPlan(retrivePricingPlan(token, institution, onboardingRequest));
         Contract contract = new Contract();
         contract.setPath(token.getContractTemplate());

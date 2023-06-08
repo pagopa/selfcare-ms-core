@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -335,7 +336,7 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#constructOnboardingRequest(Token, Institution)}
+     * Method under test: {@link OnboardingInstitutionUtils#constructOnboardingRequest(Token, Institution, Product)}
      */
     @Test
     void testConstructOnboardingRequest2() {
@@ -382,10 +383,13 @@ class OnboardingInstitutionUtilsTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
+        Product product = new Product();
+        product.setTitle("pagopa");
+
         OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
-                .constructOnboardingRequest(token, institution);
+                .constructOnboardingRequest(token, institution, product);
         assertTrue(actualConstructOnboardingRequestResult.isSignContract());
-        assertEquals("42", actualConstructOnboardingRequestResult.getProductName());
+        assertEquals("pagopa", actualConstructOnboardingRequestResult.getProductName());
         assertEquals("42", actualConstructOnboardingRequestResult.getProductId());
         assertEquals("Contract Template", actualConstructOnboardingRequestResult.getContract().getPath());
         assertNull(actualConstructOnboardingRequestResult.getInstitutionUpdate().getDescription());
@@ -436,10 +440,13 @@ class OnboardingInstitutionUtilsTest {
         token.setType(TokenType.INSTITUTION);
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
+        Product product = new Product();
+        product.setTitle("pagopa");
+
         OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
-                .constructOnboardingRequest(token, institution);
+                .constructOnboardingRequest(token, institution, product);
         assertTrue(actualConstructOnboardingRequestResult.isSignContract());
-        assertEquals("42", actualConstructOnboardingRequestResult.getProductName());
+        assertEquals("pagopa", actualConstructOnboardingRequestResult.getProductName());
         assertEquals("42", actualConstructOnboardingRequestResult.getProductId());
         assertEquals("Contract Template", actualConstructOnboardingRequestResult.getContract().getPath());
         assertNull(actualConstructOnboardingRequestResult.getInstitutionUpdate().getDescription());
