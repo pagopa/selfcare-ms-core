@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
@@ -27,7 +28,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +51,8 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private final InstitutionConnector institutionConnector;
 
+    private final ProductConnector productConnector;
+
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  UserService userService,
@@ -59,7 +61,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  EmailService emailService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
-                                 InstitutionConnector institutionConnector) {
+                                 InstitutionConnector institutionConnector, ProductConnector productConnector) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
@@ -69,6 +71,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.institutionStrategyFactory = institutionStrategyFactory;
         this.institutionConnector = institutionConnector;
+        this.productConnector = productConnector;
     }
 
     @Override
@@ -173,7 +176,8 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-        OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution);
+        Product product = productConnector.getProductById(token.getProductId());
+        OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution, product);
         InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
         File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
