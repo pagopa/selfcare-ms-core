@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
@@ -80,6 +81,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private InstitutionConnector institutionConnector;
+
+    @Mock
+    private ProductConnector productConnector;
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -314,6 +318,8 @@ class OnboardingServiceImplTest {
         tokenUser.setUserId("id");
         tokenUser.setRole(PartyRole.MANAGER);
         token.setUsers(List.of(tokenUser));
+        Product product = new Product();
+        product.setTitle("42");
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
 
@@ -323,7 +329,9 @@ class OnboardingServiceImplTest {
         when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
+        when(productConnector.getProductById(any())).thenReturn(product);
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
+        verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
         verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
@@ -424,6 +432,8 @@ class OnboardingServiceImplTest {
         tokenUser.setUserId("id");
         tokenUser.setRole(PartyRole.MANAGER);
         token.setUsers(List.of(tokenUser));
+        Product product = new Product();
+        product.setTitle("42");
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
 
@@ -433,9 +443,11 @@ class OnboardingServiceImplTest {
         when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
+        when(productConnector.getProductById(any())).thenReturn(product);
 
         doThrow(RuntimeException.class).when(emailService).sendMail(any(), any(), any(), any(), any(), anyBoolean(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
+        verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
         verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));

@@ -148,16 +148,17 @@ public class InstitutionMapper {
         institutionManagerResponse.setInstitutionUpdate(institutionUpdate);
     }
 
-    public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institutionPut, PgInstitutionPut pgInstitution) {
+    public static InstitutionUpdate toInstitutionUpdate(InstitutionPut institutionPut) {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        if (pgInstitution != null) {
-            institutionUpdate.setDescription(pgInstitution.getDescription());
-            institutionUpdate.setDigitalAddress(pgInstitution.getDigitalAddress());
-        }
-        if (institutionPut != null && institutionPut.getGeographicTaxonomyCodes() != null) {
-            institutionUpdate.setGeographicTaxonomies(institutionPut.getGeographicTaxonomyCodes()
-                    .stream().map(s -> new InstitutionGeographicTaxonomies(s, null)).collect(Collectors.toList()));
-        }
+        institutionUpdate.setDescription(institutionPut.getDescription());
+        institutionUpdate.setDigitalAddress(institutionPut.getDigitalAddress());
+        institutionUpdate.setGeographicTaxonomies(Optional.ofNullable(institutionPut.getGeographicTaxonomyCodes())
+                        .map(geoTaxonomiesCodes -> geoTaxonomiesCodes.stream()
+                                .map(code -> new InstitutionGeographicTaxonomies(code, null))
+                                .collect(Collectors.toList()))
+                        .orElse(null)
+        );
+
         return institutionUpdate;
     }
 
