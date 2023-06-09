@@ -11,10 +11,14 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
+
+    protected static final BinaryOperator<BulkProduct> MERGE_FUNCTION = (inst1, inst2) -> inst1.getStatus().compareTo(inst2.getStatus()) < 0 ? inst1 : inst2;
 
     public static InstitutionResponse toInstitutionResponse(Institution institution) {
         InstitutionResponse institutionResponse = new InstitutionResponse();
@@ -456,5 +460,47 @@ public class InstitutionMapper {
         return institutions.stream()
                 .map(institutionToOnboard -> new ValidInstitution(institutionToOnboard.getId(), institutionToOnboard.getDescription()))
                 .collect(Collectors.toList());
+    }
+
+    public static BulkInstitutions toBulkInstitutions(List<Institution> institution, List<String> idsRequest) {
+        BulkInstitutions bulkInstitutions = new BulkInstitutions();
+        bulkInstitutions.setFound(institution.stream()
+                .map(InstitutionMapper::toBulkInstitution)
+                .collect(Collectors.toList()));
+        bulkInstitutions.setNotFound(idsRequest.stream()
+                .filter(s -> institution.stream().noneMatch(inst -> inst.getId().equalsIgnoreCase(s)))
+                .collect(Collectors.toList()));
+        return bulkInstitutions;
+    }
+
+    private static BulkInstitution toBulkInstitution(Institution inst) {
+        BulkInstitution bulkInstitution = new BulkInstitution();
+        bulkInstitution.setId(inst.getId());
+        bulkInstitution.setExternalId(inst.getExternalId());
+        bulkInstitution.setOrigin(inst.getOrigin());
+        bulkInstitution.setOriginId(inst.getOriginId());
+        bulkInstitution.setDescription(inst.getDescription());
+        bulkInstitution.setInstitutionType(inst.getInstitutionType());
+        bulkInstitution.setDigitalAddress(inst.getDigitalAddress());
+        bulkInstitution.setAddress(inst.getAddress());
+        bulkInstitution.setZipCode(inst.getZipCode());
+        bulkInstitution.setTaxCode(inst.getTaxCode());
+        bulkInstitution.setAttributes(toAttributeResponse(inst.getAttributes()));
+        bulkInstitution.setProducts(toBulkProductMap(inst.getOnboarding(), inst));
+        return bulkInstitution;
+    }
+
+    private static Map<String, BulkProduct> toBulkProductMap(List<Onboarding> onboarding, Institution institution) {
+        if(onboarding != null && !onboarding.isEmpty()) {
+            return onboarding.stream().map(onb -> {
+                BulkProduct bulkProduct = new BulkProduct();
+                bulkProduct.setProduct(onb.getProductId());
+                bulkProduct.setPricingPlan(onb.getPricingPlan());
+                bulkProduct.setBilling(toBillingResponse(onb.getBilling(), institution));
+                bulkProduct.setStatus(onb.getStatus());
+                return bulkProduct;
+            }).collect(Collectors.toMap(BulkProduct::getProduct, Function.identity(), MERGE_FUNCTION));
+        }
+        return Collections.emptyMap();
     }
 }
