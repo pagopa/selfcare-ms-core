@@ -1022,7 +1022,7 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#updatePgInstitution(String, PgInstitutionPut, Authentication)} (String, PgInstitutionPut, Authentication)}
+     * Method under test: {@link InstitutionController#updateInstitution(String, InstitutionPut, Authentication)} (String, PgInstitutionPut, Authentication)}
      */
     @Test
     void testUpdateInstitutionDescription() throws Exception {
@@ -1031,11 +1031,11 @@ class InstitutionControllerTest {
         SecurityContextHolder.setContext(securityContext);
         when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
 
-        PgInstitutionPut pgInstitutionPut = new PgInstitutionPut();
+        InstitutionPut pgInstitutionPut = new InstitutionPut();
         pgInstitutionPut.setDescription("desc");
         pgInstitutionPut.setDigitalAddress("digitalAddress");
         when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/pg/42")
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/42")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(pgInstitutionPut))
                 .principal(authentication);

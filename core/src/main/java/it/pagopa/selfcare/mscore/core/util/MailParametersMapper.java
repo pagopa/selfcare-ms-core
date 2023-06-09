@@ -18,7 +18,7 @@ public class MailParametersMapper {
 
     public Map<String, String> getOnboardingMailParameter(User user, OnboardingRequest request, String token) {
         Map<String, String> map = new HashMap<>();
-        map.put(mailTemplateConfig.getProductName(), request.getProductId());
+        map.put(mailTemplateConfig.getProductName(), request.getProductName());
         if(user.getName()!=null) {
             map.put(mailTemplateConfig.getUserName(), user.getName());
         }

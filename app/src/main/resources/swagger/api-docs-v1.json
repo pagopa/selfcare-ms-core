@@ -1566,78 +1566,6 @@
         } ]
       }
     },
-    "/institutions/pg/{id}" : {
-      "put" : {
-        "tags" : [ "Institution" ],
-        "summary" : "update institution data of given institution",
-        "description" : "update institution data of given institution",
-        "operationId" : "updatePgInstitutionUsingPUT",
-        "parameters" : [ {
-          "name" : "id",
-          "in" : "path",
-          "description" : "The internal identifier of the institution",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/PgInstitutionPut"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InstitutionResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Forbidden",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
     "/institutions/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
@@ -4487,6 +4415,12 @@
         "title" : "InstitutionPut",
         "type" : "object",
         "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "digitalAddress" : {
+            "type" : "string"
+          },
           "geographicTaxonomyCodes" : {
             "type" : "array",
             "items" : {
@@ -5538,18 +5472,6 @@
         "type" : "object",
         "properties" : {
           "id" : {
-            "type" : "string"
-          }
-        }
-      },
-      "PgInstitutionPut" : {
-        "title" : "PgInstitutionPut",
-        "type" : "object",
-        "properties" : {
-          "description" : {
-            "type" : "string"
-          },
-          "digitalAddress" : {
             "type" : "string"
           }
         }

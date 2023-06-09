@@ -1258,7 +1258,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate() {
@@ -1266,23 +1266,23 @@ class MigrationInstitutionMapperTest {
         List<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
         stringList.add(new InstitutionGeographicTaxonomies());
         institutionPut.setGeographicTaxonomyCodes(stringList.stream().map(InstitutionGeographicTaxonomies::getCode).collect(Collectors.toList()));
-        assertEquals(stringList, InstitutionMapper.toInstitutionUpdate(institutionPut, null).getGeographicTaxonomies());
+        assertEquals(stringList, InstitutionMapper.toInstitutionUpdate(institutionPut).getGeographicTaxonomies());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdatePG() {
-        PgInstitutionPut institutionPut = new PgInstitutionPut();
+        InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setDescription("description");
         institutionPut.setDigitalAddress("digitalAddress");
-        assertEquals("description", InstitutionMapper.toInstitutionUpdate(null, institutionPut).getDescription());
-        assertEquals("digitalAddress", InstitutionMapper.toInstitutionUpdate(null, institutionPut).getDigitalAddress());
+        assertEquals("description", InstitutionMapper.toInstitutionUpdate( institutionPut).getDescription());
+        assertEquals("digitalAddress", InstitutionMapper.toInstitutionUpdate( institutionPut).getDigitalAddress());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate3() {
@@ -1291,7 +1291,7 @@ class MigrationInstitutionMapperTest {
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(stringList);
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut, null)
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut)
                 .getGeographicTaxonomies();
         assertEquals(1, geographicTaxonomies.size());
         InstitutionGeographicTaxonomies getResult = geographicTaxonomies.get(0);
@@ -1300,7 +1300,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut, it.pagopa.selfcare.mscore.web.model.institution.PgInstitutionPut)}
+     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate4() {
@@ -1310,7 +1310,7 @@ class MigrationInstitutionMapperTest {
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(stringList);
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut, null)
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut)
                 .getGeographicTaxonomies();
         assertEquals(2, geographicTaxonomies.size());
         InstitutionGeographicTaxonomies getResult = geographicTaxonomies.get(1);
