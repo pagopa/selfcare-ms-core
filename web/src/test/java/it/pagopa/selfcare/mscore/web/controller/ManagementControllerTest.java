@@ -4,8 +4,10 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.TokenService;
@@ -24,10 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -637,6 +641,27 @@ class ManagementControllerTest {
     void testVerifyInstitution() throws Exception {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.head("/institutions/{id}", "42");
+        MockMvcBuilders.standaloneSetup(managementController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void testGetInstitutionsByIds() throws Exception {
+        BulkPartiesSeed bulkPartiesSeed = new BulkPartiesSeed();
+        bulkPartiesSeed.setPartyIdentifiers(List.of("42"));
+        ObjectMapper mapper = new ObjectMapper();
+        Institution institution = new Institution();
+        institution.setId("id");
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("productId");
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        institution.setOnboarding(List.of(onboarding));
+        when(institutionService.retrieveInstitutionByIds(any())).thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/bulk/institutions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(bulkPartiesSeed));
         MockMvcBuilders.standaloneSetup(managementController)
                 .build()
                 .perform(requestBuilder)
