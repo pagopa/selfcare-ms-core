@@ -66,7 +66,7 @@ class RelationshipMapperTest {
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
                 geographicTaxonomiesList, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
-                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         Institution institution1 = new Institution();
 
@@ -258,7 +258,7 @@ class RelationshipMapperTest {
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
                 geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now(),"BB123", "UO","AA123");
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         Institution institution1 = new Institution();
 

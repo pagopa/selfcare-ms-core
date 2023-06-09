@@ -538,7 +538,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -639,7 +639,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
 
         Billing billing2 = new Billing();
         billing2.setPublicServices(true);
@@ -752,7 +752,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
 
         Billing billing2 = new Billing();
         billing2.setPublicServices(true);
@@ -888,7 +888,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
 
         Billing billing3 = new Billing();
         billing3.setPublicServices(true);
@@ -987,7 +987,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
                 "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}",
-                true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                true, OffsetDateTime.now(), OffsetDateTime.now(),"BB123", "UO","AA123");
 
         Billing billing3 = new Billing();
         billing3.setPublicServices(true);
@@ -1171,7 +1171,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}", true,
-                OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
         assertThrows(InvalidRequestException.class,
                 () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
@@ -1220,7 +1220,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}", true,
-                OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                OffsetDateTime.now(), OffsetDateTime.now(),"BB123", "UO","AA123");
         assertThrows(InvalidRequestException.class,
                 () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
     }
@@ -1249,7 +1249,7 @@ class OnboardingInstitutionUtilsTest {
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}",
                 "START - validateOverridingData for institution having externalId: {}", true, OffsetDateTime.now(),
-                OffsetDateTime.now(), null, null);
+                OffsetDateTime.now(),"BB123", "UO","AA123");
 
         OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution);
         }

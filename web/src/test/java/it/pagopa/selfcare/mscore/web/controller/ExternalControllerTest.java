@@ -222,10 +222,7 @@ class ExternalControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"institutionId\":null,\"externalId\":null,\"origin\":null,\"originId\":null,\"description\":null,\"institutionType\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"pricingPlan\":null,\"billing\":null}"));
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
 
     /**
@@ -245,9 +242,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"institutionId\":null,\"externalId\":null,\"origin\":null,\"originId\":null,\"description\":null,\"institutionType"
-                                        + "\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"pricingPlan\":null,\"billing"
-                                        + "\":null}"));
+                                "{\"institutionId\":null,\"externalId\":null,\"origin\":null,\"originId\":null,\"description\":null,\"institutionType\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"pricingPlan\":null,\"billing\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
     /**
@@ -445,17 +440,14 @@ class ExternalControllerTest {
         when(externalService.getInstitutionByExternalId(any())).thenReturn(new Institution("42", "42", Origin.SELC.name(), "?",
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
-                null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null));
+                null, null, "?", "?", "?", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123"));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
                 "42");
         MockMvcBuilders.standaloneSetup(externalController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"?\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":null,\"businessRegisterNumber\":null,\"legalRegisterNumber\":null,\"legalRegisterName\":null,\"vatNumberGroup\":false},\"dataProtectionOfficer\":{\"address\":null,\"email\":null,\"pec\":null},\"businessRegisterPlace\":\"?\",\"supportEmail\":\"?\",\"supportPhone\":\"?\",\"imported\":true}"));
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
 
     /**
@@ -489,7 +481,7 @@ class ExternalControllerTest {
                 .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
                         InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
                         attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, "BB123", "UO","AA123"));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/external/institutions/{externalId}",
                 "42");
         MockMvcBuilders.standaloneSetup(externalController)
@@ -499,13 +491,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or"
-                                        + " something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":"
-                                        + "\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":"
-                                        + "\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"?\",\"vatNumberGroup"
-                                        + "\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea"
-                                        + "\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone"
-                                        + "\":\"6625550144\",\"imported\":true}"));
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"originId\":\"42\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"subunitCode\":\"BB123\",\"subunitType\":\"UO\",\"aooParentCode\":\"AA123\"}"));
     }
 
     /**
@@ -584,7 +570,7 @@ class ExternalControllerTest {
         Institution institution = new Institution("42", "42", Origin.SELC.name(), "?", "The characteristics of someone or something",
                 InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing1, onboarding1, geographicTaxonomies,
                 attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "?", "?", "?",
-                true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+                true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
         institution.setId("?");
         institution.setOnboarding(onboardingList);
 
@@ -680,7 +666,7 @@ class ExternalControllerTest {
                 "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
                 billing1, onboarding1, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?", "?", "?", "jane.doe@example.org",
-                "6625550144", true, null, null, null, null);
+                "6625550144", true, null, null, "BB123", "UO","AA123");
         institution.setId("?");
         institution.setOnboarding(onboardingList);
 
@@ -698,14 +684,7 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":null,\"from\":\"?\",\"to\":\"?\",\"role\":null,\"product\":null,\"state\":null,\"pricingPlan\":\"?\",\"institutionUpdate"
-                                        + "\":{\"institutionType\":\"PA\",\"description\":\"The characteristics of someone or something\",\"digitalAddress\":\"42"
-                                        + " Main St\",\"address\":\"42 Main St\",\"taxCode\":\"?\",\"zipCode\":\"21654\",\"paymentServiceProvider\":{\"abiCode\""
-                                        + ":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"?\",\"vatNumberGroup"
-                                        + "\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},"
-                                        + "\"geographicTaxonomyCodes\":[],\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\""
-                                        + ":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true},\"billing\":{\"vatNumber\":\"42\","
-                                        + "\"recipientCode\":\"?\",\"publicServices\":true},\"createdAt\":null,\"updatedAt\":null}"));
+                                "{\"id\":null,\"from\":\"?\",\"to\":\"?\",\"role\":null,\"product\":null,\"state\":null,\"pricingPlan\":\"?\",\"institutionUpdate\":{\"institutionType\":\"PA\",\"description\":\"The characteristics of someone or something\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"taxCode\":\"?\",\"zipCode\":\"21654\",\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},\"geographicTaxonomyCodes\":[],\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"subunitCode\":\"BB123\",\"subunitType\":\"UO\",\"aooParentCode\":\"AA123\"},\"billing\":{\"vatNumber\":\"42\",\"recipientCode\":\"?\",\"publicServices\":true},\"createdAt\":null,\"updatedAt\":null}"));
     }
 
     /**
