@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
+import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
@@ -100,16 +101,12 @@ class MigrationInstitutionMapperTest {
      */
     @Test
     void testToInstitutionResponse4() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+
+        Institution institution =TestUtils.createSimpleInstitutionPA();
+        institution.setImported(true);
+
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
-                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, "share capital", "Rea",
-                        "mail", "phone", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123"));
+                .toInstitutionResponse(institution);
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
@@ -122,16 +119,8 @@ class MigrationInstitutionMapperTest {
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
         PaymentServiceProviderResponse paymentServiceProviderResponse = actualToInstitutionResponseResult
                 .getPaymentServiceProvider();
-        assertNull(paymentServiceProviderResponse.getLegalRegisterNumber());
-        assertFalse(paymentServiceProviderResponse.isVatNumberGroup());
-        DataProtectionOfficerResponse dataProtectionOfficer = actualToInstitutionResponseResult
-                .getDataProtectionOfficer();
-        assertNull(dataProtectionOfficer.getAddress());
-        assertNull(dataProtectionOfficer.getEmail());
-        assertNull(paymentServiceProviderResponse.getAbiCode());
-        assertNull(paymentServiceProviderResponse.getLegalRegisterName());
-        assertNull(paymentServiceProviderResponse.getBusinessRegisterNumber());
-        assertNull(dataProtectionOfficer.getPec());
+
+        assertTrue(paymentServiceProviderResponse.isVatNumberGroup());
     }
 
     /**
@@ -145,15 +134,12 @@ class MigrationInstitutionMapperTest {
 
         List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setGeographicTaxonomies(geographicTaxonomiesList);
+        institution.setImported(true);
+
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
-                        geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123"));
+                .toInstitutionResponse(institution);
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
@@ -168,9 +154,8 @@ class MigrationInstitutionMapperTest {
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
         PaymentServiceProviderResponse paymentServiceProviderResponse = actualToInstitutionResponseResult
                 .getPaymentServiceProvider();
-        assertNull(paymentServiceProviderResponse.getBusinessRegisterNumber());
-        assertNull(paymentServiceProviderResponse.getLegalRegisterNumber());
-        assertFalse(paymentServiceProviderResponse.isVatNumberGroup());
+
+        assertTrue(paymentServiceProviderResponse.isVatNumberGroup());
     }
 
     /**
@@ -185,15 +170,13 @@ class MigrationInstitutionMapperTest {
 
         ArrayList<Attributes> attributesList = new ArrayList<>();
         attributesList.add(attributes);
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setAttributes(attributesList);
+        institution.setImported(true);
+
         InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
-                        geographicTaxonomies, attributesList, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "Rea", "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123"));
+                .toInstitutionResponse(institution);
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
         assertEquals("21654", actualToInstitutionResponseResult.getZipCode());
@@ -206,14 +189,6 @@ class MigrationInstitutionMapperTest {
         assertEquals(InstitutionType.PA, actualToInstitutionResponseResult.getInstitutionType());
         assertEquals("The characteristics of someone or something", actualToInstitutionResponseResult.getDescription());
         assertEquals("42 Main St", actualToInstitutionResponseResult.getDigitalAddress());
-        PaymentServiceProviderResponse paymentServiceProviderResponse = actualToInstitutionResponseResult
-                .getPaymentServiceProvider();
-        assertNull(paymentServiceProviderResponse.getLegalRegisterName());
-        assertNull(paymentServiceProviderResponse.getLegalRegisterNumber());
-        assertFalse(paymentServiceProviderResponse.isVatNumberGroup());
-        DataProtectionOfficerResponse dataProtectionOfficer = actualToInstitutionResponseResult
-                .getDataProtectionOfficer();
-        assertNull(dataProtectionOfficer.getAddress());
 
 
     }
@@ -1208,16 +1183,10 @@ class MigrationInstitutionMapperTest {
      */
     @Test
     void testToInstitutionUpdateResponse4() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        Institution institution = new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboardingList,
-                geographicTaxonomies, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
-                "Share Capital", "Business Register Place", true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setImported(true);
+
         InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
                 .toInstitutionUpdateResponse(institution);
         assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getAddress());

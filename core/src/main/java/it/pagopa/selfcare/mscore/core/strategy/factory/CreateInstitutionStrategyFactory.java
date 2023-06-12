@@ -11,10 +11,8 @@ import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.*;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -152,6 +150,10 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setTaxCode( unitaOrganizzativa.getCodiceFiscaleEnte() );
             newInstitution.setSubunitCode(strategyInput.getSubunitCode());
             newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
+
+            PaAttributes paAttributes = new PaAttributes();
+            paAttributes.setAooParentCode(unitaOrganizzativa.getCodiceUniAoo());
+            newInstitution.setPaAttributes(paAttributes);
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
             newInstitution.setOrigin(Optional.ofNullable(unitaOrganizzativa.getOrigin())

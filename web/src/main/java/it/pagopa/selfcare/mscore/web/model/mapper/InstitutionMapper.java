@@ -40,7 +40,7 @@ public class InstitutionMapper {
         institutionResponse.setImported(institution.isImported());
         institutionResponse.setSubunitType(institution.getSubunitType());
         institutionResponse.setSubunitCode(institution.getSubunitCode());
-        institutionResponse.setAooParentCode(institution.getAooParentCode());
+        institutionResponse.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         if (institution.getGeographicTaxonomies() != null)
             institutionResponse.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
         if (institution.getAttributes() != null)
@@ -81,7 +81,7 @@ public class InstitutionMapper {
 
         response.setSubunitCode(institution.getSubunitCode());
         response.setSubunitType(institution.getSubunitType());
-        response.setAooParentCode(institution.getAooParentCode());
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
 
         for (Onboarding onboarding : institution.getOnboarding()) {
             if (productId.equalsIgnoreCase(onboarding.getProductId())) {
@@ -118,7 +118,7 @@ public class InstitutionMapper {
 
         institutionUpdate.setSubunitCode(institution.getSubunitCode());
         institutionUpdate.setSubunitType(institution.getSubunitType());
-        institutionUpdate.setAooParentCode(institution.getAooParentCode());
+        institutionUpdate.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
 
         return institutionUpdate;
     }
@@ -160,7 +160,7 @@ public class InstitutionMapper {
         institutionUpdate.setImported(institution.isImported());
         institutionUpdate.setSubunitCode(institution.getSubunitCode());
         institutionUpdate.setSubunitType(institution.getSubunitType());
-        institutionUpdate.setAooParentCode(institution.getAooParentCode());
+        institutionUpdate.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         if (institution.getGeographicTaxonomies() != null) {
             institutionUpdate.setGeographicTaxonomyCodes(convertToGeoString(institution.getGeographicTaxonomies()));
         }
@@ -416,7 +416,7 @@ public class InstitutionMapper {
         response.setUpdatedAt(institution.getUpdatedAt());
 
         response.setSubunitCode(institution.getSubunitCode());
-        response.setAooParentCode(institution.getAooParentCode());
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         response.setSubunitType(institution.getSubunitType());
 
         return response;

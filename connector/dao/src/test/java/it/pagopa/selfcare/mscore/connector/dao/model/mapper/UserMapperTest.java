@@ -19,8 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserMapperTest {
+
+    private final UserEntityMapper userMapper = new UserEntityMapperImpl();
     /**
-     * Method under test: {@link UserMapper#toOnboardedUser(UserEntity)}
+     * Method under test: {@link UserEntityMapper#toOnboardedUser(UserEntity)}
      */
     @Test
     void testToOnboardedUser() {
@@ -30,13 +32,13 @@ class UserMapperTest {
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
-        OnboardedUser actualToOnboardedUserResult = UserMapper.toOnboardedUser(userEntity);
+        OnboardedUser actualToOnboardedUserResult = userMapper.toOnboardedUser(userEntity);
         assertEquals("42", actualToOnboardedUserResult.getId());
         assertNull(actualToOnboardedUserResult.getCreatedAt());
     }
 
     /**
-     * Method under test: {@link UserMapper#toOnboardedUser(UserEntity)}
+     * Method under test: {@link UserEntityMapper#toOnboardedUser(UserEntity)}
      */
     @Test
     void testToOnboardedUser2() {
@@ -45,13 +47,13 @@ class UserMapperTest {
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
         userEntity.setBindings(null);
-        OnboardedUser actualToOnboardedUserResult = UserMapper.toOnboardedUser(userEntity);
+        OnboardedUser actualToOnboardedUserResult = userMapper.toOnboardedUser(userEntity);
         assertEquals("42", actualToOnboardedUserResult.getId());
         assertNull(actualToOnboardedUserResult.getCreatedAt());
     }
 
     /**
-     * Method under test: {@link UserMapper#toOnboardedUser(UserEntity)}
+     * Method under test: {@link UserEntityMapper#toOnboardedUser(UserEntity)}
      */
     @Test
     void testToOnboardedUser3() {
@@ -90,7 +92,7 @@ class UserMapperTest {
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
         userEntity.setBindings(userBindingEntityList);
-        OnboardedUser actualToOnboardedUserResult = UserMapper.toOnboardedUser(userEntity);
+        OnboardedUser actualToOnboardedUserResult = userMapper.toOnboardedUser(userEntity);
         List<UserBinding> bindings = actualToOnboardedUserResult.getBindings();
         assertEquals(4, bindings.size());
         assertEquals("42", actualToOnboardedUserResult.getId());
@@ -104,7 +106,7 @@ class UserMapperTest {
     }
 
     /**
-     * Method under test: {@link UserMapper#toOnboardedUser(UserEntity)}
+     * Method under test: {@link UserEntityMapper#toOnboardedUser(UserEntity)}
      */
     @Test
     void testToOnboardedUser4() {
@@ -115,22 +117,22 @@ class UserMapperTest {
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
         userEntity.setBindings(userBindingEntityList);
-        OnboardedUser actualToOnboardedUserResult = UserMapper.toOnboardedUser(userEntity);
+        OnboardedUser actualToOnboardedUserResult = userMapper.toOnboardedUser(userEntity);
         assertTrue(actualToOnboardedUserResult.getBindings().isEmpty());
         assertEquals("42", actualToOnboardedUserResult.getId());
         assertNull(actualToOnboardedUserResult.getCreatedAt());
     }
 
     /**
-     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     * Method under test: {@link UserEntityMapper#toUserEntity(OnboardedUser)}
      */
     @Test
     void testToUserEntity() {
-        assertNull(UserMapper.toUserEntity(new OnboardedUser()).getCreatedAt());
+        assertNull(userMapper.toUserEntity(new OnboardedUser()).getCreatedAt());
     }
 
     /**
-     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     * Method under test: {@link UserEntityMapper#toUserEntity(OnboardedUser)}
      */
     @Test
     void testToUserEntity2() {
@@ -138,12 +140,12 @@ class UserMapperTest {
         ArrayList<UserBinding> userBindingList = new ArrayList<>();
         onboardedUser.setBindings(userBindingList);
         onboardedUser.setId(null);
-        UserEntity actualToUserEntityResult = UserMapper.toUserEntity(onboardedUser);
+        UserEntity actualToUserEntityResult = userMapper.toUserEntity(onboardedUser);
         assertNull(actualToUserEntityResult.getCreatedAt());
     }
 
     /**
-     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     * Method under test: {@link UserEntityMapper#toUserEntity(OnboardedUser)}
      */
     @Test
     void testToUserEntity3() {
@@ -180,7 +182,7 @@ class UserMapperTest {
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(userBindingList);
         onboardedUser.setId(null);
-        UserEntity actualToUserEntityResult = UserMapper.toUserEntity(onboardedUser);
+        UserEntity actualToUserEntityResult = userMapper.toUserEntity(onboardedUser);
         List<UserBindingEntity> bindings = actualToUserEntityResult.getBindings();
         assertEquals(4, bindings.size());
         assertNull(actualToUserEntityResult.getCreatedAt());
@@ -193,14 +195,14 @@ class UserMapperTest {
     }
 
     /**
-     * Method under test: {@link UserMapper#toUserEntity(OnboardedUser)}
+     * Method under test: {@link UserEntityMapper#toUserEntity(OnboardedUser)}
      */
     @Test
     void testToUserEntity4() {
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(null);
         onboardedUser.setId("foo");
-        UserEntity actualToUserEntityResult = UserMapper.toUserEntity(onboardedUser);
+        UserEntity actualToUserEntityResult = userMapper.toUserEntity(onboardedUser);
         assertEquals("foo", actualToUserEntityResult.getId());
         assertNull(actualToUserEntityResult.getCreatedAt());
     }

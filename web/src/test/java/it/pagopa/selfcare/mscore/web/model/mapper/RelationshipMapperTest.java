@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
@@ -57,16 +58,8 @@ class RelationshipMapperTest {
 
         List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
         geographicTaxonomiesList.add(geographicTaxonomies);
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
 
-        Institution institution = new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                geographicTaxonomiesList, attributes, paymentServiceProvider, dataProtectionOfficer, null, null, "Rea",
-                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now(), "BB123", "UO","AA123");
+        Institution institution = TestUtils.createSimpleInstitutionPA();
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         Institution institution1 = new Institution();
 
@@ -248,21 +241,11 @@ class RelationshipMapperTest {
         geographicTaxonomies.setCode("Code");
         geographicTaxonomies.setDesc("The characteristics of someone or something");
 
-        List<InstitutionGeographicTaxonomies> geographicTaxonomiesList = new ArrayList<>();
-        geographicTaxonomiesList.add(geographicTaxonomies);
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setGeographicTaxonomies(List.of(geographicTaxonomies));
+        institution.setImported(true);
 
-        Institution institution = new Institution("42", "42", Origin.SELC.name(), "Ipa Code", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                geographicTaxonomiesList, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null, "Rea",
-                "Share Capital", "Business Register Place",true, OffsetDateTime.now(), OffsetDateTime.now(),"BB123", "UO","AA123");
-        institution.setGeographicTaxonomies(geographicTaxonomiesList);
-        Institution institution1 = new Institution();
-
-        RelationshipInfo relationshipInfo = new RelationshipInfo(institution1, "42", new OnboardedProduct());
+        RelationshipInfo relationshipInfo = new RelationshipInfo(institution, "42", new OnboardedProduct());
         relationshipInfo.setInstitution(institution);
 
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();

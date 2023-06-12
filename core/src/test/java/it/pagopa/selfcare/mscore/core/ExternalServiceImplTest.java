@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -128,18 +129,8 @@ class ExternalServiceImplTest {
      */
     @Test
     void testRetrieveInstitutionManager6() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(new Institution("42", "42",
-                Origin.MOCK.name(), "42", "The characteristics of someone or something", InstitutionType.PA, "42 Main St",
-                "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies, attributes,
-                paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null, null));
+        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(dummyInstitutionPa());
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -155,18 +146,8 @@ class ExternalServiceImplTest {
      */
     @Test
     void testRetrieveInstitutionManager8() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(new Institution("42", "42",
-                Origin.MOCK.name(), "42", "The characteristics of someone or something", InstitutionType.PA, "42 Main St",
-                "42 Main St", "21654", "Tax Code", billing, onboarding, geographicTaxonomies, attributes,
-                paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null, null));
+        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(dummyInstitutionPa());
         when(userService.findOnboardedManager(any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
         assertThrows(InvalidRequestException.class, () -> externalServiceImpl.retrieveInstitutionManager("42", "42"));

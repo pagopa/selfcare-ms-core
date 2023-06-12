@@ -4,6 +4,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.PaAttributes;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
@@ -11,6 +12,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toDataProtectionOfficer;
+import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toPaymentServiceProvider;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
@@ -76,7 +83,7 @@ public class OnboardingMapper {
 
         institutionResponse.setSubunitCode(institution.getSubunitCode());
         institutionResponse.setSubunitType(institution.getSubunitType());
-        institutionResponse.setAooParentCode(institution.getAooParentCode());
+        institutionResponse.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
 
         return institutionResponse;
     }

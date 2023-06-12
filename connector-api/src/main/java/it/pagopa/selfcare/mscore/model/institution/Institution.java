@@ -41,6 +41,6 @@ public class Institution {
 
     private String subunitCode;
     private String subunitType;
-    private String aooParentCode;
+    private PaAttributes paAttributes;
 
 }

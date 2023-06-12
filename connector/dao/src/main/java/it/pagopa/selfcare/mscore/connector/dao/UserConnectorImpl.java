@@ -6,7 +6,8 @@ import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserMapper;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapper;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapper;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -42,13 +43,19 @@ public class UserConnectorImpl implements UserConnector {
 
     private final UserRepository repository;
 
-    public UserConnectorImpl(UserRepository userRepository) {
+    private final UserEntityMapper userMapper;
+
+    private final UserInstitutionAggregationMapper userInstitutionAggregationMapper;
+
+    public UserConnectorImpl(UserRepository userRepository, UserEntityMapper userMapper, UserInstitutionAggregationMapper userInstitutionAggregationMapper) {
         this.repository = userRepository;
+        this.userMapper = userMapper;
+        this.userInstitutionAggregationMapper = userInstitutionAggregationMapper;
     }
 
     @Override
     public List<OnboardedUser> findAll() {
-        return repository.findAll().stream().map(UserMapper::toOnboardedUser).collect(Collectors.toList());
+        return repository.findAll().stream().map(userMapper::toOnboardedUser).collect(Collectors.toList());
     }
 
     @Override
@@ -59,7 +66,7 @@ public class UserConnectorImpl implements UserConnector {
     @Override
     public OnboardedUser findById(String userId) {
         Optional<UserEntity> entityOpt = repository.findById(userId);
-        return entityOpt.map(UserMapper::toOnboardedUser)
+        return entityOpt.map(userMapper::toOnboardedUser)
                 .orElseThrow(() -> {
                     log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
                     throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
@@ -67,9 +74,9 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public OnboardedUser save(OnboardedUser example) {
-        final UserEntity entity = UserMapper.toUserEntity(example);
-        return UserMapper.toOnboardedUser(repository.save(entity));
+    public OnboardedUser save(OnboardedUser onboardedUser) {
+        final UserEntity entity = userMapper.toUserEntity(onboardedUser);
+        return userMapper.toOnboardedUser(repository.save(entity));
     }
 
     @Override
@@ -78,7 +85,7 @@ public class UserConnectorImpl implements UserConnector {
         Set<String> userIds = new HashSet<>(users);
         repository.findAllById(users)
                 .forEach(userEntity -> {
-                    userList.add(UserMapper.toOnboardedUser(userEntity));
+                    userList.add(userMapper.toOnboardedUser(userEntity));
                     userIds.remove(userEntity.getId());
                 });
         if (users.size() != userList.size()) {
@@ -133,7 +140,7 @@ public class UserConnectorImpl implements UserConnector {
         update.set(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now());
         update.set(UserEntity.Fields.createdAt.name(), OffsetDateTime.now());
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true).returnNew(true);
-        return UserMapper.toOnboardedUser(repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class));
+        return userMapper.toOnboardedUser(repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class));
     }
 
     @Override
@@ -149,7 +156,7 @@ public class UserConnectorImpl implements UserConnector {
 
         return repository.find(query, UserEntity.class).stream()
                 .findFirst()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
                         GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
@@ -161,7 +168,7 @@ public class UserConnectorImpl implements UserConnector {
                         .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)));
 
         return repository.find(query, UserEntity.class).stream()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .collect(Collectors.toList());
     }
 
@@ -174,7 +181,7 @@ public class UserConnectorImpl implements UserConnector {
         }
 
         return repository.find(new Query(criteria), UserEntity.class).stream()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .collect(Collectors.toList());
     }
 
@@ -186,7 +193,7 @@ public class UserConnectorImpl implements UserConnector {
 
         return repository.find(query, UserEntity.class).stream()
                 .findFirst()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId),
                         RELATIONSHIP_ID_NOT_FOUND.getCode()));
     }
@@ -221,7 +228,7 @@ public class UserConnectorImpl implements UserConnector {
 
             FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
             repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
-            updatedUsersBindings.add(UserMapper.toOnboardedUser(repository.findAndModify(query, updateUserEntityUpdatedAt, findAndModifyOptions, UserEntity.class)));
+            updatedUsersBindings.add(userMapper.toOnboardedUser(repository.findAndModify(query, updateUserEntityUpdatedAt, findAndModifyOptions, UserEntity.class)));
         });
 
         return updatedUsersBindings;
@@ -229,7 +236,11 @@ public class UserConnectorImpl implements UserConnector {
 
     @Override
     public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter){
-        return UserMapper.toUserInstitutionAggregation(repository.findUserInstitutionAggregation(filter, UserInstitutionAggregationEntity.class));
+        List<UserInstitutionAggregationEntity> userInstitutionAggregationEntities =
+                repository.findUserInstitutionAggregation(filter, UserInstitutionAggregationEntity.class);
+        return userInstitutionAggregationEntities.stream()
+                .map(userInstitutionAggregationMapper::constructUserInstitutionAggregation)
+                .collect(Collectors.toList());
     }
 
     private Criteria constructElemMatch(String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> productRoles, List<String> products) {
