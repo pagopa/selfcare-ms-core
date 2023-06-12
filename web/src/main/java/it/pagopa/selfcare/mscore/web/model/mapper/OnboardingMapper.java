@@ -4,6 +4,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.PaAttributes;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
