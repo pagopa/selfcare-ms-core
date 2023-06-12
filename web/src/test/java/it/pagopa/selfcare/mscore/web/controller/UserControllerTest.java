@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.web.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -157,17 +158,8 @@ class UserControllerTest {
      */
     @Test
     void testGetRelationship2() throws Exception {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
 
-        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?",
-                billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?", "?", "?", "jane.doe@example.org",
-                "6625550144", true, null, null, null, null);
+        Institution institution = TestUtils.createSimpleInstitutionPA();;
         institution.setSupportPhone("8605550118");
         institution.setSupportEmail("john.smith@example.org");
         institution.setBusinessRegisterPlace("U");
@@ -197,8 +189,9 @@ class UserControllerTest {
                         .string(
                                 "{\"to\":\"?\",\"from\":\"?\",\"institutionUpdate\":{\"institutionType\":\"PG\",\"description\":\"?\",\"digitalAddress\":\"17"
                                         + " High St\",\"address\":\"17 High St\",\"taxCode\":\"U\",\"zipCode\":\"OX1 1PT\",\"paymentServiceProvider\":{\"abiCode"
-                                        + "\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"?\",\"vatNumberGroup"
-                                        + "\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},"
+                                        + "\":\""+institution.getPaymentServiceProvider().getAbiCode()+"\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\"," +
+                                        "\"legalRegisterName\":\""+institution.getPaymentServiceProvider().getLegalRegisterName()+"\",\"vatNumberGroup"
+                                        + "\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\""+institution.getDataProtectionOfficer().getPec()+"\"},"
                                         + "\"geographicTaxonomyCodes\":[],\"rea\":\"U\",\"shareCapital\":\"U\",\"businessRegisterPlace\":\"U\",\"supportEmail\""
                                         + ":\"john.smith@example.org\",\"supportPhone\":\"8605550118\",\"imported\":false}}"));
     }

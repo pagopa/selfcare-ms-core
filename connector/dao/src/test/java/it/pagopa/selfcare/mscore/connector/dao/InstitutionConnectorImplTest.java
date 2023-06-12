@@ -2,6 +2,8 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapper;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapperImpl;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -37,6 +39,9 @@ class InstitutionConnectorImplTest {
 
     @Mock
     InstitutionRepository institutionRepository;
+
+    @Spy
+    InstitutionEntityMapper institutionMapper = new InstitutionEntityMapperImpl();
 
     @Captor
     ArgumentCaptor<Query> queryArgumentCaptor;
