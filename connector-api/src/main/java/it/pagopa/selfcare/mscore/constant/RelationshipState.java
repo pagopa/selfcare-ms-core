@@ -1,10 +1,10 @@
 package it.pagopa.selfcare.mscore.constant;
 
 public enum RelationshipState {
-    PENDING,
     ACTIVE,
+    PENDING,
+    TOBEVALIDATED,
     SUSPENDED,
     DELETED,
-    TOBEVALIDATED,
     REJECTED
 }

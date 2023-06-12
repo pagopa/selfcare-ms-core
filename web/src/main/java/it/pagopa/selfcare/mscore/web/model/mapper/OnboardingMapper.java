@@ -1,9 +1,10 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.constant.TokenType;
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -19,61 +20,6 @@ import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toPay
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
-
-    public static OnboardingRequest toOnboardingRequest(OnboardingInstitutionRequest onboardingInstitutionRequest) {
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setTokenType(TokenType.INSTITUTION);
-        onboardingRequest.setProductId(onboardingInstitutionRequest.getProductId());
-        onboardingRequest.setProductName(onboardingInstitutionRequest.getProductName());
-        onboardingRequest.setInstitutionExternalId(onboardingInstitutionRequest.getInstitutionExternalId());
-        onboardingRequest.setPricingPlan(onboardingInstitutionRequest.getPricingPlan());
-
-        if (onboardingInstitutionRequest.getBilling() != null)
-            onboardingRequest.setBillingRequest(InstitutionMapper.toBilling(onboardingInstitutionRequest.getBilling()));
-        if (onboardingInstitutionRequest.getContract() != null)
-            onboardingRequest.setContract(toContract(onboardingInstitutionRequest.getContract()));
-        if (onboardingInstitutionRequest.getUsers() != null)
-            onboardingRequest.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionRequest.getUsers()));
-        if (onboardingInstitutionRequest.getInstitutionUpdate() != null)
-            onboardingRequest.setInstitutionUpdate(toInstitutionUpdate(onboardingInstitutionRequest.getInstitutionUpdate()));
-
-        onboardingRequest.setContractFilePath(Objects.nonNull(onboardingInstitutionRequest.getContractImported())
-            ? onboardingInstitutionRequest.getContractImported().getFilePath() : null);
-
-        onboardingRequest.setContractCreatedAt(Objects.nonNull(onboardingInstitutionRequest.getContractImported())
-            ? onboardingInstitutionRequest.getContractImported().getCreatedAt() : null);
-
-        return onboardingRequest;
-    }
-
-    private static InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request) {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setInstitutionType(request.getInstitutionType());
-        institutionUpdate.setDescription(request.getDescription());
-        institutionUpdate.setDigitalAddress(request.getDigitalAddress());
-        institutionUpdate.setAddress(request.getAddress());
-        institutionUpdate.setTaxCode(request.getTaxCode());
-        institutionUpdate.setZipCode(request.getZipCode());
-        if (request.getPaymentServiceProvider() != null) {
-            institutionUpdate.setPaymentServiceProvider(toPaymentServiceProvider(request.getPaymentServiceProvider()));
-        }
-        if (request.getDataProtectionOfficer() != null) {
-            institutionUpdate.setDataProtectionOfficer(toDataProtectionOfficer(request.getDataProtectionOfficer()));
-        }
-        if (request.getGeographicTaxonomyCodes() != null) {
-            var codes = request.getGeographicTaxonomyCodes().stream()
-                    .map(s -> new InstitutionGeographicTaxonomies(s,null))
-                    .collect(Collectors.toList());
-            institutionUpdate.setGeographicTaxonomies(codes);
-        }
-        institutionUpdate.setRea(institutionUpdate.getRea());
-        institutionUpdate.setShareCapital(institutionUpdate.getShareCapital());
-        institutionUpdate.setBusinessRegisterPlace(institutionUpdate.getBusinessRegisterPlace());
-        institutionUpdate.setSupportEmail(institutionUpdate.getSupportEmail());
-        institutionUpdate.setSupportPhone(institutionUpdate.getSupportPhone());
-        institutionUpdate.setImported(request.isImported());
-        return institutionUpdate;
-    }
 
     private static Contract toContract(ContractRequest request) {
         Contract contract = new Contract();
