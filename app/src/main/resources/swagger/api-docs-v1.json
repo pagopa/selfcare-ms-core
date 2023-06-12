@@ -2161,6 +2161,68 @@
         } ]
       }
     },
+    "/bulk/institutions" : {
+      "post" : {
+        "tags" : [ "Management" ],
+        "summary" : "Gets the corresponding institution using internal institution id",
+        "description" : "Gets the corresponding institution using internal institution id",
+        "operationId" : "retrieveInstitutionByIdsUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/BulkPartiesSeed"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/BulkInstitutions"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/external/institutions/product/{productId}" : {
       "get" : {
         "tags" : [ "Management" ],
@@ -3921,6 +3983,104 @@
           },
           "vatNumber" : {
             "type" : "string"
+          }
+        }
+      },
+      "BulkInstitution" : {
+        "title" : "BulkInstitution",
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "attributes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AttributesResponse"
+            }
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "digitalAddress" : {
+            "type" : "string"
+          },
+          "externalId" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "institutionType" : {
+            "type" : "string",
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+          },
+          "origin" : {
+            "type" : "string"
+          },
+          "originId" : {
+            "type" : "string"
+          },
+          "products" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/BulkProduct"
+            }
+          },
+          "taxCode" : {
+            "type" : "string"
+          },
+          "zipCode" : {
+            "type" : "string"
+          }
+        }
+      },
+      "BulkInstitutions" : {
+        "title" : "BulkInstitutions",
+        "type" : "object",
+        "properties" : {
+          "found" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/BulkInstitution"
+            }
+          },
+          "notFound" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "BulkPartiesSeed" : {
+        "title" : "BulkPartiesSeed",
+        "type" : "object",
+        "properties" : {
+          "partyIdentifiers" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "BulkProduct" : {
+        "title" : "BulkProduct",
+        "type" : "object",
+        "properties" : {
+          "billing" : {
+            "$ref" : "#/components/schemas/BillingResponse"
+          },
+          "pricingPlan" : {
+            "type" : "string"
+          },
+          "product" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           }
         }
       },

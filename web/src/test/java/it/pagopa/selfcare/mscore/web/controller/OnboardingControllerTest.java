@@ -18,6 +18,10 @@ import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionUpdateMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionUpdateMapperImpl;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
@@ -27,7 +31,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
@@ -63,7 +69,15 @@ class OnboardingControllerTest {
     @Mock
     TokenService tokenService;
 
+    @Spy
+    @InjectMocks
+    OnboardingResourceMapper onboardingResourceMapper = new OnboardingResourceMapperImpl();
+
+    @Spy
+    InstitutionUpdateMapper institutionUpdateMapper = new InstitutionUpdateMapperImpl();
+
     ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Test
     void onboardingInstitutionOperators() throws Exception {
