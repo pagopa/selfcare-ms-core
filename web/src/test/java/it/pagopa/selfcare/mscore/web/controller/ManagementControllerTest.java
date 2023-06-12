@@ -87,7 +87,7 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
 
@@ -125,7 +125,7 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
 
@@ -166,7 +166,7 @@ class ManagementControllerTest {
                                         + "\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographi"
                                         + "cTaxonomies\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\""
                                         + ":null,\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported"
-                                        + "\":false,\"createdAt\":null,\"updatedAt\":null}]}"));
+                                        + "\":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}]}"));
     }
 
 
@@ -308,7 +308,7 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
 
@@ -330,7 +330,7 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
     /**
@@ -356,7 +356,7 @@ class ManagementControllerTest {
                                         + "\"legalRegisterName\":\""+institution.getPaymentServiceProvider().getLegalRegisterName()+"\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email"
                                         + "\":\"jane.doe@example.org\",\"pec\":\""+institution.getDataProtectionOfficer().getPec()+"\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\"," +
                                         "\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\":false,\"createdAt\":null,\"updatedAt\":null"
-                                        + "}"));
+                                        + ",\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
     /**
@@ -396,7 +396,7 @@ class ManagementControllerTest {
                                         + "\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographi"
                                         + "cTaxonomies\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\""
                                         + ":null,\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported"
-                                        + "\":false,\"createdAt\":null,\"updatedAt\":null}]}"));
+                                        + "\":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}]}"));
     }
 
 

@@ -3324,14 +3324,7 @@
         } ],
         "responses" : {
           "204" : {
-            "description" : "No Content",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/OnboardingInfoResponse"
-                }
-              }
-            }
+            "description" : "No Content"
           },
           "400" : {
             "description" : "Bad Request",
@@ -4143,6 +4136,9 @@
           "originId" : {
             "type" : "string"
           },
+          "paAttributes" : {
+            "$ref" : "#/components/schemas/PaAttributes"
+          },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProvider"
           },
@@ -4183,6 +4179,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "billing" : {
             "$ref" : "#/components/schemas/BillingResponse"
           },
@@ -4204,12 +4203,18 @@
           },
           "origin" : {
             "type" : "string",
-            "enum" : [ "ADE", "INFOCAMERE", "IPA", "SELC", "UNKNOWN", "static" ]
+            "enum" : [ "ADE", "INFOCAMERE", "IPA", "MOCK", "SELC", "UNKNOWN" ]
           },
           "originId" : {
             "type" : "string"
           },
           "pricingPlan" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "taxCode" : {
@@ -4265,6 +4270,9 @@
         "type" : "object",
         "properties" : {
           "address" : {
+            "type" : "string"
+          },
+          "aooParentCode" : {
             "type" : "string"
           },
           "attributes" : {
@@ -4327,6 +4335,12 @@
             "type" : "string"
           },
           "shareCapital" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "supportEmail" : {
@@ -4526,6 +4540,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "attributes" : {
             "type" : "array",
             "items" : {
@@ -4576,6 +4593,12 @@
             "type" : "string"
           },
           "shareCapital" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "supportEmail" : {
@@ -4721,6 +4744,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "businessRegisterPlace" : {
             "type" : "string"
           },
@@ -4753,6 +4779,12 @@
             "type" : "string"
           },
           "shareCapital" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "supportEmail" : {
@@ -4977,6 +5009,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "attributes" : {
             "type" : "array",
             "items" : {
@@ -5034,6 +5069,12 @@
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
           },
           "state" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "supportContact" : {
@@ -5369,6 +5410,15 @@
             "items" : {
               "$ref" : "#/components/schemas/OnboardingResponse"
             }
+          }
+        }
+      },
+      "PaAttributes" : {
+        "title" : "PaAttributes",
+        "type" : "object",
+        "properties" : {
+          "aooParentCode" : {
+            "type" : "string"
           }
         }
       },
