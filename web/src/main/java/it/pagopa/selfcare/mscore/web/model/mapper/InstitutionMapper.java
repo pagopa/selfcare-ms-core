@@ -24,7 +24,7 @@ public class InstitutionMapper {
         InstitutionResponse institutionResponse = new InstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setOrigin(institutionResponse.getOrigin());
+        institutionResponse.setOrigin(institution.getOrigin());
         institutionResponse.setOriginId(institution.getOriginId());
         institutionResponse.setDescription(institution.getDescription());
         institutionResponse.setInstitutionType(institution.getInstitutionType());
