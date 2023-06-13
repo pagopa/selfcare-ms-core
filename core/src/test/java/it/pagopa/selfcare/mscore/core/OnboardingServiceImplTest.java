@@ -54,6 +54,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OnboardingServiceImplTest {
 
+
     @Mock
     private ContractService contractService;
     @Mock
@@ -196,7 +197,7 @@ class OnboardingServiceImplTest {
 
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#completeOboarding(Token, MultipartFile)}
+     * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
      */
     @Test
     void shouldThrowExceptionCompleteOnboarding() {
@@ -206,12 +207,12 @@ class OnboardingServiceImplTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of(new Institution()));
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.completeOboarding(token,
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.completeOnboarding(token,
                 new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#completeOboarding(Token, MultipartFile)}
+     * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
      */
     @Test
     void testCompleteOnboarding() {
@@ -223,7 +224,7 @@ class OnboardingServiceImplTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
 
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOboarding(token,
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboarding(token,
                 new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
     }
 
@@ -1360,6 +1361,7 @@ class OnboardingServiceImplTest {
 
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitutionComplete(onboardingRequest, mock(SelfCareUser.class)));
     }
+
 
 }
 

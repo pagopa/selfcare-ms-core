@@ -610,7 +610,7 @@ class OnboardingControllerTest {
      */
     @Test
     void testCompleteOnboarding() throws Exception {
-        doNothing().when(onboardingService).completeOboarding(any(), any());
+        doNothing().when(onboardingService).completeOnboarding(any(), any());
         MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .multipart("/onboarding/complete/{tokenId}",
@@ -746,7 +746,7 @@ class OnboardingControllerTest {
 
     @Test
     public void testConsumeToken() throws Exception {
-        doNothing().when(onboardingService).completeOboardingWithoutSignatureVerification(any(), any());
+        doNothing().when(onboardingService).completeOnboardingWithoutSignatureVerification(any(), any());
         MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .multipart("/onboarding/{tokenId}/consume",

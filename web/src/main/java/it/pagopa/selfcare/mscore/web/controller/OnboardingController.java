@@ -194,7 +194,7 @@ public class OnboardingController {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding tokenId = {}, contract = {}", tokenId, contract);
         CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
-        onboardingService.completeOboarding(token, contract);
+        onboardingService.completeOnboarding(token, contract);
         log.trace("completeOnboarding end");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -343,7 +343,7 @@ public class OnboardingController {
     }
 
     /**
-     * The function consume token onboarding request without verify method
+     * Consume onboarding tokens requested without signature verification
      *
      * @param tokenId String
      * @param contract MultipartFile
@@ -362,7 +362,7 @@ public class OnboardingController {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "consumeToken tokenId = {}, contract = {}", tokenId, contract);
         CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
-        onboardingService.completeOboardingWithoutSignatureVerification(token, contract);
+        onboardingService.completeOnboardingWithoutSignatureVerification(token, contract);
         log.trace("consumeToken end");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

@@ -124,18 +124,18 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .onboardingInstitution(request, principal);
     }
     @Override
-    public void completeOboarding(Token token, MultipartFile contract){
+    public void completeOnboarding(Token token, MultipartFile contract){
         Consumer<List<User>> verification = users -> contractService.verifySignature(contract, token, users);
-        this.completeOboarding(token, contract, verification);
+        this.completeOnboarding(token, contract, verification);
     }
 
     @Override
-    public void completeOboardingWithoutSignatureVerification(Token token, MultipartFile contract){
-        Consumer<List<User>> verification = ignored -> {};
-        this.completeOboarding(token, contract, verification);
+    public void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract){
+        Consumer<List<User>> verification = users -> contractService.verifySignature(contract, token, users);
+        this.completeOnboarding(token, contract, verification);
     }
 
-    public void completeOboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
+    public void completeOnboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
         log.trace("completeOnboarding start");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOboarding token = {} contract = {}", token, contract);
         checkAndHandleExpiring(token);

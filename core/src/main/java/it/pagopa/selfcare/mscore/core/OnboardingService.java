@@ -20,11 +20,11 @@ public interface OnboardingService {
 
     void onboardingInstitutionComplete(OnboardingRequest request, SelfCareUser principal);
 
-    void completeOboarding(Token token, MultipartFile contract);
+    void completeOnboarding(Token token, MultipartFile contract);
 
     void invalidateOnboarding(Token token);
 
-    void completeOboardingWithoutSignatureVerification(Token token, MultipartFile contract);
+    void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract);
 
     void approveOnboarding(Token token, SelfCareUser selfCareUser);
 
