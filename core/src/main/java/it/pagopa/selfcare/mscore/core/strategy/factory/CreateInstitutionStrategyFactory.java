@@ -12,7 +12,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import org.springframework.security.core.parameters.P;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -24,6 +24,8 @@ import java.util.function.Function;
 
 @Component
 public class CreateInstitutionStrategyFactory {
+
+    private static final String TYPE_MAIL_PEC = "Pec";
 
     private final InstitutionConnector institutionConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
@@ -107,7 +109,8 @@ public class CreateInstitutionStrategyFactory {
 
             newInstitution.setOriginId( areaOrganizzativaOmogenea.getId() );
             newInstitution.setDescription( areaOrganizzativaOmogenea.getDenominazioneAoo() );
-            newInstitution.setDigitalAddress( areaOrganizzativaOmogenea.getMail1() );
+            newInstitution.setDigitalAddress( TYPE_MAIL_PEC.equals(areaOrganizzativaOmogenea.getTipoMail1())
+                    ? areaOrganizzativaOmogenea.getMail1() : institutionProxyInfo.getDigitalAddress());
             newInstitution.setAddress( areaOrganizzativaOmogenea.getIndirizzo() );
             newInstitution.setZipCode( areaOrganizzativaOmogenea.getCAP() );
             newInstitution.setTaxCode( areaOrganizzativaOmogenea.getCodiceFiscaleEnte() );
@@ -144,16 +147,19 @@ public class CreateInstitutionStrategyFactory {
 
             newInstitution.setOriginId( unitaOrganizzativa.getId() );
             newInstitution.setDescription( unitaOrganizzativa.getDescrizioneUo() );
-            newInstitution.setDigitalAddress( unitaOrganizzativa.getMail1() );
+            newInstitution.setDigitalAddress( TYPE_MAIL_PEC.equals(unitaOrganizzativa.getTipoMail1())
+                    ? unitaOrganizzativa.getMail1() : institutionProxyInfo.getDigitalAddress() );
             newInstitution.setAddress( unitaOrganizzativa.getIndirizzo() );
             newInstitution.setZipCode( unitaOrganizzativa.getCAP() );
             newInstitution.setTaxCode( unitaOrganizzativa.getCodiceFiscaleEnte() );
             newInstitution.setSubunitCode(strategyInput.getSubunitCode());
             newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
 
-            PaAttributes paAttributes = new PaAttributes();
-            paAttributes.setAooParentCode(unitaOrganizzativa.getCodiceUniAoo());
-            newInstitution.setPaAttributes(paAttributes);
+            if(StringUtils.isNotBlank(unitaOrganizzativa.getCodiceUniAoo())) {
+                PaAttributes paAttributes = new PaAttributes();
+                paAttributes.setAooParentCode(unitaOrganizzativa.getCodiceUniAoo());
+                newInstitution.setPaAttributes(paAttributes);
+            }
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
             newInstitution.setOrigin(Optional.ofNullable(unitaOrganizzativa.getOrigin())

@@ -13,6 +13,7 @@ public class AreaOrganizzativaOmogenea {
     private String codiceUniAoo;
     private String denominazioneAoo;
     private String mail1;
+    private String tipoMail1;
     private String codAoo;
     private Origin origin;
     private String indirizzo;

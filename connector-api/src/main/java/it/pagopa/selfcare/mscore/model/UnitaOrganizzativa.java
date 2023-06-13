@@ -15,6 +15,7 @@ public class UnitaOrganizzativa {
     private String codiceUniAoo;
     private String descrizioneUo;
     private String mail1;
+    private String tipoMail1;
     private Origin origin;
     private String indirizzo;
     private String CAP;
