@@ -28,6 +28,7 @@ import java.util.List;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
 
+import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
