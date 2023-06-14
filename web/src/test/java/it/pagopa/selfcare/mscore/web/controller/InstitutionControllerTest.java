@@ -10,7 +10,8 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperImpl;
+
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapperImpl;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ class InstitutionControllerTest {
     private OnboardingResourceMapper onboardingResourceMapper = new OnboardingResourceMapperImpl();
 
     @Spy
-    private InstitutionResourceMapper institutionResourceMapper = new InstitutionMapperImpl();
+    private InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
