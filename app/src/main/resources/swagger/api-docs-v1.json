@@ -3386,7 +3386,14 @@
         } ],
         "responses" : {
           "204" : {
-            "description" : "No Content"
+            "description" : "No Content",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardingInfoResponse"
+                }
+              }
+            }
           },
           "400" : {
             "description" : "Bad Request",

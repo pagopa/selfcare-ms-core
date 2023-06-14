@@ -252,7 +252,7 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.reject}", notes = "${swagger.mscore.onboarding.reject}")
     @DeleteMapping(value = "/reject/{tokenId}")
-    public ResponseEntity<Void> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
+    public ResponseEntity<OnboardingInfoResponse> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
                                                                    @PathVariable("tokenId") String tokenId) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         Token token = tokenService.verifyToken(tokenId);
