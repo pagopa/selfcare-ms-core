@@ -191,6 +191,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionConnector.save(newInstitution);
     }
 
+    @Deprecated
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkIfAlreadyExists(externalId);

@@ -335,11 +335,11 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw() throws Exception {
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
+    void testCreateInstitution() throws Exception {
+        when(institutionService.createInstitution(any())).thenReturn(new Institution());
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -384,10 +384,10 @@ class InstitutionControllerTest {
 
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw2() throws Exception {
+    void testCreateInstitution2() throws Exception {
         Billing billing = new Billing();
         billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
@@ -421,7 +421,7 @@ class InstitutionControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(institution);
+        when(institutionService.createInstitution(any())).thenReturn(institution);
 
         AttributesRequest attributesRequest = new AttributesRequest();
         attributesRequest.setCode("?");
@@ -466,10 +466,10 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw3() throws Exception {
+    void testCreateInstitution3() throws Exception {
         Billing billing = new Billing();
         billing.setPublicServices(true);
         billing.setRecipientCode("Recipient Code");
@@ -503,7 +503,7 @@ class InstitutionControllerTest {
         institution.setPaymentServiceProvider(paymentServiceProvider);
         institution.setTaxCode("Tax Code");
         institution.setZipCode("21654");
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(institution);
+        when(institutionService.createInstitution(any())).thenReturn(institution);
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -548,11 +548,11 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw4() throws Exception {
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
+    void testCreateInstitution4() throws Exception {
+        when(institutionService.createInstitution(any())).thenReturn(new Institution());
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -590,11 +590,11 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw5() throws Exception {
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
+    void testCreateInstitution5() throws Exception {
+        when(institutionService.createInstitution(any())).thenReturn(new Institution());
 
         AttributesRequest attributesRequest = new AttributesRequest();
         attributesRequest.setCode("?");
@@ -640,11 +640,11 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw6() throws Exception {
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
+    void testCreateInstitution6() throws Exception {
+        when(institutionService.createInstitution(any())).thenReturn(new Institution());
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");
@@ -690,11 +690,11 @@ class InstitutionControllerTest {
 
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw9() throws Exception {
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
+    void testCreateInstitution9() throws Exception {
+        when(institutionService.createInstitution(any())).thenReturn(new Institution());
 
         AttributesRequest attributesRequest = new AttributesRequest();
         attributesRequest.setCode("?");
@@ -746,11 +746,11 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionRaw(String, InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
      */
     @Test
-    void testCreateInstitutionRaw10() throws Exception {
-        when(institutionService.createInstitutionRaw(any(), any())).thenReturn(new Institution());
+    void testCreateInstitution10() throws Exception {
+        when(institutionService.createInstitution(any())).thenReturn(new Institution());
 
         DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
         dataProtectionOfficerRequest.setAddress("42 Main St");

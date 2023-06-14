@@ -162,7 +162,7 @@ public class InstitutionController {
                                                                     @PathVariable("externalId") String externalId,
                                                                     @RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
-        Institution saved = institutionService.createInstitutionRaw(InstitutionMapperCustom.toInstitution(institution, externalId), externalId);
+        Institution saved = institutionService.createInstitution(InstitutionMapperCustom.toInstitution(institution, null));
         return ResponseEntity.ok(InstitutionMapperCustom.toInstitutionResponse(saved));
     }
 
