@@ -12,12 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toDataProtectionOfficer;
-import static it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper.toPaymentServiceProvider;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
@@ -61,13 +56,13 @@ public class OnboardingMapper {
         institutionResponse.setZipCode(institution.getZipCode());
         institutionResponse.setTaxCode(institution.getTaxCode());
         if (institution.getGeographicTaxonomies() != null) {
-            institutionResponse.setGeographicTaxonomies(InstitutionMapper.toGeoTaxonomies(institution.getGeographicTaxonomies()));
+            institutionResponse.setGeographicTaxonomies(InstitutionMapperCustom.toGeoTaxonomies(institution.getGeographicTaxonomies()));
         }
         if (institution.getAttributes() != null) {
-            institutionResponse.setAttributes(InstitutionMapper.toAttributeResponse(institution.getAttributes()));
+            institutionResponse.setAttributes(InstitutionMapperCustom.toAttributeResponse(institution.getAttributes()));
         }
         institutionResponse.setPricingPlan(onboarding.getPricingPlan());
-        Billing billing = InstitutionMapper.getBillingFromOnboarding(onboarding, institution);
+        Billing billing = InstitutionMapperCustom.getBillingFromOnboarding(onboarding, institution);
         institutionResponse.setBilling(billing);
         ProductInfo productInfo = new ProductInfo();
         productInfo.setRole(product.getProductRole());
@@ -78,8 +73,8 @@ public class OnboardingMapper {
         institutionResponse.setProductInfo(productInfo);
         institutionResponse.setBusinessData(new BusinessData(institution.getRea(), institution.getShareCapital(), institution.getBusinessRegisterPlace()));
         institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail(), institution.getSupportPhone()));
-        institutionResponse.setPaymentServiceProvider(InstitutionMapper.toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
-        institutionResponse.setDataProtectionOfficer(InstitutionMapper.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
+        institutionResponse.setPaymentServiceProvider(InstitutionMapperCustom.toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
+        institutionResponse.setDataProtectionOfficer(InstitutionMapperCustom.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
 
         institutionResponse.setSubunitCode(institution.getSubunitCode());
         institutionResponse.setSubunitType(institution.getSubunitType());

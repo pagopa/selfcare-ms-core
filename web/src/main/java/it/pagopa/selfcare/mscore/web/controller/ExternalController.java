@@ -18,7 +18,7 @@ import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerRespons
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPnPgResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperCustom;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -77,7 +77,7 @@ public class ExternalController {
                                                                @PathVariable("externalId") String externalId) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_EXTERNAL_ID_ERROR);
         Institution institution = externalService.getInstitutionByExternalId(externalId);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionResponse(institution));
     }
 
 
@@ -101,7 +101,7 @@ public class ExternalController {
                                                                                         @PathVariable("productId") String productId) {
         CustomExceptionMessage.setCustomMessage(INSTITUTION_MANAGER_ERROR);
         ProductManagerInfo manager = externalService.retrieveInstitutionManager(externalId, productId);
-        return ResponseEntity.ok(InstitutionMapper.toInstitutionManagerResponse(manager, productId));
+        return ResponseEntity.ok(InstitutionMapperCustom.toInstitutionManagerResponse(manager, productId));
     }
 
 
@@ -125,7 +125,7 @@ public class ExternalController {
                                                                                         @PathVariable("productId") String productId) {
         CustomExceptionMessage.setCustomMessage(INSTITUTION_BILLING_ERROR);
         Institution institution = externalService.retrieveInstitutionProduct(externalId, productId);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionBillingResponse(institution, productId));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionBillingResponse(institution, productId));
     }
 
 
@@ -148,7 +148,7 @@ public class ExternalController {
                                                                                      @RequestParam(value = "states", required = false) List<RelationshipState> states) {
         CustomExceptionMessage.setCustomMessage(GET_PRODUCTS_ERROR);
         List<Onboarding> page = externalService.retrieveInstitutionProductsByExternalId(externalId, states);
-        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(page));
+        return ResponseEntity.ok(InstitutionMapperCustom.toOnboardedProducts(page));
     }
 
     /**
@@ -234,6 +234,6 @@ public class ExternalController {
                                                                                   @RequestParam("ids") List<String> ids) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
         List<Institution> institution = externalService.retrieveInstitutionByIds(ids);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponseList(institution));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionResponseList(institution));
     }
 }

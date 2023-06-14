@@ -30,6 +30,8 @@ public interface InstitutionService {
 
     Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser);
 
+    Institution createInstitution(Institution institution);
+
     List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states);
 
     Institution retrieveInstitutionProduct(String externalId, String productId);

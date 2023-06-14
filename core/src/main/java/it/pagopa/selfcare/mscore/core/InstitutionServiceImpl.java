@@ -191,6 +191,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionConnector.save(newInstitution);
     }
 
+    @Deprecated
     @Override
     public Institution createInstitutionRaw(Institution institution, String externalId) {
         checkIfAlreadyExists(externalId);
@@ -202,6 +203,17 @@ public class InstitutionServiceImpl implements InstitutionService {
         } catch (Exception e) {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
+    }
+    @Override
+    public Institution createInstitution(Institution institution) {
+        return createInstitutionStrategyFactory.createInstitutionStrategy(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .subunitCode(institution.getSubunitCode())
+                        .subunitType(Optional.ofNullable(institution.getSubunitType())
+                                .map(InstitutionPaSubunitType::valueOf)
+                                .orElse(null))
+                        .build());
     }
 
     @Override
