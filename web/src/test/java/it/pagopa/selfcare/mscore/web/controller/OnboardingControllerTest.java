@@ -745,7 +745,7 @@ class OnboardingControllerTest {
     }
 
     @Test
-    public void testConsumeToken() throws Exception {
+    void testConsumeToken() throws Exception {
         doNothing().when(onboardingService).completeOnboardingWithoutSignatureVerification(any(), any());
         MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
