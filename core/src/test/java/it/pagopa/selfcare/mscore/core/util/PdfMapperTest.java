@@ -12,12 +12,12 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static it.pagopa.selfcare.mscore.core.util.TestUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -574,16 +574,7 @@ class PdfMapperTest {
         map1.put("42", workContact1);
         user.setWorkContacts(map1);
         ArrayList<User> users = new ArrayList<>();
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - setupCommonData",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "START - setupCommonData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
-                "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+        Institution institution = dummyInstitutionPa();
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -698,17 +689,8 @@ class PdfMapperTest {
         user.setId("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        PdfMapper.setupPSPData(stringObjectMap, user,
-                new Institution("42", "42", Origin.SELC.name(), "START - setupPSPData", "The characteristics of someone or something",
-                        InstitutionType.GSP, "42 Main St", "42 Main St", "21654", "START - setupPSPData", billing, onboarding,
-                        geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(), null, null,
-                        "START - setupPSPData", "START - setupPSPData", "START - setupPSPData", true,
-                        OffsetDateTime.now(), OffsetDateTime.now(), null, null));
+
+        PdfMapper.setupPSPData(stringObjectMap, user, dummyInstitutionGsp());
         assertEquals(8, stringObjectMap.size());
     }
 
@@ -950,16 +932,8 @@ class PdfMapperTest {
         user.setId("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - setupProdIOData",
-                "The characteristics of someone or something", InstitutionType.PT, "42 Main St", "42 Main St", "21654",
-                "START - setupProdIOData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer(), null, null, "START - setupProdIOData", "START - setupProdIOData",
-                "START - setupProdIOData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+
+        Institution institution = dummyInstitutionPt();
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);

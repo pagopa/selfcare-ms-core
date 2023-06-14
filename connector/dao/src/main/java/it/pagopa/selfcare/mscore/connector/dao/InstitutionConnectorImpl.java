@@ -4,7 +4,9 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapper;
+
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapperHelper;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -22,7 +24,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapper.addGeographicTaxonomies;
+import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapperHelper.addGeographicTaxonomies;
 import static it.pagopa.selfcare.mscore.constant.CustomError.GET_INSTITUTION_BILLING_ERROR;
 import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_NOT_FOUND;
 
@@ -34,27 +36,29 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     private static final String CURRENT_ONBOARDING_REFER = "$[current]";
 
     private final InstitutionRepository repository;
+    private final InstitutionEntityMapper institutionMapper;
 
-    public InstitutionConnectorImpl(InstitutionRepository repository) {
+    public InstitutionConnectorImpl(InstitutionRepository repository, InstitutionEntityMapper institutionMapper) {
         this.repository = repository;
+        this.institutionMapper = institutionMapper;
     }
 
     @Override
     public List<Institution> findAll(){
-        return repository.findAll().stream().map(InstitutionMapper::convertToInstitution).collect(Collectors.toList());
+        return repository.findAll().stream().map(institutionMapper::convertToInstitution).collect(Collectors.toList());
     }
 
     @Override
     public Institution save(Institution institution) {
-        final InstitutionEntity entity = InstitutionMapper.convertToInstitutionEntity(institution);
-        return InstitutionMapper.convertToInstitution(repository.save(entity));
+        final InstitutionEntity entity = institutionMapper.convertToInstitutionEntity(institution);
+        return institutionMapper.convertToInstitution(repository.save(entity));
     }
 
     @Override
     public Institution saveOrRetrievePnPg(Institution institution) {
-        final InstitutionEntity entity = InstitutionMapper.convertToInstitutionEntity(institution);
+        final InstitutionEntity entity = institutionMapper.convertToInstitutionEntity(institution);
         return findByExternalId(institution.getExternalId())
-                .orElse(InstitutionMapper.convertToInstitution(repository.save(entity)));
+                .orElse(institutionMapper.convertToInstitution(repository.save(entity)));
     }
 
     @Override
@@ -77,7 +81,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         return repository.findById(id)
                 .map(institution -> {
                     log.info("Founded institution {}", institution.getExternalId());
-                    return InstitutionMapper.convertToInstitution(institution);
+                    return institutionMapper.convertToInstitution(institution);
                 })
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND.getMessage(), id, "UNDEFINED"), INSTITUTION_NOT_FOUND.getCode()));
     }
@@ -95,7 +99,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
             update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.closedAt.name()), now);
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
+        return institutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
     @Override
@@ -107,12 +111,12 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
             update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
         }
         if (institutionUpdate != null) {
-            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
+            Map<String, Object> map = InstitutionMapperHelper.getNotNullField(institutionUpdate);
             map.forEach(update::set);
         }
         addGeographicTaxonomies(geographicTaxonomiesList, update);
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
+        return institutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
     //TODO[SELC-2286]: refactor new onboarding (onboarding != null) and updates on onboarding (state and token != null) cause conflicts
@@ -137,13 +141,13 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         }
         InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
         if (institutionUpdate != null) {
-            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
+            Map<String, Object> map = InstitutionMapperHelper.getNotNullField(institutionUpdate);
             map.forEach(update::set);
             addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
         }
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
+        return institutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
 
@@ -156,20 +160,20 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
 
         if (institutionUpdate != null) {
-            Map<String, Object> map = InstitutionMapper.getNotNullField(institutionUpdate);
+            Map<String, Object> map = InstitutionMapperHelper.getNotNullField(institutionUpdate);
             map.forEach(update::set);
             addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
         }
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
+        return institutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }
 
     @Override
     public List<Institution> findByGeotaxonomies(List<String> geo, SearchMode searchMode) {
         Query query = constructQueryWithSearchMode(geo, searchMode);
         return repository.find(query, InstitutionEntity.class).stream()
-                .map(InstitutionMapper::convertToInstitution)
+                .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }
 
@@ -177,7 +181,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     public List<Institution> findByProductId(String productId) {
         Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId));
         return repository.find(query, InstitutionEntity.class).stream()
-                .map(InstitutionMapper::convertToInstitution)
+                .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }
 
@@ -185,7 +189,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     public List<Institution> findAllByIds(List<String> ids) {
         List<Institution> list = new ArrayList<>();
         repository.findAllById(ids)
-                .forEach(entity -> list.add(InstitutionMapper.convertToInstitution(entity)));
+                .forEach(entity -> list.add(institutionMapper.convertToInstitution(entity)));
         return list;
     }
 
@@ -195,7 +199,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .and(constructQuery(Onboarding.Fields.productId.name())).is(productId));
 
         return repository.find(query, InstitutionEntity.class).stream()
-                .map(InstitutionMapper::convertToInstitution)
+                .map(institutionMapper::convertToInstitution)
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_BILLING_ERROR.getMessage(), externalId, productId),
                         GET_INSTITUTION_BILLING_ERROR.getCode()));
     }
@@ -208,7 +212,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .ofNullable(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId))
             : repository.findById(institutionId);
         return optionalInstitution
-                .map(InstitutionMapper::convertToInstitution)
+                .map(institutionMapper::convertToInstitution)
                 .map(Institution::getOnboarding)
                 .orElse(List.of());
     }
@@ -231,7 +235,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                                 .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
                         ),
                         InstitutionEntity.class).stream()
-                .map(InstitutionMapper::convertToInstitution)
+                .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }
 
@@ -255,7 +259,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     public Optional<Institution> findByExternalId(String externalId) {
         return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.externalId.name()).is(externalId)),
                         InstitutionEntity.class).stream()
-                .map(InstitutionMapper::convertToInstitution)
+                .map(institutionMapper::convertToInstitution)
                 .findFirst();
     }
 
@@ -267,7 +271,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                                 .and(Onboarding.Fields.status.name()).in(validRelationshipStates)));
 
         return repository.find(query, InstitutionEntity.class).stream()
-                .map(InstitutionMapper::convertToInstitution)
+                .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }
 
@@ -285,7 +289,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
-        return InstitutionMapper.convertToInstitution(repository.findAndModify(query, updateInstitutionEntityUpdatedAt, findAndModifyOptions, InstitutionEntity.class));
+        return institutionMapper.convertToInstitution(repository.findAndModify(query, updateInstitutionEntityUpdatedAt, findAndModifyOptions, InstitutionEntity.class));
     }
 
 

@@ -11,16 +11,20 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class InstitutionMapper {
 
+    protected static final BinaryOperator<BulkProduct> MERGE_FUNCTION = (inst1, inst2) -> inst1.getStatus().compareTo(inst2.getStatus()) < 0 ? inst1 : inst2;
+
     public static InstitutionResponse toInstitutionResponse(Institution institution) {
         InstitutionResponse institutionResponse = new InstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setOrigin(institutionResponse.getOrigin());
+        institutionResponse.setOrigin(institution.getOrigin());
         institutionResponse.setOriginId(institution.getOriginId());
         institutionResponse.setDescription(institution.getDescription());
         institutionResponse.setInstitutionType(institution.getInstitutionType());
@@ -34,6 +38,9 @@ public class InstitutionMapper {
         institutionResponse.setSupportEmail(institution.getSupportEmail());
         institutionResponse.setSupportPhone(institution.getSupportPhone());
         institutionResponse.setImported(institution.isImported());
+        institutionResponse.setSubunitType(institution.getSubunitType());
+        institutionResponse.setSubunitCode(institution.getSubunitCode());
+        institutionResponse.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         if (institution.getGeographicTaxonomies() != null)
             institutionResponse.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
         if (institution.getAttributes() != null)
@@ -72,6 +79,10 @@ public class InstitutionMapper {
         response.setZipCode(institution.getZipCode());
         response.setTaxCode(institution.getTaxCode());
 
+        response.setSubunitCode(institution.getSubunitCode());
+        response.setSubunitType(institution.getSubunitType());
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
+
         for (Onboarding onboarding : institution.getOnboarding()) {
             if (productId.equalsIgnoreCase(onboarding.getProductId())) {
                 response.setBilling(toBillingResponse(onboarding.getBilling(), institution));
@@ -103,7 +114,12 @@ public class InstitutionMapper {
         institutionUpdate.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
         institutionUpdate.setSupportEmail(institution.getSupportEmail());
         institutionUpdate.setSupportPhone(institution.getSupportPhone());
-        institution.setImported(institution.isImported());
+        institutionUpdate.setImported(institution.isImported());
+
+        institutionUpdate.setSubunitCode(institution.getSubunitCode());
+        institutionUpdate.setSubunitType(institution.getSubunitType());
+        institutionUpdate.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
+
         return institutionUpdate;
     }
 
@@ -142,6 +158,9 @@ public class InstitutionMapper {
         institutionUpdate.setSupportEmail(institution.getSupportEmail());
         institutionUpdate.setSupportPhone(institution.getSupportPhone());
         institutionUpdate.setImported(institution.isImported());
+        institutionUpdate.setSubunitCode(institution.getSubunitCode());
+        institutionUpdate.setSubunitType(institution.getSubunitType());
+        institutionUpdate.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         if (institution.getGeographicTaxonomies() != null) {
             institutionUpdate.setGeographicTaxonomyCodes(convertToGeoString(institution.getGeographicTaxonomies()));
         }
@@ -395,6 +414,11 @@ public class InstitutionMapper {
         response.setImported(institution.isImported());
         response.setCreatedAt(institution.getCreatedAt());
         response.setUpdatedAt(institution.getUpdatedAt());
+
+        response.setSubunitCode(institution.getSubunitCode());
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
+        response.setSubunitType(institution.getSubunitType());
+
         return response;
     }
 
@@ -456,5 +480,47 @@ public class InstitutionMapper {
         return institutions.stream()
                 .map(institutionToOnboard -> new ValidInstitution(institutionToOnboard.getId(), institutionToOnboard.getDescription()))
                 .collect(Collectors.toList());
+    }
+
+    public static BulkInstitutions toBulkInstitutions(List<Institution> institution, List<String> idsRequest) {
+        BulkInstitutions bulkInstitutions = new BulkInstitutions();
+        bulkInstitutions.setFound(institution.stream()
+                .map(InstitutionMapper::toBulkInstitution)
+                .collect(Collectors.toList()));
+        bulkInstitutions.setNotFound(idsRequest.stream()
+                .filter(s -> institution.stream().noneMatch(inst -> inst.getId().equalsIgnoreCase(s)))
+                .collect(Collectors.toList()));
+        return bulkInstitutions;
+    }
+
+    private static BulkInstitution toBulkInstitution(Institution inst) {
+        BulkInstitution bulkInstitution = new BulkInstitution();
+        bulkInstitution.setId(inst.getId());
+        bulkInstitution.setExternalId(inst.getExternalId());
+        bulkInstitution.setOrigin(inst.getOrigin());
+        bulkInstitution.setOriginId(inst.getOriginId());
+        bulkInstitution.setDescription(inst.getDescription());
+        bulkInstitution.setInstitutionType(inst.getInstitutionType());
+        bulkInstitution.setDigitalAddress(inst.getDigitalAddress());
+        bulkInstitution.setAddress(inst.getAddress());
+        bulkInstitution.setZipCode(inst.getZipCode());
+        bulkInstitution.setTaxCode(inst.getTaxCode());
+        bulkInstitution.setAttributes(toAttributeResponse(inst.getAttributes()));
+        bulkInstitution.setProducts(toBulkProductMap(inst.getOnboarding(), inst));
+        return bulkInstitution;
+    }
+
+    private static Map<String, BulkProduct> toBulkProductMap(List<Onboarding> onboarding, Institution institution) {
+        if(onboarding != null && !onboarding.isEmpty()) {
+            return onboarding.stream().map(onb -> {
+                BulkProduct bulkProduct = new BulkProduct();
+                bulkProduct.setProduct(onb.getProductId());
+                bulkProduct.setPricingPlan(onb.getPricingPlan());
+                bulkProduct.setBilling(toBillingResponse(onb.getBilling(), institution));
+                bulkProduct.setStatus(onb.getStatus());
+                return bulkProduct;
+            }).collect(Collectors.toMap(BulkProduct::getProduct, Function.identity(), MERGE_FUNCTION));
+        }
+        return Collections.emptyMap();
     }
 }

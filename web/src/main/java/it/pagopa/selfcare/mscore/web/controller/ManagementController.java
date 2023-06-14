@@ -13,10 +13,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionListResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagementResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.RelationshipsManagement;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
@@ -26,14 +23,10 @@ import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_ATTRIBUTES_ERROR;
@@ -205,5 +198,16 @@ public class ManagementController {
         CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
         TokenRelationships tokenRelationships = tokenService.retrieveToken(tokenId);
         return ResponseEntity.ok().body(TokenMapper.toTokenResponse(tokenRelationships));
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
+    @PostMapping(value = "/bulk/institutions")
+    public ResponseEntity<BulkInstitutions> retrieveInstitutionByIds(@ApiParam("${swagger.mscore.institutions.model.internalIds}")
+                                                                              @RequestBody @Valid BulkPartiesSeed bulkPartiesSeed) {
+        CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
+        List<String> ids = new ArrayList<>(bulkPartiesSeed.getPartyIdentifiers());
+        List<Institution> institution = institutionService.retrieveInstitutionByIds(ids);
+        return ResponseEntity.ok().body(InstitutionMapper.toBulkInstitutions(institution, ids));
     }
 }

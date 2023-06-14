@@ -15,6 +15,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
@@ -43,9 +44,12 @@ public class OnboardingController {
     private final OnboardingService onboardingService;
     private final TokenService tokenService;
 
-    public OnboardingController(OnboardingService onboardingService, TokenService tokenService) {
+    private final OnboardingResourceMapper onboardingResourceMapper;
+
+    public OnboardingController(OnboardingService onboardingService, TokenService tokenService, OnboardingResourceMapper onboardingResourceMapper) {
         this.onboardingService = onboardingService;
         this.tokenService = tokenService;
+        this.onboardingResourceMapper = onboardingResourceMapper;
     }
 
     /**
@@ -143,7 +147,7 @@ public class OnboardingController {
     public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest request,
                                                       Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitution(OnboardingMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
+        onboardingService.onboardingInstitution(onboardingResourceMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -165,7 +169,7 @@ public class OnboardingController {
         log.trace("onboardingInstitutionComplete start");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "onboardingInstitutionComplete request = {}", request);
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitutionComplete(OnboardingMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
+        onboardingService.onboardingInstitutionComplete(onboardingResourceMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
         log.trace("onboardingInstitutionComplete end");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -248,7 +252,7 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.reject}", notes = "${swagger.mscore.onboarding.reject}")
     @DeleteMapping(value = "/reject/{tokenId}")
-    public ResponseEntity<OnboardingInfoResponse> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
+    public ResponseEntity<Void> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
                                                                    @PathVariable("tokenId") String tokenId) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         Token token = tokenService.verifyToken(tokenId);

@@ -4,34 +4,45 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InstitutionResponse {
+public class BulkInstitution {
 
+    @NotNull
     private String id;
-    private String externalId;
-    private String origin;
-    private String originId;
-    private String description;
-    private InstitutionType institutionType;
-    private String digitalAddress;
-    private String address;
-    private String zipCode;
-    private String taxCode;
-    private List<GeoTaxonomies> geographicTaxonomies;
-    private List<AttributesResponse> attributes;
-    private PaymentServiceProviderResponse paymentServiceProvider;
-    private DataProtectionOfficerResponse dataProtectionOfficer;
-    private String rea;
-    private String shareCapital;
-    private String businessRegisterPlace;
-    private String supportEmail;
-    private String supportPhone;
-    private boolean imported;
 
-    private String subunitCode;
-    private String subunitType;
-    private String aooParentCode;
+    @NotNull
+    private String externalId;
+
+    @NotNull
+    private String origin;
+
+    @NotNull
+    private String originId;
+
+    @NotNull
+    private String description;
+
+    private InstitutionType institutionType;
+
+    @NotNull
+    private String digitalAddress;
+
+    @NotNull
+    private String address;
+
+    @NotNull
+    private String zipCode;
+
+    @NotNull
+    private String taxCode;
+
+    private List<AttributesResponse> attributes;
+
+    @NotNull
+    private Map<String, BulkProduct> products;
 }

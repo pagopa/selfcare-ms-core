@@ -4,8 +4,10 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.TokenService;
@@ -23,11 +25,16 @@ import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.pagopa.selfcare.mscore.web.TestUtils;
+import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
+
+import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -86,43 +93,9 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
-    /**
-     * Method under test: {@link ManagementController#getInstitutionByExternalId(String)}
-     */
-    @Test
-    void testGetInstitutionByExternalId4() throws Exception {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
-
-        when(institutionService.retrieveInstitutionByExternalId(any()))
-                .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
-                        attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/management/external/institutions/{externalId}", "42");
-        MockMvcBuilders.standaloneSetup(managementController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"42\",\"description\":\"The characteristics of"
-                                        + " someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"products\":{},\"geographicTaxonomies\":[],\"attributes\":[],"
-                                        + "\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email"
-                                        + "\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail"
-                                        + "\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"createdAt\":null,\"updatedAt\":null"
-                                        + "}"));
-    }
 
     /**
      * Method under test: {@link ManagementController#getInstitutionByGeotaxonomies(String, SearchMode)}
@@ -158,42 +131,9 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
-    /**
-     * Method under test: {@link ManagementController#getInstitutionByInternalId(String)}
-     */
-    @Test
-    void testGetInstitutionByInternalId4() throws Exception {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
-
-        when(institutionService.retrieveInstitutionById(any()))
-                .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
-                        attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/management/institutions/{id}", "42");
-        MockMvcBuilders.standaloneSetup(managementController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"42\",\"description\":\"The characteristics of"
-                                        + " someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"products\":{},\"geographicTaxonomies\":[],\"attributes\":[],"
-                                        + "\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email"
-                                        + "\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail"
-                                        + "\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"createdAt\":null,\"updatedAt\":null"
-                                        + "}"));
-    }
 
     /**
      * Method under test: {@link ManagementController#getInstitutionByProductId(String)}
@@ -232,44 +172,9 @@ class ManagementControllerTest {
                                         + "\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographi"
                                         + "cTaxonomies\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\""
                                         + ":null,\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported"
-                                        + "\":false,\"createdAt\":null,\"updatedAt\":null}]}"));
+                                        + "\":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}]}"));
     }
 
-    /**
-     * Method under test: {@link ManagementController#getInstitutionByProductId(String)}
-     */
-    @Test
-    void testGetInstitutionByProductId6() throws Exception {
-        ArrayList<Institution> institutionList = new ArrayList<>();
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
-
-        institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
-                attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?",
-                "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
-        when(institutionService.findInstitutionsByProductId(any())).thenReturn(institutionList);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/external/institutions/product/{productId}", "42");
-        MockMvcBuilders.standaloneSetup(managementController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"items\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"42\",\"description\":\"The characteristics"
-                                        + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"products\":{},\"geographicTaxonomies\":[],\"attributes\":[],"
-                                        + "\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main"
-                                        + " St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\""
-                                        + ":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"createdAt\""
-                                        + ":null,\"updatedAt\":null}]}"));
-    }
 
     /**
      * Method under test: {@link ManagementController#getInstitutionRelationships(String, String, List, List, List, List)}
@@ -409,43 +314,9 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
-    /**
-     * Method under test: {@link ManagementController#getInstitutionByExternalId(String)}
-     */
-    @Test
-    void testGetInstitutionByExternalId2() throws Exception {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
-
-        when(institutionService.retrieveInstitutionByExternalId(any()))
-                .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
-                        attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/management/external/institutions/{externalId}", "42");
-        MockMvcBuilders.standaloneSetup(managementController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"42\",\"description\":\"The characteristics of"
-                                        + " someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"products\":{},\"geographicTaxonomies\":[],\"attributes\":[],"
-                                        + "\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email"
-                                        + "\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail"
-                                        + "\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"createdAt\":null,\"updatedAt\":null"
-                                        + "}"));
-    }
 
     /**
      * Method under test: {@link ManagementController#getInstitutionByInternalId(String)}
@@ -465,7 +336,7 @@ class ManagementControllerTest {
                                         + ",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographicTaxonomies"
                                         + "\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,"
                                         + "\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\""
-                                        + ":false,\"createdAt\":null,\"updatedAt\":null}"));
+                                        + ":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
     /**
@@ -473,17 +344,9 @@ class ManagementControllerTest {
      */
     @Test
     void testGetInstitutionByInternalId2() throws Exception {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
-
+        Institution institution = TestUtils.createSimpleInstitutionPA();
         when(institutionService.retrieveInstitutionById(any()))
-                .thenReturn(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                        InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
-                        attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"),
-                        "?", "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                .thenReturn(institution);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/management/institutions/{id}", "42");
         MockMvcBuilders.standaloneSetup(managementController)
                 .build()
@@ -492,14 +355,14 @@ class ManagementControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"42\",\"description\":\"The characteristics of"
+                                "{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of"
                                         + " someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"products\":{},\"geographicTaxonomies\":[],\"attributes\":[],"
-                                        + "\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email"
-                                        + "\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\":\"?\",\"supportEmail"
-                                        + "\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"createdAt\":null,\"updatedAt\":null"
-                                        + "}"));
+                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\""+institution.getTaxCode()+"\",\"products\":{},\"geographicTaxonomies\":[],\"attributes\":[],"
+                                        + "\"paymentServiceProvider\":{\"abiCode\":\""+institution.getPaymentServiceProvider().getAbiCode()+"\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
+                                        + "\"legalRegisterName\":\""+institution.getPaymentServiceProvider().getLegalRegisterName()+"\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email"
+                                        + "\":\"jane.doe@example.org\",\"pec\":\""+institution.getDataProtectionOfficer().getPec()+"\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\"," +
+                                        "\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\":false,\"createdAt\":null,\"updatedAt\":null"
+                                        + ",\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}"));
     }
 
     /**
@@ -539,44 +402,9 @@ class ManagementControllerTest {
                                         + "\":null,\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"products\":null,\"geographi"
                                         + "cTaxonomies\":null,\"attributes\":null,\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\""
                                         + ":null,\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported"
-                                        + "\":false,\"createdAt\":null,\"updatedAt\":null}]}"));
+                                        + "\":false,\"createdAt\":null,\"updatedAt\":null,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null}]}"));
     }
 
-    /**
-     * Method under test: {@link ManagementController#getInstitutionByProductId(String)}
-     */
-    @Test
-    void testGetInstitutionByProductId3() throws Exception {
-        ArrayList<Institution> institutionList = new ArrayList<>();
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("?", "42", "?", "42", true);
-
-        institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "?", billing, onboarding, geographicTaxonomies,
-                attributes, paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "?"), "?",
-                "?", "?", "jane.doe@example.org", "6625550144", true, null, null, null, null));
-        when(institutionService.findInstitutionsByProductId(any())).thenReturn(institutionList);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/external/institutions/product/{productId}", "42");
-        MockMvcBuilders.standaloneSetup(managementController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(
-                                "{\"items\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"42\",\"description\":\"The characteristics"
-                                        + " of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main"
-                                        + " St\",\"zipCode\":\"21654\",\"taxCode\":\"?\",\"products\":{},\"geographicTaxonomies\":[],\"attributes\":[],"
-                                        + "\"paymentServiceProvider\":{\"abiCode\":\"?\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\","
-                                        + "\"legalRegisterName\":\"?\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main"
-                                        + " St\",\"email\":\"jane.doe@example.org\",\"pec\":\"?\"},\"rea\":\"?\",\"shareCapital\":\"?\",\"businessRegisterPlace\""
-                                        + ":\"?\",\"supportEmail\":\"jane.doe@example.org\",\"supportPhone\":\"6625550144\",\"imported\":true,\"createdAt\""
-                                        + ":null,\"updatedAt\":null}]}"));
-    }
 
     /**
      * Method under test: {@link ManagementController#getInstitutionRelationships(String, String, List, List, List, List)}
@@ -637,6 +465,27 @@ class ManagementControllerTest {
     void testVerifyInstitution() throws Exception {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.head("/institutions/{id}", "42");
+        MockMvcBuilders.standaloneSetup(managementController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void testGetInstitutionsByIds() throws Exception {
+        BulkPartiesSeed bulkPartiesSeed = new BulkPartiesSeed();
+        bulkPartiesSeed.setPartyIdentifiers(List.of("42"));
+        ObjectMapper mapper = new ObjectMapper();
+        Institution institution = new Institution();
+        institution.setId("id");
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("productId");
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        institution.setOnboarding(List.of(onboarding));
+        when(institutionService.retrieveInstitutionByIds(any())).thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/bulk/institutions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(bulkPartiesSeed));
         MockMvcBuilders.standaloneSetup(managementController)
                 .build()
                 .perform(requestBuilder)

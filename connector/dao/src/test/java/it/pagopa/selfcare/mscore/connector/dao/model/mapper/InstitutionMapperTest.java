@@ -20,12 +20,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class InstitutionMapperTest {
+
+    private final InstitutionEntityMapper institutionEntityMapper = new InstitutionEntityMapperImpl();
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity() {
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(new Institution());
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -45,7 +47,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity2() {
@@ -57,7 +59,7 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributesList = new ArrayList<>();
         institution.setAttributes(attributesList);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -77,7 +79,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity3() {
@@ -96,7 +98,7 @@ class InstitutionMapperTest {
         institution.setOnboarding(null);
         institution.setAttributes(attributesList);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -122,7 +124,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity4() {
@@ -134,7 +136,7 @@ class InstitutionMapperTest {
         institution.setOnboarding(null);
         institution.setAttributes(null);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -161,7 +163,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity5() {
@@ -172,7 +174,7 @@ class InstitutionMapperTest {
         institution.setOnboarding(null);
         institution.setAttributes(null);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -197,7 +199,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity6() {
@@ -209,7 +211,7 @@ class InstitutionMapperTest {
         institution.setOnboarding(null);
         institution.setAttributes(null);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -229,7 +231,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity7() {
@@ -244,7 +246,7 @@ class InstitutionMapperTest {
         institution.setOnboarding(null);
         institution.setAttributes(null);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -269,7 +271,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity8() {
@@ -281,7 +283,7 @@ class InstitutionMapperTest {
         institution.setOnboarding(onboardingList);
         institution.setAttributes(null);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -300,7 +302,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity10() {
@@ -311,12 +313,12 @@ class InstitutionMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
                 "Legal Register Name", "42", true);
 
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK.getValue(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
                         new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null, new PaAttributes()));
         assertEquals("42 Main St", actualConvertToInstitutionEntityResult.getAddress());
         assertTrue(actualConvertToInstitutionEntityResult.isImported());
         assertEquals("21654", actualConvertToInstitutionEntityResult.getZipCode());
@@ -338,7 +340,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity11() {
@@ -366,12 +368,12 @@ class InstitutionMapperTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
                 "Legal Register Name", "42", true);
 
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(new Institution("42", "42", Origin.MOCK.getValue(), "42",
                         "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
                         "Tax Code", billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
                         paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null, null));
         assertEquals("42 Main St", actualConvertToInstitutionEntityResult.getAddress());
         assertTrue(actualConvertToInstitutionEntityResult.isImported());
         assertEquals("21654", actualConvertToInstitutionEntityResult.getZipCode());
@@ -393,7 +395,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#convertToInstitutionEntity(Institution)}
+     * Method under test: {@link InstitutionEntityMapper#convertToInstitutionEntity(Institution)}
      */
     @Test
     void testConvertToInstitutionEntity12() {
@@ -407,7 +409,7 @@ class InstitutionMapperTest {
         ArrayList<Attributes> attributesList = new ArrayList<>();
         institution.setAttributes(attributesList);
         institution.setId(null);
-        InstitutionEntity actualConvertToInstitutionEntityResult = InstitutionMapper
+        InstitutionEntity actualConvertToInstitutionEntityResult = institutionEntityMapper
                 .convertToInstitutionEntity(institution);
         assertNull(actualConvertToInstitutionEntityResult.getAddress());
         assertFalse(actualConvertToInstitutionEntityResult.isImported());
@@ -494,7 +496,7 @@ class InstitutionMapperTest {
         institutionUpdate.setZipCode("21654");
         institutionUpdate.setGeographicTaxonomies(null);
         Update update = new Update();
-        InstitutionMapper.addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
+        InstitutionMapperHelper.addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
         assertEquals("42 Main St", institutionUpdate.getAddress());
         assertTrue(institutionUpdate.isImported());
         assertEquals("21654", institutionUpdate.getZipCode());
@@ -539,7 +541,7 @@ class InstitutionMapperTest {
         institutionUpdate.setZipCode("21654");
         institutionUpdate.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
         Update update = new Update();
-        InstitutionMapper.addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
+        InstitutionMapperHelper.addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
         assertEquals("42 Main St", institutionUpdate.getAddress());
         assertTrue(institutionUpdate.isImported());
         assertEquals("21654", institutionUpdate.getZipCode());
@@ -556,12 +558,6 @@ class InstitutionMapperTest {
         assertSame(dataProtectionOfficer, institutionUpdate.getDataProtectionOfficer());
         assertTrue(institutionUpdate.getGeographicTaxonomies().isEmpty());
         assertFalse(update.hasArrayFilters());
-    }
-
-    @Test
-    void convertToInstitutionList() {
-        InstitutionEntity entity = new InstitutionEntity();
-        Assertions.assertDoesNotThrow(() -> InstitutionMapper.convertToInstitutionList(Collections.singletonList(entity)));
     }
 }
 
