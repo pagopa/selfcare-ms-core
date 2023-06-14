@@ -320,6 +320,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         } else if (institutionId != null) {
             Institution institution = retrieveInstitutionById(institutionId);
             return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution, roles, states, products, productRoles);
+        } else if (products != null && !products.isEmpty()) {
+            return toRelationshipInfo(userService.retrieveUsers(null, null, roles, states, products, productRoles), null, roles, states, products, productRoles);
         }
         throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
     }
