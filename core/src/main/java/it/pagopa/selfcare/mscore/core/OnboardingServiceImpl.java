@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
@@ -122,9 +123,19 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType())
                 .onboardingInstitution(request, principal);
     }
+    @Override
+    public void completeOnboarding(Token token, MultipartFile contract){
+        Consumer<List<User>> verification = users -> contractService.verifySignature(contract, token, users);
+        this.completeOnboarding(token, contract, verification);
+    }
 
     @Override
-    public void completeOboarding(Token token, MultipartFile contract) {
+    public void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract){
+        Consumer<List<User>> verification = ignored -> {};
+        this.completeOnboarding(token, contract, verification);
+    }
+
+    public void completeOnboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
         log.trace("completeOnboarding start");
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOboarding token = {} contract = {}", token, contract);
         checkAndHandleExpiring(token);
@@ -144,7 +155,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         Product product = onboardingDao.getProductById(token.getProductId());
         if (pagoPaSignatureConfig.isVerifyEnabled()) {
-            contractService.verifySignature(contract, token, managersData);
+            verification.accept(managersData);
         }
         File logoFile = contractService.getLogoFile();
         String fileName = contractService.uploadContract(token.getId(), contract);
