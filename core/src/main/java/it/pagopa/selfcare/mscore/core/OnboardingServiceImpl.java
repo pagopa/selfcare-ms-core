@@ -131,7 +131,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract){
-        Consumer<List<User>> verification = users -> contractService.verifySignature(contract, token, users);
+        Consumer<List<User>> verification = ignored -> {};
         this.completeOnboarding(token, contract, verification);
     }
 

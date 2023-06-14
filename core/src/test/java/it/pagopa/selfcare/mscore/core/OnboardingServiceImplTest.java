@@ -229,6 +229,75 @@ class OnboardingServiceImplTest {
     }
 
     /**
+     * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
+     */
+    @Test
+    void testCompleteOnboarding2() {
+
+        Token token = TestUtils.dummyToken();
+        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
+
+        when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
+        when(pagoPaSignatureConfig.isVerifyEnabled()).thenReturn(true);
+
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboarding(token,
+                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#completeOnboardingWithoutSignatureVerification(Token, MultipartFile)}
+     */
+    @Test
+    void testCompleteOnboardingWithoutSignatureVerification() {
+
+        Token token = TestUtils.dummyToken();
+        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
+
+        when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
+
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboardingWithoutSignatureVerification(token,
+                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#completeOnboardingWithoutSignatureVerification(Token, MultipartFile)}
+     */
+    @Test
+    void testCompleteOnboardingWithoutSignatureVerification2() {
+
+        Token token = TestUtils.dummyToken();
+        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
+
+        when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
+        when(pagoPaSignatureConfig.isVerifyEnabled()).thenReturn(true);
+
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboardingWithoutSignatureVerification(token,
+                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
+
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#completeOnboardingWithoutSignatureVerification(Token, MultipartFile)}
+     */
+    @Test
+    void shouldThrowExceptionCompleteOnboardingWithoutSignatureVerification() {
+
+        Token token = TestUtils.dummyToken();
+
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of(new Institution()));
+
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.completeOnboardingWithoutSignatureVerification(token,
+                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
+    }
+
+    /**
      * Method under test: {@link OnboardingServiceImpl#approveOnboarding(Token, SelfCareUser)}
      */
     @Test
