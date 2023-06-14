@@ -194,7 +194,7 @@ public class OnboardingController {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding tokenId = {}, contract = {}", tokenId, contract);
         CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
         Token token = tokenService.verifyToken(tokenId);
-        onboardingService.completeOboarding(token, contract);
+        onboardingService.completeOnboarding(token, contract);
         log.trace("completeOnboarding end");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -252,7 +252,7 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.reject}", notes = "${swagger.mscore.onboarding.reject}")
     @DeleteMapping(value = "/reject/{tokenId}")
-    public ResponseEntity<OnboardingInfoResponse> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
+    public ResponseEntity<Void> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
                                                                    @PathVariable("tokenId") String tokenId) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         Token token = tokenService.verifyToken(tokenId);
@@ -340,5 +340,30 @@ public class OnboardingController {
             log.info("byteArray size: {}", file.getData().length);
         }
         return ResponseEntity.ok().headers(headers).body(file.getData());
+    }
+
+    /**
+     * Consume onboarding tokens requested without signature verification
+     *
+     * @param tokenId String
+     * @param contract MultipartFile
+     * @return no content
+     * * Code: 204, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.token.consume}", notes = "${swagger.mscore.token.consume}")
+    @PostMapping(value = "/{tokenId}/consume")
+    public ResponseEntity<Void> consumeToken(@ApiParam("${swagger.mscore.token.tokenId}")
+                                             @PathVariable(value = "tokenId") String tokenId,
+                                             @RequestPart MultipartFile contract) {
+        log.trace("consumeToken start");
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "consumeToken tokenId = {}, contract = {}", tokenId, contract);
+        CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
+        Token token = tokenService.verifyToken(tokenId);
+        onboardingService.completeOnboardingWithoutSignatureVerification(token, contract);
+        log.trace("consumeToken end");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

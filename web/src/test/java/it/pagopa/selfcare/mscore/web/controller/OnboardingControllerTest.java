@@ -3,10 +3,10 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
@@ -33,26 +33,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.web.multipart.MultipartFile;
-
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -62,6 +58,9 @@ import static org.mockito.Mockito.*;
 class OnboardingControllerTest {
     @InjectMocks
     private OnboardingController onboardingController;
+
+    @InjectMocks
+    private TokenController tokenController;
 
     @Mock
     private OnboardingService onboardingService;
@@ -611,7 +610,7 @@ class OnboardingControllerTest {
      */
     @Test
     void testCompleteOnboarding() throws Exception {
-        doNothing().when(onboardingService).completeOboarding(any(), any());
+        doNothing().when(onboardingService).completeOnboarding(any(), any());
         MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .multipart("/onboarding/complete/{tokenId}",
@@ -744,5 +743,20 @@ class OnboardingControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
+
+    @Test
+    void testConsumeToken() throws Exception {
+        doNothing().when(onboardingService).completeOnboardingWithoutSignatureVerification(any(), any());
+        MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .multipart("/onboarding/{tokenId}/consume",
+                        "42")
+                .file(file);
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
 }
 
