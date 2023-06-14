@@ -32,7 +32,7 @@ public class RelationshipMapper {
         relationshipResult.setTo(info.getInstitution().getId());
 
         if (info.getInstitution() != null) {
-            relationshipResult.setInstitutionUpdate(InstitutionMapper.toInstitutionUpdateResponse(info.getInstitution()));
+            relationshipResult.setInstitutionUpdate(InstitutionMapperCustom.toInstitutionUpdateResponse(info.getInstitution()));
         }
 
         addInstitutionOnboardingData(info, relationshipResult);
@@ -44,7 +44,7 @@ public class RelationshipMapper {
             for (Onboarding onboarding : info.getInstitution().getOnboarding()) {
                 if (onboarding.getProductId().equalsIgnoreCase(info.getOnboardedProduct().getProductId())) {
                     relationshipResult.setPricingPlan(onboarding.getPricingPlan());
-                    relationshipResult.setBilling(InstitutionMapper.toBillingResponse(onboarding, info.getInstitution()));
+                    relationshipResult.setBilling(InstitutionMapperCustom.toBillingResponse(onboarding, info.getInstitution()));
                 }
             }
         }

@@ -3,16 +3,17 @@ package it.pagopa.selfcare.mscore.core.strategy;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapperImpl;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
+import it.pagopa.selfcare.mscore.core.util.TestUtils;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
 import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
@@ -23,9 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -108,6 +107,48 @@ public class CreateInstitutionStrategyTest {
 
     }
 
+    @Test
+    void shouldThrowExceptionOnCreateInstitutionIfAlreadyExists() {
+
+        when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any()))
+                .thenReturn(List.of(new Institution()));
+        assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategy(new Institution())
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .build()));
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitution() {
+        //Given
+        when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
+        when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), any()))
+                .thenReturn(List.of());
+
+        Institution institution = TestUtils.dummyInstitutionGsp();
+
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategy(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .build());
+
+        //Then
+        assertThat(actual.getDescription()).isEqualTo(institution.getDescription());
+        assertThat(actual.getDigitalAddress()).isEqualTo(institution.getDigitalAddress());
+        assertThat(actual.getAddress()).isEqualTo(institution.getAddress());
+        assertThat(actual.getZipCode()).isEqualTo(institution.getZipCode());
+        assertThat(actual.getTaxCode()).isEqualTo(institution.getTaxCode());
+        assertThat(actual.getSubunitCode()).isNull();
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.GSP);
+
+        verify(institutionConnector).save(any());
+        verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), any());
+    }
+
     /**
      * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
      */
@@ -130,8 +171,6 @@ public class CreateInstitutionStrategyTest {
         verify(partyRegistryProxyConnector).getCategory(any(), any());
         verify(partyRegistryProxyConnector).getInstitutionById(any());
     }
-
-
 
     /**
      * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}

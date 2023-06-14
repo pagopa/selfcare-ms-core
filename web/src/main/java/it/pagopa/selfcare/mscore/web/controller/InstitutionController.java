@@ -14,7 +14,8 @@ import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperCustom;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -41,11 +42,14 @@ import java.util.stream.Collectors;
 public class InstitutionController {
     private final InstitutionService institutionService;
     private final OnboardingResourceMapper onboardingResourceMapper;
+    private final InstitutionResourceMapper institutionResourceMapper;
 
     public InstitutionController(InstitutionService institutionService,
-                                 OnboardingResourceMapper onboardingResourceMapper) {
+                                 OnboardingResourceMapper onboardingResourceMapper,
+                                 InstitutionResourceMapper institutionResourceMapper) {
         this.institutionService = institutionService;
         this.onboardingResourceMapper = onboardingResourceMapper;
+        this.institutionResourceMapper = institutionResourceMapper;
     }
 
     /**
@@ -70,7 +74,7 @@ public class InstitutionController {
         List<Institution> institutions = institutionService.getInstitutions(taxCode, subunitCode);
         InstitutionsResponse institutionsResponse = new InstitutionsResponse();
         institutionsResponse.setInstitutions(institutions.stream()
-                        .map(InstitutionMapper::toInstitutionResponse)
+                        .map(InstitutionMapperCustom::toInstitutionResponse)
                 .collect(Collectors.toList()));
         return ResponseEntity.ok(institutionsResponse);
     }
@@ -97,7 +101,7 @@ public class InstitutionController {
 
         Institution saved = institutionService.createInstitutionFromIpa(institutionFromIpaPost.getTaxCode(),
                 institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode());
-        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapperCustom.toInstitutionResponse(saved));
     }
 
     /**
@@ -110,6 +114,7 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
      */
+    @Deprecated
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.PA.create}", notes = "${swagger.mscore.institution.PA.create}")
     @PostMapping(value = "/{externalId}")
@@ -118,7 +123,25 @@ public class InstitutionController {
 
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionByExternalId(externalId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapperCustom.toInstitutionResponse(saved));
+    }
+
+    /**
+     * The function persist institution
+     *
+     * @param institution InstitutionRequest
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.create}", notes = "${swagger.mscore.institution.create}")
+    @PostMapping(value = "/")
+    public ResponseEntity<InstitutionResponse> createInstitution(@RequestBody @Valid InstitutionRequest institution) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
+        Institution saved = institutionService.createInstitution(InstitutionMapperCustom.toInstitution(institution, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
     }
 
     /**
@@ -131,6 +154,7 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 409, Message: Institution conflict, DataType: Problem
      */
+    @Deprecated
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.create}", notes = "${swagger.mscore.institution.create}")
     @PostMapping(value = "/insert/{externalId}")
@@ -138,8 +162,8 @@ public class InstitutionController {
                                                                     @PathVariable("externalId") String externalId,
                                                                     @RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
-        Institution saved = institutionService.createInstitutionRaw(InstitutionMapper.toInstitution(institution, externalId), externalId);
-        return ResponseEntity.ok(InstitutionMapper.toInstitutionResponse(saved));
+        Institution saved = institutionService.createInstitutionRaw(InstitutionMapperCustom.toInstitution(institution, externalId), externalId);
+        return ResponseEntity.ok(InstitutionMapperCustom.toInstitutionResponse(saved));
     }
 
     /**
@@ -159,7 +183,7 @@ public class InstitutionController {
                                                                    Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createPgInstitution(request.getTaxId(), request.getDescription(), request.isExistsInRegistry(), (SelfCareUser) authentication.getPrincipal());
-        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapper.toInstitutionResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(InstitutionMapperCustom.toInstitutionResponse(saved));
     }
 
     /**
@@ -183,7 +207,7 @@ public class InstitutionController {
         CustomExceptionMessage.setCustomMessage(GenericError.GET_PRODUCTS_ERROR);
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
         List<Onboarding> page = institutionService.retrieveInstitutionProducts(institution, states);
-        return ResponseEntity.ok(InstitutionMapper.toOnboardedProducts(page));
+        return ResponseEntity.ok(InstitutionMapperCustom.toOnboardedProducts(page));
     }
 
     /**
@@ -206,8 +230,8 @@ public class InstitutionController {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapper.toInstitutionUpdate(institutionPut), selfCareUser.getId());
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(saved));
+        Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapperCustom.toInstitutionUpdate(institutionPut), selfCareUser.getId());
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionResponse(saved));
     }
 
     /**
@@ -245,7 +269,7 @@ public class InstitutionController {
                                                                        @PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GenericError.GET_INSTITUTION_BY_ID_ERROR);
         Institution institution = institutionService.retrieveInstitutionById(id);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionResponse(institution));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionResponse(institution));
     }
 
     /**
@@ -318,8 +342,8 @@ public class InstitutionController {
     @PostMapping(value = "/onboarded/{productId}")
     public ResponseEntity<List<InstitutionToOnboard>> getValidInstitutionToOnboard(@RequestBody List<InstitutionToOnboard> institutions,
                                                                                    @PathVariable(value = "productId") String productId) {
-        List<ValidInstitution> validInstitutions = institutionService.retrieveInstitutionByExternalIds(InstitutionMapper.toValidInstitutions(institutions), productId);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionToOnboardList(validInstitutions));
+        List<ValidInstitution> validInstitutions = institutionService.retrieveInstitutionByExternalIds(InstitutionMapperCustom.toValidInstitutions(institutions), productId);
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionToOnboardList(validInstitutions));
     }
 
     /**

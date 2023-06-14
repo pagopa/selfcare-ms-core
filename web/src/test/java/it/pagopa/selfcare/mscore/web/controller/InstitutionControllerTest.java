@@ -3,13 +3,14 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperImpl;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,9 @@ class InstitutionControllerTest {
 
     @Spy
     private OnboardingResourceMapper onboardingResourceMapper = new OnboardingResourceMapperImpl();
+
+    @Spy
+    private InstitutionResourceMapper institutionResourceMapper = new InstitutionMapperImpl();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -187,6 +191,30 @@ class InstitutionControllerTest {
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+
+    /**
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
+     */
+    @Test
+    void shouldCreateInstitution() throws Exception {
+
+        InstitutionRequest institution = TestUtils.createSimpleInstitutionRequest();
+        Institution response = TestUtils.createSimpleInstitutionPA();
+
+        when(institutionService.createInstitution(any())).thenReturn(response);
+
+        String content = objectMapper.writeValueAsString(institution);
+
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
     }
 
     /**

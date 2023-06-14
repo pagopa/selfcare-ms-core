@@ -203,6 +203,17 @@ public class InstitutionServiceImpl implements InstitutionService {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
     }
+    @Override
+    public Institution createInstitution(Institution institution) {
+        return createInstitutionStrategyFactory.createInstitutionStrategy(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .subunitCode(institution.getSubunitCode())
+                        .subunitType(Optional.ofNullable(institution.getSubunitType())
+                                .map(InstitutionPaSubunitType::valueOf)
+                                .orElse(null))
+                        .build());
+    }
 
     @Override
     public List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states) {

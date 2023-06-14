@@ -43,6 +43,22 @@ public class CreateInstitutionStrategyFactory {
     }
 
 
+    public CreateInstitutionStrategy createInstitutionStrategy(Institution institution) {
+
+        Consumer<CreateInstitutionStrategyInput> checkIfAlreadyExists = checkIfAlreadyExistsByTaxCodeAndSubunitCode();
+
+        Function<CreateInstitutionStrategyInput, Institution> mappingToInstitution = strategyInput -> {
+
+            institution.setExternalId(createExternalId.apply(strategyInput));
+            institution.setOrigin(Origin.SELC.getValue());
+            institution.setOriginId("SELC_" + institution.getExternalId());
+            institution.setCreatedAt(OffsetDateTime.now());
+            return institution;
+        };
+
+        return new CreateInstitutionStrategy(institutionConnector, checkIfAlreadyExists, mappingToInstitution);
+
+    }
     public CreateInstitutionStrategy createInstitutionStrategy(InstitutionPaSubunitType subunitType) {
 
         Consumer<CreateInstitutionStrategyInput> checkIfAlreadyExists = checkIfAlreadyExistsByTaxCodeAndSubunitCode();
