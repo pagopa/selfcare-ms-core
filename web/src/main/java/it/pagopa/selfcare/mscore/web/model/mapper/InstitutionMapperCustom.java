@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
-public class InstitutionMapper {
+public class InstitutionMapperCustom {
 
     protected static final BinaryOperator<BulkProduct> MERGE_FUNCTION = (inst1, inst2) -> inst1.getStatus().compareTo(inst2.getStatus()) < 0 ? inst1 : inst2;
 
@@ -465,7 +465,7 @@ public class InstitutionMapper {
 
     public static List<InstitutionToOnboard> toInstitutionToOnboardList(List<ValidInstitution> validInstitutions) {
         return validInstitutions.stream()
-                .map(InstitutionMapper::toInstitutionToOnboard)
+                .map(InstitutionMapperCustom::toInstitutionToOnboard)
                 .collect(Collectors.toList());
     }
 
@@ -485,7 +485,7 @@ public class InstitutionMapper {
     public static BulkInstitutions toBulkInstitutions(List<Institution> institution, List<String> idsRequest) {
         BulkInstitutions bulkInstitutions = new BulkInstitutions();
         bulkInstitutions.setFound(institution.stream()
-                .map(InstitutionMapper::toBulkInstitution)
+                .map(InstitutionMapperCustom::toBulkInstitution)
                 .collect(Collectors.toList()));
         bulkInstitutions.setNotFound(idsRequest.stream()
                 .filter(s -> institution.stream().noneMatch(inst -> inst.getId().equalsIgnoreCase(s)))

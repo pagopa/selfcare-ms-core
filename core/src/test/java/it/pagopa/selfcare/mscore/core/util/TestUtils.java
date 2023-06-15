@@ -30,7 +30,7 @@ public class TestUtils {
 
         return new Institution("42", "42", Origin.SELC.name(), "START - setupCommonData",
                 "The characteristics of someone or something", institutionType, "42 Main St", "42 Main St", "21654",
-                "START - setupCommonData", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
+                "TaxCode", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
                 "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null, new PaAttributes());
     }

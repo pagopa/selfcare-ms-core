@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -12,21 +11,20 @@ import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MigrationInstitutionMapperTest {
+class MigrationInstitutionMapperCustomTest {
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse() {
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper.toInstitutionResponse(new Institution());
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom.toInstitutionResponse(new Institution());
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -45,11 +43,11 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse2() {
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom
                 .toInstitutionResponse(new Institution());
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
@@ -71,12 +69,12 @@ class MigrationInstitutionMapperTest {
 
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse3() {
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
-                .toInstitutionResponse(InstitutionMapper.toInstitution(new InstitutionRequest(), "42"));
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom
+                .toInstitutionResponse(InstitutionMapperCustom.toInstitution(new InstitutionRequest(), "42"));
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -97,7 +95,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse4() {
@@ -105,7 +103,7 @@ class MigrationInstitutionMapperTest {
         Institution institution =TestUtils.createSimpleInstitutionPA();
         institution.setImported(true);
 
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom
                 .toInstitutionResponse(institution);
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
@@ -124,7 +122,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse5() {
@@ -138,7 +136,7 @@ class MigrationInstitutionMapperTest {
         institution.setGeographicTaxonomies(geographicTaxonomiesList);
         institution.setImported(true);
 
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom
                 .toInstitutionResponse(institution);
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
@@ -159,7 +157,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse6() {
@@ -175,7 +173,7 @@ class MigrationInstitutionMapperTest {
         institution.setAttributes(attributesList);
         institution.setImported(true);
 
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom
                 .toInstitutionResponse(institution);
         assertEquals("42 Main St", actualToInstitutionResponseResult.getAddress());
         assertTrue(actualToInstitutionResponseResult.isImported());
@@ -194,7 +192,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse7() {
@@ -204,7 +202,7 @@ class MigrationInstitutionMapperTest {
         institution
                 .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
         institution.setAttributes(null);
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper.toInstitutionResponse(institution);
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom.toInstitutionResponse(institution);
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -231,7 +229,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse8() {
@@ -240,7 +238,7 @@ class MigrationInstitutionMapperTest {
         institution.setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
         institution.setPaymentServiceProvider(null);
         institution.setAttributes(null);
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper.toInstitutionResponse(institution);
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom.toInstitutionResponse(institution);
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -265,7 +263,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse9() {
@@ -275,7 +273,7 @@ class MigrationInstitutionMapperTest {
         institution.setPaymentServiceProvider(null);
         ArrayList<Attributes> attributesList = new ArrayList<>();
         institution.setAttributes(attributesList);
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper.toInstitutionResponse(institution);
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom.toInstitutionResponse(institution);
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -295,7 +293,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse10() {
@@ -312,7 +310,7 @@ class MigrationInstitutionMapperTest {
         institution.setDataProtectionOfficer(null);
         institution.setPaymentServiceProvider(null);
         institution.setAttributes(attributesList);
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper.toInstitutionResponse(institution);
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom.toInstitutionResponse(institution);
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -338,7 +336,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse11() {
@@ -348,7 +346,7 @@ class MigrationInstitutionMapperTest {
         institution.setDataProtectionOfficer(null);
         institution.setPaymentServiceProvider(null);
         institution.setAttributes(null);
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper.toInstitutionResponse(institution);
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom.toInstitutionResponse(institution);
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -368,7 +366,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponse(Institution)}
      */
     @Test
     void testToInstitutionResponse12() {
@@ -381,7 +379,7 @@ class MigrationInstitutionMapperTest {
         institution.setDataProtectionOfficer(null);
         institution.setPaymentServiceProvider(null);
         institution.setAttributes(null);
-        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapper.toInstitutionResponse(institution);
+        InstitutionResponse actualToInstitutionResponseResult = InstitutionMapperCustom.toInstitutionResponse(institution);
         assertNull(actualToInstitutionResponseResult.getAddress());
         assertFalse(actualToInstitutionResponseResult.isImported());
         assertNull(actualToInstitutionResponseResult.getZipCode());
@@ -406,7 +404,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse2() {
@@ -478,7 +476,7 @@ class MigrationInstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setInstitution(institution);
         productManagerInfo.setProducts(onboardedProductList);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "foo");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -498,7 +496,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse3() {
@@ -570,7 +568,7 @@ class MigrationInstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setInstitution(institution);
         productManagerInfo.setProducts(onboardedProductList);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "foo");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -594,7 +592,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse4() {
@@ -667,7 +665,7 @@ class MigrationInstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setInstitution(institution);
         productManagerInfo.setProducts(onboardedProductList);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "foo");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -693,7 +691,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse5() {
@@ -766,7 +764,7 @@ class MigrationInstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setInstitution(institution);
         productManagerInfo.setProducts(onboardedProductList);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "foo");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -786,7 +784,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse9() {
@@ -794,7 +792,7 @@ class MigrationInstitutionMapperTest {
         institution.setOnboarding(new ArrayList<>());
 
         ProductManagerInfo productManagerInfo = new ProductManagerInfo("id", institution, new ArrayList<>());
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         InstitutionUpdateResponse institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
@@ -815,7 +813,7 @@ class MigrationInstitutionMapperTest {
         onboardedProduct.setProductId("42");
         onboardedProducts.add(onboardedProduct);
         ProductManagerInfo productManagerInfo = new ProductManagerInfo("id", institution, onboardedProducts);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         InstitutionUpdateResponse institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
@@ -828,7 +826,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse12() {
@@ -904,7 +902,7 @@ class MigrationInstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setInstitution(institution);
         productManagerInfo.setProducts(onboardedProductList);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "foo");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -927,7 +925,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse13() {
@@ -1005,7 +1003,7 @@ class MigrationInstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setInstitution(institution);
         productManagerInfo.setProducts(onboardedProductList);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "foo");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -1029,7 +1027,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToInstitutionBillingResponse2() {
@@ -1079,7 +1077,7 @@ class MigrationInstitutionMapperTest {
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
         institution.setBilling(null);
-        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapper
+        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapperCustom
                 .toInstitutionBillingResponse(institution, "foo");
         assertNull(actualToInstitutionBillingResponseResult.getAddress());
         assertNull(actualToInstitutionBillingResponseResult.getZipCode());
@@ -1094,12 +1092,12 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdateResponse(Institution)}
      */
     @Test
     void testToInstitutionUpdateResponse() {
         Institution institution = new Institution();
-        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
+        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapperCustom
                 .toInstitutionUpdateResponse(institution);
         assertNull(actualToInstitutionUpdateResponseResult.getAddress());
         assertNull(actualToInstitutionUpdateResponseResult.getZipCode());
@@ -1116,7 +1114,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdateResponse(Institution)}
      */
     @Test
     void testToInstitutionUpdateResponse2() {
@@ -1124,7 +1122,7 @@ class MigrationInstitutionMapperTest {
         institution.setGeographicTaxonomies(null);
         institution.setPaymentServiceProvider(null);
         institution.setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
+        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapperCustom
                 .toInstitutionUpdateResponse(institution);
         assertNull(actualToInstitutionUpdateResponseResult.getAddress());
         assertNull(actualToInstitutionUpdateResponseResult.getZipCode());
@@ -1146,7 +1144,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdateResponse(Institution)}
      */
     @Test
     void testToInstitutionUpdateResponse3() {
@@ -1155,7 +1153,7 @@ class MigrationInstitutionMapperTest {
         institution
                 .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
         institution.setDataProtectionOfficer(null);
-        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
+        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapperCustom
                 .toInstitutionUpdateResponse(institution);
         assertNull(actualToInstitutionUpdateResponseResult.getAddress());
         assertNull(actualToInstitutionUpdateResponseResult.getZipCode());
@@ -1179,7 +1177,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdateResponse(Institution)}
      */
     @Test
     void testToInstitutionUpdateResponse4() {
@@ -1187,7 +1185,7 @@ class MigrationInstitutionMapperTest {
         Institution institution = TestUtils.createSimpleInstitutionPA();
         institution.setImported(true);
 
-        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
+        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapperCustom
                 .toInstitutionUpdateResponse(institution);
         assertEquals("42 Main St", actualToInstitutionUpdateResponseResult.getAddress());
         assertEquals("21654", actualToInstitutionUpdateResponseResult.getZipCode());
@@ -1200,7 +1198,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdateResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdateResponse(Institution)}
      */
     @Test
     void testToInstitutionUpdateResponse5() {
@@ -1209,7 +1207,7 @@ class MigrationInstitutionMapperTest {
         institution.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
         institution.setPaymentServiceProvider(null);
         institution.setDataProtectionOfficer(null);
-        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapper
+        InstitutionUpdateResponse actualToInstitutionUpdateResponseResult = InstitutionMapperCustom
                 .toInstitutionUpdateResponse(institution);
         assertNull(actualToInstitutionUpdateResponseResult.getAddress());
         assertNull(actualToInstitutionUpdateResponseResult.getZipCode());
@@ -1226,7 +1224,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate() {
@@ -1234,23 +1232,23 @@ class MigrationInstitutionMapperTest {
         List<InstitutionGeographicTaxonomies> stringList = new ArrayList<>();
         stringList.add(new InstitutionGeographicTaxonomies());
         institutionPut.setGeographicTaxonomyCodes(stringList.stream().map(InstitutionGeographicTaxonomies::getCode).collect(Collectors.toList()));
-        assertEquals(stringList, InstitutionMapper.toInstitutionUpdate(institutionPut).getGeographicTaxonomies());
+        assertEquals(stringList, InstitutionMapperCustom.toInstitutionUpdate(institutionPut).getGeographicTaxonomies());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdatePG() {
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setDescription("description");
         institutionPut.setDigitalAddress("digitalAddress");
-        assertEquals("description", InstitutionMapper.toInstitutionUpdate( institutionPut).getDescription());
-        assertEquals("digitalAddress", InstitutionMapper.toInstitutionUpdate( institutionPut).getDigitalAddress());
+        assertEquals("description", InstitutionMapperCustom.toInstitutionUpdate( institutionPut).getDescription());
+        assertEquals("digitalAddress", InstitutionMapperCustom.toInstitutionUpdate( institutionPut).getDigitalAddress());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate3() {
@@ -1259,7 +1257,7 @@ class MigrationInstitutionMapperTest {
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(stringList);
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut)
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapperCustom.toInstitutionUpdate(institutionPut)
                 .getGeographicTaxonomies();
         assertEquals(1, geographicTaxonomies.size());
         InstitutionGeographicTaxonomies getResult = geographicTaxonomies.get(0);
@@ -1268,7 +1266,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionUpdate(InstitutionPut)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionUpdate(InstitutionPut)}
      */
     @Test
     void testToInstitutionUpdate4() {
@@ -1278,7 +1276,7 @@ class MigrationInstitutionMapperTest {
 
         InstitutionPut institutionPut = new InstitutionPut();
         institutionPut.setGeographicTaxonomyCodes(stringList);
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapper.toInstitutionUpdate(institutionPut)
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = InstitutionMapperCustom.toInstitutionUpdate(institutionPut)
                 .getGeographicTaxonomies();
         assertEquals(2, geographicTaxonomies.size());
         InstitutionGeographicTaxonomies getResult = geographicTaxonomies.get(1);
@@ -1290,23 +1288,23 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse2() {
-        assertNull(InstitutionMapper.toInstitutionBillingResponse(null, "foo"));
+        assertNull(InstitutionMapperCustom.toInstitutionBillingResponse(null, "foo"));
     }
 
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse6() {
         Institution institution = new Institution();
         institution.setOnboarding(new ArrayList<>());
         institution.setInstitutionType(InstitutionType.GSP);
-        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
@@ -1318,7 +1316,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse7() {
@@ -1346,7 +1344,7 @@ class MigrationInstitutionMapperTest {
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
         institution.setInstitutionType(InstitutionType.GSP);
-        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
@@ -1363,7 +1361,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToBillingResponse8() {
@@ -1391,7 +1389,7 @@ class MigrationInstitutionMapperTest {
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
         institution.setInstitutionType(InstitutionType.GSP);
-        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution,
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toInstitutionBillingResponse(institution,
                 "Product Id");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
@@ -1430,7 +1428,7 @@ class MigrationInstitutionMapperTest {
         institution.setBilling(billing);
         institution.setOnboarding(onboardingList);
         institution.setInstitutionType(InstitutionType.GSP);
-        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapper.toInstitutionBillingResponse(institution, "42");
+        InstitutionBillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toInstitutionBillingResponse(institution, "42");
         assertNull(actualToBillingResponseResult.getAddress());
         assertNull(actualToBillingResponseResult.getZipCode());
         assertNull(actualToBillingResponseResult.getTaxCode());
@@ -1447,7 +1445,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution() {
@@ -1480,7 +1478,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setSupportPhone("4105551212");
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertFalse(actualToInstitutionResult.isImported());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
@@ -1507,7 +1505,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution2() {
@@ -1548,7 +1546,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setSupportPhone("4105551212");
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertFalse(actualToInstitutionResult.isImported());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
@@ -1581,7 +1579,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution3() {
@@ -1621,7 +1619,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setSupportPhone("4105551212");
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertFalse(actualToInstitutionResult.isImported());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
@@ -1649,7 +1647,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution4() {
@@ -1682,7 +1680,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setSupportPhone("4105551212");
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertFalse(actualToInstitutionResult.isImported());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
@@ -1709,7 +1707,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution5() {
@@ -1742,7 +1740,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setSupportPhone("6625550144");
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
@@ -1768,7 +1766,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution6() {
@@ -1788,7 +1786,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setPaymentServiceProvider(null);
         institutionRequest.setDataProtectionOfficer(null);
         institutionRequest.setAttributes(null);
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "foo");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "foo");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
@@ -1806,7 +1804,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution7() {
@@ -1834,7 +1832,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setPaymentServiceProvider(null);
         institutionRequest.setDataProtectionOfficer(null);
         institutionRequest.setAttributes(attributesRequestList);
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "foo");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "foo");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
@@ -1857,7 +1855,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution8() {
@@ -1884,7 +1882,7 @@ class MigrationInstitutionMapperTest {
         institutionRequest.setPaymentServiceProvider(null);
         institutionRequest.setDataProtectionOfficer(null);
         institutionRequest.setAttributes(null);
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "foo");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "foo");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
@@ -1906,7 +1904,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Onboarding, Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toBillingResponse(Onboarding, Institution)}
      */
     @Test
     void testToBillingResponse() {
@@ -1927,7 +1925,7 @@ class MigrationInstitutionMapperTest {
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
-        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding,
+        BillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toBillingResponse(onboarding,
                 new Institution());
         assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
         assertTrue(actualToBillingResponseResult.isPublicServices());
@@ -1935,7 +1933,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Onboarding, Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toBillingResponse(Onboarding, Institution)}
      */
     @Test
     void testToBillingResponse3() {
@@ -1956,7 +1954,7 @@ class MigrationInstitutionMapperTest {
         onboarding.setProductId("42");
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setUpdatedAt(null);
-        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding,
+        BillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toBillingResponse(onboarding,
                 new Institution());
         assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
         assertFalse(actualToBillingResponseResult.isPublicServices());
@@ -1984,7 +1982,7 @@ class MigrationInstitutionMapperTest {
         onboarding.setUpdatedAt(null);
         Institution institution = new Institution();
         institution.setBilling(billing);
-        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding,
+        BillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toBillingResponse(onboarding,
                 institution);
         assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
         assertFalse(actualToBillingResponseResult.isPublicServices());
@@ -1992,7 +1990,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Onboarding, Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toBillingResponse(Onboarding, Institution)}
      */
     @Test
     void testToBillingResponse5() {
@@ -2011,7 +2009,7 @@ class MigrationInstitutionMapperTest {
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setTokenId("42");
         onboarding.setUpdatedAt(null);
-        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding,
+        BillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toBillingResponse(onboarding,
                 new Institution());
         assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
         assertTrue(actualToBillingResponseResult.isPublicServices());
@@ -2019,7 +2017,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Onboarding, Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toBillingResponse(Onboarding, Institution)}
      */
     @Test
     void testToBillingResponse11() {
@@ -2041,14 +2039,14 @@ class MigrationInstitutionMapperTest {
 
         Institution institution = new Institution();
         institution.setBilling(billing);
-        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding, institution);
+        BillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toBillingResponse(onboarding, institution);
         assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
         assertTrue(actualToBillingResponseResult.isPublicServices());
         assertEquals("42", actualToBillingResponseResult.getVatNumber());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#getBillingFromOnboarding(Onboarding, Institution)}
+     * Method under test: {@link InstitutionMapperCustom#getBillingFromOnboarding(Onboarding, Institution)}
      */
     @Test
     void testGetBillingFromOnboarding2() {
@@ -2062,11 +2060,11 @@ class MigrationInstitutionMapperTest {
         onboarding.setTokenId("42");
         onboarding.setUpdatedAt(null);
         onboarding.setBilling(null);
-        assertNull(InstitutionMapper.getBillingFromOnboarding(onboarding, new Institution()));
+        assertNull(InstitutionMapperCustom.getBillingFromOnboarding(onboarding, new Institution()));
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBilling(BillingRequest)}
+     * Method under test: {@link InstitutionMapperCustom#toBilling(BillingRequest)}
      */
     @Test
     void testToBilling() {
@@ -2074,14 +2072,14 @@ class MigrationInstitutionMapperTest {
         billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
         billingRequest.setVatNumber("42");
-        Billing actualToBillingResult = InstitutionMapper.toBilling(billingRequest);
+        Billing actualToBillingResult = InstitutionMapperCustom.toBilling(billingRequest);
         assertEquals("Recipient Code", actualToBillingResult.getRecipientCode());
         assertFalse(actualToBillingResult.isPublicServices());
         assertEquals("42", actualToBillingResult.getVatNumber());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toDataProtectionOfficer(DataProtectionOfficerRequest)}
+     * Method under test: {@link InstitutionMapperCustom#toDataProtectionOfficer(DataProtectionOfficerRequest)}
      */
     @Test
     void testToDataProtectionOfficer() {
@@ -2089,7 +2087,7 @@ class MigrationInstitutionMapperTest {
         dataProtectionOfficerRequest.setAddress("42 Main St");
         dataProtectionOfficerRequest.setEmail("jane.doe@example.org");
         dataProtectionOfficerRequest.setPec("Pec");
-        DataProtectionOfficer actualToDataProtectionOfficerResult = InstitutionMapper
+        DataProtectionOfficer actualToDataProtectionOfficerResult = InstitutionMapperCustom
                 .toDataProtectionOfficer(dataProtectionOfficerRequest);
         assertEquals("42 Main St", actualToDataProtectionOfficerResult.getAddress());
         assertEquals("Pec", actualToDataProtectionOfficerResult.getPec());
@@ -2097,7 +2095,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toPaymentServiceProvider(PaymentServiceProviderRequest)}
+     * Method under test: {@link InstitutionMapperCustom#toPaymentServiceProvider(PaymentServiceProviderRequest)}
      */
     @Test
     void testToPaymentServiceProvider() {
@@ -2107,7 +2105,7 @@ class MigrationInstitutionMapperTest {
         paymentServiceProviderRequest.setLegalRegisterName("Legal Register Name");
         paymentServiceProviderRequest.setLegalRegisterNumber("42");
         paymentServiceProviderRequest.setVatNumberGroup(true);
-        PaymentServiceProvider actualToPaymentServiceProviderResult = InstitutionMapper
+        PaymentServiceProvider actualToPaymentServiceProviderResult = InstitutionMapperCustom
                 .toPaymentServiceProvider(paymentServiceProviderRequest);
         assertEquals("Abi Code", actualToPaymentServiceProviderResult.getAbiCode());
         assertTrue(actualToPaymentServiceProviderResult.isVatNumberGroup());
@@ -2117,15 +2115,15 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toAttributeResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toAttributeResponse(List)}
      */
     @Test
     void testToAttributeResponse() {
-        assertTrue(InstitutionMapper.toAttributeResponse(new ArrayList<>()).isEmpty());
+        assertTrue(InstitutionMapperCustom.toAttributeResponse(new ArrayList<>()).isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toAttributeResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toAttributeResponse(List)}
      */
     @Test
     void testToAttributeResponse2() {
@@ -2136,7 +2134,7 @@ class MigrationInstitutionMapperTest {
 
         ArrayList<Attributes> attributesList = new ArrayList<>();
         attributesList.add(attributes);
-        List<AttributesResponse> actualToAttributeResponseResult = InstitutionMapper.toAttributeResponse(attributesList);
+        List<AttributesResponse> actualToAttributeResponseResult = InstitutionMapperCustom.toAttributeResponse(attributesList);
         assertEquals(1, actualToAttributeResponseResult.size());
         AttributesResponse getResult = actualToAttributeResponseResult.get(0);
         assertEquals("Code", getResult.getCode());
@@ -2145,23 +2143,23 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toGeoTaxonomies(List)}
+     * Method under test: {@link InstitutionMapperCustom#toGeoTaxonomies(List)}
      */
     @Test
     void testToGeoTaxonomies() {
-        assertTrue(InstitutionMapper.toGeoTaxonomies(new ArrayList<>()).isEmpty());
-        assertTrue(InstitutionMapper.toGeoTaxonomies(null).isEmpty());
+        assertTrue(InstitutionMapperCustom.toGeoTaxonomies(new ArrayList<>()).isEmpty());
+        assertTrue(InstitutionMapperCustom.toGeoTaxonomies(null).isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toGeoTaxonomies(List)}
+     * Method under test: {@link InstitutionMapperCustom#toGeoTaxonomies(List)}
      */
     @Test
     void testToGeoTaxonomies2() {
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
                 .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-        List<GeoTaxonomies> actualToGeoTaxonomiesResult = InstitutionMapper
+        List<GeoTaxonomies> actualToGeoTaxonomiesResult = InstitutionMapperCustom
                 .toGeoTaxonomies(institutionGeographicTaxonomiesList);
         assertEquals(1, actualToGeoTaxonomiesResult.size());
         GeoTaxonomies getResult = actualToGeoTaxonomiesResult.get(0);
@@ -2170,15 +2168,15 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toOnboardedProducts(List)}
+     * Method under test: {@link InstitutionMapperCustom#toOnboardedProducts(List)}
      */
     @Test
     void testToOnboardedProducts2() {
-        assertTrue(InstitutionMapper.toOnboardedProducts(null).getProducts().isEmpty());
+        assertTrue(InstitutionMapperCustom.toOnboardedProducts(null).getProducts().isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toOnboardedProducts(List)}
+     * Method under test: {@link InstitutionMapperCustom#toOnboardedProducts(List)}
      */
     @Test
     void testToOnboardedProducts3() {
@@ -2200,7 +2198,7 @@ class MigrationInstitutionMapperTest {
 
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
-        List<InstitutionProduct> products = InstitutionMapper.toOnboardedProducts(onboardingList).getProducts();
+        List<InstitutionProduct> products = InstitutionMapperCustom.toOnboardedProducts(onboardingList).getProducts();
         assertEquals(1, products.size());
         InstitutionProduct getResult = products.get(0);
         assertEquals("42", getResult.getId());
@@ -2208,7 +2206,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toOnboardedProducts(List)}
+     * Method under test: {@link InstitutionMapperCustom#toOnboardedProducts(List)}
      */
     @Test
     void testToOnboardedProducts4() {
@@ -2247,7 +2245,7 @@ class MigrationInstitutionMapperTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding1);
         onboardingList.add(onboarding);
-        List<InstitutionProduct> products = InstitutionMapper.toOnboardedProducts(onboardingList).getProducts();
+        List<InstitutionProduct> products = InstitutionMapperCustom.toOnboardedProducts(onboardingList).getProducts();
         assertEquals(2, products.size());
         InstitutionProduct getResult = products.get(1);
         assertEquals(RelationshipState.PENDING, getResult.getState());
@@ -2258,16 +2256,16 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionProduct(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionProduct(List)}
      */
     @Test
     void testToInstitutionProduct() {
-        assertTrue(InstitutionMapper.toInstitutionProduct(new ArrayList<>()).isEmpty());
-        assertTrue(InstitutionMapper.toInstitutionProduct(null).isEmpty());
+        assertTrue(InstitutionMapperCustom.toInstitutionProduct(new ArrayList<>()).isEmpty());
+        assertTrue(InstitutionMapperCustom.toInstitutionProduct(null).isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionProduct(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionProduct(List)}
      */
     @Test
     void testToInstitutionProduct2() {
@@ -2289,7 +2287,7 @@ class MigrationInstitutionMapperTest {
 
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
-        List<InstitutionProduct> actualToInstitutionProductResult = InstitutionMapper
+        List<InstitutionProduct> actualToInstitutionProductResult = InstitutionMapperCustom
                 .toInstitutionProduct(onboardingList);
         assertEquals(1, actualToInstitutionProductResult.size());
         InstitutionProduct getResult = actualToInstitutionProductResult.get(0);
@@ -2298,7 +2296,7 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionProduct(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionProduct(List)}
      */
     @Test
     void testToInstitutionProduct3() {
@@ -2337,7 +2335,7 @@ class MigrationInstitutionMapperTest {
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding1);
         onboardingList.add(onboarding);
-        List<InstitutionProduct> actualToInstitutionProductResult = InstitutionMapper
+        List<InstitutionProduct> actualToInstitutionProductResult = InstitutionMapperCustom
                 .toInstitutionProduct(onboardingList);
         assertEquals(2, actualToInstitutionProductResult.size());
         InstitutionProduct getResult = actualToInstitutionProductResult.get(0);
@@ -2349,15 +2347,15 @@ class MigrationInstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponseList(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponseList(List)}
      */
     @Test
     void testToInstitutionResponseList() {
-        assertTrue(InstitutionMapper.toInstitutionResponseList(new ArrayList<>()).isEmpty());
+        assertTrue(InstitutionMapperCustom.toInstitutionResponseList(new ArrayList<>()).isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponseList(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponseList(List)}
      */
     @Test
     void testToInstitutionResponseList2() {
@@ -2415,11 +2413,11 @@ class MigrationInstitutionMapperTest {
         institutionList.add(institution7);
         institutionList.add(institution8);
         institutionList.add(institution9);
-        assertEquals(11, InstitutionMapper.toInstitutionResponseList(institutionList).size());
+        assertEquals(11, InstitutionMapperCustom.toInstitutionResponseList(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponseList(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponseList(List)}
      */
     @Test
     void testToInstitutionResponseList3() {
@@ -2478,11 +2476,11 @@ class MigrationInstitutionMapperTest {
         institutionList.add(institution7);
         institutionList.add(institution8);
         institutionList.add(institution9);
-        assertEquals(11, InstitutionMapper.toInstitutionResponseList(institutionList).size());
+        assertEquals(11, InstitutionMapperCustom.toInstitutionResponseList(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionResponseList(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionResponseList(List)}
      */
     @Test
     void testToInstitutionResponseList4() {
@@ -2540,7 +2538,7 @@ class MigrationInstitutionMapperTest {
         institutionList.add(institution7);
         institutionList.add(institution8);
         institutionList.add(institution9);
-        assertEquals(11, InstitutionMapper.toInstitutionResponseList(institutionList).size());
+        assertEquals(11, InstitutionMapperCustom.toInstitutionResponseList(institutionList).size());
     }
 }
 

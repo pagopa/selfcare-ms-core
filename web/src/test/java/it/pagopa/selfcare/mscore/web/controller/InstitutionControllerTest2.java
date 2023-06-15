@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ class InstitutionControllerTest2 {
 
     @MockBean
     private OnboardingResourceMapper onboardingResourceMapper;
+
+    @MockBean
+    private InstitutionResourceMapper institutionResourceMapper;
 
     @Test
     void updateCreatedAt_invalidDate() throws Exception {
