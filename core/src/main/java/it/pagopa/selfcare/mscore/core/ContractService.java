@@ -30,10 +30,7 @@ import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -296,6 +293,10 @@ public class ContractService {
         try {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
             toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+            GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+            toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
+            toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
+            toNotify.setCity(geographicTaxonomies.getDescription().replace(" - COMUNE", ""));
         } catch (MsCoreException | ResourceNotFoundException e) {
             log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
             toNotify.setIstatCode(null);
