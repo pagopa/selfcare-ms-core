@@ -71,6 +71,7 @@ import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 @Service
 public class ContractService {
 
+    static final String DESCRIPTION_TO_REPLACE_REGEX = " - COMUNE";
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
     private final PadesSignService padesSignService;
     private final FileStorageConnector fileStorageConnector;
@@ -296,7 +297,7 @@ public class ContractService {
             GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
             toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
             toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
-            toNotify.setCity(geographicTaxonomies.getDescription().replace(" - COMUNE", ""));
+            toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
         } catch (MsCoreException | ResourceNotFoundException e) {
             log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
             toNotify.setIstatCode(null);
