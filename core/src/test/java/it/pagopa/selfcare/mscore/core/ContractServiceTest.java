@@ -267,8 +267,11 @@ class ContractServiceTest {
         InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
         institutionProxyInfoMock.setTaxCode(institution.getExternalId());
 
+        GeographicTaxonomies geographicTaxonomiesMock = mockInstance(new GeographicTaxonomies());
+        geographicTaxonomiesMock.setIstatCode(institutionProxyInfoMock.getIstatCode());
         when(partyRegistryProxyConnector.getInstitutionById(any()))
                 .thenReturn(institutionProxyInfoMock);
+        when(partyRegistryProxyConnector.getExtByCode(any())).thenReturn(geographicTaxonomiesMock);
 
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
@@ -412,8 +415,11 @@ class ContractServiceTest {
         InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
         institutionProxyInfoMock.setTaxCode(institution.getExternalId());
 
+        GeographicTaxonomies geographicTaxonomiesMock = mockInstance(new GeographicTaxonomies());
+        geographicTaxonomiesMock.setIstatCode(institutionProxyInfoMock.getIstatCode());
         when(partyRegistryProxyConnector.getInstitutionById(any()))
                 .thenReturn(institutionProxyInfoMock);
+        when(partyRegistryProxyConnector.getExtByCode(any())).thenReturn(geographicTaxonomiesMock);
 
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE),
                 "Topic cannot be null");
