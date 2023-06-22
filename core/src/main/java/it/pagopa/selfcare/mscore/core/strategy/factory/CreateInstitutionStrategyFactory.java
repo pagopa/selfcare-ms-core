@@ -132,6 +132,7 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setTaxCode( areaOrganizzativaOmogenea.getCodiceFiscaleEnte() );
             newInstitution.setSubunitCode(strategyInput.getSubunitCode());
             newInstitution.setSubunitType(InstitutionPaSubunitType.AOO.name());
+            newInstitution.setParentDescription(institutionProxyInfo.getDescription());
 
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
@@ -170,6 +171,7 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setTaxCode( unitaOrganizzativa.getCodiceFiscaleEnte() );
             newInstitution.setSubunitCode(strategyInput.getSubunitCode());
             newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
+            newInstitution.setParentDescription(institutionProxyInfo.getDescription());
 
             if(StringUtils.isNotBlank(unitaOrganizzativa.getCodiceUniAoo())) {
                 PaAttributes paAttributes = new PaAttributes();

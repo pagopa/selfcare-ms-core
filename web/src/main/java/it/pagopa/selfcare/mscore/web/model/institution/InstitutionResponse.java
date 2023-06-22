@@ -33,5 +33,6 @@ public class InstitutionResponse {
 
     private String subunitCode;
     private String subunitType;
+    private String parentDescription;
     private String aooParentCode;
 }
