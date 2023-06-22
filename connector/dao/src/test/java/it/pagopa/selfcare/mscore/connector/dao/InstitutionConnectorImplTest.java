@@ -538,7 +538,7 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
-    void save() {
+    void shouldSaveInstitution() {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         geographicTaxonomies.add(new InstitutionGeographicTaxonomies());
         List<Onboarding> onboardings = new ArrayList<>();
@@ -551,50 +551,33 @@ class InstitutionConnectorImplTest {
         onboarding.setUpdatedAt(OffsetDateTime.now());
         onboarding.setPricingPlan("pricingPal");
         onboardings.add(onboarding);
+
         Institution institution = new Institution();
         institution.setExternalId("ext");
         institution.setId("507f1f77bcf86cd799439011");
+        institution.setParentDescription("parentDescription");
         institution.setOnboarding(onboardings);
+        institution.setZipCode("zipCpde");
+        institution.setRea("rea");
         institution.setGeographicTaxonomies(geographicTaxonomies);
-        InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId("507f1f77bcf86cd799439011");
-        List<AttributesEntity> attributes = new ArrayList<>();
-        AttributesEntity attributesEntity = new AttributesEntity();
-        attributesEntity.setCode("code");
-        attributesEntity.setOrigin("origin");
-        attributesEntity.setDescription("description");
-        attributes.add(attributesEntity);
-        institutionEntity.setAttributes(attributes);
-        institutionEntity.setOnboarding(new ArrayList<>());
-        List<GeoTaxonomyEntity> geoTaxonomyEntities = new ArrayList<>();
-        GeoTaxonomyEntity geoTaxonomyEntity = new GeoTaxonomyEntity();
-        geoTaxonomyEntity.setCode("code");
-        geoTaxonomyEntity.setDesc("desc");
-        geoTaxonomyEntities.add(geoTaxonomyEntity);
-        institutionEntity.setGeographicTaxonomies(geoTaxonomyEntities);
-        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
-        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
-        when(institutionRepository.save(any())).thenReturn(institutionEntity);
-        Institution response = institutionConnectorImpl.save(institution);
-        Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
-    }
 
-    @Test
-    void save3() {
-        Institution institution = new Institution();
-        institution.setExternalId("ext");
-        InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setExternalId("ext");
-        List<OnboardingEntity> onboardings = new ArrayList<>();
-        onboardings.add(new OnboardingEntity());
-        institutionEntity.setAttributes(new ArrayList<>());
-        institutionEntity.setOnboarding(onboardings);
-        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
-        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
-        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
-        when(institutionRepository.save(any())).thenReturn(institutionEntity);
+        when(institutionRepository.save(any())).thenAnswer(arg -> arg.getArguments()[0]);
+
         Institution response = institutionConnectorImpl.save(institution);
-        Assertions.assertEquals("ext", response.getExternalId());
+        Assertions.assertEquals(institution.getId(), response.getId());
+        Assertions.assertEquals(institution.getExternalId(), response.getExternalId());
+        Assertions.assertEquals(institution.getParentDescription(), response.getParentDescription());
+        Assertions.assertEquals(institution.getRea(), response.getRea());
+        Assertions.assertEquals(institution.getZipCode(), response.getZipCode());
+        Assertions.assertEquals(institution.getOnboarding().size(), response.getOnboarding().size());
+
+        Onboarding responseOnboarding = institution.getOnboarding().get(0);
+        Assertions.assertEquals(onboarding.getContract(), responseOnboarding.getContract());
+        Assertions.assertEquals(onboarding.getStatus(), responseOnboarding.getStatus());
+        Assertions.assertEquals(onboarding.getCreatedAt(), responseOnboarding.getCreatedAt());
+        Assertions.assertEquals(onboarding.getProductId(), responseOnboarding.getProductId());
+        Assertions.assertEquals(onboarding.getUpdatedAt(), responseOnboarding.getUpdatedAt());
+        Assertions.assertEquals(onboarding.getPricingPlan(), responseOnboarding.getPricingPlan());
     }
 
     @Test
@@ -1912,30 +1895,6 @@ class InstitutionConnectorImplTest {
     void testFindInstitutionProduct() {
         when(institutionRepository.find(any(), any())).thenReturn(new ArrayList<>());
         assertThrows(ResourceNotFoundException.class, () -> institutionConnectorImpl.findByExternalIdAndProductId("externalId", "productId"));
-    }
-
-    @Test
-    void save2() {
-        Institution institution = new Institution();
-        institution.setExternalId("ext");
-        institution.setId("507f1f77bcf86cd799439011");
-        institution.setGeographicTaxonomies(new ArrayList<>());
-        institution.setDataProtectionOfficer(new DataProtectionOfficer());
-        institution.setPaymentServiceProvider(new PaymentServiceProvider());
-
-        InstitutionEntity institutionEntity = new InstitutionEntity();
-        institutionEntity.setId("507f1f77bcf86cd799439011");
-        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
-        List<OnboardingEntity> onboardings = new ArrayList<>();
-        onboardings.add(new OnboardingEntity());
-        institutionEntity.setAttributes(new ArrayList<>());
-        institutionEntity.setOnboarding(onboardings);
-        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
-        institutionEntity.setPaymentServiceProvider(new PaymentServiceProviderEntity());
-        institutionEntity.setDataProtectionOfficer(new DataProtectionOfficerEntity());
-        when(institutionRepository.save(any())).thenReturn(institutionEntity);
-        Institution response = institutionConnectorImpl.save(institution);
-        Assertions.assertEquals("507f1f77bcf86cd799439011", response.getId());
     }
 
     /**

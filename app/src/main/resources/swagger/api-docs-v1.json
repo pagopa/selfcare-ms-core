@@ -4434,6 +4434,9 @@
           "paAttributes" : {
             "$ref" : "#/components/schemas/PaAttributes"
           },
+          "parentDescription" : {
+            "type" : "string"
+          },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProvider"
           },
@@ -4879,6 +4882,9 @@
             "type" : "string"
           },
           "originId" : {
+            "type" : "string"
+          },
+          "parentDescription" : {
             "type" : "string"
           },
           "paymentServiceProvider" : {

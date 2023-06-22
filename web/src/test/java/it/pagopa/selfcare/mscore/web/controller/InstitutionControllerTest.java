@@ -89,6 +89,7 @@ class InstitutionControllerTest {
         Institution institution = TestUtils.createSimpleInstitutionPA();
         institution.setSubunitCode("example");
         institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institution.setParentDescription("parentDescription");
 
         when(institutionService.getInstitutions(any(), any()))
                 .thenReturn(List.of(institution));
@@ -102,7 +103,7 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\",\"parentDescription\":\"parentDescription\"}]}"));
     }
 
     @Test
@@ -194,21 +195,25 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionByExternalId(String)}
+     * Method under test: {@link InstitutionController#createInstitutionFromIpa(InstitutionFromIpaPost)}}
      */
     @Test
     void shouldCreateInstitutionFromIpa() throws Exception {
-
-        Institution institution = TestUtils.createSimpleInstitutionPA();
-
-        when(institutionService.createInstitutionFromIpa(any(), any(), any())).thenReturn(institution);
-
+        // Given
         InstitutionFromIpaPost institutionFromIpaPost = new InstitutionFromIpaPost();
         institutionFromIpaPost.setTaxCode("123456");
         institutionFromIpaPost.setSubunitType(InstitutionPaSubunitType.AOO);
         institutionFromIpaPost.setSubunitCode("1234");
         String content = objectMapper.writeValueAsString(institutionFromIpaPost);
 
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode(institutionFromIpaPost.getSubunitCode());
+        institution.setSubunitType(institutionFromIpaPost.getSubunitType().name());
+        institution.setParentDescription("parentDescription");
+
+        when(institutionService.createInstitutionFromIpa(any(), any(), any())).thenReturn(institution);
+
+        //Then
         MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
@@ -216,11 +221,12 @@ class InstitutionControllerTest {
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"1234\",\"subunitType\":\"AOO\",\"parentDescription\":\"parentDescription\"}"));
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitutionByExternalId(String)}
+     * Method under test: {@link InstitutionController#createInstitutionFromIpa(InstitutionFromIpaPost)}}
      */
     @Test
     void shouldThrowValidationExceptionWhenCreateInstitutionFromIpaWithoutTax() throws Exception {
