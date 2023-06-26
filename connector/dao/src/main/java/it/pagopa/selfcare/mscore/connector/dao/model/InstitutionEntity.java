@@ -50,6 +50,7 @@ public class InstitutionEntity {
 
     private String subunitCode;
     private String subunitType;
+    private String parentDescription;
     private PaAttributesEntity paAttributes;
 
 }

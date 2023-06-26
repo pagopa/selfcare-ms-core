@@ -20,38 +20,6 @@ public class InstitutionMapperCustom {
 
     protected static final BinaryOperator<BulkProduct> MERGE_FUNCTION = (inst1, inst2) -> inst1.getStatus().compareTo(inst2.getStatus()) < 0 ? inst1 : inst2;
 
-    public static InstitutionResponse toInstitutionResponse(Institution institution) {
-        InstitutionResponse institutionResponse = new InstitutionResponse();
-        institutionResponse.setId(institution.getId());
-        institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setOrigin(institution.getOrigin());
-        institutionResponse.setOriginId(institution.getOriginId());
-        institutionResponse.setDescription(institution.getDescription());
-        institutionResponse.setInstitutionType(institution.getInstitutionType());
-        institutionResponse.setDigitalAddress(institution.getDigitalAddress());
-        institutionResponse.setAddress(institution.getAddress());
-        institutionResponse.setZipCode(institution.getZipCode());
-        institutionResponse.setTaxCode(institution.getTaxCode());
-        institutionResponse.setRea(institution.getRea());
-        institutionResponse.setShareCapital(institution.getShareCapital());
-        institutionResponse.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
-        institutionResponse.setSupportEmail(institution.getSupportEmail());
-        institutionResponse.setSupportPhone(institution.getSupportPhone());
-        institutionResponse.setImported(institution.isImported());
-        institutionResponse.setSubunitType(institution.getSubunitType());
-        institutionResponse.setSubunitCode(institution.getSubunitCode());
-        institutionResponse.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
-        if (institution.getGeographicTaxonomies() != null)
-            institutionResponse.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
-        if (institution.getAttributes() != null)
-            institutionResponse.setAttributes(toAttributeResponse(institution.getAttributes()));
-        if (institution.getDataProtectionOfficer() != null)
-            institutionResponse.setDataProtectionOfficer(toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
-        if (institution.getPaymentServiceProvider() != null)
-            institutionResponse.setPaymentServiceProvider(toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
-        return institutionResponse;
-    }
-
     public static InstitutionManagerResponse toInstitutionManagerResponse(ProductManagerInfo manager, String productId) {
         InstitutionManagerResponse institutionManagerResponse = new InstitutionManagerResponse();
         institutionManagerResponse.setFrom(manager.getUserId());
@@ -443,16 +411,6 @@ public class InstitutionMapperCustom {
             }
         }
         return map;
-    }
-
-    public static List<InstitutionResponse> toInstitutionResponseList(List<Institution> institutions) {
-        List<InstitutionResponse> responses = new ArrayList<>();
-        if (!institutions.isEmpty()) {
-            for (Institution institution : institutions) {
-                responses.add(toInstitutionResponse(institution));
-            }
-        }
-        return responses;
     }
 
     public static List<AttributesResponse> toInstitutionAttributeResponse(List<Attributes> attributes, String institutionId) {

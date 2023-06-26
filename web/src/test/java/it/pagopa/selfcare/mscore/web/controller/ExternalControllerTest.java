@@ -10,11 +10,14 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.CreatePnPgInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -41,6 +44,9 @@ class ExternalControllerTest {
 
     @Mock
     private ExternalService externalService;
+
+    @Spy
+    private InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
 
     /**
      * Method under test: {@link ExternalController#retrieveInstitutionProductsByExternalId(String, List)}

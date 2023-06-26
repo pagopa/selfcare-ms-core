@@ -203,6 +203,7 @@ public class CreateInstitutionStrategyTest {
         assertThat(actual.getTaxCode()).isEqualTo(dummyAreaOrganizzativaOmogenea.getCodiceFiscaleEnte());
         assertThat(actual.getSubunitCode()).isEqualTo(dummyAreaOrganizzativaOmogenea.getCodAoo());
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.AOO.name());
+        assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
 
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
@@ -243,6 +244,7 @@ public class CreateInstitutionStrategyTest {
         assertThat(actual.getTaxCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceFiscaleEnte());
         assertThat(actual.getSubunitCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniUo());
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.UO.name());
+        assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
         assertThat(actual.getPaAttributes().getAooParentCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniAoo());
 
         verify(institutionConnector).save(any());
