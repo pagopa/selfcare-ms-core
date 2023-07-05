@@ -12,6 +12,9 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -211,6 +214,21 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .map(InstitutionMapper::convertToInstitution)
                 .map(Institution::getOnboarding)
                 .orElse(List.of());
+    }
+
+    @Override
+    public List<Institution> findInstitutionsByProductId(String productId, Integer page, Integer size) {
+
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.onboarding.name()).
+                elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)));
+
+        Pageable pageable = PageRequest.of(Objects.nonNull(page) ? page : 0,
+                Objects.nonNull(size) ? size : 100);
+
+        Page<InstitutionEntity> institutionEntities = repository.find(query, pageable, InstitutionEntity.class);
+        return  institutionEntities.getContent().stream()
+                        .map(InstitutionMapper::convertToInstitution)
+                        .collect(Collectors.toList());
     }
 
     @Override
