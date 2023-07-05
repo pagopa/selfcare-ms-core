@@ -5691,7 +5691,8 @@
             "type" : "string"
           },
           "status" : {
-            "$ref" : "#/components/schemas/RelationshipResponse"
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           },
           "tokenId" : {
             "type" : "string"
@@ -5875,51 +5876,6 @@
           },
           "product" : {
             "type" : "string"
-          }
-        }
-      },
-      "RelationshipResponse" : {
-        "title" : "RelationshipResponse",
-        "type" : "object",
-        "properties" : {
-          "billingResponse" : {
-            "$ref" : "#/components/schemas/BillingResponse"
-          },
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "from" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "id" : {
-            "type" : "string"
-          },
-          "institutionUpdate" : {
-            "$ref" : "#/components/schemas/InstitutionUpdateResponse"
-          },
-          "pricingPlan" : {
-            "type" : "string"
-          },
-          "product" : {
-            "type" : "string"
-          },
-          "role" : {
-            "type" : "string"
-          },
-          "state" : {
-            "type" : "string",
-            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
-          },
-          "to" : {
-            "type" : "string"
-          },
-          "updatedAt" : {
-            "type" : "string",
-            "format" : "date-time"
           }
         }
       },

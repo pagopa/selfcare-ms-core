@@ -11,7 +11,7 @@ public class OnboardingResponse {
 
     private String productId;
     private String tokenId;
-    private RelationshipResponse status;
+    private RelationshipState status;
     private String contract;
     private String pricingPlan;
     private BillingResponse billing;
