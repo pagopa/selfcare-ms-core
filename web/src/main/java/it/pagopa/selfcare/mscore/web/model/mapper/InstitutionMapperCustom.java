@@ -435,15 +435,6 @@ public class InstitutionMapperCustom {
         return list;
     }
 
-    public static List<InstitutionOnboardingResponse> toInstitutionOnboardingListResponse(List<Institution> institutions) {
-        List<InstitutionOnboardingResponse> list = new ArrayList<>();
-        for (Institution institution : institutions) {
-            InstitutionOnboardingResponse response = toInstitutionOnboardingResponse(institution);
-            list.add(response);
-        }
-        return list;
-    }
-
     private static Map<String, ProductsManagement> toProductsMap(List<Onboarding> onboarding, Institution institution) {
         Map<String, ProductsManagement> map = new HashMap<>();
         if (onboarding != null) {
