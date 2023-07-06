@@ -1121,29 +1121,8 @@ class InstitutionControllerTest {
         Integer pageMock = 0;
         Integer sizeMock = 2;
 
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("?");
-        billing.setVatNumber("42");
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setClosedAt(null);
-        onboarding.setContract("?");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("?");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setTokenId("42");
-        onboarding.setUpdatedAt(null);
-
         Institution institution = new Institution();
         institution.setId("id");
-        institution.setOnboarding(List.of(onboarding));
-
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
 
         // When
         when(institutionService.getInstitutionsInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(institution));
