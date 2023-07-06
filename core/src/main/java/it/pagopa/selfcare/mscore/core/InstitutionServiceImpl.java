@@ -75,7 +75,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public List<Institution> getInstitutionsInstitutionsByProductId(String productId, Integer page, Integer size) {
+    public List<Institution> getInstitutionsByProductId(String productId, Integer page, Integer size) {
         return institutionConnector.findInstitutionsByProductId(productId, page, size);
     }
 

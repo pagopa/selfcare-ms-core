@@ -396,7 +396,7 @@ public class InstitutionController {
                                                                 @RequestParam(name = "size", defaultValue = "100") Integer size) {
         log.trace("findFromProduct start");
         log.debug("findFromProduct productId = {}", productId);
-        List<Institution> institutions = institutionService.getInstitutionsInstitutionsByProductId(productId, page, size);
+        List<Institution> institutions = institutionService.getInstitutionsByProductId(productId, page, size);
 
         InstitutionOnboardingListResponse institutionListResponse = new InstitutionOnboardingListResponse(
                 institutions.stream()

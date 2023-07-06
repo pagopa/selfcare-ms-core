@@ -68,5 +68,5 @@ public interface InstitutionService {
 
     List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 
-    List<Institution> getInstitutionsInstitutionsByProductId(String productId, Integer page, Integer size);
+    List<Institution> getInstitutionsByProductId(String productId, Integer page, Integer size);
 }

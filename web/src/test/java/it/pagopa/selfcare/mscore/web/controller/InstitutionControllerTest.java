@@ -1046,7 +1046,7 @@ class InstitutionControllerTest {
         institution.setId("id");
 
         // When
-        when(institutionService.getInstitutionsInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(institution));
+        when(institutionService.getInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(institution));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/products/{productId}", productIdMock)
                 .param("page", pageMock.toString())
                 .param("size", sizeMock.toString());
@@ -1059,7 +1059,7 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
         // Then
         verify(institutionService, times(1))
-                .getInstitutionsInstitutionsByProductId(productIdMock, pageMock, sizeMock);
+                .getInstitutionsByProductId(productIdMock, pageMock, sizeMock);
         verifyNoMoreInteractions(institutionService);
     }
 }

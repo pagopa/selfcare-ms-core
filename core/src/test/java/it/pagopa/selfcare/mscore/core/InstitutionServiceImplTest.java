@@ -5,7 +5,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
@@ -267,6 +266,16 @@ class InstitutionServiceImplTest {
         verify(institutionConnector).findByExternalId(any());
     }
 
+    /**
+     * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}
+     */
+    @Test
+    void testInstitutionsInstitutionsByProductId() {
+        List<Institution> institutions = new ArrayList<>();
+        when(institutionConnector.findInstitutionsByProductId(any(), any(), any())).thenReturn(institutions);
+        List<Institution> institutionsResult = institutionServiceImpl.getInstitutionsByProductId("id", 0, 1);
+        assertTrue(institutionsResult.isEmpty());
+    }
     /**
      * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
      */
