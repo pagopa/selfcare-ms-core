@@ -35,6 +35,8 @@ public interface InstitutionConnector {
 
     List<Onboarding> findOnboardingByIdAndProductId(String externalId, String productId);
 
+    List<Institution> findInstitutionsByProductId(String productId, Integer page, Integer size);
+
     void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
 
     Institution findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);

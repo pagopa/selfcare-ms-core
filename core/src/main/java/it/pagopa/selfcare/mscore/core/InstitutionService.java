@@ -67,4 +67,6 @@ public interface InstitutionService {
     void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);
 
     List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+
+    List<Institution> getInstitutionsInstitutionsByProductId(String productId, Integer page, Integer size);
 }
