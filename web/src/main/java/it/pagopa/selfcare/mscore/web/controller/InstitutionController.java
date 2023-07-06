@@ -397,7 +397,7 @@ public class InstitutionController {
         log.trace("findFromProduct start");
         log.debug("findFromProduct productId = {}", productId);
         List<Institution> institutions = institutionService.getInstitutionsInstitutionsByProductId(productId, page, size);
-        InstitutionOnboardingListResponse institutionListResponse = new InstitutionOnboardingListResponse(InstitutionMapper
+        InstitutionOnboardingListResponse institutionListResponse = new InstitutionOnboardingListResponse(InstitutionMapperCustom
                 .toInstitutionOnboardingListResponse(institutions));
 
         log.trace("findFromProduct end");

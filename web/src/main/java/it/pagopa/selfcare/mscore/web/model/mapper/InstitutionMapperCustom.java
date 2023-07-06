@@ -420,6 +420,9 @@ public class InstitutionMapperCustom {
         response.setImported(institution.isImported());
         response.setCreatedAt(institution.getCreatedAt());
         response.setUpdatedAt(institution.getUpdatedAt());
+        response.setSubunitCode(institution.getSubunitCode());
+        response.setSubunitType(institution.getSubunitType());
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         return response;
     }
 

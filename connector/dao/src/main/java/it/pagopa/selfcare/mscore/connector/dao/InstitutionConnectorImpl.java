@@ -231,7 +231,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
         Page<InstitutionEntity> institutionEntities = repository.find(query, pageable, InstitutionEntity.class);
         return  institutionEntities.getContent().stream()
-                        .map(InstitutionMapper::convertToInstitution)
+                        .map(institutionMapper::convertToInstitution)
                         .collect(Collectors.toList());
     }
 
