@@ -1110,4 +1110,56 @@ class InstitutionControllerTest {
                 .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
         verifyNoMoreInteractions(institutionService);
     }
+
+    /**
+     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
+     */
+    @Test
+    void findFromProduct() throws Exception {
+        // Given
+        String productIdMock = "productId";
+        Integer pageMock = 0;
+        Integer sizeMock = 2;
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("?");
+        billing.setVatNumber("42");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(billing);
+        onboarding.setClosedAt(null);
+        onboarding.setContract("?");
+        onboarding.setCreatedAt(null);
+        onboarding.setPricingPlan("?");
+        onboarding.setProductId("42");
+        onboarding.setStatus(RelationshipState.PENDING);
+        onboarding.setTokenId("42");
+        onboarding.setUpdatedAt(null);
+
+        Institution institution = new Institution();
+        institution.setId("id");
+        institution.setOnboarding(List.of(onboarding));
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        // When
+        when(institutionService.getInstitutionsInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/products/{productId}", productIdMock)
+                .param("page", pageMock.toString())
+                .param("size", sizeMock.toString());
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+        // Then
+        verify(institutionService, times(1))
+                .getInstitutionsInstitutionsByProductId(productIdMock, pageMock, sizeMock);
+        verifyNoMoreInteractions(institutionService);
+    }
 }

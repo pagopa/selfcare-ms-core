@@ -351,23 +351,32 @@ public class InstitutionController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     * Retrieve institutions with productId onboarded
+     *
+     * @param productId     String
+     * @param page          Integer
+     * @param size          Integer
+     * @return List
+     * * Code: 200, Message: successful operation
+     * * Code: 404, Message: product not found
+     */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions.findFromProduct}", notes = "${swagger.mscore.institutions.findFromProduct}")
-    @GetMapping(value = "/product/{productId}")
-    public ResponseEntity<InstitutionsResponse> findFromProduct(@ApiParam("${swagger.mscore.institutions.model.productId}")
+    @GetMapping(value = "/products/{productId}")
+    public ResponseEntity<InstitutionOnboardingListResponse> findFromProduct(@ApiParam("${swagger.mscore.institutions.model.productId}")
                                                                 @PathVariable(value = "productId") String productId,
-                                                                @ApiParam("${swagger.mscore.page.number}")
+                                                                             @ApiParam("${swagger.mscore.page.number}")
                                                                 @RequestParam(name = "page", defaultValue = "0") Integer page,
-                                                                @ApiParam("${swagger.mscore.page.size}")
+                                                                             @ApiParam("${swagger.mscore.page.size}")
                                                                 @RequestParam(name = "size", defaultValue = "100") Integer size) {
         log.trace("findFromProduct start");
         log.debug("findFromProduct productId = {}", productId);
         List<Institution> institutions = institutionService.getInstitutionsInstitutionsByProductId(productId, page, size);
-        InstitutionsResponse institutionsResponse = new InstitutionsResponse();
-        institutionsResponse.setInstitutions(institutions.stream()
-                .map(InstitutionMapper::toInstitutionResponse)
-                .collect(Collectors.toList()));
+        InstitutionOnboardingListResponse institutionListResponse = new InstitutionOnboardingListResponse(InstitutionMapper
+                .toInstitutionOnboardingListResponse(institutions));
+
         log.trace("findFromProduct end");
-        return ResponseEntity.ok(institutionsResponse);
+        return ResponseEntity.ok().body(institutionListResponse);
     }
 }
