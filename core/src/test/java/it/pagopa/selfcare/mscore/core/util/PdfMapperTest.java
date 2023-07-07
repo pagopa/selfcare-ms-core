@@ -53,7 +53,7 @@ class PdfMapperTest {
         ArrayList<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setId("id");
-        institution.setSubunitType("EC");
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -225,7 +225,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.GSP);
-        institution.setSubunitType("EC");
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -345,7 +345,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.SCP);
-        institution.setSubunitType("EC");
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -489,7 +489,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.PSP);
-        institution.setSubunitType("EC");
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -579,7 +579,7 @@ class PdfMapperTest {
         user.setWorkContacts(map1);
         ArrayList<User> users = new ArrayList<>();
         Institution institution = dummyInstitutionPa();
-        institution.setSubunitType("EC");
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -672,7 +672,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.PA);
-        institution.setSubunitType("AOO");
+        institution.setSubunitType(InstitutionPaSubunitType.AOO.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -717,16 +717,8 @@ class PdfMapperTest {
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
 
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
+        OnboardingRequest onboardingRequest = dummyOnboardingRequest(billing, contract, institutionUpdate);
+
         assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null, InstitutionType.PA).size());
     }
 
@@ -764,7 +756,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.PA);
-        institution.setSubunitType("UO");
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -809,16 +801,8 @@ class PdfMapperTest {
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
 
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
+        OnboardingRequest onboardingRequest = dummyOnboardingRequest(billing, contract, institutionUpdate);
+
         assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null, InstitutionType.PA).size());
     }
 
