@@ -47,6 +47,11 @@ public class PdfMapper {
             if (geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
                 map.put("institutionGeoTaxonomies", geographicTaxonomies.stream().map(InstitutionGeographicTaxonomies::getDesc).collect(Collectors.toList()));
             }
+            if(institution.getSubunitType() != null && (institution.getSubunitType().equals(InstitutionPaSubunitType.AOO.name()) || institution.getSubunitType().equals(InstitutionPaSubunitType.UO.name()))){
+                map.put("parentInfo", " ente centrale " + institution.getParentDescription());
+            } else {
+                map.put("parentInfo", "");
+            }
             return map;
         } else {
             throw new InvalidRequestException(MANAGER_EMAIL_NOT_FOUND.getMessage(), MANAGER_EMAIL_NOT_FOUND.getCode());
@@ -106,6 +111,7 @@ public class PdfMapper {
             map.put("institutionRecipientCode", request.getBillingRequest().getRecipientCode());
         }
     }
+
 
     private static void addPricingPlan(OnboardingRequest request, Map<String, Object> map) {
         if (StringUtils.hasText(request.getPricingPlan()) && Arrays.stream(PLAN_LIST).anyMatch(s -> s.equalsIgnoreCase(request.getPricingPlan()))) {

@@ -53,6 +53,7 @@ class PdfMapperTest {
         ArrayList<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setId("id");
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -107,7 +108,7 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        assertEquals(13, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PA).size());
+        assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PA).size());
     }
     /**
      * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
@@ -224,6 +225,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.GSP);
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -278,7 +280,7 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        assertEquals(13, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null, InstitutionType.PA).size());
+        assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null, InstitutionType.PA).size());
     }
 
     /**
@@ -343,6 +345,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.SCP);
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -397,7 +400,7 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        assertEquals(13,
+        assertEquals(14,
                 PdfMapper.setUpCommonData(user, userList, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PT).size());
     }
 
@@ -486,6 +489,7 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.PSP);
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -540,7 +544,7 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        assertEquals(13,
+        assertEquals(14,
                 PdfMapper.setUpCommonData(user, userList, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PSP).size());
     }
 
@@ -575,6 +579,7 @@ class PdfMapperTest {
         user.setWorkContacts(map1);
         ArrayList<User> users = new ArrayList<>();
         Institution institution = dummyInstitutionPa();
+        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);
@@ -629,8 +634,176 @@ class PdfMapperTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        assertEquals(13,
+        assertEquals(14,
                 PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, new ArrayList<>(), InstitutionType.PSP).size());
+    }
+
+    /**
+     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
+     */
+    @Test
+    void testSetUpCommonDataAoo() {
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+
+        User user = new User();
+        user.setEmail(certifiedField);
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+        user.setName(certifiedField2);
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        user.setWorkContacts(map);
+        ArrayList<User> users = new ArrayList<>();
+        Institution institution = new Institution();
+        institution.setId("id");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setSubunitType(InstitutionPaSubunitType.AOO.name());
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Contract contract = new Contract();
+        contract.setPath("Path");
+        contract.setVersion("1.0.2");
+
+        ContractImported contractImported = new ContractImported();
+        contractImported.setContractType("Contract Type");
+        contractImported.setFileName("foo.txt");
+        contractImported.setFilePath("/directory/foo.txt");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        OnboardingRequest onboardingRequest = dummyOnboardingRequest(billing, contract, institutionUpdate);
+
+        assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null, InstitutionType.PA).size());
+    }
+
+    /**
+     * Method under test: {@link PdfMapper#setUpCommonData(User, List, Institution, OnboardingRequest, List, InstitutionType)}
+     */
+    @Test
+    void testSetUpCommonDataUo() {
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+
+        User user = new User();
+        user.setEmail(certifiedField);
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+        user.setName(certifiedField2);
+        CertifiedField<String> emailCert = new CertifiedField<>();
+        emailCert.setValue("email");
+        WorkContact workContact = new WorkContact();
+        workContact.setEmail(emailCert);
+        Map<String, WorkContact> map = new HashMap<>();
+        map.put("id", workContact);
+        user.setWorkContacts(map);
+        ArrayList<User> users = new ArrayList<>();
+        Institution institution = new Institution();
+        institution.setId("id");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+
+        Contract contract = new Contract();
+        contract.setPath("Path");
+        contract.setVersion("1.0.2");
+
+        ContractImported contractImported = new ContractImported();
+        contractImported.setContractType("Contract Type");
+        contractImported.setFileName("foo.txt");
+        contractImported.setFilePath("/directory/foo.txt");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        OnboardingRequest onboardingRequest = dummyOnboardingRequest(billing, contract, institutionUpdate);
+
+        assertEquals(14, PdfMapper.setUpCommonData(user, users, institution, onboardingRequest, null, InstitutionType.PA).size());
     }
 
     /**
