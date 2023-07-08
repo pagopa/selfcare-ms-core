@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
@@ -47,27 +46,28 @@ public class EmailService {
         emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, productName, templateParameters, fileName);
     }
 
-    public void sendMail(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean isApproved, InstitutionType institutionType) {
+    public void sendMailWithContract(File pdf, Institution institution, User user, OnboardingRequest request, String token) {
         List<String> destinationMail;
         Map<String, String> mailParameters;
-        if (InstitutionType.PA == institutionType ||
-                (InstitutionType.GSP == institutionType && request.getProductId().equals("prod-interop") && institution.getOrigin().equals("IPA"))
-                || isApproved) {
-            mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
-            log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
-                    ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
-            log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
-            log.info("onboarding-contract-email Email successful sent");
-        } else {
-            mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
-            log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
-            log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
-            log.info("onboarding-complete-email-notification Email successful sent");
-        }
+        mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
+        log.debug(MAIL_PARAMETER_LOG, mailParameters);
+        destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
+                ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
+        log.info(DESTINATION_MAIL_LOG, destinationMail);
+        emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
+        log.info("onboarding-contract-email Email successful sent");
+    }
+
+    public void sendMailForApprove(User user, OnboardingRequest request, String token) {
+        List<String> destinationMail;
+        Map<String, String> mailParameters;
+        mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
+        log.debug(MAIL_PARAMETER_LOG, mailParameters);
+        destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
+        log.info(DESTINATION_MAIL_LOG, destinationMail);
+        emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        log.info("onboarding-complete-email-notification Email successful sent");
+
     }
 
     public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo) {

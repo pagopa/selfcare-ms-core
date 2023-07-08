@@ -404,7 +404,7 @@ class OnboardingServiceImplTest {
         verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegate, institution, request, null, null);
         verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
         verifyNoMoreInteractions(onboardingDao);
-        verify(emailService, times(1)).sendMail(file, institution, user, request, token.getId(), true, null);
+        verify(emailService, times(1)).sendMailWithContract(file, institution, user, request, token.getId());
     }
 
     @Test
@@ -508,7 +508,7 @@ class OnboardingServiceImplTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         when(productConnector.getProductById(any())).thenReturn(product);
 
-        doThrow(RuntimeException.class).when(emailService).sendMail(any(), any(), any(), any(), any(), anyBoolean(), any());
+        doThrow(RuntimeException.class).when(emailService).sendMailWithContract(any(), any(), any(), any(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
@@ -1408,7 +1408,7 @@ class OnboardingServiceImplTest {
     @Test
     void shouldOnboardingInstitution() {
         OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any()))
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
                 .thenReturn(mockInstitutionStrategy);
         doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
 
@@ -1421,7 +1421,7 @@ class OnboardingServiceImplTest {
     @Test
     void shouldOnboardingInstitutionComplete() {
         OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(any()))
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(any(), any()))
                 .thenReturn(mockInstitutionStrategy);
         doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
 

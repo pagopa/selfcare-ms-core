@@ -2,10 +2,7 @@ package it.pagopa.selfcare.mscore.core.strategy.factory;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.input.OnboardingInstitutionStrategyInput;
@@ -27,6 +24,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
 
 @Component
 public class OnboardingInstitutionStrategyFactory {
@@ -50,10 +49,9 @@ public class OnboardingInstitutionStrategyFactory {
         this.coreConfig = coreConfig;
     }
 
-    public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategy(InstitutionType institutionType) {
-
+    public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategy(InstitutionType institutionType, String productId, Institution institution) {
         Consumer<OnboardingInstitutionStrategyInput> verifyAndFillInstitutionAttributeStrategy =
-                verifyAndFillInstitutionAttributeStrategy();
+                verifyAndFillInstitutionAttributeStrategy(institution);
 
         Consumer<OnboardingInstitutionStrategyInput> digestOnboardingInstitutionStrategy;
         Consumer<OnboardingInstitutionStrategyInput> persitOnboardingInstitutionStrategy;
@@ -63,10 +61,14 @@ public class OnboardingInstitutionStrategyFactory {
             digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = ignore -> {};
-        } else {
+        } else if (InstitutionType.PA == institutionType || Boolean.TRUE.equals(checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin()))) {
             digestOnboardingInstitutionStrategy = createContractAndPerformDigest();
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
+        } else {
+            digestOnboardingInstitutionStrategy = ignore -> {};
+            persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
+            emailsOnboardingInstitutionStrategy = sendEmailWithoutDigestOrRollback();
         }
 
         return new OnboardingInstitutionStrategy(verifyAndFillInstitutionAttributeStrategy,
@@ -75,10 +77,17 @@ public class OnboardingInstitutionStrategyFactory {
                 emailsOnboardingInstitutionStrategy);
     }
 
-    public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(InstitutionType institutionType) {
+    private Boolean checkIfGspProdInteropAndOriginIPA(InstitutionType institutionType, String productId, String origin) {
+        return InstitutionType.GSP == institutionType
+                && productId.equals(PROD_INTEROP.getValue())
+                && origin.equals(Origin.IPA.getValue());
+    }
 
-        Consumer<OnboardingInstitutionStrategyInput> verifyAndFillInstitutionAttributeStrategy = verifyAndFillInstitutionAttributeStrategy();
-        Consumer<OnboardingInstitutionStrategyInput> digestOnboardingInstitutionStrategy = ignore -> {};
+    public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(InstitutionType institutionType, Institution institution) {
+
+        Consumer<OnboardingInstitutionStrategyInput> verifyAndFillInstitutionAttributeStrategy = verifyAndFillInstitutionAttributeStrategy(institution);
+        Consumer<OnboardingInstitutionStrategyInput> digestOnboardingInstitutionStrategy = ignore -> {
+        };
 
         Consumer<OnboardingInstitutionStrategyInput> persitOnboardingInstitutionStrategy;
         Consumer<OnboardingInstitutionStrategyInput> emailsOnboardingInstitutionStrategy;
@@ -167,7 +176,19 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
-                emailService.sendMail(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false, strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+                emailService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
+            } catch (Exception e) {
+                onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
+                        strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
+            }
+        };
+    }
+
+    private Consumer<OnboardingInstitutionStrategyInput> sendEmailWithoutDigestOrRollback() {
+        return strategyInput -> {
+            try {
+                User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
+                emailService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
@@ -201,10 +222,9 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private Consumer<OnboardingInstitutionStrategyInput> verifyAndFillInstitutionAttributeStrategy() {
+    private Consumer<OnboardingInstitutionStrategyInput> verifyAndFillInstitutionAttributeStrategy(Institution institution) {
         return strategyInput -> {
             strategyInput.getOnboardingRequest().setTokenType(TokenType.INSTITUTION);
-            Institution institution = institutionService.retrieveInstitutionByExternalId(strategyInput.getOnboardingRequest().getInstitutionExternalId());
 
             /* check onboaring validation */
             OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, strategyInput.getOnboardingRequest().getProductId());

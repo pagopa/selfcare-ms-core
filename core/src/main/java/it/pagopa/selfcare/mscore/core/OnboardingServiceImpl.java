@@ -110,17 +110,17 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
-
+        Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
-                .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType())
+                .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType(), request.getProductId(), institution)
                 .onboardingInstitution(request, principal);
     }
 
     @Override
     public void onboardingInstitutionComplete(OnboardingRequest request, SelfCareUser principal) {
-
+        Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
-                .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType())
+                .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType(), institution)
                 .onboardingInstitution(request, principal);
     }
     @Override
@@ -196,7 +196,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            emailService.sendMail(pdf, institution, currentUser, request, token.getId(), true, institutionType);
+            emailService.sendMailWithContract(pdf, institution, currentUser, request, token.getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -256,7 +256,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false, institutionType);
+            emailService.sendMailWithContract(pdf, institution, user, request, rollback.getToken().getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }
