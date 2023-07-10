@@ -58,10 +58,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
@@ -259,7 +256,7 @@ public class ContractService {
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
         notification.setCreatedAt(token.getCreatedAt());
-        notification.setUpdatedAt(token.getUpdatedAt());
+        notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         if (token.getStatus().equals(RelationshipState.DELETED)) {
             notification.setClosedAt(token.getClosedAt());
         }
