@@ -404,7 +404,7 @@ class OnboardingServiceImplTest {
         verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegate, institution, request, null, null);
         verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
         verifyNoMoreInteractions(onboardingDao);
-        verify(emailService, times(1)).sendMailWithContract(file, institution, user, request, token.getId());
+        verify(emailService, times(1)).sendMailWithContract(file, institution.getDigitalAddress(), user, request, token.getId());
     }
 
     @Test

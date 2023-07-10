@@ -61,7 +61,7 @@ public class OnboardingInstitutionStrategyFactory {
             digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = ignore -> {};
-        } else if (InstitutionType.PA == institutionType || Boolean.TRUE.equals(checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin()))) {
+        } else if (InstitutionType.PA == institutionType || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())) {
             digestOnboardingInstitutionStrategy = createContractAndPerformDigest();
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
@@ -77,7 +77,7 @@ public class OnboardingInstitutionStrategyFactory {
                 emailsOnboardingInstitutionStrategy);
     }
 
-    private Boolean checkIfGspProdInteropAndOriginIPA(InstitutionType institutionType, String productId, String origin) {
+    private boolean checkIfGspProdInteropAndOriginIPA(InstitutionType institutionType, String productId, String origin) {
         return InstitutionType.GSP == institutionType
                 && productId.equals(PROD_INTEROP.getValue())
                 && origin.equals(Origin.IPA.getValue());
@@ -176,7 +176,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
-                emailService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
+                emailService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution().getDigitalAddress(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());

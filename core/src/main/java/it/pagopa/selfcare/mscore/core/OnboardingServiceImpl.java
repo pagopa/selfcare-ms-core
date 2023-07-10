@@ -196,7 +196,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            emailService.sendMailWithContract(pdf, institution, currentUser, request, token.getId());
+            emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), currentUser, request, token.getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -256,7 +256,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            emailService.sendMailWithContract(pdf, institution, user, request, rollback.getToken().getId());
+            emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, request, rollback.getToken().getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }

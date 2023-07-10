@@ -46,24 +46,23 @@ public class EmailService {
         emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, productName, templateParameters, fileName);
     }
 
-    public void sendMailWithContract(File pdf, Institution institution, User user, OnboardingRequest request, String token) {
+    public void sendMailWithContract(File pdf, String digitalAddress, User user, OnboardingRequest request, String token) {
         List<String> destinationMail;
         Map<String, String> mailParameters;
         mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
         destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
-                ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
+                ? coreConfig.getDestinationMails() : List.of(digitalAddress);
         log.info(DESTINATION_MAIL_LOG, destinationMail);
         emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
         log.info("onboarding-contract-email Email successful sent");
     }
 
     public void sendMailForApprove(User user, OnboardingRequest request, String token) {
-        List<String> destinationMail;
         Map<String, String> mailParameters;
         mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
-        destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
+        List<String> destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
         log.info(DESTINATION_MAIL_LOG, destinationMail);
         emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, null, request.getProductName(), mailParameters, null);
         log.info("onboarding-complete-email-notification Email successful sent");

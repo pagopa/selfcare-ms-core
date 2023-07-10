@@ -55,7 +55,7 @@ class EmailServiceTest {
     private EmailConnector emailConnector;
 
     /**
-     * Method under test: {@link EmailService#sendMailWithContract(File, Institution, User, OnboardingRequest, String)}
+     * Method under test: {@link EmailService#sendMailWithContract(File, String, User, OnboardingRequest, String)}
      */
     @Test
     void testSendAutocompleteMail() {
@@ -74,7 +74,7 @@ class EmailServiceTest {
     }
 
     /**
-     * Method under test: {@link EmailService#sendMailWithContract(File, Institution, User, OnboardingRequest, String)}
+     * Method under test: {@link EmailService#sendMailWithContract(File, String, User, OnboardingRequest, String)}
      */
     @Test
     void testSendMail() {
@@ -163,7 +163,7 @@ class EmailServiceTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
 
-        emailService.sendMailWithContract(pdf, institution, user, onboardingRequest, "");
+        emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, onboardingRequest, "");
         assertNotNull(onboardingRequest);
     }
 
@@ -248,7 +248,7 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        emailService.sendMailWithContract(pdf, institution, user, onboardingRequest, "");
+        emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, onboardingRequest, "");
         assertNotNull(onboardingRequest);
     }
 
@@ -344,7 +344,7 @@ class EmailServiceTest {
         onboardingRequest.setUsers(new ArrayList<>());
         when(mailParametersMapper.getOnboardingNotificationPath()).thenReturn("");
         doNothing().when(emailConnector).sendMail(any(), any(), any(), any(), any(), any());
-        assertDoesNotThrow(() -> emailService.sendMailWithContract(pdf, institution, user, onboardingRequest, ""));
+        assertDoesNotThrow(() -> emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, onboardingRequest, ""));
     }
 
     /**
