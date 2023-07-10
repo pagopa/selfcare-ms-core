@@ -246,10 +246,10 @@ public class ContractService {
         NotificationToSend notification = new NotificationToSend();
         if (queueEvent.equals(QueueEvent.ADD)) {
             notification.setId(token.getId());
-            notification.setState(RelationshipState.ACTIVE);
+            notification.setState(RelationshipState.ACTIVE.toString());
         } else {
             notification.setId(UUID.randomUUID().toString());
-            notification.setState(token.getStatus());
+            notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
         }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
@@ -258,12 +258,11 @@ public class ContractService {
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         if (token.getStatus().equals(RelationshipState.DELETED)) {
-            notification.setClosedAt(token.getClosedAt());
+            notification.setClosedAt(token.getUpdatedAt());
         }
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
-
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
