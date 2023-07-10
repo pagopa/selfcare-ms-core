@@ -1290,6 +1290,66 @@
         "security" : [ {
           "bearerAuth" : [ "global" ]
         } ]
+      },
+      "post" : {
+        "tags" : [ "Institution" ],
+        "summary" : "create an institution using external institution id without fetching data from party-registry or info-camere",
+        "description" : "create an institution using external institution id without fetching data from party-registry or info-camere",
+        "operationId" : "createInstitutionUsingPOST_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
       }
     },
     "/institutions/from-ipa/" : {
@@ -1421,6 +1481,7 @@
             }
           }
         },
+        "deprecated" : true,
         "security" : [ {
           "bearerAuth" : [ "global" ]
         } ]
@@ -1566,6 +1627,79 @@
         } ]
       }
     },
+    "/institutions/products/{productId}" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "${swagger.mscore.institutions.findFromProduct}",
+        "description" : "${swagger.mscore.institutions.findFromProduct}",
+        "operationId" : "findFromProductUsingGET",
+        "parameters" : [ {
+          "name" : "productId",
+          "in" : "path",
+          "description" : "Product's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "${swagger.mscore.page.number}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "${swagger.mscore.page.size}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionOnboardingListResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
@@ -1624,6 +1758,7 @@
             }
           }
         },
+        "deprecated" : true,
         "security" : [ {
           "bearerAuth" : [ "global" ]
         } ]
@@ -3386,14 +3521,7 @@
         } ],
         "responses" : {
           "204" : {
-            "description" : "No Content",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/OnboardingInfoResponse"
-                }
-              }
-            }
+            "description" : "No Content"
           },
           "400" : {
             "description" : "Bad Request",
@@ -3553,8 +3681,8 @@
     "/onboarding/{tokenId}/consume" : {
       "post" : {
         "tags" : [ "Onboarding" ],
-        "summary" : "${swagger.mscore.token.consume}",
-        "description" : "${swagger.mscore.token.consume}",
+        "summary" : "Consume token onboarding request without digest verification ",
+        "description" : "Consume token onboarding request without digest verification ",
         "operationId" : "consumeTokenUsingPOST",
         "parameters" : [ {
           "name" : "tokenId",
@@ -4376,6 +4504,12 @@
           "originId" : {
             "type" : "string"
           },
+          "paAttributes" : {
+            "$ref" : "#/components/schemas/PaAttributes"
+          },
+          "parentDescription" : {
+            "type" : "string"
+          },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProvider"
           },
@@ -4416,6 +4550,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "billing" : {
             "$ref" : "#/components/schemas/BillingResponse"
           },
@@ -4437,12 +4574,18 @@
           },
           "origin" : {
             "type" : "string",
-            "enum" : [ "ADE", "INFOCAMERE", "IPA", "SELC", "UNKNOWN", "static" ]
+            "enum" : [ "ADE", "INFOCAMERE", "IPA", "MOCK", "SELC", "UNKNOWN" ]
           },
           "originId" : {
             "type" : "string"
           },
           "pricingPlan" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "taxCode" : {
@@ -4498,6 +4641,9 @@
         "type" : "object",
         "properties" : {
           "address" : {
+            "type" : "string"
+          },
+          "aooParentCode" : {
             "type" : "string"
           },
           "attributes" : {
@@ -4562,6 +4708,12 @@
           "shareCapital" : {
             "type" : "string"
           },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
+            "type" : "string"
+          },
           "supportEmail" : {
             "type" : "string"
           },
@@ -4619,6 +4771,114 @@
           "updatedAt" : {
             "type" : "string",
             "format" : "date-time"
+          }
+        }
+      },
+      "InstitutionOnboardingListResponse" : {
+        "title" : "InstitutionOnboardingListResponse",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InstitutionOnboardingResponse"
+            }
+          }
+        }
+      },
+      "InstitutionOnboardingResponse" : {
+        "title" : "InstitutionOnboardingResponse",
+        "type" : "object",
+        "properties" : {
+          "address" : {
+            "type" : "string"
+          },
+          "aooParentCode" : {
+            "type" : "string"
+          },
+          "attributes" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AttributesResponse"
+            }
+          },
+          "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "dataProtectionOfficer" : {
+            "$ref" : "#/components/schemas/DataProtectionOfficerResponse"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "digitalAddress" : {
+            "type" : "string"
+          },
+          "externalId" : {
+            "type" : "string"
+          },
+          "geographicTaxonomies" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GeoTaxonomies"
+            }
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "imported" : {
+            "type" : "boolean"
+          },
+          "institutionType" : {
+            "type" : "string",
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+          },
+          "onboardings" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/OnboardingResponse"
+            }
+          },
+          "origin" : {
+            "type" : "string"
+          },
+          "originId" : {
+            "type" : "string"
+          },
+          "paymentServiceProvider" : {
+            "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
+          },
+          "rea" : {
+            "type" : "string"
+          },
+          "shareCapital" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
+            "type" : "string"
+          },
+          "supportEmail" : {
+            "type" : "string"
+          },
+          "supportPhone" : {
+            "type" : "string"
+          },
+          "taxCode" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "zipCode" : {
+            "type" : "string"
           }
         }
       },
@@ -4759,6 +5019,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "attributes" : {
             "type" : "array",
             "items" : {
@@ -4802,6 +5065,9 @@
           "originId" : {
             "type" : "string"
           },
+          "parentDescription" : {
+            "type" : "string"
+          },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
           },
@@ -4809,6 +5075,12 @@
             "type" : "string"
           },
           "shareCapital" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "supportEmail" : {
@@ -4954,6 +5226,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "businessRegisterPlace" : {
             "type" : "string"
           },
@@ -4986,6 +5261,12 @@
             "type" : "string"
           },
           "shareCapital" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "supportEmail" : {
@@ -5210,6 +5491,9 @@
           "address" : {
             "type" : "string"
           },
+          "aooParentCode" : {
+            "type" : "string"
+          },
           "attributes" : {
             "type" : "array",
             "items" : {
@@ -5267,6 +5551,12 @@
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
           },
           "state" : {
+            "type" : "string"
+          },
+          "subunitCode" : {
+            "type" : "string"
+          },
+          "subunitType" : {
             "type" : "string"
           },
           "supportContact" : {
@@ -5582,7 +5872,8 @@
             "type" : "string"
           },
           "status" : {
-            "$ref" : "#/components/schemas/RelationshipResponse"
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           },
           "tokenId" : {
             "type" : "string"
@@ -5602,6 +5893,15 @@
             "items" : {
               "$ref" : "#/components/schemas/OnboardingResponse"
             }
+          }
+        }
+      },
+      "PaAttributes" : {
+        "title" : "PaAttributes",
+        "type" : "object",
+        "properties" : {
+          "aooParentCode" : {
+            "type" : "string"
           }
         }
       },
@@ -5757,51 +6057,6 @@
           },
           "product" : {
             "type" : "string"
-          }
-        }
-      },
-      "RelationshipResponse" : {
-        "title" : "RelationshipResponse",
-        "type" : "object",
-        "properties" : {
-          "billingResponse" : {
-            "$ref" : "#/components/schemas/BillingResponse"
-          },
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "from" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
-            }
-          },
-          "id" : {
-            "type" : "string"
-          },
-          "institutionUpdate" : {
-            "$ref" : "#/components/schemas/InstitutionUpdateResponse"
-          },
-          "pricingPlan" : {
-            "type" : "string"
-          },
-          "product" : {
-            "type" : "string"
-          },
-          "role" : {
-            "type" : "string"
-          },
-          "state" : {
-            "type" : "string",
-            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
-          },
-          "to" : {
-            "type" : "string"
-          },
-          "updatedAt" : {
-            "type" : "string",
-            "format" : "date-time"
           }
         }
       },

@@ -14,7 +14,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperCustom;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
@@ -79,7 +79,7 @@ public class ManagementController {
                                                                                     @PathVariable(value = "id") String institutionId) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionManagementResponse(institution));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionManagementResponse(institution));
     }
 
     /**
@@ -93,7 +93,7 @@ public class ManagementController {
                                                                                     @PathVariable(value = "externalId") String externalId) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_EXTERNAL_ID_ERROR);
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionManagementResponse(institution));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionManagementResponse(institution));
     }
 
     /**
@@ -107,7 +107,7 @@ public class ManagementController {
                                                                              @PathVariable(value = "id") String institutionId) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_ATTRIBUTES_ERROR);
         Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        return ResponseEntity.ok().body(InstitutionMapper.toInstitutionAttributeResponse(institution.getAttributes(), institutionId));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toInstitutionAttributeResponse(institution.getAttributes(), institutionId));
     }
 
     /**
@@ -141,7 +141,7 @@ public class ManagementController {
                                                                                 @RequestParam(value = "searchMode", required = false, defaultValue = "ANY") SearchMode searchMode) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_GEOTAXONOMY_ERROR);
         List<Institution> institutions = institutionService.findInstitutionsByGeoTaxonomies(geoTaxonomies, searchMode);
-        return ResponseEntity.ok().body(new InstitutionListResponse(InstitutionMapper.toInstitutionListResponse(institutions)));
+        return ResponseEntity.ok().body(new InstitutionListResponse(InstitutionMapperCustom.toInstitutionListResponse(institutions)));
     }
 
     /**
@@ -155,7 +155,7 @@ public class ManagementController {
                                                                              @PathVariable(value = "productId") String productId) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_PRODUCTID_ERROR);
         List<Institution> institutions = institutionService.findInstitutionsByProductId(productId);
-        return ResponseEntity.ok().body(new InstitutionListResponse(InstitutionMapper.toInstitutionListResponse(institutions)));
+        return ResponseEntity.ok().body(new InstitutionListResponse(InstitutionMapperCustom.toInstitutionListResponse(institutions)));
     }
 
     /**
@@ -208,6 +208,6 @@ public class ManagementController {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
         List<String> ids = new ArrayList<>(bulkPartiesSeed.getPartyIdentifiers());
         List<Institution> institution = institutionService.retrieveInstitutionByIds(ids);
-        return ResponseEntity.ok().body(InstitutionMapper.toBulkInstitutions(institution, ids));
+        return ResponseEntity.ok().body(InstitutionMapperCustom.toBulkInstitutions(institution, ids));
     }
 }

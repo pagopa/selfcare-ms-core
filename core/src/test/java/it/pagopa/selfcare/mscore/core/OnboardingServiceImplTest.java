@@ -46,6 +46,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
+import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -162,16 +163,8 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testGetOnboardingInfo10() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        Institution institution = new Institution("42", "42", Origin.SELC.name(), "START - getUser with id: {}",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "START - getUser with id: {}", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer(), null, null, "START - getUser with id: {}", "START - getUser with id: {}",
-                "true", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null);
+
+        Institution institution = dummyInstitutionPa();
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("START - getUser with id: {}");

@@ -5,7 +5,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
@@ -35,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
+import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -267,6 +267,16 @@ class InstitutionServiceImplTest {
     }
 
     /**
+     * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}
+     */
+    @Test
+    void testInstitutionsInstitutionsByProductId() {
+        List<Institution> institutions = new ArrayList<>();
+        when(institutionConnector.findInstitutionsByProductId(any(), any(), any())).thenReturn(institutions);
+        List<Institution> institutionsResult = institutionServiceImpl.getInstitutionsByProductId("id", 0, 1);
+        assertTrue(institutionsResult.isEmpty());
+    }
+    /**
      * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
      */
     @Test
@@ -474,16 +484,8 @@ class InstitutionServiceImplTest {
         Institution institution = new Institution();
         when(institutionConnector.save(any())).thenReturn(institution);
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(new Institution("42", "42", Origin.SELC.name(), "",
-                "START - check institution {} already exists", InstitutionType.PA, "42 Main St", "42 Main St", "21654", "START - check institution {} already exists",
-                billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider, new DataProtectionOfficer(),
-                null, null, "START - check institution {} already exists", "START - check institution {} already exists",
-                "START - check institution {} already exists", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null), "42"));
+
+        assertSame(institution, institutionServiceImpl.createInstitutionRaw(dummyInstitutionPa(), "example"));
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByExternalId(any());
     }
@@ -845,11 +847,7 @@ class InstitutionServiceImplTest {
         PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
                 "Legal Register Name", "42", true);
 
-        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "Tax Code", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+        Institution institution = dummyInstitutionPa();
 
         assertTrue(institutionServiceImpl
                 .retrieveUserInstitutionRelationships(institution, "42", "42", List.of(), List.of(), List.of(), List.of())
@@ -959,59 +957,6 @@ class InstitutionServiceImplTest {
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
         verify(institutionConnector).findByExternalIdAndProductId(any(), any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveAllProduct(String, UserBinding, Institution, List, List, List, List)}
-     */
-    @Test
-    void testRetrieveAllProduct5() {
-
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
-
-        //InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(partyRegistryProxyConnector, null,
-        //        userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
-        UserBinding binding = new UserBinding();
-        binding.setInstitutionId("42");
-        OnboardedProduct product = new OnboardedProduct();
-        product.setProductId("productId");
-        binding.setProducts(List.of(product));
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer("42 Main St", "jane.doe@example.org",
-                "Pec");
-
-        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "Tax Code", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
-                dataProtectionOfficer, "Rea", "Share Capital", "Business Register Place", "jane.doe@example.org",
-                "6625550144", true, null, null, null, null);
-
-        assertEquals("42 Main St", institution.getAddress());
-        assertTrue(institution.isImported());
-        assertEquals("21654", institution.getZipCode());
-        assertEquals("Tax Code", institution.getTaxCode());
-        assertEquals("6625550144", institution.getSupportPhone());
-        assertEquals("jane.doe@example.org", institution.getSupportEmail());
-        assertEquals("Share Capital", institution.getShareCapital());
-        assertEquals("Rea", institution.getRea());
-        assertSame(paymentServiceProvider, institution.getPaymentServiceProvider());
-        assertEquals("42", institution.getOriginId());
-        assertEquals("Business Register Place", institution.getBusinessRegisterPlace());
-        assertEquals("42 Main St", institution.getDigitalAddress());
-        assertEquals("42", institution.getExternalId());
-        assertEquals(Origin.MOCK.name(), institution.getOrigin());
-        assertEquals(InstitutionType.PA, institution.getInstitutionType());
-        assertEquals("42", institution.getId());
-        assertSame(billing, institution.getBilling());
-        assertSame(dataProtectionOfficer, institution.getDataProtectionOfficer());
-        assertEquals("The characteristics of someone or something", institution.getDescription());
     }
 
     /**

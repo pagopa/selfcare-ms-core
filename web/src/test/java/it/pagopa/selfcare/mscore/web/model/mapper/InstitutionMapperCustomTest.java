@@ -1,55 +1,55 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.AttributesResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.BillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.GeoTaxonomies;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagementResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionManagerResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
-import it.pagopa.selfcare.mscore.web.model.institution.ProductsManagement;
+import it.pagopa.selfcare.mscore.web.TestUtils;
+import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-class InstitutionMapperTest {
+class InstitutionMapperCustomTest {
+
+    Institution createDmmyInstitution() {
+
+        Institution dummyInstitution = new Institution();
+        dummyInstitution.setId("42");
+        dummyInstitution.setExternalId("42");
+        dummyInstitution.setOrigin(Origin.MOCK.name());
+        dummyInstitution.setOriginId("42");
+        dummyInstitution.setDescription("The characteristics of someone or something");
+        dummyInstitution.setInstitutionType(InstitutionType.PA);
+        dummyInstitution.setDigitalAddress("42 Main St");
+        dummyInstitution.setTaxCode("taxCode");
+        dummyInstitution.setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        dummyInstitution.setAddress("42 Main St");
+        dummyInstitution.setBusinessRegisterPlace("Business Register Place");
+        dummyInstitution.setRea("Rea");
+        dummyInstitution.setZipCode("zipCpde");
+        dummyInstitution.setShareCapital("Share Capital");
+
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
+                "Legal Register Name", "42", true);
+        dummyInstitution.setPaymentServiceProvider(paymentServiceProvider);
+
+        return dummyInstitution;
+    }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse6() {
@@ -78,7 +78,7 @@ class InstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setProducts(new ArrayList<>());
         productManagerInfo.setInstitution(institution);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -103,7 +103,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse7() {
@@ -147,7 +147,7 @@ class InstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setProducts(onboardedProductList);
         productManagerInfo.setInstitution(institution);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getUpdatedAt());
         assertNull(actualToInstitutionManagerResponseResult.getCreatedAt());
@@ -180,7 +180,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse8() {
@@ -237,7 +237,7 @@ class InstitutionMapperTest {
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         productManagerInfo.setProducts(onboardedProductList);
         productManagerInfo.setInstitution(institution);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getUpdatedAt());
         assertNull(actualToInstitutionManagerResponseResult.getCreatedAt());
@@ -270,7 +270,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse9() {
@@ -292,14 +292,14 @@ class InstitutionMapperTest {
 
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
-        Institution toInstitutionResult = InstitutionMapper.toInstitution(new InstitutionRequest(), "42");
+        Institution toInstitutionResult = InstitutionMapperCustom.toInstitution(new InstitutionRequest(), "42");
         toInstitutionResult.setOnboarding(onboardingList);
 
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
         productManagerInfo.setProducts(onboardedProductList);
         productManagerInfo.setInstitution(toInstitutionResult);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "42");
         assertNull(actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
@@ -324,14 +324,11 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagerResponse(ProductManagerInfo, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagerResponse(ProductManagerInfo, String)}
      */
     @Test
     void testToInstitutionManagerResponse10() {
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
+        Billing billing = TestUtils.createSimpleBilling();
 
         Onboarding onboarding = new Onboarding();
         onboarding.setBilling(billing);
@@ -346,35 +343,28 @@ class InstitutionMapperTest {
 
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
-        Billing billing1 = new Billing();
-        ArrayList<Onboarding> onboarding1 = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        Institution institution = new Institution("42", "42", Origin.MOCK.name(), "42",
-                "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                "Tax Code", billing1, onboarding1, geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+        Institution institution = createDmmyInstitution();
         institution.setOnboarding(onboardingList);
+        institution.setImported(true);
 
         ProductManagerInfo productManagerInfo = new ProductManagerInfo();
         ArrayList<OnboardedProduct> onboardedProductList = new ArrayList<>();
         productManagerInfo.setProducts(onboardedProductList);
         productManagerInfo.setInstitution(institution);
-        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapper
+
+        InstitutionManagerResponse actualToInstitutionManagerResponseResult = InstitutionMapperCustom
                 .toInstitutionManagerResponse(productManagerInfo, "42");
+
         assertEquals("42", actualToInstitutionManagerResponseResult.getTo());
         assertNull(actualToInstitutionManagerResponseResult.getFrom());
-        assertEquals("Pricing Plan", actualToInstitutionManagerResponseResult.getPricingPlan());
+        assertEquals(onboarding.getPricingPlan(), actualToInstitutionManagerResponseResult.getPricingPlan());
         InstitutionUpdateResponse institutionUpdate = actualToInstitutionManagerResponseResult.getInstitutionUpdate();
-        assertEquals("Tax Code", institutionUpdate.getTaxCode());
-        assertEquals("6625550144", institutionUpdate.getSupportPhone());
-        assertEquals("jane.doe@example.org", institutionUpdate.getSupportEmail());
-        assertEquals("Share Capital", institutionUpdate.getShareCapital());
-        assertEquals("Rea", institutionUpdate.getRea());
+        assertEquals(institution.getTaxCode(), institutionUpdate.getTaxCode());
+        assertEquals(institution.getSupportPhone(), institutionUpdate.getSupportPhone());
+        assertEquals(institution.getSupportEmail(), institutionUpdate.getSupportEmail());
+        assertEquals(institution.getShareCapital(), institutionUpdate.getShareCapital());
+        assertEquals(institution.getRea(), institutionUpdate.getRea());
         assertEquals(InstitutionType.PA, institutionUpdate.getInstitutionType());
         BillingResponse billing2 = actualToInstitutionManagerResponseResult.getBilling();
         assertTrue(billing2.isPublicServices());
@@ -382,19 +372,19 @@ class InstitutionMapperTest {
         assertEquals("Business Register Place", institutionUpdate.getBusinessRegisterPlace());
         assertEquals("42", billing2.getVatNumber());
         assertEquals("The characteristics of someone or something", institutionUpdate.getDescription());
-        assertEquals("42 Main St", institutionUpdate.getDigitalAddress());
-        assertEquals("21654", institutionUpdate.getZipCode());
+        assertEquals(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress());
+        assertEquals(institution.getZipCode(), institutionUpdate.getZipCode());
         assertTrue(institutionUpdate.isImported());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToInstitutionBillingResponse2() {
         Institution institution = new Institution();
         institution.setOnboarding(new ArrayList<>());
-        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapper
+        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapperCustom
                 .toInstitutionBillingResponse(institution, "42");
         assertNull(actualToInstitutionBillingResponseResult.getAddress());
         assertNull(actualToInstitutionBillingResponseResult.getZipCode());
@@ -409,15 +399,15 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToInstitutionBillingResponse3() {
-        assertNull(InstitutionMapper.toInstitutionBillingResponse(null, "42"));
+        assertNull(InstitutionMapperCustom.toInstitutionBillingResponse(null, "42"));
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToInstitutionBillingResponse4() {
@@ -442,7 +432,7 @@ class InstitutionMapperTest {
 
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
-        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapper
+        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapperCustom
                 .toInstitutionBillingResponse(institution, "42");
         assertNull(actualToInstitutionBillingResponseResult.getAddress());
         assertNull(actualToInstitutionBillingResponseResult.getZipCode());
@@ -462,7 +452,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionBillingResponse(Institution, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionBillingResponse(Institution, String)}
      */
     @Test
     void testToInstitutionBillingResponse5() {
@@ -504,7 +494,7 @@ class InstitutionMapperTest {
 
         Institution institution = new Institution();
         institution.setOnboarding(onboardingList);
-        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapper
+        InstitutionBillingResponse actualToInstitutionBillingResponseResult = InstitutionMapperCustom
                 .toInstitutionBillingResponse(institution, "42");
         assertNull(actualToInstitutionBillingResponseResult.getAddress());
         assertNull(actualToInstitutionBillingResponseResult.getZipCode());
@@ -524,7 +514,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution() {
@@ -571,7 +561,7 @@ class InstitutionMapperTest {
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setUpdatedAt(null);
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
@@ -597,7 +587,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution2() {
@@ -652,7 +642,7 @@ class InstitutionMapperTest {
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setUpdatedAt(null);
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
@@ -670,7 +660,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitution(InstitutionRequest, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitution(InstitutionRequest, String)}
      */
     @Test
     void testToInstitution3() {
@@ -724,7 +714,7 @@ class InstitutionMapperTest {
         institutionRequest.setTaxCode("Tax Code");
         institutionRequest.setUpdatedAt(null);
         institutionRequest.setZipCode("21654");
-        Institution actualToInstitutionResult = InstitutionMapper.toInstitution(institutionRequest, "42");
+        Institution actualToInstitutionResult = InstitutionMapperCustom.toInstitution(institutionRequest, "42");
         assertEquals("42 Main St", actualToInstitutionResult.getAddress());
         assertEquals("21654", actualToInstitutionResult.getZipCode());
         assertEquals("Tax Code", actualToInstitutionResult.getTaxCode());
@@ -742,7 +732,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBillingResponse(Onboarding, Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toBillingResponse(Onboarding, Institution)}
      */
     @Test
     void testToBillingResponse() {
@@ -761,14 +751,14 @@ class InstitutionMapperTest {
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setTokenId("42");
         onboarding.setUpdatedAt(null);
-        BillingResponse actualToBillingResponseResult = InstitutionMapper.toBillingResponse(onboarding, new Institution());
+        BillingResponse actualToBillingResponseResult = InstitutionMapperCustom.toBillingResponse(onboarding, new Institution());
         assertEquals("Recipient Code", actualToBillingResponseResult.getRecipientCode());
         assertTrue(actualToBillingResponseResult.isPublicServices());
         assertEquals("42", actualToBillingResponseResult.getVatNumber());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#getBillingFromOnboarding(Onboarding, Institution)}
+     * Method under test: {@link InstitutionMapperCustom#getBillingFromOnboarding(Onboarding, Institution)}
      */
     @Test
     void testGetBillingFromOnboarding2() {
@@ -801,7 +791,7 @@ class InstitutionMapperTest {
         onboarding.setStatus(RelationshipState.PENDING);
         onboarding.setTokenId("42");
         onboarding.setUpdatedAt(null);
-        InstitutionMapper.getBillingFromOnboarding(onboarding, new Institution());
+        InstitutionMapperCustom.getBillingFromOnboarding(onboarding, new Institution());
         verify(onboarding, atLeast(1)).getBilling();
         verify(onboarding).setBilling( any());
         verify(onboarding).setClosedAt(any());
@@ -815,7 +805,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toBilling(BillingRequest)}
+     * Method under test: {@link InstitutionMapperCustom#toBilling(BillingRequest)}
      */
     @Test
     void testToBilling() {
@@ -823,14 +813,14 @@ class InstitutionMapperTest {
         billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
         billingRequest.setVatNumber("42");
-        Billing actualToBillingResult = InstitutionMapper.toBilling(billingRequest);
+        Billing actualToBillingResult = InstitutionMapperCustom.toBilling(billingRequest);
         assertEquals("Recipient Code", actualToBillingResult.getRecipientCode());
         assertFalse(actualToBillingResult.isPublicServices());
         assertEquals("42", actualToBillingResult.getVatNumber());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toDataProtectionOfficer(DataProtectionOfficerRequest)}
+     * Method under test: {@link InstitutionMapperCustom#toDataProtectionOfficer(DataProtectionOfficerRequest)}
      */
     @Test
     void testToDataProtectionOfficer() {
@@ -838,7 +828,7 @@ class InstitutionMapperTest {
         dataProtectionOfficerRequest.setAddress("42 Main St");
         dataProtectionOfficerRequest.setEmail("jane.doe@example.org");
         dataProtectionOfficerRequest.setPec("Pec");
-        DataProtectionOfficer actualToDataProtectionOfficerResult = InstitutionMapper
+        DataProtectionOfficer actualToDataProtectionOfficerResult = InstitutionMapperCustom
                 .toDataProtectionOfficer(dataProtectionOfficerRequest);
         assertEquals("42 Main St", actualToDataProtectionOfficerResult.getAddress());
         assertEquals("Pec", actualToDataProtectionOfficerResult.getPec());
@@ -846,11 +836,11 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toDataProtectionOfficerResponse(DataProtectionOfficer)}
+     * Method under test: {@link InstitutionMapperCustom#toDataProtectionOfficerResponse(DataProtectionOfficer)}
      */
     @Test
     void testToDataProtectionOfficerResponse() {
-        DataProtectionOfficerResponse actualToDataProtectionOfficerResponseResult = InstitutionMapper
+        DataProtectionOfficerResponse actualToDataProtectionOfficerResponseResult = InstitutionMapperCustom
                 .toDataProtectionOfficerResponse(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
         assertEquals("42 Main St", actualToDataProtectionOfficerResponseResult.getAddress());
         assertEquals("Pec", actualToDataProtectionOfficerResponseResult.getPec());
@@ -858,7 +848,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toAttributes(List)}
+     * Method under test: {@link InstitutionMapperCustom#toAttributes(List)}
      */
     @Test
     void testToAttributes2() {
@@ -869,7 +859,7 @@ class InstitutionMapperTest {
 
         ArrayList<AttributesRequest> attributesRequestList = new ArrayList<>();
         attributesRequestList.add(attributesRequest);
-        List<Attributes> actualToAttributesResult = InstitutionMapper.toAttributes(attributesRequestList);
+        List<Attributes> actualToAttributesResult = InstitutionMapperCustom.toAttributes(attributesRequestList);
         assertEquals(1, actualToAttributesResult.size());
         Attributes getResult = actualToAttributesResult.get(0);
         assertEquals("Code", getResult.getCode());
@@ -878,15 +868,15 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toAttributeResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toAttributeResponse(List)}
      */
     @Test
     void testToAttributeResponse() {
-        assertTrue(InstitutionMapper.toAttributeResponse(new ArrayList<>()).isEmpty());
+        assertTrue(InstitutionMapperCustom.toAttributeResponse(new ArrayList<>()).isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toAttributeResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toAttributeResponse(List)}
      */
     @Test
     void testToAttributeResponse2() {
@@ -897,7 +887,7 @@ class InstitutionMapperTest {
 
         ArrayList<Attributes> attributesList = new ArrayList<>();
         attributesList.add(attributes);
-        List<AttributesResponse> actualToAttributeResponseResult = InstitutionMapper.toAttributeResponse(attributesList);
+        List<AttributesResponse> actualToAttributeResponseResult = InstitutionMapperCustom.toAttributeResponse(attributesList);
         assertEquals(1, actualToAttributeResponseResult.size());
         AttributesResponse getResult = actualToAttributeResponseResult.get(0);
         assertEquals("Code", getResult.getCode());
@@ -906,22 +896,22 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toGeoTaxonomies(List)}
+     * Method under test: {@link InstitutionMapperCustom#toGeoTaxonomies(List)}
      */
     @Test
     void testToGeoTaxonomies() {
-        assertTrue(InstitutionMapper.toGeoTaxonomies(new ArrayList<>()).isEmpty());
+        assertTrue(InstitutionMapperCustom.toGeoTaxonomies(new ArrayList<>()).isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toGeoTaxonomies(List)}
+     * Method under test: {@link InstitutionMapperCustom#toGeoTaxonomies(List)}
      */
     @Test
     void testToGeoTaxonomies2() {
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
                 .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-        List<GeoTaxonomies> actualToGeoTaxonomiesResult = InstitutionMapper
+        List<GeoTaxonomies> actualToGeoTaxonomiesResult = InstitutionMapperCustom
                 .toGeoTaxonomies(institutionGeographicTaxonomiesList);
         assertEquals(1, actualToGeoTaxonomiesResult.size());
         GeoTaxonomies getResult = actualToGeoTaxonomiesResult.get(0);
@@ -930,11 +920,11 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagementResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagementResponse(Institution)}
      */
     @Test
     void testToInstitutionManagementResponse() {
-        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
+        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapperCustom
                 .toInstitutionManagementResponse(new Institution());
         assertNull(actualToInstitutionManagementResponseResult.getAddress());
         assertFalse(actualToInstitutionManagementResponseResult.isImported());
@@ -957,31 +947,26 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagementResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagementResponse(Institution)}
      */
     @Test
     void testToInstitutionManagementResponse4() {
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
-                .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
-                        "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing, onboardingList, geographicTaxonomies, attributes, paymentServiceProvider,
-                        new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+        Institution institution = createDmmyInstitution();
+        institution.setImported(true);
+        institution.setOnboarding(List.of());
+
+        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapperCustom
+                .toInstitutionManagementResponse(institution);
+
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
-        assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
+        assertEquals(institution.getZipCode(), actualToInstitutionManagementResponseResult.getZipCode());
         assertNull(actualToInstitutionManagementResponseResult.getUpdatedAt());
-        assertEquals("Tax Code", actualToInstitutionManagementResponseResult.getTaxCode());
-        assertEquals("6625550144", actualToInstitutionManagementResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionManagementResponseResult.getSupportEmail());
-        assertEquals("Share Capital", actualToInstitutionManagementResponseResult.getShareCapital());
+        assertEquals(institution.getTaxCode(), actualToInstitutionManagementResponseResult.getTaxCode());
+        assertEquals(institution.getSupportPhone(), actualToInstitutionManagementResponseResult.getSupportPhone());
+        assertEquals(institution.getSupportEmail(), actualToInstitutionManagementResponseResult.getSupportEmail());
+        assertEquals(institution.getShareCapital(), actualToInstitutionManagementResponseResult.getShareCapital());
         assertEquals("Rea", actualToInstitutionManagementResponseResult.getRea());
         assertTrue(actualToInstitutionManagementResponseResult.getProducts().isEmpty());
         assertEquals("42", actualToInstitutionManagementResponseResult.getOriginId());
@@ -997,7 +982,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagementResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagementResponse(Institution)}
      */
     @Test
     void testToInstitutionManagementResponse5() {
@@ -1019,25 +1004,20 @@ class InstitutionMapperTest {
 
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
-        Billing billing1 = new Billing();
-        ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
-                .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
-                        "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing1, onboardingList, institutionGeographicTaxonomiesList, attributes,
-                        paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+        Institution institution = createDmmyInstitution();
+        institution.setOnboarding(onboardingList);
+        institution.setImported(true);
+
+        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapperCustom
+                .toInstitutionManagementResponse(institution);
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
-        assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
+        assertEquals(institution.getZipCode(), actualToInstitutionManagementResponseResult.getZipCode());
         assertNull(actualToInstitutionManagementResponseResult.getUpdatedAt());
-        assertEquals("Tax Code", actualToInstitutionManagementResponseResult.getTaxCode());
-        assertEquals("6625550144", actualToInstitutionManagementResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionManagementResponseResult.getSupportEmail());
+        assertEquals(institution.getTaxCode(), actualToInstitutionManagementResponseResult.getTaxCode());
+        assertEquals(institution.getSupportPhone(), actualToInstitutionManagementResponseResult.getSupportPhone());
+        assertEquals(institution.getSupportEmail(), actualToInstitutionManagementResponseResult.getSupportEmail());
         assertEquals("Share Capital", actualToInstitutionManagementResponseResult.getShareCapital());
         assertEquals("Rea", actualToInstitutionManagementResponseResult.getRea());
         Map<String, ProductsManagement> products = actualToInstitutionManagementResponseResult.getProducts();
@@ -1054,32 +1034,27 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagementResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagementResponse(Institution)}
      */
     @Test
     void testToInstitutionManagementResponse6() {
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
                 .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
+        Institution institution = createDmmyInstitution();
+        institution.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
+        institution.setImported(true);
+        institution.setOnboarding(List.of());
 
-        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
-                .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
-                        "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing, onboardingList, institutionGeographicTaxonomiesList, attributes,
-                        paymentServiceProvider, new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea",
-                        "Share Capital", "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapperCustom
+                .toInstitutionManagementResponse(institution);
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
-        assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
+        assertEquals(institution.getZipCode(), actualToInstitutionManagementResponseResult.getZipCode());
         assertNull(actualToInstitutionManagementResponseResult.getUpdatedAt());
-        assertEquals("Tax Code", actualToInstitutionManagementResponseResult.getTaxCode());
-        assertEquals("6625550144", actualToInstitutionManagementResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionManagementResponseResult.getSupportEmail());
+        assertEquals(institution.getTaxCode(), actualToInstitutionManagementResponseResult.getTaxCode());
+        assertEquals(institution.getSupportPhone(), actualToInstitutionManagementResponseResult.getSupportPhone());
+        assertEquals(institution.getSupportEmail(), actualToInstitutionManagementResponseResult.getSupportEmail());
         assertEquals("Share Capital", actualToInstitutionManagementResponseResult.getShareCapital());
         assertEquals("Rea", actualToInstitutionManagementResponseResult.getRea());
         assertTrue(actualToInstitutionManagementResponseResult.getProducts().isEmpty());
@@ -1098,7 +1073,7 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionManagementResponse(Institution)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionManagementResponse(Institution)}
      */
     @Test
     void testToInstitutionManagementResponse7() {
@@ -1109,25 +1084,21 @@ class InstitutionMapperTest {
 
         ArrayList<Attributes> attributesList = new ArrayList<>();
         attributesList.add(attributes);
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboardingList = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapper
-                .toInstitutionManagementResponse(new Institution("42", "42", Origin.MOCK.name(), "42",
-                        "The characteristics of someone or something", InstitutionType.PA, "42 Main St", "42 Main St", "21654",
-                        "Tax Code", billing, onboardingList, geographicTaxonomies, attributesList, paymentServiceProvider,
-                        new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                        "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
+        Institution institution = createDmmyInstitution();
+        institution.setAttributes(attributesList);
+        institution.setImported(true);
+        institution.setOnboarding(List.of());
+
+        InstitutionManagementResponse actualToInstitutionManagementResponseResult = InstitutionMapperCustom
+                .toInstitutionManagementResponse(institution);
         assertEquals("42 Main St", actualToInstitutionManagementResponseResult.getAddress());
         assertTrue(actualToInstitutionManagementResponseResult.isImported());
-        assertEquals("21654", actualToInstitutionManagementResponseResult.getZipCode());
+        assertEquals(institution.getZipCode(), actualToInstitutionManagementResponseResult.getZipCode());
         assertNull(actualToInstitutionManagementResponseResult.getUpdatedAt());
-        assertEquals("Tax Code", actualToInstitutionManagementResponseResult.getTaxCode());
-        assertEquals("6625550144", actualToInstitutionManagementResponseResult.getSupportPhone());
-        assertEquals("jane.doe@example.org", actualToInstitutionManagementResponseResult.getSupportEmail());
+        assertEquals(institution.getTaxCode(), actualToInstitutionManagementResponseResult.getTaxCode());
+        assertEquals(institution.getSupportPhone(), actualToInstitutionManagementResponseResult.getSupportPhone());
+        assertEquals(institution.getSupportEmail(), actualToInstitutionManagementResponseResult.getSupportEmail());
         assertEquals("Share Capital", actualToInstitutionManagementResponseResult.getShareCapital());
         assertEquals("Rea", actualToInstitutionManagementResponseResult.getRea());
         assertTrue(actualToInstitutionManagementResponseResult.getProducts().isEmpty());
@@ -1146,56 +1117,45 @@ class InstitutionMapperTest {
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionListResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionListResponse(List)}
      */
     @Test
     void testToInstitutionListResponse() {
-        assertTrue(InstitutionMapper.toInstitutionListResponse(new ArrayList<>()).isEmpty());
+        assertTrue(InstitutionMapperCustom.toInstitutionListResponse(new ArrayList<>()).isEmpty());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionListResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionListResponse(List)}
      */
     @Test
     void testToInstitutionListResponse2() {
         ArrayList<Institution> institutionList = new ArrayList<>();
         institutionList.add(new Institution());
-        assertEquals(1, InstitutionMapper.toInstitutionListResponse(institutionList).size());
+        assertEquals(1, InstitutionMapperCustom.toInstitutionListResponse(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionListResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionListResponse(List)}
      */
     @Test
     void testToInstitutionListResponse4() {
         ArrayList<Institution> institutionList = new ArrayList<>();
-        institutionList.add(InstitutionMapper.toInstitution(new InstitutionRequest(), "42"));
-        assertEquals(1, InstitutionMapper.toInstitutionListResponse(institutionList).size());
+        institutionList.add(InstitutionMapperCustom.toInstitution(new InstitutionRequest(), "42"));
+        assertEquals(1, InstitutionMapperCustom.toInstitutionListResponse(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionListResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionListResponse(List)}
      */
     @Test
     void testToInstitutionListResponse5() {
         ArrayList<Institution> institutionList = new ArrayList<>();
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
-
-        institutionList.add(new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null));
-        assertEquals(1, InstitutionMapper.toInstitutionListResponse(institutionList).size());
+        institutionList.add(createDmmyInstitution());
+        assertEquals(1, InstitutionMapperCustom.toInstitutionListResponse(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionListResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionListResponse(List)}
      */
     @Test
     void testToInstitutionListResponse6() {
@@ -1217,50 +1177,34 @@ class InstitutionMapperTest {
 
         ArrayList<Onboarding> onboardingList = new ArrayList<>();
         onboardingList.add(onboarding);
-        Billing billing1 = new Billing();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        Institution e = new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing1, onboardingList,
-                geographicTaxonomies, attributes, paymentServiceProvider,
-                new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+        Institution institution = createDmmyInstitution();
+        institution.setOnboarding(onboardingList);
 
         ArrayList<Institution> institutionList = new ArrayList<>();
-        institutionList.add(e);
-        assertEquals(1, InstitutionMapper.toInstitutionListResponse(institutionList).size());
+        institutionList.add(institution);
+        assertEquals(1, InstitutionMapperCustom.toInstitutionListResponse(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionListResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionListResponse(List)}
      */
     @Test
     void testToInstitutionListResponse7() {
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
                 .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<Attributes> attributes = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        Institution e = new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                institutionGeographicTaxonomiesList, attributes, paymentServiceProvider,
-                new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+        Institution institution = createDmmyInstitution();
+        institution.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
 
         ArrayList<Institution> institutionList = new ArrayList<>();
-        institutionList.add(e);
-        assertEquals(1, InstitutionMapper.toInstitutionListResponse(institutionList).size());
+        institutionList.add(institution);
+        assertEquals(1, InstitutionMapperCustom.toInstitutionListResponse(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionListResponse(List)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionListResponse(List)}
      */
     @Test
     void testToInstitutionListResponse8() {
@@ -1271,25 +1215,17 @@ class InstitutionMapperTest {
 
         ArrayList<Attributes> attributesList = new ArrayList<>();
         attributesList.add(attributes);
-        Billing billing = new Billing();
-        ArrayList<Onboarding> onboarding = new ArrayList<>();
-        ArrayList<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42",
-                "Legal Register Name", "42", true);
 
-        Institution e = new Institution("42", "42", Origin.MOCK.name(), "42", "The characteristics of someone or something",
-                InstitutionType.PA, "42 Main St", "42 Main St", "21654", "Tax Code", billing, onboarding,
-                geographicTaxonomies, attributesList, paymentServiceProvider,
-                new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"), "Rea", "Share Capital",
-                "Business Register Place", "jane.doe@example.org", "6625550144", true, null, null, null, null);
+        Institution institution = createDmmyInstitution();
+        institution.setAttributes(attributesList);
 
         ArrayList<Institution> institutionList = new ArrayList<>();
-        institutionList.add(e);
-        assertEquals(1, InstitutionMapper.toInstitutionListResponse(institutionList).size());
+        institutionList.add(institution);
+        assertEquals(1, InstitutionMapperCustom.toInstitutionListResponse(institutionList).size());
     }
 
     /**
-     * Method under test: {@link InstitutionMapper#toInstitutionAttributeResponse(List, String)}
+     * Method under test: {@link InstitutionMapperCustom#toInstitutionAttributeResponse(List, String)}
      */
     @Test
     void testToInstitutionAttributeResponse2() {
@@ -1300,7 +1236,7 @@ class InstitutionMapperTest {
 
         ArrayList<Attributes> attributesList = new ArrayList<>();
         attributesList.add(attributes);
-        List<AttributesResponse> actualToInstitutionAttributeResponseResult = InstitutionMapper
+        List<AttributesResponse> actualToInstitutionAttributeResponseResult = InstitutionMapperCustom
                 .toInstitutionAttributeResponse(attributesList, "42");
         assertEquals(1, actualToInstitutionAttributeResponseResult.size());
         AttributesResponse getResult = actualToInstitutionAttributeResponseResult.get(0);

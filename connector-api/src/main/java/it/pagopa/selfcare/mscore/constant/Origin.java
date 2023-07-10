@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 
 public enum Origin {
-    MOCK("static"),
+    MOCK("MOCK"),
     IPA("IPA"),
     SELC("SELC"),
     UNKNOWN("UNKNOWN"),

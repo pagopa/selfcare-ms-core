@@ -9,6 +9,10 @@ import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitution
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapper;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapperImpl;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapper;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapperImpl;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -42,6 +46,11 @@ class UserConnectorImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Spy
+    private UserEntityMapper userMapper = new UserEntityMapperImpl();
+    @Spy
+    private UserInstitutionAggregationMapper userInstitutionAggregationMapper = new UserInstitutionAggregationMapperImpl();
 
     @Captor
     ArgumentCaptor<Query> queryArgumentCaptor;

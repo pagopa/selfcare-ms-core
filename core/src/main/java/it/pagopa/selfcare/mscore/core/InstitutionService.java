@@ -30,6 +30,8 @@ public interface InstitutionService {
 
     Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser);
 
+    Institution createInstitution(Institution institution);
+
     List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states);
 
     Institution retrieveInstitutionProduct(String externalId, String productId);
@@ -65,4 +67,6 @@ public interface InstitutionService {
     void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);
 
     List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+
+    List<Institution> getInstitutionsByProductId(String productId, Integer page, Integer size);
 }

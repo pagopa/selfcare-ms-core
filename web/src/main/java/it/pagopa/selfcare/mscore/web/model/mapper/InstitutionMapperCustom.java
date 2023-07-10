@@ -16,38 +16,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
-public class InstitutionMapper {
+public class InstitutionMapperCustom {
 
     protected static final BinaryOperator<BulkProduct> MERGE_FUNCTION = (inst1, inst2) -> inst1.getStatus().compareTo(inst2.getStatus()) < 0 ? inst1 : inst2;
-
-    public static InstitutionResponse toInstitutionResponse(Institution institution) {
-        InstitutionResponse institutionResponse = new InstitutionResponse();
-        institutionResponse.setId(institution.getId());
-        institutionResponse.setExternalId(institution.getExternalId());
-        institutionResponse.setOrigin(institution.getOrigin());
-        institutionResponse.setOriginId(institution.getOriginId());
-        institutionResponse.setDescription(institution.getDescription());
-        institutionResponse.setInstitutionType(institution.getInstitutionType());
-        institutionResponse.setDigitalAddress(institution.getDigitalAddress());
-        institutionResponse.setAddress(institution.getAddress());
-        institutionResponse.setZipCode(institution.getZipCode());
-        institutionResponse.setTaxCode(institution.getTaxCode());
-        institutionResponse.setRea(institution.getRea());
-        institutionResponse.setShareCapital(institution.getShareCapital());
-        institutionResponse.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
-        institutionResponse.setSupportEmail(institution.getSupportEmail());
-        institutionResponse.setSupportPhone(institution.getSupportPhone());
-        institutionResponse.setImported(institution.isImported());
-        if (institution.getGeographicTaxonomies() != null)
-            institutionResponse.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
-        if (institution.getAttributes() != null)
-            institutionResponse.setAttributes(toAttributeResponse(institution.getAttributes()));
-        if (institution.getDataProtectionOfficer() != null)
-            institutionResponse.setDataProtectionOfficer(toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
-        if (institution.getPaymentServiceProvider() != null)
-            institutionResponse.setPaymentServiceProvider(toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
-        return institutionResponse;
-    }
 
     public static InstitutionManagerResponse toInstitutionManagerResponse(ProductManagerInfo manager, String productId) {
         InstitutionManagerResponse institutionManagerResponse = new InstitutionManagerResponse();
@@ -75,6 +46,10 @@ public class InstitutionMapper {
         response.setAddress(institution.getAddress());
         response.setZipCode(institution.getZipCode());
         response.setTaxCode(institution.getTaxCode());
+
+        response.setSubunitCode(institution.getSubunitCode());
+        response.setSubunitType(institution.getSubunitType());
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
 
         for (Onboarding onboarding : institution.getOnboarding()) {
             if (productId.equalsIgnoreCase(onboarding.getProductId())) {
@@ -107,7 +82,12 @@ public class InstitutionMapper {
         institutionUpdate.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
         institutionUpdate.setSupportEmail(institution.getSupportEmail());
         institutionUpdate.setSupportPhone(institution.getSupportPhone());
-        institution.setImported(institution.isImported());
+        institutionUpdate.setImported(institution.isImported());
+
+        institutionUpdate.setSubunitCode(institution.getSubunitCode());
+        institutionUpdate.setSubunitType(institution.getSubunitType());
+        institutionUpdate.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
+
         return institutionUpdate;
     }
 
@@ -146,6 +126,9 @@ public class InstitutionMapper {
         institutionUpdate.setSupportEmail(institution.getSupportEmail());
         institutionUpdate.setSupportPhone(institution.getSupportPhone());
         institutionUpdate.setImported(institution.isImported());
+        institutionUpdate.setSubunitCode(institution.getSubunitCode());
+        institutionUpdate.setSubunitType(institution.getSubunitType());
+        institutionUpdate.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         if (institution.getGeographicTaxonomies() != null) {
             institutionUpdate.setGeographicTaxonomyCodes(convertToGeoString(institution.getGeographicTaxonomies()));
         }
@@ -402,6 +385,47 @@ public class InstitutionMapper {
         return response;
     }
 
+    public static InstitutionOnboardingResponse toInstitutionOnboardingResponse(Institution institution) {
+        InstitutionOnboardingResponse response = new InstitutionOnboardingResponse();
+        response.setId(institution.getId());
+        response.setExternalId(institution.getExternalId());
+        response.setOrigin(institution.getOrigin());
+        response.setOriginId(institution.getOriginId());
+        response.setDescription(institution.getDescription());
+        response.setInstitutionType(institution.getInstitutionType());
+        response.setDigitalAddress(institution.getDigitalAddress());
+        response.setAddress(institution.getAddress());
+        response.setZipCode(institution.getZipCode());
+        response.setTaxCode(institution.getTaxCode());
+        if (institution.getOnboarding() != null) {
+            response.setOnboardings(toOnboardingMap(institution.getOnboarding(), institution));
+        }
+        if (institution.getGeographicTaxonomies() != null) {
+            response.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
+        }
+        if (institution.getAttributes() != null) {
+            response.setAttributes(toAttributeResponse(institution.getAttributes()));
+        }
+        if (institution.getPaymentServiceProvider() != null) {
+            response.setPaymentServiceProvider(toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
+        }
+        if (institution.getDataProtectionOfficer() != null) {
+            response.setDataProtectionOfficer(toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
+        }
+        response.setRea(institution.getRea());
+        response.setShareCapital(institution.getShareCapital());
+        response.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        response.setSupportEmail(institution.getSupportEmail());
+        response.setSupportPhone(institution.getSupportPhone());
+        response.setImported(institution.isImported());
+        response.setCreatedAt(institution.getCreatedAt());
+        response.setUpdatedAt(institution.getUpdatedAt());
+        response.setSubunitCode(institution.getSubunitCode());
+        response.setSubunitType(institution.getSubunitType());
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
+        return response;
+    }
+
     public static List<InstitutionManagementResponse> toInstitutionListResponse(List<Institution> institutions) {
         List<InstitutionManagementResponse> list = new ArrayList<>();
         for (Institution institution : institutions) {
@@ -425,14 +449,24 @@ public class InstitutionMapper {
         return map;
     }
 
-    public static List<InstitutionResponse> toInstitutionResponseList(List<Institution> institutions) {
-        List<InstitutionResponse> responses = new ArrayList<>();
-        if (!institutions.isEmpty()) {
-            for (Institution institution : institutions) {
-                responses.add(toInstitutionResponse(institution));
+    private static Map<String, OnboardingResponse> toOnboardingMap(List<Onboarding> onboarding, Institution institution) {
+        Map<String, OnboardingResponse> map = new HashMap<>();
+        if (onboarding != null) {
+            for (Onboarding o : onboarding) {
+                OnboardingResponse onboardingResponse = new OnboardingResponse();
+                onboardingResponse.setProductId(o.getProductId());
+                onboardingResponse.setTokenId(o.getTokenId());
+                onboardingResponse.setStatus(o.getStatus());
+                onboardingResponse.setContract(o.getContract());
+                onboardingResponse.setPricingPlan(o.getPricingPlan());
+                onboardingResponse.setBilling(toBillingResponse(o.getBilling(), institution));
+                onboardingResponse.setCreatedAt(o.getCreatedAt());
+                onboardingResponse.setUpdatedAt(o.getUpdatedAt());
+                onboardingResponse.setClosedAt(o.getClosedAt());
+                map.put(o.getProductId(), onboardingResponse);
             }
         }
-        return responses;
+        return map;
     }
 
     public static List<AttributesResponse> toInstitutionAttributeResponse(List<Attributes> attributes, String institutionId) {
@@ -445,7 +479,7 @@ public class InstitutionMapper {
 
     public static List<InstitutionToOnboard> toInstitutionToOnboardList(List<ValidInstitution> validInstitutions) {
         return validInstitutions.stream()
-                .map(InstitutionMapper::toInstitutionToOnboard)
+                .map(InstitutionMapperCustom::toInstitutionToOnboard)
                 .collect(Collectors.toList());
     }
 
@@ -465,7 +499,7 @@ public class InstitutionMapper {
     public static BulkInstitutions toBulkInstitutions(List<Institution> institution, List<String> idsRequest) {
         BulkInstitutions bulkInstitutions = new BulkInstitutions();
         bulkInstitutions.setFound(institution.stream()
-                .map(InstitutionMapper::toBulkInstitution)
+                .map(InstitutionMapperCustom::toBulkInstitution)
                 .collect(Collectors.toList()));
         bulkInstitutions.setNotFound(idsRequest.stream()
                 .filter(s -> institution.stream().noneMatch(inst -> inst.getId().equalsIgnoreCase(s)))

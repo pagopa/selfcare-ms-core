@@ -30,10 +30,7 @@ import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -61,10 +58,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
@@ -74,6 +68,7 @@ import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 @Service
 public class ContractService {
 
+    static final String DESCRIPTION_TO_REPLACE_REGEX = " - COMUNE";
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
     private final PadesSignService padesSignService;
     private final FileStorageConnector fileStorageConnector;
@@ -251,24 +246,23 @@ public class ContractService {
         NotificationToSend notification = new NotificationToSend();
         if (queueEvent.equals(QueueEvent.ADD)) {
             notification.setId(token.getId());
-            notification.setState(RelationshipState.ACTIVE);
+            notification.setState(RelationshipState.ACTIVE.toString());
         } else {
             notification.setId(UUID.randomUUID().toString());
-            notification.setState(token.getStatus());
+            notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
         }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
         notification.setCreatedAt(token.getCreatedAt());
-        notification.setUpdatedAt(token.getUpdatedAt());
+        notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         if (token.getStatus().equals(RelationshipState.DELETED)) {
-            notification.setClosedAt(token.getClosedAt());
+            notification.setClosedAt(token.getUpdatedAt());
         }
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
-
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
@@ -296,6 +290,10 @@ public class ContractService {
         try {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
             toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+            GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+            toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
+            toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
+            toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
         } catch (MsCoreException | ResourceNotFoundException e) {
             log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
             toNotify.setIstatCode(null);

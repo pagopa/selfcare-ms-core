@@ -1,14 +1,14 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class InstitutionResponse {
+public class InstitutionOnboardingResponse {
 
     private String id;
     private String externalId;
@@ -20,6 +20,7 @@ public class InstitutionResponse {
     private String address;
     private String zipCode;
     private String taxCode;
+    private Map<String, OnboardingResponse> onboardings;
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesResponse> attributes;
     private PaymentServiceProviderResponse paymentServiceProvider;
@@ -30,9 +31,9 @@ public class InstitutionResponse {
     private String supportEmail;
     private String supportPhone;
     private boolean imported;
-
     private String subunitCode;
     private String subunitType;
-    private String parentDescription;
     private String aooParentCode;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }
