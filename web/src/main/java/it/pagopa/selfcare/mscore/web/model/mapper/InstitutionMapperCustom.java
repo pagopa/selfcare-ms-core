@@ -382,11 +382,47 @@ public class InstitutionMapperCustom {
         response.setImported(institution.isImported());
         response.setCreatedAt(institution.getCreatedAt());
         response.setUpdatedAt(institution.getUpdatedAt());
+        return response;
+    }
 
+    public static InstitutionOnboardingResponse toInstitutionOnboardingResponse(Institution institution) {
+        InstitutionOnboardingResponse response = new InstitutionOnboardingResponse();
+        response.setId(institution.getId());
+        response.setExternalId(institution.getExternalId());
+        response.setOrigin(institution.getOrigin());
+        response.setOriginId(institution.getOriginId());
+        response.setDescription(institution.getDescription());
+        response.setInstitutionType(institution.getInstitutionType());
+        response.setDigitalAddress(institution.getDigitalAddress());
+        response.setAddress(institution.getAddress());
+        response.setZipCode(institution.getZipCode());
+        response.setTaxCode(institution.getTaxCode());
+        if (institution.getOnboarding() != null) {
+            response.setOnboardings(toOnboardingMap(institution.getOnboarding(), institution));
+        }
+        if (institution.getGeographicTaxonomies() != null) {
+            response.setGeographicTaxonomies(toGeoTaxonomies(institution.getGeographicTaxonomies()));
+        }
+        if (institution.getAttributes() != null) {
+            response.setAttributes(toAttributeResponse(institution.getAttributes()));
+        }
+        if (institution.getPaymentServiceProvider() != null) {
+            response.setPaymentServiceProvider(toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
+        }
+        if (institution.getDataProtectionOfficer() != null) {
+            response.setDataProtectionOfficer(toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
+        }
+        response.setRea(institution.getRea());
+        response.setShareCapital(institution.getShareCapital());
+        response.setBusinessRegisterPlace(institution.getBusinessRegisterPlace());
+        response.setSupportEmail(institution.getSupportEmail());
+        response.setSupportPhone(institution.getSupportPhone());
+        response.setImported(institution.isImported());
+        response.setCreatedAt(institution.getCreatedAt());
+        response.setUpdatedAt(institution.getUpdatedAt());
         response.setSubunitCode(institution.getSubunitCode());
-        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         response.setSubunitType(institution.getSubunitType());
-
+        response.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         return response;
     }
 
@@ -408,6 +444,26 @@ public class InstitutionMapperCustom {
                 productsManagement.setPricingPlan(o.getPricingPlan());
                 productsManagement.setBilling(toBillingResponse(o.getBilling(), institution));
                 map.put(o.getProductId(), productsManagement);
+            }
+        }
+        return map;
+    }
+
+    private static Map<String, OnboardingResponse> toOnboardingMap(List<Onboarding> onboarding, Institution institution) {
+        Map<String, OnboardingResponse> map = new HashMap<>();
+        if (onboarding != null) {
+            for (Onboarding o : onboarding) {
+                OnboardingResponse onboardingResponse = new OnboardingResponse();
+                onboardingResponse.setProductId(o.getProductId());
+                onboardingResponse.setTokenId(o.getTokenId());
+                onboardingResponse.setStatus(o.getStatus());
+                onboardingResponse.setContract(o.getContract());
+                onboardingResponse.setPricingPlan(o.getPricingPlan());
+                onboardingResponse.setBilling(toBillingResponse(o.getBilling(), institution));
+                onboardingResponse.setCreatedAt(o.getCreatedAt());
+                onboardingResponse.setUpdatedAt(o.getUpdatedAt());
+                onboardingResponse.setClosedAt(o.getClosedAt());
+                map.put(o.getProductId(), onboardingResponse);
             }
         }
         return map;

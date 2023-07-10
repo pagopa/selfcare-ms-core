@@ -3,6 +3,8 @@ package it.pagopa.selfcare.mscore.core.util;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.Contract;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -33,5 +35,19 @@ public class TestUtils {
                 "TaxCode", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
                 "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null, null, new PaAttributes());
+    }
+
+    public static OnboardingRequest dummyOnboardingRequest(Billing billing, Contract contract, InstitutionUpdate institutionUpdate){
+       OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setUsers(new ArrayList<>());
+        return onboardingRequest;
     }
 }

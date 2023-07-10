@@ -15,7 +15,7 @@ public class NotificationToSend {
     private String id;
     private String internalIstitutionID;
     private String product;
-    private RelationshipState state;
+    private String state;
     private String filePath;
     private String fileName;
     private String contentType;
