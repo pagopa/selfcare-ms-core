@@ -1031,4 +1031,35 @@ class InstitutionControllerTest {
                 .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
         verifyNoMoreInteractions(institutionService);
     }
+
+    /**
+     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
+     */
+    @Test
+    void findFromProduct() throws Exception {
+        // Given
+        String productIdMock = "productId";
+        Integer pageMock = 0;
+        Integer sizeMock = 2;
+
+        Institution institution = new Institution();
+        institution.setId("id");
+
+        // When
+        when(institutionService.getInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/products/{productId}", productIdMock)
+                .param("page", pageMock.toString())
+                .param("size", sizeMock.toString());
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+        // Then
+        verify(institutionService, times(1))
+                .getInstitutionsByProductId(productIdMock, pageMock, sizeMock);
+        verifyNoMoreInteractions(institutionService);
+    }
 }
