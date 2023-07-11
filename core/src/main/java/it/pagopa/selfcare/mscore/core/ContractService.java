@@ -288,7 +288,7 @@ public class ContractService {
         toNotify.setParentDescription(institution.getParentDescription());
         toNotify.setSubUnitCode(institution.getSubunitCode());
         toNotify.setSubUnitType(institution.getSubunitType());
-        toNotify.setAooParent(institution.getPaAttributes().getAooParentCode());
+        toNotify.setAooParent(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
         try {
             GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
             switch(institution.getSubunitType()){
