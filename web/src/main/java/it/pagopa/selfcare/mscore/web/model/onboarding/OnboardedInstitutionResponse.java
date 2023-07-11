@@ -37,7 +37,7 @@ public class OnboardedInstitutionResponse {
     private SupportContact supportContact;
     private PaymentServiceProviderResponse paymentServiceProvider;
     private DataProtectionOfficerResponse dataProtectionOfficer;
-
+    private String parentDescription;
     private String subunitCode;
     private String subunitType;
     private String aooParentCode;

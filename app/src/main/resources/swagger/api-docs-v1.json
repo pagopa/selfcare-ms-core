@@ -5537,6 +5537,9 @@
           "originId" : {
             "type" : "string"
           },
+          "parentDescription" : {
+            "type" : "string"
+          },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
           },
