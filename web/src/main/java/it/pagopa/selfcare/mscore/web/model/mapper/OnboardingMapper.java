@@ -75,7 +75,7 @@ public class OnboardingMapper {
         institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail(), institution.getSupportPhone()));
         institutionResponse.setPaymentServiceProvider(InstitutionMapperCustom.toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
         institutionResponse.setDataProtectionOfficer(InstitutionMapperCustom.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
-
+        institutionResponse.setParentDescription(institution.getParentDescription());
         institutionResponse.setSubunitCode(institution.getSubunitCode());
         institutionResponse.setSubunitType(institution.getSubunitType());
         institutionResponse.setAooParentCode(Optional.ofNullable(institution.getPaAttributes()).map(PaAttributes::getAooParentCode).orElse(null));
