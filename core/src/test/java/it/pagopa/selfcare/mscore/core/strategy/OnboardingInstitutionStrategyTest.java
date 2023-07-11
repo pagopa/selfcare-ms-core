@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -474,5 +476,69 @@ class OnboardingInstitutionStrategyTest {
         assertThrows(ResourceConflictException.class,
                 () -> strategyFactory.retrieveOnboardingInstitutionStrategy(institutionUpdate.getInstitutionType(), onboardingRequest.getProductId(), institution)
                         .onboardingInstitution(onboardingRequest, selfCareUser));
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingInstitution(OnboardingRequest, SelfCareUser)}
+     */
+    @Test
+    void testOnboardingInstitutionPA() throws IOException {
+
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId(PROD_INTEROP.getValue());
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode(
+                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
+        billing.setVatNumber("42");
+
+        Institution institution = new Institution();
+        institution.setOrigin("selc");
+        institution.setInstitutionType(InstitutionType.PA);
+
+        Billing billing1 = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+
+        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing1);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId(PROD_INTEROP.getValue());
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
+        UserToOnboard userToOnboard = new UserToOnboard();
+        userToOnboard.setId("id");
+        userToOnboard.setRole(PartyRole.MANAGER);
+        onboardingRequest.setUsers(List.of(userToOnboard));
+        OnboardingRollback onboardingRollback = new OnboardingRollback();
+        Token token1 =new Token();
+        token1.setId("id");
+        onboardingRollback.setToken(token1);
+        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+        when(contractService.extractTemplate(any())).thenReturn("template");
+        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(File.createTempFile("file",".txt"));
+        assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.PA, onboardingRequest.getProductId(), institution)
+                .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
     }
 }
