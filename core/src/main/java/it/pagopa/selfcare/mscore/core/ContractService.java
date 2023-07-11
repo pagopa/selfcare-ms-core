@@ -26,10 +26,7 @@ import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
-import it.pagopa.selfcare.mscore.model.NotificationToSend;
-import it.pagopa.selfcare.mscore.model.QueueEvent;
-import it.pagopa.selfcare.mscore.model.UserToNotify;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -89,7 +86,8 @@ public class ContractService {
                            KafkaTemplate<String, String> kafkaTemplate,
                            KafkaPropertiesConfig kafkaPropertiesConfig,
                            UserRegistryConnector userRegistryConnector,
-                           PartyRegistryProxyConnector partyRegistryProxyConnector) {
+                           PartyRegistryProxyConnector partyRegistryProxyConnector,
+                           ObjectMapper mapper) {
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
         this.fileStorageConnector = fileStorageConnector;
@@ -97,7 +95,7 @@ public class ContractService {
         this.signatureService = signatureService;
         this.kafkaTemplate = kafkaTemplate;
         this.kafkaPropertiesConfig = kafkaPropertiesConfig;
-        this.mapper = new ObjectMapper();
+        this.mapper = mapper;
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {
             @Override
@@ -287,10 +285,28 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        toNotify.setParentDescription(institution.getParentDescription());
+        toNotify.setSubUnitCode(institution.getSubunitCode());
+        toNotify.setSubUnitType(institution.getSubunitType());
+        toNotify.setAooParent(institution.getPaAttributes().getAooParentCode());
         try {
-            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
-            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
-            GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+            GeographicTaxonomies geographicTaxonomies = new GeographicTaxonomies();
+            switch(institution.getSubunitType()){
+                case "UO":
+                    UnitaOrganizzativa unitaOrganizzativa = partyRegistryProxyConnector.getUoById(institution.getSubunitCode());
+                    toNotify.setIstatCode(unitaOrganizzativa.getCodiceComuneISTAT());
+                    geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(unitaOrganizzativa.getCodiceComuneISTAT());
+                    break;
+                case "AOO":
+                    AreaOrganizzativaOmogenea areaOrganizzativaOmogenea = partyRegistryProxyConnector.getAooById(institution.getSubunitCode());
+                    toNotify.setIstatCode(areaOrganizzativaOmogenea.getCodiceComuneISTAT());
+                    geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(areaOrganizzativaOmogenea.getCodiceComuneISTAT());
+                    break;
+                default:
+                    InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getTaxCode());
+                    toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+                    geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+            }
             toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
             toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
             toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));

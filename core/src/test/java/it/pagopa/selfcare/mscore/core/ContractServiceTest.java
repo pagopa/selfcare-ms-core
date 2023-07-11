@@ -1,5 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
@@ -20,9 +22,7 @@ import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.Certification;
-import it.pagopa.selfcare.mscore.model.CertifiedField;
-import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.*;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -31,13 +31,13 @@ import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.checkNotNullFields;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -86,6 +87,15 @@ class ContractServiceTest {
 
     @Mock
     private UserRegistryConnector userRegistryConnector;
+
+    @Mock
+    private PartyRegistryProxyConnector registryProxyConnector;
+
+    @Spy
+    private ObjectMapper mapper;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void createContractPDF() {
@@ -220,7 +230,7 @@ class ContractServiceTest {
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector, mapper);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -277,7 +287,7 @@ class ContractServiceTest {
                 "Topic cannot be null");
 
         verify(partyRegistryProxyConnector, times(1))
-                .getInstitutionById(institution.getExternalId());
+                .getInstitutionById(institution.getTaxCode());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
 
@@ -300,7 +310,7 @@ class ContractServiceTest {
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector, mapper);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -352,8 +362,64 @@ class ContractServiceTest {
                 "Topic cannot be null");
 
         verify(partyRegistryProxyConnector, times(1))
-                .getInstitutionById(institution.getExternalId());
+                .getInstitutionById(institution.getTaxCode());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
+    }
+
+    @Test
+    void sendNotificationUo() throws JsonProcessingException {
+        //given
+        Institution institution = mockInstance(new Institution());
+        institution.setSubunitType("UO");
+        institution.setOnboarding(List.of(mockInstance(new Onboarding())));
+        Token token = mockInstance(new Token());
+        UnitaOrganizzativa mockUO = mockInstance(new UnitaOrganizzativa());
+        GeographicTaxonomies uoGeoTaxonomy = mockInstance(new GeographicTaxonomies());
+        uoGeoTaxonomy.setCountry("uoCountry");
+        uoGeoTaxonomy.setProvinceAbbreviation("uoProvince");
+        uoGeoTaxonomy.setDescription("uoCity - COMUNE");
+        uoGeoTaxonomy.setIstatCode(mockUO.getCodiceComuneISTAT());
+        when(registryProxyConnector.getUoById(any())).thenReturn(mockUO);
+        when(registryProxyConnector.getExtByCode(any())).thenReturn(uoGeoTaxonomy);
+        //when
+        Executable executable = () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
+        //then
+        assertThrows(NullPointerException.class, executable);
+        ArgumentCaptor<NotificationToSend> notificationCaptor = ArgumentCaptor.forClass(NotificationToSend.class);
+        verify(mapper, times(1)).writeValueAsString(notificationCaptor.capture());
+        NotificationToSend message = notificationCaptor.getValue();
+        checkNotNullFields(message, "closedAt", "users");
+        verify(registryProxyConnector, times(1)).getUoById(institution.getSubunitCode());
+        verify(registryProxyConnector, times(1)).getExtByCode(mockUO.getCodiceComuneISTAT());
+        verifyNoMoreInteractions(registryProxyConnector);
+    }
+
+    @Test
+    void sendNotificationAOO() throws JsonProcessingException {
+        //given
+        Institution institution = mockInstance(new Institution());
+        institution.setSubunitType("AOO");
+        institution.setOnboarding(List.of(mockInstance(new Onboarding())));
+        Token token = mockInstance(new Token());
+        AreaOrganizzativaOmogenea mockUO = mockInstance(new AreaOrganizzativaOmogenea());
+        GeographicTaxonomies uoGeoTaxonomy = mockInstance(new GeographicTaxonomies());
+        uoGeoTaxonomy.setCountry("aooCountry");
+        uoGeoTaxonomy.setProvinceAbbreviation("aooProvince");
+        uoGeoTaxonomy.setDescription("aooCity - COMUNE");
+        uoGeoTaxonomy.setIstatCode(mockUO.getCodiceComuneISTAT());
+        when(registryProxyConnector.getAooById(any())).thenReturn(mockUO);
+        when(registryProxyConnector.getExtByCode(any())).thenReturn(uoGeoTaxonomy);
+        //when
+        Executable executable = () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
+        //then
+        assertThrows(NullPointerException.class, executable);
+        ArgumentCaptor<NotificationToSend> notificationCaptor = ArgumentCaptor.forClass(NotificationToSend.class);
+        verify(mapper, times(1)).writeValueAsString(notificationCaptor.capture());
+        NotificationToSend message = notificationCaptor.getValue();
+        checkNotNullFields(message, "closedAt", "users");
+        verify(registryProxyConnector, times(1)).getAooById(institution.getSubunitCode());
+        verify(registryProxyConnector, times(1)).getExtByCode(mockUO.getCodiceComuneISTAT());
+        verifyNoMoreInteractions(registryProxyConnector);
     }
 
     @Test
@@ -368,7 +434,7 @@ class ContractServiceTest {
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector, mapper);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -425,7 +491,7 @@ class ContractServiceTest {
                 "Topic cannot be null");
 
         verify(partyRegistryProxyConnector, times(1))
-                .getInstitutionById(institution.getExternalId());
+                .getInstitutionById(institution.getTaxCode());
     }
 
     @Test
@@ -453,7 +519,7 @@ class ContractServiceTest {
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         assertEquals("Template File", (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector)).extractTemplate("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector, mapper)).extractTemplate("Path"));
         verify(fileStorageConnector).getTemplateFile((String) any());
         verify(producerFactory).transactionCapable();
     }
@@ -486,7 +552,7 @@ class ContractServiceTest {
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         assertSame(resourceResponse, (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector)).getFile("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector, mapper)).getFile("Path"));
         verify(fileStorageConnector).getFile((String) any());
         verify(producerFactory).transactionCapable();
     }

@@ -11,6 +11,7 @@ public class AreaOrganizzativaOmogenea {
     private String denominazioneEnte;
     private String codiceFiscaleEnte;
     private String codiceUniAoo;
+    private String codiceComuneISTAT;
     private String denominazioneAoo;
     private String mail1;
     private String tipoMail1;
