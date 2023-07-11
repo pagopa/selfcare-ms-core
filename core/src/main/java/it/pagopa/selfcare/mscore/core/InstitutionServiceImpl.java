@@ -118,6 +118,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                         .subunitType(subunitType)
                         .build());
     }
+
     @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
@@ -209,6 +210,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
     }
+
     @Override
     public Institution createInstitution(Institution institution) {
         return createInstitutionStrategyFactory.createInstitutionStrategy(institution)
@@ -332,15 +334,15 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        if (userId != null) {
-            return toRelationshipInfo(userService.retrieveUsers(institutionId, userId, roles, states, products, productRoles), null, roles, states, products, productRoles);
-        } else if (institutionId != null) {
-            Institution institution = retrieveInstitutionById(institutionId);
-            return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution, roles, states, products, productRoles);
-        } else if (products != null && !products.isEmpty()) {
-            return toRelationshipInfo(userService.retrieveUsers(null, null, roles, states, products, productRoles), null, roles, states, products, productRoles);
+        Institution institution = null;
+        if (!StringUtils.hasText(userId) && !StringUtils.hasText(institutionId)
+                && (products == null || products.isEmpty())) {
+            throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
         }
-        throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
+        if (StringUtils.hasText(institutionId)) {
+            institution = retrieveInstitutionById(institutionId);
+        }
+        return toRelationshipInfo(userService.retrieveUsers(institutionId, userId, roles, states, products, productRoles), institution, roles, states, products, productRoles);
     }
 
     @Override
@@ -376,11 +378,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     private void checkIfAlreadyExists(String taxCode, String subunitCode) {
         /* check if institution exists */
         List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
-        if(!institutions.isEmpty())
+        if (!institutions.isEmpty())
             throw new ResourceConflictException(String
                     .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
                     CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
     }
+
     private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipInfo> list = new ArrayList<>();
         for (OnboardedUser onboardedUser : institutionRelationships) {
