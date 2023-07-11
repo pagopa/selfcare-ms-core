@@ -333,7 +333,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         if (userId != null) {
-            return toRelationshipInfo(userService.retrieveUsers(null, userId, roles, states, products, productRoles), null, roles, states, products, productRoles);
+            return toRelationshipInfo(userService.retrieveUsers(institutionId, userId, roles, states, products, productRoles), null, roles, states, products, productRoles);
         } else if (institutionId != null) {
             Institution institution = retrieveInstitutionById(institutionId);
             return toRelationshipInfo(userService.retrieveUsers(institutionId, null, roles, states, products, productRoles), institution, roles, states, products, productRoles);
