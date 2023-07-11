@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +56,23 @@ class EmailConnectorImplTest {
 
         ArrayList<String> destinationMail = new ArrayList<>();
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
-        emailConnector.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>(), "foo.txt");
+        Assertions.assertDoesNotThrow(() -> emailConnector.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>(), "foo.txt"));
+    }
+
+    @Test
+    void testSendMailWithoutAttachment() throws JsonProcessingException {
+        when(fileStorageConnector.getTemplateFile(any())).thenReturn("templateFile");
+        MailTemplate mailTemplate = new MailTemplate();
+        mailTemplate.setBody("body");
+        mailTemplate.setSubject("subject");
+        when(mapper.readValue("templateFile", MailTemplate.class)).thenReturn(mailTemplate);
+
+        MimeMessage mimeMessage = mock(MimeMessage.class);
+        when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+        when(coreConfig.getSenderMail()).thenReturn("senderMail");
+
+        ArrayList<String> destinationMail = new ArrayList<>();
+        Assertions.assertDoesNotThrow(() -> emailConnector.sendMail("Template Name", destinationMail, null, "Product Name", new HashMap<>(), null));
     }
 
     @Test
