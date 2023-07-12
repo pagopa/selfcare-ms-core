@@ -55,14 +55,14 @@ class EmailServiceTest {
     private EmailConnector emailConnector;
 
     /**
-     * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, String, boolean, InstitutionType)}
+     * Method under test: {@link EmailService#sendMailWithContract(File, String, User, OnboardingRequest, String)}
      */
     @Test
     void testSendAutocompleteMail() {
         Institution institution = new Institution();
         institution.setDigitalAddress("example@pec.it");
         File file = Mockito.mock(File.class);
-        String fileName= "42";
+        String fileName = "42";
         List<String> destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                 ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
 
@@ -74,7 +74,7 @@ class EmailServiceTest {
     }
 
     /**
-     * Method under test: {@link EmailService#sendMail(File, Institution, User, OnboardingRequest, String, boolean, InstitutionType)}
+     * Method under test: {@link EmailService#sendMailWithContract(File, String, User, OnboardingRequest, String)}
      */
     @Test
     void testSendMail() {
@@ -163,90 +163,7 @@ class EmailServiceTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
 
-        emailService.sendMail(pdf, institution, user, onboardingRequest, "", true, InstitutionType.PA);
-        assertNotNull(onboardingRequest);
-    }
-
-    @Test
-    void testSendMail2() {
-        when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
-        File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
-        Institution institution = new Institution();
-
-        User user = new User();
-
-        CertifiedField<String> certifiedField = new CertifiedField<>();
-        certifiedField.setCertification(Certification.NONE);
-        certifiedField.setValue("42");
-        user.setEmail(certifiedField);
-
-        CertifiedField<String> certifiedField1 = new CertifiedField<>();
-        certifiedField1.setCertification(Certification.NONE);
-        certifiedField1.setValue("42");
-        user.setFamilyName(certifiedField1);
-        user.setFiscalCode("Fiscal Code");
-        user.setId("42");
-
-        CertifiedField<String> certifiedField2 = new CertifiedField<>();
-        certifiedField2.setCertification(Certification.NONE);
-        certifiedField2.setValue("42");
-        user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-        onboardingRequest.setBillingRequest(billing);
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-        onboardingRequest.setContract(contract);
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-        onboardingRequest.setInstitutionExternalId("42");
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PSP);
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        emailService.sendMail(pdf, institution, user, onboardingRequest, "",false, InstitutionType.PSP);
+        emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, onboardingRequest, "");
         assertNotNull(onboardingRequest);
     }
 
@@ -331,7 +248,7 @@ class EmailServiceTest {
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
-        emailService.sendMail(pdf, institution, user, onboardingRequest, "",false, InstitutionType.GSP);
+        emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, onboardingRequest, "");
         assertNotNull(onboardingRequest);
     }
 
@@ -349,6 +266,7 @@ class EmailServiceTest {
         when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
         File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
         Institution institution = new Institution();
+        institution.setDigitalAddress("digitalAddress");
 
         User user = new User();
 
@@ -426,7 +344,7 @@ class EmailServiceTest {
         onboardingRequest.setUsers(new ArrayList<>());
         when(mailParametersMapper.getOnboardingNotificationPath()).thenReturn("");
         doNothing().when(emailConnector).sendMail(any(), any(), any(), any(), any(), any());
-        assertDoesNotThrow(() -> emailService.sendMail(pdf, institution, user, onboardingRequest, "",false, institutionType));
+        assertDoesNotThrow(() -> emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, onboardingRequest, ""));
     }
 
     /**
@@ -450,7 +368,7 @@ class EmailServiceTest {
         ArrayList<User> managers = new ArrayList<>();
         User user = new User();
         user.setEmail(new CertifiedField<>());
-        Map<String, WorkContact> workContactMap= new HashMap<>();
+        Map<String, WorkContact> workContactMap = new HashMap<>();
         CertifiedField<String> mailCertified = new CertifiedField<>();
         mailCertified.setValue("Ciao");
         WorkContact workContact = new WorkContact();
@@ -515,7 +433,7 @@ class EmailServiceTest {
 
 
     @Test
-    void sendRejectMail(){
+    void sendRejectMail() {
         File file = mock(File.class);
         Institution institution = new Institution();
         institution.setDigitalAddress("digital");
@@ -529,15 +447,15 @@ class EmailServiceTest {
         product.setStatus(ProductStatus.ACTIVE);
         product.setTitle("Dr");
 
-        when(mailParametersMapper.getOnboardingRejectMailParameters(any(),any())).thenReturn(new HashMap<>());
+        when(mailParametersMapper.getOnboardingRejectMailParameters(any(), any())).thenReturn(new HashMap<>());
         when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
         when(mailParametersMapper.getOnboardingRejectNotificationPath()).thenReturn("42");
-        emailService.sendRejectMail(file,institution,product);
+        emailService.sendRejectMail(file, institution, product);
         assertNotNull(product);
     }
 
     @Test
-    void sendRejectMail2(){
+    void sendRejectMail2() {
         File file = mock(File.class);
         Institution institution = new Institution();
         institution.setDigitalAddress("digital");
@@ -551,15 +469,15 @@ class EmailServiceTest {
         product.setStatus(ProductStatus.ACTIVE);
         product.setTitle("Dr");
 
-        when(mailParametersMapper.getOnboardingRejectMailParameters(any(),any())).thenReturn(new HashMap<>());
+        when(mailParametersMapper.getOnboardingRejectMailParameters(any(), any())).thenReturn(new HashMap<>());
         when(coreConfig.getDestinationMails()).thenReturn(null);
         when(mailParametersMapper.getOnboardingRejectNotificationPath()).thenReturn("42");
-        emailService.sendRejectMail(file,institution,product);
+        emailService.sendRejectMail(file, institution, product);
         assertNotNull(product);
     }
 
     @Test
-    void sendRejectMail3(){
+    void sendRejectMail3() {
         File file = mock(File.class);
         Institution institution = new Institution();
         institution.setDigitalAddress(null);
@@ -573,12 +491,95 @@ class EmailServiceTest {
         product.setStatus(ProductStatus.ACTIVE);
         product.setTitle("Dr");
 
-        when(mailParametersMapper.getOnboardingRejectMailParameters(any(),any())).thenReturn(new HashMap<>());
+        when(mailParametersMapper.getOnboardingRejectMailParameters(any(), any())).thenReturn(new HashMap<>());
         when(coreConfig.getDestinationMails()).thenReturn(null);
         when(mailParametersMapper.getOnboardingRejectNotificationPath()).thenReturn("42");
         when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("42");
-        emailService.sendRejectMail(file,institution,product);
+        emailService.sendRejectMail(file, institution, product);
         assertNotNull(product);
+    }
+
+    @Test
+    void testSendMailForApprove() {
+        when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
+
+        User user = new User();
+
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+        user.setEmail(certifiedField);
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+        user.setName(certifiedField2);
+        user.setWorkContacts(new HashMap<>());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode("Recipient Code");
+        billing.setVatNumber("42");
+        onboardingRequest.setBillingRequest(billing);
+
+        Contract contract = new Contract();
+        contract.setPath("Path");
+        contract.setVersion("1.0.2");
+        onboardingRequest.setContract(contract);
+
+        ContractImported contractImported = new ContractImported();
+        contractImported.setContractType("Contract Type");
+        contractImported.setFileName("foo.txt");
+        contractImported.setFilePath("/directory/foo.txt");
+        onboardingRequest.setInstitutionExternalId("42");
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PT);
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setUsers(new ArrayList<>());
+        when(mailParametersMapper.getOnboardingMailNotificationParameter(user, onboardingRequest, "tokenId")).thenReturn(new HashMap<>());
+        when(mailParametersMapper.getOnboardingNotificationAdminEmail()).thenReturn(new ArrayList<>());
+        when(mailParametersMapper.getOnboardingNotificationPath()).thenReturn("");
+        doNothing().when(emailConnector).sendMail(any(), any(), any(), any(), any(), any());
+        assertDoesNotThrow(() -> emailService.sendMailForApprove(user, onboardingRequest, "tokenId"));
     }
 }
 

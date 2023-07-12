@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.mail.internet.MimeMessage;
 import java.io.File;
@@ -43,7 +44,7 @@ public class EmailConnectorImpl implements EmailConnector {
     @Override
     public void sendMail(String templateName, List<String> destinationMail, File pdf, String productName, Map<String, String> mailParameters, String fileName) {
         try {
-            log.info("START - sendMail to {}, with file {}, for product {}", destinationMail, pdf.getName(), productName);
+            log.info("START - sendMail to {}, for product {}", destinationMail, productName);
             String template = fileStorageConnector.getTemplateFile(templateName);
             MailTemplate mailTemplate = mapper.readValue(template, MailTemplate.class);
 
@@ -57,9 +58,12 @@ public class EmailConnectorImpl implements EmailConnector {
             message.setFrom(coreConfig.getSenderMail());
             message.setTo(destinationMail.toArray(new String[0]));
             message.setText(html, true);
-            message.addAttachment(fileName, pdf);
+            if(pdf != null && StringUtils.hasText(fileName)) {
+                message.addAttachment(fileName, pdf);
+                log.info("sendMail to: {}, attached file: {}, for product {}", destinationMail, pdf.getName(), productName);
+            }
             mailSender.send(mimeMessage);
-            log.info("END - sendMail to {}, with file {}, for product {}", destinationMail, pdf.getName(), productName);
+            log.info("END - sendMail to {}, for product {}", destinationMail, productName);
         } catch (Exception e) {
             log.error(ERROR_DURING_SEND_MAIL.getMessage() + ":", e.getMessage(), e);
             throw new MsCoreException(ERROR_DURING_SEND_MAIL.getMessage(), ERROR_DURING_SEND_MAIL.getCode());
