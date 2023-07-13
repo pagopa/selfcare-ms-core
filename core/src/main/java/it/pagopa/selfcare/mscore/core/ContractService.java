@@ -29,13 +29,10 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
-import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -59,7 +56,10 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
@@ -236,28 +236,14 @@ public class ContractService {
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
-                sendNotification(msg, token.getId(), null);
+                sendNotification(msg, token.getId());
             } catch (JsonProcessingException e) {
                 log.warn("error during send dataLake notification for token {}", notification.getId());
             }
         }
     }
 
-    public void sendCreateUserNotification(RelationshipInfo relationshipInfo){
-        if (relationshipInfo != null) {
-            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
-            try {
-                String msg = mapper.writeValueAsString(relationshipInfo);
-                sendUserNotification(msg, kafkaPropertiesConfig.getDatalakeContractsTopic(), relationshipInfo.getUserId());
-            } catch (JsonProcessingException e) {
-                log.warn("error during send dataLake notification for user {}", relationshipInfo.getUserId());
-            }
-        }
-    }
 
-    public void sendLegalUserNotification(User user, Token token){
-
-    }
 
     private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
@@ -318,16 +304,6 @@ public class ContractService {
         return toNotify;
     }
 
-    private UserToNotify toUserToNotify(TokenUser tokenUser, String institutionId) {
-        UserToNotify userToNotify = new UserToNotify();
-        User user = userRegistryConnector.getUserByInternalId(tokenUser.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
-        userToNotify.setName(user.getName());
-        userToNotify.setFamilyName(user.getFamilyName());
-        userToNotify.setFiscalCode(user.getFiscalCode());
-        userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
-        userToNotify.setRole(tokenUser.getRole());
-        return userToNotify;
-    }
 
     private String retrieveFileName(String tokenContractSigned, String tokenId) {
 
@@ -343,9 +319,9 @@ public class ContractService {
         return "";
     }
 
-    private void sendNotification(String message, String tokenId, String topic) {
+    private void sendNotification(String message, String tokenId) {
         ListenableFuture<SendResult<String, String>> future =
-                kafkaTemplate.send(topic, message);
+                kafkaTemplate.send(kafkaPropertiesConfig.getDatalakeContractsTopic(), message);
 
         future.addCallback(new ListenableFutureCallback<>() {
 
@@ -362,23 +338,7 @@ public class ContractService {
 
     }
 
-    private void sendUserNotification(String message, String topic, String userId){
-        ListenableFuture<SendResult<String, String>> future =
-                kafkaTemplate.send(topic, message);
 
-        future.addCallback(new ListenableFutureCallback<>() {
-
-            @Override
-            public void onSuccess(SendResult<String, String> result) {
-                log.info("sent dataLake notification for user : {}", userId);
-            }
-
-            @Override
-            public void onFailure(Throwable ex) {
-                log.warn("error during send dataLake notification for user {}: {} ", userId, ex.getMessage(), ex);
-            }
-        });
-    }
 
     public String uploadContract(String tokenId, MultipartFile contract) {
         return fileStorageConnector.uploadContract(tokenId, contract);

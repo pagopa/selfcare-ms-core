@@ -44,6 +44,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final InstitutionService institutionService;
     private final UserService userService;
     private final UserRelationshipService userRelationshipService;
+    private final UserEventService userEventService;
     private final ContractService contractService;
     private final EmailService emailService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
@@ -58,7 +59,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  InstitutionService institutionService,
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
-                                 ContractService contractService,
+                                 UserEventService userEventService, ContractService contractService,
                                  EmailService emailService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
@@ -67,6 +68,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.institutionService = institutionService;
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
+        this.userEventService = userEventService;
         this.contractService = contractService;
         this.emailService = emailService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
@@ -169,10 +171,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             contractService.deleteContract(fileName, token.getId());
         }
         contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token, QueueEvent.ADD);
-        token.getUsers().forEach(tokenUser -> {
-            User user = userService.retrieveUserFromUserRegistry(token.getId(), EnumSet.allOf(User.Fields.class));
-            contractService.sendLegalUserNotification(user, token);
-        });
+        userEventService.sendLegalUserNotification(token);
         log.trace("completeOboarding end");
     }
 
@@ -232,7 +231,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
         List<RelationshipInfo> relationshipInfos = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
-        relationshipInfos.forEach(contractService::sendCreateUserNotification);
+        relationshipInfos.forEach(userEventService::sendCreateUserNotification);
         return relationshipInfos;
     }
 
