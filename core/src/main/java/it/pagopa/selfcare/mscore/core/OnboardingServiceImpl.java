@@ -169,6 +169,10 @@ public class OnboardingServiceImpl implements OnboardingService {
             contractService.deleteContract(fileName, token.getId());
         }
         contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token, QueueEvent.ADD);
+        token.getUsers().forEach(tokenUser -> {
+            User user = userService.retrieveUserFromUserRegistry(token.getId(), EnumSet.allOf(User.Fields.class));
+            contractService.sendLegalUserNotification(user, token);
+        });
         log.trace("completeOboarding end");
     }
 
@@ -227,7 +231,9 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
-        return onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        List<RelationshipInfo> relationshipInfos = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        relationshipInfos.forEach(contractService::sendCreateUserNotification);
+        return relationshipInfos;
     }
 
     @Override

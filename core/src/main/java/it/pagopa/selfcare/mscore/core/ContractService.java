@@ -35,6 +35,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -235,11 +236,27 @@ public class ContractService {
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
-                sendNotification(msg, token.getId());
+                sendNotification(msg, token.getId(), null);
             } catch (JsonProcessingException e) {
                 log.warn("error during send dataLake notification for token {}", notification.getId());
             }
         }
+    }
+
+    public void sendCreateUserNotification(RelationshipInfo relationshipInfo){
+        if (relationshipInfo != null) {
+            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
+            try {
+                String msg = mapper.writeValueAsString(relationshipInfo);
+                sendUserNotification(msg, kafkaPropertiesConfig.getDatalakeContractsTopic(), relationshipInfo.getUserId());
+            } catch (JsonProcessingException e) {
+                log.warn("error during send dataLake notification for user {}", relationshipInfo.getUserId());
+            }
+        }
+    }
+
+    public void sendLegalUserNotification(User user, Token token){
+
     }
 
     private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
@@ -326,9 +343,9 @@ public class ContractService {
         return "";
     }
 
-    private void sendNotification(String message, String tokenId) {
+    private void sendNotification(String message, String tokenId, String topic) {
         ListenableFuture<SendResult<String, String>> future =
-                kafkaTemplate.send(kafkaPropertiesConfig.getDatalakeContractsTopic(), message);
+                kafkaTemplate.send(topic, message);
 
         future.addCallback(new ListenableFutureCallback<>() {
 
@@ -343,6 +360,24 @@ public class ContractService {
             }
         });
 
+    }
+
+    private void sendUserNotification(String message, String topic, String userId){
+        ListenableFuture<SendResult<String, String>> future =
+                kafkaTemplate.send(topic, message);
+
+        future.addCallback(new ListenableFutureCallback<>() {
+
+            @Override
+            public void onSuccess(SendResult<String, String> result) {
+                log.info("sent dataLake notification for user : {}", userId);
+            }
+
+            @Override
+            public void onFailure(Throwable ex) {
+                log.warn("error during send dataLake notification for user {}: {} ", userId, ex.getMessage(), ex);
+            }
+        });
     }
 
     public String uploadContract(String tokenId, MultipartFile contract) {
