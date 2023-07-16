@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +16,6 @@ public class UserToNotify {
     private String fiscalCode;
     private String email;
     private PartyRole role;
-    private List<String> productRoles;
+    private String productRole;
 
 }

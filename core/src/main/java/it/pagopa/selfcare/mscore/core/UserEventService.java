@@ -11,11 +11,10 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
@@ -63,50 +62,83 @@ public class UserEventService {
         mapper.registerModule(simpleModule);
     }
 
-    public void sendLegalUserNotification(Token token) {
+    public void sendLegalTokenUserNotification(Token token) {
         token.getUsers().forEach(tokenUser -> {
-            UserToNotify userToNotify = toUserToNotify(tokenUser, token.getInstitutionId(), token.getProductId());
-            try {
-                String msg = mapper.writeValueAsString(userToNotify);
-                sendUserNotification(msg, userToNotify.getUserId());
-            } catch (JsonProcessingException e) {
-                log.warn("error during send dataLake notification for user {}", userToNotify.getUserId());
-            }
+            List<UserToNotify> usersToNotify = toUserToNotify(tokenUser.getUserId(), token.getInstitutionId(), token.getProductId());
+            usersToNotify.forEach(user -> {
+                UserNotificationToSend notification = setNotificationDetailsFromToken(token, user);
+                try {
+                    String msg = mapper.writeValueAsString(notification);
+                    sendUserNotification(msg, user.getUserId());
+                } catch (JsonProcessingException e) {
+                    log.warn("error during send dataLake notification for user {}", user.getUserId());
+                }
+            });
 
         });
     }
 
-    private UserToNotify toUserToNotify(TokenUser tokenUser, String institutionId, String productId) {
-        UserToNotify userToNotify = new UserToNotify();
-        User user = userRegistryConnector.getUserByInternalId(tokenUser.getUserId(), EnumSet.allOf(User.Fields.class));
-        OnboardedUser onboardedUser = userConnector.findById(tokenUser.getUserId());
-        List<String> userProductRoles = onboardedUser.getBindings().stream()
+    private List<UserToNotify> toUserToNotify(String userId, String institutionId, String productId) {
+        User user = userRegistryConnector.getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        OnboardedUser onboardedUser = userConnector.findById(userId);
+        return onboardedUser.getBindings().stream()
                 .filter(userBinding -> institutionId.equals(userBinding.getInstitutionId()))
                 .flatMap(userBinding -> userBinding.getProducts().stream())
                 .filter(onboardedProduct -> productId.equals(onboardedProduct.getProductId()))
-                .map(OnboardedProduct::getProductRole)
+                .map(onboardedProduct -> {
+                    UserToNotify userToNotify = new UserToNotify();
+                    userToNotify.setUserId(userId);
+                    userToNotify.setName(user.getName());
+                    userToNotify.setFamilyName(user.getFamilyName());
+                    userToNotify.setFiscalCode(user.getFiscalCode());
+                    userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
+                    userToNotify.setRole(onboardedProduct.getRole());
+                    userToNotify.setProductRole(onboardedProduct.getProductRole());
+                    return userToNotify;
+                })
                 .collect(Collectors.toList());
-        userToNotify.setUserId(tokenUser.getUserId());
-        userToNotify.setName(user.getName());
-        userToNotify.setFamilyName(user.getFamilyName());
-        userToNotify.setFiscalCode(user.getFiscalCode());
-        userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
-        userToNotify.setRole(tokenUser.getRole());
-        userToNotify.setProductRoles(userProductRoles);
-
-        return userToNotify;
     }
 
-    public void sendCreateUserNotification(RelationshipInfo relationshipInfo) {
+    public void sendOperatorUserNotification(RelationshipInfo relationshipInfo) {
         if (relationshipInfo != null) {
+            List<UserToNotify> usersToNotify = toUserToNotify(relationshipInfo.getUserId(),
+                    relationshipInfo.getInstitution().getId(),
+                    relationshipInfo.getOnboardedProduct().getProductId());
+
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
-            try {
-                String msg = mapper.writeValueAsString(relationshipInfo);
-                sendUserNotification(msg, relationshipInfo.getUserId());
-            } catch (JsonProcessingException e) {
-                log.warn("error during send dataLake notification for user {}", relationshipInfo.getUserId());
-            }
+            usersToNotify.forEach(user -> {
+                UserNotificationToSend notification = setNotificationDetailsFromRelationship(relationshipInfo, user);
+                try {
+                    String msg = mapper.writeValueAsString(notification);
+                    sendUserNotification(msg, user.getUserId());
+                } catch (JsonProcessingException e) {
+                    log.warn("error during send dataLake notification for user {}", user.getUserId());
+                }
+            });
         }
+    }
+
+    private UserNotificationToSend setNotificationDetailsFromRelationship(RelationshipInfo relationshipInfo, UserToNotify user) {
+        UserNotificationToSend notification = new UserNotificationToSend();
+        notification.setInstitutionId(relationshipInfo.getInstitution().getId());
+        notification.setProductId(relationshipInfo.getOnboardedProduct().getProductId());
+        notification.setCreatedAt(relationshipInfo.getOnboardedProduct().getCreatedAt());
+        notification.setUpdatedAt(relationshipInfo.getOnboardedProduct().getUpdatedAt());
+        notification.setRelationshipStatus(relationshipInfo.getOnboardedProduct().getStatus());
+        notification.setUser(user);
+        return notification;
+    }
+
+    private UserNotificationToSend setNotificationDetailsFromToken(Token token, UserToNotify user) {
+        UserNotificationToSend notification = new UserNotificationToSend();
+        notification.setInstitutionId(token.getInstitutionId());
+        notification.setProductId(token.getProductId());
+        notification.setCreatedAt(token.getCreatedAt());
+        notification.setUpdatedAt(token.getUpdatedAt());
+        notification.setOnboardingTokenId(token.getId());
+        notification.setRelationshipStatus(token.getStatus());
+        notification.setUser(user);
+        return notification;
     }
 
 
