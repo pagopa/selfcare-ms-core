@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.model;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,6 @@ public class UserToNotify {
     private String email;
     private PartyRole role;
     private String productRole;
+    private RelationshipState relationshipStatus;
 
 }

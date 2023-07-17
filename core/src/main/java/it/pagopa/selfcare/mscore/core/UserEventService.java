@@ -97,6 +97,7 @@ public class UserEventService {
                     userToNotify.setFiscalCode(user.getFiscalCode());
                     userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
                     userToNotify.setRole(onboardedProduct.getRole());
+                    userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
                     userToNotify.setProductRole(onboardedProduct.getProductRole());
                     return userToNotify;
                 })
@@ -129,7 +130,6 @@ public class UserEventService {
         notification.setProductId(relationshipInfo.getOnboardedProduct().getProductId());
         notification.setCreatedAt(relationshipInfo.getOnboardedProduct().getCreatedAt());
         notification.setUpdatedAt(relationshipInfo.getOnboardedProduct().getUpdatedAt());
-        notification.setRelationshipStatus(relationshipInfo.getOnboardedProduct().getStatus());
         notification.setUser(user);
         return notification;
     }
@@ -142,7 +142,6 @@ public class UserEventService {
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(token.getUpdatedAt());
         notification.setOnboardingTokenId(token.getId());
-        notification.setRelationshipStatus(token.getStatus());
         notification.setUser(user);
         return notification;
     }
