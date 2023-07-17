@@ -27,6 +27,9 @@ class UserRelationshipServiceImplTest {
     private InstitutionService institutionService;
 
     @Mock
+    private UserEventService userEventService;
+
+    @Mock
     private OnboardingDao onboardingDao;
 
     @Mock

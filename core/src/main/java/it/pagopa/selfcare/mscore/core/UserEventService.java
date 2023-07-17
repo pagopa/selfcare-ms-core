@@ -80,7 +80,7 @@ public class UserEventService {
         });
     }
 
-    private List<UserToNotify> toUserToNotify(String userId, String institutionId, String productId, Optional<String> relationshipId, Optional<String> tokenId) {
+    protected List<UserToNotify> toUserToNotify(String userId, String institutionId, String productId, Optional<String> relationshipId, Optional<String> tokenId) {
         User user = userRegistryConnector.getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
         OnboardedUser onboardedUser = userConnector.findById(userId);
         return onboardedUser.getBindings().stream()
