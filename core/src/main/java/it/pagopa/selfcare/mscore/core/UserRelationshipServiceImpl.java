@@ -40,7 +40,7 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         OnboardedUser user = findByRelationshipId(relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.ACTIVE);
-            sendRelationshipEventNotification(relationshipId);
+            sendRelationshipEventNotification(user, relationshipId);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
         }
@@ -51,26 +51,30 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         OnboardedUser user = findByRelationshipId(relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.SUSPENDED);
-            sendRelationshipEventNotification(relationshipId);
+            sendRelationshipEventNotification(user, relationshipId);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
         }
     }
 
-    private void sendRelationshipEventNotification(String relationshipId){
-        RelationshipInfo relationshipInfo = retrieveRelationship(relationshipId);
+    private void sendRelationshipEventNotification(OnboardedUser user, String relationshipId){
+        RelationshipInfo relationshipInfo = getRelationshipInfoFromUser(user, relationshipId);
         userEventService.sendOperatorUserNotification(relationshipInfo);
     }
     @Override
     public void deleteRelationship(String relationshipId) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.DELETED);
-        sendRelationshipEventNotification(relationshipId);
+        sendRelationshipEventNotification(user, relationshipId);
     }
 
     @Override
     public RelationshipInfo retrieveRelationship(String relationshipId) {
         OnboardedUser user = findByRelationshipId(relationshipId);
+        return getRelationshipInfoFromUser(user, relationshipId);
+    }
+
+    private RelationshipInfo getRelationshipInfoFromUser(OnboardedUser user, String relationshipId){
         for (UserBinding userBinding : user.getBindings()) {
             for (OnboardedProduct product : userBinding.getProducts()) {
                 if (relationshipId.equalsIgnoreCase(product.getRelationshipId())) {
