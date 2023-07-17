@@ -29,25 +29,27 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserEventService {
     private final CoreConfig coreConfig;
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplateUsers;
     private final KafkaPropertiesConfig kafkaPropertiesConfig;
     private final ObjectMapper mapper;
     private final UserConnector userConnector;
     private final UserRegistryConnector userRegistryConnector;
 
     public UserEventService(CoreConfig coreConfig,
-                            KafkaTemplate<String, String> kafkaTemplate,
+                            KafkaTemplate<String, String> kafkaTemplateUsers,
                             KafkaPropertiesConfig kafkaPropertiesConfig,
                             ObjectMapper mapper,
                             UserConnector userConnector, UserRegistryConnector userRegistryConnector) {
         this.coreConfig = coreConfig;
-        this.kafkaTemplate = kafkaTemplate;
+        this.kafkaTemplateUsers = kafkaTemplateUsers;
         this.kafkaPropertiesConfig = kafkaPropertiesConfig;
         this.mapper = mapper;
         this.userConnector = userConnector;
@@ -64,7 +66,7 @@ public class UserEventService {
 
     public void sendLegalTokenUserNotification(Token token) {
         token.getUsers().forEach(tokenUser -> {
-            List<UserToNotify> usersToNotify = toUserToNotify(tokenUser.getUserId(), token.getInstitutionId(), token.getProductId());
+            List<UserToNotify> usersToNotify = toUserToNotify(tokenUser.getUserId(), token.getInstitutionId(), token.getProductId(), Optional.empty(), Optional.of(token.getId()));
             usersToNotify.forEach(user -> {
                 UserNotificationToSend notification = setNotificationDetailsFromToken(token, user);
                 try {
@@ -78,13 +80,15 @@ public class UserEventService {
         });
     }
 
-    private List<UserToNotify> toUserToNotify(String userId, String institutionId, String productId) {
+    private List<UserToNotify> toUserToNotify(String userId, String institutionId, String productId, Optional<String> relationshipId, Optional<String> tokenId) {
         User user = userRegistryConnector.getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
         OnboardedUser onboardedUser = userConnector.findById(userId);
         return onboardedUser.getBindings().stream()
                 .filter(userBinding -> institutionId.equals(userBinding.getInstitutionId()))
                 .flatMap(userBinding -> userBinding.getProducts().stream())
                 .filter(onboardedProduct -> productId.equals(onboardedProduct.getProductId()))
+                .filter(onboardedProduct -> relationshipId.map(s -> s.equals(onboardedProduct.getRelationshipId())).orElse(true))
+                .filter(onboardedProduct -> tokenId.map(s -> s.equals(onboardedProduct.getTokenId())).orElse(true))
                 .map(onboardedProduct -> {
                     UserToNotify userToNotify = new UserToNotify();
                     userToNotify.setUserId(userId);
@@ -103,7 +107,7 @@ public class UserEventService {
         if (relationshipInfo != null) {
             List<UserToNotify> usersToNotify = toUserToNotify(relationshipInfo.getUserId(),
                     relationshipInfo.getInstitution().getId(),
-                    relationshipInfo.getOnboardedProduct().getProductId());
+                    relationshipInfo.getOnboardedProduct().getProductId(), Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()), Optional.empty());
 
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
             usersToNotify.forEach(user -> {
@@ -120,6 +124,7 @@ public class UserEventService {
 
     private UserNotificationToSend setNotificationDetailsFromRelationship(RelationshipInfo relationshipInfo, UserToNotify user) {
         UserNotificationToSend notification = new UserNotificationToSend();
+        notification.setId(UUID.randomUUID().toString());
         notification.setInstitutionId(relationshipInfo.getInstitution().getId());
         notification.setProductId(relationshipInfo.getOnboardedProduct().getProductId());
         notification.setCreatedAt(relationshipInfo.getOnboardedProduct().getCreatedAt());
@@ -131,6 +136,7 @@ public class UserEventService {
 
     private UserNotificationToSend setNotificationDetailsFromToken(Token token, UserToNotify user) {
         UserNotificationToSend notification = new UserNotificationToSend();
+        notification.setId(UUID.randomUUID().toString());
         notification.setInstitutionId(token.getInstitutionId());
         notification.setProductId(token.getProductId());
         notification.setCreatedAt(token.getCreatedAt());
@@ -144,7 +150,7 @@ public class UserEventService {
 
     private void sendUserNotification(String message, String userId) {
         ListenableFuture<SendResult<String, String>> future =
-                kafkaTemplate.send(kafkaPropertiesConfig.getScUsersTopic(), message);
+                kafkaTemplateUsers.send(kafkaPropertiesConfig.getScUsersTopic(), message);
 
         future.addCallback(new ListenableFutureCallback<>() {
 

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.PropertySource;
 @ToString
 public class KafkaPropertiesConfig {
     private String datalakeContractsSaslJaasConfig;
+    private String usersSaslJaasConfig;
     private String datalakeContractsTopic ;
     private String scUsersTopic;
     private String saslMechanism;

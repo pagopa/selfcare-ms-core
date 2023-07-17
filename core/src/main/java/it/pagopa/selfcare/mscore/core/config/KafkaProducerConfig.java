@@ -47,9 +47,35 @@ public class KafkaProducerConfig {
                 StringSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
+    @Bean
+    ProducerFactory<String, String> producerFactoryUser(){
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(
+                ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+                kafkaPropertiesConfig.getBootstrapServers());
+        configProps.put(
+                AdminClientConfig.SECURITY_PROTOCOL_CONFIG,
+                kafkaPropertiesConfig.getSecurityProtocol());
+        configProps.put(
+                SaslConfigs.SASL_MECHANISM,
+                kafkaPropertiesConfig.getSaslMechanism());
+        configProps.put(
+                SaslConfigs.SASL_JAAS_CONFIG,
+                kafkaPropertiesConfig.getUsersSaslJaasConfig());
+        configProps.put(
+                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class);
+        configProps.put(
+                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
 
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
+
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplateUsers(){return new KafkaTemplate<>(producerFactoryUser());}
 }
