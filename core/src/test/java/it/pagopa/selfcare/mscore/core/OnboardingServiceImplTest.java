@@ -57,6 +57,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private ContractService contractService;
+
+    @Mock
+    private UserService userService;
     @Mock
     private EmailService emailService;
 
@@ -73,7 +76,7 @@ class OnboardingServiceImplTest {
     private InstitutionService institutionService;
 
     @Mock
-    private UserService userService;
+    private UserEventService userEventService;
 
     @Mock
     private PagoPaSignatureConfig pagoPaSignatureConfig;
