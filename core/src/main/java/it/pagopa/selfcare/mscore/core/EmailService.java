@@ -96,9 +96,7 @@ public class EmailService {
     }
 
     private List<String> getRejectDestinationMails(Institution institution) {
-        if (coreConfig.getDestinationMails() != null) {
-            return coreConfig.getDestinationMails();
-        } else if (institution.getDigitalAddress() != null) {
+        if (coreConfig.isSendEmailToInstitution()) {
             return List.of(institution.getDigitalAddress());
         } else {
             return List.of(coreConfig.getInstitutionAlternativeEmail());
