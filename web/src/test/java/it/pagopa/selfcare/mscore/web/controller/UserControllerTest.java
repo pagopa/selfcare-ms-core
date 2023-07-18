@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.TestUtils;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedInstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -270,8 +271,14 @@ class UserControllerTest {
         assertEquals(response.getUserId(), onboardingInfo.getUserId());
         assertNotNull(response.getInstitutions());
         assertEquals(1, response.getInstitutions().size());
-        assertEquals(response.getInstitutions().get(0).getInstitutionType(), onboardingInfo.getInstitution().getInstitutionType());
-        assertEquals(response.getInstitutions().get(0).getId(), onboardingInfo.getInstitution().getId());
+
+        OnboardedInstitutionResponse institutionResponse = response.getInstitutions().get(0);
+
+        assertEquals(institutionResponse.getInstitutionType(), onboardingInfo.getInstitution().getInstitutionType());
+        assertEquals(institutionResponse.getId(), onboardingInfo.getInstitution().getId());
+        assertEquals(institutionResponse.getProductInfo().getId(), onboardingInfo.getBinding().getProducts().getProductId());
+        assertEquals(institutionResponse.getInstitutionType(), onboardingInfo.getInstitution().getInstitutionType());
+
     }
 }
 
