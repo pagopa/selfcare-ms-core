@@ -433,7 +433,7 @@ class EmailServiceTest {
 
 
     @Test
-    void sendRejectMail() {
+    void sendRejectMail(){
         File file = mock(File.class);
         Institution institution = new Institution();
         institution.setDigitalAddress("digital");
@@ -447,15 +447,17 @@ class EmailServiceTest {
         product.setStatus(ProductStatus.ACTIVE);
         product.setTitle("Dr");
 
-        when(mailParametersMapper.getOnboardingRejectMailParameters(any(), any())).thenReturn(new HashMap<>());
+        when(mailParametersMapper.getOnboardingRejectMailParameters(any(),any())).thenReturn(new HashMap<>());
         when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
+        when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("42");
         when(mailParametersMapper.getOnboardingRejectNotificationPath()).thenReturn("42");
-        emailService.sendRejectMail(file, institution, product);
+        emailService.sendRejectMail(file,institution,product);
         assertNotNull(product);
     }
 
     @Test
-    void sendRejectMail2() {
+    void sendRejectMail2(){
         File file = mock(File.class);
         Institution institution = new Institution();
         institution.setDigitalAddress("digital");
@@ -471,13 +473,15 @@ class EmailServiceTest {
 
         when(mailParametersMapper.getOnboardingRejectMailParameters(any(), any())).thenReturn(new HashMap<>());
         when(coreConfig.getDestinationMails()).thenReturn(null);
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
+        when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("42");
         when(mailParametersMapper.getOnboardingRejectNotificationPath()).thenReturn("42");
         emailService.sendRejectMail(file, institution, product);
         assertNotNull(product);
     }
 
     @Test
-    void sendRejectMail3() {
+    void sendRejectMail3(){
         File file = mock(File.class);
         Institution institution = new Institution();
         institution.setDigitalAddress(null);
