@@ -449,6 +449,8 @@ class EmailServiceTest {
 
         when(mailParametersMapper.getOnboardingRejectMailParameters(any(),any())).thenReturn(new HashMap<>());
         when(coreConfig.getDestinationMails()).thenReturn(new ArrayList<>());
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
+        when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("42");
         when(mailParametersMapper.getOnboardingRejectNotificationPath()).thenReturn("42");
         emailService.sendRejectMail(file,institution,product);
         assertNotNull(product);
@@ -471,7 +473,8 @@ class EmailServiceTest {
 
         when(mailParametersMapper.getOnboardingRejectMailParameters(any(), any())).thenReturn(new HashMap<>());
         when(coreConfig.getDestinationMails()).thenReturn(null);
-        when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
+        when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("42");
         when(mailParametersMapper.getOnboardingRejectNotificationPath()).thenReturn("42");
         emailService.sendRejectMail(file, institution, product);
         assertNotNull(product);
