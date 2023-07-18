@@ -1,11 +1,19 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.TestUtils;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -20,7 +29,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +45,9 @@ class UserControllerTest {
 
     @Mock
     private UserRelationshipService userRelationshipService;
+
+    @Mock
+    private OnboardingService onboardingService;
 
     /**
      * Method under test: {@link UserController#activateRelationship(String)}
@@ -159,7 +175,7 @@ class UserControllerTest {
     @Test
     void testGetRelationship2() throws Exception {
 
-        Institution institution = TestUtils.createSimpleInstitutionPA();;
+        Institution institution = TestUtils.createSimpleInstitutionPA();
         institution.setSupportPhone("8605550118");
         institution.setSupportEmail("john.smith@example.org");
         institution.setBusinessRegisterPlace("U");
@@ -206,6 +222,56 @@ class UserControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+
+    /**
+     * Method under test: {@link UserController#getInstitutionProductsInfo(String, String)}
+     */
+    @Test
+    void testGetInstitutionProductsInfo() throws Exception {
+
+        OnboardingInfo onboardingInfo = new OnboardingInfo();
+        onboardingInfo.setUserId("id");
+        UserInstitutionBinding userInstitutionBinding = new UserInstitutionBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("productId");
+        product.setStatus(RelationshipState.ACTIVE);
+        userInstitutionBinding.setProducts(product);
+        onboardingInfo.setBinding(userInstitutionBinding);
+        Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setInstitutionType(InstitutionType.PA);
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("productId");
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        institution.setOnboarding(List.of(onboarding));
+        onboardingInfo.setInstitution(institution);
+
+        when(onboardingService.getOnboardingInfo(anyString(), anyString())).thenReturn(List.of(onboardingInfo));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/users/id/institution-products?institutionId=test")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        OnboardingInfoResponse response = new ObjectMapper().readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertNotNull(response);
+        assertNotNull(response.getUserId());
+        assertEquals(response.getUserId(), onboardingInfo.getUserId());
+        assertNotNull(response.getInstitutions());
+        assertEquals(1, response.getInstitutions().size());
+        assertEquals(response.getInstitutions().get(0).getInstitutionType(), onboardingInfo.getInstitution().getInstitutionType());
+        assertEquals(response.getInstitutions().get(0).getId(), onboardingInfo.getInstitution().getId());
     }
 }
 

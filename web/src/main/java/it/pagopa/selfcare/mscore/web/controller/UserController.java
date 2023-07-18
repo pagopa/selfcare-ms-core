@@ -3,24 +3,24 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.mscore.constant.GenericError;
+import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
+import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.ACTIVATE_RELATIONSHIP_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_RELATIONSHIP_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.SUSPEND_RELATIONSHIP_ERROR;
+import java.util.List;
+
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @RestController
@@ -28,9 +28,12 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.SUSPEND_RELATIONSH
 public class UserController {
 
     private final UserRelationshipService userRelationshipService;
+    private final OnboardingService onboardingService;
 
-    public UserController(UserRelationshipService userRelationshipService) {
+    public UserController(UserRelationshipService userRelationshipService,
+                          OnboardingService onboardingService) {
         this.userRelationshipService = userRelationshipService;
+        this.onboardingService = onboardingService;
     }
 
     /**
@@ -111,5 +114,30 @@ public class UserController {
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
         RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResult(relationship));
+    }
+
+    /**
+     * The function return onboardingInfo
+     *
+     * @param userId                String
+     * @param institutionId         String
+     * @return onboardingInfoResponse
+     * <p>
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.onboarding.info}", notes = "${swagger.mscore.onboarding.info}")
+    @GetMapping(value = "/users/{userId}/institution-products")
+    public ResponseEntity<OnboardingInfoResponse> getInstitutionProductsInfo(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+                                                                             @PathVariable("userId") String userId,
+                                                                             @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                             @RequestParam(value = "institutionId", required = false) String institutionId) {
+        CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
+        List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, userId);
+        OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
+        log.debug("onboardingInfo result = {}", onboardingInfoResponse);
+        return ResponseEntity.ok().body(onboardingInfoResponse);
     }
 }
