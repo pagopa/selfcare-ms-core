@@ -166,15 +166,7 @@ class OnboardingServiceImplTest {
 
         Institution institution = dummyInstitutionPa();
 
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setContract("START - getUser with id: {}");
-        onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(Env.ROOT);
-        onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRole("");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProduct.setStatus(RelationshipState.PENDING);
-        onboardedProduct.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = getOnboardedProduct();
 
         UserInstitutionBinding userBinding = new UserInstitutionBinding();
         userBinding.setInstitutionId("42");
@@ -195,6 +187,33 @@ class OnboardingServiceImplTest {
         assertTrue(onboarding1.isEmpty());
     }
 
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfoWithTwoParameters() {
+
+        Institution institution = dummyInstitutionPa();
+
+        OnboardedProduct onboardedProduct = getOnboardedProduct();
+
+        UserInstitutionBinding userBinding = new UserInstitutionBinding();
+        userBinding.setInstitutionId("42");
+        userBinding.setProducts(onboardedProduct);
+
+        UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
+        userInstitutionAggregation.setId("42");
+        userInstitutionAggregation.setBindings(userBinding);
+        userInstitutionAggregation.setInstitutions(List.of(institution));
+        when(userService.findUserInstitutionAggregation(any())).thenReturn(List.of(userInstitutionAggregation));
+        var actualOnboardingInfo = onboardingServiceImpl.getOnboardingInfo("42", null, null, "42");
+        assertEquals(1, actualOnboardingInfo.size());
+        OnboardingInfo getResult = actualOnboardingInfo.get(0);
+        Institution institution1 = getResult.getInstitution();
+        assertSame(institution, institution1);
+        List<Onboarding> onboarding1 = institution1.getOnboarding();
+        assertTrue(onboarding1.isEmpty());
+    }
 
     /**
      * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
@@ -1429,6 +1448,19 @@ class OnboardingServiceImplTest {
         onboardingRequest.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
 
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitutionComplete(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    private static OnboardedProduct getOnboardedProduct() {
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("START - getUser with id: {}");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(Env.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductRole("");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
+        return onboardedProduct;
     }
 
 
