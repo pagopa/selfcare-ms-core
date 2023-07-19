@@ -111,6 +111,11 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
+    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId) {
+        return this.getOnboardingInfo(institutionId, null, null, userId);
+    }
+
+    @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
