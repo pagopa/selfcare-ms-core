@@ -11,8 +11,10 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -43,17 +45,20 @@ public class UserEventService {
     private final UserConnector userConnector;
     private final UserRegistryConnector userRegistryConnector;
 
+    private final NotificationMapper notificationMapper;
+
     public UserEventService(CoreConfig coreConfig,
                             KafkaTemplate<String, String> kafkaTemplateUsers,
                             KafkaPropertiesConfig kafkaPropertiesConfig,
                             ObjectMapper mapper,
-                            UserConnector userConnector, UserRegistryConnector userRegistryConnector) {
+                            UserConnector userConnector, UserRegistryConnector userRegistryConnector, NotificationMapper notificationMapper) {
         this.coreConfig = coreConfig;
         this.kafkaTemplateUsers = kafkaTemplateUsers;
         this.kafkaPropertiesConfig = kafkaPropertiesConfig;
         this.mapper = mapper;
         this.userConnector = userConnector;
         this.userRegistryConnector = userRegistryConnector;
+        this.notificationMapper = notificationMapper;
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {
             @Override
@@ -68,7 +73,7 @@ public class UserEventService {
         token.getUsers().forEach(tokenUser -> {
             List<UserToNotify> usersToNotify = toUserToNotify(tokenUser.getUserId(), token.getInstitutionId(), token.getProductId(), Optional.empty(), Optional.of(token.getId()));
             usersToNotify.forEach(user -> {
-                UserNotificationToSend notification = setNotificationDetailsFromToken(token, user);
+                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromToken(token, user);
                 try {
                     String msg = mapper.writeValueAsString(notification);
                     sendUserNotification(msg, user.getUserId());
@@ -89,21 +94,22 @@ public class UserEventService {
                 .filter(onboardedProduct -> productId.equals(onboardedProduct.getProductId()))
                 .filter(onboardedProduct -> relationshipId.map(s -> s.equals(onboardedProduct.getRelationshipId())).orElse(true))
                 .filter(onboardedProduct -> tokenId.map(s -> s.equals(onboardedProduct.getTokenId())).orElse(true))
-                .map(onboardedProduct -> {
-                    UserToNotify userToNotify = new UserToNotify();
-                    userToNotify.setUserId(userId);
-                    userToNotify.setName(user.getName());
-                    userToNotify.setFamilyName(user.getFamilyName());
-                    userToNotify.setFiscalCode(user.getFiscalCode());
-                    userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
-                    userToNotify.setRole(onboardedProduct.getRole());
-                    userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
-                    userToNotify.setProductRole(onboardedProduct.getProductRole());
-                    return userToNotify;
-                })
+                .map(onboardedProduct -> toUserToNotify(userId, institutionId, user, onboardedProduct))
                 .collect(Collectors.toList());
     }
 
+    private UserToNotify toUserToNotify(String userId, String institutionId, User user, OnboardedProduct onboardedProduct){
+        UserToNotify userToNotify = new UserToNotify();
+        userToNotify.setUserId(userId);
+        userToNotify.setName(user.getName());
+        userToNotify.setFamilyName(user.getFamilyName());
+        userToNotify.setFiscalCode(user.getFiscalCode());
+        userToNotify.setEmail(user.getWorkContacts().containsKey(institutionId)? user.getWorkContacts().get(institutionId).getEmail():user.getEmail());
+        userToNotify.setRole(onboardedProduct.getRole());
+        userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
+        userToNotify.setProductRole(onboardedProduct.getProductRole());
+        return userToNotify;
+    }
     public void sendOperatorUserNotification(RelationshipInfo relationshipInfo) {
         if (relationshipInfo != null) {
             List<UserToNotify> usersToNotify = toUserToNotify(relationshipInfo.getUserId(),
@@ -112,7 +118,8 @@ public class UserEventService {
 
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
             usersToNotify.forEach(user -> {
-                UserNotificationToSend notification = setNotificationDetailsFromRelationship(relationshipInfo, user);
+                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromRelationship(relationshipInfo, user);
+                notification.setId(UUID.randomUUID().toString());
                 try {
                     String msg = mapper.writeValueAsString(notification);
                     sendUserNotification(msg, user.getUserId());
@@ -122,31 +129,6 @@ public class UserEventService {
             });
         }
     }
-
-    private UserNotificationToSend setNotificationDetailsFromRelationship(RelationshipInfo relationshipInfo, UserToNotify user) {
-        UserNotificationToSend notification = new UserNotificationToSend();
-        notification.setId(UUID.randomUUID().toString());
-        notification.setInstitutionId(relationshipInfo.getInstitution().getId());
-        notification.setProductId(relationshipInfo.getOnboardedProduct().getProductId());
-        notification.setCreatedAt(relationshipInfo.getOnboardedProduct().getCreatedAt());
-        notification.setUpdatedAt(relationshipInfo.getOnboardedProduct().getUpdatedAt());
-        notification.setUser(user);
-        return notification;
-    }
-
-    private UserNotificationToSend setNotificationDetailsFromToken(Token token, UserToNotify user) {
-        UserNotificationToSend notification = new UserNotificationToSend();
-        notification.setId(UUID.randomUUID().toString());
-        notification.setInstitutionId(token.getInstitutionId());
-        notification.setProductId(token.getProductId());
-        notification.setCreatedAt(token.getCreatedAt());
-        notification.setUpdatedAt(token.getUpdatedAt());
-        notification.setOnboardingTokenId(token.getId());
-        notification.setUser(user);
-        return notification;
-    }
-
-
     private void sendUserNotification(String message, String userId) {
         ListenableFuture<SendResult<String, String>> future =
                 kafkaTemplateUsers.send(kafkaPropertiesConfig.getScUsersTopic(), message);

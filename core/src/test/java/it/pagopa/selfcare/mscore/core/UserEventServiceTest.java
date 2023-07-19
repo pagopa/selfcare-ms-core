@@ -6,6 +6,8 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
+import it.pagopa.selfcare.mscore.core.util.NotificationMapperImpl;
 import it.pagopa.selfcare.mscore.core.util.model.DummyUser;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -60,7 +62,8 @@ class UserEventServiceTest {
     @Mock
     private ListenableFuture<SendResult<String, String>> mockFuture;
 
-
+    @Spy
+    private NotificationMapper notificationMapper = new NotificationMapperImpl();
 
     @Test
     void sendLegalTokenUserNotification_ok() {
@@ -129,7 +132,7 @@ class UserEventServiceTest {
         OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         UserBinding userBinding = new UserBinding(institutionId, List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
-        final User userMock = new DummyUser(institutionId);
+        final User userMock = new DummyUser("institutionId");
         when(userRegistryConnector.getUserByInternalId(any(), any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
