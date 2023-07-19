@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
@@ -57,7 +58,7 @@ class UserEventServiceTest {
     @Mock
     private SendResult<String, String> mockSendResult;
     @Mock
-    private ListenableFuture mockFuture;
+    private ListenableFuture<SendResult<String, String>> mockFuture;
 
 
 
@@ -101,7 +102,8 @@ class UserEventServiceTest {
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
         verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
-        verifyNoMoreInteractions(userConnector, userRegistryConnector);
+        verify(kafkaTemplateUsers, times(1)).send(any(), any());
+        verifyNoMoreInteractions(userConnector, userRegistryConnector, kafkaTemplateUsers);
 
     }
 
@@ -147,7 +149,8 @@ class UserEventServiceTest {
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
         verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
-        verifyNoMoreInteractions(userConnector, userRegistryConnector);
+        verify(kafkaTemplateUsers, times(1)).send(any(), any());
+        verifyNoMoreInteractions(userConnector, userRegistryConnector, kafkaTemplateUsers);
     }
 
     @Test
@@ -162,17 +165,64 @@ class UserEventServiceTest {
         relationshipInfo.setUserId(userId);
         Institution institution = mockInstance(new Institution());
         institution.setId(institutionId);
+        relationshipInfo.setInstitution(institution);
         OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
         onboardedProduct.setRelationshipId(relationshipId);
         onboardedProduct.setProductId(productId);
         relationshipInfo.setOnboardedProduct(onboardedProduct);
         OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         UserBinding userBinding = new UserBinding(institutionId, List.of(onboardedProduct));
+        userBinding.setInstitutionId(institutionId);
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser(institutionId);
         when(userRegistryConnector.getUserByInternalId(any(), any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
+        when(kafkaTemplateUsers.send(any(), any()))
+                .thenReturn(mockFuture);
+        doAnswer(invocationOnMock -> {
+            ListenableFutureCallback callback = invocationOnMock.getArgument(0);
+            callback.onSuccess(mockSendResult);
+            return null;
+        }).when(mockFuture).addCallback(any(ListenableFutureCallback.class));
+        //when
+        Executable executable = () -> userEventService.sendOperatorUserNotification(relationshipInfo);
+        //then
+        assertDoesNotThrow(executable);
+        verify(userConnector, times(1)).findById(userId);
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(kafkaTemplateUsers, times(1)).send(any(), any());
+        verifyNoMoreInteractions(userConnector, userRegistryConnector, kafkaTemplateUsers);
+
+    }
+
+    @Test
+    void sendOperatorJsonError() throws JsonProcessingException {
+        //given
+        final String relationshipId = UUID.randomUUID().toString();
+        final String userId = UUID.randomUUID().toString();
+        final String institutionId = UUID.randomUUID().toString();
+        final String productId = "prod-test";
+
+        RelationshipInfo relationshipInfo = mockInstance(new RelationshipInfo());
+        relationshipInfo.setUserId(userId);
+        Institution institution = mockInstance(new Institution());
+        institution.setId(institutionId);
+        relationshipInfo.setInstitution(institution);
+        OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setRelationshipId(relationshipId);
+        onboardedProduct.setProductId(productId);
+        relationshipInfo.setOnboardedProduct(onboardedProduct);
+        OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        UserBinding userBinding = new UserBinding(institutionId, List.of(onboardedProduct));
+        userBinding.setInstitutionId(institutionId);
+        onboardedUser.setBindings(List.of(userBinding));
+        final User userMock = new DummyUser(institutionId);
+        when(userRegistryConnector.getUserByInternalId(any(), any()))
+                .thenReturn(userMock);
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+
+        when(mapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
         //when
         Executable executable = () -> userEventService.sendOperatorUserNotification(relationshipInfo);
         //then
