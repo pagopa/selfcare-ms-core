@@ -37,7 +37,7 @@ public class DelegationController {
      *
      * @param delegation DelegationRequest
      * @return InstitutionResponse
-     * * Code: 201, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 201, Message: successful operation, DataType: DelegationResponse
      * * Code: 400, Message: Bad Request, DataType: Problem
      */
     @ResponseStatus(HttpStatus.CREATED)

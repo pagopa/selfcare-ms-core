@@ -17,6 +17,7 @@ public class DelegationEntity {
     private String id;
     private String from;
     private String institutionFromName;
+    private String institutionFromRootName;
     private String to;
     private String productId;
     private DelegationType type;
