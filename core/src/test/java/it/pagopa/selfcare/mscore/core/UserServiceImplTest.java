@@ -1,18 +1,23 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +28,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -203,6 +209,88 @@ class UserServiceImplTest {
         assertTrue(actualRetrieveAdminUsersResult.isEmpty());
         verify(userConnector).findWithFilter(any(), any(), any(),
                 any(), any(), any());
+    }
+
+    @Test
+    void retrieveBindings_shouldReturnEmpty() {
+        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
+        when(userConnector.findWithFilter(any(), any(), any(),
+                any(), any(), any())).thenReturn(onboardedUserList);
+
+        List<UserBinding> actualRetrieveAdminUsersResult = userServiceImpl.retrieveBindings("42", "42", null, new ArrayList<>());
+        assertTrue(actualRetrieveAdminUsersResult.isEmpty());
+    }
+
+    @Test
+    void retrieveBindings_shouldReturnData() {
+        String institutionId = "institutionId";
+        OnboardedUser onboardedUser = dummyOnboardedUser("institutionId");
+        when(userConnector.findWithFilter(any(), any(), any(),
+                any(), any(), any())).thenReturn(List.of(onboardedUser));
+
+        List<UserBinding> actualRetrieveAdminUsersResult = userServiceImpl.retrieveBindings(onboardedUser.getId(), institutionId, null, new ArrayList<>());
+        assertFalse(actualRetrieveAdminUsersResult.isEmpty());
+        assertSame(onboardedUser.getBindings().get(0), actualRetrieveAdminUsersResult.get(0));
+    }
+
+    @Test
+    void retrieveBindings_shouldReturnDataFilteringOnStatus() {
+        //Given
+        RelationshipState filterStatus = RelationshipState.DELETED;
+        UserBinding userBindingDeleted = dummyUserBinding("institutionA");
+        OnboardedProduct productDeleted = dummyOnboardedProduct(filterStatus);
+        userBindingDeleted.setProducts(List.of(productDeleted));
+
+        OnboardedUser expectedUser = new OnboardedUser();
+        expectedUser.setId("id");
+        expectedUser.setBindings(List.of(dummyUserBinding("institutionA"), userBindingDeleted));
+
+        when(userConnector.findWithFilter(anyString(), any(), any(),
+                any(), any(), any())).thenReturn(List.of(expectedUser));
+
+        //When
+        List<UserBinding> actualRetrieveAdminUsersResult = userServiceImpl.retrieveBindings(expectedUser.getId(),
+                null, new String[]{filterStatus.name()}, new ArrayList<>());
+
+        //Then
+        assertFalse(actualRetrieveAdminUsersResult.isEmpty());
+        assertEquals(1, actualRetrieveAdminUsersResult.size());
+        UserBinding actualUserBinding = actualRetrieveAdminUsersResult.get(0);
+        assertEquals(userBindingDeleted.getInstitutionId(), actualUserBinding.getInstitutionId());
+
+
+
+        ArgumentCaptor<List<RelationshipState>> argumentCaptorStates = ArgumentCaptor.forClass(List.class);
+        verify(userConnector).findWithFilter(anyString(), any(), any(), argumentCaptorStates.capture(), any(), any());
+        assertThat( argumentCaptorStates.getValue().get(0)).isEqualTo(filterStatus);
+    }
+
+    private OnboardedProduct dummyOnboardedProduct(RelationshipState state) {
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("productId");
+        onboardedProduct.setProductRole("admin");
+        onboardedProduct.setStatus(state);
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setEnv(Env.PROD);
+        onboardedProduct.setContract("contract");
+        onboardedProduct.setRelationshipId("setRelationshipId");
+        onboardedProduct.setTokenId("setTokenId");
+        return onboardedProduct;
+    }
+
+    private UserBinding dummyUserBinding(String institutionId) {
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId(institutionId);
+        userBinding.setProducts(List.of(dummyOnboardedProduct(RelationshipState.ACTIVE)));
+        return userBinding;
+    }
+
+    private OnboardedUser dummyOnboardedUser(String institutionId) {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("id");
+        UserBinding userBinding = dummyUserBinding(institutionId);
+        onboardedUser.setBindings(List.of(userBinding));
+        return onboardedUser;
     }
 
     /**
