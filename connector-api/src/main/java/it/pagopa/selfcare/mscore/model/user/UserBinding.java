@@ -17,4 +17,9 @@ public class UserBinding {
     private String institutionName;
     private String institutionRootName;
     private List<OnboardedProduct> products;
+
+    public UserBinding(String institutionId, List<OnboardedProduct> products) {
+        this.institutionId = institutionId;
+        this.products = products;
+    }
 }
