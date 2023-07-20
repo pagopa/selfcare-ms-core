@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -34,6 +35,9 @@ class UserRelationshipServiceImplTest {
 
     @InjectMocks
     private UserRelationshipServiceImpl userRelationshipServiceImpl;
+
+    @Mock
+    private UserNotificationService userNotificationService;
 
     /**
      * Method under test: {@link UserRelationshipServiceImpl#findByRelationshipId(String)}
@@ -75,7 +79,17 @@ class UserRelationshipServiceImplTest {
     void testActivateRelationship() {
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("id");
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
         userRelationshipServiceImpl.activateRelationship("42");
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
@@ -99,7 +113,17 @@ class UserRelationshipServiceImplTest {
     void testSuspendRelationship() {
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        onboardedUser.setId("id");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
         userRelationshipServiceImpl.suspendRelationship("42");
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
@@ -123,7 +147,17 @@ class UserRelationshipServiceImplTest {
     void testDeleteRelationship() {
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("id");
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
         userRelationshipServiceImpl.deleteRelationship("42");
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());

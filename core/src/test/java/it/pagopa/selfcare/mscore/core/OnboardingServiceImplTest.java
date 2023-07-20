@@ -58,7 +58,7 @@ class OnboardingServiceImplTest {
     @Mock
     private ContractService contractService;
     @Mock
-    private EmailService emailService;
+    private NotificationService emailService;
 
     @Mock
     private UserRelationshipService userRelationshipService;
@@ -86,6 +86,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private ProductConnector productConnector;
+
+    @Mock
+    private UserNotificationService userNotificationService;
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -757,6 +760,7 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
@@ -853,6 +857,7 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
@@ -898,6 +903,7 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
@@ -1038,6 +1044,7 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);

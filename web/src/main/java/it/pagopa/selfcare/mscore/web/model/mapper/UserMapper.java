@@ -27,6 +27,7 @@ public class UserMapper {
         userToOnboard.setEmail(p.getEmail());
         userToOnboard.setRole(p.getRole());
         userToOnboard.setProductRole(p.getProductRole());
+        userToOnboard.setRoleLabel(p.getRoleLabel());
         userToOnboard.setEnv(p.getEnv());
         return userToOnboard;
     }

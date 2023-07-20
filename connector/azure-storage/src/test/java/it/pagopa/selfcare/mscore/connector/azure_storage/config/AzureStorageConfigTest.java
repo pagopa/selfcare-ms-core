@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.azure_storage.config;
 
+import it.pagopa.selfcare.mscore.config.AzureStorageConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,18 +19,11 @@ class AzureStorageConfigTest {
     }
 
     /**
-     * Method under test: {@link AzureStorageConfig#getContractsTemplateContainer()}
-     */
-    @Test
-    void testGetContractsTemplateContainer2() {
-
-        AzureStorageConfig azureStorageConfig = new AzureStorageConfig();
-        azureStorageConfig.setContractsTemplateContainer("42");
-        assertEquals("42", azureStorageConfig.getContractsTemplateContainer());
+     * Method under test: {@link AzureStorageConfig#getContainer()} ());
     }
 
     /**
-     * Method under test: {@link AzureStorageConfig#getContractsTemplateContainer()}
+     * Method under test: {@link AzureStorageConfig#getContainer()} ()}
      */
     @Test
     void testGetContractsTemplateContainer3() {
@@ -44,7 +38,7 @@ class AzureStorageConfigTest {
 
         AzureStorageConfig azureStorageConfig = new AzureStorageConfig();
         azureStorageConfig.setConnectionString("42");
-        azureStorageConfig.setContractsTemplateContainer("42");
+        azureStorageConfig.setContainer("42");
         azureStorageConfig.setContractPath("42");
 
         assertEquals("AzureStorageConfig(connectionString=42, accountName=null, endpointSuffix=null, accountKey=null, contractsTemplateContainer=42, contractPath=42)", azureStorageConfig.toString());

@@ -8,10 +8,7 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
-import it.pagopa.selfcare.mscore.core.util.TokenUtils;
-import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
+import it.pagopa.selfcare.mscore.core.util.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -22,6 +19,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -45,7 +43,8 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final UserService userService;
     private final UserRelationshipService userRelationshipService;
     private final ContractService contractService;
-    private final EmailService emailService;
+    private final NotificationService notificationService;
+    private final UserNotificationService userNotificationService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
 
     private final OnboardingInstitutionStrategyFactory institutionStrategyFactory;
@@ -59,8 +58,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
-                                 EmailService emailService,
-                                 PagoPaSignatureConfig pagoPaSignatureConfig,
+                                 NotificationService notificationService, UserNotificationService userNotificationService, PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
                                  InstitutionConnector institutionConnector, ProductConnector productConnector) {
         this.onboardingDao = onboardingDao;
@@ -68,7 +66,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
         this.contractService = contractService;
-        this.emailService = emailService;
+        this.notificationService = notificationService;
+        this.userNotificationService = userNotificationService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.institutionStrategyFactory = institutionStrategyFactory;
         this.institutionConnector = institutionConnector;
@@ -163,7 +162,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         token.setContentType(contract.getContentType());
         OnboardingUpdateRollback rollback = onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
         try {
-            emailService.sendCompletedEmail(managersData, institution, product, logoFile);
+            notificationService.sendCompletedEmail(managersData, institution, product, logoFile);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate(rollback.getUserList(), rollback.getUpdatedInstitution(), rollback.getToken());
             contractService.deleteContract(fileName, token.getId());
@@ -196,7 +195,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), currentUser, request, token.getId());
+            notificationService.sendMailWithContract(pdf, institution.getDigitalAddress(), currentUser, request, token.getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -217,7 +216,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         File logo = contractService.getLogoFile();
         Product product = onboardingDao.getProductById(token.getProductId());
         try {
-            emailService.sendRejectMail(logo, institution, product);
+            notificationService.sendRejectMail(logo, institution, product);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -227,7 +226,14 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
-        return onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        Map<String, List<UserToOnboard>> userMap = onboardingOperatorRequest.getUsers().stream()
+                .collect(Collectors.groupingBy(UserToOnboard::getId));
+        List<String> roleLabels = onboardingOperatorRequest.getUsers().stream()
+                .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
+        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        userMap.forEach((key, value) -> userNotificationService.sendAddedProductRoleNotification(key, institution,
+                onboardingOperatorRequest.getProductTitle(), roleLabels));
+        return relationshipInfoList;
     }
 
     @Override
@@ -256,7 +262,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, request, rollback.getToken().getId());
+            notificationService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, request, rollback.getToken().getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }
