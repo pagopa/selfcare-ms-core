@@ -4,14 +4,24 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.constant.GenericError;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
+import it.pagopa.selfcare.mscore.core.UserService;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
+import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,6 +29,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
@@ -29,11 +42,16 @@ public class UserController {
 
     private final UserRelationshipService userRelationshipService;
     private final OnboardingService onboardingService;
+    private final UserService userService;
+
+    private final UserMapper userMapper;
 
     public UserController(UserRelationshipService userRelationshipService,
-                          OnboardingService onboardingService) {
+                          OnboardingService onboardingService, UserService userService, UserMapper userMapper) {
         this.userRelationshipService = userRelationshipService;
         this.onboardingService = onboardingService;
+        this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -139,5 +157,38 @@ public class UserController {
         OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
         log.debug("onboardingInfo result = {}", onboardingInfoResponse);
         return ResponseEntity.ok().body(onboardingInfoResponse);
+    }
+
+    /**
+     * The function retrieves products info and role which the user is enabled
+     *
+     * @param userId                String
+     * @param institutionId         String
+     * @return onboardingInfoResponse
+     * <p>
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.users.products}", notes = "${swagger.mscore.users.products}")
+    @GetMapping(value = "/users/{userId}/products")
+    public ResponseEntity<UserProductsResponse> getUserProductsInfo(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+                                                                             @PathVariable("userId") String userId,
+                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                             @RequestParam(value = "institutionId", required = false) String institutionId,
+                                                                    @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
+                                                                        @RequestParam(value = "states", required = false) String[] states) {
+
+        List<UserBinding> userBindings = userService.retrieveBindings(institutionId, userId, states, null);
+        if(Objects.isNull(userBindings) || userBindings.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok().body(UserProductsResponse.builder()
+                        .id(userId)
+                        .bindings(userBindings.stream()
+                                .map(userMapper::toInstitutionProducts)
+                                .collect(Collectors.toList()))
+                .build());
     }
 }
