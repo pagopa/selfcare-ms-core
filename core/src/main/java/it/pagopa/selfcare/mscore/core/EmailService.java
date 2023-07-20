@@ -92,13 +92,11 @@ public class EmailService {
         List<String> destinationMail = new ArrayList<>(getRejectDestinationMails(institution));
         log.info(DESTINATION_MAIL_LOG, destinationMail);
 
-        emailConnector.sendMail(mailParametersMapper.getOnboardingRejectNotificationPath(), destinationMail, logo, institution.getDescription(), mailParameters, "_pagopa-logo.png");
+        emailConnector.sendMail(mailParametersMapper.getOnboardingRejectNotificationPath(), destinationMail, logo, product.getTitle(), mailParameters, "_pagopa-logo.png");
     }
 
     private List<String> getRejectDestinationMails(Institution institution) {
-        if (coreConfig.getDestinationMails() != null) {
-            return coreConfig.getDestinationMails();
-        } else if (institution.getDigitalAddress() != null) {
+        if (coreConfig.isSendEmailToInstitution()) {
             return List.of(institution.getDigitalAddress());
         } else {
             return List.of(coreConfig.getInstitutionAlternativeEmail());

@@ -44,6 +44,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final InstitutionService institutionService;
     private final UserService userService;
     private final UserRelationshipService userRelationshipService;
+    private final UserEventService userEventService;
     private final ContractService contractService;
     private final EmailService emailService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
@@ -58,7 +59,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  InstitutionService institutionService,
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
-                                 ContractService contractService,
+                                 UserEventService userEventService, ContractService contractService,
                                  EmailService emailService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
@@ -67,6 +68,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.institutionService = institutionService;
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
+        this.userEventService = userEventService;
         this.contractService = contractService;
         this.emailService = emailService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
@@ -106,6 +108,11 @@ public class OnboardingServiceImpl implements OnboardingService {
         } catch (ResourceNotFoundException e) {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId) {
+        return this.getOnboardingInfo(institutionId, null, null, userId);
     }
 
     @Override
@@ -169,6 +176,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             contractService.deleteContract(fileName, token.getId());
         }
         contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token, QueueEvent.ADD);
+        userEventService.sendLegalTokenUserNotification(token);
         log.trace("completeOboarding end");
     }
 
@@ -227,7 +235,9 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
-        return onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        List<RelationshipInfo> relationshipInfos = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        relationshipInfos.forEach(userEventService::sendOperatorUserNotification);
+        return relationshipInfos;
     }
 
     @Override
