@@ -9,6 +9,7 @@ public enum GenericError {
     INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s"),
     CREATE_INSTITUTION_ERROR("0037", "Error while creating requested institution"),
     ONBOARDING_OPERATION_ERROR("0017", "Error while performing onboarding operation"),
+    CREATE_DELEGATION_ERROR("0027", "Error while creating requested delegation"),
     ONBOARDING_VERIFICATION_ERROR("0015", "Error while verifying onboarding"),
     GETTING_ONBOARDING_INFO_ERROR("0016", "Error while getting onboarding info"),
     GET_PRODUCTS_ERROR("0031", "Error while getting products"),
