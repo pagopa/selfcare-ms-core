@@ -27,6 +27,7 @@ import it.pagopa.selfcare.mscore.web.model.user.Product;
 import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -48,8 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
@@ -301,7 +301,7 @@ class UserControllerTest {
     }
 
     /**
-     * Method under test: {@link UserController#getUserProductsInfo(String, String)}
+     * Method under test: {@link UserController#getUserProductsInfo(String, String, String[])}
      */
     @Test
     void getUserProductsInfo_shouldNotFound() throws Exception {
@@ -318,22 +318,22 @@ class UserControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+
     /**
-     * Method under test: {@link UserController#getUserProductsInfo(String, String)}
+     * Method under test: {@link UserController#getUserProductsInfo(String, String, String[])}
      */
     @Test
     void getUserProductsInfo_shouldGetData() throws Exception {
 
-        final String userId = "userId";
         final String institutionId = "institutionId";
 
-        OnboardedUser expected  = dummyOnboardedUser();
+        OnboardedUser expected  = dummyOnboardedUser(institutionId);
 
-        when(userService.retrieveUsers(anyString(), anyString(), any(), any(), any(), any()))
-                .thenReturn(List.of(expected));
+        when(userService.retrieveBindings(anyString(), anyString(), any(), any()))
+                .thenReturn(expected.getBindings());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/users/{id}/products?institutionId={test}", userId, institutionId)
+                .get("/users/{id}/products?institutionId={test}", expected.getId(), institutionId)
                 .contentType(MediaType.APPLICATION_JSON);
 
         MvcResult result = MockMvcBuilders.standaloneSetup(userController)
@@ -368,11 +368,64 @@ class UserControllerTest {
 
     }
 
-    private OnboardedUser dummyOnboardedUser() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setId("id");
+
+    /**
+     * Method under test: {@link UserController#getUserProductsInfo(String, String, String[])}
+     */
+    @Test
+    void getUserProductsInfo_shouldGetDataWithStates() throws Exception {
+        //Given
+
+        final String institutionId = "institutionId";
+        final String state = "ACTIVE";
+
+        OnboardedUser expected  = dummyOnboardedUser(institutionId);
+
+        when(userService.retrieveBindings(anyString(), anyString(), any(), any()))
+                .thenReturn(expected.getBindings());
+
+        //When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/users/{id}/products?institutionId={test}&states={state}", expected.getId(), institutionId, state)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        //Then
+        UserProductsResponse actual = new ObjectMapper().readValue(
+                result.getResponse().getContentAsString(), UserProductsResponse.class);
+
+        assertNotNull(actual);
+        assertEquals(expected.getId(), actual.getId());
+        assertNotNull(actual.getBindings());
+        assertEquals(1, actual.getBindings().size());
+
+        InstitutionProducts actualInstitutionProducts = actual.getBindings().get(0);
+        UserBinding expectedUserBinding = expected.getBindings().get(0);
+
+        assertThat( actualInstitutionProducts.getInstitutionId()).isEqualTo(expectedUserBinding.getInstitutionId());
+
+        Product actualProduct = actualInstitutionProducts.getProducts().get(0);
+        OnboardedProduct expectedProduct = expectedUserBinding.getProducts().get(0);
+
+        assertThat( actualProduct.getProductRole()).isEqualTo(expectedProduct.getProductRole());
+        assertThat( actualProduct.getProductId()).isEqualTo(expectedProduct.getProductId());
+        assertThat( actualProduct.getContract()).isEqualTo(expectedProduct.getContract());
+        assertThat( actualProduct.getRole()).isEqualTo(expectedProduct.getRole());
+        assertThat( actualProduct.getEnv()).isEqualTo(expectedProduct.getEnv());
+        assertThat( actualProduct.getTokenId()).isEqualTo(expectedProduct.getTokenId());
+        assertThat( actualProduct.getStatus()).isEqualTo(expectedProduct.getStatus());
+
+    }
+
+    private UserBinding dummyUserBinding(String institutionId) {
+
         UserBinding userBinding = new UserBinding();
-        userBinding.setInstitutionId("institutionId");
+        userBinding.setInstitutionId(institutionId);
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setProductId("productId");
         onboardedProduct.setProductRole("admin");
@@ -384,6 +437,13 @@ class UserControllerTest {
         onboardedProduct.setTokenId("setTokenId");
 
         userBinding.setProducts(List.of(onboardedProduct));
+        return userBinding;
+    }
+
+    private OnboardedUser dummyOnboardedUser(String institutionId) {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("id");
+        UserBinding userBinding = dummyUserBinding(institutionId);
         onboardedUser.setBindings(List.of(userBinding));
         return onboardedUser;
     }

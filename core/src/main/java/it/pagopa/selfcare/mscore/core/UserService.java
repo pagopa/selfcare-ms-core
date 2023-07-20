@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -17,6 +18,8 @@ public interface UserService {
     OnboardedUser findByUserId(String id);
 
     List<OnboardedUser> findAllByIds(List<String> users);
+
+    List<UserBinding> retrieveBindings(String institutionId, String userId, String[] states, List<String> products);
 
     List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 

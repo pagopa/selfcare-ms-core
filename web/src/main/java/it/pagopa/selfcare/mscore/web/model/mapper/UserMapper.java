@@ -17,4 +17,6 @@ public interface UserMapper {
     UserToOnboard toUserToOnboard(Person p);
 
     UserProductsResponse toEntity(OnboardedUser model);
+
+    InstitutionProducts toInstitutionProducts(UserBinding model);
 }
