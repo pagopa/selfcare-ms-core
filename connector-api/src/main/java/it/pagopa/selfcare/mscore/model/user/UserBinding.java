@@ -14,5 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UserBinding {
     private String institutionId;
+    private String institutionName;
+    private String institutionRootName;
     private List<OnboardedProduct> products;
 }

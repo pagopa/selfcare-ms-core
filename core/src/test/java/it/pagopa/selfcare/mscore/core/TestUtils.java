@@ -4,11 +4,9 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Contract;
+import it.pagopa.selfcare.mscore.model.onboarding.ContractImported;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 
@@ -16,6 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestUtils {
+
+    public static ContractImported dummyContractImported() {
+
+        ContractImported contractImported = new ContractImported();
+        contractImported.setContractType("Contract Type");
+        contractImported.setFileName("foo.txt");
+        contractImported.setFilePath("/directory/foo.txt");
+        return contractImported;
+    }
 
     public static Token dummyToken() {
         Token token = new Token();
@@ -95,5 +102,13 @@ public class TestUtils {
         contract.setPath("Path");
         contract.setVersion("1.0.2");
         return contract;
+    }
+
+    public static Institution dummyInstitution() {
+        Institution expectedInstitution = new Institution();
+        expectedInstitution.setId("institutionId");
+        expectedInstitution.setDescription("description");
+        expectedInstitution.setParentDescription("parentDescription");
+        return expectedInstitution;
     }
 }

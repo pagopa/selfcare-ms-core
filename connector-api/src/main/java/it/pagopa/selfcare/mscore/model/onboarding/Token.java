@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -32,4 +33,13 @@ public class Token {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Token)) return false;
+        Token token = (Token) o;
+        return Objects.equals(getId(), token.getId()) && getType() == token.getType() && getStatus() == token.getStatus() && Objects.equals(getInstitutionId(), token.getInstitutionId()) && Objects.equals(getProductId(), token.getProductId()) && Objects.equals(getChecksum(), token.getChecksum()) && Objects.equals(getContractVersion(), token.getContractVersion()) && Objects.equals(getContractTemplate(), token.getContractTemplate()) && Objects.equals(getContractSigned(), token.getContractSigned()) && Objects.equals(getContentType(), token.getContentType()) && Objects.equals(getInstitutionUpdate(), token.getInstitutionUpdate());
+    }
+
 }

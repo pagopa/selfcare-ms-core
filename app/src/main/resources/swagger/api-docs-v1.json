@@ -4159,8 +4159,8 @@
     "/users/{userId}/products" : {
       "get" : {
         "tags" : [ "Persons" ],
-        "summary" : "Retrieves products info and role by user",
-        "description" : "Retrieves products info and role by user",
+        "summary" : "Retrieves products info and role which the user is enabled",
+        "description" : "Retrieves products info and role which the user is enabled",
         "operationId" : "getUserProductsInfoUsingGET",
         "parameters" : [ {
           "name" : "userId",
@@ -6475,6 +6475,12 @@
         "type" : "object",
         "properties" : {
           "institutionId" : {
+            "type" : "string"
+          },
+          "institutionName" : {
+            "type" : "string"
+          },
+          "institutionRootName" : {
             "type" : "string"
           },
           "products" : {
