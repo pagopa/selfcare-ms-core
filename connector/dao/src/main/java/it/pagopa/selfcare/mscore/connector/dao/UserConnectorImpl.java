@@ -69,7 +69,7 @@ public class UserConnectorImpl implements UserConnector {
         return entityOpt.map(userMapper::toOnboardedUser)
                 .orElseThrow(() -> {
                     log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
-                    throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
+                    return new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
                 });
     }
 
