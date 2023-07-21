@@ -58,6 +58,94 @@ class InstitutionConnectorImplTest {
     @Captor
     ArgumentCaptor<Pageable> pageableArgumentCaptor;
 
+    @Test
+    void testFindAndUpdateInstitutionDataWithNewOnboarding(){
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
+        dataProtectionOfficer.setAddress("42 Main St");
+        dataProtectionOfficer.setEmail("jane.doe@example.org");
+        dataProtectionOfficer.setPec("Pec");
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setContract("contract");
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        onboarding.setCreatedAt(OffsetDateTime.now());
+        onboarding.setProductId("productId");
+        onboarding.setUpdatedAt(OffsetDateTime.now());
+        onboarding.setPricingPlan("pricingPal");
+
+        BillingEntity billingEntity = new BillingEntity();
+        billingEntity.setPublicServices(true);
+        billingEntity.setRecipientCode("Recipient Code");
+        billingEntity.setVatNumber("42");
+
+        DataProtectionOfficerEntity dataProtectionOfficerEntity = new DataProtectionOfficerEntity();
+        dataProtectionOfficerEntity.setAddress("42 Main St");
+        dataProtectionOfficerEntity.setEmail("jane.doe@example.org");
+        dataProtectionOfficerEntity.setPec("Pec");
+
+        PaymentServiceProviderEntity paymentServiceProviderEntity = new PaymentServiceProviderEntity();
+        paymentServiceProviderEntity.setAbiCode("Abi Code");
+        paymentServiceProviderEntity.setBusinessRegisterNumber("42");
+        paymentServiceProviderEntity.setLegalRegisterName("Legal Register Name");
+        paymentServiceProviderEntity.setLegalRegisterNumber("42");
+        paymentServiceProviderEntity.setVatNumberGroup(true);
+
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+        institutionEntity.setAddress("42 Main St");
+        institutionEntity.setAttributes(new ArrayList<>());
+        institutionEntity.setBilling(billingEntity);
+        institutionEntity.setBusinessRegisterPlace("Business Register Place");
+        institutionEntity.setCreatedAt(null);
+        institutionEntity.setDataProtectionOfficer(dataProtectionOfficerEntity);
+        institutionEntity.setDescription("The characteristics of someone or something");
+        institutionEntity.setDigitalAddress("42 Main St");
+        institutionEntity.setExternalId("42");
+        institutionEntity.setGeographicTaxonomies(new ArrayList<>());
+        institutionEntity.setId("42");
+        institutionEntity.setImported(true);
+        institutionEntity.setInstitutionType(InstitutionType.PA);
+        institutionEntity.setOnboarding(new ArrayList<>());
+        institutionEntity.setOrigin(Origin.MOCK);
+        institutionEntity.setOriginId("42");
+        institutionEntity.setPaymentServiceProvider(paymentServiceProviderEntity);
+        institutionEntity.setRea("Rea");
+        institutionEntity.setShareCapital("Share Capital");
+        institutionEntity.setSupportEmail("jane.doe@example.org");
+        institutionEntity.setSupportPhone("6625550144");
+        institutionEntity.setTaxCode("Tax Code");
+        institutionEntity.setUpdatedAt(null);
+        institutionEntity.setZipCode("21654");
+
+        when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
+
+        assertNotNull(institutionConnectorImpl.findAndUpdateInstitutionDataWithNewOnboarding("institutionId",institutionUpdate,onboarding));
+    }
+
     /**
      * Method under test: {@link InstitutionConnectorImpl#findAll()}
      */

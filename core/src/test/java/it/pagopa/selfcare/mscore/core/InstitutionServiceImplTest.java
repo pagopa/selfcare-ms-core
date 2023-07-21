@@ -9,6 +9,9 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapperImpl;
+import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
+import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.*;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -63,6 +66,12 @@ class InstitutionServiceImplTest {
 
     @Mock
     private UserConnector userConnector;
+
+    @Mock
+    private CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
+
+    @Mock
+    private CreateInstitutionStrategy createInstitutionStrategy;
 
     @Spy
     private InstitutionMapper institutionMapper = new InstitutionMapperImpl();
@@ -265,6 +274,40 @@ class InstitutionServiceImplTest {
                 () -> institutionServiceImpl.createPgInstitution("42", "42", true, mock(SelfCareUser.class)));
         verify(institutionConnector).findByExternalId(any());
     }
+
+    @Test
+    void testGetOnboardingInstitutionByProductId() {
+        List<Onboarding> onboardings = new ArrayList<>();
+        when(institutionConnector.findOnboardingByIdAndProductId(any(), any())).thenReturn(onboardings);
+        List<Onboarding> onboardingList = institutionServiceImpl.getOnboardingInstitutionByProductId("id", "id");
+        assertTrue(onboardingList.isEmpty());
+    }
+
+    @Test
+    void testGetInstitutions() {
+        List<Institution> institutionList = new ArrayList<>();
+        when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any())).thenReturn(institutionList);
+        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id");
+        assertTrue(institutions.isEmpty());
+    }
+
+    @Test
+    void testCreateInstitutionFromIpa() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategy((InstitutionPaSubunitType) any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.EC,"id");
+        assertNotNull(institution);
+    }
+
+    @Test
+    void testCreateInstitution() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategy((Institution) any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitution(new Institution());
+        assertNotNull(institution);
+    }
+
+
 
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}

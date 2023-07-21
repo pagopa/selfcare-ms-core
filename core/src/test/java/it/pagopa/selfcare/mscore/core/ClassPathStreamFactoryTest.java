@@ -26,6 +26,5 @@ class ClassPathStreamFactoryTest {
         assertThrows(InvalidRequestException.class, () -> classPathStreamFactory.getUrl("a b c"));
     }
 
-
 }
 

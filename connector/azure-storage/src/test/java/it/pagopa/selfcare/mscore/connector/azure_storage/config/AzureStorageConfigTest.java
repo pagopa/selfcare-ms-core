@@ -41,7 +41,7 @@ class AzureStorageConfigTest {
         azureStorageConfig.setContainer("42");
         azureStorageConfig.setContractPath("42");
 
-        assertEquals("AzureStorageConfig(connectionString=42, accountName=null, endpointSuffix=null, accountKey=null, contractsTemplateContainer=42, contractPath=42)", azureStorageConfig.toString());
+        assertEquals("AzureStorageConfig(connectionString=42, accountName=null, endpointSuffix=null, accountKey=null, container=42, contractPath=42, checkoutTemplateContainer=null)", azureStorageConfig.toString());
     }
 }
 
