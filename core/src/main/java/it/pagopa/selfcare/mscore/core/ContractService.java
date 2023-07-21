@@ -138,10 +138,10 @@ public class ContractService {
 
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
         log.info("START - signContract for pdf: {}", pdf.getName());
-        if (pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.isSignContract()) {
+        if (pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.getSignContract()) {
             return signPdf(pdf, buildSignatureReason(institution, request));
         } else {
-            if (!pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.isSignContract()) {
+            if (!pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.getSignContract()) {
                 log.info("Skipping PagoPA contract pdf sign due to global disabling");
             }
             return pdf;

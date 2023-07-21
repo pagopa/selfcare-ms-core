@@ -25,5 +25,11 @@ public interface OnboardingResourceMapper {
     @Mapping(target = "contractFilePath", source = "contractImported.filePath")
     @Mapping(target = "contractCreatedAt", source = "contractImported.createdAt")
     @Mapping(target = "billingRequest", source = "billing")
+    @Mapping(target = "signContract", source = "signContract", qualifiedByName = "mapSignContract")
     OnboardingRequest toOnboardingRequest(OnboardingInstitutionRequest onboardingInstitutionRequest);
+
+    @Named("mapSignContract")
+    default Boolean mapSignContract(Boolean signContract) {
+        return Optional.ofNullable(signContract).orElse(true);
+    }
 }
