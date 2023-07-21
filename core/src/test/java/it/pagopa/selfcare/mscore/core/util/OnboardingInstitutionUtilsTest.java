@@ -327,7 +327,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingLegalsRequest.setUsers(new ArrayList<>());
         OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
                 .constructOnboardingRequest(onboardingLegalsRequest);
-        assertTrue(actualConstructOnboardingRequestResult.isSignContract());
+        assertTrue(actualConstructOnboardingRequestResult.getSignContract());
         assertTrue(actualConstructOnboardingRequestResult.getUsers().isEmpty());
         assertEquals(TokenType.LEGALS, actualConstructOnboardingRequestResult.getTokenType());
         assertEquals("Product Name", actualConstructOnboardingRequestResult.getProductName());
@@ -389,7 +389,7 @@ class OnboardingInstitutionUtilsTest {
 
         OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
                 .constructOnboardingRequest(token, institution, product);
-        assertTrue(actualConstructOnboardingRequestResult.isSignContract());
+        assertTrue(actualConstructOnboardingRequestResult.getSignContract());
         assertEquals("pagopa", actualConstructOnboardingRequestResult.getProductName());
         assertEquals("42", actualConstructOnboardingRequestResult.getProductId());
         assertEquals("Contract Template", actualConstructOnboardingRequestResult.getContract().getPath());
@@ -446,7 +446,7 @@ class OnboardingInstitutionUtilsTest {
 
         OnboardingRequest actualConstructOnboardingRequestResult = OnboardingInstitutionUtils
                 .constructOnboardingRequest(token, institution, product);
-        assertTrue(actualConstructOnboardingRequestResult.isSignContract());
+        assertTrue(actualConstructOnboardingRequestResult.getSignContract());
         assertEquals("pagopa", actualConstructOnboardingRequestResult.getProductName());
         assertEquals("42", actualConstructOnboardingRequestResult.getProductId());
         assertEquals("Contract Template", actualConstructOnboardingRequestResult.getContract().getPath());
@@ -510,7 +510,7 @@ class OnboardingInstitutionUtilsTest {
         OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, onboardingRequest.getProductId());
         assertFalse(institution.isImported());
         assertSame(billing, onboardingRequest.getBillingRequest());
-        assertTrue(onboardingRequest.isSignContract());
+        assertTrue(onboardingRequest.getSignContract());
         assertSame(contract, onboardingRequest.getContract());
         assertSame(institutionUpdate, onboardingRequest.getInstitutionUpdate());
         assertEquals("Pricing Plan", onboardingRequest.getPricingPlan());
@@ -964,7 +964,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setUsers(new ArrayList<>());
         OnboardingInstitutionUtils.validatePaOnboarding(onboardingRequest.getBillingRequest());
         assertSame(billing, onboardingRequest.getBillingRequest());
-        assertTrue(onboardingRequest.isSignContract());
+        assertTrue(onboardingRequest.getSignContract());
         assertSame(contract, onboardingRequest.getContract());
         assertSame(institutionUpdate, onboardingRequest.getInstitutionUpdate());
         assertEquals(TokenType.INSTITUTION, onboardingRequest.getTokenType());
