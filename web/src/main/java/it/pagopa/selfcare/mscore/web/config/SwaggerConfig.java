@@ -113,6 +113,7 @@ public class SwaggerConfig {
                 .tags(new Tag("Institution", environment.getProperty("swagger.name.api.institution.description")))
                 .tags(new Tag("Onboarding", environment.getProperty("swagger.name.api.onboarding.description")))
                 .tags(new Tag("Management", environment.getProperty("swagger.name.api.management.description")))
+                .tags(new Tag("Delegation", environment.getProperty("swagger.name.api.delegation.description")))
                 .directModelSubstitute(LocalTime.class, String.class)
                 .ignoredParameterTypes(Authentication.class)
                 .forCodeGeneration(true)
