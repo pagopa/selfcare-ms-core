@@ -63,7 +63,7 @@ class NotificationServiceImplTest {
 
     @Test
     void setCompletedPGOnboardingMail() throws JsonProcessingException {
-        when(mailTemplateConfig.getCompletePath()).thenReturn("path");
+        when(mailTemplateConfig.getPath()).thenReturn("path");
         when(fileStorageConnector.getTemplateFile(any())).thenReturn("templateFile");
         MailTemplate mailTemplate = new MailTemplate();
         mailTemplate.setBody("body");
@@ -74,7 +74,7 @@ class NotificationServiceImplTest {
 
     @Test
     void setCompletedPGOnboardingMailThrow() throws JsonProcessingException {
-        when(mailTemplateConfig.getCompletePath()).thenReturn("path");
+        when(mailTemplateConfig.getPath()).thenReturn("path");
         when(fileStorageConnector.getTemplateFile(any())).thenReturn("templateFile");
         MailTemplate mailTemplate = new MailTemplate();
         mailTemplate.setBody("body");

@@ -135,12 +135,6 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
         </dependency>
-        <dependency>
-            <groupId>it.pagopa.selfcare</groupId>
-            <artifactId>selc-dashboard-connector-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
 </project>

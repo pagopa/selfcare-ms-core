@@ -61,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void setCompletedPGOnboardingMail(String destinationMail, String businessName) {
         try {
             log.info("START - sendMail to {}, for product {}", destinationMail, PROD_PN);
-            String template = fileStorageConnector.getTemplateFile(mailTemplateConfig.getCompletePath());
+            String template = fileStorageConnector.getTemplateFile(mailTemplateConfig.getPath());
             MailTemplate mailTemplate = mapper.readValue(template, MailTemplate.class);
             MessageRequest messageRequest = constructMessageRequest(destinationMail, businessName, mailTemplate);
             log.trace("sendMessage start");
