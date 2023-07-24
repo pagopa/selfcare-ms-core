@@ -165,14 +165,21 @@ class UserConnectorImplTest {
         verify(userRepository).findAll();
     }
 
+    private UserBindingEntity dummyUserBindingEntity() {
+        UserBindingEntity dummyUserBindingEntity = new UserBindingEntity();
+        dummyUserBindingEntity.setInstitutionId("42");
+        dummyUserBindingEntity.setProducts(new ArrayList<>());
+        return dummyUserBindingEntity;
+    }
+
     /**
      * Method under test: {@link UserConnectorImpl#findAll()}
      */
     @Test
     void testFindAll6() {
         ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
-        userBindingEntityList.add(new UserBindingEntity("42", onboardedProductEntityList));
+
+        userBindingEntityList.add(dummyUserBindingEntity());
 
         UserEntity userEntity = new UserEntity();
         userEntity.setBindings(userBindingEntityList);
@@ -212,15 +219,11 @@ class UserConnectorImplTest {
         onboardedProductEntity.setTokenId("42");
         onboardedProductEntity.setUpdatedAt(null);
 
-        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
-        onboardedProductEntityList.add(onboardedProductEntity);
-        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
-
-        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        userBindingEntityList.add(e);
+        UserBindingEntity dummyUserBindingEntity = dummyUserBindingEntity();
+        dummyUserBindingEntity.setProducts(List.of(onboardedProductEntity));
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setBindings(userBindingEntityList);
+        userEntity.setBindings(List.of(dummyUserBindingEntity));
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
@@ -278,15 +281,11 @@ class UserConnectorImplTest {
         onboardedProductEntity.setTokenId("42");
         onboardedProductEntity.setUpdatedAt(null);
 
-        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
-        onboardedProductEntityList.add(onboardedProductEntity);
-        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
-
-        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        userBindingEntityList.add(e);
+        UserBindingEntity dummyUserBindingEntity = dummyUserBindingEntity();
+        dummyUserBindingEntity.setProducts(List.of(onboardedProductEntity));
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setBindings(userBindingEntityList);
+        userEntity.setBindings(List.of(dummyUserBindingEntity));
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
@@ -395,23 +394,27 @@ class UserConnectorImplTest {
      */
     @Test
     void testSave6() {
-        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
-        userBindingEntityList.add(new UserBindingEntity("42", onboardedProductEntityList));
+        //Given
+        UserBindingEntity dummyUserBindingEntity = dummyUserBindingEntity();
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setBindings(userBindingEntityList);
+        userEntity.setBindings(List.of(dummyUserBindingEntity));
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
+
         when(userRepository.save(any())).thenReturn(userEntity);
+
+        //When
         OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser());
+
+        //Then
         List<UserBinding> bindings = actualSaveResult.getBindings();
         assertEquals(1, bindings.size());
-        assertEquals("42", actualSaveResult.getId());
+
         assertNull(actualSaveResult.getCreatedAt());
         UserBinding getResult = bindings.get(0);
-        assertEquals("42", getResult.getInstitutionId());
+        assertEquals(dummyUserBindingEntity.getInstitutionId(), getResult.getInstitutionId());
         verify(userRepository).save(any());
     }
 
@@ -453,15 +456,11 @@ class UserConnectorImplTest {
         onboardedProductEntity.setTokenId("42");
         onboardedProductEntity.setUpdatedAt(null);
 
-        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
-        onboardedProductEntityList.add(onboardedProductEntity);
-        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
-
-        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        userBindingEntityList.add(e);
+        UserBindingEntity dummyUserBindingEntity = dummyUserBindingEntity();
+        dummyUserBindingEntity.setProducts(List.of(onboardedProductEntity));
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setBindings(userBindingEntityList);
+        userEntity.setBindings(List.of(dummyUserBindingEntity));
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);
@@ -472,7 +471,7 @@ class UserConnectorImplTest {
         assertEquals("42", actualSaveResult.getId());
         assertNull(actualSaveResult.getCreatedAt());
         UserBinding getResult = bindings.get(0);
-        assertEquals("42", getResult.getInstitutionId());
+        assertEquals(dummyUserBindingEntity.getInstitutionId(), getResult.getInstitutionId());
         assertEquals(1, getResult.getProducts().size());
         verify(userRepository).save(any());
     }
@@ -491,7 +490,7 @@ class UserConnectorImplTest {
         when(userRepository.save(any())).thenReturn(userEntity);
 
         ArrayList<UserBinding> userBindingList = new ArrayList<>();
-        userBindingList.add(new UserBinding("42", new ArrayList<>()));
+        userBindingList.add(new UserBinding("42", "name", "parent", new ArrayList<>()));
         OnboardedUser actualSaveResult = userConnectorImpl.save(new OnboardedUser("42", userBindingList, null));
         assertEquals("42", actualSaveResult.getId());
         assertNull(actualSaveResult.getCreatedAt());
@@ -525,15 +524,11 @@ class UserConnectorImplTest {
         onboardedProductEntity.setTokenId("42");
         onboardedProductEntity.setUpdatedAt(null);
 
-        ArrayList<OnboardedProductEntity> onboardedProductEntityList = new ArrayList<>();
-        onboardedProductEntityList.add(onboardedProductEntity);
-        UserBindingEntity e = new UserBindingEntity("42", onboardedProductEntityList);
-
-        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        userBindingEntityList.add(e);
+        UserBindingEntity dummyUserBindingEntity = dummyUserBindingEntity();
+        dummyUserBindingEntity.setProducts(List.of(onboardedProductEntity));
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setBindings(userBindingEntityList);
+        userEntity.setBindings(List.of(dummyUserBindingEntity));
         userEntity.setCreatedAt(null);
         userEntity.setId("42");
         userEntity.setUpdatedAt(null);

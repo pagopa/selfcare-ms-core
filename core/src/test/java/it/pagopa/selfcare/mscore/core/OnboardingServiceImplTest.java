@@ -374,6 +374,7 @@ class OnboardingServiceImplTest {
         request.setProductName("42");
         request.setInstitutionUpdate(new InstitutionUpdate());
         request.setBillingRequest(new Billing());
+        request.setSignContract(true);
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -481,13 +482,14 @@ class OnboardingServiceImplTest {
 
         Contract contract = new Contract();
         contract.setPath("Contract Template");
-        OnboardingRequest request = new OnboardingRequest();
-        request.setProductId("42");
-        request.setContract(contract);
-        request.setPricingPlan("C3");
-        request.setProductName("42");
-        request.setInstitutionUpdate(new InstitutionUpdate());
-        request.setBillingRequest(new Billing());
+        OnboardingRequest expectedRequest = new OnboardingRequest();
+        expectedRequest.setProductId("42");
+        expectedRequest.setContract(contract);
+        expectedRequest.setPricingPlan("C3");
+        expectedRequest.setProductName("42");
+        expectedRequest.setInstitutionUpdate(new InstitutionUpdate());
+        expectedRequest.setBillingRequest(new Billing());
+        expectedRequest.setSignContract(true);
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -539,7 +541,7 @@ class OnboardingServiceImplTest {
         verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId(), EnumSet.allOf(User.Fields.class));
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
         verify(contractService, times(1)).extractTemplate(token.getContractTemplate());
-        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegateList, institution, request, null, null);
+        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegateList, institution, expectedRequest, null, null);
         verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
         verify(onboardingDao, times(1)).rollbackSecondStepOfUpdate((List.of(tokenUser.getUserId())), institution, token);
     }

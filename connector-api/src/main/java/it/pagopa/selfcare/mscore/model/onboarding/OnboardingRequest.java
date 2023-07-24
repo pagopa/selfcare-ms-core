@@ -26,7 +26,7 @@ public class OnboardingRequest {
     private Billing billingRequest;
     private Contract contract;
 
-    private boolean signContract = true;
+    private Boolean signContract;
     private TokenType tokenType;
     private String contractFilePath;
     private OffsetDateTime contractCreatedAt;
