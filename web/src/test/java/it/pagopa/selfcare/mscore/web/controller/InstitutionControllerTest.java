@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
@@ -9,11 +10,7 @@ import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
-
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapperImpl;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
+import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +25,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -39,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -60,6 +60,9 @@ class InstitutionControllerTest {
 
     @Spy
     private InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
+
+    @Spy
+    private BrokerMapper brokerMapper = new BrokerMapperImpl();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -1061,5 +1064,86 @@ class InstitutionControllerTest {
         verify(institutionService, times(1))
                 .getInstitutionsByProductId(productIdMock, pageMock, sizeMock);
         verifyNoMoreInteractions(institutionService);
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#getInstitutionBrokers(String, InstitutionType)}
+     */
+    @Test
+    void getInstitutionBrokers() throws Exception {
+        // Given
+        final String productId = "test";
+        final InstitutionType type = InstitutionType.PT;
+        Institution institution = new Institution();
+        institution.setId("id");
+
+        // When
+        when(institutionService.getInstitutionBrokers(any(), any())).thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{productId}/brokers/{institutionType}", productId, type);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+        // Then
+        verify(institutionService, times(1))
+                .getInstitutionBrokers(productId, type);
+        verifyNoMoreInteractions(institutionService);
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#getInstitutionBrokers(String, InstitutionType)}
+     */
+    @Test
+    void getInstitutionBrokers2() throws Exception {
+        // Given
+        final String productId = "test";
+        final InstitutionType type = InstitutionType.PT;
+        Institution institution = new Institution();
+        institution.setId("id");
+
+        // When
+        when(institutionService.getInstitutionBrokers(any(), any())).thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{productId}/brokers/{institutionType}", productId, type);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+        MvcResult result =  actualPerformResult
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<BrokerResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.get(0));
+        assertEquals(response.get(0).getId(), institution.getId());
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#getInstitutionBrokers(String, InstitutionType)}
+     */
+    @Test
+    void getInstitutionBrokersWithBadRequest() throws Exception {
+        // Given
+        final String productId = "test";
+        final String type = "FAKED-TYPE";
+
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{productId}/brokers/{institutionType}", productId, type);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
     }
 }

@@ -2361,6 +2361,72 @@
         } ]
       }
     },
+    "/institutions/{productId}/brokers/{institutionType}" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "getInstitutionBrokers",
+        "description" : "${swagger.mscore.institutions.getInstitutionBrokers}",
+        "operationId" : "getInstitutionBrokersUsingGET",
+        "parameters" : [ {
+          "name" : "productId",
+          "in" : "path",
+          "description" : "Product's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "institutionType",
+          "in" : "path",
+          "description" : "Institution's type",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/BrokerResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/bulk/institutions" : {
       "post" : {
         "tags" : [ "Management" ],
@@ -4383,6 +4449,22 @@
           },
           "vatNumber" : {
             "type" : "string"
+          }
+        }
+      },
+      "BrokerResponse" : {
+        "title" : "BrokerResponse",
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "numberOfDelegations" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },

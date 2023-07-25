@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapper;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapperHelper;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -211,9 +212,9 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     public List<Onboarding> findOnboardingByIdAndProductId(String institutionId, String productId) {
 
         Optional<InstitutionEntity> optionalInstitution =  Objects.nonNull(productId)
-            ? Optional
+                ? Optional
                 .ofNullable(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId))
-            : repository.findById(institutionId);
+                : repository.findById(institutionId);
         return optionalInstitution
                 .map(institutionMapper::convertToInstitution)
                 .map(Institution::getOnboarding)
@@ -231,8 +232,8 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
 
         Page<InstitutionEntity> institutionEntities = repository.find(query, pageable, InstitutionEntity.class);
         return  institutionEntities.getContent().stream()
-                        .map(institutionMapper::convertToInstitution)
-                        .collect(Collectors.toList());
+                .map(institutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -268,9 +269,9 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         optProductId.ifPresent(productId -> criteriaOnboarding.and(Onboarding.Fields.productId.name()).is(productId));
 
         return repository.exists(Query.query(criteriaInstitution)
-                                .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
-                                        .elemMatch(criteriaOnboarding))
-                        , InstitutionEntity.class);
+                        .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                                .elemMatch(criteriaOnboarding))
+                , InstitutionEntity.class);
     }
 
     @Override
@@ -310,6 +311,17 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         return institutionMapper.convertToInstitution(repository.findAndModify(query, updateInstitutionEntityUpdatedAt, findAndModifyOptions, InstitutionEntity.class));
     }
 
+    @Override
+    public List<Institution> findBrokers(String productId, InstitutionType type) {
+
+        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.institutionType.name()).is(type)
+                .and(InstitutionEntity.Fields.onboarding.name()).elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)));
+
+        List<InstitutionEntity> institutionEntities = repository.find(query, InstitutionEntity.class);
+        return  institutionEntities.stream()
+                .map(institutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
 
     private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {
         String geoQuery = InstitutionEntity.Fields.geographicTaxonomies.name()
