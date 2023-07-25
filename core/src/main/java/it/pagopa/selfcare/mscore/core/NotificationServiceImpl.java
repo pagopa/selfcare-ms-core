@@ -113,7 +113,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
         }
         Map<String, String> mailParameter = mailParametersMapper.getCompleteOnbordingMailParameter(product.getTitle());
-        emailConnector.sendMail(mailParametersMapper.getOnboardingCompletePath(), destinationMails, logo, product.getTitle(), mailParameter, "pagopa-logo.png");
+        emailConnector.sendMail(mailParametersMapper.getOnboardingCompletePath(), destinationMails, logo, product.getTitle(), mailParameter, PAGOPA_LOGO_FILENAME);
     }
 
     public void sendRejectMail(File logo, Institution institution, Product product) {
