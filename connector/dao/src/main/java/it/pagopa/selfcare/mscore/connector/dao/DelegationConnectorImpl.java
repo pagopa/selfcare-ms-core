@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -30,6 +31,8 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
     @Override
     public List<Delegation> find(String from) {
-        return null;
+        return repository.findByFromAndProductId(from, null).stream()
+                .map(delegationMapper::convertToDelegation)
+                .collect(Collectors.toList());
     }
 }
