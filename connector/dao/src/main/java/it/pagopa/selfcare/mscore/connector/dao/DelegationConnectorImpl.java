@@ -7,6 +7,8 @@ import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Slf4j
 @Component
 public class DelegationConnectorImpl implements DelegationConnector {
@@ -24,5 +26,10 @@ public class DelegationConnectorImpl implements DelegationConnector {
     public Delegation save(Delegation delegation) {
         final DelegationEntity entity = delegationMapper.convertToDelegationEntity(delegation);
         return delegationMapper.convertToDelegation(repository.save(entity));
+    }
+
+    @Override
+    public List<Delegation> find(String from) {
+        return null;
     }
 }

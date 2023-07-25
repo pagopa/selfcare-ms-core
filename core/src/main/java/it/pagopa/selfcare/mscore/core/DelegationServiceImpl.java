@@ -29,6 +29,6 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public List<Delegation> getDelegations(String from) {
-        return null;
+        return delegationConnector.find(from);
     }
 }
