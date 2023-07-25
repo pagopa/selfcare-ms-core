@@ -68,11 +68,11 @@ class DelegationConnectorImplTest {
         delegationEntity.setInstitutionFromName("setInstitutionFromName");
         delegationEntity.setInstitutionFromRootName("setInstitutionFromRootName");
 
-        when(delegationRepository.findByFromAndProductId(any(), any())).
+        when(delegationRepository.find(any(), any())).
                 thenReturn(List.of(delegationEntity));
 
         //When
-        List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom());
+        List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(), delegationEntity.getProductId());
 
         //Then
         assertNotNull(response);

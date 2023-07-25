@@ -8,5 +8,5 @@ public interface DelegationConnector {
 
     Delegation save(Delegation delegation);
 
-    List<Delegation> find(String from);
+    List<Delegation> find(String from, String productId);
 }

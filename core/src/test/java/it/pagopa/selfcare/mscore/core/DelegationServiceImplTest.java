@@ -56,11 +56,11 @@ class DelegationServiceImplTest {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any())).thenReturn(List.of(delegation));
         //When
-        List<Delegation> response = delegationServiceImpl.getDelegations("from");
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", "productId");
         //Then
-        verify(delegationConnector).find(any());
+        verify(delegationConnector).find(any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());

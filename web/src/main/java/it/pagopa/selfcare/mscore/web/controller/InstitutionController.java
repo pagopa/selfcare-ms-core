@@ -423,9 +423,11 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
     @GetMapping(value = "/{institutionId}/delegations")
     public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                             @PathVariable("institutionId") String institutionId) {
+                                                                             @PathVariable("institutionId") String institutionId,
+                                                                             @ApiParam("${swagger.mscore.product.model.id}")
+                                                                             @RequestParam(name = "productId", required = false) String productId) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId).stream()
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, productId).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }

@@ -1079,13 +1079,12 @@ class InstitutionControllerTest {
     @Test
     void getDelegations_shouldGetData() throws Exception {
         // Given
-        String institutionId = "institutionId";
         Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(any())).thenReturn(List.of(expectedDelegation));
+        when(delegationService.getDelegations(any(), any())).thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get(BASE_URL + "/{institutionId}/delegations", institutionId);
+                .get(BASE_URL + "/{institutionId}/delegations?productId={productId}", expectedDelegation.getFrom(), expectedDelegation.getProductId());
         MvcResult result = MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder)
@@ -1107,7 +1106,7 @@ class InstitutionControllerTest {
         assertThat(actual.getInstitutionFromRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
 
         verify(delegationService, times(1))
-                .getDelegations(institutionId);
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getProductId());
         verifyNoMoreInteractions(institutionService);
     }
 
