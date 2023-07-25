@@ -13,9 +13,12 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
+
+    private static UserMapper userMapper = new UserMapperImpl();
 
     private static Contract toContract(ContractRequest request) {
         Contract contract = new Contract();
@@ -88,7 +91,10 @@ public class OnboardingMapper {
         request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());
         request.setProductId(onboardingInstitutionOperatorsRequest.getProductId());
         request.setProductTitle(onboardingInstitutionOperatorsRequest.getProductTitle());
-        request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionOperatorsRequest.getUsers()));
+        request.setUsers(Optional.ofNullable(onboardingInstitutionOperatorsRequest.getUsers())
+                .map(list -> list.stream().map(userMapper::toUserToOnboard).collect(Collectors.toList()))
+                .orElse(List.of())
+        );
         return request;
     }
 
@@ -97,7 +103,10 @@ public class OnboardingMapper {
         request.setTokenType(TokenType.LEGALS);
         request.setProductId(onboardingInstitutionLegalsRequest.getProductId());
         request.setProductName(onboardingInstitutionLegalsRequest.getProductName());
-        request.setUsers(UserMapper.toUserToOnboard(onboardingInstitutionLegalsRequest.getUsers()));
+        request.setUsers(Optional.ofNullable(onboardingInstitutionLegalsRequest.getUsers())
+                .map(list -> list.stream().map(userMapper::toUserToOnboard).collect(Collectors.toList()))
+                .orElse(List.of())
+        );
         request.setInstitutionExternalId(onboardingInstitutionLegalsRequest.getInstitutionExternalId());
         request.setInstitutionId(onboardingInstitutionLegalsRequest.getInstitutionId());
         request.setContract(toContract(onboardingInstitutionLegalsRequest.getContract()));

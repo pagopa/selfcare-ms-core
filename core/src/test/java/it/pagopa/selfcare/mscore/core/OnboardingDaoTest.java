@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -22,6 +23,7 @@ import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -32,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -129,7 +132,7 @@ class OnboardingDaoTest {
 
 
     /**
-     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
+     * Method under test: {@link OnboardingDao#persistComplete(List, List, OnboardingRequest, Institution, List, String)}
      */
     @Test
     void testPersistComplete() {
@@ -201,57 +204,18 @@ class OnboardingDaoTest {
      * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
      */
     @Test
-    void testPersist() {
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
-                .thenReturn(new Institution());
-        Token token = new Token();
-        token.setId("tokenId");
-        when(tokenConnector.save(any(), any())).thenReturn(token);
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
+    void persist_shouldPersist() {
+        String expectedProductId = "productId";
+        String expectedDigest = "Digest";
 
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
+        Billing billing = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
+        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
 
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing);
@@ -259,32 +223,64 @@ class OnboardingDaoTest {
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductId(expectedProductId);
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
+
         UserToOnboard user = new UserToOnboard();
-        List<UserToOnboard> users = new ArrayList<>();
-        users.add(user);
-        onboardingRequest.setUsers(users);
+        onboardingRequest.setUsers(List.of(user));
+
+        Institution expectedInstitution = TestUtils.dummyInstitution();
+
+        RelationshipState expectedTokenRelationshipState = OnboardingInstitutionUtils.getStatus(institutionUpdate,
+                expectedInstitution.getInstitutionType(), expectedInstitution.getOrigin(), expectedProductId);
+
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
+                .thenReturn(new Institution());
+        when(tokenConnector.save(any(), any())).thenAnswer(obj -> obj.getArguments()[0]);
         when(userConnector.findById(any())).thenReturn(new OnboardedUser());
-        Institution institution = new Institution();
-        OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
-                new ArrayList<>(), "Digest");
+
+        //When
+        OnboardingRollback actualPersistResult = onboardingDao.persist(new ArrayList<>(), new ArrayList<>(), onboardingRequest, expectedInstitution,
+                List.of(), expectedDigest);
+
+        //Then
         Onboarding onboarding = actualPersistResult.getOnboarding();
         assertEquals(RelationshipState.PENDING, onboarding.getStatus());
-        assertEquals("42", onboarding.getProductId());
+        assertEquals(expectedProductId, onboarding.getProductId());
         assertEquals("Pricing Plan", onboarding.getPricingPlan());
         assertEquals("Path", onboarding.getContract());
         assertSame(billing, onboarding.getBilling());
+
+        ArgumentCaptor<UserBinding> argumentBindings = ArgumentCaptor.forClass(UserBinding.class);
+        ArgumentCaptor<Token> argumentToken = ArgumentCaptor.forClass(Token.class);
+
         verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
-        verify(tokenConnector).save(any(), any());
+
+        verify(tokenConnector).save(argumentToken.capture(), any());
+        assertThat(argumentToken.getValue().getInstitutionId()).isEqualTo(expectedInstitution.getId());
+        assertThat(argumentToken.getValue().getProductId()).isEqualTo(expectedProductId);
+        assertThat(argumentToken.getValue().getChecksum()).isEqualTo(expectedDigest);
+        assertThat(argumentToken.getValue().getType()).isEqualTo(onboardingRequest.getTokenType());
+        assertThat(argumentToken.getValue().getChecksum()).isEqualTo(expectedDigest);
+        assertThat(argumentToken.getValue().getStatus()).isEqualTo(expectedTokenRelationshipState);
+
+        verify(userConnector).findAndUpdate(any(), any(), any(), any(), argumentBindings.capture());
+        assertThat(argumentBindings.getValue().getInstitutionId()).isEqualTo(expectedInstitution.getId());
+        assertThat(argumentBindings.getValue().getInstitutionName()).isEqualTo(expectedInstitution.getDescription());
+        assertThat(argumentBindings.getValue().getInstitutionRootName()).isEqualTo(expectedInstitution.getParentDescription());
+        List<OnboardedProduct> expectedOnboardedProducts = argumentBindings.getValue().getProducts();
+        assertThat(expectedOnboardedProducts.size()).isEqualTo(1);
+        assertThat(expectedOnboardedProducts.get(0).getProductId()).isEqualTo(expectedProductId);
+
     }
 
     /**
      * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
      */
     @Test
-    void testPersist2() {
+    void persist_shouldThrowInvalidRequestException() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
         when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));

@@ -22,14 +22,14 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     private final InstitutionService institutionService;
     private final UserNotificationService userNotificationService;
 
-    public UserRelationshipServiceImpl(OnboardingDao onboardingDao,
-                                       UserConnector userConnector,
-                                       InstitutionService institutionService,
-                                       UserNotificationService userNotificationService) {
+    private final UserEventService userEventService;
+
+    public UserRelationshipServiceImpl(OnboardingDao onboardingDao, UserConnector userConnector, InstitutionService institutionService, UserEventService userEventService, UserNotificationService userNotificationService) {
         this.onboardingDao = onboardingDao;
         this.userConnector = userConnector;
         this.institutionService = institutionService;
         this.userNotificationService = userNotificationService;
+        this.userEventService = userEventService;
     }
 
     @Override
@@ -43,6 +43,7 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.ACTIVE);
+            sendRelationshipEventNotification(user, relationshipId);
             userNotificationService.sendActivatedUserNotification(relationshipId, user.getId(), userBinding);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
@@ -56,33 +57,41 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.SUSPENDED);
             userNotificationService.sendSuspendedUserNotification(relationshipId, user.getId(), userBinding);
+            sendRelationshipEventNotification(user, relationshipId);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
         }
     }
 
+    private void sendRelationshipEventNotification(OnboardedUser user, String relationshipId){
+        RelationshipInfo relationshipInfo = getRelationshipInfoFromUser(user, relationshipId);
+        userEventService.sendOperatorUserNotification(relationshipInfo);
+    }
     @Override
     public void deleteRelationship(String relationshipId) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.DELETED);
+        sendRelationshipEventNotification(user, relationshipId);
         userNotificationService.sendDeletedUserNotification(relationshipId, user.getId(), userBinding);
     }
 
     @Override
     public RelationshipInfo retrieveRelationship(String relationshipId) {
         OnboardedUser user = findByRelationshipId(relationshipId);
-        UserBinding userBinding = retrieveUserBinding(user, relationshipId);
-        return userBinding.getProducts().stream()
-                .filter(product -> relationshipId.equalsIgnoreCase(product.getRelationshipId()))
-                .findAny()
-                .map(product -> constructRelationshipInfo(userBinding.getInstitutionId(), user.getId(), product))
-                .orElseThrow(() -> new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode()));
+        return getRelationshipInfoFromUser(user, relationshipId);
     }
 
-    private RelationshipInfo constructRelationshipInfo(String institutionId, String userId, OnboardedProduct product) {
-        Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        return new RelationshipInfo(institution, userId, product);
+    private RelationshipInfo getRelationshipInfoFromUser(OnboardedUser user, String relationshipId){
+        for (UserBinding userBinding : user.getBindings()) {
+            for (OnboardedProduct product : userBinding.getProducts()) {
+                if (relationshipId.equalsIgnoreCase(product.getRelationshipId())) {
+                    Institution institution = institutionService.retrieveInstitutionById(userBinding.getInstitutionId());
+                    return new RelationshipInfo(institution, user.getId(), product);
+                }
+            }
+        }
+        throw new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode());
     }
 
     private UserBinding retrieveUserBinding(OnboardedUser user, String relationshipId) {

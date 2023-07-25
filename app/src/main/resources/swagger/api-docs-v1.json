@@ -19,6 +19,9 @@
     }
   } ],
   "tags" : [ {
+    "name" : "Delegation",
+    "description" : "Delegation Controller"
+  }, {
     "name" : "External",
     "description" : "External Controller"
   }, {
@@ -693,6 +696,68 @@
           },
           "404" : {
             "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/delegations" : {
+      "post" : {
+        "tags" : [ "Delegation" ],
+        "summary" : "Create an association between institution id and technical partner",
+        "description" : "Create an association between institution id and technical partner",
+        "operationId" : "createDelegationUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DelegationRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DelegationResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -4093,6 +4158,140 @@
           "bearerAuth" : [ "global" ]
         } ]
       }
+    },
+    "/users/{userId}/institution-products" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "returns onboarding info",
+        "description" : "returns onboarding info",
+        "operationId" : "getInstitutionProductsInfoUsingGET",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "UserBinding's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "institutionId",
+          "in" : "query",
+          "description" : "The internal identifier of the institution",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardingInfoResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/users/{userId}/products" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Retrieves products info and role which the user is enabled",
+        "description" : "Retrieves products info and role which the user is enabled",
+        "operationId" : "getUserProductsInfoUsingGET",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "description" : "UserBinding's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "institutionId",
+          "in" : "query",
+          "description" : "The internal identifier of the institution",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "states",
+          "in" : "query",
+          "description" : "List of Relationship state for filter products",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserProductsResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
     }
   },
   "components" : {
@@ -4392,6 +4591,37 @@
             "type" : "string"
           },
           "pec" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DelegationRequest" : {
+        "title" : "DelegationRequest",
+        "type" : "object",
+        "properties" : {
+          "from" : {
+            "type" : "string"
+          },
+          "institutionFromName" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "to" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "AOO", "PT" ]
+          }
+        }
+      },
+      "DelegationResponse" : {
+        "title" : "DelegationResponse",
+        "type" : "object",
+        "properties" : {
+          "id" : {
             "type" : "string"
           }
         }
@@ -4901,6 +5131,27 @@
           "state" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          }
+        }
+      },
+      "InstitutionProducts" : {
+        "title" : "InstitutionProducts",
+        "type" : "object",
+        "properties" : {
+          "institutionId" : {
+            "type" : "string"
+          },
+          "institutionName" : {
+            "type" : "string"
+          },
+          "institutionRootName" : {
+            "type" : "string"
+          },
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Product"
+            }
           }
         }
       },
@@ -5756,6 +6007,9 @@
           "productId" : {
             "type" : "string"
           },
+          "productTitle" : {
+            "type" : "string"
+          },
           "users" : {
             "type" : "array",
             "items" : {
@@ -5995,6 +6249,9 @@
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
           },
+          "roleLabel" : {
+            "type" : "string"
+          },
           "surname" : {
             "type" : "string"
           },
@@ -6031,6 +6288,44 @@
       "ProblemError" : {
         "title" : "ProblemError",
         "type" : "object"
+      },
+      "Product" : {
+        "title" : "Product",
+        "type" : "object",
+        "properties" : {
+          "contract" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "env" : {
+            "type" : "string",
+            "enum" : [ "COLL", "DEV", "PROD", "ROOT" ]
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "productRole" : {
+            "type" : "string"
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          },
+          "tokenId" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
       },
       "ProductInfo" : {
         "title" : "ProductInfo",
@@ -6294,11 +6589,32 @@
           "institutionId" : {
             "type" : "string"
           },
+          "institutionName" : {
+            "type" : "string"
+          },
+          "institutionRootName" : {
+            "type" : "string"
+          },
           "products" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/OnboardedProduct"
             }
+          }
+        }
+      },
+      "UserProductsResponse" : {
+        "title" : "UserProductsResponse",
+        "type" : "object",
+        "properties" : {
+          "bindings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/InstitutionProducts"
+            }
+          },
+          "id" : {
+            "type" : "string"
           }
         }
       },
@@ -6325,6 +6641,9 @@
           "role" : {
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "roleLabel" : {
+            "type" : "string"
           },
           "surname" : {
             "type" : "string"

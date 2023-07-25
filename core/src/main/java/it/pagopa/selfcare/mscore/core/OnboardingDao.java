@@ -186,7 +186,10 @@ public class OnboardingDao {
     private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingRequest request, String tokenId) {
         OnboardedProduct product = constructProduct(user, request, institution);
         product.setTokenId(tokenId);
-        UserBinding binding = new UserBinding(institution.getId(), List.of(product));
+        UserBinding binding = new UserBinding(institution.getId(),
+                institution.getDescription(),
+                institution.getParentDescription(),
+                List.of(product));
         userConnector.findAndUpdate(onboardedUser, user.getId(), institution.getId(), product, binding);
         return product;
     }
@@ -218,7 +221,10 @@ public class OnboardingDao {
 
     private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
         OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
-        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
+        UserBinding binding = new UserBinding(request.getInstitutionId(),
+                institution.getDescription(),
+                institution.getParentDescription(),
+                List.of(product));
         userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
         return product;
@@ -268,7 +274,10 @@ public class OnboardingDao {
             product.setTokenId(tokenId);
             product.setStatus(RelationshipState.ACTIVE);
             product.setCreatedAt(createdAt);
-            UserBinding binding = new UserBinding(institution.getId(), List.of(product));
+            UserBinding binding = new UserBinding(institution.getId(),
+                    institution.getDescription(),
+                    institution.getParentDescription(),
+                    List.of(product));
             userConnector.findAndUpdate(onboardedUser, userToOnboard.getId(), institution.getId(), product, binding);
 
             return Optional.of(product);
@@ -309,13 +318,19 @@ public class OnboardingDao {
     private void createNewUser(UserToOnboard user, Institution institution, OnboardingRequest request, String tokenId) {
         OnboardedProduct product = constructProduct(user, request, institution);
         product.setTokenId(tokenId);
-        UserBinding binding = new UserBinding(institution.getId(), List.of(product));
+        UserBinding binding = new UserBinding(institution.getId(),
+                institution.getDescription(),
+                institution.getParentDescription(),
+                List.of(product));
         userConnector.findAndCreate(user.getId(), binding);
     }
 
     private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
         OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
-        UserBinding binding = new UserBinding(request.getInstitutionId(), List.of(product));
+        UserBinding binding = new UserBinding(request.getInstitutionId(),
+                institution.getDescription(),
+                institution.getParentDescription(),
+                List.of(product));
         userConnector.findAndCreate(user.getId(), binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
     }

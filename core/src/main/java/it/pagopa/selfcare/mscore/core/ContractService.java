@@ -29,12 +29,10 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
-import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -58,7 +56,10 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
@@ -138,10 +139,10 @@ public class ContractService {
 
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
         log.info("START - signContract for pdf: {}", pdf.getName());
-        if (pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.isSignContract()) {
+        if (pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.getSignContract()) {
             return signPdf(pdf, buildSignatureReason(institution, request));
         } else {
-            if (!pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.isSignContract()) {
+            if (!pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.getSignContract()) {
                 log.info("Skipping PagoPA contract pdf sign due to global disabling");
             }
             return pdf;
@@ -242,6 +243,8 @@ public class ContractService {
         }
     }
 
+
+
     private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
         if (queueEvent.equals(QueueEvent.ADD)) {
@@ -301,16 +304,6 @@ public class ContractService {
         return toNotify;
     }
 
-    private UserToNotify toUserToNotify(TokenUser tokenUser, String institutionId) {
-        UserToNotify userToNotify = new UserToNotify();
-        User user = userRegistryConnector.getUserByInternalId(tokenUser.getUserId(), EnumSet.of(User.Fields.name, User.Fields.familyName, User.Fields.fiscalCode, User.Fields.workContacts));
-        userToNotify.setName(user.getName());
-        userToNotify.setFamilyName(user.getFamilyName());
-        userToNotify.setFiscalCode(user.getFiscalCode());
-        userToNotify.setEmail(user.getWorkContacts().get(institutionId).getEmail());
-        userToNotify.setRole(tokenUser.getRole());
-        return userToNotify;
-    }
 
     private String retrieveFileName(String tokenContractSigned, String tokenId) {
 
@@ -344,6 +337,8 @@ public class ContractService {
         });
 
     }
+
+
 
     public String uploadContract(String tokenId, MultipartFile contract) {
         return fileStorageConnector.uploadContract(tokenId, contract);

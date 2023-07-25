@@ -94,13 +94,7 @@ class NotificationServiceImplTest {
     @Test
     void sendRejectMail(){
         File file = mock(File.class);
-        Assertions.assertDoesNotThrow(() -> notificationService.sendRejectMail(file, new Institution(), new Product()));
-    }
-
-    @Test
-    void sendRejectMail1(){
-        File file = mock(File.class);
-        when(coreConfig.getDestinationMails()).thenReturn(null);
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
         when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("email");
         Assertions.assertDoesNotThrow(() -> notificationService.sendRejectMail(file, new Institution(), new Product()));
     }
@@ -108,7 +102,7 @@ class NotificationServiceImplTest {
     @Test
     void sendRejectMail2(){
         File file = mock(File.class);
-        when(coreConfig.getDestinationMails()).thenReturn(null);
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
         Institution institution = new Institution();
         institution.setDigitalAddress("digital");
         Assertions.assertDoesNotThrow(() -> notificationService.sendRejectMail(file, institution, new Product()));

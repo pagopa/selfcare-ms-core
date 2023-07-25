@@ -4,16 +4,17 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -43,6 +44,27 @@ public class UserServiceImpl implements UserService {
             return Collections.emptyList();
         }
         return userConnector.findAllByIds(users);
+    }
+
+    @Override
+    public List<UserBinding> retrieveBindings(String institutionId, String userId, String[] states, List<String> products) {
+
+
+        List<RelationshipState> relationshipStates = Optional.ofNullable(states)
+                .map(OnboardingInfoUtils::convertStatesToRelationshipsState)
+                .orElse(null);
+
+        List<OnboardedUser> onboardingInfoList = userConnector.findWithFilter(institutionId, userId, null, relationshipStates, null, null);
+        if(Objects.isNull(onboardingInfoList) || onboardingInfoList.isEmpty()) return List.of();
+
+        OnboardedUser onboardedUser = onboardingInfoList.get(0);
+        return onboardedUser.getBindings().stream()
+                .peek(userBinding -> userBinding.setProducts(userBinding.getProducts().stream()
+                                .filter(product -> Objects.isNull(relationshipStates) || relationshipStates.isEmpty()
+                                        || relationshipStates.contains(product.getStatus()))
+                        .collect(Collectors.toList())))
+                .filter(userBinding -> !userBinding.getProducts().isEmpty())
+                .collect(Collectors.toList());
     }
 
     @Override
