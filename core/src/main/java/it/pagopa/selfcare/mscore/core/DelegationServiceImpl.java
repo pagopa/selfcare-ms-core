@@ -5,6 +5,8 @@ import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
 
 @Service
@@ -23,5 +25,10 @@ public class DelegationServiceImpl implements DelegationService {
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }
+    }
+
+    @Override
+    public List<Delegation> getDelegations(String from, String productId) {
+        return delegationConnector.find(from, productId);
     }
 }

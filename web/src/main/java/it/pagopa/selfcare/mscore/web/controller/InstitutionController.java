@@ -7,17 +7,16 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperCustom;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -41,15 +40,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InstitutionController {
     private final InstitutionService institutionService;
+    private final DelegationService delegationService;
     private final OnboardingResourceMapper onboardingResourceMapper;
     private final InstitutionResourceMapper institutionResourceMapper;
 
+    private final DelegationMapper delegationMapper;
+
     public InstitutionController(InstitutionService institutionService,
-                                 OnboardingResourceMapper onboardingResourceMapper,
-                                 InstitutionResourceMapper institutionResourceMapper) {
+                                 DelegationService delegationService, OnboardingResourceMapper onboardingResourceMapper,
+                                 InstitutionResourceMapper institutionResourceMapper, DelegationMapper delegationMapper) {
         this.institutionService = institutionService;
+        this.delegationService = delegationService;
         this.onboardingResourceMapper = onboardingResourceMapper;
         this.institutionResourceMapper = institutionResourceMapper;
+        this.delegationMapper = delegationMapper;
     }
 
     /**
@@ -405,5 +409,26 @@ public class InstitutionController {
 
         log.trace("findFromProduct end");
         return ResponseEntity.ok().body(institutionListResponse);
+    }
+
+    /**
+     * The function get institution's delegation
+     *
+     * @param institutionId String
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: List<DelegationResponse>
+     * * Code: 404, Message: Institution data not found, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     */
+    @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
+    @GetMapping(value = "/{institutionId}/delegations")
+    public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                             @PathVariable("institutionId") String institutionId,
+                                                                             @ApiParam("${swagger.mscore.product.model.id}")
+                                                                             @RequestParam(name = "productId", required = false) String productId) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, productId).stream()
+                .map(delegationMapper::toDelegationResponse)
+                .collect(Collectors.toList()));
     }
 }
