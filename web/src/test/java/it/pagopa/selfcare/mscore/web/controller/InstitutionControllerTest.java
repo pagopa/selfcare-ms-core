@@ -1097,33 +1097,6 @@ class InstitutionControllerTest {
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
                 .perform(requestBuilder);
-        actualPerformResult
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
-        // Then
-        verify(institutionService, times(1))
-                .getInstitutionBrokers(productId, type);
-        verifyNoMoreInteractions(institutionService);
-    }
-
-    /**
-     * Method under test: {@link InstitutionController#getInstitutionBrokers(String, InstitutionType)}
-     */
-    @Test
-    void getInstitutionBrokers2() throws Exception {
-        // Given
-        final String productId = "test";
-        final InstitutionType type = InstitutionType.PT;
-        Institution institution = new Institution();
-        institution.setId("id");
-
-        // When
-        when(institutionService.getInstitutionBrokers(any(), any())).thenReturn(List.of(institution));
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{productId}/brokers/{institutionType}", productId, type);
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build()
-                .perform(requestBuilder);
         MvcResult result =  actualPerformResult
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
@@ -1138,6 +1111,9 @@ class InstitutionControllerTest {
         assertNotNull(response);
         assertNotNull(response.get(0));
         assertEquals(response.get(0).getId(), institution.getId());
+        verify(institutionService, times(1))
+                .getInstitutionBrokers(productId, type);
+        verifyNoMoreInteractions(institutionService);
     }
 
     /**
