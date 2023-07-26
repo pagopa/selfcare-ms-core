@@ -3,14 +3,20 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
+import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.TestUtils;
+import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
+import it.pagopa.selfcare.mscore.web.model.mapper.*;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
@@ -55,11 +62,17 @@ class InstitutionControllerTest {
     @Mock
     private InstitutionService institutionService;
 
+    @Mock
+    private DelegationService delegationService;
+
     @Spy
     private OnboardingResourceMapper onboardingResourceMapper = new OnboardingResourceMapperImpl();
 
     @Spy
     private InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
+
+    @Spy
+    private DelegationMapper delegationMapper = new DelegationMapperImpl();
 
     @Spy
     private BrokerMapper brokerMapper = new BrokerMapperImpl();
@@ -1145,5 +1158,54 @@ class InstitutionControllerTest {
 
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isBadRequest());
 
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
+     */
+    @Test
+    void getDelegations_shouldGetData() throws Exception {
+        // Given
+        Delegation expectedDelegation = dummyDelegation();
+
+        when(delegationService.getDelegations(any(), any())).thenReturn(List.of(expectedDelegation));
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get(BASE_URL + "/{institutionId}/delegations?productId={productId}", expectedDelegation.getFrom(), expectedDelegation.getProductId());
+        MvcResult result = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<DelegationResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), new TypeReference<>() {});
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.size()).isEqualTo(1);
+        DelegationResponse actual = response.get(0);
+        assertThat(actual.getId()).isEqualTo(expectedDelegation.getId());
+        assertThat(actual.getInstitutionFromName()).isEqualTo(expectedDelegation.getInstitutionFromName());
+        assertThat(actual.getTo()).isEqualTo(expectedDelegation.getTo());
+        assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
+        assertThat(actual.getFrom()).isEqualTo(expectedDelegation.getFrom());
+        assertThat(actual.getInstitutionFromRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
+
+        verify(delegationService, times(1))
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getProductId());
+        verifyNoMoreInteractions(institutionService);
+    }
+
+    private Delegation dummyDelegation() {
+        Delegation delegation = new Delegation();
+        delegation.setFrom("from");
+        delegation.setTo("to");
+        delegation.setId("setId");
+        delegation.setProductId("setProductId");
+        delegation.setType(DelegationType.PT);
+        delegation.setInstitutionFromName("setInstitutionFromName");
+        delegation.setInstitutionFromRootName("setInstitutionFromRootName");
+        return delegation;
     }
 }

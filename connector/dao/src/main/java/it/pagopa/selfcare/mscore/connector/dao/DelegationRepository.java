@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface DelegationRepository extends MongoRepository<DelegationEntity, String>, MongoCustomConnector {
 
-
 }

@@ -82,12 +82,11 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(problem, headers, INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Problem> handleException(HttpServletRequest request, RuntimeException ex) {
-        GenericError genericError = retrieveGenericError(request);
-        log.error("{} Occured --> URL:{}, MESSAGE:{}, STATUS:{}",ex.getCause(), request.getRequestURL(), genericError.getMessage(), HttpStatus.BAD_REQUEST, ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(createProblem(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), genericError.getCode()));
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Problem> handleException(HttpServletRequest request, Exception ex) {
+        log.error("{} Occured --> URL:{}, MESSAGE:{}, STATUS:{}",ex.getCause(), request.getRequestURL(), ex.getMessage(), HttpStatus.BAD_REQUEST, ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createProblem(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ""));
     }
 
     private Problem createProblem(String errorMessage, Integer status, String code) {
