@@ -4,11 +4,13 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Contract;
 import it.pagopa.selfcare.mscore.model.onboarding.ContractImported;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,5 +112,17 @@ public class TestUtils {
         expectedInstitution.setDescription("description");
         expectedInstitution.setParentDescription("parentDescription");
         return expectedInstitution;
+    }
+
+    public static User createSimpleUser() {
+        User user = new User();
+        user.setId("1");
+        user.setFiscalCode("ABC123XYZ");
+        CertifiedField<String> nome = new CertifiedField<>();
+        nome.setValue("nome");
+        user.setName(nome);
+        user.setFamilyName(nome);
+        user.setEmail(nome);
+        return user;
     }
 }

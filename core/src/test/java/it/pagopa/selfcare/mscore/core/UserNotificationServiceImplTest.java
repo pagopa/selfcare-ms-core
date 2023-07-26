@@ -58,14 +58,7 @@ class UserNotificationServiceImplTest {
         List<String> labels = new ArrayList<>();
         labels.add("label");
 
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        CertifiedField<String> nome = new CertifiedField<>();
-        nome.setValue("nome");
-        user1.setName(nome);
-        user1.setFamilyName(nome);
-        user1.setEmail(nome);
+        User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
         WorkContact workContact = new WorkContact();
@@ -91,14 +84,7 @@ class UserNotificationServiceImplTest {
         labels.add("la");
         labels.add("Lab");
 
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        CertifiedField<String> nome = new CertifiedField<>();
-        nome.setValue("nome");
-        user1.setName(nome);
-        user1.setFamilyName(nome);
-        user1.setEmail(nome);
+        User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
         WorkContact workContact = new WorkContact();
@@ -116,14 +102,7 @@ class UserNotificationServiceImplTest {
 
     @Test
     void sendDeletedUserNotification(){
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        CertifiedField<String> nome = new CertifiedField<>();
-        nome.setValue("nome");
-        user1.setName(nome);
-        user1.setFamilyName(nome);
-        user1.setEmail(nome);
+        User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
         WorkContact workContact = new WorkContact();
@@ -175,14 +154,7 @@ class UserNotificationServiceImplTest {
 
     @Test
     void sendActivatedUserNotification(){
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        CertifiedField<String> nome = new CertifiedField<>();
-        nome.setValue("nome");
-        user1.setName(nome);
-        user1.setFamilyName(nome);
-        user1.setEmail(nome);
+        User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
         WorkContact workContact = new WorkContact();
@@ -235,14 +207,7 @@ class UserNotificationServiceImplTest {
 
     @Test
     void sendSuspendedUserNotification(){
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        CertifiedField<String> nome = new CertifiedField<>();
-        nome.setValue("nome");
-        user1.setName(nome);
-        user1.setFamilyName(nome);
-        user1.setEmail(nome);
+        User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
         WorkContact workContact = new WorkContact();
