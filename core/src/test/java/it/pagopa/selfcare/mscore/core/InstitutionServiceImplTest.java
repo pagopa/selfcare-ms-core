@@ -36,6 +36,7 @@ import java.util.Optional;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -1432,6 +1433,24 @@ class InstitutionServiceImplTest {
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A createdAt date is required.", illegalArgumentException.getMessage());
         verifyNoInteractions(institutionConnector, tokenConnector, userConnector);
+
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#getInstitutionBrokers(String, InstitutionType)}
+     */
+    @Test
+    void getInstitutionBrokers() {
+
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(institutionConnector.findBrokers(any(), any())).thenReturn(List.of(institution));
+        List<Institution> institutions = institutionServiceImpl.getInstitutionBrokers("42", InstitutionType.PT);
+        assertNotNull(institutions);
+        assertFalse(institutions.isEmpty());
+        assertNotNull(institutions.get(0));
+        assertEquals(institutions.get(0).getId(), institution.getId());
+        verify(institutionConnector).findBrokers(any(), any());
 
     }
 
