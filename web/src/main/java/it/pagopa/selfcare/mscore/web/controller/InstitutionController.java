@@ -435,25 +435,4 @@ public class InstitutionController {
         log.trace("getInstitutionBrokers end");
         return result;
     }
-
-    /**
-     * The function get institution's delegation
-     *
-     * @param institutionId String
-     * @return InstitutionResponse
-     * * Code: 200, Message: successful operation, DataType: List<DelegationResponse>
-     * * Code: 404, Message: Institution data not found, DataType: Problem
-     * * Code: 400, Message: Bad Request, DataType: Problem
-     */
-    @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
-    @GetMapping(value = "/{institutionId}/delegations")
-    public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                             @PathVariable("institutionId") String institutionId,
-                                                                             @ApiParam("${swagger.mscore.product.model.id}")
-                                                                             @RequestParam(name = "productId", required = false) String productId) {
-
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, productId).stream()
-                .map(delegationMapper::toDelegationResponse)
-                .collect(Collectors.toList()));
-    }
 }

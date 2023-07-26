@@ -711,6 +711,78 @@
       }
     },
     "/delegations" : {
+      "get" : {
+        "tags" : [ "Delegation" ],
+        "summary" : "Retrieve institution's delegations",
+        "description" : "Retrieve institution's delegations",
+        "operationId" : "getDelegationsUsingGET",
+        "parameters" : [ {
+          "name" : "from",
+          "in" : "query",
+          "description" : "The internal identifier of the institution",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "The internal identifier of the institution",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "query",
+          "description" : "Product's unique identifier",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/DelegationResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      },
       "post" : {
         "tags" : [ "Delegation" ],
         "summary" : "Create an association between institution id and technical partner",
@@ -2193,71 +2265,6 @@
                   "type" : "array",
                   "items" : {
                     "$ref" : "#/components/schemas/RelationshipResult"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/institutions/{institutionId}/delegations" : {
-      "get" : {
-        "tags" : [ "Institution" ],
-        "summary" : "Retrieve institution's delegations",
-        "description" : "Retrieve institution's delegations",
-        "operationId" : "getDelegationsUsingGET",
-        "parameters" : [ {
-          "name" : "institutionId",
-          "in" : "path",
-          "description" : "The internal identifier of the institution",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
-          "name" : "productId",
-          "in" : "query",
-          "description" : "Product's unique identifier",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/DelegationResponse"
                   }
                 }
               }

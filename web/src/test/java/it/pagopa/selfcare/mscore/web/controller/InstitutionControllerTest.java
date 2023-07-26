@@ -49,6 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 @ContextConfiguration(classes = {InstitutionController.class})
 @ExtendWith(MockitoExtension.class)
@@ -70,9 +72,6 @@ class InstitutionControllerTest {
 
     @Spy
     private InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
-
-    @Spy
-    private DelegationMapper delegationMapper = new DelegationMapperImpl();
 
     @Spy
     private BrokerMapper brokerMapper = new BrokerMapperImpl();
@@ -1136,52 +1135,25 @@ class InstitutionControllerTest {
 
     }
 
-    /**
-     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
-     */
-    @Test
-    void getDelegations_shouldGetData() throws Exception {
-        // Given
-        Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(any(), any())).thenReturn(List.of(expectedDelegation));
+
+    @Test
+    void updateCreatedAt_invalidDate() throws Exception {
+        // Given
+        String institutionIdMock = "institutionId";
+        String productIdMock = "productId";
+        OffsetDateTime createdAtMock = OffsetDateTime.now().minusHours(10);
+        String createdAtString = createdAtMock.toString();
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get(BASE_URL + "/{institutionId}/delegations?productId={productId}", expectedDelegation.getFrom(), expectedDelegation.getProductId());
-        MvcResult result = MockMvcBuilders.standaloneSetup(institutionController)
+                        .put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
+                        .param("createdAt", createdAtString)
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .accept(APPLICATION_JSON_VALUE);
+
+        MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andReturn();
-
-        List<DelegationResponse> response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), new TypeReference<>() {});
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.size()).isEqualTo(1);
-        DelegationResponse actual = response.get(0);
-        assertThat(actual.getId()).isEqualTo(expectedDelegation.getId());
-        assertThat(actual.getInstitutionFromName()).isEqualTo(expectedDelegation.getInstitutionFromName());
-        assertThat(actual.getTo()).isEqualTo(expectedDelegation.getTo());
-        assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
-        assertThat(actual.getFrom()).isEqualTo(expectedDelegation.getFrom());
-        assertThat(actual.getInstitutionFromRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
-
-        verify(delegationService, times(1))
-                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getProductId());
-        verifyNoMoreInteractions(institutionService);
-    }
-
-    private Delegation dummyDelegation() {
-        Delegation delegation = new Delegation();
-        delegation.setFrom("from");
-        delegation.setTo("to");
-        delegation.setId("setId");
-        delegation.setProductId("setProductId");
-        delegation.setType(DelegationType.PT);
-        delegation.setInstitutionFromName("setInstitutionFromName");
-        delegation.setInstitutionFromRootName("setInstitutionFromRootName");
-        return delegation;
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

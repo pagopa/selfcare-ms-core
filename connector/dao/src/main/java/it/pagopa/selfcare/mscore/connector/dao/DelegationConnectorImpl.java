@@ -36,12 +36,14 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public List<Delegation> find(String from, String productId) {
+    public List<Delegation> find(String from, String to, String productId) {
         Criteria criteria = new Criteria();
 
         List<Criteria> criterias = new ArrayList<>();
         if(Objects.nonNull(from))
             criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
+        if(Objects.nonNull(to))
+            criterias.add(Criteria.where(DelegationEntity.Fields.to.name()).is(to));
         if(Objects.nonNull(productId))
             criterias.add(Criteria.where(DelegationEntity.Fields.productId.name()).is(productId));
 
