@@ -16,6 +16,8 @@ public class DelegationRequest {
     @NotBlank
     private String institutionFromName;
     @NotBlank
+    private String institutionToName;
+    @NotBlank
     private String productId;
     @NotNull
     private DelegationType type;

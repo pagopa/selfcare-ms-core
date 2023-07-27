@@ -2,18 +2,17 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,6 +32,18 @@ public class DelegationConnectorImpl implements DelegationConnector {
     public Delegation save(Delegation delegation) {
         final DelegationEntity entity = delegationMapper.convertToDelegationEntity(delegation);
         return delegationMapper.convertToDelegation(repository.save(entity));
+    }
+
+    @Override
+    public boolean checkIfExists(Delegation delegation) {
+        Optional<DelegationEntity> opt = repository.findByFromAndToAndProductIdAndType(
+                delegation.getFrom(),
+                delegation.getTo(),
+                delegation.getProductId(),
+                delegation.getType()
+
+        );
+        return opt.isPresent();
     }
 
     @Override
