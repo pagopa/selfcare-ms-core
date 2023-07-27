@@ -55,8 +55,7 @@ class DelegationServiceImplTest {
      */
     @Test
     void testCreateDelegationWithConflict() {
-        when(delegationServiceImpl.checkIfExists(any())).thenThrow(new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
-                CustomError.CREATE_DELEGATION_CONFLICT.getCode()));
+        when(delegationServiceImpl.checkIfExists(any())).thenReturn(true);
         assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
         verifyNoMoreInteractions(delegationConnector);
     }
