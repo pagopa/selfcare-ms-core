@@ -44,6 +44,7 @@ public class DelegationController {
      * @return InstitutionResponse
      * * Code: 201, Message: successful operation, DataType: DelegationResponse
      * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Conflict, DataType: Problem
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.delegation.create}", notes = "${swagger.mscore.delegation.create}")

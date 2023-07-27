@@ -8,5 +8,7 @@ public interface DelegationConnector {
 
     Delegation save(Delegation delegation);
 
+    boolean checkIfExists(Delegation delegation);
+
     List<Delegation> find(String from, String to, String productId);
 }

@@ -1,7 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
+import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +48,28 @@ class DelegationServiceImplTest {
         when(delegationConnector.save(any())).thenThrow(new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode()));
         assertThrows(MsCoreException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
         verify(delegationConnector).save(any());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationWithConflict() {
+        when(delegationServiceImpl.checkIfExists(any())).thenThrow(new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
+                CustomError.CREATE_DELEGATION_CONFLICT.getCode()));
+        assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
+        verifyNoMoreInteractions(delegationConnector);
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#checkIfExists(Delegation)}
+     */
+    @Test
+    void testCheckIfExists() {
+        Delegation delegation = new Delegation();
+        when(delegationConnector.checkIfExists(any())).thenReturn(true);
+        boolean check = delegationServiceImpl.checkIfExists(delegation);
+        assertTrue(check);
     }
 
     /**
