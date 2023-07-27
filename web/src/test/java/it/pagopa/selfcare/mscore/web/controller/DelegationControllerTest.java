@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.core.DelegationService;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
@@ -25,12 +26,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.util.NestedServletException;
 
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {DelegationController.class})
@@ -104,6 +105,22 @@ class DelegationControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
+     */
+    @Test
+    void getDelegations_shouldInvalidRequest() {
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/delegations?&productId={productId}", "productId");
+
+        assertThrows(NestedServletException.class, () ->
+            MockMvcBuilders.standaloneSetup(delegationController)
+                    .build()
+                    .perform(requestBuilder));
+        
     }
 
     /**
