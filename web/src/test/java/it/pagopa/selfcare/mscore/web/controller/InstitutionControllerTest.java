@@ -15,6 +15,7 @@ import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
+import it.pagopa.selfcare.mscore.web.model.mapper.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,9 +44,13 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.MimeTypeUtils.APPLICATION_JSON_VALUE;
 
 @ContextConfiguration(classes = {InstitutionController.class})
 @ExtendWith(MockitoExtension.class)
@@ -69,7 +74,7 @@ class InstitutionControllerTest {
     private InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
 
     @Spy
-    private DelegationMapper delegationMapper = new DelegationMapperImpl();
+    private BrokerMapper brokerMapper = new BrokerMapperImpl();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -1074,51 +1079,81 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
+     * Method under test: {@link InstitutionController#getInstitutionBrokers(String, InstitutionType)}
      */
     @Test
-    void getDelegations_shouldGetData() throws Exception {
+    void getInstitutionBrokers() throws Exception {
         // Given
-        Delegation expectedDelegation = dummyDelegation();
+        final String productId = "test";
+        final InstitutionType type = InstitutionType.PT;
+        Institution institution = new Institution();
+        institution.setId("id");
 
-        when(delegationService.getDelegations(any(), any())).thenReturn(List.of(expectedDelegation));
         // When
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get(BASE_URL + "/{institutionId}/delegations?productId={productId}", expectedDelegation.getFrom(), expectedDelegation.getProductId());
-        MvcResult result = MockMvcBuilders.standaloneSetup(institutionController)
+        when(institutionService.getInstitutionBrokers(any(), any())).thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{productId}/brokers/{institutionType}", productId, type);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build()
-                .perform(requestBuilder)
+                .perform(requestBuilder);
+        MvcResult result =  actualPerformResult
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andReturn();
 
-        List<DelegationResponse> response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), new TypeReference<>() {});
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.size()).isEqualTo(1);
-        DelegationResponse actual = response.get(0);
-        assertThat(actual.getId()).isEqualTo(expectedDelegation.getId());
-        assertThat(actual.getInstitutionFromName()).isEqualTo(expectedDelegation.getInstitutionFromName());
-        assertThat(actual.getTo()).isEqualTo(expectedDelegation.getTo());
-        assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
-        assertThat(actual.getFrom()).isEqualTo(expectedDelegation.getFrom());
-        assertThat(actual.getInstitutionFromRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
+        List<BrokerResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
 
-        verify(delegationService, times(1))
-                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getProductId());
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.get(0));
+        assertEquals(response.get(0).getId(), institution.getId());
+        verify(institutionService, times(1))
+                .getInstitutionBrokers(productId, type);
         verifyNoMoreInteractions(institutionService);
     }
 
-    private Delegation dummyDelegation() {
-        Delegation delegation = new Delegation();
-        delegation.setFrom("from");
-        delegation.setTo("to");
-        delegation.setId("setId");
-        delegation.setProductId("setProductId");
-        delegation.setType(DelegationType.PT);
-        delegation.setInstitutionFromName("setInstitutionFromName");
-        delegation.setInstitutionFromRootName("setInstitutionFromRootName");
-        return delegation;
+    /**
+     * Method under test: {@link InstitutionController#getInstitutionBrokers(String, InstitutionType)}
+     */
+    @Test
+    void getInstitutionBrokersWithBadRequest() throws Exception {
+        // Given
+        final String productId = "test";
+        final String type = "FAKED-TYPE";
+
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{productId}/brokers/{institutionType}", productId, type);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isBadRequest());
+
+    }
+
+
+
+    @Test
+    void updateCreatedAt_invalidDate() throws Exception {
+        // Given
+        String institutionIdMock = "institutionId";
+        String productIdMock = "productId";
+        OffsetDateTime createdAtMock = OffsetDateTime.now().minusHours(10);
+        String createdAtString = createdAtMock.toString();
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                        .put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
+                        .param("createdAt", createdAtString)
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .accept(APPLICATION_JSON_VALUE);
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

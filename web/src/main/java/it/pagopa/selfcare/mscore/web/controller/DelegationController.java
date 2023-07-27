@@ -2,8 +2,10 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.DelegationService;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
@@ -16,6 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/delegations", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -47,5 +52,33 @@ public class DelegationController {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
         Delegation saved = delegationService.createDelegation(delegationMapper.toDelegation(delegation));
         return ResponseEntity.status(HttpStatus.CREATED).body(delegationMapper.toDelegationResponse(saved));
+    }
+
+
+
+    /**
+     * The function get delegations
+     *
+     * @param from String
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: List<DelegationResponse>
+     * * Code: 404, Message: Institution data not found, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     */
+    @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
+    @GetMapping()
+    public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                   @RequestParam(name = "from", required = false) String from,
+                                                                   @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                    @RequestParam(name = "to", required = false) String to,
+                                                                   @ApiParam("${swagger.mscore.product.model.id}")
+                                                                   @RequestParam(name = "productId", required = false) String productId) {
+
+        if(Objects.isNull(from) && Objects.isNull(to))
+            throw new InvalidRequestException("from or to must not be null!!", GenericError.GENERIC_ERROR.getCode());
+
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(from, to, productId).stream()
+                .map(delegationMapper::toDelegationResponse)
+                .collect(Collectors.toList()));
     }
 }
