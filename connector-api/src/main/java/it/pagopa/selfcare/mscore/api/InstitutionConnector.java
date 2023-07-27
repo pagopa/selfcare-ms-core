@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.api;
 
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -54,4 +55,6 @@ public interface InstitutionConnector {
     List<String> findByExternalIdsAndProductId(List<ValidInstitution> externalIds, String productId);
 
     Institution updateOnboardedProductCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);
+
+    List<Institution> findBrokers(String productId, InstitutionType type);
 }

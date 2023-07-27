@@ -6,18 +6,18 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperCustom;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,16 +41,26 @@ import java.util.stream.Collectors;
 @Api(tags = "Institution")
 @Slf4j
 public class InstitutionController {
+
     private final InstitutionService institutionService;
+    private final DelegationService delegationService;
     private final OnboardingResourceMapper onboardingResourceMapper;
     private final InstitutionResourceMapper institutionResourceMapper;
+    private final BrokerMapper brokerMapper;
+    private final DelegationMapper delegationMapper;
 
     public InstitutionController(InstitutionService institutionService,
                                  OnboardingResourceMapper onboardingResourceMapper,
-                                 InstitutionResourceMapper institutionResourceMapper) {
+                                 InstitutionResourceMapper institutionResourceMapper,
+                                 BrokerMapper brokerMapper,
+                                 DelegationService delegationService,
+                                 DelegationMapper delegationMapper) {
         this.institutionService = institutionService;
+        this.delegationService = delegationService;
         this.onboardingResourceMapper = onboardingResourceMapper;
         this.institutionResourceMapper = institutionResourceMapper;
+        this.delegationMapper = delegationMapper;
+        this.brokerMapper = brokerMapper;
     }
 
     /**
@@ -405,5 +416,23 @@ public class InstitutionController {
 
         log.trace("findFromProduct end");
         return ResponseEntity.ok().body(institutionListResponse);
+    }
+
+    @GetMapping(value = "/{productId}/brokers/{institutionType}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.institutions.brokers}", notes = "${swagger.mscore.institutions.getInstitutionBrokers}")
+    public Collection<BrokerResponse> getInstitutionBrokers(@ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                            @PathVariable("productId")
+                                                            String productId,
+                                                            @ApiParam("${swagger.mscore.institutions.model.type}")
+                                                            @PathVariable("institutionType")
+                                                            InstitutionType institutionType) {
+        log.trace("getInstitutionBrokers start");
+        log.debug("productId = {}, institutionType = {}", productId, institutionType);
+        List<Institution> institutions = institutionService.getInstitutionBrokers(productId, institutionType);
+        List<BrokerResponse> result = brokerMapper.toBrokers(institutions);
+        log.debug("getInstitutionBrokers result = {}", result);
+        log.trace("getInstitutionBrokers end");
+        return result;
     }
 }

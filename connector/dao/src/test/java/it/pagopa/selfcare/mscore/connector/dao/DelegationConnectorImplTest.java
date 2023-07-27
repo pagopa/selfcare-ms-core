@@ -15,6 +15,9 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.List;
+import java.util.Optional;
+
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,6 +55,52 @@ class DelegationConnectorImplTest {
         when(delegationRepository.save(any())).thenThrow(new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode()));
         assertThrows(MsCoreException.class, () -> delegationConnectorImpl.save(new Delegation()));
         verify(delegationRepository).save(any());
+    }
+
+    @Test
+    void testCheckIfExists() {
+        Delegation delegation = new Delegation();
+        delegation.setTo("to");
+        delegation.setFrom("from");
+        delegation.setType(DelegationType.PT);
+        delegation.setProductId("prod");
+        when(delegationRepository.findByFromAndToAndProductIdAndType(any(), any(), any(), any())).thenReturn(Optional.of(new DelegationEntity()));
+        boolean response = delegationConnectorImpl.checkIfExists(delegation);
+        assertTrue(response);
+
+    }
+
+    @Test
+    void find_shouldGetData() {
+        //Given
+        DelegationEntity delegationEntity = new DelegationEntity();
+        delegationEntity.setId("id");
+        delegationEntity.setProductId("productId");
+        delegationEntity.setType(DelegationType.PT);
+        delegationEntity.setTo("To");
+        delegationEntity.setFrom("From");
+        delegationEntity.setInstitutionFromName("setInstitutionFromName");
+        delegationEntity.setInstitutionFromRootName("setInstitutionFromRootName");
+
+        when(delegationRepository.find(any(), any())).
+                thenReturn(List.of(delegationEntity));
+
+        //When
+        List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(),
+                delegationEntity.getTo(), delegationEntity.getProductId());
+
+        //Then
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        Delegation actual = response.get(0);
+
+        assertEquals(actual.getId(), delegationEntity.getId());
+        assertEquals(actual.getType(), delegationEntity.getType());
+        assertEquals(actual.getProductId(), delegationEntity.getProductId());
+        assertEquals(actual.getTo(), delegationEntity.getTo());
+        assertEquals(actual.getFrom(), delegationEntity.getFrom());
+        assertEquals(actual.getInstitutionFromName(), delegationEntity.getInstitutionFromName());
+        assertEquals(actual.getInstitutionFromRootName(), delegationEntity.getInstitutionFromRootName());
     }
 
 }

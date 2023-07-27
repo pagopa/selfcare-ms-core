@@ -15,6 +15,7 @@ public class Delegation {
     private String id;
     private String from;
     private String institutionFromName;
+    private String institutionToName;
     private String institutionFromRootName;
     private DelegationType type;
     private String to;

@@ -46,7 +46,7 @@ class UserEventServiceTest {
     @Mock
     private KafkaTemplate<String, String> kafkaTemplateUsers;
     @InjectMocks
-    private UserEventService userEventService;
+    private UserEventServiceImpl userEventService;
     @Mock
     private KafkaPropertiesConfig kafkaPropertiesConfig;
     @Spy
