@@ -43,3 +43,7 @@ logging:
               MongoTemplate: DEBUG
   pattern:
     additional-info: ",%X{X-Client-Ip:-}]"
+
+core:
+  user-event-service:
+    type: ${CORE_USER_EVENT_SERVICE_TYPE:ignore}
