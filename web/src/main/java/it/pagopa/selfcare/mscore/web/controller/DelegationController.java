@@ -71,7 +71,7 @@ public class DelegationController {
     public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                    @RequestParam(name = "from", required = false) String from,
                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                    @RequestParam(name = "to", required = false) String to,
+                                                                   @RequestParam(name = "to", required = false) String to,
                                                                    @ApiParam("${swagger.mscore.product.model.id}")
                                                                    @RequestParam(name = "productId", required = false) String productId) {
 
