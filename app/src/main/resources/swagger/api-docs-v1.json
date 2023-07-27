@@ -4759,6 +4759,9 @@
           "institutionFromName" : {
             "type" : "string"
           },
+          "institutionToName" : {
+            "type" : "string"
+          },
           "productId" : {
             "type" : "string"
           },
@@ -4785,6 +4788,9 @@
             "type" : "string"
           },
           "institutionFromRootName" : {
+            "type" : "string"
+          },
+          "institutionToName" : {
             "type" : "string"
           },
           "productId" : {

@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,6 +55,19 @@ class DelegationConnectorImplTest {
         when(delegationRepository.save(any())).thenThrow(new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode()));
         assertThrows(MsCoreException.class, () -> delegationConnectorImpl.save(new Delegation()));
         verify(delegationRepository).save(any());
+    }
+
+    @Test
+    void testCheckIfExists() {
+        Delegation delegation = new Delegation();
+        delegation.setTo("to");
+        delegation.setFrom("from");
+        delegation.setType(DelegationType.PT);
+        delegation.setProductId("prod");
+        when(delegationRepository.findByFromAndToAndProductIdAndType(any(), any(), any(), any())).thenReturn(Optional.of(new DelegationEntity()));
+        boolean response = delegationConnectorImpl.checkIfExists(delegation);
+        assertTrue(response);
+
     }
 
     @Test
