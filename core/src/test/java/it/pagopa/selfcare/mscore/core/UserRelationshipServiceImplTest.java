@@ -17,7 +17,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -25,6 +28,9 @@ import static org.mockito.Mockito.*;
 class UserRelationshipServiceImplTest {
     @Mock
     private InstitutionService institutionService;
+
+    @Mock
+    private UserEventService userEventService;
 
     @Mock
     private OnboardingDao onboardingDao;
@@ -73,10 +79,17 @@ class UserRelationshipServiceImplTest {
      */
     @Test
     void testActivateRelationship() {
+        String relationshipId = UUID.randomUUID().toString();
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
-        userRelationshipServiceImpl.activateRelationship("42");
+        OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        UserBinding userBinding = mockInstance(new UserBinding());
+        OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setRelationshipId(relationshipId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        userRelationshipServiceImpl.activateRelationship(relationshipId);
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }
@@ -97,10 +110,17 @@ class UserRelationshipServiceImplTest {
      */
     @Test
     void testSuspendRelationship() {
+        String relationshipId = UUID.randomUUID().toString();
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
-        userRelationshipServiceImpl.suspendRelationship("42");
+        OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        UserBinding userBinding = mockInstance(new UserBinding());
+        OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setRelationshipId(relationshipId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        userRelationshipServiceImpl.suspendRelationship(relationshipId);
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }
@@ -121,10 +141,17 @@ class UserRelationshipServiceImplTest {
      */
     @Test
     void testDeleteRelationship() {
+        String relationshipId = UUID.randomUUID().toString();
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
-        userRelationshipServiceImpl.deleteRelationship("42");
+        OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        UserBinding userBinding = mockInstance(new UserBinding());
+        OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setRelationshipId(relationshipId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        userRelationshipServiceImpl.deleteRelationship(relationshipId);
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }

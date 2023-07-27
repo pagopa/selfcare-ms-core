@@ -44,6 +44,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final InstitutionService institutionService;
     private final UserService userService;
     private final UserRelationshipService userRelationshipService;
+    private final UserEventService userEventService;
     private final ContractService contractService;
     private final EmailService emailService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
@@ -58,7 +59,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  InstitutionService institutionService,
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
-                                 ContractService contractService,
+                                 UserEventService userEventService, ContractService contractService,
                                  EmailService emailService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
@@ -67,6 +68,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.institutionService = institutionService;
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
+        this.userEventService = userEventService;
         this.contractService = contractService;
         this.emailService = emailService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
@@ -109,18 +111,23 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
+    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId) {
+        return this.getOnboardingInfo(institutionId, null, null, userId);
+    }
 
+    @Override
+    public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
+        Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
-                .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType())
+                .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType(), request.getProductId(), institution)
                 .onboardingInstitution(request, principal);
     }
 
     @Override
     public void onboardingInstitutionComplete(OnboardingRequest request, SelfCareUser principal) {
-
+        Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
-                .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType())
+                .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType(), institution)
                 .onboardingInstitution(request, principal);
     }
     @Override
@@ -169,6 +176,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             contractService.deleteContract(fileName, token.getId());
         }
         contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token, QueueEvent.ADD);
+        userEventService.sendLegalTokenUserNotification(token);
         log.trace("completeOboarding end");
     }
 
@@ -196,7 +204,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            emailService.sendMail(pdf, institution, currentUser, request, token.getId(), true, institutionType);
+            emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), currentUser, request, token.getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -227,7 +235,9 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
-        return onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        List<RelationshipInfo> relationshipInfos = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        relationshipInfos.forEach(userEventService::sendOperatorUserNotification);
+        return relationshipInfos;
     }
 
     @Override
@@ -256,7 +266,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            emailService.sendMail(pdf, institution, user, request, rollback.getToken().getId(), false, institutionType);
+            emailService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, request, rollback.getToken().getId());
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }

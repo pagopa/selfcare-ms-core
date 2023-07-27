@@ -58,6 +58,9 @@ class SwaggerConfigTest {
     @MockBean
     MigrationService migrationService;
 
+    @MockBean
+    DelegationService delegationService;
+
     @Autowired
     private ObjectMapper objectMapper;
 

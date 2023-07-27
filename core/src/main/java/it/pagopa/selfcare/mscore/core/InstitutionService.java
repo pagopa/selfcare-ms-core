@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -69,4 +70,6 @@ public interface InstitutionService {
     List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 
     List<Institution> getInstitutionsByProductId(String productId, Integer page, Integer size);
+
+    List<Institution> getInstitutionBrokers(String productId, InstitutionType type);
 }

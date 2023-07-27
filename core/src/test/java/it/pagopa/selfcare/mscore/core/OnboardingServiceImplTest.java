@@ -57,6 +57,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private ContractService contractService;
+
+    @Mock
+    private UserService userService;
     @Mock
     private EmailService emailService;
 
@@ -73,7 +76,7 @@ class OnboardingServiceImplTest {
     private InstitutionService institutionService;
 
     @Mock
-    private UserService userService;
+    private UserEventService userEventService;
 
     @Mock
     private PagoPaSignatureConfig pagoPaSignatureConfig;
@@ -166,15 +169,7 @@ class OnboardingServiceImplTest {
 
         Institution institution = dummyInstitutionPa();
 
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setContract("START - getUser with id: {}");
-        onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(Env.ROOT);
-        onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRole("");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProduct.setStatus(RelationshipState.PENDING);
-        onboardedProduct.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = getOnboardedProduct();
 
         UserInstitutionBinding userBinding = new UserInstitutionBinding();
         userBinding.setInstitutionId("42");
@@ -195,6 +190,33 @@ class OnboardingServiceImplTest {
         assertTrue(onboarding1.isEmpty());
     }
 
+    /**
+     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
+     */
+    @Test
+    void testGetOnboardingInfoWithTwoParameters() {
+
+        Institution institution = dummyInstitutionPa();
+
+        OnboardedProduct onboardedProduct = getOnboardedProduct();
+
+        UserInstitutionBinding userBinding = new UserInstitutionBinding();
+        userBinding.setInstitutionId("42");
+        userBinding.setProducts(onboardedProduct);
+
+        UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
+        userInstitutionAggregation.setId("42");
+        userInstitutionAggregation.setBindings(userBinding);
+        userInstitutionAggregation.setInstitutions(List.of(institution));
+        when(userService.findUserInstitutionAggregation(any())).thenReturn(List.of(userInstitutionAggregation));
+        var actualOnboardingInfo = onboardingServiceImpl.getOnboardingInfo("42", null, null, "42");
+        assertEquals(1, actualOnboardingInfo.size());
+        OnboardingInfo getResult = actualOnboardingInfo.get(0);
+        Institution institution1 = getResult.getInstitution();
+        assertSame(institution, institution1);
+        List<Onboarding> onboarding1 = institution1.getOnboarding();
+        assertTrue(onboarding1.isEmpty());
+    }
 
     /**
      * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
@@ -352,6 +374,7 @@ class OnboardingServiceImplTest {
         request.setProductName("42");
         request.setInstitutionUpdate(new InstitutionUpdate());
         request.setBillingRequest(new Billing());
+        request.setSignContract(true);
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -404,7 +427,7 @@ class OnboardingServiceImplTest {
         verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegate, institution, request, null, null);
         verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
         verifyNoMoreInteractions(onboardingDao);
-        verify(emailService, times(1)).sendMail(file, institution, user, request, token.getId(), true, null);
+        verify(emailService, times(1)).sendMailWithContract(file, institution.getDigitalAddress(), user, request, token.getId());
     }
 
     @Test
@@ -459,13 +482,14 @@ class OnboardingServiceImplTest {
 
         Contract contract = new Contract();
         contract.setPath("Contract Template");
-        OnboardingRequest request = new OnboardingRequest();
-        request.setProductId("42");
-        request.setContract(contract);
-        request.setPricingPlan("C3");
-        request.setProductName("42");
-        request.setInstitutionUpdate(new InstitutionUpdate());
-        request.setBillingRequest(new Billing());
+        OnboardingRequest expectedRequest = new OnboardingRequest();
+        expectedRequest.setProductId("42");
+        expectedRequest.setContract(contract);
+        expectedRequest.setPricingPlan("C3");
+        expectedRequest.setProductName("42");
+        expectedRequest.setInstitutionUpdate(new InstitutionUpdate());
+        expectedRequest.setBillingRequest(new Billing());
+        expectedRequest.setSignContract(true);
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -508,7 +532,7 @@ class OnboardingServiceImplTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         when(productConnector.getProductById(any())).thenReturn(product);
 
-        doThrow(RuntimeException.class).when(emailService).sendMail(any(), any(), any(), any(), any(), anyBoolean(), any());
+        doThrow(RuntimeException.class).when(emailService).sendMailWithContract(any(), any(), any(), any(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
@@ -517,7 +541,7 @@ class OnboardingServiceImplTest {
         verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId(), EnumSet.allOf(User.Fields.class));
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
         verify(contractService, times(1)).extractTemplate(token.getContractTemplate());
-        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegateList, institution, request, null, null);
+        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegateList, institution, expectedRequest, null, null);
         verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
         verify(onboardingDao, times(1)).rollbackSecondStepOfUpdate((List.of(tokenUser.getUserId())), institution, token);
     }
@@ -1408,7 +1432,7 @@ class OnboardingServiceImplTest {
     @Test
     void shouldOnboardingInstitution() {
         OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any()))
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
                 .thenReturn(mockInstitutionStrategy);
         doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
 
@@ -1421,7 +1445,7 @@ class OnboardingServiceImplTest {
     @Test
     void shouldOnboardingInstitutionComplete() {
         OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(any()))
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(any(), any()))
                 .thenReturn(mockInstitutionStrategy);
         doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
 
@@ -1429,6 +1453,19 @@ class OnboardingServiceImplTest {
         onboardingRequest.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
 
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitutionComplete(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    private static OnboardedProduct getOnboardedProduct() {
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setContract("START - getUser with id: {}");
+        onboardedProduct.setCreatedAt(null);
+        onboardedProduct.setEnv(Env.ROOT);
+        onboardedProduct.setProductId("42");
+        onboardedProduct.setProductRole("");
+        onboardedProduct.setRole(PartyRole.MANAGER);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        onboardedProduct.setUpdatedAt(null);
+        return onboardedProduct;
     }
 
 

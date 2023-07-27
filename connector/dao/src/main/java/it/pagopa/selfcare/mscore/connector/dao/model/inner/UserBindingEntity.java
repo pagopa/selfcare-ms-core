@@ -16,5 +16,7 @@ public class UserBindingEntity {
 
     @Indexed(unique = true)
     private String institutionId;
+    private String institutionName;
+    private String institutionRootName;
     private List<OnboardedProductEntity> products;
 }

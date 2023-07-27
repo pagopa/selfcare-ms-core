@@ -425,6 +425,11 @@ public class InstitutionServiceImpl implements InstitutionService {
         return relationshipInfoList;
     }
 
+    @Override
+    public List<Institution> getInstitutionBrokers(String productId, InstitutionType type) {
+        return institutionConnector.findBrokers(productId, type);
+    }
+
     protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
 
         if (roles != null && !roles.isEmpty() && !roles.contains(product.getRole())) {
