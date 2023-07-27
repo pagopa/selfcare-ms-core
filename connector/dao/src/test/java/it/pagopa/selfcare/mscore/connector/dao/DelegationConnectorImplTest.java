@@ -72,7 +72,8 @@ class DelegationConnectorImplTest {
                 thenReturn(List.of(delegationEntity));
 
         //When
-        List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(), delegationEntity.getProductId());
+        List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(),
+                delegationEntity.getTo(), delegationEntity.getProductId());
 
         //Then
         assertNotNull(response);
