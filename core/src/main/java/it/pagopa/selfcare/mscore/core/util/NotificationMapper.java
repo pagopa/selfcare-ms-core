@@ -7,7 +7,9 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+import java.util.UUID;
+
+@Mapper(componentModel = "spring", imports = UUID.class)
 public interface NotificationMapper {
 
     @Mapping(source = "relationshipInfo.institution.id", target = "institutionId")
@@ -21,5 +23,6 @@ public interface NotificationMapper {
     @Mapping(source  = "token.id", target = "onboardingTokenId")
     @Mapping(source  = "token.createdAt", target = "createdAt")
     @Mapping(source  = "token.updatedAt", target = "updatedAt")
+    @Mapping(target = "id", expression = "java(UUID.randomUUID().toString())")
     UserNotificationToSend setNotificationDetailsFromToken(Token token, UserToNotify user);
 }
