@@ -6186,6 +6186,9 @@
           "productId" : {
             "type" : "string"
           },
+          "productTitle" : {
+            "type" : "string"
+          },
           "users" : {
             "type" : "array",
             "items" : {
@@ -6424,6 +6427,9 @@
           "role" : {
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "roleLabel" : {
+            "type" : "string"
           },
           "surname" : {
             "type" : "string"
@@ -6814,6 +6820,9 @@
           "role" : {
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "roleLabel" : {
+            "type" : "string"
           },
           "surname" : {
             "type" : "string"

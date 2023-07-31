@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.connector.azure_storage.config;
+package it.pagopa.selfcare.mscore.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,6 +18,8 @@ public class AzureStorageConfig {
     private String endpointSuffix;
     private String accountKey;
 
-    private String contractsTemplateContainer;
+    private String container;
     private String contractPath;
+
+    private String checkoutTemplateContainer;
 }

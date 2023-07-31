@@ -45,7 +45,7 @@ class OnboardingInstitutionStrategyTest {
     @Mock
     private UserService userService;
     @Mock
-    private EmailService emailService;
+    private NotificationService notificationService;
     @Mock
     private InstitutionService institutionService;
     @Mock
@@ -54,7 +54,7 @@ class OnboardingInstitutionStrategyTest {
     @BeforeEach
     void beforeAll() {
         strategyFactory = new OnboardingInstitutionStrategyFactory(onboardingDao,
-                contractService,userService,emailService,institutionService, coreConfig);
+                contractService,userService, institutionService, coreConfig, notificationService);
     }
 
 
