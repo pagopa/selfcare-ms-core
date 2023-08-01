@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.web.model.user;
 
-import it.pagopa.selfcare.mscore.web.model.onboarding.ProductInfo;
 import lombok.Data;
 
 import java.util.List;

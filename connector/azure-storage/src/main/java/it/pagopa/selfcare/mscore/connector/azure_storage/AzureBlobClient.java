@@ -9,7 +9,7 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
-import it.pagopa.selfcare.mscore.connector.azure_storage.config.AzureStorageConfig;
+import it.pagopa.selfcare.mscore.config.AzureStorageConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
@@ -51,11 +51,12 @@ class AzureBlobClient implements FileStorageConnector {
                 azureStorageConfig.getAccountName());
     }
 
+    @Override
     public ResourceResponse getFile(String fileName) {
         log.info("START - getFile for path: {}", fileName);
         try {
             ResourceResponse response = new ResourceResponse();
-            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContractsTemplateContainer());
+            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
             final CloudBlockBlob blob = blobContainer.getBlockBlobReference(fileName);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             BlobProperties properties = blob.getProperties();
@@ -82,7 +83,7 @@ class AzureBlobClient implements FileStorageConnector {
     public String getTemplateFile(String templateName) {
         log.info("START - getTemplateFile for template: {}", templateName);
         try {
-            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContractsTemplateContainer());
+            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
             final CloudBlockBlob blob = blobContainer.getBlockBlobReference(templateName);
             String downloaded = blob.downloadText();
             log.info("END - getTemplateFile - Downloaded {}", templateName);
@@ -100,7 +101,7 @@ class AzureBlobClient implements FileStorageConnector {
         String fileName = Paths.get(azureStorageConfig.getContractPath(), id, contract.getOriginalFilename()).toString();
         log.debug("uploadContract fileName = {}, contentType = {}", fileName, contract.getContentType());
         try {
-            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContractsTemplateContainer());
+            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
             final CloudBlockBlob blob = blobContainer.getBlockBlobReference(fileName);
             blob.getProperties().setContentType(contract.getContentType());
             blob.upload(contract.getInputStream(), contract.getInputStream().available());
@@ -118,7 +119,7 @@ class AzureBlobClient implements FileStorageConnector {
         log.info("START - deleteContract for token: {}", tokenId);
 
         try {
-            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContractsTemplateContainer());
+            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
             final CloudBlockBlob blob = blobContainer.getBlockBlobReference(fileName);
             blob.deleteIfExists();
             log.info("Deleted {}", fileName);

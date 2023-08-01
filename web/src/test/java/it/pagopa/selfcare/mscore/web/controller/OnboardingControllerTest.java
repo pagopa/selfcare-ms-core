@@ -86,6 +86,7 @@ class OnboardingControllerTest {
         OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
         request.setInstitutionId("id");
         request.setProductId("id");
+        request.setProductTitle("productTitle");
         List<Person> personList = new ArrayList<>();
         personList.add(new Person());
         request.setUsers(personList);
@@ -109,6 +110,7 @@ class OnboardingControllerTest {
         OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
         request.setInstitutionId("id");
         request.setProductId("id");
+        request.setProductTitle("productTitle");
         List<Person> personList = new ArrayList<>();
         personList.add(new Person());
         request.setUsers(personList);
@@ -471,6 +473,7 @@ class OnboardingControllerTest {
         onboardingInstitutionOperatorsRequest.setInstitutionId("42");
         onboardingInstitutionOperatorsRequest.setProductId("42");
         onboardingInstitutionOperatorsRequest.setUsers(personList);
+        onboardingInstitutionOperatorsRequest.setProductTitle("productTitle");
         String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionOperatorsRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/operators")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -554,6 +557,7 @@ class OnboardingControllerTest {
         onboardingInstitutionOperatorsRequest.setInstitutionId("42");
         onboardingInstitutionOperatorsRequest.setProductId("42");
         onboardingInstitutionOperatorsRequest.setUsers(personList);
+        onboardingInstitutionOperatorsRequest.setProductTitle("productTitle");
         String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionOperatorsRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/subdelegates")
                 .contentType(MediaType.APPLICATION_JSON)
