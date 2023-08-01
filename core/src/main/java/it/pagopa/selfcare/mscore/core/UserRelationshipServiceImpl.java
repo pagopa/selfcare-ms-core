@@ -38,25 +38,25 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     }
 
     @Override
-    public void activateRelationship(String relationshipId) {
+    public void activateRelationship(String relationshipId,String loggedUserName, String loggedUserSurname) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.ACTIVE);
             sendRelationshipEventNotification(user, relationshipId);
-            userNotificationService.sendActivatedUserNotification(relationshipId, user.getId(), userBinding);
+            userNotificationService.sendActivatedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
         }
     }
 
     @Override
-    public void suspendRelationship(String relationshipId) {
+    public void suspendRelationship(String relationshipId, String loggedUserName, String loggedUserSurname) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.SUSPENDED);
-            userNotificationService.sendSuspendedUserNotification(relationshipId, user.getId(), userBinding);
+            userNotificationService.sendSuspendedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
             sendRelationshipEventNotification(user, relationshipId);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
@@ -68,12 +68,12 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         userEventService.sendOperatorUserNotification(relationshipInfo);
     }
     @Override
-    public void deleteRelationship(String relationshipId) {
+    public void deleteRelationship(String relationshipId, String loggedUserName, String loggedUserSurname) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.DELETED);
         sendRelationshipEventNotification(user, relationshipId);
-        userNotificationService.sendDeletedUserNotification(relationshipId, user.getId(), userBinding);
+        userNotificationService.sendDeletedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
     }
 
     @Override
