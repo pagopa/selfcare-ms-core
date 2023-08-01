@@ -132,7 +132,7 @@ class DelegationControllerTest {
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/delegations?from={from}&to={to}&productId={productId}", expectedDelegation.getFrom(),
+                .get("/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}", expectedDelegation.getFrom(),
                         expectedDelegation.getTo(), expectedDelegation.getProductId());
         MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
                 .build()
