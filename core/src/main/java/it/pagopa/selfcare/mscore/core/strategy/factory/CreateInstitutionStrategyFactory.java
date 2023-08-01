@@ -34,7 +34,7 @@ public class CreateInstitutionStrategyFactory {
 
     private final Function<CreateInstitutionStrategyInput, String> createExternalId = strategyInput -> Objects.isNull(strategyInput.getSubunitCode())
             ? strategyInput.getTaxCode()
-            : String.format("%s#%s", strategyInput.getTaxCode(), strategyInput.getSubunitCode());
+            : String.format("%s_%s", strategyInput.getTaxCode(), strategyInput.getSubunitCode());
 
     public CreateInstitutionStrategyFactory(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionMapper institutionMapper) {
         this.institutionConnector = institutionConnector;
