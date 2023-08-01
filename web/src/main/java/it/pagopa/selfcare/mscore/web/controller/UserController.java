@@ -67,7 +67,7 @@ public class UserController {
         log.info("Activating relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(ACTIVATE_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        userRelationshipService.activateRelationship(relationshipId, selfCareUser.getName(), selfCareUser.getSurname());
+        userRelationshipService.activateRelationship(relationshipId, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.noContent().build();
     }
 
@@ -89,7 +89,7 @@ public class UserController {
         log.info("Suspending relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(SUSPEND_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        userRelationshipService.suspendRelationship(relationshipId, selfCareUser.getName(), selfCareUser.getSurname());
+        userRelationshipService.suspendRelationship(relationshipId, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.noContent().build();
     }
 
@@ -111,7 +111,7 @@ public class UserController {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        userRelationshipService.deleteRelationship(relationshipId, selfCareUser.getName(), selfCareUser.getSurname());
+        userRelationshipService.deleteRelationship(relationshipId, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.noContent().build();
     }
 
