@@ -148,11 +148,11 @@ class DelegationControllerTest {
         assertThat(response.size()).isEqualTo(1);
         DelegationResponse actual = response.get(0);
         assertThat(actual.getId()).isEqualTo(expectedDelegation.getId());
-        assertThat(actual.getInstitutionFromName()).isEqualTo(expectedDelegation.getInstitutionFromName());
-        assertThat(actual.getTo()).isEqualTo(expectedDelegation.getTo());
+        assertThat(actual.getInstitutionName()).isEqualTo(expectedDelegation.getInstitutionFromName());
+        assertThat(actual.getBrokerId()).isEqualTo(expectedDelegation.getTo());
         assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
-        assertThat(actual.getFrom()).isEqualTo(expectedDelegation.getFrom());
-        assertThat(actual.getInstitutionFromRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
+        assertThat(actual.getInstitutionId()).isEqualTo(expectedDelegation.getFrom());
+        assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
 
         verify(delegationService, times(1))
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId());

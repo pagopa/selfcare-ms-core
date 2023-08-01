@@ -4778,25 +4778,25 @@
         "title" : "DelegationResponse",
         "type" : "object",
         "properties" : {
-          "from" : {
+          "brokerId" : {
+            "type" : "string"
+          },
+          "brokerName" : {
             "type" : "string"
           },
           "id" : {
             "type" : "string"
           },
-          "institutionFromName" : {
+          "institutionId" : {
             "type" : "string"
           },
-          "institutionFromRootName" : {
+          "institutionName" : {
             "type" : "string"
           },
-          "institutionToName" : {
+          "institutionRootName" : {
             "type" : "string"
           },
           "productId" : {
-            "type" : "string"
-          },
-          "to" : {
             "type" : "string"
           },
           "type" : {
