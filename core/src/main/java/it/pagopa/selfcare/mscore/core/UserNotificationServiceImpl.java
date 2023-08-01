@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.Assert;
@@ -37,6 +40,11 @@ public class UserNotificationServiceImpl implements UserNotificationService {
     private static final String A_PRODUCT_TITLE_IS_REQUIRED = "A product Title is required";
     private static final String INSTITUTION_ID_IS_REQUIRED = "An institution id is required";
     private static final String PRODUCT_ROLES_ARE_REQUIRED = "ProductRoles are required";
+
+    private static final String NAME_IS_REQUIRED = "RequesterName is required";
+
+    private static final String SURNAME_IS_REQUIRED = "RequesterSurname is required";
+
 
     private final Configuration freemarkerConfig;
     private final NotificationServiceConnector notificationConnector;
@@ -66,19 +74,24 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         Assert.notNull(institution.getId(), INSTITUTION_ID_IS_REQUIRED);
         Assert.notNull(productTitle, A_PRODUCT_TITLE_IS_REQUIRED);
         Assert.notEmpty(roleLabels, PRODUCT_ROLES_ARE_REQUIRED);
-        User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        User loggedUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        Assert.notNull(loggedUser.getName(), NAME_IS_REQUIRED);
+        Assert.notNull(loggedUser.getFamilyName(), SURNAME_IS_REQUIRED);
+
+        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        Assert.notNull(user.getName(), NAME_IS_REQUIRED);
+        Assert.notNull(user.getFamilyName(), SURNAME_IS_REQUIRED);
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
         Assert.notNull(user.getWorkContacts().get(institution.getId()), String.format("WorkContacts for institution %s is required to get email", institution.getId()));
 
         String email = user.getWorkContacts().get(institution.getId()).getEmail();
         Assert.isTrue(StringUtils.hasText(email), "Email is required");
 
-        Assert.notNull(user.getName(), "RequesterName is required");
-        Assert.notNull(user.getFamilyName(), "RequesterSurname is required");
-
         Map<String, String> dataModel = new HashMap<>();
-        dataModel.put("requesterName", user.getName());
-        dataModel.put("requesterSurname", user.getFamilyName());
+        dataModel.put("requesterName", loggedUser.getName());
+        dataModel.put("requesterSurname", loggedUser.getFamilyName());
 
         sendCreateNotification(institution.getDescription(), productTitle, email, roleLabels, dataModel);
         log.trace("sendAddedProductRoleNotification start");
@@ -139,6 +152,12 @@ public class UserNotificationServiceImpl implements UserNotificationService {
     private void sendRelationshipBasedNotification(String relationshipId, String userId, UserBinding binding, String templateName, String subject) {
         Assert.notNull(relationshipId, "A relationship Id is required");
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        User loggedUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        Assert.notNull(loggedUser.getName(), NAME_IS_REQUIRED);
+        Assert.notNull(loggedUser.getFamilyName(), SURNAME_IS_REQUIRED);
+
         User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
         Assert.notNull(user.getWorkContacts().get(binding.getInstitutionId()), String.format("WorkContacts for institution %s is required to get email", binding.getInstitutionId()));
@@ -146,8 +165,8 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         String email = user.getWorkContacts().get(binding.getInstitutionId()).getEmail();
         Assert.isTrue(StringUtils.hasText(email), "Email is required");
 
-        Assert.notNull(user.getName(), "RequesterName is required");
-        Assert.notNull(user.getFamilyName(), "RequesterSurname is required");
+        Assert.notNull(user.getName(), NAME_IS_REQUIRED);
+        Assert.notNull(user.getFamilyName(), SURNAME_IS_REQUIRED);
 
         Institution institution = institutionService.retrieveInstitutionById(binding.getInstitutionId());
         Assert.notNull(institution.getDescription(), "An institution description is required");
@@ -168,8 +187,8 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         dataModel.put("productName", product.getTitle());
         dataModel.put("productRole", roleLabel.orElse("no_role_found"));
         dataModel.put("institutionName", institution.getDescription());
-        dataModel.put("requesterName", user.getName());
-        dataModel.put("requesterSurname", user.getFamilyName());
+        dataModel.put("requesterName", loggedUser.getName());
+        dataModel.put("requesterSurname", loggedUser.getFamilyName());
 
         sendNotification(email, templateName, subject, dataModel);
     }
