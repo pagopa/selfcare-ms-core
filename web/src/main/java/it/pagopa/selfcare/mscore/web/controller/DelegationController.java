@@ -60,7 +60,7 @@ public class DelegationController {
     /**
      * The function get delegations
      *
-     * @param from String
+     * @param institutionId String
      * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: List<DelegationResponse>
      * * Code: 404, Message: Institution data not found, DataType: Problem
@@ -69,16 +69,16 @@ public class DelegationController {
     @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
     @GetMapping()
     public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                   @RequestParam(name = "from", required = false) String from,
+                                                                   @RequestParam(name = "institutionId", required = false) String institutionId,
                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                   @RequestParam(name = "to", required = false) String to,
+                                                                   @RequestParam(name = "brokerId", required = false) String brokerId,
                                                                    @ApiParam("${swagger.mscore.product.model.id}")
                                                                    @RequestParam(name = "productId", required = false) String productId) {
 
-        if(Objects.isNull(from) && Objects.isNull(to))
-            throw new InvalidRequestException("from or to must not be null!!", GenericError.GENERIC_ERROR.getCode());
+        if(Objects.isNull(institutionId) && Objects.isNull(brokerId))
+            throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(from, to, productId).stream()
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
