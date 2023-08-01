@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
@@ -20,11 +21,11 @@ import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
@@ -61,10 +62,12 @@ public class UserController {
     @ApiOperation(value = "${swagger.mscore.relationship.activate}", notes = "${swagger.mscore.relationship.activate}")
     @PostMapping("/relationships/{relationshipId}/activate")
     public ResponseEntity<Void> activateRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                     @PathVariable("relationshipId") String relationshipId) {
+                                                     @PathVariable("relationshipId") String relationshipId,
+                                                     Authentication authentication) {
         log.info("Activating relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(ACTIVATE_RELATIONSHIP_ERROR);
-        userRelationshipService.activateRelationship(relationshipId);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        userRelationshipService.activateRelationship(relationshipId, selfCareUser.getName(), selfCareUser.getSurname());
         return ResponseEntity.noContent().build();
     }
 
@@ -81,10 +84,12 @@ public class UserController {
     @ApiOperation(value = "${swagger.mscore.relationship.suspend}", notes = "${swagger.mscore.relationship.suspend}")
     @PostMapping("/relationships/{relationshipId}/suspend")
     public ResponseEntity<Void> suspendRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                    @PathVariable("relationshipId") String relationshipId) {
+                                                    @PathVariable("relationshipId") String relationshipId,
+                                                    Authentication authentication) {
         log.info("Suspending relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(SUSPEND_RELATIONSHIP_ERROR);
-        userRelationshipService.suspendRelationship(relationshipId);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        userRelationshipService.suspendRelationship(relationshipId, selfCareUser.getName(), selfCareUser.getSurname());
         return ResponseEntity.noContent().build();
     }
 
@@ -101,10 +106,12 @@ public class UserController {
     @ApiOperation(value = "${swagger.mscore.relationship.delete}", notes = "${swagger.mscore.relationship.delete}")
     @DeleteMapping("/relationships/{relationshipId}")
     public ResponseEntity<Void> deleteRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                   @PathVariable("relationshipId") String relationshipId) {
+                                                   @PathVariable("relationshipId") String relationshipId,
+                                                   Authentication authentication) {
         log.info("Getting relationship {}", relationshipId);
         CustomExceptionMessage.setCustomMessage(GET_RELATIONSHIP_ERROR);
-        userRelationshipService.deleteRelationship(relationshipId);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        userRelationshipService.deleteRelationship(relationshipId, selfCareUser.getName(), selfCareUser.getSurname());
         return ResponseEntity.noContent().build();
     }
 

@@ -28,6 +28,7 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegal
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +47,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
@@ -80,9 +82,18 @@ class OnboardingControllerTest {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
+    @BeforeEach
+    void resetContext() {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+    }
+
 
     @Test
     void onboardingInstitutionOperators() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
         request.setInstitutionId("id");
         request.setProductId("id");
@@ -92,10 +103,11 @@ class OnboardingControllerTest {
         request.setUsers(personList);
         String content = (new ObjectMapper()).writeValueAsString(request);
 
-        when(onboardingService.onboardingOperators(any(), any())).thenReturn(new ArrayList<>());
+        when(onboardingService.onboardingOperators(any(), any(), any(), any())).thenReturn(new ArrayList<>());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/onboarding/operators")
+                .principal(authentication)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -107,6 +119,9 @@ class OnboardingControllerTest {
 
     @Test
     void onboardingInstitutionSubDelegate() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
         request.setInstitutionId("id");
         request.setProductId("id");
@@ -115,10 +130,11 @@ class OnboardingControllerTest {
         personList.add(new Person());
         request.setUsers(personList);
         String content = (new ObjectMapper()).writeValueAsString(request);
-        when(onboardingService.onboardingOperators(any(), any())).thenReturn(new ArrayList<>());
+        when(onboardingService.onboardingOperators(any(), any(), any(), any())).thenReturn(new ArrayList<>());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/onboarding/subdelegates")
+                .principal(authentication)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -403,7 +419,7 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionOperators() throws Exception {
@@ -422,12 +438,15 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionOperators2() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         when(onboardingService.onboardingOperators(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+                org.mockito.Mockito.any(), any(), any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -476,6 +495,7 @@ class OnboardingControllerTest {
         onboardingInstitutionOperatorsRequest.setProductTitle("productTitle");
         String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionOperatorsRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/operators")
+                .principal(authentication)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
         MockMvcBuilders.standaloneSetup(onboardingController)
@@ -487,7 +507,7 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionSubDelegate() throws Exception {
@@ -506,12 +526,15 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionSubDelegate2() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         when(onboardingService.onboardingOperators(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+                org.mockito.Mockito.any(), any(), any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -560,6 +583,7 @@ class OnboardingControllerTest {
         onboardingInstitutionOperatorsRequest.setProductTitle("productTitle");
         String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionOperatorsRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/subdelegates")
+                .principal(authentication)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
         MockMvcBuilders.standaloneSetup(onboardingController)

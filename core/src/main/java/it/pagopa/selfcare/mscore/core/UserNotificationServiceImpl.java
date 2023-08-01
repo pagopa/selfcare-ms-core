@@ -38,6 +38,11 @@ public class UserNotificationServiceImpl implements UserNotificationService {
     private static final String INSTITUTION_ID_IS_REQUIRED = "An institution id is required";
     private static final String PRODUCT_ROLES_ARE_REQUIRED = "ProductRoles are required";
 
+    private static final String NAME_IS_REQUIRED = "RequesterName is required";
+
+    private static final String SURNAME_IS_REQUIRED = "RequesterSurname is required";
+
+
     private final Configuration freemarkerConfig;
     private final NotificationServiceConnector notificationConnector;
     private final ProductConnector productsConnector;
@@ -60,25 +65,27 @@ public class UserNotificationServiceImpl implements UserNotificationService {
 
     @Override
     @Async
-    public void sendAddedProductRoleNotification(String userId, Institution institution, String productTitle, List<String> roleLabels) {
+    public void sendAddedProductRoleNotification(String userId, Institution institution, String productTitle, List<String> roleLabels, String loggedUserName, String loggedUserSurname) {
         log.trace("sendAddedProductRoleNotification start");
         log.debug("sendAddedProductRoleNotification institutionId = {}, productTitle = {}, userId = {}, productRoles = {}", institution.getId(), productTitle, userId, roleLabels);
         Assert.notNull(institution.getId(), INSTITUTION_ID_IS_REQUIRED);
         Assert.notNull(productTitle, A_PRODUCT_TITLE_IS_REQUIRED);
         Assert.notEmpty(roleLabels, PRODUCT_ROLES_ARE_REQUIRED);
+        Assert.notNull(loggedUserName, NAME_IS_REQUIRED);
+        Assert.notNull(loggedUserSurname, SURNAME_IS_REQUIRED);
+
         User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
+        Assert.notNull(user.getName(), NAME_IS_REQUIRED);
+        Assert.notNull(user.getFamilyName(), SURNAME_IS_REQUIRED);
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
         Assert.notNull(user.getWorkContacts().get(institution.getId()), String.format("WorkContacts for institution %s is required to get email", institution.getId()));
 
         String email = user.getWorkContacts().get(institution.getId()).getEmail();
         Assert.isTrue(StringUtils.hasText(email), "Email is required");
 
-        Assert.notNull(user.getName(), "RequesterName is required");
-        Assert.notNull(user.getFamilyName(), "RequesterSurname is required");
-
         Map<String, String> dataModel = new HashMap<>();
-        dataModel.put("requesterName", user.getName());
-        dataModel.put("requesterSurname", user.getFamilyName());
+        dataModel.put("requesterName", loggedUserName);
+        dataModel.put("requesterSurname", loggedUserSurname);
 
         sendCreateNotification(institution.getDescription(), productTitle, email, roleLabels, dataModel);
         log.trace("sendAddedProductRoleNotification start");
@@ -108,36 +115,38 @@ public class UserNotificationServiceImpl implements UserNotificationService {
 
     @Override
     @Async
-    public void sendActivatedUserNotification(String relationshipId, String userId, UserBinding binding) {
+    public void sendActivatedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname) {
         log.trace("sendActivatedUserNotification start");
         log.debug("sendActivatedUserNotification relationshipId = {}", relationshipId);
-        sendRelationshipBasedNotification(relationshipId, userId, binding, ACTIVATE_TEMPLATE, ACTIVATE_SUBJECT);
+        sendRelationshipBasedNotification(relationshipId, userId, binding, ACTIVATE_TEMPLATE, ACTIVATE_SUBJECT, loggedUserName, loggedUserSurname);
         log.debug("sendActivatedUserNotification end");
     }
 
 
     @Override
     @Async
-    public void sendDeletedUserNotification(String relationshipId, String userId, UserBinding binding) {
+    public void sendDeletedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname) {
         log.trace("sendDeletedUserNotification start");
         log.debug("sendDeletedUserNotification relationshipId = {}", relationshipId);
-        sendRelationshipBasedNotification(relationshipId, userId, binding, DELETE_TEMPLATE, DELETE_SUBJECT);
+        sendRelationshipBasedNotification(relationshipId, userId, binding, DELETE_TEMPLATE, DELETE_SUBJECT, loggedUserName, loggedUserSurname);
         log.debug("sendDeletedUserNotification end");
     }
 
 
     @Override
     @Async
-    public void sendSuspendedUserNotification(String relationshipId, String userId, UserBinding binding) {
+    public void sendSuspendedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname) {
         log.trace("sendSuspendedUserNotification start");
         log.debug("sendSuspendedUserNotification relationshipId = {}", relationshipId);
-        sendRelationshipBasedNotification(relationshipId, userId, binding, SUSPEND_TEMPLATE, SUSPEND_SUBJECT);
+        sendRelationshipBasedNotification(relationshipId, userId, binding, SUSPEND_TEMPLATE, SUSPEND_SUBJECT, loggedUserName, loggedUserSurname);
         log.debug("sendSuspendedUserNotification end");
     }
 
 
-    private void sendRelationshipBasedNotification(String relationshipId, String userId, UserBinding binding, String templateName, String subject) {
+    private void sendRelationshipBasedNotification(String relationshipId, String userId, UserBinding binding, String templateName, String subject, String loggedUserName, String loggedUserSurname){
         Assert.notNull(relationshipId, "A relationship Id is required");
+        Assert.notNull(loggedUserName, NAME_IS_REQUIRED);
+        Assert.notNull(loggedUserSurname, SURNAME_IS_REQUIRED);
 
         User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
@@ -146,8 +155,8 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         String email = user.getWorkContacts().get(binding.getInstitutionId()).getEmail();
         Assert.isTrue(StringUtils.hasText(email), "Email is required");
 
-        Assert.notNull(user.getName(), "RequesterName is required");
-        Assert.notNull(user.getFamilyName(), "RequesterSurname is required");
+        Assert.notNull(user.getName(), NAME_IS_REQUIRED);
+        Assert.notNull(user.getFamilyName(), SURNAME_IS_REQUIRED);
 
         Institution institution = institutionService.retrieveInstitutionById(binding.getInstitutionId());
         Assert.notNull(institution.getDescription(), "An institution description is required");
@@ -168,8 +177,8 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         dataModel.put("productName", product.getTitle());
         dataModel.put("productRole", roleLabel.orElse("no_role_found"));
         dataModel.put("institutionName", institution.getDescription());
-        dataModel.put("requesterName", user.getName());
-        dataModel.put("requesterSurname", user.getFamilyName());
+        dataModel.put("requesterName", loggedUserName);
+        dataModel.put("requesterSurname", loggedUserSurname);
 
         sendNotification(email, templateName, subject, dataModel);
     }

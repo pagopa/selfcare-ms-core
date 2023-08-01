@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
@@ -71,7 +72,7 @@ class UserNotificationServiceImplTest {
         when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
         Template template = mock(Template.class);
         when(freemarkerConfig.getTemplate(any())).thenReturn(template);
-        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels));
+        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels, "name","surname"));
     }
 
 
@@ -97,7 +98,7 @@ class UserNotificationServiceImplTest {
         when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
         Template template = mock(Template.class);
         when(freemarkerConfig.getTemplate(any())).thenReturn(template);
-        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels));
+        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels, "name","surname"));
     }
 
     @Test
@@ -149,7 +150,7 @@ class UserNotificationServiceImplTest {
 
         when(productsConnector.getProductById(any())).thenReturn(product);
 
-        assertThrows(MailPreparationException.class, () -> userNotificationService.sendDeletedUserNotification("id","userid",userBinding));
+        assertThrows(MailPreparationException.class, () -> userNotificationService.sendDeletedUserNotification("id","userid",userBinding, "name","surname"));
     }
 
     @Test
@@ -201,12 +202,12 @@ class UserNotificationServiceImplTest {
 
         when(productsConnector.getProductById(any())).thenReturn(product);
 
-        assertThrows(MailPreparationException.class, () -> userNotificationService.sendActivatedUserNotification("id","userid",userBinding));
+        assertThrows(MailPreparationException.class, () -> userNotificationService.sendActivatedUserNotification("id","userid",userBinding,"name","surname"));
     }
 
 
     @Test
-    void sendSuspendedUserNotification(){
+    void sendSuspendedUserNotification() throws JsonProcessingException {
         User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
@@ -254,6 +255,6 @@ class UserNotificationServiceImplTest {
 
         when(productsConnector.getProductById(any())).thenReturn(product);
 
-        assertThrows(MailPreparationException.class, () -> userNotificationService.sendSuspendedUserNotification("id","userid",userBinding));
+        assertThrows(MailPreparationException.class, () -> userNotificationService.sendSuspendedUserNotification("id","userid",userBinding, "name","surname"));
     }
 }
