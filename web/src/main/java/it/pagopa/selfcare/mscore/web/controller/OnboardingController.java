@@ -277,7 +277,7 @@ public class OnboardingController {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATORS_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR, selfCareUser.getName(), selfCareUser.getSurname());
+        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 
@@ -298,7 +298,7 @@ public class OnboardingController {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE, selfCareUser.getName(), selfCareUser.getSurname());
+        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 
