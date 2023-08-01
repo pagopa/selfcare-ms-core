@@ -6,11 +6,11 @@ import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import java.util.List;
 public interface UserNotificationService {
 
-    void sendActivatedUserNotification(String relationshipId, String userId, UserBinding binding);
+    void sendActivatedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname);
 
-    void sendDeletedUserNotification(String relationshipId, String userId, UserBinding binding);
+    void sendDeletedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname);
 
-    void sendSuspendedUserNotification(String relationshipId, String userId, UserBinding binding);
+    void sendSuspendedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname);
 
-    void sendAddedProductRoleNotification(String userId, Institution institution, String productTitle, List<String> roleLabels);
+    void sendAddedProductRoleNotification(String userId, Institution institution, String productTitle, List<String> roleLabels, String loggedUserName, String loggedUserSurname);
 }

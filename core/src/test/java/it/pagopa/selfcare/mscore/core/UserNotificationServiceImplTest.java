@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
@@ -15,16 +14,12 @@ import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailPreparationException;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.request.RequestContextHolder;
 
 import java.io.IOException;
 import java.util.*;
@@ -56,18 +51,9 @@ class UserNotificationServiceImplTest {
     @Mock
     private InstitutionService institutionService;
 
-    @BeforeEach
-    void resetContext() {
-        SecurityContextHolder.clearContext();
-        RequestContextHolder.resetRequestAttributes();
-    }
-
 
     @Test
     void sendAddedProductRoleNotification() throws IOException {
-        SelfCareUser selfCareUser = SelfCareUser.builder("id").build();
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(selfCareUser, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
         Institution institution = new Institution();
         institution.setId("id");
         List<String> labels = new ArrayList<>();
@@ -86,15 +72,12 @@ class UserNotificationServiceImplTest {
         when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
         Template template = mock(Template.class);
         when(freemarkerConfig.getTemplate(any())).thenReturn(template);
-        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels));
+        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels, "name","surname"));
     }
 
 
     @Test
     void sendAddedProductRoleNotification2() throws IOException {
-        SelfCareUser selfCareUser = SelfCareUser.builder("id").build();
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(selfCareUser, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
         Institution institution = new Institution();
         institution.setId("id");
         List<String> labels = new ArrayList<>();
@@ -115,14 +98,11 @@ class UserNotificationServiceImplTest {
         when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
         Template template = mock(Template.class);
         when(freemarkerConfig.getTemplate(any())).thenReturn(template);
-        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels));
+        assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels, "name","surname"));
     }
 
     @Test
     void sendDeletedUserNotification(){
-        SelfCareUser selfCareUser = SelfCareUser.builder("id").build();
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(selfCareUser, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
         User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
@@ -170,14 +150,11 @@ class UserNotificationServiceImplTest {
 
         when(productsConnector.getProductById(any())).thenReturn(product);
 
-        assertThrows(MailPreparationException.class, () -> userNotificationService.sendDeletedUserNotification("id","userid",userBinding));
+        assertThrows(MailPreparationException.class, () -> userNotificationService.sendDeletedUserNotification("id","userid",userBinding, "name","surname"));
     }
 
     @Test
     void sendActivatedUserNotification(){
-        SelfCareUser selfCareUser = SelfCareUser.builder("id").build();
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(selfCareUser, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
         User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
@@ -225,15 +202,12 @@ class UserNotificationServiceImplTest {
 
         when(productsConnector.getProductById(any())).thenReturn(product);
 
-        assertThrows(MailPreparationException.class, () -> userNotificationService.sendActivatedUserNotification("id","userid",userBinding));
+        assertThrows(MailPreparationException.class, () -> userNotificationService.sendActivatedUserNotification("id","userid",userBinding,"name","surname"));
     }
 
 
     @Test
     void sendSuspendedUserNotification() throws JsonProcessingException {
-        SelfCareUser selfCareUser = SelfCareUser.builder("id").build();
-        TestingAuthenticationToken auth = new TestingAuthenticationToken(selfCareUser, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
         User user1 = TestUtils.createSimpleUser();
 
         Map<String, WorkContact> workContacts1 = new HashMap<>();
@@ -281,6 +255,6 @@ class UserNotificationServiceImplTest {
 
         when(productsConnector.getProductById(any())).thenReturn(product);
 
-        assertThrows(MailPreparationException.class, () -> userNotificationService.sendSuspendedUserNotification("id","userid",userBinding));
+        assertThrows(MailPreparationException.class, () -> userNotificationService.sendSuspendedUserNotification("id","userid",userBinding, "name","surname"));
     }
 }

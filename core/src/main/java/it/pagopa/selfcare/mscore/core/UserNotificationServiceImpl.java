@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.core;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
@@ -15,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.Assert;
@@ -68,19 +65,16 @@ public class UserNotificationServiceImpl implements UserNotificationService {
 
     @Override
     @Async
-    public void sendAddedProductRoleNotification(String userId, Institution institution, String productTitle, List<String> roleLabels) {
+    public void sendAddedProductRoleNotification(String userId, Institution institution, String productTitle, List<String> roleLabels, String loggedUserName, String loggedUserSurname) {
         log.trace("sendAddedProductRoleNotification start");
         log.debug("sendAddedProductRoleNotification institutionId = {}, productTitle = {}, userId = {}, productRoles = {}", institution.getId(), productTitle, userId, roleLabels);
         Assert.notNull(institution.getId(), INSTITUTION_ID_IS_REQUIRED);
         Assert.notNull(productTitle, A_PRODUCT_TITLE_IS_REQUIRED);
         Assert.notEmpty(roleLabels, PRODUCT_ROLES_ARE_REQUIRED);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        User loggedUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
-        Assert.notNull(loggedUser.getName(), NAME_IS_REQUIRED);
-        Assert.notNull(loggedUser.getFamilyName(), SURNAME_IS_REQUIRED);
+        Assert.notNull(loggedUserName, NAME_IS_REQUIRED);
+        Assert.notNull(loggedUserSurname, SURNAME_IS_REQUIRED);
 
-        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
         Assert.notNull(user.getName(), NAME_IS_REQUIRED);
         Assert.notNull(user.getFamilyName(), SURNAME_IS_REQUIRED);
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
@@ -90,8 +84,8 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         Assert.isTrue(StringUtils.hasText(email), "Email is required");
 
         Map<String, String> dataModel = new HashMap<>();
-        dataModel.put("requesterName", loggedUser.getName());
-        dataModel.put("requesterSurname", loggedUser.getFamilyName());
+        dataModel.put("requesterName", loggedUserName);
+        dataModel.put("requesterSurname", loggedUserSurname);
 
         sendCreateNotification(institution.getDescription(), productTitle, email, roleLabels, dataModel);
         log.trace("sendAddedProductRoleNotification start");
@@ -121,42 +115,38 @@ public class UserNotificationServiceImpl implements UserNotificationService {
 
     @Override
     @Async
-    public void sendActivatedUserNotification(String relationshipId, String userId, UserBinding binding) {
+    public void sendActivatedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname) {
         log.trace("sendActivatedUserNotification start");
         log.debug("sendActivatedUserNotification relationshipId = {}", relationshipId);
-        sendRelationshipBasedNotification(relationshipId, userId, binding, ACTIVATE_TEMPLATE, ACTIVATE_SUBJECT);
+        sendRelationshipBasedNotification(relationshipId, userId, binding, ACTIVATE_TEMPLATE, ACTIVATE_SUBJECT, loggedUserName, loggedUserSurname);
         log.debug("sendActivatedUserNotification end");
     }
 
 
     @Override
     @Async
-    public void sendDeletedUserNotification(String relationshipId, String userId, UserBinding binding) {
+    public void sendDeletedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname) {
         log.trace("sendDeletedUserNotification start");
         log.debug("sendDeletedUserNotification relationshipId = {}", relationshipId);
-        sendRelationshipBasedNotification(relationshipId, userId, binding, DELETE_TEMPLATE, DELETE_SUBJECT);
+        sendRelationshipBasedNotification(relationshipId, userId, binding, DELETE_TEMPLATE, DELETE_SUBJECT, loggedUserName, loggedUserSurname);
         log.debug("sendDeletedUserNotification end");
     }
 
 
     @Override
     @Async
-    public void sendSuspendedUserNotification(String relationshipId, String userId, UserBinding binding) {
+    public void sendSuspendedUserNotification(String relationshipId, String userId, UserBinding binding, String loggedUserName, String loggedUserSurname) {
         log.trace("sendSuspendedUserNotification start");
         log.debug("sendSuspendedUserNotification relationshipId = {}", relationshipId);
-        sendRelationshipBasedNotification(relationshipId, userId, binding, SUSPEND_TEMPLATE, SUSPEND_SUBJECT);
+        sendRelationshipBasedNotification(relationshipId, userId, binding, SUSPEND_TEMPLATE, SUSPEND_SUBJECT, loggedUserName, loggedUserSurname);
         log.debug("sendSuspendedUserNotification end");
     }
 
 
-    private void sendRelationshipBasedNotification(String relationshipId, String userId, UserBinding binding, String templateName, String subject) {
+    private void sendRelationshipBasedNotification(String relationshipId, String userId, UserBinding binding, String templateName, String subject, String loggedUserName, String loggedUserSurname){
         Assert.notNull(relationshipId, "A relationship Id is required");
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        User loggedUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
-        Assert.notNull(loggedUser.getName(), NAME_IS_REQUIRED);
-        Assert.notNull(loggedUser.getFamilyName(), SURNAME_IS_REQUIRED);
+        Assert.notNull(loggedUserName, NAME_IS_REQUIRED);
+        Assert.notNull(loggedUserSurname, SURNAME_IS_REQUIRED);
 
         User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
@@ -187,8 +177,8 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         dataModel.put("productName", product.getTitle());
         dataModel.put("productRole", roleLabel.orElse("no_role_found"));
         dataModel.put("institutionName", institution.getDescription());
-        dataModel.put("requesterName", loggedUser.getName());
-        dataModel.put("requesterSurname", loggedUser.getFamilyName());
+        dataModel.put("requesterName", loggedUserName);
+        dataModel.put("requesterSurname", loggedUserSurname);
 
         sendNotification(email, templateName, subject, dataModel);
     }

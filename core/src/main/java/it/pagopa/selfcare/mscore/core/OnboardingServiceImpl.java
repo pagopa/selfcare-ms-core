@@ -232,7 +232,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role) {
+    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
         Map<String, List<UserToOnboard>> userMap = onboardingOperatorRequest.getUsers().stream()
@@ -241,7 +241,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
         List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
         userMap.forEach((key, value) -> userNotificationService.sendAddedProductRoleNotification(key, institution,
-                onboardingOperatorRequest.getProductTitle(), roleLabels));
+                onboardingOperatorRequest.getProductTitle(), roleLabels, loggedUserName, loggedUserSurname));
         relationshipInfoList.forEach(userEventService::sendOperatorUserNotification);
         return relationshipInfoList;
     }
