@@ -183,7 +183,7 @@ public class OnboardingInstitutionStrategyFactory {
     private Consumer<OnboardingInstitutionStrategyInput> sendConfirmationMail() {
         return strategyInput -> {
             try {
-                notificationService.setCompletedPGOnboardingMail(strategyInput.getInstitution().getDigitalAddress(), strategyInput.getInstitution().getDescription());
+                notificationService.setCompletedPGOnboardingMail(strategyInput.getOnboardingRequest().getInstitutionUpdate().getDigitalAddress(), strategyInput.getInstitution().getDescription());
             } catch (Exception e) {
                 log.warn("Error during send completed email for product: {}", PROD_PN);
             }
