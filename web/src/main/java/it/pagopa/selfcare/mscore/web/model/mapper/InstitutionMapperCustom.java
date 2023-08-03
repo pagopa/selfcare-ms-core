@@ -464,7 +464,7 @@ public class InstitutionMapperCustom {
                 onboardingResponse.setCreatedAt(o.getCreatedAt());
                 onboardingResponse.setUpdatedAt(o.getUpdatedAt());
                 onboardingResponse.setClosedAt(o.getClosedAt());
-                if (map.get(o.getProductId()).getStatus() != RelationshipState.ACTIVE) {
+                if (map.get(o.getProductId()) != null && map.get(o.getProductId()).getStatus() != RelationshipState.ACTIVE) {
                     map.put(o.getProductId(), onboardingResponse);
                 }
             }
