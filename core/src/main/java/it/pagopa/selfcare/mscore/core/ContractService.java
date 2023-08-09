@@ -251,6 +251,7 @@ public class ContractService {
         if (queueEvent.equals(QueueEvent.ADD)) {
             notification.setId(token.getId());
             notification.setState(RelationshipState.ACTIVE.toString());
+            notification.setActivatedAt(OffsetDateTime.now());
         } else {
             notification.setId(UUID.randomUUID().toString());
             notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
@@ -262,6 +263,7 @@ public class ContractService {
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         if (token.getStatus().equals(RelationshipState.DELETED)) {
+            notification.setDeletedAt(OffsetDateTime.now());
             notification.setClosedAt(token.getUpdatedAt());
         }
         notification.setNotificationType(queueEvent);
