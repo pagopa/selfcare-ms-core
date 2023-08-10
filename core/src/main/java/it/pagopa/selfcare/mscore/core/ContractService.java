@@ -263,8 +263,7 @@ public class ContractService {
         notification.setCreatedAt(token.getCreatedAt());
         notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         if (token.getStatus().equals(RelationshipState.DELETED)) {
-            notification.setDeletedAt(OffsetDateTime.now());
-            notification.setClosedAt(token.getUpdatedAt());
+            notification.setDeletedAt(token.getUpdatedAt());
         }
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
