@@ -90,7 +90,7 @@ class SchedulerServiceTest {
                 .thenReturn(configMock);
         doReturn(tokensMock)
                 .when(tokenConnector)
-                .findByStatusAndProductId(any(), any(), any());
+                .findByStatusAndProductId(any(), any(), any(), any());
         for (int i = 0; i < tokensMock.size(); i++) {
             doReturn(institutionsMock.get(i))
                     .when(institutionConnector)
@@ -108,7 +108,7 @@ class SchedulerServiceTest {
         verify(configConnector, times(1))
                 .findAndUpdate(schedulerId);
         verify(tokenConnector, times(1))
-                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
+                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0, 100);
         for (int i = 0; i < tokensMock.size(); i++) {
             verify(institutionConnector, times(1))
                     .findById(tokensMock.get(i).getInstitutionId());
@@ -139,10 +139,10 @@ class SchedulerServiceTest {
                 .thenReturn(configMock);
         doReturn(tokensMockPageOne)
                 .when(tokenConnector)
-                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
+                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0, 100);
         doReturn(tokensMockPageTwo)
                 .when(tokenConnector)
-                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 1);
+                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 1, 100);
         for (int i = 0; i < tokensMockPageOne.size(); i++) {
             doReturn(institutionsMockPageOne.get(i))
                     .when(institutionConnector)
@@ -165,9 +165,9 @@ class SchedulerServiceTest {
         verify(configConnector, times(1))
                 .findAndUpdate(schedulerId);
         verify(tokenConnector, times(1))
-                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
+                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0, 100);
         verify(tokenConnector, times(1))
-                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 1);
+                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 1, 100);
         for (int i = 0; i < tokensMockPageOne.size(); i++) {
             verify(institutionConnector, times(1))
                     .findById(tokensMockPageOne.get(i).getInstitutionId());
@@ -205,7 +205,7 @@ class SchedulerServiceTest {
                 .thenReturn(configMock);
         doReturn(tokensMock)
                 .when(tokenConnector)
-                .findByStatusAndProductId(any(), any(), any());
+                .findByStatusAndProductId(any(), any(), any(), any());
         when(institutionConnector.findById(any()))
                 .thenThrow(ResourceNotFoundException.class);
         // When
@@ -216,7 +216,7 @@ class SchedulerServiceTest {
         verify(configConnector, times(1))
                 .findAndUpdate(schedulerId);
         verify(tokenConnector, times(1))
-                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0);
+                .findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), configMock.getProductFilter(), 0, 100);
         verify(institutionConnector, times(1))
                 .findById(tokensMock.get(0).getInstitutionId());
         verifyNoMoreInteractions(tokenConnector, institutionConnector, contractService);
