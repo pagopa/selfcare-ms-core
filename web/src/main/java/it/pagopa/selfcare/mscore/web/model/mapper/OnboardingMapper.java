@@ -90,6 +90,7 @@ public class OnboardingMapper {
         OnboardingOperatorsRequest request = new OnboardingOperatorsRequest();
         request.setInstitutionId(onboardingInstitutionOperatorsRequest.getInstitutionId());
         request.setProductId(onboardingInstitutionOperatorsRequest.getProductId());
+        request.setProductTitle(onboardingInstitutionOperatorsRequest.getProductTitle());
         request.setUsers(Optional.ofNullable(onboardingInstitutionOperatorsRequest.getUsers())
                 .map(list -> list.stream().map(userMapper::toUserToOnboard).collect(Collectors.toList()))
                 .orElse(List.of())

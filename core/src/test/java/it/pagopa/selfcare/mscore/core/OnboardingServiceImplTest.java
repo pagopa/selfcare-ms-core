@@ -61,7 +61,7 @@ class OnboardingServiceImplTest {
     @Mock
     private UserService userService;
     @Mock
-    private EmailService emailService;
+    private NotificationService emailService;
 
     @Mock
     private UserRelationshipService userRelationshipService;
@@ -89,6 +89,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private ProductConnector productConnector;
+
+    @Mock
+    private UserNotificationService userNotificationService;
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -737,7 +740,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -745,7 +748,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators4() {
@@ -781,9 +784,10 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -791,7 +795,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators5() {
@@ -805,7 +809,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "name", "surname");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -813,7 +817,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators8() {
@@ -827,7 +831,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -835,7 +839,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators9() {
@@ -847,12 +851,12 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
-                () -> onboardingServiceImpl.onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER));
+                () -> onboardingServiceImpl.onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome"));
         verify(institutionService).retrieveInstitutionById(any());
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators10() {
@@ -877,9 +881,10 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -887,7 +892,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators11() {
@@ -922,9 +927,10 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -932,7 +938,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators12() {
@@ -946,7 +952,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -954,7 +960,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators13() {
@@ -968,7 +974,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -976,7 +982,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators14() {
@@ -990,7 +996,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -998,7 +1004,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators15() {
@@ -1012,7 +1018,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -1020,7 +1026,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators16() {
@@ -1032,12 +1038,12 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
-                () -> onboardingServiceImpl.onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER));
+                () -> onboardingServiceImpl.onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome"));
         verify(institutionService).retrieveInstitutionById(any());
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators17() {
@@ -1062,9 +1068,10 @@ class OnboardingServiceImplTest {
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
         onboardingOperatorsRequest.setProductId("42");
+        onboardingOperatorsRequest.setProductTitle("productTitle");
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -1072,7 +1079,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators19() {
@@ -1086,7 +1093,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -1094,7 +1101,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators20() {
@@ -1108,7 +1115,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());
@@ -1116,7 +1123,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
     @Test
     void testOnboardingOperators21() {
@@ -1130,7 +1137,7 @@ class OnboardingServiceImplTest {
         onboardingOperatorsRequest.setProductId("42");
         onboardingOperatorsRequest.setUsers(new ArrayList<>());
         List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR);
+                .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any());

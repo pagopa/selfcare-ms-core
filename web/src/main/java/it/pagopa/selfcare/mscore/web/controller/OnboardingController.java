@@ -272,10 +272,12 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.operator}", notes = "${swagger.mscore.onboarding.operator}")
     @PostMapping(value = "/operators")
-    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
+    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
+                                                                                   Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATORS_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
-        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 
@@ -291,10 +293,12 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.subdelegates}", notes = "${swagger.mscore.onboarding.subdelegates}")
     @PostMapping(value = "/subdelegates")
-    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request) {
+    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
+                                                                                     Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
-        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 

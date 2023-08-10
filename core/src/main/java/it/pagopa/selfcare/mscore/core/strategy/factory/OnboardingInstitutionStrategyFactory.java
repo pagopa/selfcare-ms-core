@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.input.OnboardingInstitutionStrategyInput;
+import it.pagopa.selfcare.mscore.core.NotificationService;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -15,6 +16,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRollback;
 import it.pagopa.selfcare.mscore.model.user.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -26,27 +28,33 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_PN;
 
 @Component
+@Slf4j
 public class OnboardingInstitutionStrategyFactory {
 
 
     private final OnboardingDao onboardingDao;
     private final ContractService contractService;
     private final UserService userService;
-    private final EmailService emailService;
     private final InstitutionService institutionService;
     private final CoreConfig coreConfig;
 
+    private final NotificationService notificationService;
 
-    public OnboardingInstitutionStrategyFactory(OnboardingDao onboardingDao, ContractService contractService, UserService userService,
-                                                EmailService emailService, InstitutionService institutionService, CoreConfig coreConfig) {
+    public OnboardingInstitutionStrategyFactory(OnboardingDao onboardingDao,
+                                                ContractService contractService,
+                                                UserService userService,
+                                                InstitutionService institutionService,
+                                                CoreConfig coreConfig,
+                                                NotificationService notificationService) {
         this.onboardingDao = onboardingDao;
         this.contractService = contractService;
         this.userService = userService;
-        this.emailService = emailService;
         this.institutionService = institutionService;
         this.coreConfig = coreConfig;
+        this.notificationService = notificationService;
     }
 
     public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategy(InstitutionType institutionType, String productId, Institution institution) {
@@ -60,7 +68,7 @@ public class OnboardingInstitutionStrategyFactory {
         if (InstitutionType.PG == institutionType) {
             digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
-            emailsOnboardingInstitutionStrategy = ignore -> {};
+            emailsOnboardingInstitutionStrategy = sendConfirmationMail();
         } else if (InstitutionType.PA == institutionType || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())) {
             digestOnboardingInstitutionStrategy = createContractAndPerformDigest();
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
@@ -172,11 +180,21 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
+    private Consumer<OnboardingInstitutionStrategyInput> sendConfirmationMail() {
+        return strategyInput -> {
+            try {
+                notificationService.setCompletedPGOnboardingMail(strategyInput.getOnboardingRequest().getInstitutionUpdate().getDigitalAddress(), strategyInput.getInstitution().getDescription());
+            } catch (Exception e) {
+                log.warn("Error during send completed email for product: {}", PROD_PN);
+            }
+        };
+    }
+
     private Consumer<OnboardingInstitutionStrategyInput> sendEmailWithDigestOrRollback() {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
-                emailService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution().getDigitalAddress(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
+                notificationService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution().getDigitalAddress(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
@@ -188,7 +206,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
-                emailService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
+                notificationService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
@@ -208,7 +226,7 @@ public class OnboardingInstitutionStrategyFactory {
 
                     File logoFile = contractService.getLogoFile();
 
-                    emailService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, EmailService.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
+                    notificationService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, NotificationServiceImpl.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
                 }
 
                 //[TODO https://pagopa.atlassian.net/wiki/spaces/SCP/pages/710901785/RFC+Proposta+per+gestione+asincrona+degli+eventi]

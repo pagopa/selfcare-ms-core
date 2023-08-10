@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -33,6 +34,13 @@ class MongoCustomConnectorImplTest {
 
     @Mock
     private MongoOperations mongoOperations;
+
+    @Test
+    void testExist() {
+        when(mongoOperations.exists(any(), (Class<?>) any())).thenReturn(true);
+        Query query = new Query();
+        assertTrue(mongoCustomConnector.exists(query, Object.class));
+    }
 
     @Test
     void testFind() {

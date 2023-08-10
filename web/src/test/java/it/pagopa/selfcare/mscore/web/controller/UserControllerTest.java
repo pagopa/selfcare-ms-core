@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -25,14 +26,16 @@ import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.user.InstitutionProducts;
 import it.pagopa.selfcare.mscore.web.model.user.Product;
 import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -40,6 +43,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,14 +73,25 @@ class UserControllerTest {
     @Spy
     private UserMapper userMapper = new UserMapperImpl();
 
+    @BeforeEach
+    void resetContext() {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+    }
+
     /**
-     * Method under test: {@link UserController#activateRelationship(String)}
+     * Method under test: {@link UserController#activateRelationship(String, org.springframework.security.core.Authentication)}
      */
     @Test
     void testActivateRelationship() throws Exception {
-        doNothing().when(userRelationshipService).activateRelationship(org.mockito.Mockito.any());
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+
+        doNothing().when(userRelationshipService).activateRelationship(org.mockito.Mockito.any(), any(), any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/relationships/{relationshipId}/activate", "42");
+                .post("/relationships/{relationshipId}/activate", "42")
+                .principal(authentication);
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder);
@@ -84,7 +99,7 @@ class UserControllerTest {
     }
 
     /**
-     * Method under test: {@link UserController#activateRelationship(String)}
+     * Method under test: {@link UserController#activateRelationship(String, org.springframework.security.core.Authentication)}
      */
     @Test
     void testActivateRelationship2() throws Exception {
@@ -97,26 +112,33 @@ class UserControllerTest {
     }
 
     /**
-     * Method under test: {@link UserController#activateRelationship(String)}
+     * Method under test: {@link UserController#activateRelationship(String, org.springframework.security.core.Authentication)}
      */
     @Test
     void testActivateRelationship3() throws Exception {
-        doNothing().when(userRelationshipService).activateRelationship(org.mockito.Mockito.any());
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+        doNothing().when(userRelationshipService).activateRelationship(org.mockito.Mockito.any(), any(), any());
         MockHttpServletRequestBuilder postResult = MockMvcRequestBuilders.post("/relationships/{relationshipId}/activate",
-                "42");
+                "42").principal(authentication);
         postResult.characterEncoding("Encoding");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(userController).build().perform(postResult);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     /**
-     * Method under test: {@link UserController#suspendRelationship(String)}
+     * Method under test: {@link UserController#suspendRelationship(String, org.springframework.security.core.Authentication)}
      */
     @Test
     void testSuspendRelationship() throws Exception {
-        doNothing().when(userRelationshipService).suspendRelationship(org.mockito.Mockito.any());
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+        doNothing().when(userRelationshipService).suspendRelationship(org.mockito.Mockito.any(), any(), any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/relationships/{relationshipId}/suspend", "42");
+                .post("/relationships/{relationshipId}/suspend", "42")
+                .principal(authentication);
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder);
@@ -124,26 +146,32 @@ class UserControllerTest {
     }
 
     /**
-     * Method under test: {@link UserController#suspendRelationship(String)}
+     * Method under test: {@link UserController#suspendRelationship(String, org.springframework.security.core.Authentication)}
      */
     @Test
     void testSuspendRelationship2() throws Exception {
-        doNothing().when(userRelationshipService).suspendRelationship(org.mockito.Mockito.any());
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+        doNothing().when(userRelationshipService).suspendRelationship(org.mockito.Mockito.any(), any(), any());
         MockHttpServletRequestBuilder postResult = MockMvcRequestBuilders.post("/relationships/{relationshipId}/suspend",
-                "42");
+                "42").principal(authentication);
         postResult.characterEncoding("Encoding");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(userController).build().perform(postResult);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     /**
-     * Method under test: {@link UserController#deleteRelationship(String)}
+     * Method under test: {@link UserController#deleteRelationship(String, org.springframework.security.core.Authentication)}
      */
     @Test
     void testDeleteRelationship() throws Exception {
-        doNothing().when(userRelationshipService).deleteRelationship(org.mockito.Mockito.any());
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+        doNothing().when(userRelationshipService).deleteRelationship(org.mockito.Mockito.any(), any(), any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/relationships/{relationshipId}",
-                "42");
+                "42").principal(authentication);
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
                 .perform(requestBuilder)
@@ -151,13 +179,16 @@ class UserControllerTest {
     }
 
     /**
-     * Method under test: {@link UserController#deleteRelationship(String)}
+     * Method under test: {@link UserController#deleteRelationship(String, org.springframework.security.core.Authentication)}
      */
     @Test
     void testDeleteRelationship2() throws Exception {
-        doNothing().when(userRelationshipService).deleteRelationship(org.mockito.Mockito.any());
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+        doNothing().when(userRelationshipService).deleteRelationship(org.mockito.Mockito.any(), any(), any());
         MockHttpServletRequestBuilder deleteResult = MockMvcRequestBuilders.delete("/relationships/{relationshipId}",
-                "42");
+                "42").principal(authentication);
         deleteResult.characterEncoding("Encoding");
         MockMvcBuilders.standaloneSetup(userController)
                 .build()
