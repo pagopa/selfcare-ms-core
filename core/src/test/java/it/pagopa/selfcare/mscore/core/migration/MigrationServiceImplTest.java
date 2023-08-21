@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core.migration;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -44,6 +43,27 @@ class MigrationServiceImplTest {
 
     @MockBean
     private UserConnector userConnector;
+
+    @Test
+    void testCreateToken2(){
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setClosedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+        when(tokenConnector.save(any(), any())).thenReturn(token);
+
+        assertNotNull(migrationServiceImpl.createToken(token));
+    }
 
     /**
      * Method under test: {@link MigrationServiceImpl#createToken(Token)}

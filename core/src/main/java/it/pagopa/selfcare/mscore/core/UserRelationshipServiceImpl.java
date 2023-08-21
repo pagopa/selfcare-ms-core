@@ -20,13 +20,15 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     private final OnboardingDao onboardingDao;
     private final UserConnector userConnector;
     private final InstitutionService institutionService;
+    private final UserNotificationService userNotificationService;
 
     private final UserEventService userEventService;
 
-    public UserRelationshipServiceImpl(OnboardingDao onboardingDao, UserConnector userConnector, InstitutionService institutionService, UserEventService userEventService) {
+    public UserRelationshipServiceImpl(OnboardingDao onboardingDao, UserConnector userConnector, InstitutionService institutionService, UserEventService userEventService, UserNotificationService userNotificationService) {
         this.onboardingDao = onboardingDao;
         this.userConnector = userConnector;
         this.institutionService = institutionService;
+        this.userNotificationService = userNotificationService;
         this.userEventService = userEventService;
     }
 
@@ -36,21 +38,25 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
     }
 
     @Override
-    public void activateRelationship(String relationshipId) {
+    public void activateRelationship(String relationshipId,String loggedUserName, String loggedUserSurname) {
         OnboardedUser user = findByRelationshipId(relationshipId);
+        UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.ACTIVE);
             sendRelationshipEventNotification(user, relationshipId);
+            userNotificationService.sendActivatedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
         }
     }
 
     @Override
-    public void suspendRelationship(String relationshipId) {
+    public void suspendRelationship(String relationshipId, String loggedUserName, String loggedUserSurname) {
         OnboardedUser user = findByRelationshipId(relationshipId);
+        UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.SUSPENDED);
+            userNotificationService.sendSuspendedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
             sendRelationshipEventNotification(user, relationshipId);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
@@ -62,10 +68,12 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         userEventService.sendOperatorUserNotification(relationshipInfo);
     }
     @Override
-    public void deleteRelationship(String relationshipId) {
+    public void deleteRelationship(String relationshipId, String loggedUserName, String loggedUserSurname) {
         OnboardedUser user = findByRelationshipId(relationshipId);
+        UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.DELETED);
         sendRelationshipEventNotification(user, relationshipId);
+        userNotificationService.sendDeletedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
     }
 
     @Override
@@ -84,5 +92,17 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
             }
         }
         throw new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode());
+    }
+
+    private UserBinding retrieveUserBinding(OnboardedUser user, String relationshipId) {
+        if (user.getBindings() != null) {
+            return user.getBindings().stream()
+                    .filter(binding -> binding.getProducts().stream().anyMatch(product -> relationshipId.equalsIgnoreCase(product.getRelationshipId())))
+                    .findAny()
+                    .orElseThrow(() -> new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode()));
+        }else{
+            throw new InvalidRequestException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId), RELATIONSHIP_ID_NOT_FOUND.getCode());
+
+        }
     }
 }

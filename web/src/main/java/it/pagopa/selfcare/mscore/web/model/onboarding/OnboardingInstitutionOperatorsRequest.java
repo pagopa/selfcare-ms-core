@@ -12,6 +12,9 @@ public class OnboardingInstitutionOperatorsRequest {
     @NotEmpty(message = "productId is required")
     private String productId;
 
+    @NotEmpty(message = "productTitle is required")
+    private String productTitle;
+
     @NotEmpty(message = "at least one user is required")
     private List<Person> users;
 

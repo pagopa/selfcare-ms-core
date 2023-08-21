@@ -717,7 +717,7 @@
         "description" : "Retrieve institution's delegations",
         "operationId" : "getDelegationsUsingGET",
         "parameters" : [ {
-          "name" : "from",
+          "name" : "institutionId",
           "in" : "query",
           "description" : "The internal identifier of the institution",
           "required" : false,
@@ -726,7 +726,7 @@
             "type" : "string"
           }
         }, {
-          "name" : "to",
+          "name" : "brokerId",
           "in" : "query",
           "description" : "The internal identifier of the institution",
           "required" : false,
@@ -3954,6 +3954,79 @@
         } ]
       }
     },
+    "/tokens/products/{productId}" : {
+      "get" : {
+        "tags" : [ "Token" ],
+        "summary" : "${swagger.mscore.tokens.findFromProduct}",
+        "description" : "${swagger.mscore.tokens.findFromProduct}",
+        "operationId" : "findFromProductUsingGET_1",
+        "parameters" : [ {
+          "name" : "productId",
+          "in" : "path",
+          "description" : "Product's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "${swagger.mscore.page.number}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "${swagger.mscore.page.size}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenListResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/tokens/token" : {
       "get" : {
         "tags" : [ "Token" ],
@@ -4778,25 +4851,25 @@
         "title" : "DelegationResponse",
         "type" : "object",
         "properties" : {
-          "from" : {
+          "brokerId" : {
+            "type" : "string"
+          },
+          "brokerName" : {
             "type" : "string"
           },
           "id" : {
             "type" : "string"
           },
-          "institutionFromName" : {
+          "institutionId" : {
             "type" : "string"
           },
-          "institutionFromRootName" : {
+          "institutionName" : {
             "type" : "string"
           },
-          "institutionToName" : {
+          "institutionRootName" : {
             "type" : "string"
           },
           "productId" : {
-            "type" : "string"
-          },
-          "to" : {
             "type" : "string"
           },
           "type" : {
@@ -6186,6 +6259,9 @@
           "productId" : {
             "type" : "string"
           },
+          "productTitle" : {
+            "type" : "string"
+          },
           "users" : {
             "type" : "array",
             "items" : {
@@ -6424,6 +6500,9 @@
           "role" : {
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "roleLabel" : {
+            "type" : "string"
           },
           "surname" : {
             "type" : "string"
@@ -6664,6 +6743,18 @@
           }
         }
       },
+      "TokenListResponse" : {
+        "title" : "TokenListResponse",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TokenResponse"
+            }
+          }
+        }
+      },
       "TokenResource" : {
         "title" : "TokenResource",
         "type" : "object",
@@ -6731,13 +6822,60 @@
           "checksum" : {
             "type" : "string"
           },
+          "closedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "contentType" : {
+            "type" : "string"
+          },
+          "contractSigned" : {
+            "type" : "string"
+          },
+          "contractTemplate" : {
+            "type" : "string"
+          },
+          "contractVersion" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "expiringDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "id" : {
             "type" : "string"
+          },
+          "institutionId" : {
+            "type" : "string"
+          },
+          "institutionUpdate" : {
+            "$ref" : "#/components/schemas/InstitutionUpdate"
           },
           "legals" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/LegalsResponse"
+            }
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TokenUser"
             }
           }
         }
@@ -6814,6 +6952,9 @@
           "role" : {
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "roleLabel" : {
+            "type" : "string"
           },
           "surname" : {
             "type" : "string"

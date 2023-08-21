@@ -14,5 +14,6 @@ public class UserToOnboard {
     private String email;
     private PartyRole role;
     private String productRole;
+    private String roleLabel;
     private Env env;
 }

@@ -7,11 +7,11 @@ public interface UserRelationshipService {
 
     OnboardedUser findByRelationshipId(String relationshipId);
 
-    void activateRelationship(String relationshipId);
+    void activateRelationship(String relationshipId, String loggedUserName, String loggedUserSurname);
 
-    void suspendRelationship(String relationshipId);
+    void suspendRelationship(String relationshipId, String loggedUserName, String loggedUserSurname);
 
-    void deleteRelationship(String relationshipId);
+    void deleteRelationship(String relationshipId, String loggedUserName, String loggedUserSurname);
 
     RelationshipInfo retrieveRelationship(String relationshipId);
 

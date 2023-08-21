@@ -8,6 +8,7 @@ import java.util.List;
 public class OnboardingOperatorsRequest {
 
     private String productId;
+    private String productTitle;
     private List<UserToOnboard> users;
     private String institutionId;
 

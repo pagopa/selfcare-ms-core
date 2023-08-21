@@ -26,6 +26,7 @@ public class Person {
     private PartyRole role;
     private String productRole;
     private Env env = Env.ROOT;
+    private String roleLabel;
 
     public Person(String id) {
         this.id = id;

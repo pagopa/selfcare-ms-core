@@ -9,12 +9,12 @@ import lombok.Data;
 public class DelegationResponse {
 
     private String id;
-    private String from;
-    private String institutionFromName;
-    private String institutionToName;
-    private String institutionFromRootName;
+    private String institutionId;
+    private String institutionName;
+    private String brokerName;
+    private String institutionRootName;
     private DelegationType type;
-    private String to;
+    private String brokerId;
     private String productId;
 
 }

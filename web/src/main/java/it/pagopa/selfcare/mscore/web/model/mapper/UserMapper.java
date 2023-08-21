@@ -7,9 +7,6 @@ import it.pagopa.selfcare.mscore.web.model.user.InstitutionProducts;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {

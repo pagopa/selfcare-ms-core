@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.web.model.onboarding.TokenListResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
 import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -14,6 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -70,5 +74,37 @@ public class TokenController {
         log.debug("getToken result = {}", result);
         log.trace("getToken end");
         return result;
+    }
+
+    /**
+     * Retrieve institutions with productId onboarded
+     *
+     * @param productId String
+     * @param page      Integer
+     * @param size      Integer
+     * @return List
+     * * Code: 200, Message: successful operation
+     * * Code: 404, Message: product not found
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.tokens.findFromProduct}", notes = "${swagger.mscore.tokens.findFromProduct}")
+    @GetMapping(value = "/tokens/products/{productId}")
+    public ResponseEntity<TokenListResponse> findFromProduct(@ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                                             @PathVariable(value = "productId") String productId,
+                                                             @ApiParam("${swagger.mscore.page.number}")
+                                                                             @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                             @ApiParam("${swagger.mscore.page.size}")
+                                                                             @RequestParam(name = "size", defaultValue = "100") Integer size) {
+        log.trace("findFromProduct start");
+        log.debug("findFromProduct productId = {}", productId);
+        List<Token> tokens = tokenService.getTokensByProductId(productId, page, size);
+
+        TokenListResponse tokenListResponse = new TokenListResponse(
+                tokens.stream()
+                        .map(TokenMapper::toTokenResponse)
+                        .collect(Collectors.toList()));
+
+        log.trace("findFromProduct end");
+        return ResponseEntity.ok().body(tokenListResponse);
     }
 }
