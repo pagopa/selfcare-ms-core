@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProductResponse;
 import lombok.Data;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class InstitutionResponse {
     private String taxCode;
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesResponse> attributes;
+    private List<OnboardedProductResponse> onboarding;
     private PaymentServiceProviderResponse paymentServiceProvider;
     private DataProtectionOfficerResponse dataProtectionOfficer;
     private String rea;
