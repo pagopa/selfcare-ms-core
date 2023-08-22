@@ -296,6 +296,7 @@ public class ContractService {
         toNotify.setSubUnitType(institution.getSubunitType());
         RootParent rootParent = new RootParent();
         rootParent.setDescription(institution.getParentDescription());
+        rootParent.setId(institution.getRootParentId());
         toNotify.setRootParent(rootParent);
         try {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
