@@ -29,7 +29,9 @@ public class Token {
     private List<TokenUser> users;
     private InstitutionUpdate institutionUpdate;
     private OffsetDateTime createdAt;
+    private OffsetDateTime activatedAt;
     private OffsetDateTime updatedAt;
+    private OffsetDateTime deletedAt;
     private OffsetDateTime closedAt;
 
 }

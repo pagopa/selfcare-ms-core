@@ -25,6 +25,7 @@ public class NotificationToSend {
     private OffsetDateTime createdAt;
     private OffsetDateTime activatedAt;
     private OffsetDateTime deletedAt;
+    private OffsetDateTime closedAt;
     private OffsetDateTime updatedAt;
     private List<UserToNotify> users;
     private QueueEvent notificationType;

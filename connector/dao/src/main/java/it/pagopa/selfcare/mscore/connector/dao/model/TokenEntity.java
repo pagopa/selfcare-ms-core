@@ -40,5 +40,8 @@ public class TokenEntity {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
+    private OffsetDateTime activatedAt;
+    private OffsetDateTime deletedAt;
+
 }
 
