@@ -61,7 +61,7 @@ public class SchedulerService {
                 boolean nextPage = true;
                 int page = 0;
                 do {
-                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page);
+                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page, 100);
 
                     sendDataLakeNotifications(tokens);
 

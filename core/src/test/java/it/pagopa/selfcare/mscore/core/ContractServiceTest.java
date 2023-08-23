@@ -237,7 +237,7 @@ class ContractServiceTest {
         token.setProductId("prod");
         token.setStatus(RelationshipState.ACTIVE);
         token.setInstitutionUpdate(institutionUpdate);
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -318,7 +318,7 @@ class ContractServiceTest {
         token.setProductId("prod");
         token.setStatus(RelationshipState.ACTIVE);
         token.setInstitutionUpdate(institutionUpdate);
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("");
 
@@ -387,7 +387,7 @@ class ContractServiceTest {
         token.setProductId("prod");
         token.setStatus(RelationshipState.DELETED);
         token.setInstitutionUpdate(institutionUpdate);
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned(null);
         token.setContentType(null);

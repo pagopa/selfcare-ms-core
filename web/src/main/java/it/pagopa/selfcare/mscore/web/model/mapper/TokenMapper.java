@@ -37,6 +37,24 @@ public class TokenMapper {
         return tokenResponse;
     }
 
+    public static TokenResponse toTokenResponse(Token tokenRelationships){
+        TokenResponse tokenResponse = new TokenResponse();
+        tokenResponse.setId(tokenRelationships.getId());
+        tokenResponse.setChecksum(tokenRelationships.getChecksum());
+        tokenResponse.setStatus(tokenRelationships.getStatus());
+        tokenResponse.setInstitutionId(tokenRelationships.getInstitutionId());
+        tokenResponse.setProductId(tokenRelationships.getProductId());
+        tokenResponse.setExpiringDate(tokenRelationships.getExpiringDate());
+        tokenResponse.setContractTemplate(tokenRelationships.getContractTemplate());
+        tokenResponse.setContractSigned(tokenRelationships.getContractSigned());
+        tokenResponse.setContentType(tokenRelationships.getContentType());
+        tokenResponse.setCreatedAt(tokenRelationships.getCreatedAt());
+        tokenResponse.setUpdatedAt(tokenRelationships.getUpdatedAt());
+
+
+        return tokenResponse;
+    }
+
     public static TokenResource toResource(Token model){
         TokenResource resource = null;
         if(model != null) {
@@ -55,7 +73,7 @@ public class TokenMapper {
             resource.setInstitutionUpdate(model.getInstitutionUpdate());
             resource.setCreatedAt(model.getCreatedAt());
             resource.setUpdatedAt(model.getUpdatedAt());
-            resource.setClosedAt(model.getClosedAt());
+            resource.setClosedAt(model.getDeletedAt());
         }
         return resource;
     }
