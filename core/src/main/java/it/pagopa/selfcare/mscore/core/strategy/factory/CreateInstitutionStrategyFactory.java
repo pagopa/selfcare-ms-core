@@ -4,7 +4,6 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -12,6 +11,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Slf4j
 @Component
 public class CreateInstitutionStrategyFactory {
 
@@ -30,16 +31,13 @@ public class CreateInstitutionStrategyFactory {
     private final InstitutionConnector institutionConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
-    private final InstitutionMapper institutionMapper;
-
     private final Function<CreateInstitutionStrategyInput, String> createExternalId = strategyInput -> Objects.isNull(strategyInput.getSubunitCode())
             ? strategyInput.getTaxCode()
             : String.format("%s_%s", strategyInput.getTaxCode(), strategyInput.getSubunitCode());
 
-    public CreateInstitutionStrategyFactory(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionMapper institutionMapper) {
+    public CreateInstitutionStrategyFactory(InstitutionConnector institutionConnector, PartyRegistryProxyConnector partyRegistryProxyConnector) {
         this.institutionConnector = institutionConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
-        this.institutionMapper = institutionMapper;
     }
 
 
@@ -62,14 +60,15 @@ public class CreateInstitutionStrategyFactory {
     public CreateInstitutionStrategy createInstitutionStrategy(InstitutionPaSubunitType subunitType) {
 
         Consumer<CreateInstitutionStrategyInput> checkIfAlreadyExists = checkIfAlreadyExistsByTaxCodeAndSubunitCode();
-        Function<CreateInstitutionStrategyInput, Institution> mappingToInstitution = null;
+        Function<CreateInstitutionStrategyInput, Institution> mappingToInstitution;
 
-        if(Objects.isNull(subunitType) || InstitutionPaSubunitType.EC.equals(subunitType)) {
-            mappingToInstitution = mappingToInstitutionIPAEc();
-        } else if(InstitutionPaSubunitType.AOO.equals(subunitType)) {
+        if(InstitutionPaSubunitType.AOO.equals(subunitType)) {
             mappingToInstitution = mappingToInstitutionIPAAoo();
-        } else {
+        } else if(InstitutionPaSubunitType.UO.equals(subunitType)) {
             mappingToInstitution = mappingToInstitutionIPAUo();
+        } else {
+            log.info("Unsupported subunitType {} for create institution strategy", subunitType);
+            return null;
         }
 
         return new CreateInstitutionStrategy(institutionConnector, checkIfAlreadyExists, mappingToInstitution);
@@ -84,30 +83,6 @@ public class CreateInstitutionStrategyFactory {
                 throw new ResourceConflictException(String
                         .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), strategyInput.getTaxCode(), strategyInput.getSubunitCode()),
                         CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
-        };
-    }
-
-    private Function<CreateInstitutionStrategyInput, Institution> mappingToInstitutionIPAEc() {
-        return strategyInput -> {
-
-            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(strategyInput.getTaxCode());
-
-            CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
-
-            Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
-
-            newInstitution.setSubunitType(InstitutionPaSubunitType.EC.name());
-            newInstitution.setExternalId(createExternalId.apply(strategyInput));
-            newInstitution.setOrigin(Origin.IPA.getValue());
-            newInstitution.setCreatedAt(OffsetDateTime.now());
-
-            Attributes attributes = new Attributes();
-            attributes.setOrigin(categoryProxyInfo.getOrigin());
-            attributes.setCode(categoryProxyInfo.getCode());
-            attributes.setDescription(categoryProxyInfo.getName());
-            newInstitution.setAttributes(List.of(attributes));
-
-            return newInstitution;
         };
     }
 

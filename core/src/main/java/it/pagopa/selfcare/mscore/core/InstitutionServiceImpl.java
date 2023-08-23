@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -108,15 +109,33 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
     }
 
-
     @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
-        return createInstitutionStrategyFactory.createInstitutionStrategy(subunitType)
-                .createInstitution(CreateInstitutionStrategyInput.builder()
-                        .taxCode(taxCode)
-                        .subunitCode(subunitCode)
-                        .subunitType(subunitType)
-                        .build());
+
+        Institution institutionEC;
+        Optional<Institution> opt = institutionConnector.findByExternalId(taxCode);
+        if(opt.isEmpty()){
+            try {
+                institutionEC = getInstitutionEC(taxCode);
+                institutionConnector.save(institutionEC);
+            } catch (Exception e) {
+                throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
+            }
+        } else {
+            institutionEC = opt.get();
+        }
+
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategy(subunitType);
+        if(Objects.nonNull(institutionStrategy)) {
+            return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                    .taxCode(taxCode)
+                    .subunitCode(subunitCode)
+                    .subunitType(subunitType)
+                    .build());
+        }
+
+        return institutionEC;
+
     }
 
     @Override
@@ -374,16 +393,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
-
-    private void checkIfAlreadyExists(String taxCode, String subunitCode) {
-        /* check if institution exists */
-        List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
-        if (!institutions.isEmpty())
-            throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
-                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
-    }
-
     private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         List<RelationshipInfo> list = new ArrayList<>();
         for (OnboardedUser onboardedUser : institutionRelationships) {
@@ -428,6 +437,26 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<Institution> getInstitutionBrokers(String productId, InstitutionType type) {
         return institutionConnector.findBrokers(productId, type);
+    }
+
+    private Institution getInstitutionEC(String taxCode) {
+
+        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(taxCode);
+        CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
+
+        Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
+        newInstitution.setSubunitType(InstitutionPaSubunitType.EC.name());
+        newInstitution.setExternalId(taxCode);
+        newInstitution.setOrigin(Origin.IPA.getValue());
+        newInstitution.setCreatedAt(OffsetDateTime.now());
+
+        Attributes attributes = new Attributes();
+        attributes.setOrigin(categoryProxyInfo.getOrigin());
+        attributes.setCode(categoryProxyInfo.getCode());
+        attributes.setDescription(categoryProxyInfo.getName());
+        newInstitution.setAttributes(List.of(attributes));
+
+        return newInstitution;
     }
 
     protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {

@@ -292,10 +292,26 @@ class InstitutionServiceImplTest {
         assertTrue(institutions.isEmpty());
     }
 
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String)}
+     */
     @Test
     void testCreateInstitutionFromIpa() {
         when(createInstitutionStrategyFactory.createInstitutionStrategy((InstitutionPaSubunitType) any())).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        when(partyRegistryProxyConnector.getInstitutionById(anyString())).thenReturn(new InstitutionProxyInfo());
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(new CategoryProxyInfo());
+        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id");
+        assertNotNull(institution);
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String)}
+     */
+    @Test
+    void testCreateInstitutionFromIpaEC() {
+        when(partyRegistryProxyConnector.getInstitutionById(anyString())).thenReturn(new InstitutionProxyInfo());
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(new CategoryProxyInfo());
         Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.EC,"id");
         assertNotNull(institution);
     }
@@ -307,8 +323,6 @@ class InstitutionServiceImplTest {
         Institution institution = institutionServiceImpl.createInstitution(new Institution());
         assertNotNull(institution);
     }
-
-
 
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}

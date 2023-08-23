@@ -101,7 +101,7 @@ public class CreateInstitutionStrategyTest {
 
         when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any()))
                 .thenReturn(List.of(new Institution()));
-        assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategy(InstitutionPaSubunitType.EC)
+        assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategy(InstitutionPaSubunitType.AOO)
                 .createInstitution(CreateInstitutionStrategyInput.builder()
                         .build()));
 
@@ -147,29 +147,6 @@ public class CreateInstitutionStrategyTest {
 
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), any());
-    }
-
-    /**
-     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
-     */
-    @Test
-    void shouldCreateInstitutionFromIpaEc() {
-        Institution institution = new Institution();
-        when(institutionConnector.save(any())).thenReturn(institution);
-        when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), any()))
-                .thenReturn(List.of());
-
-
-        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(dummyCategoryProxyInfo);
-        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
-        assertSame(institution, strategyFactory.createInstitutionStrategy(InstitutionPaSubunitType.EC)
-                .createInstitution(CreateInstitutionStrategyInput.builder()
-                        .taxCode("example")
-                        .build()));
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByTaxCodeAndSubunitCode(any(), any());
-        verify(partyRegistryProxyConnector).getCategory(any(), any());
-        verify(partyRegistryProxyConnector).getInstitutionById(any());
     }
 
     /**
