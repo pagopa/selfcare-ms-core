@@ -1,25 +1,14 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.migration.MigrationService;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +22,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.ArrayList;
+
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {CrudController.class})
 @ExtendWith(SpringExtension.class)
@@ -66,7 +59,7 @@ class CrudControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -102,7 +95,7 @@ class CrudControllerTest {
 
         Token token1 = new Token();
         token1.setChecksum("Checksum");
-        token1.setClosedAt(null);
+        token1.setDeletedAt(null);
         token1.setContractSigned("Contract Signed");
         token1.setContractTemplate("Contract Template");
         token1.setCreatedAt(null);
@@ -224,7 +217,7 @@ class CrudControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
