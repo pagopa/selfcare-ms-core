@@ -133,7 +133,7 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setSubunitCode(strategyInput.getSubunitCode());
             newInstitution.setSubunitType(InstitutionPaSubunitType.AOO.name());
             newInstitution.setParentDescription(institutionProxyInfo.getDescription());
-
+            newInstitution.setRootParentId(institutionProxyInfo.getId());
 
             newInstitution.setExternalId(createExternalId.apply(strategyInput));
             newInstitution.setOrigin(Optional.ofNullable(areaOrganizzativaOmogenea.getOrigin())
@@ -172,6 +172,7 @@ public class CreateInstitutionStrategyFactory {
             newInstitution.setSubunitCode(strategyInput.getSubunitCode());
             newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
             newInstitution.setParentDescription(institutionProxyInfo.getDescription());
+            newInstitution.setRootParentId(institutionProxyInfo.getId());
 
             if(StringUtils.isNotBlank(unitaOrganizzativa.getCodiceUniAoo())) {
                 PaAttributes paAttributes = new PaAttributes();
