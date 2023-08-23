@@ -1196,7 +1196,7 @@ class TokenConnectorImplTest {
                 .when(tokenRepository)
                 .find(any(), any(), any());
         // When
-        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber);
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber, 100);
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -1222,7 +1222,7 @@ class TokenConnectorImplTest {
                 .when(tokenRepository)
                 .find(any(), any(), any());
         // When
-        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, null, pageNumber);
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, null, pageNumber, 100);
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -1249,7 +1249,7 @@ class TokenConnectorImplTest {
                 .when(tokenRepository)
                 .find(any(), any(), any());
         // When
-        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber);
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber, 100);
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());

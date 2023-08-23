@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -463,7 +464,10 @@ public class InstitutionMapperCustom {
                 onboardingResponse.setCreatedAt(o.getCreatedAt());
                 onboardingResponse.setUpdatedAt(o.getUpdatedAt());
                 onboardingResponse.setClosedAt(o.getClosedAt());
-                map.put(o.getProductId(), onboardingResponse);
+                if (!map.containsKey(o.getProductId()) ||
+                        map.containsKey(o.getProductId()) && map.get(o.getProductId()).getStatus() != RelationshipState.ACTIVE) {
+                    map.put(o.getProductId(), onboardingResponse);
+                }
             }
         }
         return map;

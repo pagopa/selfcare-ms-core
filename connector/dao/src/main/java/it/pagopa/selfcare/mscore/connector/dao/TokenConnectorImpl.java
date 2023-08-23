@@ -136,10 +136,10 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer page) {
+    public List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer page, Integer size) {
         Query query = Query.query(Criteria.where(TokenEntity.Fields.status.name()).in(statuses));
 
-        Pageable pageable = PageRequest.of(page, 100);
+        Pageable pageable = PageRequest.of(page, size);
 
         if (productId != null && !productId.isBlank()) {
             query.addCriteria(Criteria.where(TokenEntity.Fields.productId.name()).is(productId));
