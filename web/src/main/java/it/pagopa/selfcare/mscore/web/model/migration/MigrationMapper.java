@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.migration;
-import it.pagopa.selfcare.mscore.model.institution.*;
+
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.AccessLevel;
@@ -24,7 +25,7 @@ public class MigrationMapper {
         token.setInstitutionUpdate(migrationToken.getInstitutionUpdate());
         token.setCreatedAt(migrationToken.getCreatedAt());
         token.setUpdatedAt(migrationToken.getUpdatedAt());
-        token.setClosedAt(migrationToken.getClosedAt());
+        token.setDeletedAt(migrationToken.getClosedAt());
         return token;
     }
 

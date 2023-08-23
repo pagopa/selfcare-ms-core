@@ -6640,10 +6640,6 @@
           "checksum" : {
             "type" : "string"
           },
-          "closedAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
           "contentType" : {
             "type" : "string"
           },

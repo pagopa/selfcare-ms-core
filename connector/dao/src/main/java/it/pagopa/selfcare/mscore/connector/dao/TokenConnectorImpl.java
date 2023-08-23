@@ -104,8 +104,7 @@ public class TokenConnectorImpl implements TokenConnector {
             updateDefinition.set(TokenEntity.Fields.activatedAt.name(), now);
         }
         if (status == RelationshipState.DELETED) {
-            updateDefinition.set(TokenEntity.Fields.closedAt.name(), now)
-                    .set(TokenEntity.Fields.deletedAt.name(), now);
+            updateDefinition.set(TokenEntity.Fields.deletedAt.name(), now);
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
