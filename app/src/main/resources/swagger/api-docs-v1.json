@@ -5090,7 +5090,7 @@
           },
           "subunitType" : {
             "type" : "string",
-            "enum" : [ "AOO", "EC", "UO" ]
+            "enum" : [ "AOO", "UO" ]
           },
           "taxCode" : {
             "type" : "string"
