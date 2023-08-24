@@ -47,11 +47,14 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
 
         final InstitutionPaSubunitType subunitType = strategyInput.getSubunitType();
 
+        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(strategyInput.getTaxCode());
+        CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
+
         Institution institutionToReturn;
         Optional<Institution> opt = institutionConnector.findByExternalId(strategyInput.getTaxCode());
         if(opt.isEmpty()){
             try {
-                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode());
+                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo);
                 institutionToReturn = institutionConnector.save(institutionEC);
             } catch (Exception e) {
                 throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
@@ -69,9 +72,9 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
 
         Institution institution;
         if (InstitutionPaSubunitType.AOO.equals(subunitType)) {
-            institution = mappingToInstitutionIPAAoo(strategyInput, institutionToReturn);
+            institution = mappingToInstitutionIPAAoo(strategyInput, institutionToReturn, institutionProxyInfo, categoryProxyInfo);
         } else if(InstitutionPaSubunitType.UO.equals(subunitType)) {
-            institution = mappingToInstitutionIPAUo(strategyInput, institutionToReturn);
+            institution = mappingToInstitutionIPAUo(strategyInput, institutionToReturn, institutionProxyInfo, categoryProxyInfo);
         }else{
             log.info("createInstitution :: unsupported subunitType {}", subunitType);
             return institutionToReturn;
@@ -85,10 +88,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
 
     }
 
-    private Institution getInstitutionEC(String taxCode) {
-
-        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(taxCode);
-        CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
+    private Institution getInstitutionEC(String taxCode, InstitutionProxyInfo institutionProxyInfo, CategoryProxyInfo categoryProxyInfo) {
 
         Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
         newInstitution.setSubunitType(InstitutionPaSubunitType.EC.name());
@@ -106,17 +106,14 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
     }
 
 
-    private Institution mappingToInstitutionIPAAoo(CreateInstitutionStrategyInput strategyInput, Institution rootParentInstitution) {
-
-        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(strategyInput.getTaxCode());
-
-        CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
-
+    private Institution mappingToInstitutionIPAAoo(CreateInstitutionStrategyInput strategyInput,
+                                                   Institution rootParentInstitution,
+                                                   InstitutionProxyInfo institutionProxyInfo,
+                                                   CategoryProxyInfo categoryProxyInfo) {
 
         AreaOrganizzativaOmogenea areaOrganizzativaOmogenea = partyRegistryProxyConnector.getAooById(strategyInput.getSubunitCode());
 
         Institution newInstitution = new Institution();
-
         newInstitution.setOriginId( areaOrganizzativaOmogenea.getId() );
         newInstitution.setDescription( areaOrganizzativaOmogenea.getDenominazioneAoo() );
         newInstitution.setDigitalAddress( TYPE_MAIL_PEC.equals(areaOrganizzativaOmogenea.getTipoMail1())
@@ -127,7 +124,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         newInstitution.setSubunitCode(strategyInput.getSubunitCode());
         newInstitution.setSubunitType(InstitutionPaSubunitType.AOO.name());
         newInstitution.setParentDescription(institutionProxyInfo.getDescription());
-        newInstitution.setRootParentId(rootParentInstitution.getRootParentId());
+        newInstitution.setRootParentId(rootParentInstitution.getId());
 
         newInstitution.setExternalId(getExternalId(strategyInput));
         newInstitution.setOrigin(Optional.ofNullable(areaOrganizzativaOmogenea.getOrigin())
@@ -144,14 +141,14 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         return newInstitution;
     }
 
-    private Institution mappingToInstitutionIPAUo(CreateInstitutionStrategyInput strategyInput, Institution rootParentInstitution) {
+    private Institution mappingToInstitutionIPAUo(CreateInstitutionStrategyInput strategyInput,
+                                                  Institution rootParentInstitution,
+                                                  InstitutionProxyInfo institutionProxyInfo,
+                                                  CategoryProxyInfo categoryProxyInfo) {
 
-        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(strategyInput.getTaxCode());
-        CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
         UnitaOrganizzativa unitaOrganizzativa = partyRegistryProxyConnector.getUoById(strategyInput.getSubunitCode());
 
         Institution newInstitution = new Institution();
-
         newInstitution.setOriginId( unitaOrganizzativa.getId() );
         newInstitution.setDescription( unitaOrganizzativa.getDescrizioneUo() );
         newInstitution.setDigitalAddress( TYPE_MAIL_PEC.equals(unitaOrganizzativa.getTipoMail1())
@@ -162,7 +159,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         newInstitution.setSubunitCode(strategyInput.getSubunitCode());
         newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
         newInstitution.setParentDescription(institutionProxyInfo.getDescription());
-        newInstitution.setRootParentId(rootParentInstitution.getRootParentId());
+        newInstitution.setRootParentId(rootParentInstitution.getId());
 
         if(StringUtils.isNotBlank(unitaOrganizzativa.getCodiceUniAoo())) {
             PaAttributes paAttributes = new PaAttributes();
