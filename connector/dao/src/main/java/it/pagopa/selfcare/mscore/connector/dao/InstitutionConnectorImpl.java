@@ -5,7 +5,6 @@ import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapper;
-
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapperHelper;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -249,8 +248,8 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode) {
-        return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode)
+    public List<Institution> findByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
+        return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxCode)
                                 .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
                         ),
                         InstitutionEntity.class).stream()
