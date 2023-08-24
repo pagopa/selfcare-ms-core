@@ -25,17 +25,16 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CreateInstitutionStrategyTest {
+class CreateInstitutionStrategyTest {
 
     @InjectMocks
     CreateInstitutionStrategyFactory strategyFactory;
@@ -99,10 +98,11 @@ public class CreateInstitutionStrategyTest {
     @Test
     void shouldThrowExceptionOnCreateInstitutionFromIpaIfAlreadyExists() {
 
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
         when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any()))
                 .thenReturn(List.of(new Institution()));
-        assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategy(InstitutionPaSubunitType.AOO)
-                .createInstitution(CreateInstitutionStrategyInput.builder()
+        assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategyIpa()
+                .createInstitution(CreateInstitutionStrategyInput.builder().subunitType(InstitutionPaSubunitType.AOO)
                         .build()));
 
     }
@@ -164,7 +164,7 @@ public class CreateInstitutionStrategyTest {
         when(partyRegistryProxyConnector.getAooById(any())).thenReturn(dummyAreaOrganizzativaOmogenea);
 
         //When
-        Institution actual = strategyFactory.createInstitutionStrategy(InstitutionPaSubunitType.AOO)
+        Institution actual = strategyFactory.createInstitutionStrategyIpa()
                 .createInstitution(CreateInstitutionStrategyInput.builder()
                         .taxCode(dummyAreaOrganizzativaOmogenea.getCodiceFiscaleEnte())
                         .subunitType(InstitutionPaSubunitType.AOO)
@@ -182,10 +182,10 @@ public class CreateInstitutionStrategyTest {
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.AOO.name());
         assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
 
-        verify(institutionConnector).save(any());
+        verify(institutionConnector, times(2)).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
-        verify(partyRegistryProxyConnector).getCategory(any(), any());
-        verify(partyRegistryProxyConnector).getInstitutionById(any());
+        verify(partyRegistryProxyConnector, times(2)).getCategory(any(), any());
+        verify(partyRegistryProxyConnector, times(2)).getInstitutionById(any());
     }
 
     /**
@@ -204,7 +204,7 @@ public class CreateInstitutionStrategyTest {
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
         when(partyRegistryProxyConnector.getUoById(any())).thenReturn(dummyUnitaOrganizzativa);
 
-       Institution actual = strategyFactory.createInstitutionStrategy(InstitutionPaSubunitType.UO)
+       Institution actual = strategyFactory.createInstitutionStrategyIpa()
                 .createInstitution(CreateInstitutionStrategyInput.builder()
                         .taxCode(dummyUnitaOrganizzativa.getCodiceFiscaleEnte())
                         .subunitType(InstitutionPaSubunitType.UO)
@@ -224,10 +224,10 @@ public class CreateInstitutionStrategyTest {
         assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
         assertThat(actual.getPaAttributes().getAooParentCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniAoo());
 
-        verify(institutionConnector).save(any());
+        verify(institutionConnector, times(2)).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
-        verify(partyRegistryProxyConnector).getCategory(any(), any());
-        verify(partyRegistryProxyConnector).getInstitutionById(any());
+        verify(partyRegistryProxyConnector, times(2)).getCategory(any(), any());
+        verify(partyRegistryProxyConnector, times(2)).getInstitutionById(any());
     }
 
 
@@ -250,7 +250,7 @@ public class CreateInstitutionStrategyTest {
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
         when(partyRegistryProxyConnector.getUoById(any())).thenReturn(dummyUnitaOrganizzativa);
 
-        Institution actual = strategyFactory.createInstitutionStrategy(InstitutionPaSubunitType.UO)
+        Institution actual = strategyFactory.createInstitutionStrategyIpa()
                 .createInstitution(CreateInstitutionStrategyInput.builder()
                         .taxCode(dummyUnitaOrganizzativa.getCodiceFiscaleEnte())
                         .subunitType(InstitutionPaSubunitType.UO)
@@ -269,9 +269,9 @@ public class CreateInstitutionStrategyTest {
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.UO.name());
         assertThat(actual.getPaAttributes()).isNull();
 
-        verify(institutionConnector).save(any());
+        verify(institutionConnector, times(2)).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
-        verify(partyRegistryProxyConnector).getCategory(any(), any());
-        verify(partyRegistryProxyConnector).getInstitutionById(any());
+        verify(partyRegistryProxyConnector, times(2)).getCategory(any(), any());
+        verify(partyRegistryProxyConnector, times(2)).getInstitutionById(any());
     }
 }

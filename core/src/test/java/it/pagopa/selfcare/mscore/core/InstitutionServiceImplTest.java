@@ -39,7 +39,6 @@ import java.util.Optional;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -297,22 +296,9 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testCreateInstitutionFromIpa() {
-        when(createInstitutionStrategyFactory.createInstitutionStrategy((InstitutionPaSubunitType) any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategyFactory.createInstitutionStrategyIpa()).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
-        when(partyRegistryProxyConnector.getInstitutionById(anyString())).thenReturn(new InstitutionProxyInfo());
-        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(new CategoryProxyInfo());
         Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id");
-        assertNotNull(institution);
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String)}
-     */
-    @Test
-    void testCreateInstitutionFromIpaEC() {
-        when(partyRegistryProxyConnector.getInstitutionById(anyString())).thenReturn(new InstitutionProxyInfo());
-        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(new CategoryProxyInfo());
-        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.EC,"id");
         assertNotNull(institution);
     }
 

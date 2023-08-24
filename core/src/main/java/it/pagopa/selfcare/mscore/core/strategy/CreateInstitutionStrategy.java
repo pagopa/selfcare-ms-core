@@ -1,41 +1,20 @@
 package it.pagopa.selfcare.mscore.core.strategy;
 
-import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import lombok.extern.slf4j.Slf4j;
 
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.Objects;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
+public interface CreateInstitutionStrategy {
 
-@Slf4j
-public class CreateInstitutionStrategy {
+    String TYPE_MAIL_PEC = "Pec";
 
-    private final InstitutionConnector institutionConnector;
-
-    private final Consumer<CreateInstitutionStrategyInput> checkIfAlreadyExists;
-    private final Function<CreateInstitutionStrategyInput, Institution> mappingToInstitution;
-
-    public CreateInstitutionStrategy(InstitutionConnector institutionConnector, Consumer<CreateInstitutionStrategyInput> checkIfAlreadyExists, Function<CreateInstitutionStrategyInput, Institution> mappingToInstitution) {
-        this.institutionConnector = institutionConnector;
-        this.checkIfAlreadyExists = checkIfAlreadyExists;
-        this.mappingToInstitution = mappingToInstitution;
+    default String getExternalId(CreateInstitutionStrategyInput strategyInput) {
+        return Objects.isNull(strategyInput.getSubunitCode())
+                ? strategyInput.getTaxCode()
+                : String.format("%s_%s", strategyInput.getTaxCode(), strategyInput.getSubunitCode());
     }
 
+    Institution createInstitution(CreateInstitutionStrategyInput strategyInput);
 
-    public Institution createInstitution(CreateInstitutionStrategyInput strategyInput) {
-
-        checkIfAlreadyExists.accept(strategyInput);
-
-        Institution newInstitution = mappingToInstitution.apply(strategyInput);
-
-        try {
-            return institutionConnector.save(newInstitution);
-        } catch (Exception e) {
-            throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
-        }
-    }
 }

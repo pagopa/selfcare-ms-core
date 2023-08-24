@@ -111,31 +111,12 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
-
-        Institution institutionEC;
-        Optional<Institution> opt = institutionConnector.findByExternalId(taxCode);
-        if(opt.isEmpty()){
-            try {
-                institutionEC = getInstitutionEC(taxCode);
-                institutionConnector.save(institutionEC);
-            } catch (Exception e) {
-                throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
-            }
-        } else {
-            institutionEC = opt.get();
-        }
-
-        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategy(subunitType);
-        if(Objects.nonNull(institutionStrategy)) {
-            return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
-                    .taxCode(taxCode)
-                    .subunitCode(subunitCode)
-                    .subunitType(subunitType)
-                    .build());
-        }
-
-        return institutionEC;
-
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyIpa();
+        return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                .taxCode(taxCode)
+                .subunitCode(subunitCode)
+                .subunitType(subunitType)
+                .build());
     }
 
     @Override
@@ -437,26 +418,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<Institution> getInstitutionBrokers(String productId, InstitutionType type) {
         return institutionConnector.findBrokers(productId, type);
-    }
-
-    private Institution getInstitutionEC(String taxCode) {
-
-        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(taxCode);
-        CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
-
-        Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
-        newInstitution.setSubunitType(InstitutionPaSubunitType.EC.name());
-        newInstitution.setExternalId(taxCode);
-        newInstitution.setOrigin(Origin.IPA.getValue());
-        newInstitution.setCreatedAt(OffsetDateTime.now());
-
-        Attributes attributes = new Attributes();
-        attributes.setOrigin(categoryProxyInfo.getOrigin());
-        attributes.setCode(categoryProxyInfo.getCode());
-        attributes.setDescription(categoryProxyInfo.getName());
-        newInstitution.setAttributes(List.of(attributes));
-
-        return newInstitution;
     }
 
     protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
