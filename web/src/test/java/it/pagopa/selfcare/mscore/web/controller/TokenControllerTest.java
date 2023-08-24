@@ -23,8 +23,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(value = {TokenController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 @ContextConfiguration(classes = {TokenController.class, WebTestConfig.class})
@@ -80,6 +79,36 @@ class TokenControllerTest {
         //then
         verify(tokenService, times(1)).getToken(institutionId, productId);
 
+    }
+
+    /**
+     * Method under test: {@link TokenController#findFromProduct(String, Integer, Integer)}
+     */
+    @Test
+    void findFromProduct() throws Exception {
+        // Given
+        String productIdMock = "productId";
+        Integer pageMock = 0;
+        Integer sizeMock = 100;
+
+        Token token = new Token();
+        token.setId("id");
+
+        // When
+        when(tokenService.getTokensByProductId(any(), any(), any())).thenReturn(List.of(token));
+
+
+        mvc.perform(MockMvcRequestBuilders
+                        .get("/tokens/products/{productId}", productIdMock)
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON_VALUE));
+
+        // Then
+        verify(tokenService, times(1))
+                .getTokensByProductId(productIdMock, pageMock, sizeMock);
+        verifyNoMoreInteractions(tokenService);
     }
 }
 

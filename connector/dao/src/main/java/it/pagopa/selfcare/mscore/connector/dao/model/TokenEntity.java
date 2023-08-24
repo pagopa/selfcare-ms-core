@@ -39,6 +39,8 @@ public class TokenEntity {
     @Indexed
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-    private OffsetDateTime closedAt;
+    private OffsetDateTime deletedAt;
+    private OffsetDateTime activatedAt;
+
 }
 

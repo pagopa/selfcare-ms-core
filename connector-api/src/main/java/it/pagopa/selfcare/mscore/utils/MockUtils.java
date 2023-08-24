@@ -43,7 +43,7 @@ public class MockUtils {
         tokenMock.setInstitutionUpdate(createInstitutionUpdateMock(bias, institutionType));
         tokenMock.setCreatedAt(OffsetDateTime.now().minusDays(2));
         tokenMock.setUpdatedAt(OffsetDateTime.now().minusDays(1));
-        tokenMock.setClosedAt((status.equals(RelationshipState.DELETED) ? OffsetDateTime.now() : null));
+        tokenMock.setDeletedAt((status.equals(RelationshipState.DELETED) ? OffsetDateTime.now() : null));
         return tokenMock;
     }
 

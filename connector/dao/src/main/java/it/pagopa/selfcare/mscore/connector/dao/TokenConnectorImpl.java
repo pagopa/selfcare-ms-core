@@ -100,8 +100,11 @@ public class TokenConnectorImpl implements TokenConnector {
         if (token.getContentType() != null) {
             updateDefinition.set(TokenEntity.Fields.contentType.name(), token.getContentType());
         }
+        if (status == RelationshipState.ACTIVE){
+            updateDefinition.set(TokenEntity.Fields.activatedAt.name(), now);
+        }
         if (status == RelationshipState.DELETED) {
-            updateDefinition.set(TokenEntity.Fields.closedAt.name(), now);
+            updateDefinition.set(TokenEntity.Fields.deletedAt.name(), now);
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
@@ -133,10 +136,10 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer page) {
+    public List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer page, Integer size) {
         Query query = Query.query(Criteria.where(TokenEntity.Fields.status.name()).in(statuses));
 
-        Pageable pageable = PageRequest.of(page, 100);
+        Pageable pageable = PageRequest.of(page, size);
 
         if (productId != null && !productId.isBlank()) {
             query.addCriteria(Criteria.where(TokenEntity.Fields.productId.name()).is(productId));

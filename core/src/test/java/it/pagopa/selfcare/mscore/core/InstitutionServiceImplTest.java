@@ -39,7 +39,6 @@ import java.util.Optional;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -292,11 +291,14 @@ class InstitutionServiceImplTest {
         assertTrue(institutions.isEmpty());
     }
 
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String)}
+     */
     @Test
     void testCreateInstitutionFromIpa() {
-        when(createInstitutionStrategyFactory.createInstitutionStrategy((InstitutionPaSubunitType) any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategyFactory.createInstitutionStrategyIpa()).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
-        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.EC,"id");
+        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id");
         assertNotNull(institution);
     }
 
@@ -307,8 +309,6 @@ class InstitutionServiceImplTest {
         Institution institution = institutionServiceImpl.createInstitution(new Institution());
         assertNotNull(institution);
     }
-
-
 
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}

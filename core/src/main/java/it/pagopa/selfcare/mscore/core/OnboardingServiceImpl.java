@@ -8,7 +8,10 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
-import it.pagopa.selfcare.mscore.core.util.*;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
+import it.pagopa.selfcare.mscore.core.util.TokenUtils;
+import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -175,7 +178,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             onboardingDao.rollbackSecondStepOfUpdate(rollback.getUserList(), rollback.getUpdatedInstitution(), rollback.getToken());
             contractService.deleteContract(fileName, token.getId());
         }
-        contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), token, QueueEvent.ADD);
+        contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), rollback.getToken(), QueueEvent.ADD);
         userEventService.sendLegalTokenUserNotification(token);
         log.trace("completeOboarding end");
     }

@@ -391,7 +391,7 @@ class OnboardingServiceImplTest {
         institution.setOnboarding(onboardingList);
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -506,7 +506,7 @@ class OnboardingServiceImplTest {
         institution.setOnboarding(onboardingList);
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -560,7 +560,7 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -600,7 +600,7 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -639,7 +639,7 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -696,7 +696,7 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -1193,7 +1193,7 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -1281,7 +1281,7 @@ class OnboardingServiceImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -1316,7 +1316,7 @@ class OnboardingServiceImplTest {
         Token token = mock(Token.class);
         when(token.getExpiringDate()).thenReturn(null);
         doNothing().when(token).setChecksum(any());
-        doNothing().when(token).setClosedAt(any());
+        doNothing().when(token).setDeletedAt(any());
         doNothing().when(token).setContractSigned(any());
         doNothing().when(token).setContractTemplate(any());
         doNothing().when(token).setCreatedAt(any());
@@ -1329,7 +1329,7 @@ class OnboardingServiceImplTest {
         doNothing().when(token).setType(any());
         doNothing().when(token).setUpdatedAt(any());
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -1345,7 +1345,7 @@ class OnboardingServiceImplTest {
         onboardingServiceImpl.checkAndHandleExpiring(token);
         verify(token).getExpiringDate();
         verify(token).setChecksum(any());
-        verify(token).setClosedAt(any());
+        verify(token).setDeletedAt(any());
         verify(token).setContractSigned(any());
         verify(token).setContractTemplate(any());
         verify(token).setCreatedAt(any());
@@ -1400,7 +1400,7 @@ class OnboardingServiceImplTest {
         token.setInstitutionUpdate(institutionUpdate);
         token.setCreatedAt(token.getExpiringDate().minusDays(150));
         token.setUpdatedAt(null);
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
 
         Institution institution = new Institution();
         institution.setId("InstitutionId");

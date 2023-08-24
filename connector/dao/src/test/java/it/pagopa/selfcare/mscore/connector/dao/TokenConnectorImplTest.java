@@ -106,7 +106,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -163,7 +163,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -214,7 +214,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity1 = new TokenEntity();
         tokenEntity1.setChecksum("it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity");
-        tokenEntity1.setClosedAt(null);
+        tokenEntity1.setDeletedAt(null);
         tokenEntity1.setContractSigned("it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity");
         tokenEntity1.setContractTemplate("it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity");
         tokenEntity1.setCreatedAt(null);
@@ -354,7 +354,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -487,7 +487,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -593,7 +593,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -634,7 +634,7 @@ class TokenConnectorImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -778,7 +778,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -819,7 +819,7 @@ class TokenConnectorImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -967,7 +967,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -1008,7 +1008,7 @@ class TokenConnectorImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -1087,7 +1087,7 @@ class TokenConnectorImplTest {
         assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.checksum.name()) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.contractSigned.name()) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.contentType.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.closedAt.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.deletedAt.name()) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(digestMock) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContractSigned()) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContentType()));
@@ -1117,6 +1117,33 @@ class TokenConnectorImplTest {
         assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()));
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findAndUpdateTokenActivated(){
+        // Given
+        Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.ACTIVE, InstitutionType.GSP);
+        tokenMock.setContractSigned(null);
+        tokenMock.setContentType(null);
+        RelationshipState statusMock = RelationshipState.ACTIVE;
+        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE);
+
+        when(tokenRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedTokenMock);
+        // When
+        Token result = tokenConnectorImpl.findAndUpdateToken(tokenMock, statusMock, null);
+        // Then
+        assertNotNull(result);
+        verify(tokenRepository, times(1))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()).toString().contains(tokenMock.getId()));
+        Update capturedUpdate = updateArgumentCaptor.getValue();
+        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.activatedAt.name()));
         verifyNoMoreInteractions(tokenRepository);
     }
 
@@ -1169,7 +1196,7 @@ class TokenConnectorImplTest {
                 .when(tokenRepository)
                 .find(any(), any(), any());
         // When
-        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber);
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber, 100);
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -1195,7 +1222,7 @@ class TokenConnectorImplTest {
                 .when(tokenRepository)
                 .find(any(), any(), any());
         // When
-        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, null, pageNumber);
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, null, pageNumber, 100);
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -1222,7 +1249,7 @@ class TokenConnectorImplTest {
                 .when(tokenRepository)
                 .find(any(), any(), any());
         // When
-        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber);
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber, 100);
         // Then
         assertNotNull(result);
         assertEquals(1, result.size());

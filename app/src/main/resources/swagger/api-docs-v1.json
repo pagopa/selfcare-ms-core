@@ -3954,6 +3954,79 @@
         } ]
       }
     },
+    "/tokens/products/{productId}" : {
+      "get" : {
+        "tags" : [ "Token" ],
+        "summary" : "${swagger.mscore.tokens.findFromProduct}",
+        "description" : "${swagger.mscore.tokens.findFromProduct}",
+        "operationId" : "findFromProductUsingGET_1",
+        "parameters" : [ {
+          "name" : "productId",
+          "in" : "path",
+          "description" : "Product's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "${swagger.mscore.page.number}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "${swagger.mscore.page.size}",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TokenListResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/tokens/token" : {
       "get" : {
         "tags" : [ "Token" ],
@@ -4925,6 +4998,9 @@
           "rea" : {
             "type" : "string"
           },
+          "rootParentId" : {
+            "type" : "string"
+          },
           "shareCapital" : {
             "type" : "string"
           },
@@ -5489,6 +5565,12 @@
             "type" : "string",
             "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
           },
+          "onboarding" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OnboardedProductResponse"
+            }
+          },
           "origin" : {
             "type" : "string"
           },
@@ -6041,6 +6123,22 @@
           "updatedAt" : {
             "type" : "string",
             "format" : "date-time"
+          }
+        }
+      },
+      "OnboardedProductResponse" : {
+        "title" : "OnboardedProductResponse",
+        "type" : "object",
+        "properties" : {
+          "billing" : {
+            "$ref" : "#/components/schemas/BillingResponse"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           }
         }
       },
@@ -6611,12 +6709,12 @@
         "title" : "Token",
         "type" : "object",
         "properties" : {
-          "checksum" : {
-            "type" : "string"
-          },
-          "closedAt" : {
+          "activatedAt" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "checksum" : {
+            "type" : "string"
           },
           "contentType" : {
             "type" : "string"
@@ -6631,6 +6729,10 @@
             "type" : "string"
           },
           "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "deletedAt" : {
             "type" : "string",
             "format" : "date-time"
           },
@@ -6666,6 +6768,18 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/TokenUser"
+            }
+          }
+        }
+      },
+      "TokenListResponse" : {
+        "title" : "TokenListResponse",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TokenResponse"
             }
           }
         }
@@ -6737,13 +6851,60 @@
           "checksum" : {
             "type" : "string"
           },
+          "closedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "contentType" : {
+            "type" : "string"
+          },
+          "contractSigned" : {
+            "type" : "string"
+          },
+          "contractTemplate" : {
+            "type" : "string"
+          },
+          "contractVersion" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "expiringDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "id" : {
             "type" : "string"
+          },
+          "institutionId" : {
+            "type" : "string"
+          },
+          "institutionUpdate" : {
+            "$ref" : "#/components/schemas/InstitutionUpdate"
           },
           "legals" : {
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/LegalsResponse"
+            }
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/TokenUser"
             }
           }
         }
