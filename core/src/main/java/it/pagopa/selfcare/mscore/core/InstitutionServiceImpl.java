@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -108,15 +109,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
     }
 
-
     @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
-        return createInstitutionStrategyFactory.createInstitutionStrategy(subunitType)
-                .createInstitution(CreateInstitutionStrategyInput.builder()
-                        .taxCode(taxCode)
-                        .subunitCode(subunitCode)
-                        .subunitType(subunitType)
-                        .build());
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyIpa();
+        return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                .taxCode(taxCode)
+                .subunitCode(subunitCode)
+                .subunitType(subunitType)
+                .build());
     }
 
     @Override
@@ -372,16 +372,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (opt.isPresent()) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_INSTITUTION_CONFLICT.getMessage(), externalId), CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
         }
-    }
-
-
-    private void checkIfAlreadyExists(String taxCode, String subunitCode) {
-        /* check if institution exists */
-        List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
-        if (!institutions.isEmpty())
-            throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
-                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
     }
 
     private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {

@@ -4998,6 +4998,9 @@
           "rea" : {
             "type" : "string"
           },
+          "rootParentId" : {
+            "type" : "string"
+          },
           "shareCapital" : {
             "type" : "string"
           },
