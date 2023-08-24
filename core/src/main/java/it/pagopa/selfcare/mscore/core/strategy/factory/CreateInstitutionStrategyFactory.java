@@ -35,7 +35,5 @@ public class CreateInstitutionStrategyFactory {
     public CreateInstitutionStrategy createInstitutionStrategyIpa() {
         return new CreateInstitutionStrategyIpa(partyRegistryProxyConnector, institutionConnector, institutionMapper);
     }
-
-
-
+  
 }
