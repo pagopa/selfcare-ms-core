@@ -60,7 +60,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
                 throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
             }
         } else {
-           if(Objects.isNull(subunitType) || InstitutionPaSubunitType.EC.equals(subunitType)){
+           if(Objects.isNull(subunitType)){
                throw new ResourceConflictException(String
                        .format(CustomError.CREATE_INSTITUTION_CONFLICT.getMessage(), strategyInput.getTaxCode()),
                        CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
@@ -91,7 +91,6 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
     private Institution getInstitutionEC(String taxCode, InstitutionProxyInfo institutionProxyInfo, CategoryProxyInfo categoryProxyInfo) {
 
         Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
-        newInstitution.setSubunitType(InstitutionPaSubunitType.EC.name());
         newInstitution.setExternalId(taxCode);
         newInstitution.setOrigin(Origin.IPA.getValue());
         newInstitution.setCreatedAt(OffsetDateTime.now());
