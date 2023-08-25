@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
@@ -60,11 +59,6 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
                 throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
             }
         } else {
-           if(Objects.isNull(subunitType)){
-               throw new ResourceConflictException(String
-                       .format(CustomError.CREATE_INSTITUTION_CONFLICT.getMessage(), strategyInput.getTaxCode()),
-                       CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
-           }
             institutionToReturn = opt.get();
         }
 
