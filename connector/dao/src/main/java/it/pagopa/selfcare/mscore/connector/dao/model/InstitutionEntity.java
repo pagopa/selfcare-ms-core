@@ -47,7 +47,6 @@ public class InstitutionEntity {
     private boolean imported;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-
     private String subunitCode;
     private String subunitType;
     private String parentDescription;
