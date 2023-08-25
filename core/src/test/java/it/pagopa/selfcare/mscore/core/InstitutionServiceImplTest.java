@@ -304,7 +304,7 @@ class InstitutionServiceImplTest {
 
     @Test
     void testCreateInstitution() {
-        when(createInstitutionStrategyFactory.createInstitutionStrategy((Institution) any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategyFactory.createInstitutionStrategy(any())).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
         Institution institution = institutionServiceImpl.createInstitution(new Institution());
         assertNotNull(institution);

@@ -5090,7 +5090,7 @@
           },
           "subunitType" : {
             "type" : "string",
-            "enum" : [ "AOO", "EC", "UO" ]
+            "enum" : [ "AOO", "UO" ]
           },
           "taxCode" : {
             "type" : "string"
@@ -6064,6 +6064,9 @@
           "role" : {
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "rootParentId" : {
+            "type" : "string"
           },
           "state" : {
             "type" : "string"
