@@ -146,6 +146,7 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getSubunitCode()).isNull();
         assertThat(actual.getSubunitType()).isNull();
         assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.GSP);
+        assertThat(actual.getSubunitType()).isNull();
 
         verify(institutionConnector).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), any());
