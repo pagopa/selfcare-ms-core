@@ -4998,6 +4998,9 @@
           "rea" : {
             "type" : "string"
           },
+          "rootParentId" : {
+            "type" : "string"
+          },
           "shareCapital" : {
             "type" : "string"
           },
@@ -5562,6 +5565,12 @@
             "type" : "string",
             "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
           },
+          "onboarding" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OnboardedProductResponse"
+            }
+          },
           "origin" : {
             "type" : "string"
           },
@@ -6056,6 +6065,9 @@
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
           },
+          "rootParentId" : {
+            "type" : "string"
+          },
           "state" : {
             "type" : "string"
           },
@@ -6114,6 +6126,22 @@
           "updatedAt" : {
             "type" : "string",
             "format" : "date-time"
+          }
+        }
+      },
+      "OnboardedProductResponse" : {
+        "title" : "OnboardedProductResponse",
+        "type" : "object",
+        "properties" : {
+          "billing" : {
+            "$ref" : "#/components/schemas/BillingResponse"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           }
         }
       },
@@ -6684,12 +6712,12 @@
         "title" : "Token",
         "type" : "object",
         "properties" : {
-          "checksum" : {
-            "type" : "string"
-          },
-          "closedAt" : {
+          "activatedAt" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "checksum" : {
+            "type" : "string"
           },
           "contentType" : {
             "type" : "string"
@@ -6704,6 +6732,10 @@
             "type" : "string"
           },
           "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "deletedAt" : {
             "type" : "string",
             "format" : "date-time"
           },

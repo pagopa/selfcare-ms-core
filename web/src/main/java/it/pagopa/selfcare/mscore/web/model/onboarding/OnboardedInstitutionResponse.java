@@ -38,6 +38,7 @@ public class OnboardedInstitutionResponse {
     private PaymentServiceProviderResponse paymentServiceProvider;
     private DataProtectionOfficerResponse dataProtectionOfficer;
     private String parentDescription;
+    private String rootParentId;
     private String subunitCode;
     private String subunitType;
     private String aooParentCode;

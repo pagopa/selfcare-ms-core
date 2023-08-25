@@ -73,7 +73,7 @@ public class TokenMapper {
             resource.setInstitutionUpdate(model.getInstitutionUpdate());
             resource.setCreatedAt(model.getCreatedAt());
             resource.setUpdatedAt(model.getUpdatedAt());
-            resource.setClosedAt(model.getClosedAt());
+            resource.setClosedAt(model.getDeletedAt());
         }
         return resource;
     }

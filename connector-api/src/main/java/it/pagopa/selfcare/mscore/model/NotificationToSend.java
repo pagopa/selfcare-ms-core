@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import lombok.Data;
 
@@ -24,8 +23,10 @@ public class NotificationToSend {
     private InstitutionToNotify institution;
     private Billing billing;
     private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
+    private OffsetDateTime activatedAt;
+    private OffsetDateTime deletedAt;
     private OffsetDateTime closedAt;
+    private OffsetDateTime updatedAt;
     private List<UserToNotify> users;
     private QueueEvent notificationType;
 
