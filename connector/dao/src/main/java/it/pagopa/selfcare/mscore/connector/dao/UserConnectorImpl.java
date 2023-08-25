@@ -114,6 +114,20 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
+    public void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId)
+                .and(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId)
+                .and(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.productId.name())).is(productId)
+        );
+        Update update = new Update()
+                .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
+                .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+    }
+
+    @Override
     public void findAndUpdate(OnboardedUser onboardedUser, String userId, String institutionId, OnboardedProduct product, UserBinding bindings) {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
         Update update = new Update();
