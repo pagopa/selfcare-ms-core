@@ -42,7 +42,6 @@ public class Institution {
     private String subunitType;
     private String rootParentId;
     private String parentDescription;
-    private String rootParentId;
     private PaAttributes paAttributes;
 
 }

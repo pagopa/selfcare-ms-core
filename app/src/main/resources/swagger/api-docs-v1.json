@@ -6065,6 +6065,9 @@
             "type" : "string",
             "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
           },
+          "rootParentId" : {
+            "type" : "string"
+          },
           "state" : {
             "type" : "string"
           },
