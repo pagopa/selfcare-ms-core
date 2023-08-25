@@ -643,7 +643,7 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionService#updateInstitution(String, InstitutionUpdate, String)}
      */
     @Test
-    void testUpdateInstitution6() {
+    void updateInstitution_shouldThrowExceptionIfGeotaxNotFound() {
 
         when(partyRegistryProxyConnector.getExtByCode(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
@@ -672,7 +672,7 @@ class InstitutionServiceImplTest {
         institutionUpdate.setSupportPhone("6625550144");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
-        assertThrows(ResourceNotFoundException.class,
+        assertThrows(MsCoreException.class,
                 () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
         verify(partyRegistryProxyConnector).getExtByCode(any());
         verify(userService).checkIfInstitutionUser(any(), any());
@@ -1294,7 +1294,9 @@ class InstitutionServiceImplTest {
         geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
         geographicTaxonomies.setRegionId("us-east-2");
         when(partyRegistryProxyConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
-        assertSame(geographicTaxonomies, institutionServiceImpl.retrieveGeoTaxonomies("Code"));
+        Optional<GeographicTaxonomies> optionalGeographicTaxonomies = institutionServiceImpl.retrieveGeoTaxonomies("Code");
+        assertTrue(optionalGeographicTaxonomies.isPresent());
+        assertSame(geographicTaxonomies,optionalGeographicTaxonomies.get());
         verify(partyRegistryProxyConnector).getExtByCode(any());
     }
 
@@ -1302,11 +1304,10 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionServiceImpl#retrieveGeoTaxonomies(String)}
      */
     @Test
-    void testGetGeoTaxonomies2() {
+    void getGeoTaxonomies_whenGeoTaxIsEmpty() {
         when(partyRegistryProxyConnector.getExtByCode(any()))
-                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveGeoTaxonomies("Code"));
-        verify(partyRegistryProxyConnector).getExtByCode(any());
+                .thenThrow(new ResourceNotFoundException("",""));
+        assertTrue(institutionServiceImpl.retrieveGeoTaxonomies("Code").isEmpty());
     }
 
     /**
