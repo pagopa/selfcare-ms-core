@@ -251,8 +251,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.info("Retrieving geographic taxonomies for institution {}", institution.getId());
         if (institution.getGeographicTaxonomies() != null) {
             List<GeographicTaxonomies> geographicTaxonomies = institution.getGeographicTaxonomies().stream()
-                    .map(InstitutionGeographicTaxonomies::getCode)
-                    .map(this::retrieveGeoTaxonomies)
+                    .map(institutionGeoTax -> retrieveGeoTaxonomies(institutionGeoTax.getCode())
+                        .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), institutionGeoTax.getCode()), CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode())))
                     .collect(Collectors.toList());
             if (!geographicTaxonomies.isEmpty()) {
                 return geographicTaxonomies;
@@ -262,8 +262,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public GeographicTaxonomies retrieveGeoTaxonomies(String code) {
-        return partyRegistryProxyConnector.getExtByCode(code);
+    public Optional<GeographicTaxonomies> retrieveGeoTaxonomies(String code) {
+        try {
+            return Optional.of(partyRegistryProxyConnector.getExtByCode(code));
+        } catch (ResourceNotFoundException e){
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -280,8 +284,10 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (institutionUpdate.getGeographicTaxonomies() != null) {
             return institutionUpdate.getGeographicTaxonomies()
                     .stream()
-                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription())).collect(Collectors.toList());
+                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode())
+                            .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geoTaxonomy.getCode()), geoTaxonomy.getCode())))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
+                    .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
