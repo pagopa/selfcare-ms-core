@@ -1492,8 +1492,8 @@
     "/institutions/from-ipa/" : {
       "post" : {
         "tags" : [ "Institution" ],
-        "summary" : "${swagger.mscore.institution.create.from-ipa}",
-        "description" : "${swagger.mscore.institution.create.from-ipa}",
+        "summary" : "create an institution from ipa registry",
+        "description" : "create an institution from ipa registry",
         "operationId" : "createInstitutionFromIpaUsingPOST",
         "requestBody" : {
           "content" : {
@@ -5584,6 +5584,9 @@
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
           },
           "rea" : {
+            "type" : "string"
+          },
+          "rootParentId" : {
             "type" : "string"
           },
           "shareCapital" : {
