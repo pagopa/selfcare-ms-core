@@ -115,13 +115,14 @@ public class UserConnectorImpl implements UserConnector {
 
     @Override
     public void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state) {
-        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId)
-                .and(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId)
-                .and(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.productId.name())).is(productId)
-        );
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
+
         Update update = new Update()
-                .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
-                .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
+                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
+                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
+
+        update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.productId.name()).is(productId));
+        update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);

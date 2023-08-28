@@ -91,4 +91,9 @@ public class UserServiceImpl implements UserService {
     public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
         return userConnector.findUserInstitutionAggregation(filter);
     }
+
+    @Override
+    public void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state) {
+        userConnector.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, state);
+    }
 }

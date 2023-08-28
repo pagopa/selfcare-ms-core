@@ -366,5 +366,13 @@ class UserServiceImplTest {
         filter.setUserId("id");
         Assertions.assertDoesNotThrow(() -> userServiceImpl.findUserInstitutionAggregation(filter));
     }
+
+    @Test
+    void findAndUpdateStateByInstitutionAndProduct() {
+
+        doNothing().when(userConnector).findAndUpdateStateByInstitutionAndProduct(anyString(),anyString(),anyString(),any());
+        Assertions.assertDoesNotThrow(() -> userServiceImpl
+                .findAndUpdateStateByInstitutionAndProduct("userId","institutionId","productId",RelationshipState.DELETED));
+    }
 }
 
