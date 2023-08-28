@@ -53,13 +53,13 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         Institution institution;
         if (InstitutionPaSubunitType.AOO.equals(subunitType)) {
             Institution institutionEC = getOrSaveInstitutionEc(strategyInput, institutionProxyInfo, categoryProxyInfo);
-            institution = mappingToInstitutionIPAAoo(strategyInput, institutionEC, institutionProxyInfo, categoryProxyInfo);
+            institution = mappingToInstitutionIPAAoo(strategyInput, institutionEC.getId(), institutionProxyInfo, categoryProxyInfo);
         } else if(InstitutionPaSubunitType.UO.equals(subunitType)) {
             Institution institutionEC = getOrSaveInstitutionEc(strategyInput, institutionProxyInfo, categoryProxyInfo);
-            institution = mappingToInstitutionIPAUo(strategyInput, institutionEC, institutionProxyInfo, categoryProxyInfo);
+            institution = mappingToInstitutionIPAUo(strategyInput, institutionEC.getId(), institutionProxyInfo, categoryProxyInfo);
         }else{
             log.info("createInstitution :: unsupported subunitType {}", subunitType);
-            return getOrSaveInstitutionEc(strategyInput);
+            institution = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo);
         }
 
         try {
@@ -85,10 +85,6 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         }
     }
 
-    private Institution getOrSaveInstitutionEc(CreateInstitutionStrategyInput strategyInput) {
-      return this.getOrSaveInstitutionEc(strategyInput, null, null);
-    }
-
     private Institution getInstitutionEC(String taxCode, InstitutionProxyInfo institutionProxyInfo, CategoryProxyInfo categoryProxyInfo) {
 
         Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
@@ -107,7 +103,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
 
 
     private Institution mappingToInstitutionIPAAoo(CreateInstitutionStrategyInput strategyInput,
-                                                   Institution rootParentInstitution,
+                                                   String rootParentInstitutionId,
                                                    InstitutionProxyInfo institutionProxyInfo,
                                                    CategoryProxyInfo categoryProxyInfo) {
 
@@ -124,7 +120,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         newInstitution.setSubunitCode(strategyInput.getSubunitCode());
         newInstitution.setSubunitType(InstitutionPaSubunitType.AOO.name());
         newInstitution.setParentDescription(institutionProxyInfo.getDescription());
-        newInstitution.setRootParentId(rootParentInstitution.getId());
+        newInstitution.setRootParentId(rootParentInstitutionId);
 
         newInstitution.setExternalId(getExternalId(strategyInput));
         newInstitution.setOrigin(Optional.ofNullable(areaOrganizzativaOmogenea.getOrigin())
@@ -142,7 +138,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
     }
 
     private Institution mappingToInstitutionIPAUo(CreateInstitutionStrategyInput strategyInput,
-                                                  Institution rootParentInstitution,
+                                                  String rootParentInstitutionId,
                                                   InstitutionProxyInfo institutionProxyInfo,
                                                   CategoryProxyInfo categoryProxyInfo) {
 
@@ -159,7 +155,7 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         newInstitution.setSubunitCode(strategyInput.getSubunitCode());
         newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
         newInstitution.setParentDescription(institutionProxyInfo.getDescription());
-        newInstitution.setRootParentId(rootParentInstitution.getId());
+        newInstitution.setRootParentId(rootParentInstitutionId);
 
         if(StringUtils.isNotBlank(unitaOrganizzativa.getCodiceUniAoo())) {
             PaAttributes paAttributes = new PaAttributes();

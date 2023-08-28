@@ -25,7 +25,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -238,7 +237,7 @@ class CreateInstitutionStrategyTest {
 
         Institution institutionToReturn = new Institution();
         institutionToReturn.setId("id");
-        institutionToReturn.setDescription("tes");
+        institutionToReturn.setDescription("test");
 
         //Given
         when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), anyString()))
@@ -246,7 +245,7 @@ class CreateInstitutionStrategyTest {
 
         when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(dummyCategoryProxyInfo);
         when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(institutionToReturn));
+        when(institutionConnector.save(any())).thenReturn(institutionToReturn);
 
         //When
         Institution actual = strategyFactory.createInstitutionStrategyIpa()
