@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -279,12 +276,15 @@ public class OnboardingInstitutionStrategyFactory {
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = geographicTaxonomieDtos.stream()
                     .map(InstitutionGeographicTaxonomies::getCode)
                     .map(institutionService::retrieveGeoTaxonomies)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
                     .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
                     .collect(Collectors.toList());
 
         if (geographicTaxonomies.size() != geographicTaxonomieDtos.size()) {
-            throw new ResourceNotFoundException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geographicTaxonomieDtos),
+            log.error(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geographicTaxonomieDtos),
                     CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode());
+            return List.of();
         }
 
         return geographicTaxonomies;

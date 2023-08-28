@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -68,12 +69,20 @@ class OnboardingInstitutionStrategyTest {
         DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
         PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
 
+        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setDesc("desc");
+        geographicTaxonomies.setCode("code");
+
+        InstitutionGeographicTaxonomies geoTaxNotFound = new InstitutionGeographicTaxonomies();
+        geographicTaxonomies.setDesc("notFound");
+        geographicTaxonomies.setCode("notFound");
+
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
         institutionUpdate.setBusinessRegisterPlace("Business Register Place");
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
         institutionUpdate.setDescription("description");
         institutionUpdate.setDigitalAddress("digitalAddress");
-        institutionUpdate.setGeographicTaxonomies(List.of(new InstitutionGeographicTaxonomies()));
+        institutionUpdate.setGeographicTaxonomies(List.of(geographicTaxonomies,geoTaxNotFound));
         institutionUpdate.setInstitutionType(InstitutionType.PG);
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setSupportPhone("4105551212");
@@ -98,11 +107,6 @@ class OnboardingInstitutionStrategyTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(userToOnboardList);
 
-
-        InstitutionGeographicTaxonomies geographicTaxonomies = new InstitutionGeographicTaxonomies();
-        geographicTaxonomies.setDesc("desc");
-        geographicTaxonomies.setCode("code");
-
         Onboarding onboarding = new Onboarding();
         onboarding.setProductId("43");
         onboarding.setStatus(RelationshipState.PENDING);
@@ -123,7 +127,11 @@ class OnboardingInstitutionStrategyTest {
 
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
 
-        when(institutionService.retrieveGeoTaxonomies(any())).thenReturn(new GeographicTaxonomies());
+        when(institutionService.retrieveGeoTaxonomies(geographicTaxonomies.getCode()))
+                .thenReturn(Optional.of(new GeographicTaxonomies()));
+
+        when(institutionService.retrieveGeoTaxonomies(geoTaxNotFound.getCode()))
+                .thenReturn(Optional.empty());
         Token token = new Token();
         token.setId("token");
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(new OnboardingRollback());
