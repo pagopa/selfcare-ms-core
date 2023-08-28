@@ -98,11 +98,8 @@ class CreateInstitutionStrategyTest {
     @Test
     void shouldThrowExceptionOnCreateInstitutionFromIpaIfAlreadyExists() {
 
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
         when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any()))
                 .thenReturn(List.of(new Institution()));
-        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(new InstitutionProxyInfo());
-        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(new CategoryProxyInfo());
         assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategyIpa()
                 .createInstitution(CreateInstitutionStrategyInput.builder().subunitType(InstitutionPaSubunitType.AOO)
                         .build()));

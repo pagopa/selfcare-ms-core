@@ -44,34 +44,22 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
     @Override
     public Institution createInstitution(CreateInstitutionStrategyInput strategyInput) {
 
-        final InstitutionPaSubunitType subunitType = strategyInput.getSubunitType();
-
-        InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(strategyInput.getTaxCode());
-        CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
-
-        Institution institutionToReturn;
-        Optional<Institution> opt = institutionConnector.findByExternalId(strategyInput.getTaxCode());
-        if(opt.isEmpty()){
-            try {
-                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo);
-                institutionToReturn = institutionConnector.save(institutionEC);
-            } catch (Exception e) {
-                throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
-            }
-        } else {
-            institutionToReturn = opt.get();
-        }
-
         checkIfAlreadyExistsByTaxCodeAndSubunitCode(strategyInput.getTaxCode(), strategyInput.getSubunitCode());
+
+        final InstitutionPaSubunitType subunitType = strategyInput.getSubunitType();
+        final InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(strategyInput.getTaxCode());
+        final CategoryProxyInfo categoryProxyInfo = partyRegistryProxyConnector.getCategory(institutionProxyInfo.getOrigin(), institutionProxyInfo.getCategory());
 
         Institution institution;
         if (InstitutionPaSubunitType.AOO.equals(subunitType)) {
-            institution = mappingToInstitutionIPAAoo(strategyInput, institutionToReturn, institutionProxyInfo, categoryProxyInfo);
+            Institution institutionEC = getOrSaveInstitutionEc(strategyInput, institutionProxyInfo, categoryProxyInfo);
+            institution = mappingToInstitutionIPAAoo(strategyInput, institutionEC, institutionProxyInfo, categoryProxyInfo);
         } else if(InstitutionPaSubunitType.UO.equals(subunitType)) {
-            institution = mappingToInstitutionIPAUo(strategyInput, institutionToReturn, institutionProxyInfo, categoryProxyInfo);
+            Institution institutionEC = getOrSaveInstitutionEc(strategyInput, institutionProxyInfo, categoryProxyInfo);
+            institution = mappingToInstitutionIPAUo(strategyInput, institutionEC, institutionProxyInfo, categoryProxyInfo);
         }else{
             log.info("createInstitution :: unsupported subunitType {}", subunitType);
-            return institutionToReturn;
+            return getOrSaveInstitutionEc(strategyInput);
         }
 
         try {
@@ -79,7 +67,26 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         } catch (Exception e) {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
+    }
 
+    private Institution getOrSaveInstitutionEc(CreateInstitutionStrategyInput strategyInput,
+                                               InstitutionProxyInfo institutionProxyInfo,
+                                               CategoryProxyInfo categoryProxyInfo) {
+        try {
+            Optional<Institution> opt = institutionConnector.findByExternalId(strategyInput.getTaxCode());
+            if(opt.isEmpty()) {
+                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo);
+                return institutionConnector.save(institutionEC);
+            } else {
+                return opt.get();
+            }
+        } catch (Exception e) {
+            throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
+        }
+    }
+
+    private Institution getOrSaveInstitutionEc(CreateInstitutionStrategyInput strategyInput) {
+      return this.getOrSaveInstitutionEc(strategyInput, null, null);
     }
 
     private Institution getInstitutionEC(String taxCode, InstitutionProxyInfo institutionProxyInfo, CategoryProxyInfo categoryProxyInfo) {
