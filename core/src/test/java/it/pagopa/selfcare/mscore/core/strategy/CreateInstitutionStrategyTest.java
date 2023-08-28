@@ -230,6 +230,39 @@ class CreateInstitutionStrategyTest {
         verify(partyRegistryProxyConnector).getInstitutionById(any());
     }
 
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldGetExistingEC() {
+
+        Institution institutionToReturn = new Institution();
+        institutionToReturn.setId("id");
+        institutionToReturn.setDescription("tes");
+
+        //Given
+        when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), anyString()))
+                .thenReturn(List.of());
+
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(dummyCategoryProxyInfo);
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(institutionToReturn));
+
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyIpa()
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(dummyAreaOrganizzativaOmogenea.getCodiceFiscaleEnte())
+                        .subunitCode(dummyAreaOrganizzativaOmogenea.getCodAoo())
+                        .build());
+
+        assertThat(actual.getId()).isEqualTo(institutionToReturn.getId());
+        assertThat(actual.getDescription()).isEqualTo(institutionToReturn.getDescription());
+
+        verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
+        verify(partyRegistryProxyConnector).getCategory(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
+    }
+
 
     /**
      * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
