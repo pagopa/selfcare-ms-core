@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface InstitutionService {
 
@@ -51,7 +52,7 @@ public interface InstitutionService {
 
     List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomies(Institution institution);
 
-    GeographicTaxonomies retrieveGeoTaxonomies(String code);
+    Optional<GeographicTaxonomies> retrieveGeoTaxonomies(String code);
 
     List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, SearchMode searchMode);
 

@@ -26,15 +26,15 @@ public class InstitutionResponse {
     private List<OnboardedProductResponse> onboarding;
     private PaymentServiceProviderResponse paymentServiceProvider;
     private DataProtectionOfficerResponse dataProtectionOfficer;
+    private RootParentResponse rootParent;
     private String rea;
     private String shareCapital;
     private String businessRegisterPlace;
     private String supportEmail;
     private String supportPhone;
     private boolean imported;
-
     private String subunitCode;
     private String subunitType;
-    private String parentDescription;
     private String aooParentCode;
+
 }

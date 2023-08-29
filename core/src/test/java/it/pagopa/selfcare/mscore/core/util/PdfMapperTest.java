@@ -53,7 +53,6 @@ class PdfMapperTest {
         ArrayList<User> users = new ArrayList<>();
         Institution institution = new Institution();
         institution.setId("id");
-        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -225,7 +224,6 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.GSP);
-        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -345,7 +343,6 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.SCP);
-        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -489,7 +486,6 @@ class PdfMapperTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.PSP);
-        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -579,7 +575,6 @@ class PdfMapperTest {
         user.setWorkContacts(map1);
         ArrayList<User> users = new ArrayList<>();
         Institution institution = dummyInstitutionPa();
-        institution.setSubunitType(InstitutionPaSubunitType.EC.name());
 
         Billing billing1 = new Billing();
         billing1.setPublicServices(true);

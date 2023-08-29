@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,4 +89,9 @@ public class TokenServiceImpl implements TokenService {
         return token.getExpiringDate() != null && (now.isEqual(token.getExpiringDate()) || now.isAfter(token.getExpiringDate()));
     }
 
+    @Override
+    public List<Token> getTokensByProductId(String productId, Integer page, Integer size) {
+        return tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.PENDING),
+                productId, page, size);
+    }
 }

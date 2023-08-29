@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -268,5 +269,15 @@ class TokenServiceImplTest {
         verify(tokenConnector, times(1)).findWithFilter(institutionId, productId);
     }
 
+    /**
+     * Method under test: {@link TokenServiceImpl#getTokensByProductId(String, Integer, Integer)}
+     */
+    @Test
+    void testInstitutionsInstitutionsByProductId() {
+        List<Token> tokens = new ArrayList<>();
+        when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(tokens);
+        List<Token> tokensResult = tokenServiceImpl.getTokensByProductId("id", 0, 1);
+        assertTrue(tokensResult.isEmpty());
+    }
 }
 

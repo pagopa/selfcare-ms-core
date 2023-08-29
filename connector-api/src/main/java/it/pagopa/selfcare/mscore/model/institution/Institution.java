@@ -38,9 +38,9 @@ public class Institution {
     private boolean imported;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-
     private String subunitCode;
     private String subunitType;
+    private String rootParentId;
     private String parentDescription;
     private PaAttributes paAttributes;
 

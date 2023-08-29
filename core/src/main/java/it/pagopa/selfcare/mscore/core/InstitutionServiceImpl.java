@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -108,15 +109,14 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
     }
 
-
     @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
-        return createInstitutionStrategyFactory.createInstitutionStrategy(subunitType)
-                .createInstitution(CreateInstitutionStrategyInput.builder()
-                        .taxCode(taxCode)
-                        .subunitCode(subunitCode)
-                        .subunitType(subunitType)
-                        .build());
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyIpa();
+        return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                .taxCode(taxCode)
+                .subunitCode(subunitCode)
+                .subunitType(subunitType)
+                .build());
     }
 
     @Override
@@ -251,8 +251,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.info("Retrieving geographic taxonomies for institution {}", institution.getId());
         if (institution.getGeographicTaxonomies() != null) {
             List<GeographicTaxonomies> geographicTaxonomies = institution.getGeographicTaxonomies().stream()
-                    .map(InstitutionGeographicTaxonomies::getCode)
-                    .map(this::retrieveGeoTaxonomies)
+                    .map(institutionGeoTax -> retrieveGeoTaxonomies(institutionGeoTax.getCode())
+                        .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), institutionGeoTax.getCode()), CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode())))
                     .collect(Collectors.toList());
             if (!geographicTaxonomies.isEmpty()) {
                 return geographicTaxonomies;
@@ -262,8 +262,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public GeographicTaxonomies retrieveGeoTaxonomies(String code) {
-        return partyRegistryProxyConnector.getExtByCode(code);
+    public Optional<GeographicTaxonomies> retrieveGeoTaxonomies(String code) {
+        try {
+            return Optional.of(partyRegistryProxyConnector.getExtByCode(code));
+        } catch (ResourceNotFoundException e){
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -280,8 +284,10 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (institutionUpdate.getGeographicTaxonomies() != null) {
             return institutionUpdate.getGeographicTaxonomies()
                     .stream()
-                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode()))
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription())).collect(Collectors.toList());
+                    .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode())
+                            .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geoTaxonomy.getCode()), geoTaxonomy.getCode())))
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
+                    .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -372,16 +378,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (opt.isPresent()) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_INSTITUTION_CONFLICT.getMessage(), externalId), CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
         }
-    }
-
-
-    private void checkIfAlreadyExists(String taxCode, String subunitCode) {
-        /* check if institution exists */
-        List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
-        if (!institutions.isEmpty())
-            throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
-                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
     }
 
     private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
