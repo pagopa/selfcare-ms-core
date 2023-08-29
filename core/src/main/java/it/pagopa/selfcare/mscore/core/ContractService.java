@@ -23,6 +23,7 @@ import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -254,11 +255,15 @@ public class ContractService {
         notification.setProduct(token.getProductId());
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
-        notification.setCreatedAt(token.getActivatedAt());
+        // Queue.CreatedAt: onboarding complete date
+        notification.setCreatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
+        // Queue.UpdatedAt: last ypdate date
         notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         if (token.getStatus().equals(RelationshipState.DELETED)) {
+            // Queue.ClosedAt: if token.deleted show closedAt
             notification.setClosedAt(token.getDeletedAt());
         }
+        // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
@@ -286,8 +291,11 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
-        toNotify.setSubUnitCode(institution.getSubunitCode());
-        toNotify.setSubUnitType(institution.getSubunitType());
+        try {
+            InstitutionPaSubunitType.valueOf(institution.getSubunitType());
+            toNotify.setSubUnitType(institution.getSubunitType());
+            toNotify.setSubUnitCode(institution.getSubunitCode());
+        } catch (IllegalArgumentException ignored) {}
         RootParent rootParent = new RootParent();
         rootParent.setId(institution.getRootParentId());
         rootParent.setDescription(institution.getParentDescription());
