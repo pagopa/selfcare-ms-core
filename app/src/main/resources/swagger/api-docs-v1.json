@@ -1376,7 +1376,7 @@
         "parameters" : [ {
           "name" : "taxCode",
           "in" : "query",
-          "description" : "${swagger.mscore.institutions.model.taxCode}",
+          "description" : "Institution's tax code",
           "required" : true,
           "style" : "form",
           "schema" : {
@@ -1385,7 +1385,7 @@
         }, {
           "name" : "subunitCode",
           "in" : "query",
-          "description" : "${swagger.mscore.institutions.model.subunitCode}",
+          "description" : "Institution's subunit code",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -1767,8 +1767,8 @@
     "/institutions/products/{productId}" : {
       "get" : {
         "tags" : [ "Institution" ],
-        "summary" : "${swagger.mscore.institutions.findFromProduct}",
-        "description" : "${swagger.mscore.institutions.findFromProduct}",
+        "summary" : "Gets institutions filtering onboardings by product id",
+        "description" : "Gets institutions filtering onboardings by product id",
         "operationId" : "findFromProductUsingGET",
         "parameters" : [ {
           "name" : "productId",
@@ -3111,7 +3111,7 @@
         "parameters" : [ {
           "name" : "taxCode",
           "in" : "query",
-          "description" : "${swagger.mscore.institutions.model.taxCode}",
+          "description" : "Institution's tax code",
           "required" : true,
           "style" : "form",
           "schema" : {
@@ -3120,7 +3120,7 @@
         }, {
           "name" : "subunitCode",
           "in" : "query",
-          "description" : "${swagger.mscore.institutions.model.subunitCode}",
+          "description" : "Institution's subunit code",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -5651,17 +5651,14 @@
           "originId" : {
             "type" : "string"
           },
-          "parentDescription" : {
-            "type" : "string"
-          },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
           },
           "rea" : {
             "type" : "string"
           },
-          "rootParentId" : {
-            "type" : "string"
+          "rootParent" : {
+            "$ref" : "#/components/schemas/RootParentResponse"
           },
           "shareCapital" : {
             "type" : "string"
@@ -6770,6 +6767,18 @@
             "items" : {
               "$ref" : "#/components/schemas/RelationshipResult"
             }
+          }
+        }
+      },
+      "RootParentResponse" : {
+        "title" : "RootParentResponse",
+        "type" : "object",
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
           }
         }
       },
