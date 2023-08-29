@@ -121,7 +121,8 @@ public class UserConnectorImpl implements UserConnector {
                 .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
                 .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
 
-        update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.productId.name()).is(productId));
+        update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.productId.name()).is(productId)
+                .and(CURRENT_PRODUCT  + OnboardedProduct.Fields.status.name()).is(RelationshipState.ACTIVE.name()));
         update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
