@@ -453,6 +453,29 @@ class UserControllerTest {
 
     }
 
+
+    /**
+     * Method under test: {@link UserController#deleteProducts(String, String, String)}
+     */
+    @Test
+    void deleteProducts() throws Exception {
+
+        final String userId = "userId";
+        final String institutionId = "institutionId";
+        final String productId = "productId";
+
+        doNothing().when(userService).findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, RelationshipState.DELETED);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .delete("/users/{userId}/institutions/{institutionId}/products/{productId}", userId, institutionId, productId)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
     private UserBinding dummyUserBinding(String institutionId) {
 
         UserBinding userBinding = new UserBinding();
