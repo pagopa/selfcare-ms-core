@@ -256,6 +256,10 @@ public class ContractService {
             notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
             // when update last update is updated date
             notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
+            if (token.getStatus().equals(RelationshipState.DELETED)) {
+                // Queue.ClosedAt: if token.deleted show closedAt
+                notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+            }
         }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
@@ -263,12 +267,7 @@ public class ContractService {
         notification.setOnboardingTokenId(token.getId());
         // Queue.CreatedAt: onboarding complete date
         notification.setCreatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
-        // Queue.UpdatedAt: last ypdate date
-        notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
-        if (token.getStatus().equals(RelationshipState.DELETED)) {
-            // Queue.ClosedAt: if token.deleted show closedAt
-            notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
-        }
+
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
