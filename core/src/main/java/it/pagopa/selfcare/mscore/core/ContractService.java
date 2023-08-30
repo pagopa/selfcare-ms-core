@@ -248,10 +248,14 @@ public class ContractService {
             // When Onboarding.complete event id is the onboarding id
             notification.setId(token.getId());
             notification.setState(RelationshipState.ACTIVE.toString());
+            // when onboarding complete last update is activated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
         } else {
             // New id
             notification.setId(UUID.randomUUID().toString());
             notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
+            // when update last update is updated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
@@ -263,7 +267,7 @@ public class ContractService {
         notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
         if (token.getStatus().equals(RelationshipState.DELETED)) {
             // Queue.ClosedAt: if token.deleted show closedAt
-            notification.setClosedAt(token.getDeletedAt());
+            notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
         }
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
