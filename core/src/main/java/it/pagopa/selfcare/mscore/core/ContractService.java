@@ -293,11 +293,14 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
-        try {
-            InstitutionPaSubunitType.valueOf(institution.getSubunitType());
-            toNotify.setSubUnitType(institution.getSubunitType());
-            toNotify.setSubUnitCode(institution.getSubunitCode());
-        } catch (IllegalArgumentException ignored) {}
+        if (institution.getSubunitType() != null) {
+            try {
+                InstitutionPaSubunitType.valueOf(institution.getSubunitType());
+                toNotify.setSubUnitType(institution.getSubunitType());
+                toNotify.setSubUnitCode(institution.getSubunitCode());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
         RootParent rootParent = new RootParent();
         rootParent.setDescription(institution.getParentDescription());
         if(StringUtils.hasText(institution.getRootParentId())){
