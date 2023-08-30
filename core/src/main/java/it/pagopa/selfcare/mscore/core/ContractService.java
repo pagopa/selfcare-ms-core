@@ -245,9 +245,11 @@ public class ContractService {
     private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
         if (queueEvent.equals(QueueEvent.ADD)) {
+            // When Onboarding.complete event id is the onboarding id
             notification.setId(token.getId());
             notification.setState(RelationshipState.ACTIVE.toString());
         } else {
+            // New id
             notification.setId(UUID.randomUUID().toString());
             notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
         }
@@ -297,9 +299,9 @@ public class ContractService {
             toNotify.setSubUnitCode(institution.getSubunitCode());
         } catch (IllegalArgumentException ignored) {}
         RootParent rootParent = new RootParent();
-        rootParent.setId(institution.getRootParentId());
         rootParent.setDescription(institution.getParentDescription());
         if(StringUtils.hasText(institution.getRootParentId())){
+            rootParent.setId(institution.getRootParentId());
             Institution rootParentInstitution = institutionConnector.findById(institution.getRootParentId());
             rootParent.setOriginId(Objects.nonNull(rootParentInstitution) ? rootParentInstitution.getOriginId() : null);
         }

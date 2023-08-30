@@ -23,11 +23,8 @@ public class NotificationToSend {
     private InstitutionToNotify institution;
     private Billing billing;
     private OffsetDateTime createdAt;
-    private OffsetDateTime activatedAt;
-    private OffsetDateTime deletedAt;
     private OffsetDateTime closedAt;
     private OffsetDateTime updatedAt;
-    private List<UserToNotify> users;
     private QueueEvent notificationType;
 
 }
