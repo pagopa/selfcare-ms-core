@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
@@ -39,7 +40,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
     @Override
-    public List<Delegation> getDelegations(String from, String to, String productId) {
-        return delegationConnector.find(from, to, productId);
+    public List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode) {
+        return delegationConnector.find(from, to, productId, mode);
     }
 }
