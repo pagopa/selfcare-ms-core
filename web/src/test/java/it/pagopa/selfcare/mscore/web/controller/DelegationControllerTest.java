@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
+import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
@@ -121,19 +122,19 @@ class DelegationControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode)}
      */
     @Test
     void getDelegations_shouldGetData() throws Exception {
         // Given
         Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId()))
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}", expectedDelegation.getFrom(),
-                        expectedDelegation.getTo(), expectedDelegation.getProductId());
+                .get("/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}&mode={mode}", expectedDelegation.getFrom(),
+                        expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL);
         MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
                 .build()
                 .perform(requestBuilder)
@@ -155,7 +156,7 @@ class DelegationControllerTest {
         assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
 
         verify(delegationService, times(1))
-                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId());
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL);
         verifyNoMoreInteractions(delegationService);
     }
 
