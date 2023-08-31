@@ -594,6 +594,13 @@ class UserConnectorImplTest {
     }
 
     @Test
+    void findAndUpdateStateByInstitutionAndProduct() {
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(new UserEntity());
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateByInstitutionAndProduct("42", "42", "productId", RelationshipState.PENDING));
+    }
+
+    @Test
     void testFindAndUpdate() {
         UserEntity userEntity = new UserEntity();
         userEntity.setBindings(new ArrayList<>());
