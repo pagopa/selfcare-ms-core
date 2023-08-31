@@ -160,6 +160,45 @@ class DelegationControllerTest {
         verifyNoMoreInteractions(delegationService);
     }
 
+    /**
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode)}
+     */
+    @Test
+    void getDelegations_shouldGetData_nullMode() throws Exception {
+        // Given
+        Delegation expectedDelegation = dummyDelegation();
+
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), null))
+                .thenReturn(List.of(expectedDelegation));
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}", expectedDelegation.getFrom(),
+                        expectedDelegation.getTo(), expectedDelegation.getProductId());
+        MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<DelegationResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), new TypeReference<>() {});
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.size()).isEqualTo(1);
+        DelegationResponse actual = response.get(0);
+        assertThat(actual.getId()).isEqualTo(expectedDelegation.getId());
+        assertThat(actual.getInstitutionName()).isEqualTo(expectedDelegation.getInstitutionFromName());
+        assertThat(actual.getBrokerId()).isEqualTo(expectedDelegation.getTo());
+        assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
+        assertThat(actual.getInstitutionId()).isEqualTo(expectedDelegation.getFrom());
+        assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
+
+        verify(delegationService, times(1))
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), null);
+        verifyNoMoreInteractions(delegationService);
+    }
+
     private Delegation dummyDelegation() {
         Delegation delegation = new Delegation();
         delegation.setFrom("from");

@@ -19,11 +19,11 @@ public interface DelegationInstitutionMapper {
 
     @Named("setTaxCode")
     default String setTaxCode(List<Institution> institutionList) {
-        return institutionList.get(0).getTaxCode();
+        return !institutionList.isEmpty() ? institutionList.get(0).getTaxCode() : null;
     }
 
     @Named("setInstitutionType")
     default InstitutionType setInstitutionType(List<Institution> institutionList) {
-        return institutionList.get(0).getInstitutionType();
+        return !institutionList.isEmpty() ? institutionList.get(0).getInstitutionType() : null;
     }
 }
