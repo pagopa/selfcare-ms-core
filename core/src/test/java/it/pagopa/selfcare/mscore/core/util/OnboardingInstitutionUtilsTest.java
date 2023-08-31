@@ -1,7 +1,10 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.TestUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
@@ -12,7 +15,6 @@ import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +107,7 @@ class OnboardingInstitutionUtilsTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -153,7 +155,7 @@ class OnboardingInstitutionUtilsTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -203,7 +205,7 @@ class OnboardingInstitutionUtilsTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -253,7 +255,7 @@ class OnboardingInstitutionUtilsTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -371,7 +373,7 @@ class OnboardingInstitutionUtilsTest {
         institution.setOnboarding(onboardingList);
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -428,7 +430,7 @@ class OnboardingInstitutionUtilsTest {
         institution.setOnboarding(onboardingList);
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);

@@ -156,7 +156,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -469,7 +469,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -557,7 +557,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -686,7 +686,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -736,7 +736,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);

@@ -34,7 +34,7 @@ public class DaoMockUtils {
         tokenEntityMock.setContractSigned("ContractPath/" + tokenEntityMock.getId() + "/FileName");
         tokenEntityMock.setCreatedAt(OffsetDateTime.now().minusDays(2));
         tokenEntityMock.setUpdatedAt(OffsetDateTime.now().minusDays(1));
-        tokenEntityMock.setClosedAt((status.equals(RelationshipState.DELETED) ? OffsetDateTime.now() : null));
+        tokenEntityMock.setDeletedAt((status.equals(RelationshipState.DELETED) ? OffsetDateTime.now() : null));
         return tokenEntityMock;
     }
 }

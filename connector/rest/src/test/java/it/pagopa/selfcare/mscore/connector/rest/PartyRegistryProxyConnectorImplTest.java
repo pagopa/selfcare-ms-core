@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapperImpl;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.exception.BadGatewayException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
@@ -23,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -462,7 +464,7 @@ class PartyRegistryProxyConnectorImplTest {
 
 
     @Test
-    void testGetExtByCode() {
+    void getExtByCode() {
         GeographicTaxonomiesResponse geographicTaxonomiesResponse = new GeographicTaxonomiesResponse();
         geographicTaxonomiesResponse.setGeotaxId("Code");
         geographicTaxonomiesResponse.setCountry("GB");
@@ -482,23 +484,9 @@ class PartyRegistryProxyConnectorImplTest {
     }
 
     @Test
-    void testGetExtByCode2() {
-        GeographicTaxonomiesResponse geographicTaxonomiesResponse = new GeographicTaxonomiesResponse();
-        geographicTaxonomiesResponse.setGeotaxId("Code");
-        geographicTaxonomiesResponse.setCountry("GB");
-        geographicTaxonomiesResponse.setCountryAbbreviation("GB");
-        geographicTaxonomiesResponse.setDescription("The characteristics of someone or something");
-        geographicTaxonomiesResponse.setEnable(false);
-        geographicTaxonomiesResponse.setIstatCode("");
-        geographicTaxonomiesResponse.setProvinceId("Province");
-        geographicTaxonomiesResponse.setProvinceAbbreviation("Province Abbreviation");
-        geographicTaxonomiesResponse.setRegionId("us-east-2");
-        when(partyRegistryProxyRestClient.getExtByCode(any())).thenReturn(geographicTaxonomiesResponse);
-        GeographicTaxonomies actualExtByCode = partyRegistryProxyConnectorImpl.getExtByCode("Code");
-        assertEquals("Code", actualExtByCode.getGeotaxId());
-        assertFalse(actualExtByCode.isEnable());
-        assertEquals("The characteristics of someone or something", actualExtByCode.getDescription());
-        verify(partyRegistryProxyRestClient).getExtByCode(any());
+    void getExtByCode_notFound() {
+        when(partyRegistryProxyRestClient.getExtByCode(any())).thenThrow(new ResourceNotFoundException("", ""));
+        assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getExtByCode("Code"));
     }
 
     @Test

@@ -10,6 +10,7 @@ import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
@@ -83,9 +84,6 @@ class ContractServiceTest {
 
     @Mock
     private KafkaPropertiesConfig kafkaPropertiesConfig;
-
-    @Mock
-    private UserRegistryConnector userRegistryConnector;
 
     @Test
     void createContractPDF() {
@@ -219,8 +217,9 @@ class ContractServiceTest {
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -238,7 +237,7 @@ class ContractServiceTest {
         token.setProductId("prod");
         token.setStatus(RelationshipState.ACTIVE);
         token.setInstitutionUpdate(institutionUpdate);
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -299,8 +298,9 @@ class ContractServiceTest {
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -318,7 +318,7 @@ class ContractServiceTest {
         token.setProductId("prod");
         token.setStatus(RelationshipState.ACTIVE);
         token.setInstitutionUpdate(institutionUpdate);
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("");
 
@@ -367,8 +367,9 @@ class ContractServiceTest {
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector);
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -386,7 +387,7 @@ class ContractServiceTest {
         token.setProductId("prod");
         token.setStatus(RelationshipState.DELETED);
         token.setInstitutionUpdate(institutionUpdate);
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned(null);
         token.setContentType(null);
@@ -452,8 +453,9 @@ class ContractServiceTest {
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         assertEquals("Template File", (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector)).extractTemplate("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector)).extractTemplate("Path"));
         verify(fileStorageConnector).getTemplateFile((String) any());
         verify(producerFactory).transactionCapable();
     }
@@ -483,10 +485,10 @@ class ContractServiceTest {
         CoreConfig coreConfig = new CoreConfig();
         Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
         SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
-        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         assertSame(resourceResponse, (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), userRegistryConnector, partyRegistryProxyConnector)).getFile("Path"));
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector)).getFile("Path"));
         verify(fileStorageConnector).getFile((String) any());
         verify(producerFactory).transactionCapable();
     }

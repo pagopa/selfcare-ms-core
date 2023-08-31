@@ -39,7 +39,6 @@ import java.util.Optional;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -292,23 +291,24 @@ class InstitutionServiceImplTest {
         assertTrue(institutions.isEmpty());
     }
 
+    /**
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String)}
+     */
     @Test
     void testCreateInstitutionFromIpa() {
-        when(createInstitutionStrategyFactory.createInstitutionStrategy((InstitutionPaSubunitType) any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategyFactory.createInstitutionStrategyIpa()).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
-        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.EC,"id");
+        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id");
         assertNotNull(institution);
     }
 
     @Test
     void testCreateInstitution() {
-        when(createInstitutionStrategyFactory.createInstitutionStrategy((Institution) any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategyFactory.createInstitutionStrategy(any())).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
         Institution institution = institutionServiceImpl.createInstitution(new Institution());
         assertNotNull(institution);
     }
-
-
 
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}
@@ -643,7 +643,7 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionService#updateInstitution(String, InstitutionUpdate, String)}
      */
     @Test
-    void testUpdateInstitution6() {
+    void updateInstitution_shouldThrowExceptionIfGeotaxNotFound() {
 
         when(partyRegistryProxyConnector.getExtByCode(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
@@ -672,7 +672,7 @@ class InstitutionServiceImplTest {
         institutionUpdate.setSupportPhone("6625550144");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
-        assertThrows(ResourceNotFoundException.class,
+        assertThrows(MsCoreException.class,
                 () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
         verify(partyRegistryProxyConnector).getExtByCode(any());
         verify(userService).checkIfInstitutionUser(any(), any());
@@ -1294,7 +1294,9 @@ class InstitutionServiceImplTest {
         geographicTaxonomies.setProvinceAbbreviation("Province Abbreviation");
         geographicTaxonomies.setRegionId("us-east-2");
         when(partyRegistryProxyConnector.getExtByCode(any())).thenReturn(geographicTaxonomies);
-        assertSame(geographicTaxonomies, institutionServiceImpl.retrieveGeoTaxonomies("Code"));
+        Optional<GeographicTaxonomies> optionalGeographicTaxonomies = institutionServiceImpl.retrieveGeoTaxonomies("Code");
+        assertTrue(optionalGeographicTaxonomies.isPresent());
+        assertSame(geographicTaxonomies,optionalGeographicTaxonomies.get());
         verify(partyRegistryProxyConnector).getExtByCode(any());
     }
 
@@ -1302,11 +1304,10 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionServiceImpl#retrieveGeoTaxonomies(String)}
      */
     @Test
-    void testGetGeoTaxonomies2() {
+    void getGeoTaxonomies_whenGeoTaxIsEmpty() {
         when(partyRegistryProxyConnector.getExtByCode(any()))
-                .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> institutionServiceImpl.retrieveGeoTaxonomies("Code"));
-        verify(partyRegistryProxyConnector).getExtByCode(any());
+                .thenThrow(new ResourceNotFoundException("",""));
+        assertTrue(institutionServiceImpl.retrieveGeoTaxonomies("Code").isEmpty());
     }
 
     /**

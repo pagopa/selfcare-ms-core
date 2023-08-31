@@ -16,13 +16,14 @@ import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -43,6 +44,7 @@ import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.multipart.MultipartFile;
@@ -57,10 +59,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
@@ -79,9 +78,8 @@ public class ContractService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaPropertiesConfig kafkaPropertiesConfig;
     private final ObjectMapper mapper;
-
-    private final UserRegistryConnector userRegistryConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
+    private final InstitutionConnector institutionConnector;
 
     public ContractService(PagoPaSignatureConfig pagoPaSignatureConfig,
                            FileStorageConnector fileStorageConnector,
@@ -90,8 +88,8 @@ public class ContractService {
                            SignatureService signatureService,
                            KafkaTemplate<String, String> kafkaTemplate,
                            KafkaPropertiesConfig kafkaPropertiesConfig,
-                           UserRegistryConnector userRegistryConnector,
-                           PartyRegistryProxyConnector partyRegistryProxyConnector) {
+                           PartyRegistryProxyConnector partyRegistryProxyConnector,
+                           InstitutionConnector institutionConnector) {
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
         this.fileStorageConnector = fileStorageConnector;
@@ -108,8 +106,8 @@ public class ContractService {
             }
         });
         mapper.registerModule(simpleModule);
-        this.userRegistryConnector = userRegistryConnector;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
+        this.institutionConnector = institutionConnector;
     }
 
     public File createContractPDF(String contractTemplate, User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
@@ -244,26 +242,33 @@ public class ContractService {
         }
     }
 
-
-
     private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
         if (queueEvent.equals(QueueEvent.ADD)) {
+            // When Onboarding.complete event id is the onboarding id
             notification.setId(token.getId());
             notification.setState(RelationshipState.ACTIVE.toString());
+            // when onboarding complete last update is activated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
         } else {
+            // New id
             notification.setId(UUID.randomUUID().toString());
             notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
+            // when update last update is updated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
+            if (token.getStatus().equals(RelationshipState.DELETED)) {
+                // Queue.ClosedAt: if token.deleted show closedAt
+                notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+            }
         }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
-        notification.setCreatedAt(token.getCreatedAt());
-        notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
-        if (token.getStatus().equals(RelationshipState.DELETED)) {
-            notification.setClosedAt(token.getUpdatedAt());
-        }
+        // Queue.CreatedAt: onboarding complete date
+        notification.setCreatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
+
+        // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
@@ -291,10 +296,21 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
-        toNotify.setSubUnitCode(institution.getSubunitCode());
-        toNotify.setSubUnitType(institution.getSubunitType());
+        if (institution.getSubunitType() != null) {
+            try {
+                InstitutionPaSubunitType.valueOf(institution.getSubunitType());
+                toNotify.setSubUnitType(institution.getSubunitType());
+                toNotify.setSubUnitCode(institution.getSubunitCode());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
         RootParent rootParent = new RootParent();
         rootParent.setDescription(institution.getParentDescription());
+        if(StringUtils.hasText(institution.getRootParentId())){
+            rootParent.setId(institution.getRootParentId());
+            Institution rootParentInstitution = institutionConnector.findById(institution.getRootParentId());
+            rootParent.setOriginId(Objects.nonNull(rootParentInstitution) ? rootParentInstitution.getOriginId() : null);
+        }
         toNotify.setRootParent(rootParent);
         try {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());

@@ -1,16 +1,8 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.InstitutionUpdateEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.TokenUserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
@@ -20,11 +12,12 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TokenMapperTest {
     /**
@@ -53,7 +46,7 @@ class TokenMapperTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -106,7 +99,7 @@ class TokenMapperTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -170,7 +163,7 @@ class TokenMapperTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -243,7 +236,7 @@ class TokenMapperTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -321,7 +314,7 @@ class TokenMapperTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -401,7 +394,7 @@ class TokenMapperTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -434,7 +427,7 @@ class TokenMapperTest {
     void testConvertToToken2() {
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -484,7 +477,7 @@ class TokenMapperTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -536,7 +529,7 @@ class TokenMapperTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -576,7 +569,7 @@ class TokenMapperTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
