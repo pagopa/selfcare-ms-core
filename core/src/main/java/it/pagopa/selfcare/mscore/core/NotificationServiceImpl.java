@@ -34,6 +34,8 @@ public class NotificationServiceImpl implements NotificationService {
     public static final String PAGOPA_LOGO_FILENAME = "pagopa-logo.png";
     private final NotificationServiceConnector notificationConnector;
     private final FileStorageConnector fileStorageConnector;
+    private final InstitutionConnector institutionConnector;
+    private final ProductConnector productConnector;
     private final ObjectMapper mapper;
     private final MailTemplateConfig mailTemplateConfig;
     private final EmailConnector emailConnector;
@@ -43,6 +45,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     public NotificationServiceImpl(NotificationServiceConnector notificationConnector,
                                    FileStorageConnector fileStorageConnector,
+                                   InstitutionConnector institutionConnector,
+                                   ProductConnector productConnector,
                                    ObjectMapper mapper,
                                    MailTemplateConfig mailTemplateConfig,
                                    EmailConnector emailConnector,
@@ -50,6 +54,8 @@ public class NotificationServiceImpl implements NotificationService {
                                    CoreConfig coreConfig) {
         this.notificationConnector = notificationConnector;
         this.fileStorageConnector = fileStorageConnector;
+        this.institutionConnector = institutionConnector;
+        this.productConnector = productConnector;
         this.mapper = mapper;
         this.mailTemplateConfig = mailTemplateConfig;
         this.emailConnector = emailConnector;
@@ -124,6 +130,18 @@ public class NotificationServiceImpl implements NotificationService {
         log.info(DESTINATION_MAIL_LOG, destinationMail);
 
         emailConnector.sendMail(mailParametersMapper.getOnboardingRejectNotificationPath(), destinationMail, logo, product.getTitle(), mailParameters, "_pagopa-logo.png");
+    }
+
+    public void sendMailForDelegation(String institutionName, String productId, String partnerId) {
+        Map<String, String> mailParameters;
+        Product product = productConnector.getProductById(productId);
+        mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
+        log.debug(MAIL_PARAMETER_LOG, mailParameters);
+        Institution partnerInstitution = institutionConnector.findById(partnerId);
+        List<String> destinationMail = mailParametersMapper.getDelegationNotificationReceivers(partnerInstitution);
+        log.info(DESTINATION_MAIL_LOG, destinationMail);
+        emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, productId, mailParameters, null);
+        log.info("create-delegation-email-notification Email successful sent");
     }
 
     private List<String> getRejectDestinationMails(Institution institution) {

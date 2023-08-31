@@ -20,6 +20,8 @@ public class MailTemplateConfig {
 
     private String autocompletePath;
 
+    private String delegationNotificationPath;
+
     private String path;
     private String userName;
     private String userSurname;

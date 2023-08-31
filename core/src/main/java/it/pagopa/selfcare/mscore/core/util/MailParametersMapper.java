@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +50,19 @@ public class MailParametersMapper {
         return map;
     }
 
+    public Map<String, String> getDelegationNotificationParameter(String institutionName, String productName) {
+        Map<String, String> map = new HashMap<>();
+        map.put(mailTemplateConfig.getNotificationProductName(), productName);
+        map.put(mailTemplateConfig.getInstitutionDescription(), institutionName);
+        return map;
+    }
+
     public String getOnboardingNotificationPath() {
         return mailTemplateConfig.getNotificationPath();
+    }
+
+    public String getDelegationNotificationPath() {
+        return mailTemplateConfig.getDelegationNotificationPath();
     }
 
     public String getOnboardingCompletePath() {
@@ -77,5 +89,9 @@ public class MailParametersMapper {
 
     public String getOnboardingRejectNotificationPath(){
         return mailTemplateConfig.getRejectPath();
+    }
+
+    public List<String> getDelegationNotificationReceivers(Institution partnerInstitution) {
+        return List.of(partnerInstitution.getDigitalAddress());
     }
 }
