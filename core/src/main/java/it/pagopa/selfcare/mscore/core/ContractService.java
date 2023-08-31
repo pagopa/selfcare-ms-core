@@ -23,6 +23,7 @@ import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -244,21 +245,30 @@ public class ContractService {
     private NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
         if (queueEvent.equals(QueueEvent.ADD)) {
+            // When Onboarding.complete event id is the onboarding id
             notification.setId(token.getId());
             notification.setState(RelationshipState.ACTIVE.toString());
+            // when onboarding complete last update is activated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
         } else {
+            // New id
             notification.setId(UUID.randomUUID().toString());
             notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
+            // when update last update is updated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
+            if (token.getStatus().equals(RelationshipState.DELETED)) {
+                // Queue.ClosedAt: if token.deleted show closedAt
+                notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+            }
         }
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
-        notification.setCreatedAt(token.getActivatedAt());
-        notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
-        if (token.getStatus().equals(RelationshipState.DELETED)) {
-            notification.setClosedAt(token.getDeletedAt());
-        }
+        // Queue.CreatedAt: onboarding complete date
+        notification.setCreatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
+
+        // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
         notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
@@ -286,12 +296,18 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
-        toNotify.setSubUnitCode(institution.getSubunitCode());
-        toNotify.setSubUnitType(institution.getSubunitType());
+        if (institution.getSubunitType() != null) {
+            try {
+                InstitutionPaSubunitType.valueOf(institution.getSubunitType());
+                toNotify.setSubUnitType(institution.getSubunitType());
+                toNotify.setSubUnitCode(institution.getSubunitCode());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
         RootParent rootParent = new RootParent();
-        rootParent.setId(institution.getRootParentId());
         rootParent.setDescription(institution.getParentDescription());
         if(StringUtils.hasText(institution.getRootParentId())){
+            rootParent.setId(institution.getRootParentId());
             Institution rootParentInstitution = institutionConnector.findById(institution.getRootParentId());
             rootParent.setOriginId(Objects.nonNull(rootParentInstitution) ? rootParentInstitution.getOriginId() : null);
         }
