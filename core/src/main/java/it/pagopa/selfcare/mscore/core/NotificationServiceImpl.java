@@ -133,15 +133,19 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     public void sendMailForDelegation(String institutionName, String productId, String partnerId) {
-        Map<String, String> mailParameters;
-        Product product = productConnector.getProductById(productId);
-        mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
-        log.debug(MAIL_PARAMETER_LOG, mailParameters);
-        Institution partnerInstitution = institutionConnector.findById(partnerId);
-        List<String> destinationMail = new ArrayList<>(getDestinationMails(partnerInstitution));
-        log.info(DESTINATION_MAIL_LOG, destinationMail);
-        emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, productId, mailParameters, null);
-        log.info("create-delegation-email-notification Email successful sent");
+        try {
+            Map<String, String> mailParameters;
+            Product product = productConnector.getProductById(productId);
+            mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
+            log.debug(MAIL_PARAMETER_LOG, mailParameters);
+            Institution partnerInstitution = institutionConnector.findById(partnerId);
+            List<String> destinationMail = new ArrayList<>(getDestinationMails(partnerInstitution));
+            log.info(DESTINATION_MAIL_LOG, destinationMail);
+            emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, product.getTitle(), mailParameters, null);
+            log.info("create-delegation-email-notification Email successful sent");
+        } catch (Exception e) {
+            log.error("create-delegation-email-notification Impossible to send email. Error: {}", e.getMessage(), e);
+        }
     }
 
     private List<String> getRejectDestinationMails(Institution institution) {

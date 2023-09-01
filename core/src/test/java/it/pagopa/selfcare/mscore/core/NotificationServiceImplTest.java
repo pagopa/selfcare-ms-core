@@ -2,9 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.selfcare.mscore.api.EmailConnector;
-import it.pagopa.selfcare.mscore.api.FileStorageConnector;
-import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
+import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
@@ -45,6 +43,12 @@ class NotificationServiceImplTest {
 
     @Mock
     private FileStorageConnector fileStorageConnector;
+
+    @Mock
+    private InstitutionConnector institutionConnector;
+
+    @Mock
+    private ProductConnector productConnector;
 
     @Mock
     private ObjectMapper mapper;
@@ -117,6 +121,18 @@ class NotificationServiceImplTest {
     @Test
     void sendMailForApprove(){
         Assertions.assertDoesNotThrow(() -> notificationService.sendMailForApprove(new User(), new OnboardingRequest(), "token"));
+    }
+
+    @Test
+    void sendNotificationDelegationMail() {
+        Product product = new Product();
+        product.setTitle("test");
+        Institution institution = new Institution();
+        institution.setDigitalAddress("test@test.com");
+        when(productConnector.getProductById(anyString())).thenReturn(product);
+        when(institutionConnector.findById(anyString())).thenReturn(institution);
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
     }
 
     @Test
