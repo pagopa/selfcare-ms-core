@@ -23,6 +23,7 @@ import java.util.List;
 @Slf4j
 public class SchedulerService {
 
+    public static final int TOKEN_PAGE_SIZE = 100;
     private final ContractService contractService;
 
     private final TokenConnector tokenConnector;
@@ -61,13 +62,15 @@ public class SchedulerService {
                 boolean nextPage = true;
                 int page = 0;
                 do {
-                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page, 100);
+                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), regenerateQueueConfiguration.getProductFilter(), page, TOKEN_PAGE_SIZE);
 
                     sendDataLakeNotifications(tokens);
 
                     page += 1;
-                    if (tokens.size() < 100)
+                    if (tokens.size() < TOKEN_PAGE_SIZE) {
                         nextPage = false;
+                        log.debug("TOKEN NUMBERS {}", page * TOKEN_PAGE_SIZE + tokens.size());
+                    }
 
                 } while (nextPage);
             }
