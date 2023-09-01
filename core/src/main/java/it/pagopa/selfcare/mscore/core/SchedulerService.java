@@ -60,14 +60,16 @@ public class SchedulerService {
                 log.debug("Regenerating notifications on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
 
                 boolean nextPage = true;
-                int page = 0;
+                int page = Math.max(regenerateQueueConfiguration.getFirstPage(), 0);
+                int lastPage = Math.max(regenerateQueueConfiguration.getLastPage(), page);
+
                 do {
                     List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), regenerateQueueConfiguration.getProductFilter(), page, TOKEN_PAGE_SIZE);
 
                     sendDataLakeNotifications(tokens);
 
                     page += 1;
-                    if (tokens.size() < TOKEN_PAGE_SIZE) {
+                    if (tokens.size() < TOKEN_PAGE_SIZE || page > lastPage) {
                         nextPage = false;
                         log.debug("TOKEN NUMBERS {}", page * TOKEN_PAGE_SIZE + tokens.size());
                     }

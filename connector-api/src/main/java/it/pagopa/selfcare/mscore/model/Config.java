@@ -13,6 +13,10 @@ public class Config {
 
     private String productFilter;
 
+    private int firstPage;
+
+    private int lastPage;
+
     private boolean enableKafkaScheduler;
 
 }
