@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
@@ -191,5 +192,33 @@ public class UserController {
                                 .map(userMapper::toInstitutionProducts)
                                 .collect(Collectors.toList()))
                 .build());
+    }
+
+
+
+    /**
+     * The function delete logically the association institution and product
+     *
+     * @param userId                String
+     * @param institutionId         String
+     * @param productId         String
+     * @return onboardingInfoResponse
+     * <p>
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.users.delete.products}", notes = "${swagger.mscore.users.delete.products}")
+    @DeleteMapping(value = "/users/{userId}/institutions/{institutionId}/products/{productId}")
+    public ResponseEntity<Void> deleteProducts(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+                                                                    @PathVariable("userId") String userId,
+                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                                    @PathVariable(value = "institutionId") String institutionId,
+                                                                    @ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                                        @PathVariable(value = "productId") String productId) {
+
+        userService.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, RelationshipState.DELETED);
+        return ResponseEntity.ok().build();
     }
 }

@@ -417,8 +417,13 @@ class SignatureServiceTest {
         xmlOriginalThirdCountryQcStatementsMapping.setQcSSCD(new XmlQcSSCD());
         xmlOriginalThirdCountryQcStatementsMapping.setQcTypes(new ArrayList<>());
 
+
+        XmlTrustServiceEquivalenceInformation trustServiceEquivalenceInformation = new XmlTrustServiceEquivalenceInformation();
+        trustServiceEquivalenceInformation.setTrustServiceLegalIdentifier("42");
+        trustServiceEquivalenceInformation.setCertificateContentEquivalenceList(new ArrayList<>());
+
         XmlMRACertificateMapping xmlMRACertificateMapping = new XmlMRACertificateMapping();
-        xmlMRACertificateMapping.setEnactedTrustServiceLegalIdentifier("42");
+        xmlMRACertificateMapping.setTrustServiceEquivalenceInformation(trustServiceEquivalenceInformation);
         xmlMRACertificateMapping.setOriginalThirdCountryMapping(xmlOriginalThirdCountryQcStatementsMapping);
 
         XmlPSD2QcInfo xmlPSD2QcInfo = new XmlPSD2QcInfo();
@@ -487,96 +492,77 @@ class SignatureServiceTest {
         xmlSigningCertificate.setPublicKey(new byte[]{'A', 1, 'A', 1, 'A', 1, 'A', 1});
 
         XmlCertificate xmlCertificate = new XmlCertificate();
-        xmlCertificate.setAuthorityInformationAccessUrls(new ArrayList<>());
         xmlCertificate.setBase64Encoded(new byte[]{'A', 1, 'A', 1, 'A', 1, 'A', 1});
         xmlCertificate.setBasicSignature(xmlBasicSignature1);
-        xmlCertificate.setCRLDistributionPoints(new ArrayList<>());
+        xmlCertificate.setCertificateExtensions(new ArrayList<>());
         xmlCertificate.setCertificateChain(new ArrayList<>());
-        xmlCertificate.setCertificatePolicies(new ArrayList<>());
         xmlCertificate.setCommonName("42");
         xmlCertificate.setCountryName("42");
         xmlCertificate.setDigestAlgoAndValue(xmlDigestAlgoAndValue1);
         xmlCertificate.setEmail("42");
         xmlCertificate.setEntityKey("42");
-        xmlCertificate.setExtendedKeyUsages(new ArrayList<>());
         xmlCertificate.setGivenName("42");
         xmlCertificate.setId("42");
-        xmlCertificate.setIdPkixOcspNoCheck(true);
-        xmlCertificate.setKeyUsageBits(new ArrayList<>());
         xmlCertificate.setLocality("42");
         xmlCertificate
                 .setNotAfter(java.util.Date.from(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()));
         xmlCertificate.setNotBefore(
                 java.util.Date.from(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()));
-        xmlCertificate.setOCSPAccessUrls(new ArrayList<>());
         xmlCertificate.setOrganizationIdentifier("42");
         xmlCertificate.setOrganizationName("42");
         xmlCertificate.setOrganizationalUnit("42");
         xmlCertificate.setPseudonym("42");
         xmlCertificate.setPublicKeyEncryptionAlgo(EncryptionAlgorithm.RSA);
         xmlCertificate.setPublicKeySize(42);
-        xmlCertificate.setQcStatements(xmlQcStatements1);
         xmlCertificate.setRevocations(new ArrayList<>());
         xmlCertificate.setSelfSigned(true);
         xmlCertificate.setSerialNumber(BigInteger.valueOf(42L));
         xmlCertificate.setSigningCertificate(xmlSigningCertificate);
         xmlCertificate.setSources(new ArrayList<>());
         xmlCertificate.setState("42");
-        xmlCertificate.setSubjectAlternativeNames(new ArrayList<>());
         xmlCertificate.setSubjectSerialNumber("42");
         xmlCertificate.setSurname("42");
         xmlCertificate.setTitle("42");
         xmlCertificate.setTrusted(true);
         xmlCertificate.setTrustedServiceProviders(new ArrayList<>());
-        xmlCertificate.setValAssuredShortTermCertificate(true);
 
         XmlSigningCertificate xmlSigningCertificate1 = new XmlSigningCertificate();
         xmlSigningCertificate1.setCertificate(xmlCertificate);
         xmlSigningCertificate1.setPublicKey(new byte[]{'A', 1, 'A', 1, 'A', 1, 'A', 1});
 
         XmlCertificate xmlCertificate1 = new XmlCertificate();
-        xmlCertificate1.setAuthorityInformationAccessUrls(new ArrayList<>());
         xmlCertificate1.setBase64Encoded(new byte[]{'A', 1, 'A', 1, 'A', 1, 'A', 1});
         xmlCertificate1.setBasicSignature(xmlBasicSignature);
-        xmlCertificate1.setCRLDistributionPoints(new ArrayList<>());
         xmlCertificate1.setCertificateChain(new ArrayList<>());
-        xmlCertificate1.setCertificatePolicies(new ArrayList<>());
         xmlCertificate1.setCommonName("42");
         xmlCertificate1.setCountryName("42");
         xmlCertificate1.setDigestAlgoAndValue(xmlDigestAlgoAndValue);
         xmlCertificate1.setEmail("42");
         xmlCertificate1.setEntityKey("42");
-        xmlCertificate1.setExtendedKeyUsages(new ArrayList<>());
         xmlCertificate1.setGivenName("42");
         xmlCertificate1.setId("42");
-        xmlCertificate1.setIdPkixOcspNoCheck(true);
-        xmlCertificate1.setKeyUsageBits(new ArrayList<>());
         xmlCertificate1.setLocality("42");
         xmlCertificate1
                 .setNotAfter(java.util.Date.from(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()));
         xmlCertificate1.setNotBefore(
                 java.util.Date.from(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant()));
-        xmlCertificate1.setOCSPAccessUrls(new ArrayList<>());
         xmlCertificate1.setOrganizationIdentifier("42");
         xmlCertificate1.setOrganizationName("42");
         xmlCertificate1.setOrganizationalUnit("42");
         xmlCertificate1.setPseudonym("42");
         xmlCertificate1.setPublicKeyEncryptionAlgo(EncryptionAlgorithm.RSA);
         xmlCertificate1.setPublicKeySize(42);
-        xmlCertificate1.setQcStatements(xmlQcStatements);
         xmlCertificate1.setRevocations(new ArrayList<>());
         xmlCertificate1.setSelfSigned(true);
         xmlCertificate1.setSerialNumber(BigInteger.valueOf(42L));
         xmlCertificate1.setSigningCertificate(xmlSigningCertificate1);
         xmlCertificate1.setSources(new ArrayList<>());
         xmlCertificate1.setState("42");
-        xmlCertificate1.setSubjectAlternativeNames(new ArrayList<>());
         xmlCertificate1.setSubjectSerialNumber("42");
         xmlCertificate1.setSurname("42");
         xmlCertificate1.setTitle("42");
         xmlCertificate1.setTrusted(true);
         xmlCertificate1.setTrustedServiceProviders(new ArrayList<>());
-        xmlCertificate1.setValAssuredShortTermCertificate(true);
 
         ArrayList<XmlCertificate> xmlCertificateList = new ArrayList<>();
         xmlCertificateList.add(xmlCertificate1);

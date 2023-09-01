@@ -11,7 +11,6 @@ import java.util.Map;
 
 public interface NotificationService {
 
-
     void setCompletedPGOnboardingMail(String destinationMail, String businessName);
 
     void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName, String productName);
@@ -23,4 +22,6 @@ public interface NotificationService {
     void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo);
 
     void sendRejectMail(File logo, Institution institution, Product product);
+
+    void sendMailForDelegation(String institutionName, String productId, String partnerId);
 }

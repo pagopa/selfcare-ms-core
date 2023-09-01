@@ -24,6 +24,8 @@
 
     <properties>
         <selc-commons.version>2.4.6</selc-commons.version>
+        <httpclient5.version>5.2.1</httpclient5.version>
+        <httpcore5.version>5.2.1</httpcore5.version>
     </properties>
 
     <dependencyManagement>
@@ -153,7 +155,6 @@
             <artifactId>selc-commons-connector-soap-aruba-sign</artifactId>
             <version>${selc-commons.version}</version>
         </dependency>
-
         <!-- Dependency for verify Signature -->
         <dependency>
             <groupId>javax.xml.bind</groupId>

@@ -30,4 +30,6 @@ public interface UserService {
     User retrieveUserFromUserRegistry(String userId, EnumSet<User.Fields> fields);
 
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
+
+    void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);
 }
