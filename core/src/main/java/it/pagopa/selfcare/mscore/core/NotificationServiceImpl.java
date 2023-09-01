@@ -143,7 +143,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
             mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            List<String> destinationMail = new ArrayList<>(getDestinationMails(partnerInstitution));
+            List<String> destinationMail = getDestinationMails(partnerInstitution);
             log.info(DESTINATION_MAIL_LOG, destinationMail);
             emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, product.getTitle(), mailParameters, null);
             log.info("create-delegation-email-notification :: Email successful sent");
