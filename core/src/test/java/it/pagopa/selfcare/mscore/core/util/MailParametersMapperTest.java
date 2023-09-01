@@ -76,6 +76,12 @@ class MailParametersMapperTest {
     }
 
     @Test
+    void getNotificationDelegationPath(){
+        when(mailTemplateConfig.getDelegationNotificationPath()).thenReturn("path");
+        Assertions.assertNotNull(mailParametersMapper.getDelegationNotificationPath());
+    }
+
+    @Test
     void getOnboardingCompletePath(){
         when(mailTemplateConfig.getCompletePath()).thenReturn("path");
         Assertions.assertNotNull(mailParametersMapper.getOnboardingCompletePath());
