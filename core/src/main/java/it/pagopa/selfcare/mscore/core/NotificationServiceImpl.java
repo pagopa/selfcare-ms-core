@@ -107,7 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo) {
-        List<String> destinationMails = new ArrayList<>(getCompleteDestinationMails(institution));
+        List<String> destinationMails = new ArrayList<>(getDestinationMails(institution));
         if (managers != null && !managers.isEmpty()) {
             for (User user : managers) {
                 if (user.getWorkContacts() != null && user.getWorkContacts().containsKey(institution.getId())) {
@@ -138,7 +138,7 @@ public class NotificationServiceImpl implements NotificationService {
         mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
         Institution partnerInstitution = institutionConnector.findById(partnerId);
-        List<String> destinationMail = mailParametersMapper.getDelegationNotificationReceivers(partnerInstitution);
+        List<String> destinationMail = new ArrayList<>(getDestinationMails(partnerInstitution));
         log.info(DESTINATION_MAIL_LOG, destinationMail);
         emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, productId, mailParameters, null);
         log.info("create-delegation-email-notification Email successful sent");
@@ -152,7 +152,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private List<String> getCompleteDestinationMails(Institution institution) {
+    private List<String> getDestinationMails(Institution institution) {
         if (coreConfig.isSendEmailToInstitution()) {
             return List.of(institution.getDigitalAddress());
         } else {

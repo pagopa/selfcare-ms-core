@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +90,4 @@ public class MailParametersMapper {
         return mailTemplateConfig.getRejectPath();
     }
 
-    public List<String> getDelegationNotificationReceivers(Institution partnerInstitution) {
-        return List.of(partnerInstitution.getDigitalAddress());
-    }
 }
