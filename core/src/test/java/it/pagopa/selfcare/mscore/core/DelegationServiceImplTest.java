@@ -26,6 +26,9 @@ class DelegationServiceImplTest {
     @InjectMocks
     private DelegationServiceImpl delegationServiceImpl;
 
+    @Mock
+    private NotificationService notificationService;
+
     /**
      * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
      */
@@ -34,6 +37,7 @@ class DelegationServiceImplTest {
         Delegation delegation = new Delegation();
         delegation.setId("id");
         when(delegationConnector.save(any())).thenReturn(delegation);
+        doNothing().when(notificationService).sendMailForDelegation(any(), any(), any());
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
