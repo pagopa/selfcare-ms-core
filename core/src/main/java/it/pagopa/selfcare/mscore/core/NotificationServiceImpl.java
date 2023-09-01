@@ -136,15 +136,19 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             Map<String, String> mailParameters;
             Product product = productConnector.getProductById(productId);
+            Institution partnerInstitution = institutionConnector.findById(partnerId);
+            if(Objects.isNull(product) || Objects.isNull(partnerInstitution)) {
+                log.error("create-delegation-email-notification :: Impossible to send email. Error: partner institution or product is null");
+                return;
+            }
             mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            Institution partnerInstitution = institutionConnector.findById(partnerId);
             List<String> destinationMail = new ArrayList<>(getDestinationMails(partnerInstitution));
             log.info(DESTINATION_MAIL_LOG, destinationMail);
             emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, product.getTitle(), mailParameters, null);
-            log.info("create-delegation-email-notification Email successful sent");
+            log.info("create-delegation-email-notification :: Email successful sent");
         } catch (Exception e) {
-            log.error("create-delegation-email-notification Impossible to send email. Error: {}", e.getMessage(), e);
+            log.error("create-delegation-email-notification :: Impossible to send email. Error: {}", e.getMessage(), e);
         }
     }
 
