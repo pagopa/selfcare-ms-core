@@ -62,16 +62,18 @@ public class SchedulerService {
                 boolean nextPage = true;
                 int page = Math.max(regenerateQueueConfiguration.getFirstPage(), 0);
                 int lastPage = Math.max(regenerateQueueConfiguration.getLastPage(), page);
+                log.debug("[KAFKA] SCHEDULER START PAGE {} LAST PAGE {}", page, lastPage);
 
                 do {
                     List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), regenerateQueueConfiguration.getProductFilter(), page, TOKEN_PAGE_SIZE);
+                    log.debug("[KAFKA] TOKEN NUMBER {} PAGE {}", tokens.size(), page);
 
                     sendDataLakeNotifications(tokens);
 
                     page += 1;
                     if (tokens.size() < TOKEN_PAGE_SIZE || page > lastPage) {
                         nextPage = false;
-                        log.debug("TOKEN NUMBERS {}", page * TOKEN_PAGE_SIZE + tokens.size());
+                        log.debug("[KAFKA] TOKEN TOTAL NUMBER {}", page * TOKEN_PAGE_SIZE + tokens.size());
                     }
 
                 } while (nextPage);
