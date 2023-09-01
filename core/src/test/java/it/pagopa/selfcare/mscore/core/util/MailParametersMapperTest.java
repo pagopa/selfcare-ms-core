@@ -112,5 +112,11 @@ class MailParametersMapperTest {
 
         Assertions.assertNotNull(mailParametersMapper.getOnboardingRejectMailParameters("productName","productId"));
     }
+
+    @Test
+    void getNotificationDelegationParameters(){
+        Assertions.assertNotNull(mailParametersMapper.getDelegationNotificationParameter("productName","productId"));
+    }
+
 }
 

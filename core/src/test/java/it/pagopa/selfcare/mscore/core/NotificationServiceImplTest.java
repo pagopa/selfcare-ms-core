@@ -136,6 +136,15 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    void sendNotificationDelegationMailWithEmptyProduct() {
+        Institution institution = new Institution();
+        institution.setDigitalAddress("test@test.com");
+        when(productConnector.getProductById(anyString())).thenReturn(null);
+        when(institutionConnector.findById(anyString())).thenReturn(institution);
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
+    }
+
+    @Test
     void sendCompletedEmail(){
         File file = mock(File.class);
 
