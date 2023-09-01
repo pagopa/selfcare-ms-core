@@ -23,6 +23,7 @@ import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -427,6 +429,176 @@ class ContractServiceTest {
 
         verify(partyRegistryProxyConnector, times(1))
                 .getInstitutionById(institution.getExternalId());
+    }
+
+    ContractService createContractServiceMock(InstitutionConnector institutionConnector,
+                                              PartyRegistryProxyConnector partyRegistryProxyConnector) {
+        ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
+        when(producerFactory.transactionCapable()).thenReturn(true);
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
+        CoreConfig coreConfig = new CoreConfig();
+        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        return new ContractService(pagoPaSignatureConfig, null, coreConfig,
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector);
+
+    }
+
+    /**
+     * Method under test: {@link ContractService#toNotificationToSend(Institution, Token, QueueEvent)}
+     */
+    @Test
+    void testGenerateMessageActiveWithActivatedAt() throws ExecutionException, InterruptedException {
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        ContractService contractService = createContractServiceMock(institutionConnector, partyRegistryProxyConnector);
+
+        String institutionId = "i1";
+        String tokenId = "t1";
+
+        Onboarding onboarding = createOnboarding(tokenId, "prod");
+        Institution institution = createInstitution(institutionId, onboarding);
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
+        Token token = createToken(institutionId, tokenId, institutionUpdate,
+                RelationshipState.ACTIVE,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+
+        mockPartyRegistryProxy(partyRegistryProxyConnector, institution);
+        when(institutionConnector.findById(any())).thenReturn(null);
+
+        NotificationToSend notification = contractService.toNotificationToSend(institution, token, QueueEvent.ADD);
+
+        assertNotNull(notification);
+        assertNull(notification.getClosedAt());
+        assertEquals(RelationshipState.ACTIVE.toString(), notification.getState());
+        assertEquals(token.getActivatedAt(), notification.getCreatedAt());
+        assertEquals(token.getUpdatedAt(), notification.getCreatedAt());
+        assertEquals(QueueEvent.ADD, notification.getNotificationType());
+    }
+
+    /**
+     * Method under test: {@link ContractService#toNotificationToSend(Institution, Token, QueueEvent)}
+     */
+    @Test
+    void testGenerateMessageActiveWithoutActivatedAt() throws ExecutionException, InterruptedException {
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        ContractService contractService = createContractServiceMock(institutionConnector, partyRegistryProxyConnector);
+
+        String institutionId = "i1";
+        String tokenId = "t1";
+
+        Onboarding onboarding = createOnboarding(tokenId, "prod");
+        Institution institution = createInstitution(institutionId, onboarding);
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
+        Token token = createToken(institutionId, tokenId, institutionUpdate,
+                RelationshipState.ACTIVE,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+
+        mockPartyRegistryProxy(partyRegistryProxyConnector, institution);
+        when(institutionConnector.findById(any())).thenReturn(null);
+
+        NotificationToSend notification = contractService.toNotificationToSend(institution, token, QueueEvent.ADD);
+
+        assertNotNull(notification);
+        assertNull(notification.getClosedAt());
+        assertEquals(RelationshipState.ACTIVE.toString(), notification.getState());
+        assertEquals(token.getCreatedAt(), notification.getCreatedAt());
+        assertEquals(token.getUpdatedAt(), notification.getCreatedAt());
+        assertEquals(QueueEvent.ADD, notification.getNotificationType());
+    }
+
+    /**
+     * Method under test: {@link ContractService#toNotificationToSend(Institution, Token, QueueEvent)}
+     */
+    @Test
+    void testGenerateMessageClosedWithoutActivatedAt() throws ExecutionException, InterruptedException {
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        ContractService contractService = createContractServiceMock(institutionConnector, partyRegistryProxyConnector);
+
+        String institutionId = "i1";
+        String tokenId = "t1";
+
+        Onboarding onboarding = createOnboarding(tokenId, "prod");
+        Institution institution = createInstitution(institutionId, onboarding);
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
+        Token token = createToken(institutionId, tokenId, institutionUpdate,
+                RelationshipState.DELETED,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+
+        mockPartyRegistryProxy(partyRegistryProxyConnector, institution);
+        when(institutionConnector.findById(any())).thenReturn(null);
+
+        NotificationToSend notification = contractService.toNotificationToSend(institution, token, QueueEvent.UPDATE);
+
+        assertNotNull(notification);
+        assertNotNull(notification.getClosedAt());
+        assertEquals("CLOSED", notification.getState());
+        assertEquals(token.getCreatedAt(), notification.getCreatedAt());
+        assertEquals(token.getUpdatedAt(), notification.getUpdatedAt());
+        assertEquals(QueueEvent.UPDATE, notification.getNotificationType());
+    }
+
+    private static Institution createInstitution(String institutionId, Onboarding onboarding) {
+        Institution institution = mockInstance(new Institution());
+        institution.setId(institutionId);
+        institution.setOrigin("IPA");
+        institution.setOnboarding(List.of(onboarding));
+        return institution;
+    }
+
+    private static Onboarding createOnboarding(String tokenId, String productId) {
+        Onboarding onboarding = mockInstance(new Onboarding());
+        onboarding.setProductId(productId);
+        onboarding.setTokenId(tokenId);
+        return onboarding;
+    }
+
+    private static Token createToken(String institutionId, String tokenId, InstitutionUpdate institutionUpdate,
+                                     RelationshipState status,
+                                     OffsetDateTime createdAt, OffsetDateTime activatedAt,
+                                     OffsetDateTime updatedAt, OffsetDateTime deletedAt) {
+        TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
+        TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
+
+        Token token = mockInstance(new Token());
+        token.setId(tokenId);
+        token.setInstitutionId(institutionId);
+        token.setProductId("prod");
+        token.setStatus(status);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setCreatedAt(createdAt);
+        token.setActivatedAt(activatedAt);
+        token.setUpdatedAt(updatedAt);
+        token.setDeletedAt(deletedAt);
+        token.setUsers(List.of(tokenUser1, tokenUser2));
+        token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return token;
+    }
+
+    private static void mockPartyRegistryProxy(PartyRegistryProxyConnector partyRegistryProxyConnector, Institution institution) {
+        InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
+        institutionProxyInfoMock.setTaxCode(institution.getExternalId());
+
+        GeographicTaxonomies geographicTaxonomiesMock = mockInstance(new GeographicTaxonomies());
+        geographicTaxonomiesMock.setIstatCode(institutionProxyInfoMock.getIstatCode());
+
+        when(partyRegistryProxyConnector.getInstitutionById(any()))
+                .thenReturn(institutionProxyInfoMock);
+        when(partyRegistryProxyConnector.getExtByCode(any())).thenReturn(geographicTaxonomiesMock);
     }
 
     @Test
