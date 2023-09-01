@@ -23,8 +23,8 @@ public class MockUtils {
         configMock.setId("KafkaScheduler");
         configMock.setEnableKafkaScheduler(enabled);
         configMock.setProductFilter(productFilter);
-//        configMock.setFirstPage(0);
-//        configMock.setLastPage(10);
+        configMock.setFirstPage(0);
+        configMock.setLastPage(10);
         return configMock;
     }
 
