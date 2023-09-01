@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
+import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
@@ -121,14 +122,53 @@ class DelegationControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#findFromProduct(String, Integer, Integer)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode)}
      */
     @Test
     void getDelegations_shouldGetData() throws Exception {
         // Given
         Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId()))
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL))
+                .thenReturn(List.of(expectedDelegation));
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}&mode={mode}", expectedDelegation.getFrom(),
+                        expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL);
+        MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<DelegationResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), new TypeReference<>() {});
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.size()).isEqualTo(1);
+        DelegationResponse actual = response.get(0);
+        assertThat(actual.getId()).isEqualTo(expectedDelegation.getId());
+        assertThat(actual.getInstitutionName()).isEqualTo(expectedDelegation.getInstitutionFromName());
+        assertThat(actual.getBrokerId()).isEqualTo(expectedDelegation.getTo());
+        assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
+        assertThat(actual.getInstitutionId()).isEqualTo(expectedDelegation.getFrom());
+        assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
+
+        verify(delegationService, times(1))
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL);
+        verifyNoMoreInteractions(delegationService);
+    }
+
+    /**
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode)}
+     */
+    @Test
+    void getDelegations_shouldGetData_nullMode() throws Exception {
+        // Given
+        Delegation expectedDelegation = dummyDelegation();
+
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), null))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -155,7 +195,7 @@ class DelegationControllerTest {
         assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
 
         verify(delegationService, times(1))
-                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId());
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), null);
         verifyNoMoreInteractions(delegationService);
     }
 
