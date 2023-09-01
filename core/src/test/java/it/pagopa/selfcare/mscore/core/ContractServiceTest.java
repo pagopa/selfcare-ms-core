@@ -512,7 +512,7 @@ class ContractServiceTest {
         assertNull(notification.getClosedAt());
         assertEquals(RelationshipState.ACTIVE.toString(), notification.getState());
         assertEquals(token.getCreatedAt(), notification.getCreatedAt());
-        assertEquals(token.getUpdatedAt(), notification.getCreatedAt());
+        assertEquals(token.getCreatedAt(), notification.getUpdatedAt());
         assertEquals(QueueEvent.ADD, notification.getNotificationType());
     }
 
