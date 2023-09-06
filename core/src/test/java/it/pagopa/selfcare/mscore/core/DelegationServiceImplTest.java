@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
-import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
@@ -87,6 +86,25 @@ class DelegationServiceImplTest {
         when(delegationConnector.find(any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", "to", "productId", GetDelegationsMode.NORMAL);
+        //Then
+        verify(delegationConnector).find(any(), any(), any(), any());
+
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(delegation.getId(), response.get(0).getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void find_shouldGetData_fullMode() {
+        //Given
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        when(delegationConnector.find(any(), any(), any(), any())).thenReturn(List.of(delegation));
+        //When
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", GetDelegationsMode.FULL);
         //Then
         verify(delegationConnector).find(any(), any(), any(), any());
 

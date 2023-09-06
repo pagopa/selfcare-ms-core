@@ -15,7 +15,11 @@ public interface DelegationInstitutionMapper {
 
     @Mapping(source = "institutions", target = "taxCode", qualifiedByName = "setTaxCode")
     @Mapping(source = "institutions", target = "institutionType", qualifiedByName = "setInstitutionType")
-    Delegation convertToDelegation(DelegationInstitution delegation);
+    Delegation convertToDelegationInstitution(DelegationInstitution delegation);
+
+    @Mapping(source = "institutions", target = "brokerTaxCode", qualifiedByName = "setTaxCode")
+    @Mapping(source = "institutions", target = "brokerType", qualifiedByName = "setInstitutionType")
+    Delegation convertToDelegationBroker(DelegationInstitution delegation);
 
     @Named("setTaxCode")
     default String setTaxCode(List<Institution> institutionList) {
@@ -24,6 +28,7 @@ public interface DelegationInstitutionMapper {
 
     @Named("setInstitutionType")
     default InstitutionType setInstitutionType(List<Institution> institutionList) {
-        return !institutionList.isEmpty() ? institutionList.get(0).getInstitutionType() : null;
+        return !institutionList.isEmpty()? institutionList.get(0).getInstitutionType() : null;
     }
+
 }
