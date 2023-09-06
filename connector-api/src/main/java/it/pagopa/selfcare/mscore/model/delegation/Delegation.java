@@ -23,5 +23,7 @@ public class Delegation {
     private String productId;
     private InstitutionType institutionType;
     private String taxCode;
+    private InstitutionType brokerType;
+    private String brokerTaxCode;
 
 }
