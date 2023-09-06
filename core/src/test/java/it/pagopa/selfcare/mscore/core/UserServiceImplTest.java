@@ -374,5 +374,94 @@ class UserServiceImplTest {
         Assertions.assertDoesNotThrow(() -> userServiceImpl
                 .findAndUpdateStateByInstitutionAndProduct("userId","institutionId","productId",RelationshipState.DELETED));
     }
+
+    @Test
+    void retrievePersonOk(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+
+        User user = new User();
+        user.setFiscalCode("taxCode");
+        CertifiedField<String> certName = new CertifiedField<>();
+        certName.setValue("nome");
+        user.setName(certName);
+        CertifiedField<String> certSurname = new CertifiedField<>();
+        certSurname.setValue("cognome");
+        user.setFamilyName(certSurname);
+        CertifiedField<String> certMail = new CertifiedField<>();
+        certMail.setValue("mail@test.it");
+        user.setEmail(certMail);
+        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+
+        User response = userServiceImpl.retrievePerson("userId","prod-pn");
+
+        Assertions.assertEquals("nome", response.getName());
+        Assertions.assertEquals("cognome", response.getFamilyName());
+        Assertions.assertEquals("mail@test.it", response.getEmail());
+        Assertions.assertEquals("taxCode", response.getFiscalCode());
+    }
+
+    @Test
+    void retrievePersonOkWithoutProductFilter(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+
+        User user = new User();
+        user.setFiscalCode("taxCode");
+        CertifiedField<String> certName = new CertifiedField<>();
+        certName.setValue("nome");
+        user.setName(certName);
+        CertifiedField<String> certSurname = new CertifiedField<>();
+        certSurname.setValue("cognome");
+        user.setFamilyName(certSurname);
+        CertifiedField<String> certMail = new CertifiedField<>();
+        certMail.setValue("mail@test.it");
+        user.setEmail(certMail);
+        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+
+        User response = userServiceImpl.retrievePerson("userId",null);
+
+        Assertions.assertEquals("nome", response.getName());
+        Assertions.assertEquals("cognome", response.getFamilyName());
+        Assertions.assertEquals("mail@test.it", response.getEmail());
+        Assertions.assertEquals("taxCode", response.getFiscalCode());
+    }
+
+    @Test
+    void retrievePersonProductNotFound(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> userServiceImpl.retrievePerson("userId","prod-io"));
+    }
+
+    @Test
+    void retrievePersonNotFound(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
+
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> userServiceImpl.retrievePerson("userId","prod-io"));
+    }
 }
 

@@ -32,4 +32,6 @@ public interface UserService {
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 
     void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);
+
+    User retrievePerson(String userId, String productId);
 }
