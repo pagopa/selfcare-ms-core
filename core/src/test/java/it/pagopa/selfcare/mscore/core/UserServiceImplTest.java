@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -23,10 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -397,8 +395,14 @@ class UserServiceImplTest {
         certMail.setValue("mail@test.it");
         user.setEmail(certMail);
         when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
-
-        User response = userServiceImpl.retrievePerson("userId","prod-pn");
+        Map<String, WorkContact> map = new HashMap<>();
+        WorkContact contact = new WorkContact();
+        CertifiedField<String> mail = new CertifiedField<>();
+        mail.setValue("mail@test.it");
+        contact.setEmail(mail);
+        map.put("id", contact);
+        user.setWorkContacts(map);
+        User response = userServiceImpl.retrievePerson("userId","prod-pn", "id");
 
         Assertions.assertEquals("nome", response.getName());
         Assertions.assertEquals("cognome", response.getFamilyName());
@@ -424,16 +428,19 @@ class UserServiceImplTest {
         CertifiedField<String> certSurname = new CertifiedField<>();
         certSurname.setValue("cognome");
         user.setFamilyName(certSurname);
-        CertifiedField<String> certMail = new CertifiedField<>();
-        certMail.setValue("mail@test.it");
-        user.setEmail(certMail);
+        Map<String, WorkContact> map = new HashMap<>();
+        WorkContact contact = new WorkContact();
+        CertifiedField<String> mail = new CertifiedField<>();
+        mail.setValue("mail@test.it");
+        contact.setEmail(mail);
+        map.put("id", contact);
+        user.setWorkContacts(map);
         when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
 
-        User response = userServiceImpl.retrievePerson("userId",null);
+        User response = userServiceImpl.retrievePerson("userId",null, null);
 
         Assertions.assertEquals("nome", response.getName());
         Assertions.assertEquals("cognome", response.getFamilyName());
-        Assertions.assertEquals("mail@test.it", response.getEmail());
         Assertions.assertEquals("taxCode", response.getFiscalCode());
     }
 
@@ -447,7 +454,7 @@ class UserServiceImplTest {
         onboardedUser.setBindings(List.of(binding));
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         Assertions.assertThrows(ResourceNotFoundException.class,
-                () -> userServiceImpl.retrievePerson("userId","prod-io"));
+                () -> userServiceImpl.retrievePerson("userId","prod-io", null));
     }
 
     @Test
@@ -461,7 +468,7 @@ class UserServiceImplTest {
         when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
 
         Assertions.assertThrows(ResourceNotFoundException.class,
-                () -> userServiceImpl.retrievePerson("userId","prod-io"));
+                () -> userServiceImpl.retrievePerson("userId","prod-io", "id"));
     }
 }
 

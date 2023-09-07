@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User retrievePerson(String userId, String productId) {
+    public User retrievePerson(String userId, String productId, String institutionId) {
         OnboardedUser onboardedUser = userConnector.findById(userId);
         if (StringUtils.hasText(productId) && !verifyBindings(onboardedUser, productId)) {
             log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));

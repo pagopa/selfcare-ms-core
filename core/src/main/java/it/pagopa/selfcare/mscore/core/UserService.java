@@ -33,5 +33,5 @@ public interface UserService {
 
     void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);
 
-    User retrievePerson(String userId, String productId);
+    User retrievePerson(String userId, String productId, String institutionId);
 }

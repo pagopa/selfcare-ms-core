@@ -229,6 +229,7 @@ public class UserController {
      *
      * @param userId                String
      * @param productId         String
+     * @param institutionId String
      * @return onboardingInfoResponse
      * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
@@ -241,9 +242,11 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserInfo(@ApiParam("${swagger.mscore.users.userId}")
                                                                     @PathVariable("id") String userId,
                                                     @ApiParam("${swagger.mscore.institutions.model.productId}")
-                                                                    @RequestParam(value = "productId", required = false) String productId) {
+                                                                    @RequestParam(value = "productId", required = false) String productId,
+                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                        @RequestParam(value = "institutionId", required = false) String institutionId) {
 
-        User user = userService.retrievePerson(userId, productId);
-        return ResponseEntity.ok().body(userMapper.toUserResponse(user));
+        User user = userService.retrievePerson(userId, productId, institutionId);
+        return ResponseEntity.ok().body(userMapper.toUserResponse(user, institutionId));
     }
 }

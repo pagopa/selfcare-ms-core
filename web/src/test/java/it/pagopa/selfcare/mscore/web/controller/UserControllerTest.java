@@ -14,6 +14,7 @@ import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
@@ -50,7 +51,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -517,10 +520,56 @@ class UserControllerTest {
         CertifiedField<String> certSurname = new CertifiedField<>();
         certSurname.setValue("cognome");
         user.setFamilyName(certSurname);
-        CertifiedField<String> certMail = new CertifiedField<>();
-        certMail.setValue("mail@test.it");
-        user.setEmail(certMail);
-        when(userService.retrievePerson("userId", "prod-pn")).thenReturn(user);
+        Map<String, WorkContact> map = new HashMap<>();
+        WorkContact contact = new WorkContact();
+        CertifiedField<String> mail = new CertifiedField<>();
+        mail.setValue("mail@test.it");
+        contact.setEmail(mail);
+        map.put("id", contact);
+        user.setWorkContacts(map);
+        when(userService.retrievePerson("userId", "prod-pn", "id")).thenReturn(user);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/users/userId?productId=prod-pn&institutionId=id")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        UserResponse response = new ObjectMapper().readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        Assertions.assertEquals("nome", response.getName());
+        Assertions.assertEquals("cognome", response.getSurname());
+        Assertions.assertEquals("mail@test.it", response.getEmail());
+        Assertions.assertEquals("taxCode", response.getTaxCode());
+
+    }
+
+    @Test
+    void testGetPersonOkWithoutMail() throws Exception {
+
+        User user = new User();
+        user.setFiscalCode("taxCode");
+        CertifiedField<String> certName = new CertifiedField<>();
+        certName.setValue("nome");
+        user.setName(certName);
+        CertifiedField<String> certSurname = new CertifiedField<>();
+        certSurname.setValue("cognome");
+        user.setFamilyName(certSurname);
+        Map<String, WorkContact> map = new HashMap<>();
+        WorkContact contact = new WorkContact();
+        CertifiedField<String> mail = new CertifiedField<>();
+        mail.setValue("mail@test.it");
+        contact.setEmail(mail);
+        map.put("id", contact);
+        user.setWorkContacts(map);
+        when(userService.retrievePerson("userId", "prod-pn", null)).thenReturn(user);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/users/userId?productId=prod-pn")
@@ -539,7 +588,6 @@ class UserControllerTest {
 
         Assertions.assertEquals("nome", response.getName());
         Assertions.assertEquals("cognome", response.getSurname());
-        Assertions.assertEquals("mail@test.it", response.getEmail());
         Assertions.assertEquals("taxCode", response.getTaxCode());
 
     }
