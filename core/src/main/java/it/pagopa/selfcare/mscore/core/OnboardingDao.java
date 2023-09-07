@@ -232,7 +232,9 @@ public class OnboardingDao {
 
     private Token updateToken(Token token, RelationshipState state, String digest) {
         log.info("update token {} from state {} to {}", token.getId(), token.getStatus(), state);
-        return tokenConnector.findAndUpdateToken(token, state, digest);
+        Token updatedToken = tokenConnector.findAndUpdateToken(token, state, digest);
+        log.debug("updatedToken updatedToken = {}", updatedToken);
+        return updatedToken;
     }
 
     private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
