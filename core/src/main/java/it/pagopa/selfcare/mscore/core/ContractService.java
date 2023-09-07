@@ -270,8 +270,7 @@ public class ContractService {
 
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
-//        notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
-        notification.setFileName(token.getContractSigned().substring(50));
+        notification.setFileName(token.getContractSigned() == null?"":  token.getContractSigned().substring(50));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
@@ -325,21 +324,6 @@ public class ContractService {
             toNotify.setIstatCode(null);
         }
         return toNotify;
-    }
-
-
-    private String retrieveFileName(String tokenContractSigned, String tokenId) {
-
-        if (tokenContractSigned == null) {
-            return "";
-        }
-
-        String[] tokenContractSignedSplit = tokenContractSigned.split(tokenId.concat("/"));
-        if (tokenContractSignedSplit.length > 1) {
-            return tokenContractSignedSplit[1];
-        }
-
-        return "";
     }
 
     private void sendNotification(String message, String tokenId) {
