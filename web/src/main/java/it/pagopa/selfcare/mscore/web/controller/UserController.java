@@ -238,9 +238,9 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.users}", notes = "${swagger.mscore.users}")
     @GetMapping(value = "/users/{id}")
-    public ResponseEntity<UserResponse> getUserProductsInfo(@ApiParam("${swagger.mscore.relationship.relationshipId}")
+    public ResponseEntity<UserResponse> getUserInfo(@ApiParam("${swagger.mscore.users.userId}")
                                                                     @PathVariable("id") String userId,
-                                                            @ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                    @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                                     @RequestParam(value = "productId", required = false) String productId) {
 
         User user = userService.retrievePerson(userId, productId);

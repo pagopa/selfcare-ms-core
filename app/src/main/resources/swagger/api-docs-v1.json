@@ -4385,11 +4385,11 @@
         "tags" : [ "Persons" ],
         "summary" : "Retrieves user given userId and optional ProductId",
         "description" : "Retrieves user given userId and optional ProductId",
-        "operationId" : "getUserProductsInfoUsingGET_1",
+        "operationId" : "getUserInfoUsingGET",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
-          "description" : "UserBinding's unique identifier",
+          "description" : "User's unique identifier",
           "required" : true,
           "style" : "simple",
           "schema" : {
