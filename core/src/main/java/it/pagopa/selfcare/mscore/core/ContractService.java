@@ -230,6 +230,7 @@ public class ContractService {
     }
 
     public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "sendDataLakeNotification institution = {}, token = {}, queueEvent = {}", institution, token, queueEvent);
         if (institution != null) {
             NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
@@ -270,7 +271,7 @@ public class ContractService {
 
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
-        notification.setFileName(token.getContractSigned() == null?"":  token.getContractSigned().substring(50));
+        notification.setFileName(token.getContractSigned() == null? "":  token.getContractSigned().substring(50));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
