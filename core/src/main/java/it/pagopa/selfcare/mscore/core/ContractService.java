@@ -270,7 +270,8 @@ public class ContractService {
 
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
-        notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
+//        notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
+        notification.setFileName(token.getChecksum().substring(45));
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
