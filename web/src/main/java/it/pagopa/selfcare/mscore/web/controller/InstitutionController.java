@@ -15,7 +15,6 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -26,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -64,11 +64,13 @@ public class InstitutionController {
     }
 
     /**
-     * Gets institutions filtering by taxCode and/or subunitCode
+     * Gets institutions filtering by taxCode and/or subunitCode and/or origin and/or originId
      *
-     * @param taxCode String
+     * @param taxCode     String
      * @param subunitCode String
-     * @return OnboardedProducts
+     * @param origin      String
+     * @param originId    originId
+     * @return InstitutionResponse
      * * Code: 200, Message: successful operation, DataType: OnboardedProducts
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
@@ -77,15 +79,25 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
     @GetMapping(value = "/")
     public ResponseEntity<InstitutionsResponse> getInstitutions(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
-                                                             @RequestParam(value = "taxCode") String taxCode,
-                                                             @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
-                                                             @RequestParam(value = "subunitCode", required = false) String subunitCode) {
+                                                                @RequestParam(value = "taxCode", required = false) String taxCode,
+                                                                @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
+                                                                @RequestParam(value = "subunitCode", required = false) String subunitCode,
+                                                                @RequestParam(value = "origin", required = false) String origin,
+                                                                @RequestParam(value = "originId", required = false) String originId) {
+
+
+        if (!StringUtils.hasText(taxCode) && !StringUtils.hasText(originId) && !StringUtils.hasText(origin)) {
+            throw new ValidationException("At least one of taxCode, origin or originId must be present");
+        } else if (StringUtils.hasText(subunitCode) && !StringUtils.hasText(taxCode)) {
+            throw new ValidationException("TaxCode is required if subunitCode is present");
+        }
 
         CustomExceptionMessage.setCustomMessage(GenericError.GET_INSTITUTION_BY_ID_ERROR);
-        List<Institution> institutions = institutionService.getInstitutions(taxCode, subunitCode);
+
+        List<Institution> institutions = institutionService.getInstitutions(taxCode, subunitCode, origin, originId);
         InstitutionsResponse institutionsResponse = new InstitutionsResponse();
         institutionsResponse.setInstitutions(institutions.stream()
-                        .map(institutionResourceMapper::toInstitutionResponse)
+                .map(institutionResourceMapper::toInstitutionResponse)
                 .collect(Collectors.toList()));
         return ResponseEntity.ok(institutionsResponse);
     }

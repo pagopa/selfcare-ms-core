@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +35,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.validation.ValidationException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,7 +112,7 @@ class InstitutionControllerTest {
 
         Institution institution = TestUtils.createSimpleInstitutionPA();
 
-        when(institutionService.getInstitutions(any(), any()))
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
                 .thenReturn(List.of(institution));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/institutions/?taxCode={taxCode}", "TaxCode");
@@ -134,7 +136,7 @@ class InstitutionControllerTest {
         institution.setParentDescription("parentDescription");
         institution.setRootParentId("rootParentId");
 
-        when(institutionService.getInstitutions(any(), any()))
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
                 .thenReturn(List.of(institution));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/institutions/?taxCode={taxCode}&subunitCode={subunitCode}", "TaxCode", "SubunitCode");
@@ -147,6 +149,92 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
                                 "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsByOriginAndOriginId() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode("example");
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institution.setParentDescription("parentDescription");
+        institution.setRootParentId("rootParentId");
+
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
+                .thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/?origin={origin}&originId={originId}", "origin", "originId");
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsByOrigin() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode("example");
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institution.setParentDescription("parentDescription");
+        institution.setRootParentId("rootParentId");
+
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
+                .thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/?origin={origin}", "origin");
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsByOriginId() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode("example");
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institution.setParentDescription("parentDescription");
+        institution.setRootParentId("rootParentId");
+
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
+                .thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/?originId={originId}", "originId");
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsBySubunitCodeWithoutParam(){
+        Assertions.assertThrows(ValidationException.class,
+                () -> institutionController.getInstitutions(null, null, null, null),
+                "At least one of taxCode, origin or originId must be present");
+    }
+
+    @Test
+    void shouldGetInstitutionsBySubunitCodeWithoutTaxCode() {
+        Assertions.assertThrows(ValidationException.class,
+                () -> institutionController.getInstitutions(null, "subunitCode", "origin", null),
+                "TaxCode is required if subunitCode is present");
     }
 
     @Test

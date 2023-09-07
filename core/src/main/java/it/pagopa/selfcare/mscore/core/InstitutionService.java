@@ -22,7 +22,7 @@ public interface InstitutionService {
 
     Institution retrieveInstitutionByExternalId(String institutionExternalId);
 
-    List<Institution> getInstitutions(String taxCode, String subunitCode);
+    List<Institution> getInstitutions(String taxCode, String subunitCode, String origin, String originId);
 
     Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode);
 
