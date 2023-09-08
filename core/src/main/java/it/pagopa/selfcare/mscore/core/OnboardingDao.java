@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
@@ -232,7 +233,9 @@ public class OnboardingDao {
 
     private Token updateToken(Token token, RelationshipState state, String digest) {
         log.info("update token {} from state {} to {}", token.getId(), token.getStatus(), state);
-        return tokenConnector.findAndUpdateToken(token, state, digest);
+        Token updatedToken = tokenConnector.findAndUpdateToken(token, state, digest);
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "updatedToken updatedToken = {}", updatedToken);
+        return updatedToken;
     }
 
     private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
