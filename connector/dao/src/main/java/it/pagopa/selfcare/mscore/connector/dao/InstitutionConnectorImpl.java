@@ -248,9 +248,13 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
-        return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxCode)
-                                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
+    public List<Institution> findByTaxCodeSubunitCodeAndOrigin(String taxCode, String subunitCode, String origin, String originId) {
+        return repository.find(Query.query(CriteriaBuilder.builder()
+                                .isIfNotNull(InstitutionEntity.Fields.taxCode.name(), taxCode)
+                                .isIfNotNull(InstitutionEntity.Fields.subunitCode.name(), subunitCode)
+                                .isIfNotNull(InstitutionEntity.Fields.origin.name(), origin)
+                                .isIfNotNull(InstitutionEntity.Fields.originId.name(), originId)
+                                .build()
                         ),
                         InstitutionEntity.class).stream()
                 .map(institutionMapper::convertToInstitution)
@@ -320,6 +324,11 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         return  institutionEntities.stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Institution> findByTaxCodeSubunitCode(String taxCode, String subunitCode) {
+        return findByTaxCodeSubunitCodeAndOrigin(taxCode, subunitCode, null, null);
     }
 
     private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {

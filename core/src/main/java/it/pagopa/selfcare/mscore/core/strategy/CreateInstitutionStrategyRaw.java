@@ -45,7 +45,7 @@ public class CreateInstitutionStrategyRaw implements CreateInstitutionStrategy {
 
     private void checkIfAlreadyExistsByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
 
-        List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+        List<Institution> institutions = institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
         if (!institutions.isEmpty())
             throw new ResourceConflictException(String
                     .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
