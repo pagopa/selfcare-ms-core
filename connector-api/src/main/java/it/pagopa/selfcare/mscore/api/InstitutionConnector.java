@@ -18,7 +18,7 @@ public interface InstitutionConnector {
 
     void deleteById(String id);
 
-    List<Institution> findByTaxCodeAndSubunitCode(String taxtCode, String subunitCode);
+    List<Institution> findByTaxCodeSubunitCodeAndOrigin(String taxtCode, String subunitCode, String origin, String originId);
 
     Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> subunitCode, Optional<String> productId, List<RelationshipState> validRelationshipStates);
 
@@ -57,4 +57,6 @@ public interface InstitutionConnector {
     Institution updateOnboardedProductCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);
 
     List<Institution> findBrokers(String productId, InstitutionType type);
+
+    List<Institution> findByTaxCodeSubunitCode(String taxCode, String subunitCode);
 }

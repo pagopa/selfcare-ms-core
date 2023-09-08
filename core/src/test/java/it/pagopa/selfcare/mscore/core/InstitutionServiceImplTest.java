@@ -286,8 +286,8 @@ class InstitutionServiceImplTest {
     @Test
     void testGetInstitutions() {
         List<Institution> institutionList = new ArrayList<>();
-        when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any())).thenReturn(institutionList);
-        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id");
+        when(institutionConnector.findByTaxCodeSubunitCodeAndOrigin(any(), any(), any(), any())).thenReturn(institutionList);
+        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", "id", "id");
         assertTrue(institutions.isEmpty());
     }
 

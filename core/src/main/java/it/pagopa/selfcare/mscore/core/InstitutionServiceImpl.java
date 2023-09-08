@@ -105,8 +105,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public List<Institution> getInstitutions(String taxCode, String subunitCode) {
-        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+    public List<Institution> getInstitutions(String taxCode, String subunitCode, String origin, String originId) {
+        return institutionConnector.findByTaxCodeSubunitCodeAndOrigin(taxCode, subunitCode, origin, originId);
     }
 
     @Override
