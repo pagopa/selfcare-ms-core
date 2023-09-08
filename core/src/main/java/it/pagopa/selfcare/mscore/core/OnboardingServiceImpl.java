@@ -172,6 +172,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         token.setContractSigned(fileName);
         token.setContentType(contract.getContentType());
         OnboardingUpdateRollback rollback = onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding persistedOnboardingRollBack = {}", rollback);
         try {
             notificationService.sendCompletedEmail(managersData, institution, product, logoFile);
         } catch (Exception e) {
