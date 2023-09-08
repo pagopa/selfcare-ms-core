@@ -105,12 +105,8 @@ public class UserEventServiceImpl implements UserEventService {
     private UserToNotify toUserToNotify(String userId, String institutionId, User user, OnboardedProduct onboardedProduct){
         UserToNotify userToNotify = new UserToNotify();
         userToNotify.setUserId(userId);
-        userToNotify.setName(user.getName());
-        userToNotify.setFamilyName(user.getFamilyName());
-        userToNotify.setFiscalCode(user.getFiscalCode());
-        userToNotify.setEmail(user.getWorkContacts().containsKey(institutionId)? user.getWorkContacts().get(institutionId).getEmail():user.getEmail());
         userToNotify.setRole(onboardedProduct.getRole());
-        userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
+        userToNotify.setStatus(onboardedProduct.getStatus());
         userToNotify.setProductRole(onboardedProduct.getProductRole());
         return userToNotify;
     }
