@@ -658,7 +658,7 @@ class InstitutionConnectorImplTest {
                 .thenReturn(List.of(institutionEntity));
 
         List<Institution> onboardings = institutionConnectorImpl
-                .findByTaxCodeAndSubunitCode("example", "example");
+                .findByTaxCodeSubunitCodeAndOrigin("example", "example", "example", "example");
 
         assertFalse(onboardings.isEmpty());
     }
