@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -23,10 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -373,6 +371,104 @@ class UserServiceImplTest {
         doNothing().when(userConnector).findAndUpdateStateByInstitutionAndProduct(anyString(),anyString(),anyString(),any());
         Assertions.assertDoesNotThrow(() -> userServiceImpl
                 .findAndUpdateStateByInstitutionAndProduct("userId","institutionId","productId",RelationshipState.DELETED));
+    }
+
+    @Test
+    void retrievePersonOk(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+
+        User user = new User();
+        user.setFiscalCode("taxCode");
+        CertifiedField<String> certName = new CertifiedField<>();
+        certName.setValue("nome");
+        user.setName(certName);
+        CertifiedField<String> certSurname = new CertifiedField<>();
+        certSurname.setValue("cognome");
+        user.setFamilyName(certSurname);
+        CertifiedField<String> certMail = new CertifiedField<>();
+        certMail.setValue("mail@test.it");
+        user.setEmail(certMail);
+        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+        Map<String, WorkContact> map = new HashMap<>();
+        WorkContact contact = new WorkContact();
+        CertifiedField<String> mail = new CertifiedField<>();
+        mail.setValue("mail@test.it");
+        contact.setEmail(mail);
+        map.put("id", contact);
+        user.setWorkContacts(map);
+        User response = userServiceImpl.retrievePerson("userId","prod-pn", "id");
+
+        Assertions.assertEquals("nome", response.getName());
+        Assertions.assertEquals("cognome", response.getFamilyName());
+        Assertions.assertEquals("mail@test.it", response.getEmail());
+        Assertions.assertEquals("taxCode", response.getFiscalCode());
+    }
+
+    @Test
+    void retrievePersonOkWithoutProductFilter(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+
+        User user = new User();
+        user.setFiscalCode("taxCode");
+        CertifiedField<String> certName = new CertifiedField<>();
+        certName.setValue("nome");
+        user.setName(certName);
+        CertifiedField<String> certSurname = new CertifiedField<>();
+        certSurname.setValue("cognome");
+        user.setFamilyName(certSurname);
+        Map<String, WorkContact> map = new HashMap<>();
+        WorkContact contact = new WorkContact();
+        CertifiedField<String> mail = new CertifiedField<>();
+        mail.setValue("mail@test.it");
+        contact.setEmail(mail);
+        map.put("id", contact);
+        user.setWorkContacts(map);
+        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+
+        User response = userServiceImpl.retrievePerson("userId",null, null);
+
+        Assertions.assertEquals("nome", response.getName());
+        Assertions.assertEquals("cognome", response.getFamilyName());
+        Assertions.assertEquals("taxCode", response.getFiscalCode());
+    }
+
+    @Test
+    void retrievePersonProductNotFound(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> userServiceImpl.retrievePerson("userId","prod-io", null));
+    }
+
+    @Test
+    void retrievePersonNotFound(){
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        onboardedUser.setBindings(List.of(binding));
+        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
+
+        Assertions.assertThrows(ResourceNotFoundException.class,
+                () -> userServiceImpl.retrievePerson("userId","prod-io", "id"));
     }
 }
 

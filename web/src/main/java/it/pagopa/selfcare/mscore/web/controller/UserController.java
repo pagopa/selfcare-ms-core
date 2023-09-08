@@ -11,7 +11,9 @@ import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
@@ -220,5 +222,31 @@ public class UserController {
 
         userService.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, RelationshipState.DELETED);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * The function retrieves userInfo given UserId and optional productId
+     *
+     * @param userId                String
+     * @param productId         String
+     * @param institutionId String
+     * @return onboardingInfoResponse
+     * <p>
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.users}", notes = "${swagger.mscore.users}")
+    @GetMapping(value = "/users/{id}")
+    public ResponseEntity<UserResponse> getUserInfo(@ApiParam("${swagger.mscore.users.userId}")
+                                                                    @PathVariable("id") String userId,
+                                                    @ApiParam("${swagger.mscore.institutions.model.productId}")
+                                                                    @RequestParam(value = "productId", required = false) String productId,
+                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                        @RequestParam(value = "institutionId", required = false) String institutionId) {
+
+        User user = userService.retrievePerson(userId, productId, institutionId);
+        return ResponseEntity.ok().body(userMapper.toUserResponse(user, institutionId));
     }
 }
