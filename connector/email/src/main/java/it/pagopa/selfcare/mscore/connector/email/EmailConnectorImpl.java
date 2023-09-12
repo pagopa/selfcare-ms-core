@@ -87,7 +87,7 @@ public class EmailConnectorImpl implements EmailConnector {
                 zos.putNextEntry(entry);
                 zos.write(pdfToByte);
                 zos.closeEntry();
-                zos.close();
+                zos.finish();
                 return baos.toByteArray();
             } catch (IOException e) {
                 log.error(String.format(ERROR_DURING_COMPRESS_FILE.getMessage(), filename), e);
