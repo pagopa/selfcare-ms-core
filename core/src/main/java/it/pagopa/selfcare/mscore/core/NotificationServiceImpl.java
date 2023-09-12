@@ -7,7 +7,6 @@ import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
@@ -35,7 +34,7 @@ public class NotificationServiceImpl implements NotificationService {
     public static final String PAGOPA_LOGO_FILENAME = "pagopa-logo.png";
     private final NotificationServiceConnector notificationConnector;
     private final FileStorageConnector fileStorageConnector;
-    private final PartyRegistryProxyConnector partyRegistryConnector;
+    private final InstitutionConnector institutionConnector;
     private final ProductConnector productConnector;
     private final ObjectMapper mapper;
     private final MailTemplateConfig mailTemplateConfig;
@@ -46,7 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     public NotificationServiceImpl(NotificationServiceConnector notificationConnector,
                                    FileStorageConnector fileStorageConnector,
-                                   PartyRegistryProxyConnector partyRegistryConnector,
+                                   InstitutionConnector institutionConnector,
                                    ProductConnector productConnector,
                                    ObjectMapper mapper,
                                    MailTemplateConfig mailTemplateConfig,
@@ -55,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
                                    CoreConfig coreConfig) {
         this.notificationConnector = notificationConnector;
         this.fileStorageConnector = fileStorageConnector;
-        this.partyRegistryConnector = partyRegistryConnector;
+        this.institutionConnector = institutionConnector;
         this.productConnector = productConnector;
         this.mapper = mapper;
         this.mailTemplateConfig = mailTemplateConfig;
@@ -137,14 +136,14 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             Map<String, String> mailParameters;
             Product product = productConnector.getProductById(productId);
-            InstitutionProxyInfo partnerInstitution = partyRegistryConnector.getInstitutionById(partnerId);
+            Institution partnerInstitution = institutionConnector.findById(partnerId);
             if(Objects.isNull(product) || Objects.isNull(partnerInstitution)) {
                 log.error("create-delegation-email-notification :: Impossible to send email. Error: partner institution or product is null");
                 return;
             }
             mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            List<String> destinationMail = getDestinationDelegationMails(partnerInstitution);
+            List<String> destinationMail = getDestinationMails(partnerInstitution);
             log.info(DESTINATION_MAIL_LOG, destinationMail);
             emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, product.getTitle(), mailParameters, null);
             log.info("create-delegation-email-notification :: Email successful sent");
@@ -154,14 +153,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private List<String> getRejectDestinationMails(Institution institution) {
-        if (coreConfig.isSendEmailToInstitution()) {
-            return List.of(institution.getDigitalAddress());
-        } else {
-            return List.of(coreConfig.getInstitutionAlternativeEmail());
-        }
-    }
-
-    private List<String> getDestinationDelegationMails(InstitutionProxyInfo institution) {
         if (coreConfig.isSendEmailToInstitution()) {
             return List.of(institution.getDigitalAddress());
         } else {

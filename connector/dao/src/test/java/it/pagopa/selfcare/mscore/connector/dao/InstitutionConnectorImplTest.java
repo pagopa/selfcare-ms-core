@@ -820,4 +820,17 @@ class InstitutionConnectorImplTest {
         institutionEntity.setZipCode("21654");
         return institutionEntity;
     }
+
+    @Test
+    void findByTaxCodeAndSubunitCode() {
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+
+        when(institutionRepository.find(any(), any()))
+                .thenReturn(List.of(institutionEntity));
+
+        List<Institution> onboardings = institutionConnectorImpl
+                .findByTaxCodeSubunitCode("example", "example");
+
+        assertFalse(onboardings.isEmpty());
+    }
 }

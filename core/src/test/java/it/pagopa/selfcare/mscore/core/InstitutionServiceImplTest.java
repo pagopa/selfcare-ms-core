@@ -1498,5 +1498,23 @@ class InstitutionServiceImplTest {
 
     }
 
+    /**
+     * Method under test: {@link InstitutionServiceImpl#getInstitutions(String, String)}
+     */
+    @Test
+    void getInstitutionsByTaxCode() {
+
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(institutionConnector.findByTaxCodeSubunitCode(any(), any())).thenReturn(List.of(institution));
+        List<Institution> institutions = institutionServiceImpl.getInstitutions("1111111", null);
+        assertNotNull(institutions);
+        assertFalse(institutions.isEmpty());
+        assertNotNull(institutions.get(0));
+        assertEquals(institutions.get(0).getId(), institution.getId());
+        verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+
+    }
+
 }
 

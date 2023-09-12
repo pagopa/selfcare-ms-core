@@ -9,7 +9,6 @@ import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
@@ -46,7 +45,7 @@ class NotificationServiceImplTest {
     private FileStorageConnector fileStorageConnector;
 
     @Mock
-    private PartyRegistryProxyConnector partyRegistryProxyConnector;
+    private InstitutionConnector institutionConnector;
 
     @Mock
     private ProductConnector productConnector;
@@ -128,20 +127,20 @@ class NotificationServiceImplTest {
     void sendNotificationDelegationMail() {
         Product product = new Product();
         product.setTitle("test");
-        InstitutionProxyInfo institution = new InstitutionProxyInfo();
+        Institution institution = new Institution();
         institution.setDigitalAddress("test@test.com");
         when(productConnector.getProductById(anyString())).thenReturn(product);
-        when(partyRegistryProxyConnector.getInstitutionById(anyString())).thenReturn(institution);
+        when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
         Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
     }
 
     @Test
     void sendNotificationDelegationMailWithEmptyProduct() {
-        InstitutionProxyInfo institution = new InstitutionProxyInfo();
+        Institution institution = new Institution();
         institution.setDigitalAddress("test@test.com");
         when(productConnector.getProductById(anyString())).thenReturn(null);
-        when(partyRegistryProxyConnector.getInstitutionById(anyString())).thenReturn(institution);
+        when(institutionConnector.findById(anyString())).thenReturn(institution);
         Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
     }
 
