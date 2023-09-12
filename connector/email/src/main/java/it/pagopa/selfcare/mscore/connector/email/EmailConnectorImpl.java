@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_COMPRESS_FILE;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_SEND_MAIL;
 
 @Slf4j
@@ -78,17 +79,21 @@ public class EmailConnectorImpl implements EmailConnector {
         }
         log.trace("sendMessage end");
     }
-    public byte[] zipBytes(String filename, File pdf) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ZipOutputStream zos = new ZipOutputStream(baos);
-        ZipEntry entry = new ZipEntry(filename);
-        byte[] pdfToByte = FileCopyUtils.copyToByteArray(pdf);
-        zos.putNextEntry(entry);
-        zos.write(pdfToByte);
-        zos.closeEntry();
-        zos.close();
-        return baos.toByteArray();
-    }
-
+    public byte[] zipBytes(String filename, File pdf)  {
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                 ZipOutputStream zos = new ZipOutputStream(baos)) {
+                ZipEntry entry = new ZipEntry(filename);
+                byte[] pdfToByte = FileCopyUtils.copyToByteArray(pdf);
+                zos.putNextEntry(entry);
+                zos.write(pdfToByte);
+                zos.closeEntry();
+                zos.close();
+                return baos.toByteArray();
+            } catch (IOException e) {
+                log.error(String.format(ERROR_DURING_COMPRESS_FILE.getMessage(), filename), e);
+                throw new MsCoreException(String.format(ERROR_DURING_COMPRESS_FILE.getMessage(), filename),
+                        ERROR_DURING_COMPRESS_FILE.getCode());
+            }
+        }
 }
 
