@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,10 +16,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.mail.internet.MimeMessage;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -43,9 +46,14 @@ class EmailConnectorImplTest {
     private CoreConfig coreConfig;
 
     @Test
-    void testSendMail() throws JsonProcessingException {
+    void testSendMail() throws IOException {
         when(fileStorageConnector.getTemplateFile(any())).thenReturn("templateFile");
         MailTemplate mailTemplate = new MailTemplate();
+        Path path = Files.createTempFile("contratto", ".pdf");
+        File pdf = new File(path.toUri());
+        String fileName = "text.pdf";
+        byte [] bytes = emailConnector.zipBytes(fileName, pdf);
+        assertNotNull(bytes);
         mailTemplate.setBody("body");
         mailTemplate.setSubject("subject");
         when(mapper.readValue("templateFile", MailTemplate.class)).thenReturn(mailTemplate);
@@ -55,7 +63,7 @@ class EmailConnectorImplTest {
         when(coreConfig.getSenderMail()).thenReturn("senderMail");
 
         ArrayList<String> destinationMail = new ArrayList<>();
-        File pdf = Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile();
+
         Assertions.assertDoesNotThrow(() -> emailConnector.sendMail("Template Name", destinationMail, pdf, "Product Name", new HashMap<>(), "foo.txt"));
     }
 
