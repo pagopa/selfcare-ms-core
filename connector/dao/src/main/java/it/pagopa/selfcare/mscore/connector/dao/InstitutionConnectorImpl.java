@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -318,7 +319,8 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     public List<Institution> findBrokers(String productId, InstitutionType type) {
 
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.institutionType.name()).is(type)
-                .and(InstitutionEntity.Fields.onboarding.name()).elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)));
+                .and(InstitutionEntity.Fields.onboarding.name()).elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)
+                        .and(Onboarding.Fields.status.name()).is(ProductStatus.ACTIVE)));
 
         List<InstitutionEntity> institutionEntities = repository.find(query, InstitutionEntity.class);
         return  institutionEntities.stream()
