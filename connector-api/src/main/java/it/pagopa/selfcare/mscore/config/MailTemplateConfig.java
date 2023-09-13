@@ -17,6 +17,7 @@ public class MailTemplateConfig {
     private String completeProductName;
     private String completeSelfcarePlaceholder;
     private String completeSelfcareName;
+    private String completePathFd;
 
     private String autocompletePath;
 

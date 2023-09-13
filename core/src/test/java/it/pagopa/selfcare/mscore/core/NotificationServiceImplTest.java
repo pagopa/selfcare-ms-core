@@ -204,4 +204,37 @@ class NotificationServiceImplTest {
         when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("email");
         Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,new Product(),file));
     }
+
+    @Test
+    void sendCompletedMailFD(){
+        File file = mock(File.class);
+
+        User user1 = new User();
+        user1.setId("1");
+        user1.setFiscalCode("ABC123XYZ");
+        user1.setName(new CertifiedField<>());
+        user1.setFamilyName(new CertifiedField<>());
+        user1.setEmail(new CertifiedField<>());
+
+        Map<String, WorkContact> workContacts1 = new HashMap<>();
+        WorkContact workContact = new WorkContact();
+        CertifiedField<String> email = new CertifiedField<>();
+        email.setValue("email");
+        workContact.setEmail(email);
+        workContacts1.put("id",workContact);
+
+        user1.setWorkContacts(workContacts1);
+
+        List<User> manager = new ArrayList<>();
+        manager.add(user1);
+
+        Product prodFD = new Product();
+        prodFD.setId("prod-fd");
+        Institution institution = new Institution();
+        institution.setId("id");
+        institution.setDigitalAddress("digital");
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
+        when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("email");
+        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,prodFD,file));
+    }
 }
