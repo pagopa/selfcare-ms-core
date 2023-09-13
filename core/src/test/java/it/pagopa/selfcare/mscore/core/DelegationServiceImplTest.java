@@ -4,7 +4,9 @@ import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +30,9 @@ class DelegationServiceImplTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private InstitutionService institutionService;
+
     /**
      * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
      */
@@ -48,10 +53,41 @@ class DelegationServiceImplTest {
      * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
      */
     @Test
+    void testCreateDelegationForProductPagopa() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-pagopa");
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(delegationConnector.save(any())).thenReturn(delegation);
+        doNothing().when(notificationService).sendMailForDelegation(any(), any(), any());
+        when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
+        Delegation response = delegationServiceImpl.createDelegation(delegation);
+        verify(delegationConnector).save(any());
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals(delegation.getId(), response.getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
     void testCreateDelegationWithError() {
         when(delegationConnector.save(any())).thenThrow(new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode()));
         assertThrows(MsCoreException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
         verify(delegationConnector).save(any());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationWithResourceNotFoundException() {
+        Delegation delegation = new Delegation();
+        delegation.setProductId("prod-pagopa");
+        when(institutionService.getInstitutions(any(), any())).thenReturn(List.of());
+        assertThrows(ResourceNotFoundException.class, () -> delegationServiceImpl.createDelegation(delegation));
     }
 
     /**

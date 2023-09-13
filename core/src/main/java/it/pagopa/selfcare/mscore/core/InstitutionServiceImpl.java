@@ -110,6 +110,11 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public List<Institution> getInstitutions(String taxCode, String subunitCode) {
+        return institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
+    }
+
+    @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
         CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyIpa();
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
