@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core.strategy.factory;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.*;
@@ -22,8 +23,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_PN;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Component
 @Slf4j
@@ -35,6 +35,7 @@ public class OnboardingInstitutionStrategyFactory {
     private final UserService userService;
     private final InstitutionService institutionService;
     private final CoreConfig coreConfig;
+    private final FileStorageConnector fileStorageConnector;
 
     private final NotificationService notificationService;
 
@@ -43,13 +44,14 @@ public class OnboardingInstitutionStrategyFactory {
                                                 UserService userService,
                                                 InstitutionService institutionService,
                                                 CoreConfig coreConfig,
-                                                NotificationService notificationService) {
+                                                NotificationService notificationService, FileStorageConnector fileStorageConnector) {
         this.onboardingDao = onboardingDao;
         this.contractService = contractService;
         this.userService = userService;
         this.institutionService = institutionService;
         this.coreConfig = coreConfig;
         this.notificationService = notificationService;
+        this.fileStorageConnector = fileStorageConnector;
     }
 
     public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategy(InstitutionType institutionType, String productId, Institution institution) {
@@ -61,7 +63,8 @@ public class OnboardingInstitutionStrategyFactory {
         Consumer<OnboardingInstitutionStrategyInput> emailsOnboardingInstitutionStrategy;
 
         if (InstitutionType.PG == institutionType) {
-            digestOnboardingInstitutionStrategy = ignore -> {};
+            digestOnboardingInstitutionStrategy = ignore -> {
+            };
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendConfirmationMail();
         } else if (InstitutionType.PA == institutionType || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())) {
@@ -69,7 +72,8 @@ public class OnboardingInstitutionStrategyFactory {
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
         } else {
-            digestOnboardingInstitutionStrategy = ignore -> {};
+            digestOnboardingInstitutionStrategy = ignore -> {
+            };
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithoutDigestOrRollback();
         }
@@ -98,7 +102,8 @@ public class OnboardingInstitutionStrategyFactory {
         if (InstitutionType.PG == institutionType) {
 
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
-            emailsOnboardingInstitutionStrategy = ignore -> {};
+            emailsOnboardingInstitutionStrategy = ignore -> {
+            };
 
         } else {
 
@@ -126,8 +131,6 @@ public class OnboardingInstitutionStrategyFactory {
             strategyInput.setOnboardingRollback(onboardingRollback);
         };
     }
-
-
 
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
@@ -167,7 +170,13 @@ public class OnboardingInstitutionStrategyFactory {
                     .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(strategyInput.getOnboardingRequest().getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+            String productId = strategyInput.getOnboardingRequest().getProductId();
+            File pdf = null;
+            if (productId.equals(PROD_FD.getValue()) || productId.equals(PROD_FD_GARANTITO.getValue())) {
+                pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContractFilePath());
+            } else {
+                pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+            }
             String digest = TokenUtils.createDigest(pdf);
 
             strategyInput.setDigest(digest);
@@ -213,7 +222,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
 
-                if(strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
+                if (strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
 
                     List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                             ? coreConfig.getDestinationMails()
@@ -254,7 +263,7 @@ public class OnboardingInstitutionStrategyFactory {
     }
 
     private void deleteTokenExpired(Institution institution, String productId) {
-        if(Objects.nonNull(institution.getOnboarding())) {
+        if (Objects.nonNull(institution.getOnboarding())) {
 
             /* set state DELETE for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
             institution.getOnboarding().stream()
@@ -272,12 +281,12 @@ public class OnboardingInstitutionStrategyFactory {
         }
 
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = geographicTaxonomieDtos.stream()
-                    .map(InstitutionGeographicTaxonomies::getCode)
-                    .map(institutionService::retrieveGeoTaxonomies)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
-                    .collect(Collectors.toList());
+                .map(InstitutionGeographicTaxonomies::getCode)
+                .map(institutionService::retrieveGeoTaxonomies)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
+                .collect(Collectors.toList());
 
         if (geographicTaxonomies.size() != geographicTaxonomieDtos.size()) {
             log.error(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geographicTaxonomieDtos),

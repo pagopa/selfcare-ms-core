@@ -4,10 +4,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageCredentials;
 import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.BlobProperties;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
+import com.microsoft.azure.storage.blob.*;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.AzureStorageConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
@@ -20,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -96,6 +95,31 @@ class AzureBlobClient implements FileStorageConnector {
     }
 
     @Override
+    public File getFileAsPdf(String contractTemplate){
+        try{
+            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
+            final CloudBlockBlob blob = blobContainer.getBlockBlobReference(contractTemplate);
+            BlobInputStream blobInputStream = blob.openInputStream();
+            String fileName = Paths.get(contractTemplate).getFileName().toString();
+            File downloadedFile = File.createTempFile(fileName, ".pdf");
+            FileOutputStream fileOutputStream = new FileOutputStream(downloadedFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = blobInputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, bytesRead);
+            }
+
+            // Close the streams
+            blobInputStream.close();
+            fileOutputStream.close();
+            return downloadedFile;
+        } catch (StorageException | URISyntaxException | IOException e) {
+            log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate), e);
+            throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate),
+                    ERROR_DURING_DOWNLOAD_FILE.getCode());
+        }
+    }
+    @Override
     public String uploadContract(String id, MultipartFile contract) {
         log.info("START - uploadContract for token: {}", id);
         String fileName = Paths.get(azureStorageConfig.getContractPath(), id, contract.getOriginalFilename()).toString();
@@ -129,4 +153,5 @@ class AzureBlobClient implements FileStorageConnector {
                     ERROR_DURING_DELETED_FILE.getCode());
         }
     }
+
 }

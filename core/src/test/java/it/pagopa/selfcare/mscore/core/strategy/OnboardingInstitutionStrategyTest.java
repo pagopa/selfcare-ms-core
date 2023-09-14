@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core.strategy;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -46,6 +47,9 @@ class OnboardingInstitutionStrategyTest {
     private UserService userService;
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private FileStorageConnector fileStorageConnector;
     @Mock
     private InstitutionService institutionService;
     @Mock
@@ -54,7 +58,7 @@ class OnboardingInstitutionStrategyTest {
     @BeforeEach
     void beforeAll() {
         strategyFactory = new OnboardingInstitutionStrategyFactory(onboardingDao,
-                contractService,userService, institutionService, coreConfig, notificationService);
+                contractService,userService, institutionService, coreConfig, notificationService, fileStorageConnector);
     }
 
 
