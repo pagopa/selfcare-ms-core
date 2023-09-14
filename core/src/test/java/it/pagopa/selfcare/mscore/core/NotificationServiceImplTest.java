@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -168,12 +169,13 @@ class NotificationServiceImplTest {
 
         List<User> manager = new ArrayList<>();
         manager.add(user1);
+        Product product = mockInstance(new Product());
 
         Institution institution = new Institution();
         institution.setId("id");
         institution.setDigitalAddress("digital");
         when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
-        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,new Product(),file));
+        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,product,file));
     }
 
     @Test
@@ -198,13 +200,13 @@ class NotificationServiceImplTest {
 
         List<User> manager = new ArrayList<>();
         manager.add(user1);
-
+        Product product = mockInstance(new Product());
         Institution institution = new Institution();
         institution.setId("id");
         institution.setDigitalAddress("digital");
         when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
         when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("email");
-        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,new Product(),file));
+        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,product,file));
     }
 
     @ParameterizedTest()

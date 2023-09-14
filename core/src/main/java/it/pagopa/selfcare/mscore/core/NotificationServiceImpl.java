@@ -23,7 +23,7 @@ import java.io.File;
 import java.util.*;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_SEND_MAIL;
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_PN;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Slf4j
 @Service
@@ -119,7 +119,7 @@ public class NotificationServiceImpl implements NotificationService {
             }
         }
         Map<String, String> mailParameter = mailParametersMapper.getCompleteOnbordingMailParameter(product.getTitle());
-        String templatePath = product.getId().equals("prod-fd")||product.getId().equals("prod-fd-garantito")? mailParametersMapper.getFdOnboardingCompletePath():mailParametersMapper.getOnboardingCompletePath();
+        String templatePath = product.getId().equals(PROD_FD.getValue())||product.getId().equals(PROD_FD_GARANTITO.getValue())? mailParametersMapper.getFdOnboardingCompletePath():mailParametersMapper.getOnboardingCompletePath();
         emailConnector.sendMail(templatePath, destinationMails, logo, product.getTitle(), mailParameter, PAGOPA_LOGO_FILENAME);
     }
 
