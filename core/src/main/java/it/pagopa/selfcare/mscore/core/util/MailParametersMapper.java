@@ -68,6 +68,10 @@ public class MailParametersMapper {
         return mailTemplateConfig.getCompletePath();
     }
 
+    public String getFdOnboardingCompletePath(){
+        return mailTemplateConfig.getCompletePathFd();
+    }
+
     public List<String> getOnboardingNotificationAdminEmail() {
         return List.of(mailTemplateConfig.getNotificationAdminEmail());
     }
