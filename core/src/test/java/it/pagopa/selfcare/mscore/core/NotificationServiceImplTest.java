@@ -205,8 +205,9 @@ class NotificationServiceImplTest {
         Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,new Product(),file));
     }
 
-    @Test
-    void sendCompletedMailFD(){
+    @ParametrizedTest()
+    @ValueSource(strings = {"prod-fd", "prod-fd-garantito"})
+    void sendCompletedMailFD(String productId){
         File file = mock(File.class);
 
         User user1 = new User();
@@ -229,7 +230,7 @@ class NotificationServiceImplTest {
         manager.add(user1);
 
         Product prodFD = new Product();
-        prodFD.setId("prod-fd");
+        prodFD.setId(productId);
         Institution institution = new Institution();
         institution.setId("id");
         institution.setDigitalAddress("digital");
