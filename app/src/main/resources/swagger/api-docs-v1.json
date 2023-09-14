@@ -5723,6 +5723,10 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficerResponse"
           },
@@ -5789,6 +5793,10 @@
           },
           "taxCode" : {
             "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "zipCode" : {
             "type" : "string"

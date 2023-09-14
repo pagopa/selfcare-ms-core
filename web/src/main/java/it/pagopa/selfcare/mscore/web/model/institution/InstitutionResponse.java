@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProductResponse;
 import lombok.Data;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -36,5 +37,7 @@ public class InstitutionResponse {
     private String subunitCode;
     private String subunitType;
     private String aooParentCode;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
 }
