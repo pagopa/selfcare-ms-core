@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -140,7 +141,8 @@ public class TokenConnectorImpl implements TokenConnector {
 
     @Override
     public List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer page, Integer size) {
-        Query query = Query.query(Criteria.where(TokenEntity.Fields.status.name()).in(statuses));
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.status.name()).in(statuses))
+                .with(Sort.by(Sort.Direction.ASC, TokenEntity.Fields.id.name()));
 
         Pageable pageable = PageRequest.of(page, size);
 

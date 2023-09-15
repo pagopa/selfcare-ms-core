@@ -63,8 +63,7 @@ public class OnboardingInstitutionStrategyFactory {
         Consumer<OnboardingInstitutionStrategyInput> emailsOnboardingInstitutionStrategy;
 
         if (InstitutionType.PG == institutionType) {
-            digestOnboardingInstitutionStrategy = ignore -> {
-            };
+            digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendConfirmationMail();
         } else if (InstitutionType.PA == institutionType || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())) {
@@ -72,8 +71,7 @@ public class OnboardingInstitutionStrategyFactory {
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
         } else {
-            digestOnboardingInstitutionStrategy = ignore -> {
-            };
+            digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithoutDigestOrRollback();
         }
@@ -102,8 +100,7 @@ public class OnboardingInstitutionStrategyFactory {
         if (InstitutionType.PG == institutionType) {
 
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
-            emailsOnboardingInstitutionStrategy = ignore -> {
-            };
+            emailsOnboardingInstitutionStrategy = ignore -> {};
 
         } else {
 
@@ -222,7 +219,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
 
-                if (strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
+                if(strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
 
                     List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                             ? coreConfig.getDestinationMails()
@@ -250,7 +247,7 @@ public class OnboardingInstitutionStrategyFactory {
 
             /* check onboaring validation */
             OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, strategyInput.getOnboardingRequest().getProductId());
-            deleteTokenExpired(institution, strategyInput.getOnboardingRequest().getProductId());
+            rejectTokenExpired(institution, strategyInput.getOnboardingRequest().getProductId());
             OnboardingInstitutionUtils.validateOverridingData(strategyInput.getOnboardingRequest().getInstitutionUpdate(), institution);
 
             strategyInput.setInstitution(institution);
@@ -262,16 +259,16 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private void deleteTokenExpired(Institution institution, String productId) {
-        if (Objects.nonNull(institution.getOnboarding())) {
+    private void rejectTokenExpired(Institution institution, String productId) {
+        if(Objects.nonNull(institution.getOnboarding())) {
 
-            /* set state DELETE for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
+            /* set state REJECTED for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
             institution.getOnboarding().stream()
                     .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(productId)
                             && (onboarding.getStatus() == RelationshipState.PENDING || onboarding.getStatus() == RelationshipState.TOBEVALIDATED))
                     .map(onboarding -> onboardingDao.getTokenById(onboarding.getTokenId()))
                     .filter(TokenUtils::isTokenExpired)
-                    .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null));
+                        .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null));
         }
     }
 
@@ -281,12 +278,12 @@ public class OnboardingInstitutionStrategyFactory {
         }
 
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = geographicTaxonomieDtos.stream()
-                .map(InstitutionGeographicTaxonomies::getCode)
-                .map(institutionService::retrieveGeoTaxonomies)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
-                .collect(Collectors.toList());
+                    .map(InstitutionGeographicTaxonomies::getCode)
+                    .map(institutionService::retrieveGeoTaxonomies)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
+                    .collect(Collectors.toList());
 
         if (geographicTaxonomies.size() != geographicTaxonomieDtos.size()) {
             log.error(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geographicTaxonomieDtos),

@@ -23,6 +23,7 @@ import java.util.List;
 @Slf4j
 public class SchedulerService {
 
+    public static final int TOKEN_PAGE_SIZE = 100;
     private final ContractService contractService;
 
     private final TokenConnector tokenConnector;
@@ -59,15 +60,21 @@ public class SchedulerService {
                 log.debug("Regenerating notifications on queue with product filter {}", retrieveProductFilter(regenerateQueueConfiguration.getProductFilter()));
 
                 boolean nextPage = true;
-                int page = 0;
+                int page = Math.max(regenerateQueueConfiguration.getFirstPage(), 0);
+                int lastPage = Math.max(regenerateQueueConfiguration.getLastPage(), page);
+                log.debug("[KAFKA] SCHEDULER START PAGE {} LAST PAGE {}", page, lastPage);
+
                 do {
-                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED, RelationshipState.SUSPENDED), regenerateQueueConfiguration.getProductFilter(), page, 100);
+                    List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), regenerateQueueConfiguration.getProductFilter(), page, TOKEN_PAGE_SIZE);
+                    log.debug("[KAFKA] TOKEN NUMBER {} PAGE {}", tokens.size(), page);
 
                     sendDataLakeNotifications(tokens);
 
                     page += 1;
-                    if (tokens.size() < 100)
+                    if (tokens.size() < TOKEN_PAGE_SIZE || page > lastPage) {
                         nextPage = false;
+                        log.debug("[KAFKA] TOKEN TOTAL NUMBER {}", page * TOKEN_PAGE_SIZE + tokens.size());
+                    }
 
                 } while (nextPage);
             }
