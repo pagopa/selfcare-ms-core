@@ -96,6 +96,7 @@ class AzureBlobClient implements FileStorageConnector {
 
     @Override
     public File getFileAsPdf(String contractTemplate){
+        log.info("START - getFileAsPdf for template: {}", contractTemplate);
         try{
             final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
             final CloudBlockBlob blob = blobContainer.getBlockBlobReference(contractTemplate);
@@ -112,6 +113,7 @@ class AzureBlobClient implements FileStorageConnector {
             // Close the streams
             blobInputStream.close();
             fileOutputStream.close();
+            log.info("END - getFileAsPdf");
             return downloadedFile;
         } catch (StorageException | URISyntaxException | IOException e) {
             log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate), e);

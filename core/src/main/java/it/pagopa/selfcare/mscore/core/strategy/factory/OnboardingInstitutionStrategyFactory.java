@@ -173,7 +173,7 @@ public class OnboardingInstitutionStrategyFactory {
             String productId = strategyInput.getOnboardingRequest().getProductId();
             File pdf = null;
             if (productId.equals(PROD_FD.getValue()) || productId.equals(PROD_FD_GARANTITO.getValue())) {
-                pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContractFilePath());
+                pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContract().getPath());
             } else {
                 pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
             }
