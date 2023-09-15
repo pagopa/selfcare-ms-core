@@ -6,11 +6,9 @@ import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.input.OnboardingInstitutionStrategyInput;
-import it.pagopa.selfcare.mscore.core.NotificationService;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
@@ -258,13 +256,13 @@ public class OnboardingInstitutionStrategyFactory {
     private void deleteTokenExpired(Institution institution, String productId) {
         if(Objects.nonNull(institution.getOnboarding())) {
 
-            /* set state DELETE for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
+            /* set state REJECTED for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
             institution.getOnboarding().stream()
                     .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(productId)
                             && (onboarding.getStatus() == RelationshipState.PENDING || onboarding.getStatus() == RelationshipState.TOBEVALIDATED))
                     .map(onboarding -> onboardingDao.getTokenById(onboarding.getTokenId()))
                     .filter(TokenUtils::isTokenExpired)
-                    .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null));
+                        .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null));
         }
     }
 
