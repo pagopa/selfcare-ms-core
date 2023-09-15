@@ -241,7 +241,7 @@ public class OnboardingInstitutionStrategyFactory {
 
             /* check onboaring validation */
             OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, strategyInput.getOnboardingRequest().getProductId());
-            deleteTokenExpired(institution, strategyInput.getOnboardingRequest().getProductId());
+            rejectTokenExpired(institution, strategyInput.getOnboardingRequest().getProductId());
             OnboardingInstitutionUtils.validateOverridingData(strategyInput.getOnboardingRequest().getInstitutionUpdate(), institution);
 
             strategyInput.setInstitution(institution);
@@ -253,7 +253,7 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private void deleteTokenExpired(Institution institution, String productId) {
+    private void rejectTokenExpired(Institution institution, String productId) {
         if(Objects.nonNull(institution.getOnboarding())) {
 
             /* set state REJECTED for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
