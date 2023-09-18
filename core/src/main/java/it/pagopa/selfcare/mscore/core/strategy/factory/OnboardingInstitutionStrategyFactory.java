@@ -10,7 +10,6 @@ import it.pagopa.selfcare.mscore.core.strategy.input.OnboardingInstitutionStrate
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
@@ -20,12 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_DOWNLOAD_FILE;
 import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Component
@@ -173,11 +170,7 @@ public class OnboardingInstitutionStrategyFactory {
             String productId = strategyInput.getOnboardingRequest().getProductId();
             File pdf = null;
             if (productId.equals(PROD_FD.getValue()) || productId.equals(PROD_FD_GARANTITO.getValue())) {
-                try {
                     pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContract().getPath());
-                } catch (IOException e) {
-                    throw new MsCoreException(ERROR_DURING_DOWNLOAD_FILE.getMessage(), ERROR_DURING_DOWNLOAD_FILE.getCode());
-                }
             } else {
                 pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
             }

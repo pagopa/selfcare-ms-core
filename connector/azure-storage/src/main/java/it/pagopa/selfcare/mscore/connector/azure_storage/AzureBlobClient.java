@@ -66,13 +66,13 @@ class AzureBlobClient implements FileStorageConnector {
             response.setMimetype(properties.getContentType());
             return response;
         } catch (StorageException e) {
-            if(e.getHttpStatusCode() == 404){
+            if (e.getHttpStatusCode() == 404) {
                 throw new ResourceNotFoundException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
                         ERROR_DURING_DOWNLOAD_FILE.getCode());
             }
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
-        }catch (URISyntaxException e){
+        } catch (URISyntaxException e) {
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
         }
@@ -95,35 +95,44 @@ class AzureBlobClient implements FileStorageConnector {
     }
 
     @Override
-    public File getFileAsPdf(String contractTemplate) throws IOException {
+    public File getFileAsPdf(String contractTemplate){
         log.info("START - getFileAsPdf for template: {}", contractTemplate);
-        BlobInputStream blobInputStream = null;
-        FileOutputStream fileOutputStream = null;
-        try{
-            final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
-            final CloudBlockBlob blob = blobContainer.getBlockBlobReference(contractTemplate);
-            blobInputStream = blob.openInputStream();
+
+        final CloudBlobContainer blobContainer;
+        final CloudBlockBlob blob;
+        final File downloadedFile;
+
+        try {
+            blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
+            blob = blobContainer.getBlockBlobReference(contractTemplate);
+
             String fileName = Paths.get(contractTemplate).getFileName().toString();
-            File downloadedFile = File.createTempFile(fileName, ".pdf");
-            fileOutputStream = new FileOutputStream(downloadedFile);
+            downloadedFile = File.createTempFile(fileName, ".pdf");
+        } catch (URISyntaxException | StorageException | IOException e) {
+            log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate), e);
+            throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate),
+                    ERROR_DURING_DOWNLOAD_FILE.getCode());
+        }
+
+        try (BlobInputStream blobInputStream = blob.openInputStream();
+             FileOutputStream fileOutputStream = new FileOutputStream(downloadedFile)){
+
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = blobInputStream.read(buffer)) != -1) {
                 fileOutputStream.write(buffer, 0, bytesRead);
             }
 
-            log.info("END - getFileAsPdf");
-            return downloadedFile;
-        } catch (StorageException | URISyntaxException | IOException e) {
+        } catch (IOException | StorageException e) {
             log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate), e);
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
-        } finally {
-            // Close the streams
-            blobInputStream.close();
-            fileOutputStream.close();
         }
+
+        log.info("END - getFileAsPdf");
+        return downloadedFile;
     }
+
     @Override
     public String uploadContract(String id, MultipartFile contract) {
         log.info("START - uploadContract for token: {}", id);
