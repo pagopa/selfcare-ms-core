@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core.strategy;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -16,6 +17,8 @@ import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,6 +49,9 @@ class OnboardingInstitutionStrategyTest {
     private UserService userService;
     @Mock
     private NotificationService notificationService;
+
+    @Mock
+    private FileStorageConnector fileStorageConnector;
     @Mock
     private InstitutionService institutionService;
     @Mock
@@ -54,7 +60,7 @@ class OnboardingInstitutionStrategyTest {
     @BeforeEach
     void beforeAll() {
         strategyFactory = new OnboardingInstitutionStrategyFactory(onboardingDao,
-                contractService,userService, institutionService, coreConfig, notificationService);
+                contractService,userService, institutionService, coreConfig, notificationService, fileStorageConnector);
     }
 
 
@@ -545,6 +551,67 @@ class OnboardingInstitutionStrategyTest {
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
         when(contractService.extractTemplate(any())).thenReturn("template");
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(File.createTempFile("file",".txt"));
+        assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.PA, onboardingRequest.getProductId(), institution)
+                .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+    @ParameterizedTest()
+    @ValueSource(strings = {"prod-fd", "prod-fd-garantito"})
+    void testOnboardingProdFD(String productId) throws IOException {
+
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setDeletedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId(productId);
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode(
+                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
+        billing.setVatNumber("42");
+
+        Institution institution = new Institution();
+        institution.setOrigin("selc");
+        institution.setInstitutionType(InstitutionType.PA);
+
+        Billing billing1 = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+
+        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing1);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId(productId);
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
+        UserToOnboard userToOnboard = new UserToOnboard();
+        userToOnboard.setId("id");
+        userToOnboard.setRole(PartyRole.MANAGER);
+        onboardingRequest.setUsers(List.of(userToOnboard));
+        OnboardingRollback onboardingRollback = new OnboardingRollback();
+        Token token1 =new Token();
+        token1.setId("id");
+        onboardingRollback.setToken(token1);
+        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+        when(contractService.extractTemplate(any())).thenReturn("template");
+        when(fileStorageConnector.getFileAsPdf(any())).thenReturn(File.createTempFile("file",".pdf"));
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.PA, onboardingRequest.getProductId(), institution)
                 .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
     }

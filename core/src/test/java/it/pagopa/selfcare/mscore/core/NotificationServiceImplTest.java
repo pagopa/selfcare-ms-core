@@ -17,6 +17,8 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -166,12 +169,13 @@ class NotificationServiceImplTest {
 
         List<User> manager = new ArrayList<>();
         manager.add(user1);
+        Product product = mockInstance(new Product());
 
         Institution institution = new Institution();
         institution.setId("id");
         institution.setDigitalAddress("digital");
         when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
-        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,new Product(),file));
+        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,product,file));
     }
 
     @Test
@@ -196,12 +200,46 @@ class NotificationServiceImplTest {
 
         List<User> manager = new ArrayList<>();
         manager.add(user1);
-
+        Product product = mockInstance(new Product());
         Institution institution = new Institution();
         institution.setId("id");
         institution.setDigitalAddress("digital");
         when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
         when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("email");
-        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,new Product(),file));
+        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,product,file));
+    }
+
+    @ParameterizedTest()
+    @ValueSource(strings = {"prod-fd", "prod-fd-garantito"})
+    void sendCompletedMailFD(String productId){
+        File file = mock(File.class);
+
+        User user1 = new User();
+        user1.setId("1");
+        user1.setFiscalCode("ABC123XYZ");
+        user1.setName(new CertifiedField<>());
+        user1.setFamilyName(new CertifiedField<>());
+        user1.setEmail(new CertifiedField<>());
+
+        Map<String, WorkContact> workContacts1 = new HashMap<>();
+        WorkContact workContact = new WorkContact();
+        CertifiedField<String> email = new CertifiedField<>();
+        email.setValue("email");
+        workContact.setEmail(email);
+        workContacts1.put("id",workContact);
+
+        user1.setWorkContacts(workContacts1);
+
+        List<User> manager = new ArrayList<>();
+        manager.add(user1);
+
+        Product prodFD = new Product();
+        prodFD.setId(productId);
+        Institution institution = new Institution();
+        institution.setId("id");
+        institution.setDigitalAddress("digital");
+        when(coreConfig.isSendEmailToInstitution()).thenReturn(false);
+        when(coreConfig.getInstitutionAlternativeEmail()).thenReturn("email");
+        Assertions.assertDoesNotThrow(() -> notificationService.sendCompletedEmail(manager,institution,prodFD,file));
     }
 }

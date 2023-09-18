@@ -15,6 +15,8 @@ public class ConfigMapper {
             config.setId(entity.getId());
             config.setProductFilter(entity.getProductFilter());
             config.setEnableKafkaScheduler(entity.isEnableKafkaScheduler());
+            config.setFirstPage(entity.getFirstPage());
+            config.setLastPage(entity.getLastPage());
         }
         return config;
     }

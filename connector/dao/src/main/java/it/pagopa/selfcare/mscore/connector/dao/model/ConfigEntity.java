@@ -17,6 +17,10 @@ public class ConfigEntity {
 
     private String productFilter;
 
+    private int firstPage;
+
+    private int lastPage;
+
     private boolean enableKafkaScheduler;
 
     private OffsetDateTime lastRequestDate;
