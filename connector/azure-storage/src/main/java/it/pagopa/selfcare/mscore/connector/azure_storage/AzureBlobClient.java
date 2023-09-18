@@ -95,30 +95,33 @@ class AzureBlobClient implements FileStorageConnector {
     }
 
     @Override
-    public File getFileAsPdf(String contractTemplate){
+    public File getFileAsPdf(String contractTemplate) throws IOException {
         log.info("START - getFileAsPdf for template: {}", contractTemplate);
+        BlobInputStream blobInputStream = null;
+        FileOutputStream fileOutputStream = null;
         try{
             final CloudBlobContainer blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
             final CloudBlockBlob blob = blobContainer.getBlockBlobReference(contractTemplate);
-            BlobInputStream blobInputStream = blob.openInputStream();
+            blobInputStream = blob.openInputStream();
             String fileName = Paths.get(contractTemplate).getFileName().toString();
             File downloadedFile = File.createTempFile(fileName, ".pdf");
-            FileOutputStream fileOutputStream = new FileOutputStream(downloadedFile);
+            fileOutputStream = new FileOutputStream(downloadedFile);
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = blobInputStream.read(buffer)) != -1) {
                 fileOutputStream.write(buffer, 0, bytesRead);
             }
 
-            // Close the streams
-            blobInputStream.close();
-            fileOutputStream.close();
             log.info("END - getFileAsPdf");
             return downloadedFile;
         } catch (StorageException | URISyntaxException | IOException e) {
             log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate), e);
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
+        } finally {
+            // Close the streams
+            blobInputStream.close();
+            fileOutputStream.close();
         }
     }
     @Override

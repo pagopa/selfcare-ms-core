@@ -4,6 +4,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 
 public interface FileStorageConnector {
 
@@ -15,5 +16,5 @@ public interface FileStorageConnector {
 
     void removeContract(String fileName, String tokenId);
 
-    File getFileAsPdf(String contractTemplate);
+    File getFileAsPdf(String contractTemplate) throws IOException;
 }
