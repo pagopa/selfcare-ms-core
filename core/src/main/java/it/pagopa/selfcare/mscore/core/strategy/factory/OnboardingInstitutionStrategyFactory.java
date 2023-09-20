@@ -1,8 +1,13 @@
 package it.pagopa.selfcare.mscore.core.strategy.factory;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.input.OnboardingInstitutionStrategyInput;
@@ -22,8 +27,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_PN;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Component
 @Slf4j
@@ -35,6 +39,7 @@ public class OnboardingInstitutionStrategyFactory {
     private final UserService userService;
     private final InstitutionService institutionService;
     private final CoreConfig coreConfig;
+    private final FileStorageConnector fileStorageConnector;
 
     private final NotificationService notificationService;
 
@@ -43,13 +48,14 @@ public class OnboardingInstitutionStrategyFactory {
                                                 UserService userService,
                                                 InstitutionService institutionService,
                                                 CoreConfig coreConfig,
-                                                NotificationService notificationService) {
+                                                NotificationService notificationService, FileStorageConnector fileStorageConnector) {
         this.onboardingDao = onboardingDao;
         this.contractService = contractService;
         this.userService = userService;
         this.institutionService = institutionService;
         this.coreConfig = coreConfig;
         this.notificationService = notificationService;
+        this.fileStorageConnector = fileStorageConnector;
     }
 
     public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategy(InstitutionType institutionType, String productId, Institution institution) {
@@ -128,8 +134,6 @@ public class OnboardingInstitutionStrategyFactory {
     }
 
 
-
-
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
 
@@ -167,7 +171,13 @@ public class OnboardingInstitutionStrategyFactory {
                     .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(strategyInput.getOnboardingRequest().getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+            String productId = strategyInput.getOnboardingRequest().getProductId();
+            File pdf = null;
+            if (productId.equals(PROD_FD.getValue()) || productId.equals(PROD_FD_GARANTITO.getValue())) {
+                    pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContract().getPath());
+            } else {
+                pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+            }
             String digest = TokenUtils.createDigest(pdf);
 
             strategyInput.setDigest(digest);

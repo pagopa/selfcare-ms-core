@@ -2540,7 +2540,7 @@
           "style" : "simple",
           "schema" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           }
         } ],
         "responses" : {
@@ -4869,7 +4869,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -5106,7 +5106,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "productId" : {
             "type" : "string"
@@ -5214,7 +5214,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5297,7 +5297,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string",
@@ -5412,7 +5412,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -5562,7 +5562,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboardings" : {
             "type" : "object",
@@ -5719,7 +5719,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5809,7 +5809,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5901,7 +5901,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProvider"
@@ -5956,7 +5956,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderRequest"
@@ -6014,7 +6014,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
@@ -6126,7 +6126,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -6291,7 +6291,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
