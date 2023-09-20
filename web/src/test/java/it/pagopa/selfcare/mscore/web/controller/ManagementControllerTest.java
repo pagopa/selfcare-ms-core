@@ -1,35 +1,18 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
-
-import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +24,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {ManagementController.class})
 @ExtendWith(SpringExtension.class)

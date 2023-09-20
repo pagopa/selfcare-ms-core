@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
