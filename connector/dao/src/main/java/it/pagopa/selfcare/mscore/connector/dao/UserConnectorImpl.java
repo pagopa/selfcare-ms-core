@@ -254,11 +254,10 @@ public class UserConnectorImpl implements UserConnector {
     @Override
     public List<UserInfo> findByInstitutionId(String institutionId) {
         Criteria criteria = Criteria.where(UserEntity.Fields.bindings.name())
-                .elemMatch(CriteriaBuilder.builder()
-                        .isIfNotNull(UserBinding.Fields.institutionId.name(), institutionId)
-                        .build());
+                .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name())
+                        .is(institutionId));
         return repository.find(new Query(criteria), UserEntity.class).stream()
-                .map(userMapper::toUserInfo)
+                .map(userEntity -> userMapper.toUserInfoByFirstInstitution(userEntity, institutionId))
                 .collect(Collectors.toList());
     }
 

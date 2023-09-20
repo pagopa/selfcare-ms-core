@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -25,14 +24,16 @@ public interface UserEntityMapper {
 
     OnboardedUser toOnboardedUser(UserEntity entity);
 
-    @Mapping(target = "products", source = "bindings", qualifiedByName = "setProducts")
-    UserInfo toUserInfo(UserEntity entity);
+    @Mapping(target = "products", expression = "java(setProducts(entity.getBindings(), institutionId))")
+    UserInfo toUserInfoByFirstInstitution(UserEntity entity, String institutionId);
 
     @Named("setProducts")
-    static List<OnboardedProduct> setProducts(List<UserBindingEntity> bindings) {
-        if(Objects.nonNull(bindings) && !bindings.isEmpty()){
-            List<OnboardedProductEntity> productEntities = bindings.get(0).getProducts();
-            return productEntities.stream().map(productMapper::toOnboardedProduct).collect(Collectors.toList());
+    default List<OnboardedProduct> setProducts(List<UserBindingEntity> bindings, String institutionId) {
+        if(Objects.nonNull(bindings) && !bindings.isEmpty()) {
+            UserBindingEntity filteredEntity = bindings.stream().filter(el -> institutionId.equals(el.getInstitutionId())).findFirst().orElse(null);
+            return Objects.nonNull(filteredEntity) ?
+                    filteredEntity.getProducts().stream().map(productMapper::toOnboardedProduct).collect(Collectors.toList())
+                    : Collections.emptyList();
         }
         return Collections.emptyList();
     }
