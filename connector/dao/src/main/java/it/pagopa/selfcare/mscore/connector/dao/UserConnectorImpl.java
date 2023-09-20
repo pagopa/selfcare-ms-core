@@ -17,6 +17,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -248,6 +249,16 @@ public class UserConnectorImpl implements UserConnector {
         });
 
         return updatedUsersBindings;
+    }
+
+    @Override
+    public List<UserInfo> findByInstitutionId(String institutionId) {
+        Criteria criteria = Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name())
+                        .is(institutionId));
+        return repository.find(new Query(criteria), UserEntity.class).stream()
+                .map(userEntity -> userMapper.toUserInfoByFirstInstitution(userEntity, institutionId))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -8,13 +8,13 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -43,23 +43,20 @@ import java.util.stream.Collectors;
 public class InstitutionController {
 
     private final InstitutionService institutionService;
-    private final DelegationService delegationService;
     private final OnboardingResourceMapper onboardingResourceMapper;
     private final InstitutionResourceMapper institutionResourceMapper;
     private final BrokerMapper brokerMapper;
-    private final DelegationMapper delegationMapper;
+    private final UserMapper userMapper;
 
     public InstitutionController(InstitutionService institutionService,
                                  OnboardingResourceMapper onboardingResourceMapper,
                                  InstitutionResourceMapper institutionResourceMapper,
                                  BrokerMapper brokerMapper,
-                                 DelegationService delegationService,
-                                 DelegationMapper delegationMapper) {
+                                 UserMapper userMapper) {
         this.institutionService = institutionService;
-        this.delegationService = delegationService;
         this.onboardingResourceMapper = onboardingResourceMapper;
         this.institutionResourceMapper = institutionResourceMapper;
-        this.delegationMapper = delegationMapper;
+        this.userMapper = userMapper;
         this.brokerMapper = brokerMapper;
     }
 
@@ -445,6 +442,25 @@ public class InstitutionController {
         List<BrokerResponse> result = brokerMapper.toBrokers(institutions);
         log.debug("getInstitutionBrokers result = {}", result);
         log.trace("getInstitutionBrokers end");
+        return result;
+    }
+
+    @GetMapping(value = "/{institutionId}/users")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.mscore.institutions.api.getInstitutionUsers}")
+    public List<UserInfoResponse> getInstitutionUsers(@ApiParam("${swagger.mscore.institutions.model.id}")
+                                                             @PathVariable("institutionId")
+                                                             String institutionId) {
+
+        log.trace("getInstitutionUsers start");
+        log.debug("getInstitutionUsers institutionId = {}, role = {}", institutionId);
+        List<UserInfo> userInfos = institutionService.getInstitutionUsers(institutionId);
+        List<UserInfoResponse> result =  userInfos.stream()
+                .map(userInfo -> userMapper.toUserInfoResponse(userInfo, institutionId))
+                .collect(Collectors.toList());
+        log.debug("getInstitutionUsers result = {}", result);
+        log.trace("getInstitutionUsers end");
+
         return result;
     }
 }

@@ -9,6 +9,8 @@ import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
@@ -39,6 +41,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -70,6 +73,9 @@ class InstitutionControllerTest {
 
     @Spy
     private BrokerMapper brokerMapper = new BrokerMapperImpl();
+
+    @Spy
+    private UserMapper userMapper = new UserMapperImpl();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -301,7 +307,7 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"description\":\"description\",\"institutionType\":\"PG\",\"attributes\":[{\"origin\":null,\"code\":\"code\",\"description\":\"description\"}],\"onboarding\":[{\"productId\":\"example\",\"status\":\"ACTIVE\",\"billing\":{\"vatNumber\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false}}],\"imported\":false}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"description\":\"description\",\"institutionType\":\"PG\",\"attributes\":[{\"origin\":null,\"code\":\"code\",\"description\":\"description\"}],\"onboarding\":[{\"productId\":\"example\",\"status\":\"ACTIVE\",\"billing\":{\"vatNumber\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false},\"createdAt\":null,\"updatedAt\":null}],\"imported\":false}"));
     }
 
     @Test
@@ -1165,6 +1171,45 @@ class InstitutionControllerTest {
         // Then
         verify(institutionService, times(1))
                 .getInstitutionsByProductId(productIdMock, pageMock, sizeMock);
+        verifyNoMoreInteractions(institutionService);
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#getInstitutionUsers(String)}
+     */
+    @Test
+    void getInstitutionUsers() throws Exception {
+        // Given
+        final String institutionId = "test";
+
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId("userId");
+        User user = new User();
+        user.setWorkContacts(Map.of("test", new WorkContact()));
+        userInfo.setUser(user);
+        // When
+        when(institutionService.getInstitutionUsers(any())).thenReturn(List.of(userInfo));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{institutionId}/users", institutionId);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+        MvcResult result =  actualPerformResult
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<UserInfoResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.get(0));
+        assertEquals(response.get(0).getId(), userInfo.getId());
+        verify(institutionService, times(1))
+                .getInstitutionUsers(institutionId);
         verifyNoMoreInteractions(institutionService);
     }
 
