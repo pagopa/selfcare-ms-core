@@ -1,8 +1,9 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import lombok.Data;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 

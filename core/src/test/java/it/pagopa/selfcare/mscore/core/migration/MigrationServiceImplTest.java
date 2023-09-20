@@ -1,9 +1,9 @@
 package it.pagopa.selfcare.mscore.core.migration;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;

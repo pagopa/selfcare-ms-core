@@ -1,18 +1,11 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.institution.Attributes;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
@@ -28,12 +21,7 @@ import java.util.List;
 
 import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalServiceImplTest {

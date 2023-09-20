@@ -2461,6 +2461,62 @@
         } ]
       }
     },
+    "/institutions/{institutionId}/users" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "getInstitutionUsers",
+        "description" : "Retrieve institution's users",
+        "operationId" : "getInstitutionUsersUsingGET",
+        "parameters" : [ {
+          "name" : "institutionId",
+          "in" : "path",
+          "description" : "Institution's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserInfoResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/{productId}/brokers/{institutionType}" : {
       "get" : {
         "tags" : [ "Institution" ],
@@ -2484,7 +2540,7 @@
           "style" : "simple",
           "schema" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           }
         } ],
         "responses" : {
@@ -4813,7 +4869,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -5050,7 +5106,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "productId" : {
             "type" : "string"
@@ -5158,7 +5214,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5241,7 +5297,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string",
@@ -5356,7 +5412,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -5506,7 +5562,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboardings" : {
             "type" : "object",
@@ -5663,7 +5719,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5753,7 +5809,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5845,7 +5901,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProvider"
@@ -5900,7 +5956,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderRequest"
@@ -5958,7 +6014,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
@@ -6070,7 +6126,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -6235,7 +6291,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -6330,12 +6386,20 @@
           "billing" : {
             "$ref" : "#/components/schemas/BillingResponse"
           },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "productId" : {
             "type" : "string"
           },
           "status" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },
@@ -7149,6 +7213,33 @@
             "items" : {
               "$ref" : "#/components/schemas/OnboardedProduct"
             }
+          }
+        }
+      },
+      "UserInfoResponse" : {
+        "title" : "UserInfoResponse",
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OnboardedProduct"
+            }
+          },
+          "surname" : {
+            "type" : "string"
+          },
+          "taxCode" : {
+            "type" : "string"
           }
         }
       },
