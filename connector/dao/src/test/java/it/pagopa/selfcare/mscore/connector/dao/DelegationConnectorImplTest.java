@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapperImpl;
@@ -7,7 +8,6 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutio
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapperImpl;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.delegation.DelegationInstitution;

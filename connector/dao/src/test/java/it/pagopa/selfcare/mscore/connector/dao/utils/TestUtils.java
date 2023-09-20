@@ -1,10 +1,10 @@
 package it.pagopa.selfcare.mscore.connector.dao.utils;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.BillingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
