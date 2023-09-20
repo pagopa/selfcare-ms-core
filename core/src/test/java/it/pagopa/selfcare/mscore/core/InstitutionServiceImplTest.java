@@ -20,7 +20,9 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,6 +68,9 @@ class InstitutionServiceImplTest {
 
     @Mock
     private UserConnector userConnector;
+
+    @Mock
+    private UserRegistryConnector userRegistryConnector;
 
     @Mock
     private CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
@@ -1514,6 +1519,25 @@ class InstitutionServiceImplTest {
         assertEquals(institutions.get(0).getId(), institution.getId());
         verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
 
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#getInstitutionUsers(String)}
+     */
+    @Test
+    void getInstitutionUsers() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId("id");
+        User user = new User();
+        user.setId("id");
+        when(userConnector.findByInstitutionId(any())).thenReturn(List.of(userInfo));
+        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+        List<UserInfo> userInfos = institutionServiceImpl.getInstitutionUsers("test");
+        assertNotNull(userInfos);
+        assertFalse(userInfos.isEmpty());
+        assertNotNull(userInfos.get(0));
+        assertEquals(userInfos.get(0).getId(), userInfo.getId());
+        verify(userConnector).findByInstitutionId("test");
     }
 
 }
