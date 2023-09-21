@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
         value="core.user-event-service.type",
         havingValue = "send")
 public class UserEventServiceImpl implements UserEventService {
+    public static final String ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER = "error during send dataLake notification for user {}";
     private final CoreConfig coreConfig;
     private final KafkaTemplate<String, String> kafkaTemplateUsers;
     private final KafkaPropertiesConfig kafkaPropertiesConfig;
@@ -83,7 +84,7 @@ public class UserEventServiceImpl implements UserEventService {
                     String msg = mapper.writeValueAsString(notification);
                     sendUserNotification(msg, user.getUserId());
                 } catch (JsonProcessingException e) {
-                    log.warn("error during send dataLake notification for user {}", user.getUserId());
+                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getUserId());
                 }
             });
 
@@ -123,7 +124,7 @@ public class UserEventServiceImpl implements UserEventService {
                     String msg = mapper.writeValueAsString(notification);
                     sendUserNotification(msg, userId);
                 } catch (JsonProcessingException e) {
-                    log.warn("error during send dataLake notification for user {}", userId);
+                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
                 }
             });
         }
@@ -161,7 +162,7 @@ public class UserEventServiceImpl implements UserEventService {
                     String msg = mapper.writeValueAsString(notification);
                     sendUserNotification(msg, user.getUserId());
                 } catch (JsonProcessingException e) {
-                    log.warn("error during send dataLake notification for user {}", user.getUserId());
+                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getUserId());
                 }
             });
         }
