@@ -1,9 +1,9 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;

@@ -9,10 +9,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitution
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapper;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapperImpl;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapper;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapperImpl;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.*;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -49,6 +46,10 @@ class UserConnectorImplTest {
 
     @Spy
     private UserEntityMapper userMapper = new UserEntityMapperImpl();
+
+    @Spy
+    private OnboardedProductMapper productMapper = new OnboardedProductMapperImpl();
+
     @Spy
     private UserInstitutionAggregationMapper userInstitutionAggregationMapper = new UserInstitutionAggregationMapperImpl();
 
@@ -956,5 +957,14 @@ class UserConnectorImplTest {
         when(userRepository.findUserInstitutionAggregation(any(), any()))
                 .thenReturn(List.of(mockInstance(new UserInstitutionAggregationEntity())));
         Assertions.assertDoesNotThrow(() -> userConnectorImpl.findUserInstitutionAggregation(filter));
+    }
+
+    @Test
+    void findByInstitutionId() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id");
+        when(userRepository.find(any(), any()))
+                .thenReturn(List.of(userEntity));
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findByInstitutionId("institutionId"));
     }
 }
