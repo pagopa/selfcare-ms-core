@@ -250,7 +250,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
         userMap.forEach((key, value) -> userNotificationService.sendAddedProductRoleNotification(key, institution,
                 onboardingOperatorRequest.getProductTitle(), roleLabels, loggedUserName, loggedUserSurname));
-        relationshipInfoList.forEach(userEventService::sendOperatorUserNotification);
+        relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
         return relationshipInfoList;
     }
 

@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -43,7 +44,7 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.ACTIVE);
-            sendRelationshipEventNotification(user, relationshipId);
+            sendRelationshipEventNotification(user, relationshipId, QueueEvent.UPDATE);
             userNotificationService.sendActivatedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_ACTIVABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_ACTIVABLE.getCode());
@@ -57,22 +58,22 @@ public class UserRelationshipServiceImpl implements UserRelationshipService {
         try {
             onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.SUSPENDED);
             userNotificationService.sendSuspendedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
-            sendRelationshipEventNotification(user, relationshipId);
+            sendRelationshipEventNotification(user, relationshipId, QueueEvent.UPDATE);
         } catch (InvalidRequestException e) {
             throw new InvalidRequestException(String.format(RELATIONSHIP_NOT_SUSPENDABLE.getMessage(), relationshipId), RELATIONSHIP_NOT_SUSPENDABLE.getCode());
         }
     }
 
-    private void sendRelationshipEventNotification(OnboardedUser user, String relationshipId){
+    private void sendRelationshipEventNotification(OnboardedUser user, String relationshipId, QueueEvent eventType){
         RelationshipInfo relationshipInfo = getRelationshipInfoFromUser(user, relationshipId);
-        userEventService.sendOperatorUserNotification(relationshipInfo);
+        userEventService.sendOperatorUserNotification(relationshipInfo, eventType);
     }
     @Override
     public void deleteRelationship(String relationshipId, String loggedUserName, String loggedUserSurname) {
         OnboardedUser user = findByRelationshipId(relationshipId);
         UserBinding userBinding = retrieveUserBinding(user, relationshipId);
         onboardingDao.updateUserProductState(user, relationshipId, RelationshipState.DELETED);
-        sendRelationshipEventNotification(user, relationshipId);
+        sendRelationshipEventNotification(user, relationshipId, QueueEvent.UPDATE);
         userNotificationService.sendDeletedUserNotification(relationshipId, user.getId(), userBinding, loggedUserName, loggedUserSurname);
     }
 

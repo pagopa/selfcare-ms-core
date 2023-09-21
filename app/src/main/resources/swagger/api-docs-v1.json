@@ -4525,6 +4525,71 @@
         } ]
       }
     },
+    "/users/{id}/update" : {
+      "post" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Service to send notification when user data get's updated",
+        "description" : "Service to send notification when user data get's updated",
+        "operationId" : "updateUserUsingPOST",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "User's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "institutionId",
+          "in" : "query",
+          "description" : "The internal identifier of the institution",
+          "required" : true,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/users/{userId}/institution-products" : {
       "get" : {
         "tags" : [ "Persons" ],

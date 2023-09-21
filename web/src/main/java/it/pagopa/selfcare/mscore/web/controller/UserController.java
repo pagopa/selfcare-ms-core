@@ -7,19 +7,20 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
+import it.pagopa.selfcare.mscore.core.UserEventService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
+import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -41,14 +42,16 @@ public class UserController {
     private final UserRelationshipService userRelationshipService;
     private final OnboardingService onboardingService;
     private final UserService userService;
+    private final UserEventService userEventService;
 
     private final UserMapper userMapper;
 
     public UserController(UserRelationshipService userRelationshipService,
-                          OnboardingService onboardingService, UserService userService, UserMapper userMapper) {
+                          OnboardingService onboardingService, UserService userService, UserEventService userEventService, UserMapper userMapper) {
         this.userRelationshipService = userRelationshipService;
         this.onboardingService = onboardingService;
         this.userService = userService;
+        this.userEventService = userEventService;
         this.userMapper = userMapper;
     }
 
@@ -141,8 +144,8 @@ public class UserController {
     /**
      * The function return onboardingInfo
      *
-     * @param userId                String
-     * @param institutionId         String
+     * @param userId        String
+     * @param institutionId String
      * @return onboardingInfoResponse
      * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
@@ -166,8 +169,8 @@ public class UserController {
     /**
      * The function retrieves products info and role which the user is enabled
      *
-     * @param userId                String
-     * @param institutionId         String
+     * @param userId        String
+     * @param institutionId String
      * @return onboardingInfoResponse
      * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
@@ -178,32 +181,31 @@ public class UserController {
     @ApiOperation(value = "${swagger.mscore.users.products}", notes = "${swagger.mscore.users.products}")
     @GetMapping(value = "/users/{userId}/products")
     public ResponseEntity<UserProductsResponse> getUserProductsInfo(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                                             @PathVariable("userId") String userId,
+                                                                    @PathVariable("userId") String userId,
                                                                     @ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                             @RequestParam(value = "institutionId", required = false) String institutionId,
+                                                                    @RequestParam(value = "institutionId", required = false) String institutionId,
                                                                     @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
-                                                                        @RequestParam(value = "states", required = false) String[] states) {
+                                                                    @RequestParam(value = "states", required = false) String[] states) {
 
         List<UserBinding> userBindings = userService.retrieveBindings(institutionId, userId, states, null);
-        if(Objects.isNull(userBindings) || userBindings.isEmpty())
+        if (Objects.isNull(userBindings) || userBindings.isEmpty())
             return ResponseEntity.notFound().build();
 
         return ResponseEntity.ok().body(UserProductsResponse.builder()
-                        .id(userId)
-                        .bindings(userBindings.stream()
-                                .map(userMapper::toInstitutionProducts)
-                                .collect(Collectors.toList()))
+                .id(userId)
+                .bindings(userBindings.stream()
+                        .map(userMapper::toInstitutionProducts)
+                        .collect(Collectors.toList()))
                 .build());
     }
-
 
 
     /**
      * The function delete logically the association institution and product
      *
-     * @param userId                String
-     * @param institutionId         String
-     * @param productId         String
+     * @param userId        String
+     * @param institutionId String
+     * @param productId     String
      * @return onboardingInfoResponse
      * <p>
      * * Code: 200, Message: successful operation, DataType: TokenId
@@ -214,11 +216,11 @@ public class UserController {
     @ApiOperation(value = "${swagger.mscore.users.delete.products}", notes = "${swagger.mscore.users.delete.products}")
     @DeleteMapping(value = "/users/{userId}/institutions/{institutionId}/products/{productId}")
     public ResponseEntity<Void> deleteProducts(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                                    @PathVariable("userId") String userId,
-                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                    @PathVariable(value = "institutionId") String institutionId,
-                                                                    @ApiParam("${swagger.mscore.institutions.model.productId}")
-                                                                        @PathVariable(value = "productId") String productId) {
+                                               @PathVariable("userId") String userId,
+                                               @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                               @PathVariable(value = "institutionId") String institutionId,
+                                               @ApiParam("${swagger.mscore.institutions.model.productId}")
+                                               @PathVariable(value = "productId") String productId) {
 
         userService.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, RelationshipState.DELETED);
         return ResponseEntity.ok().build();
@@ -227,8 +229,8 @@ public class UserController {
     /**
      * The function retrieves userInfo given UserId and optional productId
      *
-     * @param userId                String
-     * @param productId         String
+     * @param userId        String
+     * @param productId     String
      * @param institutionId String
      * @return onboardingInfoResponse
      * <p>
@@ -240,13 +242,35 @@ public class UserController {
     @ApiOperation(value = "${swagger.mscore.users}", notes = "${swagger.mscore.users}")
     @GetMapping(value = "/users/{id}")
     public ResponseEntity<UserResponse> getUserInfo(@ApiParam("${swagger.mscore.users.userId}")
-                                                                    @PathVariable("id") String userId,
+                                                    @PathVariable("id") String userId,
                                                     @ApiParam("${swagger.mscore.institutions.model.productId}")
-                                                                    @RequestParam(value = "productId", required = false) String productId,
+                                                    @RequestParam(value = "productId", required = false) String productId,
                                                     @ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                        @RequestParam(value = "institutionId", required = false) String institutionId) {
+                                                    @RequestParam(value = "institutionId", required = false) String institutionId) {
 
         User user = userService.retrievePerson(userId, productId, institutionId);
         return ResponseEntity.ok().body(userMapper.toUserResponse(user, institutionId));
+    }
+
+    /**
+     * The function sends a notification to DL when a user's information are updated
+     *
+     * @param userId        String
+     * @param institutionId String
+     * @return onboardingInfoResponse
+     * <p>
+     * * Code: 200, Message: successful operation, DataType: TokenId
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.api.users.updateUser}", notes = "${swagger.mscore.api.users.updateUser}")
+    @PostMapping(value = "/users/{id}/update")
+    public ResponseEntity<Void> updateUser(@ApiParam("${swagger.mscore.users.userId}")
+                                           @PathVariable("id") String userId,
+                                           @ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                           @RequestParam(value = "institutionId") String institutionId) {
+        userEventService.sendUpdateUserNotification(userId, institutionId);
+        return ResponseEntity.noContent().build();
     }
 }
