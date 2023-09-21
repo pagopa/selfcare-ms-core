@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @ConditionalOnProperty(
-        value="core.user-event-service.type",
+        value = "core.user-event-service.type",
         havingValue = "send")
 public class UserEventServiceImpl implements UserEventService {
     public static final String ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER = "error during send dataLake notification for user {}";
@@ -103,51 +103,41 @@ public class UserEventServiceImpl implements UserEventService {
                 .map(onboardedProduct -> toUserToNotify(userId, institutionId, user, onboardedProduct))
                 .collect(Collectors.toList());
     }
+
     @Override
     public void sendUpdateUserNotification(String userId, String institutionId) {
         log.trace("sendUpdateUserNotification start");
-        log.debug("sendUpdateUserNotification userId = {}, institutionId = {}, productId = {}", userId, institutionId);
-            OnboardedUser onboardedUser = userConnector.findById(userId);
-            List<OnboardedProduct> onboardedProducts = onboardedUser.getBindings().stream()
-                    .filter(userBinding -> institutionId.equals(userBinding.getInstitutionId()))
-                    .flatMap(userBinding -> userBinding.getProducts().stream())
-                    .collect(Collectors.toList());
-            onboardedProducts.forEach(onboardedProduct -> {
-                UserToNotify userToNotify = updateUserToNotify(userId,  onboardedProduct);
-                UserNotificationToSend notification = notificationMapper.setUpdateUserNotification(institutionId, userToNotify);
-                notification.setId(UUID.randomUUID().toString());
-                notification.setUpdatedAt(OffsetDateTime.now());
-                notification.setCreatedAt(onboardedProduct.getCreatedAt());
-                notification.setEventType(QueueEvent.UPDATE);
-                notification.setProductId(onboardedProduct.getProductId());
-                try {
-                    String msg = mapper.writeValueAsString(notification);
-                    sendUserNotification(msg, userId);
-                } catch (JsonProcessingException e) {
-                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
-                }
-            });
+        log.debug("sendUpdateUserNotification userId = {}, institutionId = {}", userId, institutionId);
+        UserToNotify userToNotify = new UserToNotify();
+        userToNotify.setUserId(userId);
+        UserNotificationToSend notification = new UserNotificationToSend();
+        notification.setId(UUID.randomUUID().toString());
+        notification.setUpdatedAt(OffsetDateTime.now());
+        notification.setInstitutionId(institutionId);
+        notification.setEventType(QueueEvent.UPDATE);
+        notification.setProductId("*");
+        notification.setUser(userToNotify);
+        try {
+            String msg = mapper.writeValueAsString(notification);
+            sendUserNotification(msg, userId);
+        } catch (JsonProcessingException e) {
+            log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
         }
-    private UserToNotify toUserToNotify(String userId, String institutionId, User user, OnboardedProduct onboardedProduct){
+    }
+
+    private UserToNotify toUserToNotify(String userId, String institutionId, User user, OnboardedProduct onboardedProduct) {
         UserToNotify userToNotify = new UserToNotify();
         userToNotify.setUserId(userId);
         userToNotify.setName(user.getName());
         userToNotify.setFamilyName(user.getFamilyName());
         userToNotify.setFiscalCode(user.getFiscalCode());
-        userToNotify.setEmail(user.getWorkContacts().containsKey(institutionId)? user.getWorkContacts().get(institutionId).getEmail():user.getEmail());
+        userToNotify.setEmail(user.getWorkContacts().containsKey(institutionId) ? user.getWorkContacts().get(institutionId).getEmail() : user.getEmail());
         userToNotify.setRole(onboardedProduct.getRole());
         userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
         userToNotify.setProductRole(onboardedProduct.getProductRole());
         return userToNotify;
     }
-    private UserToNotify updateUserToNotify(String userId, OnboardedProduct onboardedProduct){
-        UserToNotify userToNotify = new UserToNotify();
-        userToNotify.setUserId(userId);
-        userToNotify.setRole(onboardedProduct.getRole());
-        userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
-        userToNotify.setProductRole(onboardedProduct.getProductRole());
-        return userToNotify;
-    }
+
     public void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType) {
         if (relationshipInfo != null) {
             List<UserToNotify> usersToNotify = toUserToNotify(relationshipInfo.getUserId(),
@@ -167,7 +157,6 @@ public class UserEventServiceImpl implements UserEventService {
             });
         }
     }
-
 
 
     private void sendUserNotification(String message, String userId) {
