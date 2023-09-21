@@ -9,6 +9,8 @@ import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapperImpl;
 import it.pagopa.selfcare.mscore.core.util.model.DummyUser;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -21,6 +23,7 @@ import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -35,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.checkNotNullFields;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -189,7 +193,7 @@ class UserEventServiceTest {
             return null;
         }).when(mockFuture).addCallback(any(ListenableFutureCallback.class));
         //when
-        Executable executable = () -> userEventService.sendOperatorUserNotification(relationshipInfo);
+        Executable executable = () -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD);
         //then
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
@@ -227,7 +231,7 @@ class UserEventServiceTest {
 
         when(mapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
         //when
-        Executable executable = () -> userEventService.sendOperatorUserNotification(relationshipInfo);
+        Executable executable = () -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD);
         //then
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
@@ -348,6 +352,38 @@ class UserEventServiceTest {
         verify(userConnector, times(1)).findById(userId);
         verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
         verifyNoMoreInteractions(userConnector, userRegistryConnector);
+    }
+
+    @Test
+    void updateUserEventNotification() throws JsonProcessingException {
+        //given
+        final String userId = UUID.randomUUID().toString();
+        final String institutionId = UUID.randomUUID().toString();
+        final String productId = "prod-test";
+        OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setProductId(productId);
+        OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        onboardedUser.setId(userId);
+        UserBinding userBinding =mockInstance(new UserBinding());
+        userBinding.setProducts(List.of(onboardedProduct));
+        userBinding.setInstitutionId(institutionId);
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        when(kafkaTemplateUsers.send(any(), any()))
+                .thenReturn(mockFuture);
+        doAnswer(invocationOnMock -> {
+            ListenableFutureCallback callback = invocationOnMock.getArgument(0);
+            callback.onSuccess(mockSendResult);
+            return null;
+        }).when(mockFuture).addCallback(any(ListenableFutureCallback.class));
+        //when
+        Executable executable = () -> userEventService.sendUpdateUserNotification(userId, institutionId);
+        //then
+        assertDoesNotThrow(executable);
+        ArgumentCaptor<UserNotificationToSend> messageArgumentCaptor = ArgumentCaptor.forClass(UserNotificationToSend.class);
+        verify(mapper, times(1)).writeValueAsString(messageArgumentCaptor.capture());
+        UserNotificationToSend message = messageArgumentCaptor.getValue();
+        checkNotNullFields(message, "onboardingTokenId", "user.name", "user.familyName", "user.fiscalCode", "user.email");
     }
 
 
