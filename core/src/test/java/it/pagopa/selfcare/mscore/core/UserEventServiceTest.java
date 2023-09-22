@@ -374,7 +374,7 @@ class UserEventServiceTest {
         ArgumentCaptor<UserNotificationToSend> messageArgumentCaptor = ArgumentCaptor.forClass(UserNotificationToSend.class);
         verify(mapper, times(1)).writeValueAsString(messageArgumentCaptor.capture());
         UserNotificationToSend message = messageArgumentCaptor.getValue();
-        checkNotNullFields(message, "onboardingTokenId", "user.name", "user.familyName", "user.fiscalCode", "user.email", "user.productRole", "user.role", "createdAt");
+        checkNotNullFields(message, "onboardingTokenId", "productId", "user.name", "user.familyName", "user.fiscalCode", "user.email", "user.productRole", "user.role", "createdAt");
     }
 
 

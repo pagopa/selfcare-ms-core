@@ -115,7 +115,6 @@ public class UserEventServiceImpl implements UserEventService {
         notification.setUpdatedAt(OffsetDateTime.now());
         notification.setInstitutionId(institutionId);
         notification.setEventType(QueueEvent.UPDATE);
-        notification.setProductId("*");
         notification.setUser(userToNotify);
         try {
             String msg = mapper.writeValueAsString(notification);
