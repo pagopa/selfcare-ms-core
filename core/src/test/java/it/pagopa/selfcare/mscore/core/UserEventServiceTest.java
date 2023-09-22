@@ -368,7 +368,7 @@ class UserEventServiceTest {
             return null;
         }).when(mockFuture).addCallback(any(ListenableFutureCallback.class));
         //when
-        Executable executable = () -> userEventService.sendUpdateUserNotification(userId, institutionId);
+        Executable executable = () -> userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
         //then
         assertDoesNotThrow(executable);
         ArgumentCaptor<UserNotificationToSend> messageArgumentCaptor = ArgumentCaptor.forClass(UserNotificationToSend.class);

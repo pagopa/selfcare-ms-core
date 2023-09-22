@@ -105,7 +105,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     @Override
-    public void sendUpdateUserNotification(String userId, String institutionId) {
+    public void sendUpdateUserNotificationToQueue(String userId, String institutionId) {
         log.trace("sendUpdateUserNotification start");
         log.debug("sendUpdateUserNotification userId = {}, institutionId = {}", userId, institutionId);
         UserToNotify userToNotify = new UserToNotify();

@@ -9,6 +9,6 @@ public interface UserEventService {
     void sendLegalTokenUserNotification(Token token);
 
     void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType);
-    void sendUpdateUserNotification(String userId, String institutionId);
+    void sendUpdateUserNotificationToQueue(String userId, String institutionId);
 
 }
