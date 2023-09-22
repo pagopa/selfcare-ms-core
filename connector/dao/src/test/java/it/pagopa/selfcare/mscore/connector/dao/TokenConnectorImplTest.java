@@ -1,12 +1,12 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.InstitutionUpdateEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
 import it.pagopa.selfcare.mscore.connector.dao.utils.DaoMockUtils;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;

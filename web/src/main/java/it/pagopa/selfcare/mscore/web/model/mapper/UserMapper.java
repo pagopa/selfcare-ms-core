@@ -5,12 +5,14 @@ import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
-import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.UserInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.user.InstitutionProducts;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
+import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -28,6 +30,12 @@ public interface UserMapper {
     UserToOnboard toUserToOnboard(Person p);
 
     UserProductsResponse toEntity(OnboardedUser model);
+
+    @Mapping(source = "userInfo.user.fiscalCode", target = "taxCode")
+    @Mapping(source = "userInfo.user.familyName", target = "surname")
+    @Mapping(source = "userInfo.user.name", target = "name")
+    @Mapping(target = "email", expression = "java(retrieveMailFromWorkContacts(userInfo.getUser().getWorkContacts(), institutionId))")
+    UserInfoResponse toUserInfoResponse(UserInfo userInfo, String institutionId);
 
     InstitutionProducts toInstitutionProducts(UserBinding model);
 

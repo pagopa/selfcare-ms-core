@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core.util;
 
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -16,7 +17,7 @@ public interface NotificationMapper {
     @Mapping(source = "relationshipInfo.onboardedProduct.productId", target = "productId")
     @Mapping(source = "relationshipInfo.onboardedProduct.createdAt", target = "createdAt")
     @Mapping(source = "relationshipInfo.onboardedProduct.updatedAt", target = "updatedAt")
-    UserNotificationToSend setNotificationDetailsFromRelationship(RelationshipInfo relationshipInfo, UserToNotify user);
+    UserNotificationToSend setNotificationDetailsFromRelationship(RelationshipInfo relationshipInfo, UserToNotify user, QueueEvent eventType);
 
     @Mapping(source = "token.institutionId", target = "institutionId")
     @Mapping(source = "token.productId", target = "productId")
@@ -24,5 +25,7 @@ public interface NotificationMapper {
     @Mapping(source  = "token.createdAt", target = "createdAt")
     @Mapping(source  = "token.updatedAt", target = "updatedAt")
     @Mapping(target = "id", expression = "java(UUID.randomUUID().toString())")
-    UserNotificationToSend setNotificationDetailsFromToken(Token token, UserToNotify user);
+    UserNotificationToSend setNotificationDetailsFromToken(Token token, UserToNotify user, QueueEvent eventType);
+
+    UserNotificationToSend setUpdateUserNotification(String institutionId, UserToNotify user);
 }
