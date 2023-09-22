@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
