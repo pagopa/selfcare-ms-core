@@ -288,7 +288,7 @@ class OnboardingInstitutionStrategyTest {
      * Method under test: {@link OnboardingServiceImpl#onboardingInstitution(OnboardingRequest, SelfCareUser)}
      */
     @Test
-    void testOnboardingInstitutionGSP(){
+    void testOnboardingInstitutionGSP() throws IOException {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
@@ -315,7 +315,7 @@ class OnboardingInstitutionStrategyTest {
         billing.setVatNumber("42");
 
         Institution institution = new Institution();
-        institution.setOrigin("selc");
+        institution.setOrigin("IPA");
 
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
@@ -341,6 +341,9 @@ class OnboardingInstitutionStrategyTest {
         token1.setId("id");
         onboardingRollback.setToken(token1);
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+        when(contractService.extractTemplate(any())).thenReturn("template");
+        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(File.createTempFile("file",".txt"));
 
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.GSP, onboardingRequest.getProductId(), institution)
                 .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
