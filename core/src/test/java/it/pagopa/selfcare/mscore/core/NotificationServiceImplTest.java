@@ -118,7 +118,9 @@ class NotificationServiceImplTest {
     @Test
     void sendMailWithContract(){
         File file = mock(File.class);
-        Assertions.assertDoesNotThrow(() -> notificationService.sendMailWithContract(file, "digital", new User(), new OnboardingRequest(), "token"));
+        Institution institution = new Institution();
+        institution.setDigitalAddress("digital");
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailWithContract(file, institution, new User(), new OnboardingRequest(), "", false));
     }
 
     @Test
