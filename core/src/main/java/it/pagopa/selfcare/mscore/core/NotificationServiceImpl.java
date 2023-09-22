@@ -83,13 +83,13 @@ public class NotificationServiceImpl implements NotificationService {
         emailConnector.sendMail(mailTemplateConfig.getAutocompletePath(), destinationMail, file, productName, templateParameters, fileName);
     }
 
-    public void sendMailWithContract(File pdf, String digitalAddress, User user, OnboardingRequest request, String token) {
+    public void sendMailWithContract(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean fromApprove) {
         List<String> destinationMail;
         Map<String, String> mailParameters;
-        mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token);
+        mailParameters = mailParametersMapper.getOnboardingMailParameter(user, request, token, institution.getDescription(), fromApprove);
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
         destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
-                ? coreConfig.getDestinationMails() : List.of(digitalAddress);
+                ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
         log.info(DESTINATION_MAIL_LOG, destinationMail);
         emailConnector.sendMail(mailTemplateConfig.getPath(), destinationMail, pdf, request.getProductName(), mailParameters, request.getProductName() + "_accordo_adesione.pdf");
         log.info("onboarding-contract-email Email successful sent");
