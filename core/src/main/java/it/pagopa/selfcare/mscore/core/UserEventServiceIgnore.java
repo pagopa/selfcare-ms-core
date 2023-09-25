@@ -25,7 +25,7 @@ public class UserEventServiceIgnore implements UserEventService{
     }
 
     @Override
-    public void sendUpdateUserNotification(String userId, String institutionId) {
+    public void sendUpdateUserNotificationToQueue(String userId, String institutionId) {
 
     }
 }
