@@ -1,18 +1,19 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapperHelper;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -248,9 +249,13 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
-        return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxCode)
-                                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
+    public List<Institution> findByTaxCodeSubunitCodeAndOrigin(String taxCode, String subunitCode, String origin, String originId) {
+        return repository.find(Query.query(CriteriaBuilder.builder()
+                                .isIfNotNull(InstitutionEntity.Fields.taxCode.name(), taxCode)
+                                .isIfNotNull(InstitutionEntity.Fields.subunitCode.name(), subunitCode)
+                                .isIfNotNull(InstitutionEntity.Fields.origin.name(), origin)
+                                .isIfNotNull(InstitutionEntity.Fields.originId.name(), originId)
+                                .build()
                         ),
                         InstitutionEntity.class).stream()
                 .map(institutionMapper::convertToInstitution)
@@ -314,12 +319,18 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     public List<Institution> findBrokers(String productId, InstitutionType type) {
 
         Query query = Query.query(Criteria.where(InstitutionEntity.Fields.institutionType.name()).is(type)
-                .and(InstitutionEntity.Fields.onboarding.name()).elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)));
+                .and(InstitutionEntity.Fields.onboarding.name()).elemMatch(Criteria.where(Onboarding.Fields.productId.name()).is(productId)
+                        .and(Onboarding.Fields.status.name()).is(ProductStatus.ACTIVE)));
 
         List<InstitutionEntity> institutionEntities = repository.find(query, InstitutionEntity.class);
         return  institutionEntities.stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Institution> findByTaxCodeSubunitCode(String taxCode, String subunitCode) {
+        return findByTaxCodeSubunitCodeAndOrigin(taxCode, subunitCode, null, null);
     }
 
     private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {

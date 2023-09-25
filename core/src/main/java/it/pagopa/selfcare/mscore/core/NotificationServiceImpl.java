@@ -23,7 +23,7 @@ import java.io.File;
 import java.util.*;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_SEND_MAIL;
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_PN;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Slf4j
 @Service
@@ -34,6 +34,8 @@ public class NotificationServiceImpl implements NotificationService {
     public static final String PAGOPA_LOGO_FILENAME = "pagopa-logo.png";
     private final NotificationServiceConnector notificationConnector;
     private final FileStorageConnector fileStorageConnector;
+    private final InstitutionConnector institutionConnector;
+    private final ProductConnector productConnector;
     private final ObjectMapper mapper;
     private final MailTemplateConfig mailTemplateConfig;
     private final EmailConnector emailConnector;
@@ -43,6 +45,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     public NotificationServiceImpl(NotificationServiceConnector notificationConnector,
                                    FileStorageConnector fileStorageConnector,
+                                   InstitutionConnector institutionConnector,
+                                   ProductConnector productConnector,
                                    ObjectMapper mapper,
                                    MailTemplateConfig mailTemplateConfig,
                                    EmailConnector emailConnector,
@@ -50,6 +54,8 @@ public class NotificationServiceImpl implements NotificationService {
                                    CoreConfig coreConfig) {
         this.notificationConnector = notificationConnector;
         this.fileStorageConnector = fileStorageConnector;
+        this.institutionConnector = institutionConnector;
+        this.productConnector = productConnector;
         this.mapper = mapper;
         this.mailTemplateConfig = mailTemplateConfig;
         this.emailConnector = emailConnector;
@@ -101,7 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo) {
-        List<String> destinationMails = new ArrayList<>(getCompleteDestinationMails(institution));
+        List<String> destinationMails = new ArrayList<>(getDestinationMails(institution));
         if (managers != null && !managers.isEmpty()) {
             for (User user : managers) {
                 if (user.getWorkContacts() != null && user.getWorkContacts().containsKey(institution.getId())) {
@@ -113,7 +119,8 @@ public class NotificationServiceImpl implements NotificationService {
             }
         }
         Map<String, String> mailParameter = mailParametersMapper.getCompleteOnbordingMailParameter(product.getTitle());
-        emailConnector.sendMail(mailParametersMapper.getOnboardingCompletePath(), destinationMails, logo, product.getTitle(), mailParameter, PAGOPA_LOGO_FILENAME);
+        String templatePath = product.getId().equals(PROD_FD.getValue())||product.getId().equals(PROD_FD_GARANTITO.getValue())? mailParametersMapper.getFdOnboardingCompletePath():mailParametersMapper.getOnboardingCompletePath();
+        emailConnector.sendMail(templatePath, destinationMails, logo, product.getTitle(), mailParameter, PAGOPA_LOGO_FILENAME);
     }
 
     public void sendRejectMail(File logo, Institution institution, Product product) {
@@ -126,6 +133,26 @@ public class NotificationServiceImpl implements NotificationService {
         emailConnector.sendMail(mailParametersMapper.getOnboardingRejectNotificationPath(), destinationMail, logo, product.getTitle(), mailParameters, "_pagopa-logo.png");
     }
 
+    public void sendMailForDelegation(String institutionName, String productId, String partnerId) {
+        try {
+            Map<String, String> mailParameters;
+            Product product = productConnector.getProductById(productId);
+            Institution partnerInstitution = institutionConnector.findById(partnerId);
+            if(Objects.isNull(product) || Objects.isNull(partnerInstitution)) {
+                log.error("create-delegation-email-notification :: Impossible to send email. Error: partner institution or product is null");
+                return;
+            }
+            mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
+            log.debug(MAIL_PARAMETER_LOG, mailParameters);
+            List<String> destinationMail = getDestinationMails(partnerInstitution);
+            log.info(DESTINATION_MAIL_LOG, destinationMail);
+            emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, product.getTitle(), mailParameters, null);
+            log.info("create-delegation-email-notification :: Email successful sent");
+        } catch (Exception e) {
+            log.error("create-delegation-email-notification :: Impossible to send email. Error: {}", e.getMessage(), e);
+        }
+    }
+
     private List<String> getRejectDestinationMails(Institution institution) {
         if (coreConfig.isSendEmailToInstitution()) {
             return List.of(institution.getDigitalAddress());
@@ -134,7 +161,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private List<String> getCompleteDestinationMails(Institution institution) {
+    private List<String> getDestinationMails(Institution institution) {
         if (coreConfig.isSendEmailToInstitution()) {
             return List.of(institution.getDigitalAddress());
         } else {

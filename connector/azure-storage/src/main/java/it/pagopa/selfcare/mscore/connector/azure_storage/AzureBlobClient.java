@@ -4,10 +4,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageCredentials;
 import com.microsoft.azure.storage.StorageCredentialsAccountAndKey;
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.BlobProperties;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
+import com.microsoft.azure.storage.blob.*;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.AzureStorageConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
@@ -20,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -67,13 +66,13 @@ class AzureBlobClient implements FileStorageConnector {
             response.setMimetype(properties.getContentType());
             return response;
         } catch (StorageException e) {
-            if(e.getHttpStatusCode() == 404){
+            if (e.getHttpStatusCode() == 404) {
                 throw new ResourceNotFoundException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
                         ERROR_DURING_DOWNLOAD_FILE.getCode());
             }
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
-        }catch (URISyntaxException e){
+        } catch (URISyntaxException e) {
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), fileName),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
         }
@@ -93,6 +92,45 @@ class AzureBlobClient implements FileStorageConnector {
             throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), templateName),
                     ERROR_DURING_DOWNLOAD_FILE.getCode());
         }
+    }
+
+    @Override
+    public File getFileAsPdf(String contractTemplate){
+        log.info("START - getFileAsPdf for template: {}", contractTemplate);
+
+        final CloudBlobContainer blobContainer;
+        final CloudBlockBlob blob;
+        final File downloadedFile;
+
+        try {
+            blobContainer = blobClient.getContainerReference(azureStorageConfig.getContainer());
+            blob = blobContainer.getBlockBlobReference(contractTemplate);
+
+            String fileName = Paths.get(contractTemplate).getFileName().toString();
+            downloadedFile = File.createTempFile(fileName, ".pdf");
+        } catch (URISyntaxException | StorageException | IOException e) {
+            log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate), e);
+            throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate),
+                    ERROR_DURING_DOWNLOAD_FILE.getCode());
+        }
+
+        try (BlobInputStream blobInputStream = blob.openInputStream();
+             FileOutputStream fileOutputStream = new FileOutputStream(downloadedFile)){
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = blobInputStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, bytesRead);
+            }
+
+        } catch (IOException | StorageException e) {
+            log.error(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate), e);
+            throw new MsCoreException(String.format(ERROR_DURING_DOWNLOAD_FILE.getMessage(), contractTemplate),
+                    ERROR_DURING_DOWNLOAD_FILE.getCode());
+        }
+
+        log.info("END - getFileAsPdf");
+        return downloadedFile;
     }
 
     @Override
@@ -129,4 +167,5 @@ class AzureBlobClient implements FileStorageConnector {
                     ERROR_DURING_DELETED_FILE.getCode());
         }
     }
+
 }

@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -12,9 +13,12 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static it.pagopa.selfcare.mscore.constant.CustomError.USER_NOT_FOUND_ERROR;
 
 @Service
 @Slf4j
@@ -55,13 +59,13 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
 
         List<OnboardedUser> onboardingInfoList = userConnector.findWithFilter(institutionId, userId, null, relationshipStates, null, null);
-        if(Objects.isNull(onboardingInfoList) || onboardingInfoList.isEmpty()) return List.of();
+        if (Objects.isNull(onboardingInfoList) || onboardingInfoList.isEmpty()) return List.of();
 
         OnboardedUser onboardedUser = onboardingInfoList.get(0);
         return onboardedUser.getBindings().stream()
                 .peek(userBinding -> userBinding.setProducts(userBinding.getProducts().stream()
-                                .filter(product -> Objects.isNull(relationshipStates) || relationshipStates.isEmpty()
-                                        || relationshipStates.contains(product.getStatus()))
+                        .filter(product -> Objects.isNull(relationshipStates) || relationshipStates.isEmpty()
+                                || relationshipStates.contains(product.getStatus()))
                         .collect(Collectors.toList())))
                 .filter(userBinding -> !userBinding.getProducts().isEmpty())
                 .collect(Collectors.toList());
@@ -95,5 +99,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state) {
         userConnector.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, state);
+    }
+
+    @Override
+    public User retrievePerson(String userId, String productId, String institutionId) {
+        OnboardedUser onboardedUser = userConnector.findById(userId);
+        if (StringUtils.hasText(productId) && !verifyBindings(onboardedUser, productId)) {
+            log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
+            throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
+        }
+        return userRegistryConnector.getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+    }
+
+    private boolean verifyBindings(OnboardedUser onboardedUser, String productId) {
+        return onboardedUser.getBindings().stream()
+                .anyMatch(binding -> existsProduct(binding, productId));
+    }
+
+    private boolean existsProduct(UserBinding binding, String productId) {
+        return binding.getProducts().stream()
+                .anyMatch(product -> productId.equalsIgnoreCase(product.getProductId()));
     }
 }

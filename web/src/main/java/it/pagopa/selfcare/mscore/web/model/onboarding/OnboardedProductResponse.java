@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,4 +15,6 @@ public class OnboardedProductResponse {
     private String productId;
     private RelationshipState status;
     private BillingResponse billing;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

@@ -3,16 +3,18 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,10 +36,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.validation.ValidationException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -69,6 +73,9 @@ class InstitutionControllerTest {
 
     @Spy
     private BrokerMapper brokerMapper = new BrokerMapperImpl();
+
+    @Spy
+    private UserMapper userMapper = new UserMapperImpl();
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -110,7 +117,7 @@ class InstitutionControllerTest {
 
         Institution institution = TestUtils.createSimpleInstitutionPA();
 
-        when(institutionService.getInstitutions(any(), any()))
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
                 .thenReturn(List.of(institution));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/institutions/?taxCode={taxCode}", "TaxCode");
@@ -134,7 +141,7 @@ class InstitutionControllerTest {
         institution.setParentDescription("parentDescription");
         institution.setRootParentId("rootParentId");
 
-        when(institutionService.getInstitutions(any(), any()))
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
                 .thenReturn(List.of(institution));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/institutions/?taxCode={taxCode}&subunitCode={subunitCode}", "TaxCode", "SubunitCode");
@@ -147,6 +154,92 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
                                 "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsByOriginAndOriginId() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode("example");
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institution.setParentDescription("parentDescription");
+        institution.setRootParentId("rootParentId");
+
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
+                .thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/?origin={origin}&originId={originId}", "origin", "originId");
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsByOrigin() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode("example");
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institution.setParentDescription("parentDescription");
+        institution.setRootParentId("rootParentId");
+
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
+                .thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/?origin={origin}", "origin");
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsByOriginId() throws Exception {
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode("example");
+        institution.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institution.setParentDescription("parentDescription");
+        institution.setRootParentId("rootParentId");
+
+        when(institutionService.getInstitutions(any(), any(), any(), any()))
+                .thenReturn(List.of(institution));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/institutions/?originId={originId}", "originId");
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(
+                                "{\"institutions\":[{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"example\",\"subunitType\":\"UO\"}]}"));
+    }
+
+    @Test
+    void shouldGetInstitutionsBySubunitCodeWithoutParam(){
+        Assertions.assertThrows(ValidationException.class,
+                () -> institutionController.getInstitutions(null, null, null, null),
+                "At least one of taxCode, origin or originId must be present");
+    }
+
+    @Test
+    void shouldGetInstitutionsBySubunitCodeWithoutTaxCode() {
+        Assertions.assertThrows(ValidationException.class,
+                () -> institutionController.getInstitutions(null, "subunitCode", "origin", null),
+                "TaxCode is required if subunitCode is present");
     }
 
     @Test
@@ -214,7 +307,7 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"description\":\"description\",\"institutionType\":\"PG\",\"attributes\":[{\"origin\":null,\"code\":\"code\",\"description\":\"description\"}],\"onboarding\":[{\"productId\":\"example\",\"status\":\"ACTIVE\",\"billing\":{\"vatNumber\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false}}],\"imported\":false}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"description\":\"description\",\"institutionType\":\"PG\",\"attributes\":[{\"origin\":null,\"code\":\"code\",\"description\":\"description\"}],\"onboarding\":[{\"productId\":\"example\",\"status\":\"ACTIVE\",\"billing\":{\"vatNumber\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false},\"createdAt\":null,\"updatedAt\":null}],\"imported\":false}"));
     }
 
     @Test
@@ -1078,6 +1171,45 @@ class InstitutionControllerTest {
         // Then
         verify(institutionService, times(1))
                 .getInstitutionsByProductId(productIdMock, pageMock, sizeMock);
+        verifyNoMoreInteractions(institutionService);
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#getInstitutionUsers(String)}
+     */
+    @Test
+    void getInstitutionUsers() throws Exception {
+        // Given
+        final String institutionId = "test";
+
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId("userId");
+        User user = new User();
+        user.setWorkContacts(Map.of("test", new WorkContact()));
+        userInfo.setUser(user);
+        // When
+        when(institutionService.getInstitutionUsers(any())).thenReturn(List.of(userInfo));
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/{institutionId}/users", institutionId);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                .build()
+                .perform(requestBuilder);
+        MvcResult result =  actualPerformResult
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<UserInfoResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        // Then
+        assertNotNull(response);
+        assertNotNull(response.get(0));
+        assertEquals(response.get(0).getId(), userInfo.getId());
+        verify(institutionService, times(1))
+                .getInstitutionUsers(institutionId);
         verifyNoMoreInteractions(institutionService);
     }
 

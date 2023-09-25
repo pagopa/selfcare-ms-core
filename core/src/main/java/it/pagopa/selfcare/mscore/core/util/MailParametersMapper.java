@@ -49,12 +49,27 @@ public class MailParametersMapper {
         return map;
     }
 
+    public Map<String, String> getDelegationNotificationParameter(String institutionName, String productName) {
+        Map<String, String> map = new HashMap<>();
+        map.put(mailTemplateConfig.getNotificationProductName(), productName);
+        map.put(mailTemplateConfig.getInstitutionDescription(), institutionName);
+        return map;
+    }
+
     public String getOnboardingNotificationPath() {
         return mailTemplateConfig.getNotificationPath();
     }
 
+    public String getDelegationNotificationPath() {
+        return mailTemplateConfig.getDelegationNotificationPath();
+    }
+
     public String getOnboardingCompletePath() {
         return mailTemplateConfig.getCompletePath();
+    }
+
+    public String getFdOnboardingCompletePath(){
+        return mailTemplateConfig.getCompletePathFd();
     }
 
     public List<String> getOnboardingNotificationAdminEmail() {
@@ -78,4 +93,5 @@ public class MailParametersMapper {
     public String getOnboardingRejectNotificationPath(){
         return mailTemplateConfig.getRejectPath();
     }
+
 }

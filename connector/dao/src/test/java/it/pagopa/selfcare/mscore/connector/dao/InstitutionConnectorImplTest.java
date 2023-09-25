@@ -1,11 +1,14 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
-import it.pagopa.selfcare.mscore.connector.dao.utils.TestUtils;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapperImpl;
-import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.connector.dao.utils.TestUtils;
+import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -658,7 +661,7 @@ class InstitutionConnectorImplTest {
                 .thenReturn(List.of(institutionEntity));
 
         List<Institution> onboardings = institutionConnectorImpl
-                .findByTaxCodeAndSubunitCode("example", "example");
+                .findByTaxCodeSubunitCodeAndOrigin("example", "example", "example", "example");
 
         assertFalse(onboardings.isEmpty());
     }
@@ -819,5 +822,18 @@ class InstitutionConnectorImplTest {
         institutionEntity.setUpdatedAt(null);
         institutionEntity.setZipCode("21654");
         return institutionEntity;
+    }
+
+    @Test
+    void findByTaxCodeAndSubunitCode() {
+        InstitutionEntity institutionEntity = new InstitutionEntity();
+
+        when(institutionRepository.find(any(), any()))
+                .thenReturn(List.of(institutionEntity));
+
+        List<Institution> onboardings = institutionConnectorImpl
+                .findByTaxCodeSubunitCode("example", "example");
+
+        assertFalse(onboardings.isEmpty());
     }
 }

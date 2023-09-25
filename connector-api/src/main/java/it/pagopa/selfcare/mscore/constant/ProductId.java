@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum ProductId {
 
     PROD_INTEROP("prod-interop"),
-    PROD_PN("prod-pn");
+    PROD_PN("prod-pn"),
+    PROD_FD("prod-fd"),
+    PROD_FD_GARANTITO("prod-fd-garantito");
 
     private final String value;
 

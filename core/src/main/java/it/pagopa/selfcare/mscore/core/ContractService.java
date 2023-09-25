@@ -11,6 +11,7 @@ import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.commons.utils.crypto.model.SignatureInformation;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
@@ -20,7 +21,6 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -230,6 +230,7 @@ public class ContractService {
     }
 
     public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "sendDataLakeNotification institution = {}, token = {}, queueEvent = {}", institution, token, queueEvent);
         if (institution != null) {
             NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
@@ -270,7 +271,7 @@ public class ContractService {
 
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
-        notification.setFileName(retrieveFileName(token.getContractSigned(), token.getId()));
+        notification.setFileName(token.getContractSigned() == null? "":  Paths.get(token.getContractSigned()).getFileName().toString());
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
@@ -324,21 +325,6 @@ public class ContractService {
             toNotify.setIstatCode(null);
         }
         return toNotify;
-    }
-
-
-    private String retrieveFileName(String tokenContractSigned, String tokenId) {
-
-        if (tokenContractSigned == null) {
-            return "";
-        }
-
-        String[] tokenContractSignedSplit = tokenContractSigned.split(tokenId.concat("/"));
-        if (tokenContractSignedSplit.length > 1) {
-            return tokenContractSignedSplit[1];
-        }
-
-        return "";
     }
 
     private void sendNotification(String message, String tokenId) {

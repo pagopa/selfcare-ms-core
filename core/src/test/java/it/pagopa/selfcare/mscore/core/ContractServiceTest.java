@@ -8,6 +8,7 @@ import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
 import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
@@ -15,7 +16,6 @@ import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -50,10 +50,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
@@ -236,12 +233,13 @@ class ContractServiceTest {
         TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
 
         Token token = mockInstance(new Token());
+        token.setId(UUID.randomUUID().toString());
         token.setProductId("prod");
         token.setStatus(RelationshipState.ACTIVE);
         token.setInstitutionUpdate(institutionUpdate);
         token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
-        token.setContractSigned("ContractPath".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
+        token.setContractSigned("docs/parties".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         User user1 = new User();
@@ -322,7 +320,7 @@ class ContractServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         token.setDeletedAt(null);
         token.setUsers(List.of(tokenUser1, tokenUser2));
-        token.setContractSigned("");
+        token.setContractSigned(null);
 
         User user1 = new User();
         user1.setId(tokenUser1.getUserId());

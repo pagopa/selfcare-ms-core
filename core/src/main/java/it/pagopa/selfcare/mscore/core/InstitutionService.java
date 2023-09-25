@@ -2,13 +2,14 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -21,6 +22,8 @@ public interface InstitutionService {
     Institution retrieveInstitutionById(String id);
 
     Institution retrieveInstitutionByExternalId(String institutionExternalId);
+
+    List<Institution> getInstitutions(String taxCode, String subunitCode, String origin, String originId);
 
     List<Institution> getInstitutions(String taxCode, String subunitCode);
 
@@ -73,4 +76,7 @@ public interface InstitutionService {
     List<Institution> getInstitutionsByProductId(String productId, Integer page, Integer size);
 
     List<Institution> getInstitutionBrokers(String productId, InstitutionType type);
+
+    List<UserInfo> getInstitutionUsers(String institutionId);
+
 }

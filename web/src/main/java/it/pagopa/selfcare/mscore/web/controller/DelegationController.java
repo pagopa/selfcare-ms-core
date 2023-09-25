@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.constant.GenericError;
+import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
@@ -73,12 +74,14 @@ public class DelegationController {
                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                    @RequestParam(name = "brokerId", required = false) String brokerId,
                                                                    @ApiParam("${swagger.mscore.product.model.id}")
-                                                                   @RequestParam(name = "productId", required = false) String productId) {
+                                                                   @RequestParam(name = "productId", required = false) String productId,
+                                                                   @ApiParam("${swagger.mscore.institutions.delegations.mode}")
+                                                                   @RequestParam(name = "mode", required = false) GetDelegationsMode mode) {
 
         if(Objects.isNull(institutionId) && Objects.isNull(brokerId))
             throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId).stream()
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, mode).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
