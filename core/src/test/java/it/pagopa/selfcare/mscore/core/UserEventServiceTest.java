@@ -360,15 +360,6 @@ class UserEventServiceTest {
         final String userId = UUID.randomUUID().toString();
         final String institutionId = UUID.randomUUID().toString();
         final String productId = "prod-test";
-        OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
-        onboardedProduct.setProductId(productId);
-        OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
-        onboardedUser.setId(userId);
-        UserBinding userBinding =mockInstance(new UserBinding());
-        userBinding.setProducts(List.of(onboardedProduct));
-        userBinding.setInstitutionId(institutionId);
-        onboardedUser.setBindings(List.of(userBinding));
-        when(userConnector.findById(any())).thenReturn(onboardedUser);
         when(kafkaTemplateUsers.send(any(), any()))
                 .thenReturn(mockFuture);
         doAnswer(invocationOnMock -> {
@@ -377,13 +368,13 @@ class UserEventServiceTest {
             return null;
         }).when(mockFuture).addCallback(any(ListenableFutureCallback.class));
         //when
-        Executable executable = () -> userEventService.sendUpdateUserNotification(userId, institutionId);
+        Executable executable = () -> userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
         //then
         assertDoesNotThrow(executable);
         ArgumentCaptor<UserNotificationToSend> messageArgumentCaptor = ArgumentCaptor.forClass(UserNotificationToSend.class);
         verify(mapper, times(1)).writeValueAsString(messageArgumentCaptor.capture());
         UserNotificationToSend message = messageArgumentCaptor.getValue();
-        checkNotNullFields(message, "onboardingTokenId", "user.name", "user.familyName", "user.fiscalCode", "user.email");
+        checkNotNullFields(message, "onboardingTokenId", "productId", "user.name", "user.familyName", "user.fiscalCode", "user.email", "user.productRole", "user.role", "createdAt");
     }
 
 
