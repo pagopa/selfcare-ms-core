@@ -18,6 +18,10 @@ public class TestUtils {
     public static Institution dummyInstitutionGsp() {
         return dummyInstitution(InstitutionType.GSP);
     }
+
+    public static Institution dummyInstitutionSa() {
+        return dummyInstitution(InstitutionType.SA);
+    }
     public static Institution dummyInstitutionPt() {
         return dummyInstitution(InstitutionType.PT);
     }
