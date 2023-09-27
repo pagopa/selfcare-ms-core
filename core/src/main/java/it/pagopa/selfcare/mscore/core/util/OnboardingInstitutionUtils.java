@@ -88,6 +88,7 @@ public class OnboardingInstitutionUtils {
     private static RelationshipState getStatusByInstitutionType(InstitutionType institutionType, String productId, String institutionOrigin) {
         switch (institutionType) {
             case PA:
+            case SA:
                 return RelationshipState.PENDING;
             case PG:
                 return RelationshipState.ACTIVE;
