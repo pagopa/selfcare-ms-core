@@ -270,7 +270,7 @@ public class UserController {
                                            @PathVariable("id") String userId,
                                            @ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                            @RequestParam(value = "institutionId") String institutionId) {
-        userEventService.sendUpdateUserNotification(userId, institutionId);
+        userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
         return ResponseEntity.noContent().build();
     }
 }
