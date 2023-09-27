@@ -21,7 +21,7 @@ public class InstitutionRequest {
     private String address;
     private String zipCode;
 
-    @NotEmpty
+    @NotEmpty(message = "TaxCode is required")
     private String taxCode;
 
     private BillingRequest billing;
