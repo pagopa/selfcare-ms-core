@@ -70,7 +70,9 @@ public class OnboardingInstitutionStrategyFactory {
             digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendConfirmationMail();
-        } else if (InstitutionType.PA == institutionType || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())) {
+        } else if (InstitutionType.PA == institutionType
+                || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())
+                || InstitutionType.SA == institutionType) {
             digestOnboardingInstitutionStrategy = createContractAndPerformDigest();
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
