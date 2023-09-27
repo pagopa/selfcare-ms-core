@@ -41,7 +41,7 @@ public class CreateInstitutionStrategyAnac implements CreateInstitutionStrategy 
 
         SaResource saResource = partyRegistryProxyConnector.getSAFromAnac(strategyInput.getTaxCode());
 
-        institution = addFieldsToInstitution(strategyInput.getTaxCode(), saResource);
+        institution = addFieldsToInstitution(saResource);
         try {
             return institutionConnector.save(institution);
         } catch (Exception e) {
@@ -49,17 +49,16 @@ public class CreateInstitutionStrategyAnac implements CreateInstitutionStrategy 
         }
     }
 
-    private Institution addFieldsToInstitution(String taxCode, SaResource saResource) {
+    private Institution addFieldsToInstitution(SaResource saResource) {
 
-        Institution newInstitution = new Institution();
-        newInstitution.setExternalId(taxCode);
-        newInstitution.setOrigin(Origin.ANAC.getValue());
-        newInstitution.setOriginId(saResource.getOriginId());
-        newInstitution.setCreatedAt(OffsetDateTime.now());
-        newInstitution.setDigitalAddress(saResource.getDigitalAddress());
-        newInstitution.setDescription(saResource.getDescription());
+        institution.setExternalId(institution.getTaxCode());
+        institution.setOrigin(Origin.ANAC.getValue());
+        institution.setOriginId(saResource.getOriginId());
+        institution.setCreatedAt(OffsetDateTime.now());
+        institution.setDigitalAddress(saResource.getDigitalAddress());
+        institution.setDescription(saResource.getDescription());
 
-        return newInstitution;
+        return institution;
     }
 
     private void checkIfAlreadyExistsByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {

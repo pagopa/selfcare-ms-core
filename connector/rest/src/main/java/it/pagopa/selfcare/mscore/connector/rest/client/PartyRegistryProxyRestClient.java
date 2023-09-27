@@ -41,5 +41,5 @@ public interface PartyRegistryProxyRestClient {
 
     @GetMapping(value = "${rest-client.party-registry-proxy.sa.getByTaxId.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    PdndResponse getSaByTaxId(String s);
+    PdndResponse getSaByTaxId(@PathVariable(value = "taxId") String taxId);
 }

@@ -139,9 +139,6 @@ public class InstitutionController {
     @PostMapping(value = "/from-anac/")
     public ResponseEntity<InstitutionResponse> createInstitutionFromAnac(@RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
-        if (!StringUtils.hasText(institution.getTaxCode())) {
-            throw new ValidationException("TaxCode is required");
-        }
         Institution saved = institutionService.createInstitutionFromAnac(InstitutionMapperCustom.toInstitution(institution, null));
         return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
     }
