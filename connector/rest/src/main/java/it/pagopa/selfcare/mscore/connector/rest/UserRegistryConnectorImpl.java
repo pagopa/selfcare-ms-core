@@ -4,6 +4,8 @@ import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.UserRegistryRestClient;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserResource;
+import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserSearchDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.UUID;
 public class UserRegistryConnectorImpl implements UserRegistryConnector {
 
     private final UserRegistryRestClient restClient;
+    public static final String USERS_FIELD_LIST = "fiscalCode,name,workContacts";
 
     @Autowired
     public UserRegistryConnectorImpl(UserRegistryRestClient restClient) {
@@ -31,7 +34,16 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
         User result = restClient.getUserByInternalId(UUID.fromString(userId), fieldList);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId result = {}", result);
         return result;
+    }
 
+    @Override
+    public User getUserByFiscalCode(String fiscalCode) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByFiscalCode fiscalCode = {}", fiscalCode);
+        Assert.hasText(fiscalCode, "A userId is required");
+        UserResource result = restClient._searchUsingPOST(USERS_FIELD_LIST, new UserSearchDto().fiscalCode(fiscalCode))
+                .getBody();
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByFiscalCode result = {}", result);
+        return new User();
     }
 
 }

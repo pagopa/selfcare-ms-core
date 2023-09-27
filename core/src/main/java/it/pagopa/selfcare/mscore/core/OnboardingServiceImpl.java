@@ -240,6 +240,39 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
+    public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname) {
+
+        Institution institution = institutionService.getInstitutions(request.getInstitutionTaxCode(), request.getInstitutionSubunitCode()).stream()
+                .findFirst()
+                .orElseThrow(() -> new InvalidRequestException("Institution not found!", ""));
+
+        Product product = Optional.ofNullable(productConnector.getProductValidById(request.getProductId()))
+                .orElseThrow(() -> new InvalidRequestException("Product not found or is not valid!", ""));
+
+        List<String> roleLabels = request.getUsers().stream()
+                .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
+
+        request.getUsers().forEach(userToOnboard -> fillUserIdAndCreateIfNotExist(userToOnboard, institution.getId()));
+
+        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, request.getProductId(), request.getUsers());
+
+        request.getUsers().forEach(userToOnboard -> userNotificationService.sendCreateUserNotification(institution.getDescription(),
+                        product.getTitle(), userToOnboard.getEmail(), roleLabels, loggedUserName, loggedUserSurname));
+
+        relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
+
+        return relationshipInfoList;
+    }
+
+    private void fillUserIdAndCreateIfNotExist(UserToOnboard user, String institutionId){
+        User userRegistry = userService.retrieveUserFromUserRegistry(user.getTaxCode());
+        if(Objects.isNull(userRegistry)) {
+            userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
+        }
+        user.setId(userRegistry.getId());
+    }
+
+    @Override
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
@@ -247,7 +280,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .collect(Collectors.groupingBy(UserToOnboard::getId));
         List<String> roleLabels = onboardingOperatorRequest.getUsers().stream()
                 .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
-        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, onboardingOperatorRequest.getProductId(), onboardingOperatorRequest.getUsers());
         userMap.forEach((key, value) -> userNotificationService.sendAddedProductRoleNotification(key, institution,
                 onboardingOperatorRequest.getProductTitle(), roleLabels, loggedUserName, loggedUserSurname));
         relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));

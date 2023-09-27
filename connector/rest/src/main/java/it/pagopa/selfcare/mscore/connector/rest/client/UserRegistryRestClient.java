@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.user_registry.generated.openapi.v1.api.UserApi;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +12,7 @@ import java.util.EnumSet;
 import java.util.UUID;
 
 @FeignClient(name = "${rest-client.user-registry.serviceCode}", url = "${rest-client.user-registry.base-url}")
-public interface UserRegistryRestClient {
+public interface UserRegistryRestClient extends UserApi {
 
 
     @GetMapping(value = "${rest-client.user-registry.getUserByInternalId.path}")

@@ -83,17 +83,18 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         String email = user.getWorkContacts().get(institution.getId()).getEmail();
         Assert.isTrue(StringUtils.hasText(email), "Email is required");
 
-        Map<String, String> dataModel = new HashMap<>();
-        dataModel.put("requesterName", loggedUserName);
-        dataModel.put("requesterSurname", loggedUserSurname);
-
-        sendCreateNotification(institution.getDescription(), productTitle, email, roleLabels, dataModel);
+        sendCreateUserNotification(institution.getDescription(), productTitle, email, roleLabels, loggedUserName, loggedUserSurname);
         log.trace("sendAddedProductRoleNotification start");
     }
 
-    private void sendCreateNotification(String description, String productTitle, String email, List<String> roleLabels, Map<String, String> dataModel) {
+    @Override
+    public void sendCreateUserNotification(String description, String productTitle, String email, List<String> roleLabels, String loggedUserName, String loggedUserSurname) {
         log.debug("sendCreateNotification start");
         log.debug("sendCreateNotification institution = {}, productTitle = {}, email = {}", description, productTitle, email);
+
+        Map<String, String> dataModel = new HashMap<>();
+        dataModel.put("requesterName", loggedUserName);
+        dataModel.put("requesterSurname", loggedUserSurname);
 
         dataModel.put("productName", productTitle);
         dataModel.put("institutionName", description);

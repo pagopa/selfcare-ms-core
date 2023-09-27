@@ -220,13 +220,13 @@ public class OnboardingDao {
         }
     }
 
-    private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
-        UserBinding binding = new UserBinding(request.getInstitutionId(),
+    private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, String productId) {
+        OnboardedProduct product = constructOperatorProduct(user, productId);
+        UserBinding binding = new UserBinding(institution.getId(),
                 institution.getDescription(),
                 institution.getParentDescription(),
                 List.of(product));
-        userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
+        userConnector.findAndUpdate(onboardedUser, user.getId(), institution.getId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
         return product;
     }
@@ -291,30 +291,29 @@ public class OnboardingDao {
         return Optional.empty();
     }
 
-    public List<RelationshipInfo> onboardOperator(OnboardingOperatorsRequest request, Institution institution) {
+    public List<RelationshipInfo> onboardOperator(Institution institution, String productId, List<UserToOnboard> users) {
         List<RelationshipInfo> response = new ArrayList<>();
         List<String> toUpdate = new ArrayList<>();
-        List<String> usersId = request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList());
+        List<String> usersId = users.stream().map(UserToOnboard::getId).collect(Collectors.toList());
         Map<String, OnboardedProduct> productMap = new HashMap<>();
         try {
-            request.getUsers()
-                    .forEach(userToOnboard -> updateOrCreateOperator(toUpdate, userToOnboard, response, institution, request, productMap));
+            users.forEach(userToOnboard -> updateOrCreateOperator(toUpdate, userToOnboard, response, institution, productMap, productId));
             log.debug("users to update: {}", toUpdate);
         } catch (Exception e) {
             log.warn("can not onboard operators", e);
             List<String> toDelete = usersId.stream().filter(id -> !toUpdate.contains(id)).collect(Collectors.toList());
-            rollbackUser(toUpdate, toDelete, request.getInstitutionId(), productMap);
+            rollbackUser(toUpdate, toDelete, institution.getId(), productMap);
         }
         return response;
     }
 
-    private void updateOrCreateOperator(List<String> toUpdate, UserToOnboard userToOnboard, List<RelationshipInfo> response, Institution institution, OnboardingOperatorsRequest request, Map<String, OnboardedProduct> productMap) {
+    private void updateOrCreateOperator(List<String> toUpdate, UserToOnboard userToOnboard, List<RelationshipInfo> response, Institution institution, Map<String, OnboardedProduct> productMap, String productId) {
         try {
             OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
-            OnboardedProduct currentProduct = updateOperator(response, onboardedUser, userToOnboard, institution, request);
+            OnboardedProduct currentProduct = updateOperator(response, onboardedUser, userToOnboard, institution, productId);
             productMap.put(userToOnboard.getId(), currentProduct);
         } catch (ResourceNotFoundException e) {
-            createOperator(response, userToOnboard, institution, request);
+            createOperator(response, userToOnboard, institution, productId);
         }
     }
 
@@ -328,9 +327,9 @@ public class OnboardingDao {
         userConnector.findAndCreate(user.getId(), binding);
     }
 
-    private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
-        UserBinding binding = new UserBinding(request.getInstitutionId(),
+    private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, String productId) {
+        OnboardedProduct product = constructOperatorProduct(user, productId);
+        UserBinding binding = new UserBinding(institution.getId(),
                 institution.getDescription(),
                 institution.getParentDescription(),
                 List.of(product));

@@ -13,14 +13,13 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
+import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
@@ -45,11 +45,13 @@ public class OnboardingController {
     private final TokenService tokenService;
 
     private final OnboardingResourceMapper onboardingResourceMapper;
+    private final UserMapper userMapper;
 
-    public OnboardingController(OnboardingService onboardingService, TokenService tokenService, OnboardingResourceMapper onboardingResourceMapper) {
+    public OnboardingController(OnboardingService onboardingService, TokenService tokenService, OnboardingResourceMapper onboardingResourceMapper, UserMapper userMapper) {
         this.onboardingService = onboardingService;
         this.tokenService = tokenService;
         this.onboardingResourceMapper = onboardingResourceMapper;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -299,6 +301,26 @@ public class OnboardingController {
         tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE, selfCareUser.getUserName(), selfCareUser.getSurname());
+        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
+    }
+
+    /**
+     * The function persist user on registry if not exists and add relation with institution-product
+     *
+     * @param request OnboardingInstitutionUsersRequest
+     * @return no content
+     * * Code: 204, Message: successful operation
+     * * Code: 404, Message: Not found, DataType: Problem
+     * * Code: 400, Message: Invalid request, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
+    @PostMapping(value = "/users")
+    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionUsers(@RequestBody @Valid OnboardingInstitutionUsersRequest request,
+                                                                                     Authentication authentication) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
+        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
+        List<RelationshipInfo> response = onboardingService.onboardingUsers(onboardingResourceMapper.toOnboardingUsersRequest(request), selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 

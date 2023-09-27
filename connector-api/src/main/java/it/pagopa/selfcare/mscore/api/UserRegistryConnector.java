@@ -8,4 +8,5 @@ public interface UserRegistryConnector {
 
     User getUserByInternalId(String userId, EnumSet<User.Fields> fieldList);
 
+    User getUserByFiscalCode(String fiscalCode);
 }
