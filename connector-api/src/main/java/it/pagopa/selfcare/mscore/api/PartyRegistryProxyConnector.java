@@ -5,7 +5,6 @@ import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface PartyRegistryProxyConnector {
 
@@ -22,4 +21,6 @@ public interface PartyRegistryProxyConnector {
     AreaOrganizzativaOmogenea getAooById(String aooId);
 
     UnitaOrganizzativa getUoById(String uoId);
+
+    SaResource getSAFromAnac(String taxId);
 }

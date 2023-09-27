@@ -315,6 +315,14 @@ class InstitutionServiceImplTest {
         assertNotNull(institution);
     }
 
+    @Test
+    void testCreateInstitutionFromAnac() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategyAnac(any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitutionFromAnac(new Institution());
+        assertNotNull(institution);
+    }
+
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}
      */

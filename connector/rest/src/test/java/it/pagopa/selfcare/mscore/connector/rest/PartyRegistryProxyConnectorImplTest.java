@@ -9,7 +9,6 @@ import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapperImpl;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.exception.BadGatewayException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
@@ -24,7 +23,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -502,6 +500,17 @@ class PartyRegistryProxyConnectorImplTest {
 
     @Test
     void shouldGetUo() {
+        when(partyRegistryProxyRestClient.getUoById(anyString()))
+                .thenReturn(uoResponse);
+
+        UnitaOrganizzativa uo = partyRegistryProxyConnectorImpl.getUoById("example");
+        assertEquals(uo.getCodiceUniUo(), uoResponse.getCodiceUniUo());
+        assertEquals(uo.getId(), uoResponse.getId());
+        assertEquals(uo.getOrigin(), uoResponse.getOrigin());
+    }
+
+    @Test
+    void shouldGetSa() {
         when(partyRegistryProxyRestClient.getUoById(anyString()))
                 .thenReturn(uoResponse);
 
