@@ -138,9 +138,11 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-
-            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
-
+            if(!strategyInput.getInstitution().getInstitutionType().equals(InstitutionType.SA)) {
+                OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
+            } else {
+                OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
+            }
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -151,9 +153,11 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
-
-            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
-
+            if(!strategyInput.getInstitution().getInstitutionType().equals(InstitutionType.SA)) {
+                OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
+            } else {
+                OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
+            }
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
