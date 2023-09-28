@@ -24,6 +24,7 @@ public enum CustomError {
     ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),
     ONBOARDING_BILLING_ERROR("0000", "Billing vatNumber and recipientCode are required"),
+    ONBOARDING_BILLING_VATNUMBER_ERROR("0000", "Billing vatNumber is required"),
     ONBOARDING_PENDING("0000", "There is already an onboarding request for product %s pending"),
     TOKEN_ALREADY_CONSUMED("0040", "Token %s has already consumed"),
     TOKEN_EXPIRED("0040", "Token %s is expired in %s and is status is DELETED"),
