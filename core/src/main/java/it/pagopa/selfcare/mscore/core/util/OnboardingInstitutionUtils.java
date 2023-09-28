@@ -257,4 +257,9 @@ public class OnboardingInstitutionUtils {
         return onboardedProduct;
     }
 
+    public static void validateSaOnboarding(String vatNumber) {
+        if (StringUtils.isEmpty(vatNumber)){
+            throw new InvalidRequestException(CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getCode(), CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getMessage());
+        }
+    }
 }
