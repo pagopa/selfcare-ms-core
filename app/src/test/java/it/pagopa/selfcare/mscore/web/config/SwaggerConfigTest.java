@@ -61,6 +61,9 @@ class SwaggerConfigTest {
     @MockBean
     DelegationService delegationService;
 
+    @MockBean
+    private UserEventService userEventService;
+
     @Autowired
     private ObjectMapper objectMapper;
 

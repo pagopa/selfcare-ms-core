@@ -17,6 +17,7 @@ import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
+import it.pagopa.selfcare.mscore.model.institution.SaResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -114,6 +115,40 @@ class CreateInstitutionStrategyTest {
         assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategy(new Institution())
                 .createInstitution(CreateInstitutionStrategyInput.builder()
                         .build()));
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionFromAnac() {
+
+        Institution institution = TestUtils.dummyInstitutionSa();
+        SaResource saResource = new SaResource();
+        saResource.setOriginId("originId");
+        saResource.setTaxCode("taxCode");
+        saResource.setDescription("desc");
+        saResource.setDigitalAddress("test@test.it");
+        when(partyRegistryProxyConnector.getSAFromAnac(any())).thenReturn(saResource);
+        when(institutionConnector.save(any())).thenReturn(institution);
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyAnac(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .build());
+
+        //Then
+        assertThat(actual.getDescription()).isEqualTo(institution.getDescription());
+        assertThat(actual.getDigitalAddress()).isEqualTo(institution.getDigitalAddress());
+        assertThat(actual.getAddress()).isEqualTo(institution.getAddress());
+        assertThat(actual.getZipCode()).isEqualTo(institution.getZipCode());
+        assertThat(actual.getTaxCode()).isEqualTo(institution.getTaxCode());
+        assertThat(actual.getSubunitCode()).isNull();
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.SA);
+        assertThat(actual.getSubunitType()).isNull();
+
+        verify(institutionConnector).save(any());
     }
 
     /**

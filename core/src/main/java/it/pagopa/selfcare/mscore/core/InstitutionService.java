@@ -31,6 +31,8 @@ public interface InstitutionService {
 
     Institution createInstitutionByExternalId(String externalId);
 
+    Institution createInstitutionFromAnac(Institution institution);
+
     Institution createInstitutionRaw(Institution institution, String externalId);
 
     Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser);

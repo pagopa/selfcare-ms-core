@@ -13,6 +13,7 @@ public class UserNotificationToSend {
     private String onboardingTokenId;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private QueueEvent eventType;
     private UserToNotify user;
 
 }

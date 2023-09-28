@@ -38,4 +38,8 @@ public interface PartyRegistryProxyRestClient {
     @GetMapping(value = "${rest-client.party-registry-proxy.uo.getByCode.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     UoResponse getUoById(@PathVariable(value = "uoId") String uoId);
+
+    @GetMapping(value = "${rest-client.party-registry-proxy.sa.getByTaxId.path}", consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    PdndResponse getSaByTaxId(@PathVariable(value = "taxId") String taxId);
 }

@@ -15,7 +15,7 @@ public interface NotificationService {
 
     void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName, String productName);
 
-    void sendMailWithContract(File pdf, String digitalAddress, User user, OnboardingRequest request, String token);
+    void sendMailWithContract(File pdf, Institution institution, User user, OnboardingRequest request, String token, boolean fromApprove);
 
     void sendMailForApprove(User user, OnboardingRequest request, String token);
 

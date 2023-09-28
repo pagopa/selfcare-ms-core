@@ -212,7 +212,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.info("Digest {}", digest);
         onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
         try {
-            notificationService.sendMailWithContract(pdf, institution.getDigitalAddress(), currentUser, request, token.getId());
+            notificationService.sendMailWithContract(pdf, institution, currentUser, request, token.getId(), true);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
@@ -250,7 +250,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
         userMap.forEach((key, value) -> userNotificationService.sendAddedProductRoleNotification(key, institution,
                 onboardingOperatorRequest.getProductTitle(), roleLabels, loggedUserName, loggedUserSurname));
-        relationshipInfoList.forEach(userEventService::sendOperatorUserNotification);
+        relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
         return relationshipInfoList;
     }
 
@@ -280,7 +280,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
         log.info("{} - Digest {}", rollback.getToken().getId(), digest);
         try {
-            notificationService.sendMailWithContract(pdf, institution.getDigitalAddress(), user, request, rollback.getToken().getId());
+            notificationService.sendMailWithContract(pdf, institution, user, request, rollback.getToken().getId(), false);
         } catch (Exception e) {
             onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
         }
