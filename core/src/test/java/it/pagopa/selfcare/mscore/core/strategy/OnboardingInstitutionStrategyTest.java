@@ -378,6 +378,8 @@ class OnboardingInstitutionStrategyTest {
 
         Institution institution = new Institution();
         institution.setOrigin("IPA");
+        institution.setBilling(billing);
+        institution.setInstitutionType(InstitutionType.GSP);
 
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
