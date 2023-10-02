@@ -655,12 +655,12 @@ class OnboardingInstitutionStrategyTest {
 
         Institution institution = new Institution();
         institution.setOrigin("selc");
-        institution.setInstitutionType(InstitutionType.SA);
 
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
         InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        institutionUpdate1.setInstitutionType(InstitutionType.SA);
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -683,6 +683,7 @@ class OnboardingInstitutionStrategyTest {
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
         when(contractService.extractTemplate(any())).thenReturn("template");
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(File.createTempFile("file",".txt"));
+
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.SA, onboardingRequest.getProductId(), institution)
                 .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
     }
