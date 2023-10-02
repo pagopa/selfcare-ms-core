@@ -138,7 +138,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-            if(!strategyInput.getInstitution().getInstitutionType().equals(InstitutionType.SA)) {
+            if(!InstitutionType.SA.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
                 OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
             } else {
                 OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
@@ -153,7 +153,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
-            if(!strategyInput.getInstitution().getInstitutionType().equals(InstitutionType.SA)) {
+            if(!InstitutionType.SA.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
                 OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
             } else {
                 OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
