@@ -10,7 +10,9 @@ public enum ProductId {
     PROD_FD_GARANTITO("prod-fd-garantito"),
     PROD_IO("prod-io"),
     PROD_INTEROP_COLL("prod-interop-coll"),
-    PROD_IO_SIGN("prod-io-sign");
+    PROD_IO_SIGN("prod-io-sign"),
+    PROD_PAGOPA("prod-pagopa"),
+    PROD_IO_PREMIUM("prod-io-premium");
 
     private final String value;
 

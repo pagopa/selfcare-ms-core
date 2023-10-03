@@ -63,6 +63,7 @@ import java.util.*;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 
 @Slf4j
@@ -116,16 +117,16 @@ public class ContractService {
         try {
             Path files = Files.createTempFile(builder, ".pdf");
             Map<String, Object> data = setUpCommonData(validManager, users, institution, request, geographicTaxonomies, institutionType);
-            if ("prod-pagopa".equalsIgnoreCase(request.getProductId()) &&
+            if (PROD_PAGOPA.equals(request.getProductId()) &&
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
-            } else if ("prod-io".equalsIgnoreCase(request.getProductId())
-                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())
-                    || "prod-io-sign".equalsIgnoreCase(request.getProductId())) {
+            } else if (PROD_IO.equals(request.getProductId())
+                    || PROD_IO_PREMIUM.equals(request.getProductId())
+                    || PROD_IO_SIGN.equals(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
-            } else if ("prod-pn".equalsIgnoreCase(request.getProductId())){
+            } else if (PROD_PN.equals(request.getProductId())){
                 setupProdPNData(data, institution, request);
-            } else if ("prod-interop".equalsIgnoreCase(request.getProductId())){
+            } else if (PROD_INTEROP.equals(request.getProductId())){
                 setupSAProdInteropData(data, institution);
             }
             log.debug("data Map for PDF: {}", data);
