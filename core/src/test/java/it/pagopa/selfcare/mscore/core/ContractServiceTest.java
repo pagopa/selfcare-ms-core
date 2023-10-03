@@ -126,6 +126,9 @@ class ContractServiceTest {
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.SA);
         institution.setDescription("42");
+        institution.setRea("rea");
+        institution.setBusinessRegisterPlace("place");
+        institution.setShareCapital("10000");
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("prod-interop");
         request.setSignContract(true);
