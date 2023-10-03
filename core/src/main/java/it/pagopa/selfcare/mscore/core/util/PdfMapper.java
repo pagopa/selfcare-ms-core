@@ -104,7 +104,7 @@ public class PdfMapper {
 
         addPricingPlan(request, map);
     }
-
+  
     public static void setupSAProdInteropData(Map<String, Object> map, InstitutionUpdate institutionUpdate) {
         log.info("START - setupSAProdInteropData");
         String underscore = "_______________";
