@@ -112,7 +112,7 @@ public class PdfMapper {
         map.put("institutionShareCapital", Optional.ofNullable(institutionUpdate.getShareCapital()).orElse(underscore));
         map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institutionUpdate.getBusinessRegisterPlace()).orElse(underscore));
         //override originId to not fill ipa code in case of SA
-        if(institutionUpdate.getInstitutionType().equals(InstitutionType.SA))
+        if(InstitutionType.SA.equals(institutionUpdate.getInstitutionType()))
             map.remove("originId");
     }
 
