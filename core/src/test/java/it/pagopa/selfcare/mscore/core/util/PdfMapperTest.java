@@ -1435,7 +1435,7 @@ class PdfMapperTest {
         onboardingRequest.getBillingRequest().setRecipientCode("42");
 
         PdfMapper.setupSAProdInteropData(stringObjectMap, institutionUpdate);
-        assertEquals(3, stringObjectMap.size());
+        assertEquals(4, stringObjectMap.size());
     }
 
 }

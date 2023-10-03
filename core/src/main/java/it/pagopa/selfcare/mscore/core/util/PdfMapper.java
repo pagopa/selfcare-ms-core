@@ -113,7 +113,7 @@ public class PdfMapper {
         map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institutionUpdate.getBusinessRegisterPlace()).orElse(underscore));
         //override originId to not fill ipa code in case of SA
         if(InstitutionType.SA.equals(institutionUpdate.getInstitutionType()))
-            map.remove("originId");
+            map.put("originId", underscore);
     }
 
     public static void setupProdPNData(Map<String, Object> map, Institution institution, OnboardingRequest request) {
