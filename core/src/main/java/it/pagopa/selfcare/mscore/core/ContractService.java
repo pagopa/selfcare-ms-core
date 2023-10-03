@@ -125,8 +125,7 @@ public class ContractService {
                 setupProdIOData(data, validManager, institution, request, institutionType);
             } else if ("prod-pn".equalsIgnoreCase(request.getProductId())){
                 setupProdPNData(data, institution, request);
-            } else if ("prod-interop".equalsIgnoreCase(request.getProductId())
-                    && institutionType.SA.equals(institutionType)){
+            } else if ("prod-interop".equalsIgnoreCase(request.getProductId())){
                 setupSAProdInteropData(data, institution);
             }
             log.debug("data Map for PDF: {}", data);
