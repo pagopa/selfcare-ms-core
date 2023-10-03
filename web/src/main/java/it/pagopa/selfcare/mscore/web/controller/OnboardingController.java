@@ -88,7 +88,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
-    @RequestMapping(method = {RequestMethod.HEAD}, value = "/")
+    @RequestMapping(method = {RequestMethod.HEAD}, value = "")
     public ResponseEntity<Void> verifyOnboardingInfo(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
                                                      @RequestParam(value = "taxCode") String taxCode,
                                                      @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
