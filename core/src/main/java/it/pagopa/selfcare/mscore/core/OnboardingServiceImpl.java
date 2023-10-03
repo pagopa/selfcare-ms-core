@@ -210,7 +210,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
         String digest = TokenUtils.createDigest(pdf);
         log.info("Digest {}", digest);
-        onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
+        var status = InstitutionType.PT.equals(institutionType) ? RelationshipState.ACTIVE : RelationshipState.PENDING;
+        onboardingDao.persistForUpdate(token, institution, status, digest);
         try {
             notificationService.sendMailWithContract(pdf, institution, currentUser, request, token.getId(), true);
         } catch (Exception e) {
