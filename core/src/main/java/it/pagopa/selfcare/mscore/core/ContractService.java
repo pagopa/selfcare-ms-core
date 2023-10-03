@@ -117,16 +117,16 @@ public class ContractService {
         try {
             Path files = Files.createTempFile(builder, ".pdf");
             Map<String, Object> data = setUpCommonData(validManager, users, institution, request, geographicTaxonomies, institutionType);
-            if (PROD_PAGOPA.equals(request.getProductId()) &&
+            if (PROD_PAGOPA.getValue().equalsIgnoreCase(request.getProductId()) &&
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
-            } else if (PROD_IO.equals(request.getProductId())
-                    || PROD_IO_PREMIUM.equals(request.getProductId())
-                    || PROD_IO_SIGN.equals(request.getProductId())) {
+            } else if (PROD_IO.getValue().equalsIgnoreCase(request.getProductId())
+                    || PROD_IO_PREMIUM.getValue().equalsIgnoreCase(request.getProductId())
+                    || "prod-io-sign".equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
-            } else if (PROD_PN.equals(request.getProductId())){
+            } else if (PROD_PN.getValue().equalsIgnoreCase(request.getProductId())){
                 setupProdPNData(data, institution, request);
-            } else if (PROD_INTEROP.equals(request.getProductId())){
+            } else if (PROD_INTEROP.getValue().equalsIgnoreCase(request.getProductId())){
                 setupSAProdInteropData(data, institution);
             }
             log.debug("data Map for PDF: {}", data);
