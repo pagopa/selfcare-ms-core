@@ -1387,7 +1387,7 @@ class PdfMapperTest {
     }
 
     /**
-     * Method under test: {@link PdfMapper#setupSAProdInteropData(Map, OnboardingRequest)}
+     * Method under test: {@link PdfMapper#setupSAProdInteropData(Map, InstitutionUpdate)}
      */
     @Test
     void testSetupSAProdInterop() {
@@ -1434,7 +1434,7 @@ class PdfMapperTest {
         onboardingRequest.setBillingRequest(billing);
         onboardingRequest.getBillingRequest().setRecipientCode("42");
 
-        PdfMapper.setupSAProdInteropData(stringObjectMap, onboardingRequest);
+        PdfMapper.setupSAProdInteropData(stringObjectMap, institutionUpdate);
         assertEquals(3, stringObjectMap.size());
     }
 
