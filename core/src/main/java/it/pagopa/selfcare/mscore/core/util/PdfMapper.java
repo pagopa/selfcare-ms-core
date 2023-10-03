@@ -104,12 +104,12 @@ public class PdfMapper {
         addPricingPlan(request, map);
     }
 
-    public static void setupSAProdInteropData(Map<String, Object> map, Institution institution) {
+    public static void setupSAProdInteropData(Map<String, Object> map, OnboardingRequest request) {
         log.info("START - setupSAProdInteropData");
         String underscore = "_______________";
-        map.put("institutionREA", Optional.ofNullable(institution.getRea()).orElse(underscore));
-        map.put("institutionShareCapital", Optional.ofNullable(institution.getShareCapital()).orElse(underscore));
-        map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institution.getBusinessRegisterPlace()).orElse(underscore));
+        map.put("institutionREA", Optional.ofNullable(request.getInstitutionUpdate().getRea()).orElse(underscore));
+        map.put("institutionShareCapital", Optional.ofNullable(request.getInstitutionUpdate().getShareCapital()).orElse(underscore));
+        map.put("institutionBusinessRegisterPlace", Optional.ofNullable(request.getInstitutionUpdate().getBusinessRegisterPlace()).orElse(underscore));
     }
 
     public static void setupProdPNData(Map<String, Object> map, Institution institution, OnboardingRequest request) {
