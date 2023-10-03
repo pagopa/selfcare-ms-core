@@ -1385,5 +1385,30 @@ class PdfMapperTest {
         PdfMapper.setupProdPNData(stringObjectMap, institution, onboardingRequest);
         assertEquals(2, stringObjectMap.size());
     }
+
+    /**
+     * Method under test: {@link PdfMapper#setupSAProdInteropData(Map, Institution)}
+     */
+    @Test
+    void testSetupSAProdInterop() {
+        HashMap<String, Object> stringObjectMap = new HashMap<>();
+
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setOrigin(Origin.IPA.name());
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+
+        PdfMapper.setupSAProdInteropData(stringObjectMap, institution);
+        assertEquals(3, stringObjectMap.size());
+    }
+
 }
 

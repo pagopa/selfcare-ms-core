@@ -125,6 +125,9 @@ public class ContractService {
                 setupProdIOData(data, validManager, institution, request, institutionType);
             } else if ("prod-pn".equalsIgnoreCase(request.getProductId())){
                 setupProdPNData(data, institution, request);
+            } else if ("prod-interop".equalsIgnoreCase(request.getProductId())
+                    && institutionType.SA.equals(institutionType)){
+                setupSAProdInteropData(data, institution);
             }
             log.debug("data Map for PDF: {}", data);
             getPDFAsFile(files, contractTemplate, data);
@@ -134,6 +137,8 @@ public class ContractService {
             throw new InvalidRequestException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
         }
     }
+
+
 
 
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
