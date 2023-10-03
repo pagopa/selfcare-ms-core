@@ -53,7 +53,7 @@ public class CreateInstitutionStrategyAnac implements CreateInstitutionStrategy 
 
         institution.setExternalId(institution.getTaxCode());
         institution.setOrigin(Origin.ANAC.getValue());
-        institution.setOriginId(saResource.getOriginId());
+        institution.setOriginId(saResource.getTaxCode());
         institution.setCreatedAt(OffsetDateTime.now());
         institution.setDigitalAddress(saResource.getDigitalAddress());
         institution.setDescription(saResource.getDescription());
