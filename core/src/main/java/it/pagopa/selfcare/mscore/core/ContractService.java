@@ -122,7 +122,7 @@ public class ContractService {
                 setupPSPData(data, validManager, institution);
             } else if (PROD_IO.getValue().equalsIgnoreCase(request.getProductId())
                     || PROD_IO_PREMIUM.getValue().equalsIgnoreCase(request.getProductId())
-                    || "prod-io-sign".equalsIgnoreCase(request.getProductId())) {
+                    || PROD_IO_SIGN.getValue().equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
             } else if (PROD_PN.getValue().equalsIgnoreCase(request.getProductId())){
                 setupProdPNData(data, institution, request);
