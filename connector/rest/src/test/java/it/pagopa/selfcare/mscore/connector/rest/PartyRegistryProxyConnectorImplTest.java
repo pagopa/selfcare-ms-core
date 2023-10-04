@@ -2,10 +2,7 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import feign.FeignException;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapper;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapperImpl;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapper;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapperImpl;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.*;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.constant.Origin;
@@ -16,6 +13,7 @@ import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -24,6 +22,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.List;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.checkNotNullFields;
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -41,8 +41,12 @@ class PartyRegistryProxyConnectorImplTest {
     @Spy
     private UoMapper uoMapper = new UoMapperImpl();
 
+    @Spy
+    private SaMapper saMapper = new SaMapperImpl();
+
     private final static AooResponse aooResponse;
     private final static UoResponse uoResponse;
+    private final static PdndResponse pdndResponse;
 
     static {
         aooResponse = new AooResponse();
@@ -54,6 +58,7 @@ class PartyRegistryProxyConnectorImplTest {
         uoResponse.setCodiceUniUo("codiceUniUo");
         uoResponse.setId("id");
         uoResponse.setOrigin(Origin.IPA);
+        pdndResponse = mockInstance(new PdndResponse());
     }
 
     /**
@@ -518,6 +523,30 @@ class PartyRegistryProxyConnectorImplTest {
         assertEquals(uo.getCodiceUniUo(), uoResponse.getCodiceUniUo());
         assertEquals(uo.getId(), uoResponse.getId());
         assertEquals(uo.getOrigin(), uoResponse.getOrigin());
+    }
+
+    @Test
+    void getSAFromAnac(){
+        //given
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient.getSaByTaxId(anyString())).thenReturn(pdndResponse);
+        //when
+        SaResource result = partyRegistryProxyConnectorImpl.getSAFromAnac(taxId);
+        //then
+        checkNotNullFields(result);
+        verify(partyRegistryProxyRestClient, times(1)).getSaByTaxId(taxId);
+    }
+
+    @Test
+    void getSAFromAnacNotFound(){
+        //given
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient.getSaByTaxId(anyString())).thenThrow(ResourceNotFoundException.class);
+        //when
+        Executable executable = () -> partyRegistryProxyConnectorImpl.getSAFromAnac(taxId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        verify(partyRegistryProxyRestClient, times(1)).getSaByTaxId(taxId);
     }
 
 }
