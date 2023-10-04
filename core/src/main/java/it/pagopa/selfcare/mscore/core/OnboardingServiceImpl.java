@@ -202,19 +202,25 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .stream()
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = productConnector.getProductById(token.getProductId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution, product);
         InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
-        String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
-        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
-        String digest = TokenUtils.createDigest(pdf);
-        log.info("Digest {}", digest);
-        var status = InstitutionType.PT.equals(institutionType) ? RelationshipState.ACTIVE : RelationshipState.PENDING;
-        onboardingDao.persistForUpdate(token, institution, status, digest);
         try {
-            notificationService.sendMailWithContract(pdf, institution, currentUser, request, token.getId(), true);
-        } catch (Exception e) {
+            if(InstitutionType.PT.equals(institutionType)) {
+                onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
+                File logoFile = contractService.getLogoFile();
+                notificationService.sendCompletedEmail(delegate, institution, product, logoFile);
+            } else {
+                String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
+                File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
+                String digest = TokenUtils.createDigest(pdf);
+                log.info("Digest {}", digest);
+                onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
+                notificationService.sendMailWithContract(pdf, institution, currentUser, request, token.getId(), true);
+            }
+        }  catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
     }

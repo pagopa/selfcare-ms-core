@@ -13,7 +13,6 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
-import it.pagopa.selfcare.mscore.core.util.model.DummyUser;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
@@ -545,7 +544,6 @@ class OnboardingServiceImplTest {
         manager.setId("44");
         manager.setName(certifiedField2);
         manager.setWorkContacts(new HashMap<>());
-        List<User> delegateList = List.of(delegate);
 
         OnboardedUser onboardedUser1 = new OnboardedUser();
         OnboardedUser onboardedUser2 = new OnboardedUser();
@@ -556,7 +554,6 @@ class OnboardingServiceImplTest {
         when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser1, onboardedUser2));
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
-        OnboardingRequest expectedRequest = getOnboardingRequest();
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -581,12 +578,11 @@ class OnboardingServiceImplTest {
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getId()).thenReturn("42");
         File file = File.createTempFile("file", ".txt");
-        when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
+        when(contractService.getLogoFile()).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         when(productConnector.getProductById(any())).thenReturn(product);
 
-        doThrow(RuntimeException.class).when(emailService).sendMailWithContract(any(), any(), any(), any(), any(), anyBoolean());
+        doThrow(RuntimeException.class).when(emailService).sendCompletedEmail(any(), any(), any(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
@@ -594,8 +590,8 @@ class OnboardingServiceImplTest {
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId(), EnumSet.allOf(User.Fields.class));
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
-        verify(contractService, times(1)).extractTemplate(token.getContractTemplate());
-        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.ACTIVE, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
+        verify(contractService, times(1)).getLogoFile();
+        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
         verify(onboardingDao, times(1)).rollbackSecondStepOfUpdate((List.of(tokenUser.getUserId())), institution, token);
     }
 
