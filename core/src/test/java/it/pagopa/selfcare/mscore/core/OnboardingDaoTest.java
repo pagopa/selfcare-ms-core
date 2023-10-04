@@ -278,38 +278,7 @@ class OnboardingDaoTest {
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
-        Billing billing = TestUtils.createSimpleBilling();
-        Contract contract = TestUtils.createSimpleContract();
-        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
-        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setContractFilePath("/example");
+        OnboardingRequest onboardingRequest = TestUtils.createDummyOnboardingRequest();
 
         UserToOnboard user = new UserToOnboard();
         List<UserToOnboard> users = new ArrayList<>();
@@ -325,7 +294,7 @@ class OnboardingDaoTest {
         assertEquals(RelationshipState.PENDING, onboarding.getStatus());
         assertEquals("42", onboarding.getProductId());
         assertEquals("Pricing Plan", onboarding.getPricingPlan());
-        assertSame(billing, onboarding.getBilling());
+        assertSame(onboardingRequest.getBillingRequest(), onboarding.getBilling());
     }
 
     /**
