@@ -144,6 +144,13 @@ class NotificationServiceImplTest {
     }
 
     @Test
+    void sendMailToPT(){
+        Institution institution =  new Institution();
+        institution.setDigitalAddress("42");
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailToPT(new User(), institution , new OnboardingRequest(), "token"));
+    }
+
+    @Test
     void sendNotificationDelegationMail() {
         Product product = new Product();
         product.setTitle("test");

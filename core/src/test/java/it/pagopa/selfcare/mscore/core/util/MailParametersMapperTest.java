@@ -82,6 +82,18 @@ class MailParametersMapperTest {
     }
 
     @Test
+    void getRegistrationRequestPath(){
+        when(mailTemplateConfig.getRegistrationRequestPath()).thenReturn("path");
+        Assertions.assertNotNull(mailParametersMapper.getRegistrationRequestPath());
+    }
+
+    @Test
+    void getRegistrationNotificationPath(){
+        when(mailTemplateConfig.getRegistrationNotificationAdminPath()).thenReturn("path");
+        Assertions.assertNotNull(mailParametersMapper.getRegistrationNotificationAdminPath());
+    }
+
+    @Test
     void getOnboardingCompletePath(){
         when(mailTemplateConfig.getCompletePath()).thenReturn("path");
         Assertions.assertNotNull(mailParametersMapper.getOnboardingCompletePath());
