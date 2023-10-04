@@ -41,7 +41,7 @@ class MailParametersMapperTest {
         user.setFamilyName(certifiedField);
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("productId");
-        Map<String, String> map = mailParametersMapper.getOnboardingMailParameter(user, request, "");
+        Map<String, String> map = mailParametersMapper.getOnboardingMailParameter(user, request, "token", "description", false);
         Assertions.assertNotNull(map);
     }
 

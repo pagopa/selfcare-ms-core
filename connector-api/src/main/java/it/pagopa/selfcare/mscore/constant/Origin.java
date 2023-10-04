@@ -11,6 +11,8 @@ public enum Origin {
     MOCK("MOCK"),
     IPA("IPA"),
     SELC("SELC"),
+
+    ANAC("ANAC"),
     UNKNOWN("UNKNOWN"),
     ADE("ADE"),
     INFOCAMERE("INFOCAMERE");

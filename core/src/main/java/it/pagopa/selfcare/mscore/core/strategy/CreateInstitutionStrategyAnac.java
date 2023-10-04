@@ -1,28 +1,37 @@
 package it.pagopa.selfcare.mscore.core.strategy;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import org.springframework.stereotype.Component;
+import it.pagopa.selfcare.mscore.model.institution.SaResource;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
 
-@Component
-public class CreateInstitutionStrategyRaw implements CreateInstitutionStrategy {
+@Slf4j
+public class CreateInstitutionStrategyAnac implements CreateInstitutionStrategy {
+    private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     private final InstitutionConnector institutionConnector;
 
     private Institution institution;
 
-    public CreateInstitutionStrategyRaw(InstitutionConnector institutionConnector) {
+    public CreateInstitutionStrategyAnac(PartyRegistryProxyConnector partyRegistryProxyConnector,
+                                         InstitutionConnector institutionConnector) {
+        this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
+    }
+
+    public void setInstitution(Institution institution) {
+        this.institution = institution;
     }
 
     @Override
@@ -30,17 +39,26 @@ public class CreateInstitutionStrategyRaw implements CreateInstitutionStrategy {
 
         checkIfAlreadyExistsByTaxCodeAndSubunitCode(strategyInput.getTaxCode(), strategyInput.getSubunitCode());
 
-        institution.setExternalId(getExternalId(strategyInput));
-        institution.setOrigin(Origin.SELC.getValue());
-        institution.setOriginId("SELC_" + institution.getExternalId());
-        institution.setCreatedAt(OffsetDateTime.now());
+        SaResource saResource = partyRegistryProxyConnector.getSAFromAnac(strategyInput.getTaxCode());
 
+        institution = addFieldsToInstitution(saResource);
         try {
             return institutionConnector.save(institution);
         } catch (Exception e) {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
+    }
 
+    private Institution addFieldsToInstitution(SaResource saResource) {
+
+        institution.setExternalId(institution.getTaxCode());
+        institution.setOrigin(Origin.ANAC.getValue());
+        institution.setOriginId(saResource.getTaxCode());
+        institution.setCreatedAt(OffsetDateTime.now());
+        institution.setDigitalAddress(saResource.getDigitalAddress());
+        institution.setDescription(saResource.getDescription());
+
+        return institution;
     }
 
     private void checkIfAlreadyExistsByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
@@ -52,7 +70,4 @@ public class CreateInstitutionStrategyRaw implements CreateInstitutionStrategy {
                     CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
     }
 
-    public void setInstitution(Institution institution) {
-        this.institution = institution;
-    }
 }

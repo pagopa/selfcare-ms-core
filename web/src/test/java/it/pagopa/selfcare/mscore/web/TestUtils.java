@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.web;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
@@ -57,6 +57,32 @@ public class TestUtils {
         institution.setInstitutionType(InstitutionType.PA);
         institution.setOriginId("Ipa Code");
         institution.setOrigin(Origin.MOCK.name());
+        institution.setOnboarding(new ArrayList<>());
+
+        institution.setPaymentServiceProvider(createSimplePaymentServiceProvider());
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        institution.setShareCapital("Share Capital");
+        institution.setRea("Rea");
+
+        return institution;
+    }
+
+    public static Institution createSimpleInstitutionSA() {
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(new ArrayList<>());
+        institution.setBilling(createSimpleBilling());
+
+        institution.setDataProtectionOfficer(createSimpleDataProtectionOfficer());
+        institution.setDescription("The characteristics of someone or something");
+        institution.setDigitalAddress("42 Main St");
+        institution.setExternalId("42");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setId("42");
+        institution.setInstitutionType(InstitutionType.SA);
+        institution.setOriginId("ANAC Code");
+        institution.setOrigin(Origin.ANAC.name());
         institution.setOnboarding(new ArrayList<>());
 
         institution.setPaymentServiceProvider(createSimplePaymentServiceProvider());

@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import org.springframework.lang.Nullable;
 
 import java.time.OffsetDateTime;
@@ -54,5 +55,8 @@ public interface UserConnector {
     List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
 
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
+
+    List<UserInfo> findByInstitutionId(String institutionId);
+
 
 }

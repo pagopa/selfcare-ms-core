@@ -1,8 +1,13 @@
 package it.pagopa.selfcare.mscore.core.strategy.factory;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.*;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.input.OnboardingInstitutionStrategyInput;
@@ -22,8 +27,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_PN;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Component
 @Slf4j
@@ -35,6 +39,7 @@ public class OnboardingInstitutionStrategyFactory {
     private final UserService userService;
     private final InstitutionService institutionService;
     private final CoreConfig coreConfig;
+    private final FileStorageConnector fileStorageConnector;
 
     private final NotificationService notificationService;
 
@@ -43,13 +48,14 @@ public class OnboardingInstitutionStrategyFactory {
                                                 UserService userService,
                                                 InstitutionService institutionService,
                                                 CoreConfig coreConfig,
-                                                NotificationService notificationService) {
+                                                NotificationService notificationService, FileStorageConnector fileStorageConnector) {
         this.onboardingDao = onboardingDao;
         this.contractService = contractService;
         this.userService = userService;
         this.institutionService = institutionService;
         this.coreConfig = coreConfig;
         this.notificationService = notificationService;
+        this.fileStorageConnector = fileStorageConnector;
     }
 
     public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategy(InstitutionType institutionType, String productId, Institution institution) {
@@ -64,7 +70,9 @@ public class OnboardingInstitutionStrategyFactory {
             digestOnboardingInstitutionStrategy = ignore -> {};
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendConfirmationMail();
-        } else if (InstitutionType.PA == institutionType || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())) {
+        } else if (InstitutionType.PA == institutionType
+                || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())
+                || InstitutionType.SA == institutionType) {
             digestOnboardingInstitutionStrategy = createContractAndPerformDigest();
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
@@ -128,13 +136,13 @@ public class OnboardingInstitutionStrategyFactory {
     }
 
 
-
-
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-
-            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
-
+            if(!InstitutionType.SA.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
+                OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
+            } else {
+                OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
+            }
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -145,9 +153,11 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
-
-            OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
-
+            if(!InstitutionType.SA.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
+                OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
+            } else {
+                OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
+            }
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -167,7 +177,13 @@ public class OnboardingInstitutionStrategyFactory {
                     .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(strategyInput.getOnboardingRequest().getContract().getPath());
-            File pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+            String productId = strategyInput.getOnboardingRequest().getProductId();
+            File pdf = null;
+            if (productId.equals(PROD_FD.getValue()) || productId.equals(PROD_FD_GARANTITO.getValue())) {
+                    pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContract().getPath());
+            } else {
+                pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
+            }
             String digest = TokenUtils.createDigest(pdf);
 
             strategyInput.setDigest(digest);
@@ -189,7 +205,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
-                notificationService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution().getDigitalAddress(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
+                notificationService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false);
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
@@ -241,7 +257,7 @@ public class OnboardingInstitutionStrategyFactory {
 
             /* check onboaring validation */
             OnboardingInstitutionUtils.checkIfProductAlreadyOnboarded(institution, strategyInput.getOnboardingRequest().getProductId());
-            deleteTokenExpired(institution, strategyInput.getOnboardingRequest().getProductId());
+            rejectTokenExpired(institution, strategyInput.getOnboardingRequest().getProductId());
             OnboardingInstitutionUtils.validateOverridingData(strategyInput.getOnboardingRequest().getInstitutionUpdate(), institution);
 
             strategyInput.setInstitution(institution);
@@ -253,16 +269,16 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private void deleteTokenExpired(Institution institution, String productId) {
+    private void rejectTokenExpired(Institution institution, String productId) {
         if(Objects.nonNull(institution.getOnboarding())) {
 
-            /* set state DELETE for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
+            /* set state REJECTED for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
             institution.getOnboarding().stream()
                     .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(productId)
                             && (onboarding.getStatus() == RelationshipState.PENDING || onboarding.getStatus() == RelationshipState.TOBEVALIDATED))
                     .map(onboarding -> onboardingDao.getTokenById(onboarding.getTokenId()))
                     .filter(TokenUtils::isTokenExpired)
-                    .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, null));
+                        .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null));
         }
     }
 

@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -39,9 +40,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @ConditionalOnProperty(
-        value="core.user-event-service.type",
+        value = "core.user-event-service.type",
         havingValue = "send")
 public class UserEventServiceImpl implements UserEventService {
+    public static final String ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER = "error during send dataLake notification for user {}";
     private final CoreConfig coreConfig;
     private final KafkaTemplate<String, String> kafkaTemplateUsers;
     private final KafkaPropertiesConfig kafkaPropertiesConfig;
@@ -77,12 +79,12 @@ public class UserEventServiceImpl implements UserEventService {
         token.getUsers().forEach(tokenUser -> {
             List<UserToNotify> usersToNotify = toUserToNotify(tokenUser.getUserId(), token.getInstitutionId(), token.getProductId(), Optional.empty(), Optional.of(token.getId()));
             usersToNotify.forEach(user -> {
-                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromToken(token, user);
+                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromToken(token, user, QueueEvent.ADD);
                 try {
                     String msg = mapper.writeValueAsString(notification);
                     sendUserNotification(msg, user.getUserId());
                 } catch (JsonProcessingException e) {
-                    log.warn("error during send dataLake notification for user {}", user.getUserId());
+                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getUserId());
                 }
             });
 
@@ -102,19 +104,40 @@ public class UserEventServiceImpl implements UserEventService {
                 .collect(Collectors.toList());
     }
 
-    private UserToNotify toUserToNotify(String userId, String institutionId, User user, OnboardedProduct onboardedProduct){
+    @Override
+    public void sendUpdateUserNotificationToQueue(String userId, String institutionId) {
+        log.trace("sendUpdateUserNotification start");
+        log.debug("sendUpdateUserNotification userId = {}, institutionId = {}", userId, institutionId);
+        UserToNotify userToNotify = new UserToNotify();
+        userToNotify.setUserId(userId);
+        UserNotificationToSend notification = new UserNotificationToSend();
+        notification.setId(UUID.randomUUID().toString());
+        notification.setUpdatedAt(OffsetDateTime.now());
+        notification.setInstitutionId(institutionId);
+        notification.setEventType(QueueEvent.UPDATE);
+        notification.setUser(userToNotify);
+        try {
+            String msg = mapper.writeValueAsString(notification);
+            sendUserNotification(msg, userId);
+        } catch (JsonProcessingException e) {
+            log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
+        }
+    }
+
+    private UserToNotify toUserToNotify(String userId, String institutionId, User user, OnboardedProduct onboardedProduct) {
         UserToNotify userToNotify = new UserToNotify();
         userToNotify.setUserId(userId);
         userToNotify.setName(user.getName());
         userToNotify.setFamilyName(user.getFamilyName());
         userToNotify.setFiscalCode(user.getFiscalCode());
-        userToNotify.setEmail(user.getWorkContacts().containsKey(institutionId)? user.getWorkContacts().get(institutionId).getEmail():user.getEmail());
+        userToNotify.setEmail(user.getWorkContacts().containsKey(institutionId) ? user.getWorkContacts().get(institutionId).getEmail() : user.getEmail());
         userToNotify.setRole(onboardedProduct.getRole());
         userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
         userToNotify.setProductRole(onboardedProduct.getProductRole());
         return userToNotify;
     }
-    public void sendOperatorUserNotification(RelationshipInfo relationshipInfo) {
+
+    public void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType) {
         if (relationshipInfo != null) {
             List<UserToNotify> usersToNotify = toUserToNotify(relationshipInfo.getUserId(),
                     relationshipInfo.getInstitution().getId(),
@@ -122,17 +145,19 @@ public class UserEventServiceImpl implements UserEventService {
 
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
             usersToNotify.forEach(user -> {
-                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromRelationship(relationshipInfo, user);
+                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromRelationship(relationshipInfo, user, eventType);
                 notification.setId(UUID.randomUUID().toString());
                 try {
                     String msg = mapper.writeValueAsString(notification);
                     sendUserNotification(msg, user.getUserId());
                 } catch (JsonProcessingException e) {
-                    log.warn("error during send dataLake notification for user {}", user.getUserId());
+                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getUserId());
                 }
             });
         }
     }
+
+
     private void sendUserNotification(String message, String userId) {
         ListenableFuture<SendResult<String, String>> future =
                 kafkaTemplateUsers.send(kafkaPropertiesConfig.getScUsersTopic(), message);

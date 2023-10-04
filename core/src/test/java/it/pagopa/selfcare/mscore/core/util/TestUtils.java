@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.core.util;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Contract;
@@ -17,6 +17,10 @@ public class TestUtils {
     }
     public static Institution dummyInstitutionGsp() {
         return dummyInstitution(InstitutionType.GSP);
+    }
+
+    public static Institution dummyInstitutionSa() {
+        return dummyInstitution(InstitutionType.SA);
     }
     public static Institution dummyInstitutionPt() {
         return dummyInstitution(InstitutionType.PT);

@@ -1,10 +1,11 @@
 package it.pagopa.selfcare.mscore.core.util;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.AccessLevel;
@@ -102,6 +103,17 @@ public class PdfMapper {
         map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institution.getBusinessRegisterPlace()).orElse(underscore));
 
         addPricingPlan(request, map);
+    }
+  
+    public static void setupSAProdInteropData(Map<String, Object> map, InstitutionUpdate institutionUpdate) {
+        log.info("START - setupSAProdInteropData");
+        String underscore = "_______________";
+        map.put("institutionREA", Optional.ofNullable(institutionUpdate.getRea()).orElse(underscore));
+        map.put("institutionShareCapital", Optional.ofNullable(institutionUpdate.getShareCapital()).orElse(underscore));
+        map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institutionUpdate.getBusinessRegisterPlace()).orElse(underscore));
+        //override originId to not fill ipa code in case of SA
+        if(InstitutionType.SA.equals(institutionUpdate.getInstitutionType()))
+            map.put("originId", underscore);
     }
 
     public static void setupProdPNData(Map<String, Object> map, Institution institution, OnboardingRequest request) {

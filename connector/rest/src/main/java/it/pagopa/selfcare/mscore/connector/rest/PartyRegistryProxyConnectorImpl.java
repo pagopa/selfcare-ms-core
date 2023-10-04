@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
 import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapper;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.SaMapper;
 import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapper;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
@@ -30,10 +31,13 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     private final AooMapper aooMapper;
     private final UoMapper uoMapper;
 
-    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper) {
+    private final SaMapper saMapper;
+
+    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper, SaMapper saMapper) {
         this.restClient = restClient;
         this.aooMapper = aooMapper;
         this.uoMapper = uoMapper;
+        this.saMapper = saMapper;
     }
 
     @Override
@@ -152,6 +156,22 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
         UoResponse result = restClient.getUoById(uoId);
         log.debug("getUoById id = {}", uoId);
         return uoMapper.toEntity(result);
+    }
+
+    @Override
+    public SaResource getSAFromAnac(String taxId) {
+        try {
+            log.debug("getSaByTaxId = {}", taxId);
+            Assert.hasText(taxId, "TaxId is required");
+            PdndResponse result = restClient.getSaByTaxId(taxId);
+            log.debug("getSaByTaxId = {}", taxId);
+            if (result != null) {
+                return saMapper.toResource(result);
+            }
+            throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), taxId), CREATE_INSTITUTION_NOT_FOUND.getCode());
+        } catch (FeignException e) {
+            throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
+        }
     }
 
     private GeographicTaxonomies toGeoTaxonomies(GeographicTaxonomiesResponse result) {

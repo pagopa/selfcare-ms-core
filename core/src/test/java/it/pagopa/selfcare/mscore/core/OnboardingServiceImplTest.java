@@ -2,10 +2,14 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
@@ -430,7 +434,7 @@ class OnboardingServiceImplTest {
         verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegate, institution, request, null, null);
         verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
         verifyNoMoreInteractions(onboardingDao);
-        verify(emailService, times(1)).sendMailWithContract(file, institution.getDigitalAddress(), user, request, token.getId());
+        verify(emailService, times(1)).sendMailWithContract(file, institution, user, request, token.getId(), true);
     }
 
     @Test
@@ -535,7 +539,7 @@ class OnboardingServiceImplTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         when(productConnector.getProductById(any())).thenReturn(product);
 
-        doThrow(RuntimeException.class).when(emailService).sendMailWithContract(any(), any(), any(), any(), any());
+        doThrow(RuntimeException.class).when(emailService).sendMailWithContract(any(), any(), any(), any(), any(), anyBoolean());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));

@@ -1387,7 +1387,7 @@
           "name" : "taxCode",
           "in" : "query",
           "description" : "Institution's tax code",
-          "required" : true,
+          "required" : false,
           "style" : "form",
           "schema" : {
             "type" : "string"
@@ -1396,6 +1396,24 @@
           "name" : "subunitCode",
           "in" : "query",
           "description" : "Institution's subunit code",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "origin",
+          "in" : "query",
+          "description" : "origin",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "originId",
+          "in" : "query",
+          "description" : "originId",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -1443,6 +1461,68 @@
         "summary" : "create an institution using external institution id without fetching data from party-registry or info-camere",
         "description" : "create an institution using external institution id without fetching data from party-registry or info-camere",
         "operationId" : "createInstitutionUsingPOST_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/institutions/from-anac/" : {
+      "post" : {
+        "tags" : [ "Institution" ],
+        "summary" : "${swagger.mscore.institution.create.from-anac}",
+        "description" : "${swagger.mscore.institution.create.from-anac}",
+        "operationId" : "createInstitutionFromAnacUsingPOST",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -2443,6 +2523,62 @@
         } ]
       }
     },
+    "/institutions/{institutionId}/users" : {
+      "get" : {
+        "tags" : [ "Institution" ],
+        "summary" : "getInstitutionUsers",
+        "description" : "Retrieve institution's users",
+        "operationId" : "getInstitutionUsersUsingGET",
+        "parameters" : [ {
+          "name" : "institutionId",
+          "in" : "path",
+          "description" : "Institution's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/UserInfoResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/{productId}/brokers/{institutionType}" : {
       "get" : {
         "tags" : [ "Institution" ],
@@ -2466,7 +2602,7 @@
           "style" : "simple",
           "schema" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           }
         } ],
         "responses" : {
@@ -3112,7 +3248,7 @@
         } ]
       }
     },
-    "/onboarding/" : {
+    "/onboarding" : {
       "head" : {
         "tags" : [ "Onboarding" ],
         "summary" : "verify if onboardedProduct is already onboarded for institution",
@@ -4380,6 +4516,142 @@
         } ]
       }
     },
+    "/users/{id}" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Retrieves user given userId and optional ProductId",
+        "description" : "Retrieves user given userId and optional ProductId",
+        "operationId" : "getUserInfoUsingGET",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "User's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "query",
+          "description" : "Product's unique identifier",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "institutionId",
+          "in" : "query",
+          "description" : "The internal identifier of the institution",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/users/{id}/update" : {
+      "post" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Service to send notification when user data get's updated",
+        "description" : "Service to send notification when user data get's updated",
+        "operationId" : "updateUserUsingPOST",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "User's unique identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "institutionId",
+          "in" : "query",
+          "description" : "The internal identifier of the institution",
+          "required" : true,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/users/{userId}/institution-products" : {
       "get" : {
         "tags" : [ "Persons" ],
@@ -4724,7 +4996,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -4941,6 +5213,12 @@
           "brokerName" : {
             "type" : "string"
           },
+          "brokerTaxCode" : {
+            "type" : "string"
+          },
+          "brokerType" : {
+            "type" : "string"
+          },
           "id" : {
             "type" : "string"
           },
@@ -4955,7 +5233,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "productId" : {
             "type" : "string"
@@ -5063,7 +5341,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5146,11 +5424,11 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string",
-            "enum" : [ "ADE", "INFOCAMERE", "IPA", "MOCK", "SELC", "UNKNOWN" ]
+            "enum" : [ "ADE", "ANAC", "INFOCAMERE", "IPA", "MOCK", "SELC", "UNKNOWN" ]
           },
           "originId" : {
             "type" : "string"
@@ -5261,7 +5539,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -5411,7 +5689,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboardings" : {
             "type" : "object",
@@ -5568,7 +5846,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5628,6 +5906,10 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficerResponse"
           },
@@ -5654,7 +5936,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -5694,6 +5976,10 @@
           },
           "taxCode" : {
             "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "zipCode" : {
             "type" : "string"
@@ -5742,7 +6028,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProvider"
@@ -5797,7 +6083,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderRequest"
@@ -5855,7 +6141,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
@@ -5967,7 +6253,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -6132,7 +6418,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SCP" ]
+            "enum" : [ "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -6227,12 +6513,20 @@
           "billing" : {
             "$ref" : "#/components/schemas/BillingResponse"
           },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "productId" : {
             "type" : "string"
           },
           "status" : {
             "type" : "string",
             "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },
@@ -7049,6 +7343,33 @@
           }
         }
       },
+      "UserInfoResponse" : {
+        "title" : "UserInfoResponse",
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/OnboardedProduct"
+            }
+          },
+          "surname" : {
+            "type" : "string"
+          },
+          "taxCode" : {
+            "type" : "string"
+          }
+        }
+      },
       "UserProductsResponse" : {
         "title" : "UserProductsResponse",
         "type" : "object",
@@ -7060,6 +7381,27 @@
             }
           },
           "id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "UserResponse" : {
+        "title" : "UserResponse",
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "surname" : {
+            "type" : "string"
+          },
+          "taxCode" : {
             "type" : "string"
           }
         }

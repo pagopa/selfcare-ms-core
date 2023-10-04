@@ -1,7 +1,11 @@
 package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
@@ -84,6 +88,7 @@ public class OnboardingInstitutionUtils {
     private static RelationshipState getStatusByInstitutionType(InstitutionType institutionType, String productId, String institutionOrigin) {
         switch (institutionType) {
             case PA:
+            case SA:
                 return RelationshipState.PENDING;
             case PG:
                 return RelationshipState.ACTIVE;
@@ -252,4 +257,9 @@ public class OnboardingInstitutionUtils {
         return onboardedProduct;
     }
 
+    public static void validateSaOnboarding(String vatNumber) {
+        if (StringUtils.isEmpty(vatNumber)){
+            throw new InvalidRequestException(CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getCode(), CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getMessage());
+        }
+    }
 }

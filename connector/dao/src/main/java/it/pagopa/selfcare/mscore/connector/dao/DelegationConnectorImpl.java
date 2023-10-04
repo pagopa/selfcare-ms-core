@@ -75,8 +75,8 @@ public class DelegationConnectorImpl implements DelegationConnector {
         if(GetDelegationsMode.FULL.equals(mode)) {
 
             GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
-                    .startWith(Objects.nonNull(from) ? "from" : "to")
-                    .connectFrom(Objects.nonNull(from) ? "from" : "to")
+                    .startWith(Objects.nonNull(from) ? "to" : "from")
+                    .connectFrom(Objects.nonNull(from) ? "to" : "from")
                     .connectTo("_id");
 
             MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
@@ -84,7 +84,9 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
             List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();
             return result.stream()
-                    .map(delegationInstitutionMapper::convertToDelegation)
+                    .map(Objects.nonNull(from) ?
+                            delegationInstitutionMapper::convertToDelegationBroker :
+                            delegationInstitutionMapper::convertToDelegationInstitution)
                     .collect(Collectors.toList());
         }
 

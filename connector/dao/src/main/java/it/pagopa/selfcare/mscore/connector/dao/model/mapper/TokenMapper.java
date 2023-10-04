@@ -39,6 +39,8 @@ public class TokenMapper {
         entity.setProductId(token.getProductId());
         entity.setCreatedAt(token.getCreatedAt());
         entity.setUpdatedAt(token.getUpdatedAt());
+        entity.setActivatedAt(token.getActivatedAt());
+        entity.setDeletedAt(token.getDeletedAt());
         entity.setContentType(token.getContentType());
         if (token.getInstitutionUpdate() != null) {
             entity.setInstitutionUpdate(toInstitutionUpdateEntity(token.getInstitutionUpdate(), geographicTaxonomies));
@@ -94,6 +96,8 @@ public class TokenMapper {
         token.setExpiringDate(tokenEntity.getExpiringDate());
         token.setCreatedAt(tokenEntity.getCreatedAt());
         token.setUpdatedAt(tokenEntity.getUpdatedAt());
+        token.setActivatedAt(tokenEntity.getActivatedAt());
+        token.setDeletedAt(token.getDeletedAt());
         token.setProductId(tokenEntity.getProductId());
         token.setContentType(tokenEntity.getContentType());
         if (tokenEntity.getInstitutionUpdate() != null) {

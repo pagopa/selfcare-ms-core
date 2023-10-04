@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper;
@@ -107,8 +108,10 @@ public class TokenConnectorImpl implements TokenConnector {
         if (status == RelationshipState.DELETED) {
             updateDefinition.set(TokenEntity.Fields.deletedAt.name(), now);
         }
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
-        return convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+        Token modifiedToken = convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "findAndUpdateToken modifiedToken = {}", modifiedToken);
+        return modifiedToken;
     }
 
     @Override

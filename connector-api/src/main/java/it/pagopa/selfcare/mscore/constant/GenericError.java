@@ -39,6 +39,7 @@ public enum GenericError {
 
     ERROR_DURING_DELETED_FILE("0000", "Error during deleted file %s"),
     ERROR_DURING_DOWNLOAD_FILE("0000", "Error during download file %s"),
+    ERROR_DURING_COMPRESS_FILE("0000", "Error compressing the file %s"),
     RETRIEVING_USER_RELATIONSHIP_ERROR("0023", "Error while retrieving user relationships"),
     ACTIVATE_RELATIONSHIP_ERROR("0024", "Error while activating relationship"),
     SUSPEND_RELATIONSHIP_ERROR("0025", "Error while suspending relationship"),

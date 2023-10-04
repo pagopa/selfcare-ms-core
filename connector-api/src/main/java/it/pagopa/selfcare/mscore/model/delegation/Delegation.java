@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.model.delegation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,5 +23,7 @@ public class Delegation {
     private String productId;
     private InstitutionType institutionType;
     private String taxCode;
+    private InstitutionType brokerType;
+    private String brokerTaxCode;
 
 }

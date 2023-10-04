@@ -1,13 +1,19 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.mscore.api.*;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.*;
+import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
@@ -21,7 +27,9 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -34,21 +42,24 @@ import java.util.stream.Collectors;
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
+import static it.pagopa.selfcare.mscore.model.user.User.Fields.*;
 
 @Slf4j
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
 
+
+    private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
+    private static final EnumSet<User.Fields> USER_FIELD_LIST = EnumSet.of(fiscalCode, name, familyName, workContacts);
     private final InstitutionConnector institutionConnector;
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
+    private final UserRegistryConnector userRegistryConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final UserService userService;
     private final CoreConfig coreConfig;
     private final ContractService contractService;
-
     private final InstitutionMapper institutionMapper;
-
     private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
@@ -58,7 +69,8 @@ public class InstitutionServiceImpl implements InstitutionService {
                                   UserConnector userConnector,
                                   ContractService contractService,
                                   InstitutionMapper institutionMapper,
-                                  CreateInstitutionStrategyFactory createInstitutionStrategyFactory) {
+                                  CreateInstitutionStrategyFactory createInstitutionStrategyFactory,
+                                  UserRegistryConnector userRegistryConnector) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.userService = userService;
@@ -68,6 +80,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         this.contractService = contractService;
         this.institutionMapper = institutionMapper;
         this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
+        this.userRegistryConnector = userRegistryConnector;
     }
 
     @Override
@@ -105,8 +118,13 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public List<Institution> getInstitutions(String taxCode, String subunitCode, String origin, String originId) {
+        return institutionConnector.findByTaxCodeSubunitCodeAndOrigin(taxCode, subunitCode, origin, originId);
+    }
+
+    @Override
     public List<Institution> getInstitutions(String taxCode, String subunitCode) {
-        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+        return institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
     }
 
     @Override
@@ -117,6 +135,30 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .subunitCode(subunitCode)
                 .subunitType(subunitType)
                 .build());
+    }
+
+    @Override
+    public Institution createInstitution(Institution institution) {
+        return createInstitutionStrategyFactory.createInstitutionStrategy(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .subunitCode(institution.getSubunitCode())
+                        .subunitType(Optional.ofNullable(institution.getSubunitType())
+                                .map(InstitutionPaSubunitType::valueOf)
+                                .orElse(null))
+                        .build());
+    }
+
+    @Override
+    public Institution createInstitutionFromAnac(Institution institution) {
+        return createInstitutionStrategyFactory.createInstitutionStrategyAnac(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .subunitCode(institution.getSubunitCode())
+                        .subunitType(Optional.ofNullable(institution.getSubunitType())
+                                .map(InstitutionPaSubunitType::valueOf)
+                                .orElse(null))
+                        .build());
     }
 
     @Override
@@ -212,18 +254,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createInstitution(Institution institution) {
-        return createInstitutionStrategyFactory.createInstitutionStrategy(institution)
-                .createInstitution(CreateInstitutionStrategyInput.builder()
-                        .taxCode(institution.getTaxCode())
-                        .subunitCode(institution.getSubunitCode())
-                        .subunitType(Optional.ofNullable(institution.getSubunitType())
-                                .map(InstitutionPaSubunitType::valueOf)
-                                .orElse(null))
-                        .build());
-    }
-
-    @Override
     public List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states) {
         List<Onboarding> onboardingList;
         if (institution.getOnboarding() != null) {
@@ -252,7 +282,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (institution.getGeographicTaxonomies() != null) {
             List<GeographicTaxonomies> geographicTaxonomies = institution.getGeographicTaxonomies().stream()
                     .map(institutionGeoTax -> retrieveGeoTaxonomies(institutionGeoTax.getCode())
-                        .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), institutionGeoTax.getCode()), CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode())))
+                            .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), institutionGeoTax.getCode()), CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode())))
                     .collect(Collectors.toList());
             if (!geographicTaxonomies.isEmpty()) {
                 return geographicTaxonomies;
@@ -426,6 +456,18 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionConnector.findBrokers(productId, type);
     }
 
+    @Override
+    public List<UserInfo> getInstitutionUsers(String institutionId) {
+        log.trace("getInstitutionUsers start");
+        log.debug("getInstitutionUsers institutionId = {}, productId = {}", institutionId);
+        Assert.hasText(institutionId, REQUIRED_INSTITUTION_MESSAGE);
+        List<UserInfo> userInfos = userConnector.findByInstitutionId(institutionId);
+        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalId(userInfo.getId(), USER_FIELD_LIST)));
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getInstitutionUsers result = {}", userInfos);
+        log.trace("getInstitutionUsers end");
+        return userInfos;
+    }
+
     protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
 
         if (roles != null && !roles.isEmpty() && !roles.contains(product.getRole())) {
@@ -443,5 +485,4 @@ public class InstitutionServiceImpl implements InstitutionService {
         return !(productRoles != null && !productRoles.isEmpty() && !productRoles.contains(product.getProductRole()));
 
     }
-
 }

@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
@@ -108,7 +109,7 @@ public class OnboardingDao {
         try {
 
             for (UserToOnboard userToOnboard : request.getUsers()) {
-                createOrAddOnboardedProductUser(toUpdate, userToOnboard, institution, request, token.getId(), createdAt)
+                createOrAddOnboardedProductUser(toUpdate, userToOnboard, institution, request, token.getId(), createdAt, RelationshipState.ACTIVE)
                         .ifPresent(onboardedProduct -> productMap.put(userToOnboard.getId(), onboardedProduct));
             }
             log.debug("users to update: {}", toUpdate);
@@ -232,7 +233,9 @@ public class OnboardingDao {
 
     private Token updateToken(Token token, RelationshipState state, String digest) {
         log.info("update token {} from state {} to {}", token.getId(), token.getStatus(), state);
-        return tokenConnector.findAndUpdateToken(token, state, digest);
+        Token updatedToken = tokenConnector.findAndUpdateToken(token, state, digest);
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "updatedToken updatedToken = {}", updatedToken);
+        return updatedToken;
     }
 
     private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
@@ -262,11 +265,11 @@ public class OnboardingDao {
             OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institution, request, tokenId);
             productMap.put(userToOnboard.getId(), currentProduct);
         } catch (ResourceNotFoundException e) {
-            createNewUser(userToOnboard, institution, request, tokenId);
+            createNewUser(userToOnboard, institution, request, tokenId, null);
         }
     }
 
-    private Optional<OnboardedProduct> createOrAddOnboardedProductUser(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, OffsetDateTime createdAt) {
+    private Optional<OnboardedProduct> createOrAddOnboardedProductUser(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, OffsetDateTime createdAt, RelationshipState state) {
         try {
             OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
 
@@ -282,7 +285,7 @@ public class OnboardingDao {
 
             return Optional.of(product);
         } catch (ResourceNotFoundException e) {
-            createNewUser(userToOnboard, institution, request, tokenId);
+            createNewUser(userToOnboard, institution, request, tokenId, Optional.of(state));
         }
 
         return Optional.empty();
@@ -315,8 +318,9 @@ public class OnboardingDao {
         }
     }
 
-    private void createNewUser(UserToOnboard user, Institution institution, OnboardingRequest request, String tokenId) {
+    private void createNewUser(UserToOnboard user, Institution institution, OnboardingRequest request, String tokenId, Optional<RelationshipState> state) {
         OnboardedProduct product = constructProduct(user, request, institution);
+        state.ifPresent(product::setStatus);
         product.setTokenId(tokenId);
         UserBinding binding = new UserBinding(institution.getId(),
                 institution.getDescription(),

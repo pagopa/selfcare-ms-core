@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
@@ -59,6 +59,28 @@ public class TestUtils {
         institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+        return institutionUpdate;
+    }
+
+    public static InstitutionUpdate createSimpleInstitutionUpdatePG() {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate
+                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PG);
         institutionUpdate
                 .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
         institutionUpdate.setRea("Rea");

@@ -23,7 +23,7 @@
     </modules>
 
     <properties>
-        <selc-commons.version>2.4.6</selc-commons.version>
+        <selc-commons.version>2.4.7</selc-commons.version>
         <httpclient5.version>5.2.1</httpclient5.version>
         <httpcore5.version>5.2.1</httpcore5.version>
     </properties>
