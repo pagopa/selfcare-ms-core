@@ -81,7 +81,7 @@ public class PdfMapper {
     public static void setupProdIOData(Map<String, Object> map, User validManager, Institution institution, OnboardingRequest request, InstitutionType institutionType) {
         log.info("START - setupProdIOData");
         map.put("institutionTypeCode", institutionType);
-        map.put("pricingPlan", decodePricingPlan(request.getPricingPlan(), request.getProductId()));
+        decodePricingPlan(request.getPricingPlan(), request.getProductId(), map);
         if (StringUtils.hasText(institution.getOrigin())) {
             map.put("originIdLabelValue", Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin()) ?
                     "<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>"
@@ -153,14 +153,22 @@ public class PdfMapper {
         }
     }
 
-    private static String decodePricingPlan(String pricingPlan, String productId) {
+    private static void decodePricingPlan(String pricingPlan, String productId, Map<String, Object> map) {
         if ("FA".equals(pricingPlan)) {
-            return "FAST";
-        }
-        if ("prod-io".equalsIgnoreCase(productId)) {
-            return "BASE";
+            map.put("pricingPlanFastCheckbox", "X");
+            map.put("pricingPlanBaseCheckbox", "");
+            map.put("pricingPlanPremiumCheckbox", "");
+            map.put("pricingPlan", "FAST");
+        } else if ("prod-io".equalsIgnoreCase(productId)) {
+            map.put("pricingPlanFastCheckbox", "");
+            map.put("pricingPlanBaseCheckbox", "X");
+            map.put("pricingPlanPremiumCheckbox", "");
+            map.put("pricingPlan", "BASE");
         } else {
-            return "PREMIUM";
+            map.put("pricingPlanFastCheckbox", "");
+            map.put("pricingPlanBaseCheckbox", "");
+            map.put("pricingPlanPremiumCheckbox", "X");
+            map.put("pricingPlan", "PREMIUM");
         }
     }
 
