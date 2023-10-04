@@ -70,6 +70,24 @@ class MailParametersMapperTest {
     }
 
     @Test
+    void getRegistrationRequestParameter(){
+        when(mailTemplateConfig.getUserName()).thenReturn("userName");
+        when(mailTemplateConfig.getUserSurname()).thenReturn("userSurname");
+        when(mailTemplateConfig.getInstitutionDescription()).thenReturn("institutionDescription");
+        when(mailTemplateConfig.getAdminLink()).thenReturn("institutionDescription");
+        User user = new User();
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setValue("42");
+        user.setName(certifiedField);
+        user.setFamilyName(certifiedField);
+        OnboardingRequest request = new OnboardingRequest();
+        request.setProductId("productId");
+        request.setInstitutionUpdate(new InstitutionUpdate());
+        Map<String, String> map = mailParametersMapper.getRegistrationRequestParameter(user, request, "");
+        Assertions.assertNotNull(map);
+    }
+
+    @Test
     void getOnboardingNotificationPath(){
         when(mailTemplateConfig.getNotificationPath()).thenReturn("path");
         Assertions.assertNotNull(mailParametersMapper.getOnboardingNotificationPath());
