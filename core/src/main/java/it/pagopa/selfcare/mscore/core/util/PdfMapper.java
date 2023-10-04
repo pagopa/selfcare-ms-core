@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.PricingPlan;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.MANAGER_EMAIL_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_IO;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.NONE)
@@ -154,21 +156,23 @@ public class PdfMapper {
     }
 
     private static void decodePricingPlan(String pricingPlan, String productId, Map<String, Object> map) {
-        if ("FA".equals(pricingPlan)) {
+        if (PricingPlan.FA.name().equals(pricingPlan)) {
             map.put("pricingPlanFastCheckbox", "X");
             map.put("pricingPlanBaseCheckbox", "");
             map.put("pricingPlanPremiumCheckbox", "");
-            map.put("pricingPlan", "FAST");
-        } else if ("prod-io".equalsIgnoreCase(productId)) {
+            map.put("pricingPlan", PricingPlan.FA.getValue());
+            return;
+        }
+        if (PROD_IO.getValue().equalsIgnoreCase(productId)) {
             map.put("pricingPlanFastCheckbox", "");
             map.put("pricingPlanBaseCheckbox", "X");
             map.put("pricingPlanPremiumCheckbox", "");
-            map.put("pricingPlan", "BASE");
+            map.put("pricingPlan", PricingPlan.BASE.getValue());
         } else {
             map.put("pricingPlanFastCheckbox", "");
             map.put("pricingPlanBaseCheckbox", "");
             map.put("pricingPlanPremiumCheckbox", "X");
-            map.put("pricingPlan", "PREMIUM");
+            map.put("pricingPlan", PricingPlan.PREMIUM.getValue());
         }
     }
 
