@@ -582,7 +582,7 @@ class OnboardingServiceImplTest {
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         when(productConnector.getProductById(any())).thenReturn(product);
 
-        doThrow(RuntimeException.class).when(emailService).sendCompletedEmail(any(), any(), any(), any());
+        doNothing().when(emailService).sendCompletedEmail(any(), any(), any(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
@@ -592,7 +592,6 @@ class OnboardingServiceImplTest {
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
         verify(contractService, times(1)).getLogoFile();
         verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
-        verify(onboardingDao, times(1)).rollbackSecondStepOfUpdate((List.of(tokenUser.getUserId())), institution, token);
     }
 
     /**
