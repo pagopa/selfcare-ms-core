@@ -129,10 +129,15 @@ class ContractServiceTest {
         institution.setRea("rea");
         institution.setBusinessRegisterPlace("place");
         institution.setShareCapital("10000");
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setShareCapital("10000");
+        institutionUpdate.setRea("rea");
+        institutionUpdate.setBusinessRegisterPlace("place");
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("prod-interop");
         request.setSignContract(true);
         request.setProductName("42");
+        request.setInstitutionUpdate(institutionUpdate);
         InstitutionType institutionType = InstitutionType.SA;
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = new ArrayList<>();
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
