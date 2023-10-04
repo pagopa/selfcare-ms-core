@@ -135,19 +135,19 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void sendMailForApprovePT(){
+    void sendMailForRegistrationNotificationApprove(){
         OnboardingRequest onboardingRequest =  new OnboardingRequest();
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setInstitutionType(InstitutionType.PT);
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForApprove(new User(), onboardingRequest, "token"));
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForRegistrationNotificationApprove(new User(), onboardingRequest, "token"));
     }
 
     @Test
-    void sendMailToPT(){
+    void sendMailForRegistration(){
         Institution institution =  new Institution();
         institution.setDigitalAddress("42");
-        Assertions.assertDoesNotThrow(() -> notificationService.sendMailToPT(new User(), institution , new OnboardingRequest()));
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForRegistration(new User(), institution , new OnboardingRequest()));
     }
 
     @Test

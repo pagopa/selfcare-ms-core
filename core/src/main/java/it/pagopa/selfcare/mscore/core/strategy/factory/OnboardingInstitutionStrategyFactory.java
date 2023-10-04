@@ -217,9 +217,11 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
+                if(!InstitutionType.PT.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
                     notificationService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
-                    if(InstitutionType.PT.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())){
-                        notificationService.sendMailToPT(user, strategyInput.getInstitution(), strategyInput.getOnboardingRequest());
+                } else {
+                    notificationService.sendMailForRegistration(user, strategyInput.getInstitution(), strategyInput.getOnboardingRequest());
+                    notificationService.sendMailForRegistrationNotificationApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
                     }
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),

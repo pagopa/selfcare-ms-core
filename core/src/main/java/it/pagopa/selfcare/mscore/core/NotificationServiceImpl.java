@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
@@ -102,16 +101,22 @@ public class NotificationServiceImpl implements NotificationService {
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
         List<String> destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
         log.info(DESTINATION_MAIL_LOG, destinationMail);
-        if (!InstitutionType.PT.equals(request.getInstitutionUpdate().getInstitutionType())) {
-            emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, null, request.getProductName(), mailParameters, null);
-        } else {
-            emailConnector.sendMail(mailParametersMapper.getRegistrationNotificationAdminPath(), destinationMail, null, request.getProductName(), mailParameters, null);
-        }
+        emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, null, request.getProductName(), mailParameters, null);
         log.info("onboarding-complete-email-notification Email successful sent");
 
     }
 
-    public void sendMailToPT(User user,Institution institution, OnboardingRequest request) {
+    public void sendMailForRegistrationNotificationApprove(User user, OnboardingRequest request, String token) {
+        Map<String, String> mailParameters;
+        mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
+        log.debug(MAIL_PARAMETER_LOG, mailParameters);
+        List<String> destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
+        log.info(DESTINATION_MAIL_LOG, destinationMail);
+        emailConnector.sendMail(mailParametersMapper.getRegistrationNotificationAdminPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        log.info("onboarding-registration-email-notification Email successful sent");
+    }
+
+    public void sendMailForRegistration(User user, Institution institution, OnboardingRequest request) {
         Map<String, String> mailParameters;
         mailParameters = mailParametersMapper.getRegistrationRequestParameter(user, request);
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
