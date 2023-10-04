@@ -6,10 +6,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Contract;
-import it.pagopa.selfcare.mscore.model.onboarding.ContractImported;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.User;
 
 import java.util.ArrayList;
@@ -46,6 +43,19 @@ public class TestUtils {
         user.setRole(PartyRole.MANAGER);
         token.setUsers(List.of(user));
         return token;
+    }
+
+    public static OnboardingRequest dummyOnboardingRequest() {
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId("prod-io");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
+        onboardingRequest.setBillingRequest(new Billing());
+        onboardingRequest.setUsers(new ArrayList<>());
+        return onboardingRequest;
     }
 
     public static InstitutionUpdate createSimpleInstitutionUpdate() {

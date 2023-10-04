@@ -352,23 +352,6 @@ class OnboardingInstitutionStrategyTest {
     @Test
     void testOnboardingInstitutionGSP() throws IOException {
 
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("prod-io");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -386,14 +369,10 @@ class OnboardingInstitutionStrategyTest {
 
         InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
 
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate1);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("prod-io");
-        onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         UserToOnboard userToOnboard = new UserToOnboard();
@@ -404,7 +383,6 @@ class OnboardingInstitutionStrategyTest {
         Token token1 =new Token();
         token1.setId("id");
         onboardingRollback.setToken(token1);
-        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
 
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.GSP, onboardingRequest.getProductId(), institution)
@@ -567,23 +545,6 @@ class OnboardingInstitutionStrategyTest {
     @Test
     void testOnboardingInstitutionPT() {
 
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("prod-io");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -599,19 +560,13 @@ class OnboardingInstitutionStrategyTest {
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        InstitutionUpdate institutionUpdate1 = TestUtils.createSimpleInstitutionUpdate();
         institutionUpdate1.setInstitutionType(InstitutionType.PT);
 
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate1);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("prod-io");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setTokenType(TokenType.INSTITUTION);
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setId("id");
         userToOnboard.setRole(PartyRole.MANAGER);
@@ -620,7 +575,6 @@ class OnboardingInstitutionStrategyTest {
         Token token1 =new Token();
         token1.setId("id");
         onboardingRollback.setToken(token1);
-        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
 
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.PT, onboardingRequest.getProductId(), institution)
