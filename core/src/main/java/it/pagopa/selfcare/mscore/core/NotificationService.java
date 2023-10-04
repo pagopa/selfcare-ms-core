@@ -25,5 +25,5 @@ public interface NotificationService {
 
     void sendMailForDelegation(String institutionName, String productId, String partnerId);
 
-    void sendMailToPT(User user, Institution institution, OnboardingRequest onboardingRequest, String id);
+    void sendMailToPT(User user, Institution institution, OnboardingRequest onboardingRequest);
 }

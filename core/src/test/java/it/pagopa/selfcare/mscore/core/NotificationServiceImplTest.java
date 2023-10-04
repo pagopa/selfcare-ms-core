@@ -147,7 +147,7 @@ class NotificationServiceImplTest {
     void sendMailToPT(){
         Institution institution =  new Institution();
         institution.setDigitalAddress("42");
-        Assertions.assertDoesNotThrow(() -> notificationService.sendMailToPT(new User(), institution , new OnboardingRequest(), "token"));
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailToPT(new User(), institution , new OnboardingRequest()));
     }
 
     @Test

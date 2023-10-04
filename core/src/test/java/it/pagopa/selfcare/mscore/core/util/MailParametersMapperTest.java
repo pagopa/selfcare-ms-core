@@ -83,7 +83,7 @@ class MailParametersMapperTest {
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("productId");
         request.setInstitutionUpdate(new InstitutionUpdate());
-        Map<String, String> map = mailParametersMapper.getRegistrationRequestParameter(user, request, "");
+        Map<String, String> map = mailParametersMapper.getRegistrationRequestParameter(user, request);
         Assertions.assertNotNull(map);
     }
 

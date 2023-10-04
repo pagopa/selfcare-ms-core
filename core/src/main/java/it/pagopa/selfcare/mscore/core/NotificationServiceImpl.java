@@ -111,9 +111,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     }
 
-    public void sendMailToPT(User user,Institution institution, OnboardingRequest request, String token) {
+    public void sendMailToPT(User user,Institution institution, OnboardingRequest request) {
         Map<String, String> mailParameters;
-        mailParameters = mailParametersMapper.getRegistrationRequestParameter(user, request, token);
+        mailParameters = mailParametersMapper.getRegistrationRequestParameter(user, request);
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
         List<String> destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                 ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());

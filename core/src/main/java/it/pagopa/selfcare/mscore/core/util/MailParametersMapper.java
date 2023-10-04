@@ -54,7 +54,7 @@ public class MailParametersMapper {
         return map;
     }
 
-    public Map<String, String> getRegistrationRequestParameter(User user, OnboardingRequest request, String token) {
+    public Map<String, String> getRegistrationRequestParameter(User user, OnboardingRequest request) {
         Map<String, String> map = new HashMap<>();
         if(user.getName()!=null) {
             map.put(mailTemplateConfig.getNotificationRequesterName(), user.getName());
