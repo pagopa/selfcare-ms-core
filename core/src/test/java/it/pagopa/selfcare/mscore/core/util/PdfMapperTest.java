@@ -1004,7 +1004,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(18, stringObjectMap.size());
     }
 
     /**
@@ -1071,7 +1071,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(18, stringObjectMap.size());
     }
 
     /**
@@ -1157,7 +1157,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(18, stringObjectMap.size());
     }
 
     /**
@@ -1242,7 +1242,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(15, stringObjectMap.size());
+        assertEquals(17, stringObjectMap.size());
     }
 
     /**
@@ -1327,7 +1327,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(15, stringObjectMap.size());
+        assertEquals(17, stringObjectMap.size());
     }
     @Test
     void testSetupProdPNData() {
