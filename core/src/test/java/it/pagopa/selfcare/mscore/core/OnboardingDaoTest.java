@@ -266,6 +266,37 @@ class OnboardingDaoTest {
         verify(tokenConnector).save(any(), any());
     }
 
+    @Test
+    void testNewUserStandard(){
+        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
+                .thenReturn(new Institution());
+
+        Token token = new Token();
+        token.setId("tokenId");
+        when(tokenConnector.save(any(), any())).thenReturn(token);
+
+        ArrayList<String> toUpdate = new ArrayList<>();
+        ArrayList<String> toDelete = new ArrayList<>();
+
+        OnboardingRequest onboardingRequest = TestUtils.createDummyOnboardingRequest();
+
+        UserToOnboard user = new UserToOnboard();
+        List<UserToOnboard> users = new ArrayList<>();
+        users.add(user);
+        onboardingRequest.setUsers(users);
+
+        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
+
+        OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, new Institution(),
+                new ArrayList<>(), null);
+
+        Onboarding onboarding = actualPersistResult.getOnboarding();
+        assertEquals(RelationshipState.PENDING, onboarding.getStatus());
+        assertEquals("42", onboarding.getProductId());
+        assertEquals("Pricing Plan", onboarding.getPricingPlan());
+        assertSame(onboardingRequest.getBillingRequest(), onboarding.getBilling());
+    }
+
     /**
      * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
      */
