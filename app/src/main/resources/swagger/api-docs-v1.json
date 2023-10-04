@@ -3248,7 +3248,7 @@
         } ]
       }
     },
-    "/onboarding/" : {
+    "/onboarding" : {
       "head" : {
         "tags" : [ "Onboarding" ],
         "summary" : "verify if onboardedProduct is already onboarded for institution",
