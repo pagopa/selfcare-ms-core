@@ -70,7 +70,7 @@ public class TestUtils {
         return institutionUpdate;
     }
 
-    public static InstitutionUpdate createSimpleInstitutionUpdatePG() {
+    public static InstitutionUpdate createSimpleInstitutionUpdatePT() {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
         institutionUpdate.setBusinessRegisterPlace("Business Register Place");
@@ -80,7 +80,7 @@ public class TestUtils {
         institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
         institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PG);
+        institutionUpdate.setInstitutionType(InstitutionType.PT);
         institutionUpdate
                 .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
         institutionUpdate.setRea("Rea");
