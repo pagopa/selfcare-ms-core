@@ -24,4 +24,6 @@ public interface NotificationService {
     void sendRejectMail(File logo, Institution institution, Product product);
 
     void sendMailForDelegation(String institutionName, String productId, String partnerId);
+
+    void sendMailToPT(User user, Institution institution, OnboardingRequest onboardingRequest, String id);
 }

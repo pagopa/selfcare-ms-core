@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
@@ -101,8 +102,24 @@ public class NotificationServiceImpl implements NotificationService {
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
         List<String> destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
         log.info(DESTINATION_MAIL_LOG, destinationMail);
-        emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        if (!InstitutionType.PT.equals(request.getInstitutionUpdate().getInstitutionType())) {
+            emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        } else {
+            emailConnector.sendMail(mailParametersMapper.getRegistrationNotificationAdminPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        }
         log.info("onboarding-complete-email-notification Email successful sent");
+
+    }
+
+    public void sendMailToPT(User user,Institution institution, OnboardingRequest request, String token) {
+        Map<String, String> mailParameters;
+        mailParameters = mailParametersMapper.getRegistrationRequestParameter(user, request, token);
+        log.debug(MAIL_PARAMETER_LOG, mailParameters);
+        List<String> destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
+                ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
+        log.info(DESTINATION_MAIL_LOG, destinationMail);
+        emailConnector.sendMail(mailParametersMapper.getRegistrationRequestPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        log.info("registration-request-email Email successful sent");
 
     }
 
