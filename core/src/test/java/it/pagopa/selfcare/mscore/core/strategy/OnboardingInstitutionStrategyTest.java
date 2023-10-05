@@ -352,6 +352,49 @@ class OnboardingInstitutionStrategyTest {
     @Test
     void testOnboardingInstitutionGSP() throws IOException {
 
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode(
+                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
+        billing.setVatNumber("42");
+
+        Institution institution = new Institution();
+        institution.setOrigin("IPA");
+        institution.setBilling(billing);
+        institution.setInstitutionType(InstitutionType.GSP);
+
+        Billing billing1 = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+
+        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+
+        OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
+        onboardingRequest.setBillingRequest(billing1);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
+        UserToOnboard userToOnboard = new UserToOnboard();
+        userToOnboard.setId("id");
+        userToOnboard.setRole(PartyRole.MANAGER);
+        onboardingRequest.setUsers(List.of(userToOnboard));
+        OnboardingRollback onboardingRollback = new OnboardingRollback();
+        Token token1 =new Token();
+        token1.setId("id");
+        onboardingRollback.setToken(token1);
+        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+
+        assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.GSP, onboardingRequest.getProductId(), institution)
+                .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    /**
+     *Method under test: {@link OnboardingServiceImpl#onboardingInstitution(OnboardingRequest, SelfCareUser)}
+     */
+    @Test
+    void testOnboardingInstitutionGSP2() throws IOException {
+
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
         Token token = new Token();
@@ -493,6 +536,49 @@ class OnboardingInstitutionStrategyTest {
         assertThrows(InvalidRequestException.class,
                 () -> strategyFactory.retrieveOnboardingInstitutionStrategy(institutionUpdate.getInstitutionType(), onboardingRequest.getProductId(), institution)
                         .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingInstitution(OnboardingRequest, SelfCareUser)}
+     */
+    @Test
+    void testOnboardingInstitutionPT() {
+
+
+        Billing billing = new Billing();
+        billing.setPublicServices(true);
+        billing.setRecipientCode(
+                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
+        billing.setVatNumber("42");
+
+        Institution institution = new Institution();
+        institution.setOrigin("IPA");
+        institution.setBilling(billing);
+        institution.setInstitutionType(InstitutionType.PT);
+
+        Billing billing1 = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+
+        InstitutionUpdate institutionUpdate1 = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate1.setInstitutionType(InstitutionType.PT);
+
+        OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
+        onboardingRequest.setBillingRequest(billing1);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
+        UserToOnboard userToOnboard = new UserToOnboard();
+        userToOnboard.setId("id");
+        userToOnboard.setRole(PartyRole.MANAGER);
+        onboardingRequest.setUsers(List.of(userToOnboard));
+        OnboardingRollback onboardingRollback = new OnboardingRollback();
+        Token token1 =new Token();
+        token1.setId("id");
+        onboardingRollback.setToken(token1);
+        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+
+        assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.PT, onboardingRequest.getProductId(), institution)
+                .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
 
     }
 
