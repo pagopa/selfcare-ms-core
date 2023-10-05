@@ -415,7 +415,8 @@ public class OnboardingDao {
     private boolean isValidStateChangeForToken(RelationshipState fromState, RelationshipState toState) {
         switch (fromState) {
             case TOBEVALIDATED:
-                return RelationshipState.PENDING == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
+                return RelationshipState.PENDING == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState
+                        || RelationshipState.ACTIVE == toState;
             case PENDING:
                 return RelationshipState.ACTIVE == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
             default:
