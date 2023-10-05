@@ -45,4 +45,7 @@ public class MailTemplateConfig {
     private String rejectProductName;
     private String rejectOnboardingUrlPlaceholder;
     private String rejectOnboardingUrlValue;
+
+    private String registrationRequestPath;
+    private String registrationNotificationAdminPath;
 }

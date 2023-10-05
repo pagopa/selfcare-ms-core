@@ -54,6 +54,20 @@ public class MailParametersMapper {
         return map;
     }
 
+    public Map<String, String> getRegistrationRequestParameter(User user, OnboardingRequest request) {
+        Map<String, String> map = new HashMap<>();
+        if(user.getName()!=null) {
+            map.put(mailTemplateConfig.getNotificationRequesterName(), user.getName());
+        }
+        if(user.getFamilyName()!=null) {
+            map.put(mailTemplateConfig.getNotificationRequesterSurname(), user.getFamilyName());
+        }
+        if(request.getInstitutionUpdate()!=null) {
+            map.put(mailTemplateConfig.getInstitutionDescription(), request.getInstitutionUpdate().getDescription());
+        }
+        return map;
+    }
+
     public Map<String, String> getDelegationNotificationParameter(String institutionName, String productName) {
         Map<String, String> map = new HashMap<>();
         map.put(mailTemplateConfig.getNotificationProductName(), productName);
@@ -63,6 +77,14 @@ public class MailParametersMapper {
 
     public String getOnboardingNotificationPath() {
         return mailTemplateConfig.getNotificationPath();
+    }
+
+    public String getRegistrationRequestPath() {
+        return mailTemplateConfig.getRegistrationRequestPath();
+    }
+
+    public String getRegistrationNotificationAdminPath() {
+        return mailTemplateConfig.getRegistrationNotificationAdminPath();
     }
 
     public String getDelegationNotificationPath() {

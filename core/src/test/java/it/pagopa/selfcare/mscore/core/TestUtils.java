@@ -45,6 +45,19 @@ public class TestUtils {
         return token;
     }
 
+    public static OnboardingRequest dummyOnboardingRequest() {
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId("prod-io");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
+        onboardingRequest.setBillingRequest(new Billing());
+        onboardingRequest.setUsers(new ArrayList<>());
+        return onboardingRequest;
+    }
+
     public static InstitutionUpdate createSimpleInstitutionUpdate() {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");

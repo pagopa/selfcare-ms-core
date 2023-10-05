@@ -19,9 +19,13 @@ public interface NotificationService {
 
     void sendMailForApprove(User user, OnboardingRequest request, String token);
 
+    void sendMailForRegistrationNotificationApprove(User user, OnboardingRequest request, String token);
+
     void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo);
 
     void sendRejectMail(File logo, Institution institution, Product product);
 
     void sendMailForDelegation(String institutionName, String productId, String partnerId);
+
+    void sendMailForRegistration(User user, Institution institution, OnboardingRequest onboardingRequest);
 }
