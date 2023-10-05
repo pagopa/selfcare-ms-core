@@ -1770,8 +1770,7 @@ class OnboardingDaoTest {
         onboardingOperatorsRequest.setUsers(userToOnboardList);
         assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
         verify(userConnector).findById(any());
-        verify(userConnector).deleteById(any());
-        verify(userConnector).findAndRemoveProduct(any(), any(),any());
+        verify(userConnector, times(2)).findAndRemoveProduct(any(), any(),any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
                any(), any());
     }
@@ -1912,7 +1911,6 @@ class OnboardingDaoTest {
         assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
         verify(userConnector).findAndCreate(any(), any());
         verify(userConnector).findById(any());
-        verify(userConnector).deleteById(any());
         verify(onboardedUser).getId();
     }
 
