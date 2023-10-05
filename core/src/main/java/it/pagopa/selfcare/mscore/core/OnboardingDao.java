@@ -265,7 +265,7 @@ public class OnboardingDao {
             OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institution, request, tokenId);
             productMap.put(userToOnboard.getId(), currentProduct);
         } catch (ResourceNotFoundException e) {
-            createNewUser(userToOnboard, institution, request, tokenId, null);
+            createNewUser(userToOnboard, institution, request, tokenId, Optional.empty());
         }
     }
 
