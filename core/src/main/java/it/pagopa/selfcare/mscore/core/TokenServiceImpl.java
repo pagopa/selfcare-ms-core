@@ -73,12 +73,14 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public TokenRelationships retrieveToken(String tokenId) {
+    public TokenRelationships retrieveToken(String tokenId, boolean existingOnly) {
+        log.trace("retrieveToken start");
+        log.debug("retrieveToken tokenId = {}, existingOnly = {}", tokenId, existingOnly);
         Token token = tokenConnector.findById(tokenId);
         List<OnboardedUser> users;
         if (token.getUsers() != null) {
             var ids = token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
-            users = userService.findAllByIds(ids);
+                users = userService.findAllByIds(ids, existingOnly);
         } else {
             users = Collections.emptyList();
         }
@@ -90,8 +92,16 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public List<Token> getTokensByProductId(String productId, Integer page, Integer size) {
-        return tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.PENDING),
+    public List<TokenRelationships> getTokensByProductId(String productId, Integer page, Integer size) {
+        log.trace("getTokensByProductId start");
+        log.debug("getTokensByProductId productId = {}, page = {}, size = {}", productId, page, size);
+        List<Token> tokensByStatusAndProduct = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.PENDING),
                 productId, page, size);
+        List<TokenRelationships> tokens = tokensByStatusAndProduct.stream()
+                .map(token -> retrieveToken(token.getId(), true))
+                .collect(Collectors.toList());
+        log.debug("getTokensByProductId result = {}", tokens);
+        log.trace("getTokensByProductId end");
+        return tokens;
     }
 }

@@ -11,15 +11,19 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.BulkPartiesSeed;
+import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -28,22 +32,28 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ContextConfiguration(classes = {ManagementController.class})
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class ManagementControllerTest {
-    @MockBean
+    @Mock
     private InstitutionService institutionService;
 
-    @Autowired
+    @InjectMocks
     private ManagementController managementController;
 
-    @MockBean
+    @Mock
     private TokenService tokenService;
 
-    @MockBean
+    @Mock
     private UserService userService;
+
+    @Spy
+    private TokenMapper tokenMapper = new TokenMapperImpl();
 
     /**
      * Method under test: {@link ManagementController#getInstitutionAttributes(String)}
@@ -178,27 +188,6 @@ class ManagementControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content().string("{\"items\":[]}"));
-    }
-
-    /**
-     * Method under test: {@link ManagementController#getToken(String)}
-     */
-    @Test
-    void testGetToken2() throws Exception {
-        TokenRelationships tokenRelationships = new TokenRelationships();
-        tokenRelationships.setChecksum("Checksum");
-        tokenRelationships.setInstitutionId("42");
-        tokenRelationships.setProductId("42");
-        tokenRelationships.setTokenId("42");
-        tokenRelationships.setUsers(new ArrayList<>());
-        when(tokenService.retrieveToken(any())).thenReturn(tokenRelationships);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/tokens/{tokenId}", "42");
-        MockMvcBuilders.standaloneSetup(managementController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"checksum\":\"Checksum\",\"legals\":[]}"));
     }
 
     /**
@@ -420,15 +409,18 @@ class ManagementControllerTest {
         tokenRelationships.setInstitutionId("42");
         tokenRelationships.setProductId("42");
         tokenRelationships.setTokenId("42");
-        tokenRelationships.setUsers(new ArrayList<>());
-        when(tokenService.retrieveToken(any())).thenReturn(tokenRelationships);
+        OnboardedUser user = mockInstance(new OnboardedUser());
+        UserBinding binding = mockInstance(new UserBinding());
+        user.setBindings(List.of(binding));
+        tokenRelationships.setUsers(List.of(user));
+        when(tokenService.retrieveToken(any(), anyBoolean())).thenReturn(tokenRelationships);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/tokens/{tokenId}", "42");
         MockMvcBuilders.standaloneSetup(managementController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"checksum\":\"Checksum\",\"legals\":[]}"));
+                .andExpect(jsonPath("$.productId", is(tokenRelationships.getProductId())));
     }
 
     /**

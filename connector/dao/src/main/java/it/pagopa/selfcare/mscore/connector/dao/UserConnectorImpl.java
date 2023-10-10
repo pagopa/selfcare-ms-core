@@ -81,7 +81,7 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findAllByIds(List<String> users) {
+    public List<OnboardedUser> findAllByIds(List<String> users, boolean existingOnly) {
         List<OnboardedUser> userList = new ArrayList<>();
         Set<String> userIds = new HashSet<>(users);
         repository.findAllById(users)
@@ -89,7 +89,7 @@ public class UserConnectorImpl implements UserConnector {
                     userList.add(userMapper.toOnboardedUser(userEntity));
                     userIds.remove(userEntity.getId());
                 });
-        if (users.size() != userList.size()) {
+        if (users.size() != userList.size() && !existingOnly) {
             throw new ResourceNotFoundException(String.format(USERS_NOT_FOUND_ERROR.getMessage(), String.join(",", userIds)), USERS_NOT_FOUND_ERROR.getCode());
         }
         return userList;

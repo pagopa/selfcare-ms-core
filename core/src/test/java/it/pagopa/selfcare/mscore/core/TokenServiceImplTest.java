@@ -215,10 +215,10 @@ class TokenServiceImplTest {
 
         when(tokenConnector.findById(any()))
                 .thenReturn(tokenMock);
-        when(userService.findAllByIds(any()))
+        when(userService.findAllByIds(any(), anyBoolean()))
                 .thenReturn(onboardedUsersMock);
         // When
-        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId());
+        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId(), false);
         // Then
         assertNotNull(result);
         assertEquals(tokenMock.getId(), result.getTokenId());
@@ -230,7 +230,7 @@ class TokenServiceImplTest {
         verify(tokenConnector, times(1))
                 .findById(tokenMock.getId());
         verify(userService, times(1))
-                .findAllByIds(List.of(tokenMock.getUsers().get(0).getUserId()));
+                .findAllByIds(List.of(tokenMock.getUsers().get(0).getUserId()), false);
     }
 
     @Test
@@ -241,7 +241,7 @@ class TokenServiceImplTest {
         when(tokenConnector.findById(any()))
                 .thenReturn(tokenMock);
         // When
-        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId());
+        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId(), false);
         // Then
         assertNotNull(result);
         assertEquals(tokenMock.getId(), result.getTokenId());
@@ -276,7 +276,7 @@ class TokenServiceImplTest {
     void testInstitutionsInstitutionsByProductId() {
         List<Token> tokens = new ArrayList<>();
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(tokens);
-        List<Token> tokensResult = tokenServiceImpl.getTokensByProductId("id", 0, 1);
+        List<TokenRelationships> tokensResult = tokenServiceImpl.getTokensByProductId("id", 0, 1);
         assertTrue(tokensResult.isEmpty());
     }
 }

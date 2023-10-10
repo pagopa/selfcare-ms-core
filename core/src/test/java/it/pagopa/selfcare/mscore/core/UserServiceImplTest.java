@@ -174,27 +174,27 @@ class UserServiceImplTest {
     }
 
     /**
-     * Method under test: {@link UserServiceImpl#findAllByIds(List)}
+     * Method under test: {@link UserService#findAllByIds(List, boolean)}
      */
     @Test
     void testFindAllByIds() {
-        assertTrue(userServiceImpl.findAllByIds(new ArrayList<>()).isEmpty());
+        assertTrue(userServiceImpl.findAllByIds(new ArrayList<>(), false).isEmpty());
     }
 
     /**
-     * Method under test: {@link UserServiceImpl#findAllByIds(List)}
+     * Method under test: {@link UserService#findAllByIds(List, boolean)}
      */
     @Test
     void testFindAllByIds2() {
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        when(userConnector.findAllByIds(any())).thenReturn(onboardedUserList);
+        when(userConnector.findAllByIds(any(), anyBoolean())).thenReturn(onboardedUserList);
 
         ArrayList<String> stringList = new ArrayList<>();
         stringList.add("foo");
-        List<OnboardedUser> actualFindAllByIdsResult = userServiceImpl.findAllByIds(stringList);
+        List<OnboardedUser> actualFindAllByIdsResult = userServiceImpl.findAllByIds(stringList, false);
         assertSame(onboardedUserList, actualFindAllByIdsResult);
         assertTrue(actualFindAllByIdsResult.isEmpty());
-        verify(userConnector).findAllByIds(any());
+        verify(userConnector).findAllByIds(any(), eq(false));
     }
 
     @Test

@@ -50,13 +50,12 @@ public interface UserConnector {
 
     void findAndRemoveProduct(String userId, String institutionId, OnboardedProduct product);
 
-    List<OnboardedUser> findAllByIds(List<String> users);
+    List<OnboardedUser> findAllByIds(List<String> users, boolean existingOnly);
 
     List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
 
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 
     List<UserInfo> findByInstitutionId(String institutionId);
-
 
 }

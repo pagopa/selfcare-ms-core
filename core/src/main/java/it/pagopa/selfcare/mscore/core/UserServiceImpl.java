@@ -43,11 +43,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<OnboardedUser> findAllByIds(List<String> users) {
+    public List<OnboardedUser> findAllByIds(List<String> users, boolean existingOnly) {
         if (users == null || users.isEmpty()) {
             return Collections.emptyList();
         }
-        return userConnector.findAllByIds(users);
+        return userConnector.findAllByIds(users, existingOnly);
     }
 
     @Override

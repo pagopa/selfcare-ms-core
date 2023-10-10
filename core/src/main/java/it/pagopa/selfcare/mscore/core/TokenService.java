@@ -11,10 +11,10 @@ public interface TokenService {
 
     Token verifyOnboarding(String institutionId, String productId);
 
-    TokenRelationships retrieveToken(String tokenId);
+    TokenRelationships retrieveToken(String tokenId, boolean existingOnly);
 
     Token getToken(String institutionId, String productId);
 
-    List<Token> getTokensByProductId(String productId, Integer page, Integer size);
+    List<TokenRelationships> getTokensByProductId(String productId, Integer page, Integer size);
 
 }

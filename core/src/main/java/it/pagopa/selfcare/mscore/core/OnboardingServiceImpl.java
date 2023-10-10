@@ -194,7 +194,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         checkAndHandleExpiring(token);
         User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
 
-        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
+        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()), false);
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));

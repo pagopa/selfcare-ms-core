@@ -554,7 +554,7 @@ class UserConnectorImplTest {
         userEntities.add(new UserEntity());
         when(userRepository.findAllById(any())).thenReturn(userEntities);
         List<String> ids = new ArrayList<>();
-        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findAllByIds(ids));
+        assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findAllByIds(ids, false));
     }
 
     @Test
@@ -566,7 +566,7 @@ class UserConnectorImplTest {
         when(userRepository.findAllById(any())).thenReturn(userEntities);
         List<String> users = new ArrayList<>();
         users.add("id1");
-        assertNotNull(userConnectorImpl.findAllByIds(users));
+        assertNotNull(userConnectorImpl.findAllByIds(users, false));
     }
 
 
