@@ -101,6 +101,27 @@ public class TestUtils {
         institutionUpdate.setZipCode("21654");
         return institutionUpdate;
     }
+    public static InstitutionUpdate createSimpleInstitutionUpdateSA() {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate
+                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.SA);
+        institutionUpdate
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+        return institutionUpdate;
+    }
 
     public static DataProtectionOfficer createSimpleDataProtectionOfficer() {
 
@@ -139,11 +160,25 @@ public class TestUtils {
     }
 
     public static Institution dummyInstitution() {
-        Institution expectedInstitution = new Institution();
-        expectedInstitution.setId("institutionId");
-        expectedInstitution.setDescription("description");
-        expectedInstitution.setParentDescription("parentDescription");
-        return expectedInstitution;
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setBusinessRegisterPlace("Business Register Place");
+        institution
+                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
+        institution.setDescription("The characteristics of someone or something");
+        institution.setDigitalAddress("42 Main St");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setImported(true);
+        institution.setInstitutionType(InstitutionType.PA);
+        institution
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
+        institution.setRea("Rea");
+        institution.setShareCapital("Share Capital");
+        institution.setSupportEmail("jane.doe@example.org");
+        institution.setSupportPhone("6625550144");
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        return institution;
     }
 
     public static User createSimpleUser() {

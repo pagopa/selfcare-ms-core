@@ -45,10 +45,10 @@ public class OnboardingInstitutionUtils {
         log.info("END - checkIfProductAlreadyOnboarded without error");
     }
 
-    public static void validateOnboarding(Billing billing) {
+    public static void validateOnboarding(Billing billing, boolean checkRecipientCode) {
         if (billing == null
                 || StringUtils.isEmpty(billing.getVatNumber())
-                || StringUtils.isEmpty(billing.getRecipientCode())) {
+                || (checkRecipientCode && StringUtils.isEmpty(billing.getRecipientCode()))) {
             throw new InvalidRequestException(CustomError.ONBOARDING_BILLING_ERROR.getCode(), CustomError.ONBOARDING_BILLING_ERROR.getMessage());
         }
     }
@@ -257,9 +257,4 @@ public class OnboardingInstitutionUtils {
         return onboardedProduct;
     }
 
-    public static void validateVatNumber(String vatNumber) {
-        if (StringUtils.isEmpty(vatNumber)){
-            throw new InvalidRequestException(CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getCode(), CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getMessage());
-        }
-    }
 }
