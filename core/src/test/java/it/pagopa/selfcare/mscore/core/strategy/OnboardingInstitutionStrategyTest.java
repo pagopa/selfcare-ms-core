@@ -226,45 +226,20 @@ class OnboardingInstitutionStrategyTest {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
+        Token token = TestUtils.dummyToken();
         token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
 
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode(
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
-        billing.setVatNumber("42");
-
-        Institution institution = new Institution();
+        Institution institution = TestUtils.dummyInstitution();
         institution.setInstitutionType(InstitutionType.PA);
 
-        Billing billing1 = TestUtils.createSimpleBilling();
+        Billing billing = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
-        institutionUpdate1.setImported(true);
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing1);
+        OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
+
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setContractCreatedAt(OffsetDateTime.now());
@@ -275,9 +250,7 @@ class OnboardingInstitutionStrategyTest {
         onboardingRequest.setUsers(List.of(userToOnboard));
 
         OnboardingRollback onboardingRollback = new OnboardingRollback();
-        Token token1 =new Token();
-        token1.setId("id");
-        onboardingRollback.setToken(token1);
+        onboardingRollback.setToken(token);
         when(onboardingDao.persistComplete(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
 
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(institutionUpdate.getInstitutionType(), institution)
@@ -286,47 +259,22 @@ class OnboardingInstitutionStrategyTest {
     @Test
     void shouldOnboardInstitutionSuccessWithoutContractAndInstitutionTypeSA() {
 
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdateSA();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
+        Token token = TestUtils.dummyToken();
         token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode(
-                "START - checkIfProductAlreadyOnboarded for institution having externalId: {} and productId: {}");
-        billing.setVatNumber("42");
 
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.SA);
 
-        Billing billing1 = TestUtils.createSimpleBilling();
+        Billing billing = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
-        institutionUpdate1.setImported(true);
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing1);
+        OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
         onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
+
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setContractCreatedAt(OffsetDateTime.now());
@@ -337,9 +285,7 @@ class OnboardingInstitutionStrategyTest {
         onboardingRequest.setUsers(List.of(userToOnboard));
 
         OnboardingRollback onboardingRollback = new OnboardingRollback();
-        Token token1 =new Token();
-        token1.setId("id");
-        onboardingRollback.setToken(token1);
+        onboardingRollback.setToken(token);
         when(onboardingDao.persistComplete(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
 
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(institutionUpdate.getInstitutionType(), institution)
@@ -367,7 +313,7 @@ class OnboardingInstitutionStrategyTest {
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
 
         OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -427,7 +373,7 @@ class OnboardingInstitutionStrategyTest {
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -682,6 +628,7 @@ class OnboardingInstitutionStrategyTest {
         Contract contract = TestUtils.createSimpleContract();
 
         InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        institutionUpdate1.setInstitutionType(InstitutionType.PA);
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -812,6 +759,7 @@ class OnboardingInstitutionStrategyTest {
         Contract contract = TestUtils.createSimpleContract();
 
         InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        institutionUpdate1.setInstitutionType(InstitutionType.PA);
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
