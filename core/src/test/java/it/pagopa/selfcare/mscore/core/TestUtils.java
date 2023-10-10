@@ -161,6 +161,9 @@ public class TestUtils {
 
     public static Institution dummyInstitution() {
         Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setDescription("description");
+        institution.setParentDescription("parentDescription");
         institution.setAddress("42 Main St");
         institution.setBusinessRegisterPlace("Business Register Place");
         institution
