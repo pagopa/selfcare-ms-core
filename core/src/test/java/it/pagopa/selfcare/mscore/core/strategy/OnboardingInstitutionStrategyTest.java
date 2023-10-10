@@ -367,7 +367,7 @@ class OnboardingInstitutionStrategyTest {
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
 
         OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -427,7 +427,7 @@ class OnboardingInstitutionStrategyTest {
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -682,6 +682,7 @@ class OnboardingInstitutionStrategyTest {
         Contract contract = TestUtils.createSimpleContract();
 
         InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        institutionUpdate1.setInstitutionType(InstitutionType.PA);
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -812,6 +813,7 @@ class OnboardingInstitutionStrategyTest {
         Contract contract = TestUtils.createSimpleContract();
 
         InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        institutionUpdate1.setInstitutionType(InstitutionType.PA);
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);

@@ -920,7 +920,7 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#validatePaOnboarding(Billing)}
+     * Method under test: {@link OnboardingInstitutionUtils#validateOnboarding(Billing)}
      */
     @Test
     void testValidatePaOnboarding() {
@@ -964,7 +964,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.validatePaOnboarding(onboardingRequest.getBillingRequest());
+        OnboardingInstitutionUtils.validateOnboarding(onboardingRequest.getBillingRequest());
         assertSame(billing, onboardingRequest.getBillingRequest());
         assertTrue(onboardingRequest.getSignContract());
         assertSame(contract, onboardingRequest.getContract());
@@ -977,7 +977,7 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#validatePaOnboarding(Billing)}
+     * Method under test: {@link OnboardingInstitutionUtils#validateOnboarding(Billing)}
      */
     @Test
     void testValidatePaOnboarding4() {
@@ -1021,7 +1021,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validatePaOnboarding(onboardingRequest.getBillingRequest()));
+                () -> OnboardingInstitutionUtils.validateOnboarding(onboardingRequest.getBillingRequest()));
     }
 
     /**
@@ -1543,7 +1543,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingInstitutionUtils.validateSaOnboarding(onboardingRequest.getBillingRequest().getVatNumber());
+        OnboardingInstitutionUtils.validateVatNumber(onboardingRequest.getBillingRequest().getVatNumber());
         assertSame(billing, onboardingRequest.getBillingRequest());
         assertTrue(onboardingRequest.getSignContract());
         assertSame(contract, onboardingRequest.getContract());
@@ -1597,7 +1597,7 @@ class OnboardingInstitutionUtilsTest {
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
         onboardingRequest.setUsers(new ArrayList<>());
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validateSaOnboarding(onboardingRequest.getBillingRequest().getVatNumber()));
+                () -> OnboardingInstitutionUtils.validateVatNumber(onboardingRequest.getBillingRequest().getVatNumber()));
     }
 }
 

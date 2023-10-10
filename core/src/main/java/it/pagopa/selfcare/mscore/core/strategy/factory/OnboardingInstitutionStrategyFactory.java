@@ -138,10 +138,11 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-            if(!InstitutionType.SA.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
-                OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
+            if(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.SA)
+            || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.PT)){
+                OnboardingInstitutionUtils.validateVatNumber(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
             } else {
-                OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
+                OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
             }
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
@@ -154,9 +155,9 @@ public class OnboardingInstitutionStrategyFactory {
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
             if(!InstitutionType.SA.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
-                OnboardingInstitutionUtils.validatePaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
+                OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest());
             } else {
-                OnboardingInstitutionUtils.validateSaOnboarding(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
+                OnboardingInstitutionUtils.validateVatNumber(strategyInput.getOnboardingRequest().getBillingRequest().getVatNumber());
             }
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 

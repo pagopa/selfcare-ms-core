@@ -45,7 +45,7 @@ public class OnboardingInstitutionUtils {
         log.info("END - checkIfProductAlreadyOnboarded without error");
     }
 
-    public static void validatePaOnboarding(Billing billing) {
+    public static void validateOnboarding(Billing billing) {
         if (billing == null
                 || StringUtils.isEmpty(billing.getVatNumber())
                 || StringUtils.isEmpty(billing.getRecipientCode())) {
@@ -257,7 +257,7 @@ public class OnboardingInstitutionUtils {
         return onboardedProduct;
     }
 
-    public static void validateSaOnboarding(String vatNumber) {
+    public static void validateVatNumber(String vatNumber) {
         if (StringUtils.isEmpty(vatNumber)){
             throw new InvalidRequestException(CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getCode(), CustomError.ONBOARDING_BILLING_VATNUMBER_ERROR.getMessage());
         }
