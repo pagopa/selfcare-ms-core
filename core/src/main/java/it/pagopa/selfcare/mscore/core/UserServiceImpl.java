@@ -51,6 +51,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<OnboardedUser> findAllExistingByIds(List<String> users) {
+        if (users == null || users.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return userConnector.findAllByExistingIds(users);
+    }
+
+    @Override
     public List<UserBinding> retrieveBindings(String institutionId, String userId, String[] states, List<String> products) {
 
 

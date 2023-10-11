@@ -551,9 +551,12 @@ class UserConnectorImplTest {
     @Test
     void findAllByIds() {
         List<UserEntity> userEntities = new ArrayList<>();
-        userEntities.add(new UserEntity());
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id");
+        userEntities.add(userEntity);
         when(userRepository.findAllById(any())).thenReturn(userEntities);
         List<String> ids = new ArrayList<>();
+        ids.add("id1");
         assertThrows(ResourceNotFoundException.class, () -> userConnectorImpl.findAllByIds(ids));
     }
 
@@ -561,13 +564,27 @@ class UserConnectorImplTest {
     void findAllByIds2() {
         List<UserEntity> userEntities = new ArrayList<>();
         UserEntity userEntity = new UserEntity();
-        userEntity.setId("id");
+        userEntity.setId("id1");
         userEntities.add(userEntity);
         when(userRepository.findAllById(any())).thenReturn(userEntities);
         List<String> users = new ArrayList<>();
         users.add("id1");
         assertNotNull(userConnectorImpl.findAllByIds(users));
     }
+
+    @Test
+    void findAllExistingByIds2() {
+        List<UserEntity> userEntities = new ArrayList<>();
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id1");
+        userEntities.add(userEntity);
+        when(userRepository.findAllById(any())).thenReturn(userEntities);
+        List<String> users = new ArrayList<>();
+        users.add("id1");
+        assertNotNull(userConnectorImpl.findAllByExistingIds(users));
+    }
+
+
 
 
     /**

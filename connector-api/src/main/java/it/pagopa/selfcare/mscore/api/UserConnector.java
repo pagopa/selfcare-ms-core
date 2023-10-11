@@ -52,11 +52,12 @@ public interface UserConnector {
 
     List<OnboardedUser> findAllByIds(List<String> users);
 
+    List<OnboardedUser> findAllByExistingIds(List<String> users);
+
     List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
 
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 
     List<UserInfo> findByInstitutionId(String institutionId);
-
 
 }
