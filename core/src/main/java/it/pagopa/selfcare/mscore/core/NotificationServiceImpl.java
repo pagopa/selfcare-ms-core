@@ -125,7 +125,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     }
 
-    public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo) {
+    public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo, String templatePath) {
         List<String> destinationMails = new ArrayList<>(getDestinationMails(institution));
         if (managers != null && !managers.isEmpty()) {
             for (User user : managers) {
@@ -138,8 +138,12 @@ public class NotificationServiceImpl implements NotificationService {
             }
         }
         Map<String, String> mailParameter = mailParametersMapper.getCompleteOnbordingMailParameter(product.getTitle());
-        String templatePath = product.getId().equals(PROD_FD.getValue())||product.getId().equals(PROD_FD_GARANTITO.getValue())? mailParametersMapper.getFdOnboardingCompletePath():mailParametersMapper.getOnboardingCompletePath();
         emailConnector.sendMail(templatePath, destinationMails, logo, product.getTitle(), mailParameter, PAGOPA_LOGO_FILENAME);
+    }
+
+    public void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo) {
+        String templatePath = product.getId().equals(PROD_FD.getValue())||product.getId().equals(PROD_FD_GARANTITO.getValue()) ? mailParametersMapper.getFdOnboardingCompletePath() : mailParametersMapper.getOnboardingCompletePath();
+        this.sendCompletedEmail(managers, institution, product, logo, templatePath);
     }
 
     public void sendRejectMail(File logo, Institution institution, Product product) {
