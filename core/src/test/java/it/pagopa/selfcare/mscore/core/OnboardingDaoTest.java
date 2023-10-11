@@ -266,6 +266,37 @@ class OnboardingDaoTest {
         verify(tokenConnector).save(any(), any());
     }
 
+    @Test
+    void testNewUserStandard(){
+        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
+                .thenReturn(new Institution());
+
+        Token token = new Token();
+        token.setId("tokenId");
+        when(tokenConnector.save(any(), any())).thenReturn(token);
+
+        ArrayList<String> toUpdate = new ArrayList<>();
+        ArrayList<String> toDelete = new ArrayList<>();
+
+        OnboardingRequest onboardingRequest = TestUtils.createDummyOnboardingRequest();
+
+        UserToOnboard user = new UserToOnboard();
+        List<UserToOnboard> users = new ArrayList<>();
+        users.add(user);
+        onboardingRequest.setUsers(users);
+
+        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
+
+        OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, new Institution(),
+                new ArrayList<>(), null);
+
+        Onboarding onboarding = actualPersistResult.getOnboarding();
+        assertEquals(RelationshipState.PENDING, onboarding.getStatus());
+        assertEquals("42", onboarding.getProductId());
+        assertEquals("Pricing Plan", onboarding.getPricingPlan());
+        assertSame(onboardingRequest.getBillingRequest(), onboarding.getBilling());
+    }
+
     /**
      * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
      */
@@ -751,46 +782,21 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate2() {
 
+        TokenConnector tokenConnector = mock(TokenConnector.class);
+        UserConnector userConnector = mock(UserConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
 
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
+
+        Token token = TestUtils.dummyToken();
         token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
         token.setStatus(RelationshipState.TOBEVALIDATED);
         Institution institution = new Institution();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, "foo"));
+        assertDoesNotThrow(() ->
+                onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, "foo"));
     }
 
     @Test

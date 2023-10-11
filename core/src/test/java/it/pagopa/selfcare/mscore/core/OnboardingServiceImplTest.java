@@ -371,17 +371,7 @@ class OnboardingServiceImplTest {
         when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Contract contract = new Contract();
-        contract.setPath("Contract Template");
-        OnboardingRequest request = new OnboardingRequest();
-        request.setProductId("42");
-        request.setContract(contract);
-        request.setPricingPlan("C3");
-        request.setProductName("42");
-        request.setInstitutionUpdate(new InstitutionUpdate());
-        request.setBillingRequest(new Billing());
-        request.setSignContract(true);
+        OnboardingRequest request = getOnboardingRequest();
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -393,20 +383,7 @@ class OnboardingServiceImplTest {
         onboarding.setProductId("42");
         onboardingList.add(onboarding);
         institution.setOnboarding(onboardingList);
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
+        Token token = getToken(institutionUpdate);
         TokenUser tokenUser = new TokenUser();
         tokenUser.setUserId("id");
         tokenUser.setRole(PartyRole.MANAGER);
@@ -487,16 +464,7 @@ class OnboardingServiceImplTest {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Contract contract = new Contract();
-        contract.setPath("Contract Template");
-        OnboardingRequest expectedRequest = new OnboardingRequest();
-        expectedRequest.setProductId("42");
-        expectedRequest.setContract(contract);
-        expectedRequest.setPricingPlan("C3");
-        expectedRequest.setProductName("42");
-        expectedRequest.setInstitutionUpdate(new InstitutionUpdate());
-        expectedRequest.setBillingRequest(new Billing());
-        expectedRequest.setSignContract(true);
+        OnboardingRequest expectedRequest = getOnboardingRequest();
 
         Institution institution = new Institution();
         institution.setBilling(new Billing());
@@ -508,20 +476,7 @@ class OnboardingServiceImplTest {
         onboarding.setProductId("42");
         onboardingList.add(onboarding);
         institution.setOnboarding(onboardingList);
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
+        Token token = getToken(institutionUpdate);
         TokenUser tokenUser = new TokenUser();
         tokenUser.setUserId("id");
         tokenUser.setRole(PartyRole.MANAGER);
@@ -553,6 +508,92 @@ class OnboardingServiceImplTest {
         verify(onboardingDao, times(1)).rollbackSecondStepOfUpdate((List.of(tokenUser.getUserId())), institution, token);
     }
 
+    @Test
+    void testApproveOnboardingPT() throws IOException {
+
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+
+        User user = new User();
+        user.setEmail(certifiedField);
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+        user.setName(certifiedField2);
+        user.setWorkContacts(new HashMap<>());
+        User delegate = new User();
+        delegate.setEmail(certifiedField);
+        delegate.setFamilyName(certifiedField1);
+        delegate.setFiscalCode("Fiscal Code3");
+        delegate.setId("43");
+        delegate.setName(certifiedField2);
+        delegate.setWorkContacts(new HashMap<>());
+        User manager = new User();
+        manager.setEmail(certifiedField);
+        manager.setFamilyName(certifiedField1);
+        manager.setFiscalCode("Fiscal Code3");
+        manager.setId("44");
+        manager.setName(certifiedField2);
+        manager.setWorkContacts(new HashMap<>());
+
+        OnboardedUser onboardedUser1 = new OnboardedUser();
+        OnboardedUser onboardedUser2 = new OnboardedUser();
+        onboardedUser1.setId(manager.getId());
+        onboardedUser2.setId(delegate.getId());
+
+        when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user).thenReturn(manager).thenReturn(delegate);
+        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser1, onboardedUser2));
+
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
+
+        Institution institution = new Institution();
+        institution.setBilling(new Billing());
+        institution.setInstitutionType(InstitutionType.PT);
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setTokenId("42");
+        onboarding.setPricingPlan("C3");
+        onboarding.setProductId("42");
+        List<Onboarding> onboardingList = List.of(onboarding);
+        institution.setOnboarding(onboardingList);
+        Token token = getToken(institutionUpdate);
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId("id");
+        tokenUser.setRole(PartyRole.MANAGER);
+        token.setUsers(List.of(tokenUser));
+        Product product = new Product();
+        product.setTitle("42");
+
+        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
+
+        SelfCareUser selfCareUser = mock(SelfCareUser.class);
+        when(selfCareUser.getId()).thenReturn("42");
+        File file = File.createTempFile("file", ".txt");
+        when(contractService.getLogoFile()).thenReturn(file);
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
+        when(productConnector.getProductById(any())).thenReturn(product);
+
+        doNothing().when(emailService).sendCompletedEmail(any(), any(), any(), any());
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
+        verify(productConnector, times(1)).getProductById(token.getProductId());
+        verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId(), EnumSet.allOf(User.Fields.class));
+        verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
+        verify(contractService, times(1)).getLogoFile();
+        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
+    }
+
     /**
      * Method under test: {@link OnboardingServiceImpl#invalidateOnboarding}
      */
@@ -562,21 +603,7 @@ class OnboardingServiceImplTest {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
+        Token token = getToken(institutionUpdate);
         onboardingServiceImpl.invalidateOnboarding(token);
         verify(onboardingDao).persistForUpdate(any(), any(), any(),
                 any());
@@ -602,21 +629,7 @@ class OnboardingServiceImplTest {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
+        Token token = getToken(institutionUpdate);
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.invalidateOnboarding(token));
         verify(institutionService).retrieveInstitutionById(any());
     }
@@ -641,21 +654,7 @@ class OnboardingServiceImplTest {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
+        Token token = getToken(institutionUpdate);
         onboardingServiceImpl.onboardingReject(token);
         verify(onboardingDao).getProductById(any());
         verify(onboardingDao).persistForUpdate(any(), any(), any(),
@@ -698,21 +697,7 @@ class OnboardingServiceImplTest {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
+        Token token = getToken(institutionUpdate);
         onboardingServiceImpl.onboardingReject(token);
         verify(onboardingDao).getProductById(any());
         verify(onboardingDao).persistForUpdate(any(), any(), any(),
@@ -1250,17 +1235,7 @@ class OnboardingServiceImplTest {
      */
     @Test
     void testRetrieveDocument4(){
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setContract("Contract");
-        onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(Env.ROOT);
-        onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRole("Product Role");
-        onboardedProduct.setRelationshipId("42");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProduct.setStatus(RelationshipState.PENDING);
-        onboardedProduct.setTokenId("42");
-        onboardedProduct.setUpdatedAt(null);
+        OnboardedProduct onboardedProduct = getOnboardedProduct();
         RelationshipInfo relationshipInfo = mock(RelationshipInfo.class);
         when(relationshipInfo.getOnboardedProduct()).thenReturn(onboardedProduct);
         when(userRelationshipService.retrieveRelationship(any())).thenReturn(relationshipInfo);
@@ -1283,21 +1258,7 @@ class OnboardingServiceImplTest {
     void testCheckAndHandleExpiring() {
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
+        Token token = getToken(institutionUpdate);
         onboardingServiceImpl.checkAndHandleExpiring(token);
         assertEquals("Checksum", token.getChecksum());
         assertEquals(TokenType.INSTITUTION, token.getType());
@@ -1466,7 +1427,7 @@ class OnboardingServiceImplTest {
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitutionComplete(onboardingRequest, mock(SelfCareUser.class)));
     }
 
-    private static OnboardedProduct getOnboardedProduct() {
+    private OnboardedProduct getOnboardedProduct() {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("START - getUser with id: {}");
         onboardedProduct.setCreatedAt(null);
@@ -1479,6 +1440,37 @@ class OnboardingServiceImplTest {
         return onboardedProduct;
     }
 
+    private OnboardingRequest getOnboardingRequest() {
+        Contract contract = new Contract();
+        contract.setPath("Contract Template");
+        OnboardingRequest expectedRequest = new OnboardingRequest();
+        expectedRequest.setProductId("42");
+        expectedRequest.setContract(contract);
+        expectedRequest.setPricingPlan("C3");
+        expectedRequest.setProductName("42");
+        expectedRequest.setInstitutionUpdate(new InstitutionUpdate());
+        expectedRequest.setBillingRequest(new Billing());
+        expectedRequest.setSignContract(true);
+        return expectedRequest;
+    }
 
+    private Token getToken(InstitutionUpdate institutionUpdate) {
+        Token token = new Token();
+        token.setChecksum("Checksum");
+        token.setDeletedAt(null);
+        token.setContractSigned("Contract Signed");
+        token.setContractTemplate("Contract Template");
+        token.setCreatedAt(null);
+        token.setExpiringDate(null);
+        token.setId("42");
+        token.setInstitutionId("42");
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setProductId("42");
+        token.setStatus(RelationshipState.PENDING);
+        token.setType(TokenType.INSTITUTION);
+        token.setUpdatedAt(null);
+        token.setUsers(new ArrayList<>());
+        return token;
+    }
 }
 

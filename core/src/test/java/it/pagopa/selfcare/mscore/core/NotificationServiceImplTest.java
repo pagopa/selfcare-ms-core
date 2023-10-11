@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
@@ -9,6 +10,7 @@ import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
@@ -125,7 +127,27 @@ class NotificationServiceImplTest {
 
     @Test
     void sendMailForApprove(){
-        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForApprove(new User(), new OnboardingRequest(), "token"));
+        OnboardingRequest onboardingRequest =  new OnboardingRequest();
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForApprove(new User(), onboardingRequest, "token"));
+    }
+
+    @Test
+    void sendMailForRegistrationNotificationApprove(){
+        OnboardingRequest onboardingRequest =  new OnboardingRequest();
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.PT);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForRegistrationNotificationApprove(new User(), onboardingRequest, "token"));
+    }
+
+    @Test
+    void sendMailForRegistration(){
+        Institution institution =  new Institution();
+        institution.setDigitalAddress("42");
+        Assertions.assertDoesNotThrow(() -> notificationService.sendMailForRegistration(new User(), institution , new OnboardingRequest()));
     }
 
     @Test
