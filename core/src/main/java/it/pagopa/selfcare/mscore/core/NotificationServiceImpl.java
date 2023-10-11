@@ -96,13 +96,32 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     public void sendMailForApprove(User user, OnboardingRequest request, String token) {
-        Map<String, String> mailParameters;
-        mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
+        Map<String, String> mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
         log.debug(MAIL_PARAMETER_LOG, mailParameters);
         List<String> destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
         log.info(DESTINATION_MAIL_LOG, destinationMail);
         emailConnector.sendMail(mailParametersMapper.getOnboardingNotificationPath(), destinationMail, null, request.getProductName(), mailParameters, null);
         log.info("onboarding-complete-email-notification Email successful sent");
+
+    }
+
+    public void sendMailForRegistrationNotificationApprove(User user, OnboardingRequest request, String token) {
+        Map<String, String> mailParameters = mailParametersMapper.getOnboardingMailNotificationParameter(user, request, token);
+        log.debug(MAIL_PARAMETER_LOG, mailParameters);
+        List<String> destinationMail = mailParametersMapper.getOnboardingNotificationAdminEmail();
+        log.info(DESTINATION_MAIL_LOG, destinationMail);
+        emailConnector.sendMail(mailParametersMapper.getRegistrationNotificationAdminPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        log.info("onboarding-registration-email-notification Email successful sent");
+    }
+
+    public void sendMailForRegistration(User user, Institution institution, OnboardingRequest request) {
+        Map<String, String> mailParameters = mailParametersMapper.getRegistrationRequestParameter(user, request);
+        log.debug(MAIL_PARAMETER_LOG, mailParameters);
+        List<String> destinationMail = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
+                ? coreConfig.getDestinationMails() : List.of(institution.getDigitalAddress());
+        log.info(DESTINATION_MAIL_LOG, destinationMail);
+        emailConnector.sendMail(mailParametersMapper.getRegistrationRequestPath(), destinationMail, null, request.getProductName(), mailParameters, null);
+        log.info("registration-request-email Email successful sent");
 
     }
 

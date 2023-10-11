@@ -112,7 +112,7 @@ public class InstitutionController {
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-ipa}", notes = "${swagger.mscore.institution.create.from-ipa}")
     @PostMapping(value = "/from-ipa/")
-    public ResponseEntity<InstitutionResponse> createInstitutionFromIpa( @RequestBody @Valid InstitutionFromIpaPost institutionFromIpaPost) {
+    public ResponseEntity<InstitutionResponse> createInstitutionFromIpa(@RequestBody @Valid InstitutionFromIpaPost institutionFromIpaPost) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
         if (Objects.isNull(institutionFromIpaPost.getSubunitType()) && Objects.nonNull(institutionFromIpaPost.getSubunitCode())) {
@@ -121,6 +121,25 @@ public class InstitutionController {
 
         Institution saved = institutionService.createInstitutionFromIpa(institutionFromIpaPost.getTaxCode(),
                 institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode());
+        return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
+    }
+
+    /**
+     * The function create an institution retriving values from ANAC
+     *
+     * @param institution InstitutionRequest
+     * @return InstitutionResponse
+     * * Code: 201, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.create.from-anac}", notes = "${swagger.mscore.institution.create.from-anac}")
+    @PostMapping(value = "/from-anac/")
+    public ResponseEntity<InstitutionResponse> createInstitutionFromAnac(@RequestBody @Valid InstitutionRequest institution) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
+        Institution saved = institutionService.createInstitutionFromAnac(InstitutionMapperCustom.toInstitution(institution, null));
         return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
     }
 
@@ -246,7 +265,7 @@ public class InstitutionController {
                                                                  @PathVariable("id") String institutionId,
                                                                  @RequestBody InstitutionPut institutionPut,
                                                                  Authentication authentication
-                                                                 ) {
+    ) {
 
         CustomExceptionMessage.setCustomMessage(GenericError.PUT_INSTITUTION_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
@@ -324,12 +343,11 @@ public class InstitutionController {
     }
 
 
-
     /**
      * Get list of onboarding for a certain productId
      *
      * @param institutionId String
-     * @param productId      String
+     * @param productId     String
      * @return List
      * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
@@ -338,8 +356,8 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
     @GetMapping(value = "/{institutionId}/onboardings")
     public ResponseEntity<OnboardingsResponse> getOnboardingsInstitution(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                                    @PathVariable("institutionId") String institutionId,
-                                                                                    @RequestParam(value = "productId", required = false) String productId) {
+                                                                         @PathVariable("institutionId") String institutionId,
+                                                                         @RequestParam(value = "productId", required = false) String productId) {
         CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
         List<Onboarding> onboardings = institutionService.getOnboardingInstitutionByProductId(institutionId, productId);
         OnboardingsResponse onboardingsResponse = new OnboardingsResponse();
@@ -398,9 +416,9 @@ public class InstitutionController {
     /**
      * Retrieve institutions with productId onboarded
      *
-     * @param productId     String
-     * @param page          Integer
-     * @param size          Integer
+     * @param productId String
+     * @param page      Integer
+     * @param size      Integer
      * @return List
      * * Code: 200, Message: successful operation
      * * Code: 404, Message: product not found
@@ -409,19 +427,19 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institutions.findFromProduct}", notes = "${swagger.mscore.institutions.findFromProduct}")
     @GetMapping(value = "/products/{productId}")
     public ResponseEntity<InstitutionOnboardingListResponse> findFromProduct(@ApiParam("${swagger.mscore.institutions.model.productId}")
-                                                                @PathVariable(value = "productId") String productId,
+                                                                             @PathVariable(value = "productId") String productId,
                                                                              @ApiParam("${swagger.mscore.page.number}")
-                                                                @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                                             @RequestParam(name = "page", defaultValue = "0") Integer page,
                                                                              @ApiParam("${swagger.mscore.page.size}")
-                                                                @RequestParam(name = "size", defaultValue = "100") Integer size) {
+                                                                             @RequestParam(name = "size", defaultValue = "100") Integer size) {
         log.trace("findFromProduct start");
         log.debug("findFromProduct productId = {}", productId);
         List<Institution> institutions = institutionService.getInstitutionsByProductId(productId, page, size);
 
         InstitutionOnboardingListResponse institutionListResponse = new InstitutionOnboardingListResponse(
                 institutions.stream()
-                .map(InstitutionMapperCustom::toInstitutionOnboardingResponse)
-                .collect(Collectors.toList()));
+                        .map(InstitutionMapperCustom::toInstitutionOnboardingResponse)
+                        .collect(Collectors.toList()));
 
         log.trace("findFromProduct end");
         return ResponseEntity.ok().body(institutionListResponse);
@@ -449,13 +467,13 @@ public class InstitutionController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.institutions.api.getInstitutionUsers}")
     public List<UserInfoResponse> getInstitutionUsers(@ApiParam("${swagger.mscore.institutions.model.id}")
-                                                             @PathVariable("institutionId")
-                                                             String institutionId) {
+                                                      @PathVariable("institutionId")
+                                                      String institutionId) {
 
         log.trace("getInstitutionUsers start");
         log.debug("getInstitutionUsers institutionId = {}, role = {}", institutionId);
         List<UserInfo> userInfos = institutionService.getInstitutionUsers(institutionId);
-        List<UserInfoResponse> result =  userInfos.stream()
+        List<UserInfoResponse> result = userInfos.stream()
                 .map(userInfo -> userMapper.toUserInfoResponse(userInfo, institutionId))
                 .collect(Collectors.toList());
         log.debug("getInstitutionUsers result = {}", result);

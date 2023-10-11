@@ -1004,7 +1004,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(18, stringObjectMap.size());
     }
 
     /**
@@ -1071,7 +1071,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(18, stringObjectMap.size());
     }
 
     /**
@@ -1157,7 +1157,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(16, stringObjectMap.size());
+        assertEquals(18, stringObjectMap.size());
     }
 
     /**
@@ -1242,7 +1242,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(15, stringObjectMap.size());
+        assertEquals(17, stringObjectMap.size());
     }
 
     /**
@@ -1327,7 +1327,7 @@ class PdfMapperTest {
         onboardingRequest.setSignContract(true);
         onboardingRequest.setUsers(new ArrayList<>());
         PdfMapper.setupProdIOData(stringObjectMap, user, institution, onboardingRequest, InstitutionType.PA);
-        assertEquals(15, stringObjectMap.size());
+        assertEquals(17, stringObjectMap.size());
     }
     @Test
     void testSetupProdPNData() {
@@ -1385,5 +1385,58 @@ class PdfMapperTest {
         PdfMapper.setupProdPNData(stringObjectMap, institution, onboardingRequest);
         assertEquals(2, stringObjectMap.size());
     }
+
+    /**
+     * Method under test: {@link PdfMapper#setupSAProdInteropData(Map, InstitutionUpdate)}
+     */
+    @Test
+    void testSetupSAProdInterop() {
+        HashMap<String, Object> stringObjectMap = new HashMap<>();
+
+        Institution institution = new Institution();
+        institution.setInstitutionType(InstitutionType.SA);
+        institution.setOrigin(Origin.ANAC.name());
+
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
+        paymentServiceProvider.setAbiCode("Abi Code");
+        paymentServiceProvider.setBusinessRegisterNumber("42");
+        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
+        paymentServiceProvider.setLegalRegisterNumber("42");
+        paymentServiceProvider.setVatNumberGroup(true);
+
+        institution.setPaymentServiceProvider(paymentServiceProvider);
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setRea("rea");
+        institutionUpdate.setShareCapital("1111");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.SA);
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        Billing billing = new Billing();
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("C1");
+        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setUsers(new ArrayList<>());
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.getBillingRequest().setRecipientCode("42");
+
+        PdfMapper.setupSAProdInteropData(stringObjectMap, institutionUpdate);
+        assertEquals(4, stringObjectMap.size());
+    }
+
 }
 
