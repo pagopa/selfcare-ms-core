@@ -275,9 +275,18 @@ class TokenServiceImplTest {
     @Test
     void testInstitutionsInstitutionsByProductId() {
         List<Token> tokens = new ArrayList<>();
+        Token token = mockInstance(new Token());
+        TokenUser user = mockInstance(new TokenUser());
+        tokens.add(token);
+        token.setUsers(List.of(user));
+        List<OnboardedUser> onboardedUsersMock = List.of(mockInstance(new OnboardedUser()));
+        onboardedUsersMock.get(0).setBindings(List.of(mockInstance(new UserBinding())));
+        when(userService.findAllExistingByIds(any()))
+                .thenReturn(onboardedUsersMock);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(tokens);
+        when(tokenConnector.findById(any())).thenReturn(token);
         List<TokenRelationships> tokensResult = tokenServiceImpl.getTokensByProductId("id", 0, 1);
-        assertTrue(tokensResult.isEmpty());
+        assertFalse(tokensResult.isEmpty());
     }
 }
 

@@ -26,6 +26,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -179,6 +180,25 @@ class UserServiceImplTest {
     @Test
     void testFindAllByIds() {
         assertTrue(userServiceImpl.findAllByIds(new ArrayList<>()).isEmpty());
+    }
+    @Test
+    void testFindAllExistingByIds_empty() {
+        assertTrue(userServiceImpl.findAllExistingByIds(new ArrayList<>()).isEmpty());
+    }
+    @Test
+    void testFindAllExistingByIds_null() {
+        assertTrue(userServiceImpl.findAllExistingByIds(null).isEmpty());
+    }
+    @Test
+    void testFindAllExistingByIds() {
+        List<OnboardedUser> onboardedUserList = List.of(mockInstance(new OnboardedUser()));
+        when(userConnector.findAllByExistingIds(any())).thenReturn(onboardedUserList);
+
+        List<String> stringList = new ArrayList<>();
+        stringList.add("foo");
+        List<OnboardedUser> actualFindAllByIdsResult = userServiceImpl.findAllExistingByIds(stringList);
+        assertSame(onboardedUserList, actualFindAllByIdsResult);
+        verify(userConnector).findAllByExistingIds(stringList);
     }
 
     /**

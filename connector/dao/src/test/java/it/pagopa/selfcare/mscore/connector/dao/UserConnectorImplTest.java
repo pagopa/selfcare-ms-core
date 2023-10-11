@@ -572,6 +572,20 @@ class UserConnectorImplTest {
         assertNotNull(userConnectorImpl.findAllByIds(users));
     }
 
+    @Test
+    void findAllExistingByIds2() {
+        List<UserEntity> userEntities = new ArrayList<>();
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id1");
+        userEntities.add(userEntity);
+        when(userRepository.findAllById(any())).thenReturn(userEntities);
+        List<String> users = new ArrayList<>();
+        users.add("id1");
+        assertNotNull(userConnectorImpl.findAllByExistingIds(users));
+    }
+
+
+
 
     /**
      * Method under test: {@link UserConnectorImpl#deleteById}
