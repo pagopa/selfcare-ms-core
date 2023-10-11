@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_ALREADY_CONSUMED;
@@ -84,14 +85,13 @@ public class TokenServiceImpl implements TokenService {
 
     private TokenRelationships retrieveToken(String tokenId, boolean existingOnly){
         Token token = tokenConnector.findById(tokenId);
-        List<OnboardedUser> users;
-        if (token.getUsers() != null) {
-            var ids = token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
-            users = userService.findAllByIds(ids);
-        } else {
-            users = Collections.emptyList();
-        }
-        return TokenUtils.toTokenRelationships(token, users);
+        List<OnboardedUser> onboardedUsers = Optional.ofNullable(token.getUsers())
+                .map(users -> {
+                    var ids = users.stream().map(TokenUser::getUserId).collect(Collectors.toList());
+                    return existingOnly ? userService.findAllExistingByIds(ids) : userService.findAllByIds(ids);
+                })
+                .orElse(Collections.emptyList());
+        return TokenUtils.toTokenRelationships(token, onboardedUsers);
     }
 
     private boolean hasTokenExpired(Token token, OffsetDateTime now) {
