@@ -215,10 +215,10 @@ class TokenServiceImplTest {
 
         when(tokenConnector.findById(any()))
                 .thenReturn(tokenMock);
-        when(userService.findAllByIds(any(), anyBoolean()))
+        when(userService.findAllByIds(any()))
                 .thenReturn(onboardedUsersMock);
         // When
-        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId(), false);
+        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId());
         // Then
         assertNotNull(result);
         assertEquals(tokenMock.getId(), result.getTokenId());
@@ -230,7 +230,7 @@ class TokenServiceImplTest {
         verify(tokenConnector, times(1))
                 .findById(tokenMock.getId());
         verify(userService, times(1))
-                .findAllByIds(List.of(tokenMock.getUsers().get(0).getUserId()), false);
+                .findAllByIds(List.of(tokenMock.getUsers().get(0).getUserId()));
     }
 
     @Test
@@ -241,7 +241,7 @@ class TokenServiceImplTest {
         when(tokenConnector.findById(any()))
                 .thenReturn(tokenMock);
         // When
-        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId(), false);
+        TokenRelationships result = tokenServiceImpl.retrieveToken(tokenMock.getId());
         // Then
         assertNotNull(result);
         assertEquals(tokenMock.getId(), result.getTokenId());

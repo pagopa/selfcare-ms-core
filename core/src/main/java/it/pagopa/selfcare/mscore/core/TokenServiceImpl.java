@@ -73,14 +73,21 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public TokenRelationships retrieveToken(String tokenId, boolean existingOnly) {
+    public TokenRelationships retrieveToken(String tokenId) {
         log.trace("retrieveToken start");
-        log.debug("retrieveToken tokenId = {}, existingOnly = {}", tokenId, existingOnly);
+        log.debug("retrieveToken tokenId = {}", tokenId);
+        TokenRelationships tokenRelationships = retrieveToken(tokenId, false);
+        log.debug("retrieveToken tokenRelationships = {}", tokenRelationships);
+        log.trace("retrieveToken end");
+        return tokenRelationships;
+    }
+
+    private TokenRelationships retrieveToken(String tokenId, boolean existingOnly){
         Token token = tokenConnector.findById(tokenId);
         List<OnboardedUser> users;
         if (token.getUsers() != null) {
             var ids = token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
-                users = userService.findAllByIds(ids, existingOnly);
+            users = userService.findAllByIds(ids);
         } else {
             users = Collections.emptyList();
         }

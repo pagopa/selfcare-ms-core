@@ -17,8 +17,9 @@ public interface UserService {
 
     OnboardedUser findByUserId(String id);
 
-    List<OnboardedUser> findAllByIds(List<String> users, boolean existingOnly);
+    List<OnboardedUser> findAllByIds(List<String> users);
 
+    List<OnboardedUser> findAllExistingByIds(List<String> users);
     List<UserBinding> retrieveBindings(String institutionId, String userId, String[] states, List<String> products);
 
     List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);

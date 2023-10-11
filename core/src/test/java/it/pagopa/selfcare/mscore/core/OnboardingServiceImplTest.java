@@ -368,7 +368,7 @@ class OnboardingServiceImplTest {
 
         List<User> delegate = new ArrayList<>();
         when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user).thenReturn(manager).thenReturn(onboardedUser);
-        when(userService.findAllByIds(any(), anyBoolean())).thenReturn(new ArrayList<>());
+        when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
         OnboardingRequest request = getOnboardingRequest();
@@ -403,7 +403,7 @@ class OnboardingServiceImplTest {
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
-        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()), false);
+        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         verify(userService, times(1)).retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class));
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
@@ -460,7 +460,7 @@ class OnboardingServiceImplTest {
         onboardedUser2.setId(delegate.getId());
 
         when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user).thenReturn(manager).thenReturn(delegate);
-        when(userService.findAllByIds(any(), anyBoolean())).thenReturn(List.of(onboardedUser1, onboardedUser2));
+        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser1, onboardedUser2));
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
@@ -498,7 +498,7 @@ class OnboardingServiceImplTest {
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
-        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()), false);
+        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId(), EnumSet.allOf(User.Fields.class));
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
@@ -551,7 +551,7 @@ class OnboardingServiceImplTest {
         onboardedUser2.setId(delegate.getId());
 
         when(userService.retrieveUserFromUserRegistry(any(), any())).thenReturn(user).thenReturn(manager).thenReturn(delegate);
-        when(userService.findAllByIds(any(), anyBoolean())).thenReturn(List.of(onboardedUser1, onboardedUser2));
+        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser1, onboardedUser2));
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
 
@@ -586,7 +586,7 @@ class OnboardingServiceImplTest {
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
-        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()), false);
+        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
         verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId(), EnumSet.allOf(User.Fields.class));
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());

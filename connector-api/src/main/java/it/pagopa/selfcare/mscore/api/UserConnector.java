@@ -50,7 +50,9 @@ public interface UserConnector {
 
     void findAndRemoveProduct(String userId, String institutionId, OnboardedProduct product);
 
-    List<OnboardedUser> findAllByIds(List<String> users, boolean existingOnly);
+    List<OnboardedUser> findAllByIds(List<String> users);
+
+    List<OnboardedUser> findAllByExistingIds(List<String> users);
 
     List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> users, OffsetDateTime createdAt);
 

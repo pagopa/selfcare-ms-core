@@ -190,7 +190,7 @@ public class ManagementController {
     public ResponseEntity<TokenResponse> getToken(@ApiParam("${swagger.mscore.token.tokenId}")
                                                   @PathVariable("tokenId") String tokenId) {
         CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
-        TokenRelationships tokenRelationships = tokenService.retrieveToken(tokenId, false);
+        TokenRelationships tokenRelationships = tokenService.retrieveToken(tokenId);
         return ResponseEntity.ok().body(tokenMapper.toTokenResponse(tokenRelationships));
     }
 

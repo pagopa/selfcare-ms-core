@@ -11,7 +11,7 @@ public interface TokenService {
 
     Token verifyOnboarding(String institutionId, String productId);
 
-    TokenRelationships retrieveToken(String tokenId, boolean existingOnly);
+    TokenRelationships retrieveToken(String tokenId);
 
     Token getToken(String institutionId, String productId);
 

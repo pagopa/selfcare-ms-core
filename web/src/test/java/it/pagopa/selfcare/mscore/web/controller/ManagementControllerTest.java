@@ -413,7 +413,7 @@ class ManagementControllerTest {
         UserBinding binding = mockInstance(new UserBinding());
         user.setBindings(List.of(binding));
         tokenRelationships.setUsers(List.of(user));
-        when(tokenService.retrieveToken(any(), anyBoolean())).thenReturn(tokenRelationships);
+        when(tokenService.retrieveToken(any())).thenReturn(tokenRelationships);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/tokens/{tokenId}", "42");
         MockMvcBuilders.standaloneSetup(managementController)
                 .build()
