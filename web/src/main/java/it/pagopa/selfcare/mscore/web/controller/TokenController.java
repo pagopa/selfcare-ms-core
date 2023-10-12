@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
 import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenListResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
@@ -25,9 +26,11 @@ import java.util.stream.Collectors;
 public class TokenController {
 
     private final TokenService tokenService;
+    private final TokenMapper tokenMapper;
 
-    public TokenController(TokenService tokenService) {
+    public TokenController(TokenService tokenService, TokenMapper tokenMapper) {
         this.tokenService = tokenService;
+        this.tokenMapper = tokenMapper;
     }
 
     /**
@@ -70,7 +73,7 @@ public class TokenController {
         log.trace("getToken start");
         log.debug("getToken institutionId = {}, productId = {}", institutionId, productId);
         Token token = tokenService.getToken(institutionId, productId);
-        TokenResource result = TokenMapper.toResource(token);
+        TokenResource result = tokenMapper.toTokenResponse(token);
         log.debug("getToken result = {}", result);
         log.trace("getToken end");
         return result;
@@ -97,11 +100,11 @@ public class TokenController {
                                                                              @RequestParam(name = "size", defaultValue = "100") Integer size) {
         log.trace("findFromProduct start");
         log.debug("findFromProduct productId = {}", productId);
-        List<Token> tokens = tokenService.getTokensByProductId(productId, page, size);
+        List<TokenRelationships> tokens = tokenService.getTokensByProductId(productId, page, size);
 
         TokenListResponse tokenListResponse = new TokenListResponse(
                 tokens.stream()
-                        .map(TokenMapper::toTokenResponse)
+                        .map(tokenMapper::toTokenResponse)
                         .collect(Collectors.toList()));
 
         log.trace("findFromProduct end");

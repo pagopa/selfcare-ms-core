@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
+import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Env;
@@ -59,7 +60,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OnboardingServiceImplTest {
 
-
     @Mock
     private ContractService contractService;
 
@@ -97,6 +97,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserNotificationService userNotificationService;
+
+    @Mock
+    private MailTemplateConfig mailTemplateConfig;
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -582,8 +585,8 @@ class OnboardingServiceImplTest {
         when(contractService.getLogoFile()).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
         when(productConnector.getProductById(any())).thenReturn(product);
-
-        doNothing().when(emailService).sendCompletedEmail(any(), any(), any(), any());
+        when(mailTemplateConfig.getCompletePathPt()).thenReturn("test@email.it");
+        doNothing().when(emailService).sendCompletedEmail(any(), any(), any(), any(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
