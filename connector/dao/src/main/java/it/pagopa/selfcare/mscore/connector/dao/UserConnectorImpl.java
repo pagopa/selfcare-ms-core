@@ -82,18 +82,30 @@ public class UserConnectorImpl implements UserConnector {
 
     @Override
     public List<OnboardedUser> findAllByIds(List<String> users) {
+        return findAll(users, false);
+    }
+
+    @Override
+    public List<OnboardedUser> findAllByExistingIds(List<String> users) {
+        return findAll(users, true);
+    }
+
+    private List<OnboardedUser> findAll(List<String> userIds, boolean existingOnly){
         List<OnboardedUser> userList = new ArrayList<>();
-        Set<String> userIds = new HashSet<>(users);
-        repository.findAllById(users)
-                .forEach(userEntity -> {
-                    userList.add(userMapper.toOnboardedUser(userEntity));
-                    userIds.remove(userEntity.getId());
-                });
-        if (users.size() != userList.size()) {
-            throw new ResourceNotFoundException(String.format(USERS_NOT_FOUND_ERROR.getMessage(), String.join(",", userIds)), USERS_NOT_FOUND_ERROR.getCode());
+        Set<String> remainingUserIds = new HashSet<>(userIds);
+
+        repository.findAllById(userIds).forEach(userEntity -> {
+            userList.add(userMapper.toOnboardedUser(userEntity));
+            remainingUserIds.remove(userEntity.getId());
+        });
+
+        if (!existingOnly && !remainingUserIds.isEmpty()) {
+            String missingUserIds = String.join(",", remainingUserIds);
+            throw new ResourceNotFoundException(String.format(USERS_NOT_FOUND_ERROR.getMessage(), missingUserIds), USERS_NOT_FOUND_ERROR.getCode());
         }
         return userList;
     }
+
 
     @Override
     public void findAndUpdateState(String userId, @Nullable String relationshipId, @Nullable Token token, RelationshipState state) {
