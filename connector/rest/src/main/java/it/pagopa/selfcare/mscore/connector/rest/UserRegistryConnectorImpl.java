@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.connector.rest;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.UserRegistryRestClient;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.UserMapperClient;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserResource;
 import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserSearchDto;
@@ -19,11 +20,13 @@ import java.util.UUID;
 public class UserRegistryConnectorImpl implements UserRegistryConnector {
 
     private final UserRegistryRestClient restClient;
-    public static final String USERS_FIELD_LIST = "fiscalCode,name,workContacts";
+    private final UserMapperClient userMapper;
+    public static final String USERS_FIELD_LIST = "fiscalCode,name,familyName,workContacts";
 
     @Autowired
-    public UserRegistryConnectorImpl(UserRegistryRestClient restClient) {
+    public UserRegistryConnectorImpl(UserRegistryRestClient restClient, UserMapperClient userMapper) {
         this.restClient = restClient;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -42,8 +45,9 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
         Assert.hasText(fiscalCode, "A userId is required");
         UserResource result = restClient._searchUsingPOST(USERS_FIELD_LIST, new UserSearchDto().fiscalCode(fiscalCode))
                 .getBody();
+        User user = userMapper.toUser(result);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByFiscalCode result = {}", result);
-        return new User();
+        return user;
     }
 
 }

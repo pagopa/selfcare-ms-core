@@ -226,9 +226,21 @@ public class OnboardingDao {
                 institution.getDescription(),
                 institution.getParentDescription(),
                 List.of(product));
+        relationShipExistAndDelete(onboardedUser, productId);
         userConnector.findAndUpdate(onboardedUser, user.getId(), institution.getId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
         return product;
+    }
+
+    private void relationShipExistAndDelete (OnboardedUser onboardedUser, String productId){
+        List<OnboardedProduct> products = onboardedUser.getBindings().stream()
+                .flatMap(userBinding -> userBinding.getProducts().stream()
+                        .filter(userProduct -> userProduct.getProductId().equalsIgnoreCase(productId)
+                        && !userProduct.getStatus().equals(RelationshipState.DELETED)))
+                .collect(Collectors.toList());
+        if(!products.isEmpty()) {
+            products.stream().forEach(singleProduct -> updateUserProductState(onboardedUser, singleProduct.getRelationshipId(), RelationshipState.DELETED));
+        }
     }
 
     private Token updateToken(Token token, RelationshipState state, String digest) {
