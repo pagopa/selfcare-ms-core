@@ -6,21 +6,27 @@ import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
 import it.pagopa.selfcare.mscore.web.model.onboarding.LegalsResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
 import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor(access = AccessLevel.NONE)
-public class TokenMapper {
+@Mapper(componentModel = "spring", imports = List.class)
+public interface TokenMapper {
+    @Mapping(target = "legals",  expression = "java(toLegalsResponse(tokenRelationships))")
+    @Mapping(ignore = true, target="users")
+    @Mapping(target = "id", source = "tokenId")
+    TokenResponse toTokenResponse(TokenRelationships tokenRelationships);
 
-    public static TokenResponse toTokenResponse(TokenRelationships tokenRelationships){
-        TokenResponse tokenResponse = new TokenResponse();
-        tokenResponse.setId(tokenRelationships.getTokenId());
-        tokenResponse.setChecksum(tokenRelationships.getChecksum());
-        for(OnboardedUser user : tokenRelationships.getUsers()){
-            List<LegalsResponse> list  = user.getBindings().stream()
+    TokenResource toTokenResponse(Token token);
+    @Named("toLegalsResponse")
+    default List<LegalsResponse> toLegalsResponse( TokenRelationships tokenRelationships){
+        List<LegalsResponse> legalsResponses = new ArrayList<>();
+        for(OnboardedUser user: tokenRelationships.getUsers()){
+            List<LegalsResponse> list = user.getBindings().stream()
                     .filter(userBinding -> tokenRelationships.getInstitutionId().equalsIgnoreCase(userBinding.getInstitutionId()))
                     .flatMap(userBinding -> userBinding.getProducts().stream())
                     .filter(onboardedProduct -> tokenRelationships.getProductId().equalsIgnoreCase(onboardedProduct.getProductId()))
@@ -32,49 +38,9 @@ public class TokenMapper {
                         legalsResponse.setRole(product.getRole());
                         return legalsResponse;
                     }).collect(Collectors.toList());
-            tokenResponse.getLegals().addAll(list);
+            legalsResponses.addAll(list);
         }
-        return tokenResponse;
+        return legalsResponses;
     }
 
-    public static TokenResponse toTokenResponse(Token tokenRelationships){
-        TokenResponse tokenResponse = new TokenResponse();
-        tokenResponse.setId(tokenRelationships.getId());
-        tokenResponse.setChecksum(tokenRelationships.getChecksum());
-        tokenResponse.setStatus(tokenRelationships.getStatus());
-        tokenResponse.setInstitutionId(tokenRelationships.getInstitutionId());
-        tokenResponse.setProductId(tokenRelationships.getProductId());
-        tokenResponse.setExpiringDate(tokenRelationships.getExpiringDate());
-        tokenResponse.setContractTemplate(tokenRelationships.getContractTemplate());
-        tokenResponse.setContractSigned(tokenRelationships.getContractSigned());
-        tokenResponse.setContentType(tokenRelationships.getContentType());
-        tokenResponse.setCreatedAt(tokenRelationships.getCreatedAt());
-        tokenResponse.setUpdatedAt(tokenRelationships.getUpdatedAt());
-
-
-        return tokenResponse;
-    }
-
-    public static TokenResource toResource(Token model){
-        TokenResource resource = null;
-        if(model != null) {
-            resource = new TokenResource();
-            resource.setId(model.getId());
-            resource.setType(model.getType());
-            resource.setStatus(model.getStatus());
-            resource.setInstitutionId(model.getInstitutionId());
-            resource.setProductId(model.getProductId());
-            resource.setExpiringDate(model.getExpiringDate());
-            resource.setChecksum(model.getChecksum());
-            resource.setContractVersion(model.getContractVersion());
-            resource.setContractTemplate(model.getContractTemplate());
-            resource.setContractSigned(model.getContractSigned());
-            resource.setUsers(model.getUsers());
-            resource.setInstitutionUpdate(model.getInstitutionUpdate());
-            resource.setCreatedAt(model.getCreatedAt());
-            resource.setUpdatedAt(model.getUpdatedAt());
-            resource.setClosedAt(model.getDeletedAt());
-        }
-        return resource;
-    }
 }

@@ -2,10 +2,13 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.TokenService;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.web.config.WebTestConfig;
+import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapperImpl;
 import org.junit.jupiter.api.Test;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,7 +29,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(value = {TokenController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
-@ContextConfiguration(classes = {TokenController.class, WebTestConfig.class})
+@ContextConfiguration(classes = {TokenController.class, WebTestConfig.class, TokenMapperImpl.class})
 class TokenControllerTest {
 
 
@@ -35,6 +38,9 @@ class TokenControllerTest {
 
     @Autowired
     protected MockMvc mvc;
+
+    @Spy
+    private TokenMapper tokenMapper = new TokenMapperImpl();
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -91,9 +97,18 @@ class TokenControllerTest {
         Integer pageMock = 0;
         Integer sizeMock = 100;
 
-        Token token = new Token();
-        token.setId("id");
-
+        TokenRelationships token = new TokenRelationships();
+        token.setTokenId("id");
+        token.setProductId("productId");
+        token.setInstitutionId("institutionId");
+        OnboardedUser user = mockInstance(new OnboardedUser());
+        OnboardedProduct product = mockInstance(new OnboardedProduct());
+        product.setProductId("productId");
+        UserBinding binding = mockInstance(new UserBinding());
+        binding.setInstitutionId("institutionId");
+        binding.setProducts(List.of(product));
+        user.setBindings(List.of(binding));
+        token.setUsers(List.of(user));
         // When
         when(tokenService.getTokensByProductId(any(), any(), any())).thenReturn(List.of(token));
 
