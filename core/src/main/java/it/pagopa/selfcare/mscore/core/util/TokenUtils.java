@@ -60,6 +60,14 @@ public class TokenUtils {
         tokenRelationships.setInstitutionId(token.getInstitutionId());
         tokenRelationships.setProductId(token.getProductId());
         tokenRelationships.setUsers(users);
+        tokenRelationships.setType(token.getType());
+        tokenRelationships.setStatus(token.getStatus());
+        tokenRelationships.setClosedAt(token.getDeletedAt());
+        tokenRelationships.setCreatedAt(token.getCreatedAt());
+        tokenRelationships.setActivatedAt(token.getActivatedAt());
+        tokenRelationships.setUpdatedAt(token.getUpdatedAt());
+        tokenRelationships.setContentType(token.getContentType());
+        tokenRelationships.setContractSigned(token.getContractSigned());
         return tokenRelationships;
     }
 

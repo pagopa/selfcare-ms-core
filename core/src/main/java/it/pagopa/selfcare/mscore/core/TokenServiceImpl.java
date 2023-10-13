@@ -64,7 +64,7 @@ public class TokenServiceImpl implements TokenService {
         return tokenConnector.findWithFilter(institutionId, productId);
     }
 
-    public Token getToken(String institutionId, String productId){
+    public Token getToken(String institutionId, String productId) {
         log.trace("getToken start");
         log.debug("getToken institutionId = {}, productId = {}", institutionId, productId);
         Token token = tokenConnector.findWithFilter(institutionId, productId);
