@@ -53,7 +53,7 @@ class UserRegistryConnectorImplTest {
         when(userRegistryRestClient._findByIdUsingGET(any(), any())).thenReturn(userIdResponseEntity);
         User user = userRegistryConnector.getUserByInternalId(id.toString(), userFields);
         assertEquals(user.getId(), userResource.getId().toString());
-        verify(userRegistryRestClient)._findByIdUsingGET(userFields.toString(), id.toString());
+        verify(userRegistryRestClient)._findByIdUsingGET("fiscalCode,name,familyName,workContacts", id.toString());
     }
 
     @Test
