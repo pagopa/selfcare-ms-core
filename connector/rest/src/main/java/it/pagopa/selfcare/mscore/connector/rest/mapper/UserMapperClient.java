@@ -5,7 +5,6 @@ import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserId;
 import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserResource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 
 
@@ -15,11 +14,7 @@ public interface UserMapperClient {
 
     User toUser (UserResource userResource);
 
-    @Mapping(target = "id", source = ".", qualifiedByName = "getId")
+    @Mapping(target = "id", source = "userId.id")
     User fromUserId (UserId userId);
 
-    @Named("getId")
-    static String getId(UserId userId){
-        return userId.getId().toString();
-    }
 }
