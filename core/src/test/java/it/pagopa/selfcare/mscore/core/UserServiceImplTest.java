@@ -490,5 +490,22 @@ class UserServiceImplTest {
         Assertions.assertThrows(ResourceNotFoundException.class,
                 () -> userServiceImpl.retrievePerson("userId","prod-io", "id"));
     }
+
+    @Test
+    void retrieveUsersFromRegistry() {
+        User user = new User();
+        user.setId("fiscalCode");
+        when(userRegistryConnector.getUserByFiscalCode(any())).thenReturn(user);
+        Assertions.assertDoesNotThrow(() -> userServiceImpl.retrieveUserFromUserRegistry("fiscalCode"));
+        assertEquals("fiscalCode", user.getId());
+    }
+
+    @Test
+    void persistUsersFromRegistry() {
+        User user = new User();
+        user.setId("fiscalCode");
+        when(userRegistryConnector.persistUserUsingPatch(any(), any(), any(), any(), any())).thenReturn(user);
+        Assertions.assertDoesNotThrow(() -> userServiceImpl.persistUserRegistry("name", "familyName", "fiscalCode", "email", "institutionId"));
+    }
 }
 

@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
@@ -720,10 +721,86 @@ class OnboardingServiceImplTest {
         assertEquals("42", token.getId());
     }
 
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     */
+    @Test
+    void onboardingUsers_shouldThrowExceptionIfInstitutionNotFound() {
+        OnboardingUsersRequest request = new OnboardingUsersRequest();
+        request.setInstitutionTaxCode("taxCode");
+        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of());
+        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.onboardingUsers(request, null, null));
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     */
+    @Test
+    void onboardingUsers_shouldThrowExceptionIfProductIsNotValid() {
+        OnboardingUsersRequest request = new OnboardingUsersRequest();
+        request.setInstitutionTaxCode("taxCode");
+        request.setProductId("productId");
+        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
+        when(productConnector.getProductValidById(request.getProductId())).thenReturn(null);
+        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.onboardingUsers(request, null, null));
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     */
+    @Test
+    void onboardingUsers_whenUserExistsOnRegistry() {
+        OnboardingUsersRequest request = new OnboardingUsersRequest();
+        request.setInstitutionTaxCode("taxCode");
+        request.setProductId("productId");
+        UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        request.setUsers(List.of(userToOnboard));
+
+        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
+        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
+        when(userService.retrieveUserFromUserRegistry(userToOnboard.getTaxCode())).thenReturn(new User());
+
+        onboardingServiceImpl.onboardingUsers(request, null, null);
+
+        verify(userService, times(1))
+                .retrieveUserFromUserRegistry(userToOnboard.getTaxCode());
+        verifyNoMoreInteractions(userService);
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     */
+    @Test
+    void onboardingUsers_whenUserNotExistsOnRegistry() {
+        OnboardingUsersRequest request = new OnboardingUsersRequest();
+        request.setInstitutionTaxCode("taxCode");
+        request.setProductId("productId");
+        UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        User user = new User();
+        user.setId("42");
+        request.setUsers(List.of(userToOnboard));
+
+        Institution institution = new Institution();
+        institution.setId("example");
+        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(institution));
+        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
+        when(userService.retrieveUserFromUserRegistry(userToOnboard.getTaxCode())).thenThrow(FeignException.NotFound.class);
+        when(userService.persistUserRegistry(any(), any(), any(), any(),any())).thenReturn(user);
+
+        onboardingServiceImpl.onboardingUsers(request, null, null);
+
+        verify(userService, times(1))
+                .retrieveUserFromUserRegistry(userToOnboard.getTaxCode());
+        verifyNoMoreInteractions(userService);
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
+     */
     @Test
     void testOnboardingOperators() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(),any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -735,20 +812,11 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators4() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-
+    private UserToOnboard createSimpleUserToOnboard() {
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
         userToOnboard.setEnv(Env.ROOT);
@@ -758,16 +826,23 @@ class OnboardingServiceImplTest {
         userToOnboard.setRole(PartyRole.MANAGER);
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
+        return userToOnboard;
+    }
 
-        UserToOnboard userToOnboard1 = new UserToOnboard();
-        userToOnboard1.setEmail("jane.doe@example.org");
-        userToOnboard1.setEnv(Env.ROOT);
-        userToOnboard1.setId("42");
-        userToOnboard1.setName("Name");
-        userToOnboard1.setProductRole("");
-        userToOnboard1.setRole(PartyRole.MANAGER);
-        userToOnboard1.setSurname("Doe");
-        userToOnboard1.setTaxCode("Tax Code");
+
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
+     */
+    @Test
+    void testOnboardingOperators4() {
+        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
+        when(onboardingDao.onboardOperator(any(), any(), any()))
+                .thenReturn(relationshipInfoList);
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+
+        UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        UserToOnboard userToOnboard1 = createSimpleUserToOnboard();
 
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard1);
@@ -782,7 +857,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -792,7 +867,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators5() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -804,7 +879,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "name", "surname");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -814,7 +889,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators8() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -826,7 +901,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -853,7 +928,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators10() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -879,7 +954,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -889,7 +964,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators11() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -925,7 +1000,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -935,7 +1010,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators12() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -947,7 +1022,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -957,7 +1032,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators13() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -969,7 +1044,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -979,7 +1054,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators14() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -991,7 +1066,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -1001,7 +1076,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators15() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -1013,7 +1088,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -1040,7 +1115,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators17() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -1066,7 +1141,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -1076,7 +1151,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators19() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -1088,7 +1163,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -1098,7 +1173,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators20() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -1110,7 +1185,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 
@@ -1120,7 +1195,7 @@ class OnboardingServiceImplTest {
     @Test
     void testOnboardingOperators21() {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any()))
+        when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
 
@@ -1132,7 +1207,7 @@ class OnboardingServiceImplTest {
                 .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR, "nome", "cognome");
         assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any());
+        verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
     }
 

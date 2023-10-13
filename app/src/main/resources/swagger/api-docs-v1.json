@@ -4027,6 +4027,71 @@
         } ]
       }
     },
+    "/onboarding/users" : {
+      "post" : {
+        "tags" : [ "Onboarding" ],
+        "summary" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
+        "description" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
+        "operationId" : "onboardingInstitutionUsersUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OnboardingInstitutionUsersRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/RelationshipResult"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/onboarding/{tokenId}/consume" : {
       "post" : {
         "tags" : [ "Onboarding" ],
@@ -6713,6 +6778,27 @@
           },
           "signContract" : {
             "type" : "boolean"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Person"
+            }
+          }
+        }
+      },
+      "OnboardingInstitutionUsersRequest" : {
+        "title" : "OnboardingInstitutionUsersRequest",
+        "type" : "object",
+        "properties" : {
+          "institutionSubunitCode" : {
+            "type" : "string"
+          },
+          "institutionTaxCode" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
           },
           "users" : {
             "type" : "array",

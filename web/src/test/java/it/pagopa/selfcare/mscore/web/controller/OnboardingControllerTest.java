@@ -23,10 +23,7 @@ import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionUpdateMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionUpdateMapperImpl;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
-import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -136,6 +133,34 @@ class OnboardingControllerTest {
                 .post("/onboarding/subdelegates")
                 .principal(authentication)
                 .content(content)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#onboardingInstitutionUsers(OnboardingInstitutionUsersRequest, Authentication)}
+     */
+    @Test
+    void onboardingInstitutionUsers() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+
+        OnboardingInstitutionUsersRequest request = new OnboardingInstitutionUsersRequest();
+        request.setInstitutionTaxCode("taxCode");
+        request.setProductId("id");
+        request.setUsers(List.of(new Person()));
+
+        when(onboardingService.onboardingUsers(any(), any(), any())).thenReturn(new ArrayList<>());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/onboarding/users")
+                .principal(authentication)
+                .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON);
 
         MockMvcBuilders.standaloneSetup(onboardingController)

@@ -100,6 +100,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User retrieveUserFromUserRegistry(String fiscalCode) {
+        return userRegistryConnector.getUserByFiscalCode(fiscalCode);
+    }
+
+    @Override
+    public User persistUserRegistry(String name, String familyName, String fiscalCode, String email, String institutionId) {
+        return userRegistryConnector.persistUserUsingPatch(name ,familyName ,fiscalCode ,email , institutionId);
+    }
+
+    @Override
     public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
         return userConnector.findUserInstitutionAggregation(filter);
     }
