@@ -20,7 +20,6 @@ public class TokenResponse {
     private String id;
     private String checksum;
     private List<LegalsResponse> legals = new ArrayList<>();
-
     private RelationshipState status;
     private String institutionId;
     private String productId;
