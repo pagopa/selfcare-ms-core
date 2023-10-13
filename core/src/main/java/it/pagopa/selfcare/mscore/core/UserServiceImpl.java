@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User persistUserRegistry(String name, String familyName, String fiscalCode, String email, String institutionId) {
-        return null;
+        return userRegistryConnector.persistUserUsingPatch(name ,familyName ,fiscalCode ,email , institutionId);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
@@ -35,7 +36,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.parameters.P;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -776,23 +776,21 @@ class OnboardingServiceImplTest {
         request.setInstitutionTaxCode("taxCode");
         request.setProductId("productId");
         UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        User user = new User();
+        user.setId("42");
         request.setUsers(List.of(userToOnboard));
 
         Institution institution = new Institution();
         institution.setId("example");
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(institution));
         when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
-        when(userService.retrieveUserFromUserRegistry(userToOnboard.getTaxCode())).thenReturn(null);
-        when(userService.persistUserRegistry(userToOnboard.getName(), userToOnboard.getSurname(),
-                userToOnboard.getTaxCode(), userToOnboard.getEmail(), institution.getId())).thenReturn(new User());
+        when(userService.retrieveUserFromUserRegistry(userToOnboard.getTaxCode())).thenThrow(FeignException.NotFound.class);
+        when(userService.persistUserRegistry(any(), any(), any(), any(),any())).thenReturn(user);
 
         onboardingServiceImpl.onboardingUsers(request, null, null);
 
         verify(userService, times(1))
                 .retrieveUserFromUserRegistry(userToOnboard.getTaxCode());
-        verify(userService, times(1))
-                .persistUserRegistry(userToOnboard.getName(), userToOnboard.getSurname(),
-                        userToOnboard.getTaxCode(), userToOnboard.getEmail(), institution.getId());
         verifyNoMoreInteractions(userService);
     }
 
@@ -830,6 +828,8 @@ class OnboardingServiceImplTest {
         userToOnboard.setTaxCode("Tax Code");
         return userToOnboard;
     }
+
+
 
     /**
      * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}

@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import feign.FeignException;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
@@ -13,7 +14,10 @@ import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
-import it.pagopa.selfcare.mscore.core.util.*;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
+import it.pagopa.selfcare.mscore.core.util.TokenUtils;
+import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -266,7 +270,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, request.getProductId(), request.getUsers());
 
         request.getUsers().forEach(userToOnboard -> userNotificationService.sendCreateUserNotification(institution.getDescription(),
-                        product.getTitle(), userToOnboard.getEmail(), roleLabels, loggedUserName, loggedUserSurname));
+                            product.getTitle(), userToOnboard.getEmail(), roleLabels, loggedUserName, loggedUserSurname));
 
         relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
 
@@ -274,8 +278,11 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     private void fillUserIdAndCreateIfNotExist(UserToOnboard user, String institutionId){
-        User userRegistry = userService.retrieveUserFromUserRegistry(user.getTaxCode());
-        if(Objects.isNull(userRegistry)) {
+        User userRegistry;
+        try {
+            userRegistry =  userService.retrieveUserFromUserRegistry(user.getTaxCode());
+        }
+        catch (FeignException.NotFound e) {
             userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
         }
         user.setId(userRegistry.getId());

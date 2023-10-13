@@ -5,15 +5,17 @@ import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.UserRegistryRestClient;
 import it.pagopa.selfcare.mscore.connector.rest.mapper.UserMapperClient;
 import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserResource;
-import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.UserSearchDto;
+import it.pagopa.selfcare.user_registry.generated.openapi.v1.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.EnumSet;
-import java.util.UUID;
+import java.util.Map;
+
+
 
 @Slf4j
 @Service
@@ -34,9 +36,10 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId userId = {}", userId);
         Assert.hasText(userId, "A userId is required");
         Assert.notEmpty(fieldList, "At least one user fields is required");
-        User result = restClient.getUserByInternalId(UUID.fromString(userId), fieldList);
+        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(fieldList.toString(), userId);
+        User user = userMapper.toUser(result.getBody());
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId result = {}", result);
-        return result;
+        return user;
     }
 
     @Override
@@ -49,5 +52,32 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByFiscalCode result = {}", result);
         return user;
     }
+
+    @Override
+    public User persistUserUsingPatch(String name, String familyName, String fiscalCode, String email, String institutionId) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "persistUserByFiscalCode fiscalCode = {}", fiscalCode);
+        Assert.hasText(fiscalCode, "A fiscalCode is required");
+        UserId result = restClient._saveUsingPATCH(SaveUserDto.builder()
+                        .name(CertifiableFieldResourceOfstring.builder()
+                                .value(name)
+                                .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                                .build())
+                        .familyName(CertifiableFieldResourceOfstring.builder()
+                                .value(familyName)
+                                .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                                .build())
+                        .fiscalCode(fiscalCode)
+                        .workContacts(Map.of(institutionId, WorkContactResource.builder()
+                                .email(CertifiableFieldResourceOfstring.builder()
+                                        .value(email)
+                                        .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                                        .build())
+                                .build()))
+                        .build())
+                        .getBody();
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "persistUserByFiscalCode result = {}", result);
+        return userMapper.fromUserId(result);
+    }
+
 
 }
