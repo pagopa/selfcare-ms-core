@@ -497,7 +497,7 @@ class UserServiceImplTest {
         user.setId("fiscalCode");
         when(userRegistryConnector.getUserByFiscalCode(any())).thenReturn(user);
         Assertions.assertDoesNotThrow(() -> userServiceImpl.retrieveUserFromUserRegistry("fiscalCode"));
-        assertEquals(user.getId(), "fiscalCode");
+        assertEquals("fiscalCode", user.getId());
     }
 
     @Test

@@ -17,7 +17,6 @@ import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -43,13 +42,11 @@ public class OnboardingController {
     private final TokenService tokenService;
 
     private final OnboardingResourceMapper onboardingResourceMapper;
-    private final UserMapper userMapper;
 
-    public OnboardingController(OnboardingService onboardingService, TokenService tokenService, OnboardingResourceMapper onboardingResourceMapper, UserMapper userMapper) {
+    public OnboardingController(OnboardingService onboardingService, TokenService tokenService, OnboardingResourceMapper onboardingResourceMapper) {
         this.onboardingService = onboardingService;
         this.tokenService = tokenService;
         this.onboardingResourceMapper = onboardingResourceMapper;
-        this.userMapper = userMapper;
     }
 
     /**

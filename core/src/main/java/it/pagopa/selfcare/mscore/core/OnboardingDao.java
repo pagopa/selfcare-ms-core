@@ -407,7 +407,6 @@ public class OnboardingDao {
     private void rollbackUser(List<String> toUpdate, List<String> toDelete, String institutionId, Map<String, OnboardedProduct> productMap) {
         toUpdate.forEach(userId -> userConnector.findAndRemoveProduct(userId, institutionId, productMap.get(userId)));
         toDelete.forEach(userId -> userConnector.findAndRemoveProduct(userId, institutionId, productMap.get(userId)));
-        //toDelete.forEach(userConnector::deleteById);
         log.debug("rollback second step completed");
     }
 
