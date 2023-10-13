@@ -70,6 +70,26 @@ class NotificationServiceImplTest {
     @Mock
     private CoreConfig coreConfig;
 
+    private static final User user;
+
+    static {
+        user = new User();
+        user.setId("1");
+        user.setFiscalCode("ABC123XYZ");
+        user.setName(new CertifiedField<>());
+        user.setFamilyName(new CertifiedField<>());
+        user.setEmail(new CertifiedField<>());
+
+        Map<String, WorkContact> workContacts1 = new HashMap<>();
+        WorkContact workContact = new WorkContact();
+        CertifiedField<String> email = new CertifiedField<>();
+        email.setValue("email");
+        workContact.setEmail(email);
+        workContacts1.put("id",workContact);
+
+        user.setWorkContacts(workContacts1);
+    }
+
     @Test
     void setCompletedPGOnboardingMail() throws JsonProcessingException {
         when(mailTemplateConfig.getPath()).thenReturn("path");
@@ -175,24 +195,8 @@ class NotificationServiceImplTest {
     void sendCompletedEmail(){
         File file = mock(File.class);
 
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        user1.setName(new CertifiedField<>());
-        user1.setFamilyName(new CertifiedField<>());
-        user1.setEmail(new CertifiedField<>());
-
-        Map<String, WorkContact> workContacts1 = new HashMap<>();
-        WorkContact workContact = new WorkContact();
-        CertifiedField<String> email = new CertifiedField<>();
-        email.setValue("email");
-        workContact.setEmail(email);
-        workContacts1.put("id",workContact);
-
-        user1.setWorkContacts(workContacts1);
-
         List<User> manager = new ArrayList<>();
-        manager.add(user1);
+        manager.add(user);
         Product product = mockInstance(new Product());
 
         Institution institution = new Institution();
@@ -206,24 +210,8 @@ class NotificationServiceImplTest {
     void sendCompletedEmail2(){
         File file = mock(File.class);
 
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        user1.setName(new CertifiedField<>());
-        user1.setFamilyName(new CertifiedField<>());
-        user1.setEmail(new CertifiedField<>());
-
-        Map<String, WorkContact> workContacts1 = new HashMap<>();
-        WorkContact workContact = new WorkContact();
-        CertifiedField<String> email = new CertifiedField<>();
-        email.setValue("email");
-        workContact.setEmail(email);
-        workContacts1.put("id",workContact);
-
-        user1.setWorkContacts(workContacts1);
-
         List<User> manager = new ArrayList<>();
-        manager.add(user1);
+        manager.add(user);
         Product product = mockInstance(new Product());
         Institution institution = new Institution();
         institution.setId("id");
@@ -238,24 +226,8 @@ class NotificationServiceImplTest {
     void sendCompletedMailFD(String productId){
         File file = mock(File.class);
 
-        User user1 = new User();
-        user1.setId("1");
-        user1.setFiscalCode("ABC123XYZ");
-        user1.setName(new CertifiedField<>());
-        user1.setFamilyName(new CertifiedField<>());
-        user1.setEmail(new CertifiedField<>());
-
-        Map<String, WorkContact> workContacts1 = new HashMap<>();
-        WorkContact workContact = new WorkContact();
-        CertifiedField<String> email = new CertifiedField<>();
-        email.setValue("email");
-        workContact.setEmail(email);
-        workContacts1.put("id",workContact);
-
-        user1.setWorkContacts(workContacts1);
-
         List<User> manager = new ArrayList<>();
-        manager.add(user1);
+        manager.add(user);
 
         Product prodFD = new Product();
         prodFD.setId(productId);

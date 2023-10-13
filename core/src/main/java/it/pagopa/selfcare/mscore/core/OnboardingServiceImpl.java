@@ -6,16 +6,14 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
+import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
-import it.pagopa.selfcare.mscore.core.util.TokenUtils;
-import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
+import it.pagopa.selfcare.mscore.core.util.*;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -54,11 +52,9 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final NotificationService notificationService;
     private final UserNotificationService userNotificationService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
-
+    private final MailTemplateConfig mailTemplateConfig;
     private final OnboardingInstitutionStrategyFactory institutionStrategyFactory;
-
     private final InstitutionConnector institutionConnector;
-
     private final ProductConnector productConnector;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
@@ -67,9 +63,13 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
                                  UserEventService userEventService,
-                                 NotificationService notificationService, UserNotificationService userNotificationService, PagoPaSignatureConfig pagoPaSignatureConfig,
+                                 NotificationService notificationService,
+                                 UserNotificationService userNotificationService,
+                                 PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
-                                 InstitutionConnector institutionConnector, ProductConnector productConnector) {
+                                 InstitutionConnector institutionConnector,
+                                 ProductConnector productConnector,
+                                 MailTemplateConfig mailTemplateConfig) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
@@ -82,6 +82,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.institutionStrategyFactory = institutionStrategyFactory;
         this.institutionConnector = institutionConnector;
         this.productConnector = productConnector;
+        this.mailTemplateConfig = mailTemplateConfig;
     }
 
     @Override
@@ -211,7 +212,8 @@ public class OnboardingServiceImpl implements OnboardingService {
             if(InstitutionType.PT.equals(institutionType)) {
                 onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
                 File logoFile = contractService.getLogoFile();
-                notificationService.sendCompletedEmail(delegate, institution, product, logoFile);
+                String templatePath = mailTemplateConfig.getCompletePathPt();
+                notificationService.sendCompletedEmail(delegate, institution, product, logoFile, templatePath);
             } else {
                 String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
                 File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
