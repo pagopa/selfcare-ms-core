@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
 
@@ -48,10 +47,9 @@ class UserRegistryConnectorImplTest {
         UUID id = UUID.randomUUID();
         UserResource userResource = new UserResource();
         userResource.setId(id);
-        EnumSet<User.Fields> userFields = EnumSet.allOf(User.Fields.class);
         ResponseEntity<UserResource> userIdResponseEntity = ResponseEntity.ok(userResource);
         when(userRegistryRestClient._findByIdUsingGET(any(), any())).thenReturn(userIdResponseEntity);
-        User user = userRegistryConnector.getUserByInternalId(id.toString(), userFields);
+        User user = userRegistryConnector.getUserByInternalId(id.toString());
         assertEquals(user.getId(), userResource.getId().toString());
         verify(userRegistryRestClient)._findByIdUsingGET("fiscalCode,name,familyName,workContacts", id.toString());
     }

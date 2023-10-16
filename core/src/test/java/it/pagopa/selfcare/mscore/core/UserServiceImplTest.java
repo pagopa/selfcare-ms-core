@@ -24,7 +24,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -115,7 +118,7 @@ class UserServiceImplTest {
     }
 
     /**
-     * Method under test: {@link UserServiceImpl#retrieveUserFromUserRegistry(String, EnumSet)}
+     * Method under test: {@link UserServiceImpl#retrieveUserFromUserRegistry(String)}
      */
     @Test
     void testRetrieveUserFromUserRegistry() {
@@ -138,9 +141,9 @@ class UserServiceImplTest {
         user.setId("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
-        when(userRegistryConnector.getUserByInternalId( any(), any())).thenReturn(user);
-        assertSame(user, userServiceImpl.retrieveUserFromUserRegistry("42", null));
-        verify(userRegistryConnector).getUserByInternalId( any(), any());
+        when(userRegistryConnector.getUserByInternalId( any())).thenReturn(user);
+        assertSame(user, userServiceImpl.retrieveUserFromUserRegistry("42"));
+        verify(userRegistryConnector).getUserByInternalId( any());
     }
 
     /**
@@ -414,7 +417,7 @@ class UserServiceImplTest {
         CertifiedField<String> certMail = new CertifiedField<>();
         certMail.setValue("mail@test.it");
         user.setEmail(certMail);
-        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
         Map<String, WorkContact> map = new HashMap<>();
         WorkContact contact = new WorkContact();
         CertifiedField<String> mail = new CertifiedField<>();
@@ -455,7 +458,7 @@ class UserServiceImplTest {
         contact.setEmail(mail);
         map.put("id", contact);
         user.setWorkContacts(map);
-        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
 
         User response = userServiceImpl.retrievePerson("userId",null, null);
 
@@ -496,7 +499,7 @@ class UserServiceImplTest {
         User user = new User();
         user.setId("fiscalCode");
         when(userRegistryConnector.getUserByFiscalCode(any())).thenReturn(user);
-        Assertions.assertDoesNotThrow(() -> userServiceImpl.retrieveUserFromUserRegistry("fiscalCode"));
+        Assertions.assertDoesNotThrow(() -> userServiceImpl.retrieveUserFromUserRegistryByFiscalCode("fiscalCode"));
         assertEquals("fiscalCode", user.getId());
     }
 

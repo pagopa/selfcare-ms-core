@@ -15,7 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.USER_NOT_FOUND_ERROR;
@@ -95,12 +98,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User retrieveUserFromUserRegistry(String userId, EnumSet<User.Fields> fields) {
-        return userRegistryConnector.getUserByInternalId(userId, fields);
+    public User retrieveUserFromUserRegistry(String userId) {
+        return userRegistryConnector.getUserByInternalId(userId);
     }
 
     @Override
-    public User retrieveUserFromUserRegistry(String fiscalCode) {
+    public User retrieveUserFromUserRegistryByFiscalCode(String fiscalCode) {
         return userRegistryConnector.getUserByFiscalCode(fiscalCode);
     }
 
@@ -126,7 +129,7 @@ public class UserServiceImpl implements UserService {
             log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
             throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
         }
-        return userRegistryConnector.getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        return userRegistryConnector.getUserByInternalId(userId);
     }
 
     private boolean verifyBindings(OnboardedUser onboardedUser, String productId) {
