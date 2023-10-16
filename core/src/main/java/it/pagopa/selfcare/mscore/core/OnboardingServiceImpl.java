@@ -160,7 +160,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         checkAndHandleExpiring(token);
         List<String> managerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         List<User> managersData = managerList.stream()
-                .map(user -> userService.retrieveUserFromUserRegistry(user, EnumSet.allOf(User.Fields.class)))
+                .map(user -> userService.retrieveUserFromUserRegistry(user))
                 .collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
@@ -197,16 +197,16 @@ public class OnboardingServiceImpl implements OnboardingService {
     public void approveOnboarding(Token token, SelfCareUser selfCareUser) {
 
         checkAndHandleExpiring(token);
-        User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
 
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
         List<User> delegate = onboardedUsers
                 .stream()
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
-                .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+                .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId())).collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = productConnector.getProductById(token.getProductId());
@@ -280,7 +280,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private void fillUserIdAndCreateIfNotExist(UserToOnboard user, String institutionId){
         User userRegistry;
         try {
-            userRegistry =  userService.retrieveUserFromUserRegistry(user.getTaxCode());
+            userRegistry =  userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
         }
         catch (FeignException.NotFound e) {
             userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
@@ -313,14 +313,14 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<String> toUpdate = new ArrayList<>();
         List<String> toDelete = new ArrayList<>();
 
-        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
         OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
         List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), token);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
 
         List<User> delegate = request.getUsers().stream()
                 .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
-                .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class)))
+                .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId()))
                 .collect(Collectors.toList());
 
         String contractTemplate = contractService.extractTemplate(request.getContract().getPath());

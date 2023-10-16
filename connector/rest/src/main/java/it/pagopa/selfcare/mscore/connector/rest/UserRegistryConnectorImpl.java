@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.EnumSet;
 import java.util.Map;
 
 
@@ -32,11 +31,10 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
     }
 
     @Override
-    public User getUserByInternalId(String userId, EnumSet<User.Fields> fieldList) {
+    public User getUserByInternalId(String userId) {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId userId = {}", userId);
         Assert.hasText(userId, "A userId is required");
-        Assert.notEmpty(fieldList, "At least one user fields is required");
-        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(fieldList.toString(), userId);
+        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(USERS_FIELD_LIST, userId);
         User user = userMapper.toUser(result.getBody());
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId result = {}", result);
         return user;

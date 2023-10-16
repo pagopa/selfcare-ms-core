@@ -69,7 +69,7 @@ class UserNotificationServiceImplTest {
         workContacts1.put("id",workContact);
 
         user1.setWorkContacts(workContacts1);
-        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
+        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user1);
         Template template = mock(Template.class);
         when(freemarkerConfig.getTemplate(any())).thenReturn(template);
         assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels, "name","surname"));
@@ -95,7 +95,7 @@ class UserNotificationServiceImplTest {
         workContacts1.put("id",workContact);
 
         user1.setWorkContacts(workContacts1);
-        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
+        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user1);
         Template template = mock(Template.class);
         when(freemarkerConfig.getTemplate(any())).thenReturn(template);
         assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels, "name","surname"));
@@ -113,7 +113,7 @@ class UserNotificationServiceImplTest {
         workContacts1.put("id",workContact);
 
         user1.setWorkContacts(workContacts1);
-        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
+        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user1);
 
         UserBinding userBinding = new UserBinding();
         userBinding.setInstitutionId("id");
@@ -165,7 +165,7 @@ class UserNotificationServiceImplTest {
         workContacts1.put("id",workContact);
 
         user1.setWorkContacts(workContacts1);
-        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
+        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user1);
 
         UserBinding userBinding = new UserBinding();
         userBinding.setInstitutionId("id");
@@ -218,7 +218,7 @@ class UserNotificationServiceImplTest {
         workContacts1.put("id",workContact);
 
         user1.setWorkContacts(workContacts1);
-        when(userService.retrieveUserFromUserRegistry(any(),any())).thenReturn(user1);
+        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user1);
 
         UserBinding userBinding = new UserBinding();
         userBinding.setInstitutionId("id");
