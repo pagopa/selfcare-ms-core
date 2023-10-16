@@ -2,7 +2,8 @@ package it.pagopa.selfcare.mscore.core;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import it.pagopa.selfcare.mscore.api.*;
+import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
+import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -18,7 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -74,7 +79,7 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         Assert.notNull(loggedUserName, NAME_IS_REQUIRED);
         Assert.notNull(loggedUserSurname, SURNAME_IS_REQUIRED);
 
-        User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
+        User user = userService.retrieveUserFromUserRegistry(userId);
         Assert.notNull(user.getName(), NAME_IS_REQUIRED);
         Assert.notNull(user.getFamilyName(), SURNAME_IS_REQUIRED);
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
@@ -83,17 +88,18 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         String email = user.getWorkContacts().get(institution.getId()).getEmail();
         Assert.isTrue(StringUtils.hasText(email), "Email is required");
 
-        Map<String, String> dataModel = new HashMap<>();
-        dataModel.put("requesterName", loggedUserName);
-        dataModel.put("requesterSurname", loggedUserSurname);
-
-        sendCreateNotification(institution.getDescription(), productTitle, email, roleLabels, dataModel);
+        sendCreateUserNotification(institution.getDescription(), productTitle, email, roleLabels, loggedUserName, loggedUserSurname);
         log.trace("sendAddedProductRoleNotification start");
     }
 
-    private void sendCreateNotification(String description, String productTitle, String email, List<String> roleLabels, Map<String, String> dataModel) {
+    @Override
+    public void sendCreateUserNotification(String description, String productTitle, String email, List<String> roleLabels, String loggedUserName, String loggedUserSurname) {
         log.debug("sendCreateNotification start");
         log.debug("sendCreateNotification institution = {}, productTitle = {}, email = {}", description, productTitle, email);
+
+        Map<String, String> dataModel = new HashMap<>();
+        dataModel.put("requesterName", loggedUserName);
+        dataModel.put("requesterSurname", loggedUserSurname);
 
         dataModel.put("productName", productTitle);
         dataModel.put("institutionName", description);
@@ -148,7 +154,7 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         Assert.notNull(loggedUserName, NAME_IS_REQUIRED);
         Assert.notNull(loggedUserSurname, SURNAME_IS_REQUIRED);
 
-        User user = userService.retrieveUserFromUserRegistry(userId, EnumSet.allOf(User.Fields.class));
+        User user = userService.retrieveUserFromUserRegistry(userId);
         Assert.notNull(user.getWorkContacts(), "WorkContacts is required to get email");
         Assert.notNull(user.getWorkContacts().get(binding.getInstitutionId()), String.format("WorkContacts for institution %s is required to get email", binding.getInstitutionId()));
 

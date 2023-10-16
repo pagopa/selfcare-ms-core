@@ -2,12 +2,15 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -247,5 +250,45 @@ public class TestUtils {
         onboardingRequest.setContractFilePath("/example");
 
         return onboardingRequest;
+    }
+    public static OnboardedUser dummyOnboardedUser(){
+        OnboardedUser onboardedUser =  new OnboardedUser();
+        onboardedUser.setId("42");
+        onboardedUser.setBindings(new ArrayList<>());
+        return onboardedUser;
+    }
+
+    public static UserBinding dummyUserBinding (){
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        userBinding.setInstitutionName("Name");
+        userBinding.setInstitutionRootName("RootName");
+        userBinding.setProducts(new ArrayList<>());
+        return userBinding;
+    }
+
+    public static OnboardedProduct dummyOnboardedProduct(){
+        OnboardedProduct onboardedProduct =  new OnboardedProduct();
+        onboardedProduct.setProductId("prod-interop");
+        onboardedProduct.setProductRole("productRole");
+        onboardedProduct.setRole(PartyRole.DELEGATE);
+        onboardedProduct.setStatus(RelationshipState.ACTIVE);
+        onboardedProduct.setEnv(Env.ROOT);
+        onboardedProduct.setRelationshipId("RelId");
+        onboardedProduct.setTokenId("tokenId");
+        return onboardedProduct;
+    }
+
+    public static UserToOnboard dummyUserToOnboard(){
+        UserToOnboard userToOnboard = new UserToOnboard();
+        userToOnboard.setEmail("prof.einstein@example.org");
+        userToOnboard.setEnv(Env.COLL);
+        userToOnboard.setId("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
+        userToOnboard.setName("42");
+        userToOnboard.setProductRole("42");
+        userToOnboard.setRole(PartyRole.SUB_DELEGATE);
+        userToOnboard.setSurname("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
+        userToOnboard.setTaxCode("42");
+        return userToOnboard;
     }
 }

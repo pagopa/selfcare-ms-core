@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -31,6 +32,8 @@ public interface OnboardingService {
     void approveOnboarding(Token token, SelfCareUser selfCareUser);
 
     void onboardingReject(Token token);
+
+    List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname);
 
     List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest toOnboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname);
 

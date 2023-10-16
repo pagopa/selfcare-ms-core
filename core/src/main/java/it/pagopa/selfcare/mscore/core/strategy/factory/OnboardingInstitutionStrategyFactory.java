@@ -23,7 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -171,12 +174,12 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
 
             String validManagerId = OnboardingInstitutionUtils.getValidManagerId(strategyInput.getOnboardingRequest().getUsers());
-            User manager = userService.retrieveUserFromUserRegistry(validManagerId, EnumSet.allOf(User.Fields.class));
+            User manager = userService.retrieveUserFromUserRegistry(validManagerId);
 
             List<User> delegates = strategyInput.getOnboardingRequest().getUsers()
                     .stream()
                     .filter(userToOnboard -> PartyRole.MANAGER != userToOnboard.getRole())
-                    .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+                    .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId())).collect(Collectors.toList());
 
             String contractTemplate = contractService.extractTemplate(strategyInput.getOnboardingRequest().getContract().getPath());
             String productId = strategyInput.getOnboardingRequest().getProductId();
@@ -206,7 +209,7 @@ public class OnboardingInstitutionStrategyFactory {
     private Consumer<OnboardingInstitutionStrategyInput> sendEmailWithDigestOrRollback() {
         return strategyInput -> {
             try {
-                User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
+                User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId());
                 notificationService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false);
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
@@ -218,7 +221,7 @@ public class OnboardingInstitutionStrategyFactory {
     private Consumer<OnboardingInstitutionStrategyInput> sendEmailWithoutDigestOrRollback() {
         return strategyInput -> {
             try {
-                User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId(), EnumSet.allOf(User.Fields.class));
+                User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId());
                 if(!InstitutionType.PT.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
                     notificationService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
                 } else {

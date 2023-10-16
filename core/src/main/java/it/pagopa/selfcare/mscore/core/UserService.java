@@ -8,7 +8,6 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
-import java.util.EnumSet;
 import java.util.List;
 
 public interface UserService {
@@ -28,7 +27,11 @@ public interface UserService {
 
     void verifyUser(String userId);
 
-    User retrieveUserFromUserRegistry(String userId, EnumSet<User.Fields> fields);
+    User retrieveUserFromUserRegistry(String userId);
+
+    User retrieveUserFromUserRegistryByFiscalCode(String fiscalCode);
+
+    User persistUserRegistry(String name, String familyName, String fiscalCode, String email, String institutionId);
 
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 

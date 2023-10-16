@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import feign.FeignException;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
@@ -156,7 +157,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         checkAndHandleExpiring(token);
         List<String> managerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         List<User> managersData = managerList.stream()
-                .map(user -> userService.retrieveUserFromUserRegistry(user, EnumSet.allOf(User.Fields.class)))
+                .map(user -> userService.retrieveUserFromUserRegistry(user))
                 .collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
@@ -193,16 +194,16 @@ public class OnboardingServiceImpl implements OnboardingService {
     public void approveOnboarding(Token token, SelfCareUser selfCareUser) {
 
         checkAndHandleExpiring(token);
-        User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
 
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
         List<User> delegate = onboardedUsers
                 .stream()
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
-                .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId(), EnumSet.allOf(User.Fields.class))).collect(Collectors.toList());
+                .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId())).collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = productConnector.getProductById(token.getProductId());
@@ -249,6 +250,42 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
+    public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname) {
+
+        Institution institution = institutionService.getInstitutions(request.getInstitutionTaxCode(), request.getInstitutionSubunitCode()).stream()
+                .findFirst()
+                .orElseThrow(() -> new InvalidRequestException("Institution not found!", ""));
+
+        Product product = Optional.ofNullable(productConnector.getProductValidById(request.getProductId()))
+                .orElseThrow(() -> new InvalidRequestException("Product not found or is not valid!", ""));
+
+        List<String> roleLabels = request.getUsers().stream()
+                .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
+
+        request.getUsers().forEach(userToOnboard -> fillUserIdAndCreateIfNotExist(userToOnboard, institution.getId()));
+
+        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, request.getProductId(), request.getUsers());
+
+        request.getUsers().forEach(userToOnboard -> userNotificationService.sendCreateUserNotification(institution.getDescription(),
+                            product.getTitle(), userToOnboard.getEmail(), roleLabels, loggedUserName, loggedUserSurname));
+
+        relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
+
+        return relationshipInfoList;
+    }
+
+    private void fillUserIdAndCreateIfNotExist(UserToOnboard user, String institutionId){
+        User userRegistry;
+        try {
+            userRegistry =  userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
+        }
+        catch (FeignException.NotFound e) {
+            userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
+        }
+        user.setId(userRegistry.getId());
+    }
+
+    @Override
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
@@ -256,7 +293,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .collect(Collectors.groupingBy(UserToOnboard::getId));
         List<String> roleLabels = onboardingOperatorRequest.getUsers().stream()
                 .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
-        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(onboardingOperatorRequest, institution);
+        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, onboardingOperatorRequest.getProductId(), onboardingOperatorRequest.getUsers());
         userMap.forEach((key, value) -> userNotificationService.sendAddedProductRoleNotification(key, institution,
                 onboardingOperatorRequest.getProductTitle(), roleLabels, loggedUserName, loggedUserSurname));
         relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
@@ -273,14 +310,14 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<String> toUpdate = new ArrayList<>();
         List<String> toDelete = new ArrayList<>();
 
-        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId(), EnumSet.allOf(User.Fields.class));
+        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
         OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
         List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), token);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0), EnumSet.allOf(User.Fields.class));
+        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
 
         List<User> delegate = request.getUsers().stream()
                 .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
-                .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId(), EnumSet.allOf(User.Fields.class)))
+                .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId()))
                 .collect(Collectors.toList());
 
         String contractTemplate = contractService.extractTemplate(request.getContract().getPath());

@@ -31,7 +31,6 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,7 +91,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     protected List<UserToNotify> toUserToNotify(String userId, String institutionId, String productId, Optional<String> relationshipId, Optional<String> tokenId) {
-        User user = userRegistryConnector.getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        User user = userRegistryConnector.getUserByInternalId(userId);
         OnboardedUser onboardedUser = userConnector.findById(userId);
         return onboardedUser.getBindings().stream()
                 .filter(userBinding -> institutionId.equals(userBinding.getInstitutionId()))
