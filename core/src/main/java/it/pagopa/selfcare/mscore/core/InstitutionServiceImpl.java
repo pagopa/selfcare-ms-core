@@ -23,7 +23,6 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
-import static it.pagopa.selfcare.mscore.model.user.User.Fields.*;
 
 @Slf4j
 @Service
@@ -46,7 +44,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 
 
     private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
-    private static final EnumSet<User.Fields> USER_FIELD_LIST = EnumSet.of(fiscalCode, name, familyName, workContacts);
     private final InstitutionConnector institutionConnector;
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
