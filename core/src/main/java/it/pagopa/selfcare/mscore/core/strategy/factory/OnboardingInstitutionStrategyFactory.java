@@ -141,9 +141,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-            if(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.SA)
-                    || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.PT)
-                    || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.AS)){
+            if(isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())){
                 OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), false);
             } else {
                 OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), true);
@@ -158,9 +156,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
-            if(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.SA)
-                    || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.PT)
-                    || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.AS)) {
+            if(isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
                 OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), false);
             } else {
                 OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), true);
@@ -170,6 +166,15 @@ public class OnboardingInstitutionStrategyFactory {
             OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
             strategyInput.setOnboardingRollback(onboardingRollback);
         };
+    }
+
+    private boolean isValidateOnboardingByInstitutionType(InstitutionType institutionType) {
+        if (institutionType.equals(InstitutionType.SA)
+                || institutionType.equals(InstitutionType.PT)
+                || institutionType.equals(InstitutionType.AS)) {
+            return true;
+        }
+        return false;
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> createContractAndPerformDigest() {
