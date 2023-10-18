@@ -142,7 +142,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-            isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
+            validateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -153,7 +153,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
-            isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
+            validateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -161,7 +161,7 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private void isValidateOnboardingByInstitutionType(InstitutionType institutionType, Billing billing) {
+    private void validateOnboardingByInstitutionType(InstitutionType institutionType, Billing billing) {
         boolean checkRecipientCode = !(institutionType.equals(InstitutionType.SA)
                 || institutionType.equals(InstitutionType.PT)
                 || institutionType.equals(InstitutionType.AS));
