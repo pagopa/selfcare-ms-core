@@ -162,13 +162,10 @@ public class OnboardingInstitutionStrategyFactory {
     }
 
     private void isValidateOnboardingByInstitutionType(InstitutionType institutionType, Billing billing) {
-        if (institutionType.equals(InstitutionType.SA)
+        boolean checkRecipientCode = !(institutionType.equals(InstitutionType.SA)
                 || institutionType.equals(InstitutionType.PT)
-                || institutionType.equals(InstitutionType.AS)) {
-            OnboardingInstitutionUtils.validateOnboarding(billing, false);
-        } else {
-            OnboardingInstitutionUtils.validateOnboarding(billing, true);
-        }
+                || institutionType.equals(InstitutionType.AS));
+        OnboardingInstitutionUtils.validateOnboarding(billing, checkRecipientCode);
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> createContractAndPerformDigest() {
