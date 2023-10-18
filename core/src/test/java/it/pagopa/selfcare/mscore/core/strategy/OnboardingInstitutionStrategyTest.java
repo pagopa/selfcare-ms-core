@@ -721,6 +721,50 @@ class OnboardingInstitutionStrategyTest {
                 .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
     }
 
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingInstitution(OnboardingRequest, SelfCareUser)}
+     */
+    @Test
+    void testOnboardingInstitutionAS() throws IOException {
+
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.AS);
+        institutionUpdate.setIvassCode("ivassCode");
+
+        Token token = TestUtils.dummyToken();
+        token.setProductId(PROD_INTEROP.getValue());
+        token.setId("id");
+
+        Institution institution = new Institution();
+        institution.setOrigin("selc");
+
+        Billing billing1 = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+
+        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
+        institutionUpdate1.setInstitutionType(InstitutionType.AS);
+
+        OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
+        onboardingRequest.setBillingRequest(billing1);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
+        onboardingRequest.setProductId(PROD_INTEROP.getValue());
+
+        UserToOnboard userToOnboard = new UserToOnboard();
+        userToOnboard.setId("id");
+        userToOnboard.setRole(PartyRole.MANAGER);
+        onboardingRequest.setUsers(List.of(userToOnboard));
+        OnboardingRollback onboardingRollback = new OnboardingRollback();
+
+        onboardingRollback.setToken(token);
+        when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
+        when(contractService.extractTemplate(any())).thenReturn("template");
+        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(File.createTempFile("file",".txt"));
+
+        assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.AS, onboardingRequest.getProductId(), institution)
+                .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
 
 
     @ParameterizedTest()

@@ -75,7 +75,8 @@ public class OnboardingInstitutionStrategyFactory {
             emailsOnboardingInstitutionStrategy = sendConfirmationMail();
         } else if (InstitutionType.PA == institutionType
                 || checkIfGspProdInteropAndOriginIPA(institutionType, productId, institution.getOrigin())
-                || InstitutionType.SA == institutionType) {
+                || InstitutionType.SA == institutionType
+                || InstitutionType.AS == institutionType) {
             digestOnboardingInstitutionStrategy = createContractAndPerformDigest();
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
@@ -138,11 +139,11 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
             if(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.SA)
-            || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.PT)){
+                    || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.PT)
+                    || strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType().equals(InstitutionType.AS)){
                 OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), false);
             } else {
                 OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), true);
