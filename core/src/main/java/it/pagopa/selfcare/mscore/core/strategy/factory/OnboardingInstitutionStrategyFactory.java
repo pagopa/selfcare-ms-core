@@ -15,6 +15,7 @@ import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRollback;
@@ -141,11 +142,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-            if(isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())){
-                OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), false);
-            } else {
-                OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), true);
-            }
+            isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -156,11 +153,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
-            if(isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
-                OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), false);
-            } else {
-                OnboardingInstitutionUtils.validateOnboarding(strategyInput.getOnboardingRequest().getBillingRequest(), true);
-            }
+            isValidateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -168,13 +161,14 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private boolean isValidateOnboardingByInstitutionType(InstitutionType institutionType) {
+    private void isValidateOnboardingByInstitutionType(InstitutionType institutionType, Billing billing) {
         if (institutionType.equals(InstitutionType.SA)
                 || institutionType.equals(InstitutionType.PT)
                 || institutionType.equals(InstitutionType.AS)) {
-            return true;
+            OnboardingInstitutionUtils.validateOnboarding(billing, false);
+        } else {
+            OnboardingInstitutionUtils.validateOnboarding(billing, true);
         }
-        return false;
     }
 
     private Consumer<OnboardingInstitutionStrategyInput> createContractAndPerformDigest() {
