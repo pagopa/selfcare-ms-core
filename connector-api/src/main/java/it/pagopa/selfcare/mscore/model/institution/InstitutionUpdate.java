@@ -25,5 +25,6 @@ public class InstitutionUpdate {
     private String businessRegisterPlace;
     private String supportEmail;
     private String supportPhone;
+    private String ivassCode;
     private boolean imported;
 }
