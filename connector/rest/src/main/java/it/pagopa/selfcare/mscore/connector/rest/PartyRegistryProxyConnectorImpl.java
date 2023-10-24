@@ -182,10 +182,10 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     @Override
     public AsResource getASFromIvass(String taxId) {
         try {
-            log.debug("getAsByTaxId = {}", taxId);
+            log.debug("getASFromIvass = {}", taxId);
             Assert.hasText(taxId, "TaxId is required");
             ResponseEntity<InsuranceCompanyResource> result = restClient._searchByTaxCodeUsingGET(taxId);
-            log.debug("getAsByTaxId = {}", taxId);
+            log.debug("getASFromIvass = {}", taxId);
             if (result != null) {
                 return asMapper.toResource(result.getBody());
             }
