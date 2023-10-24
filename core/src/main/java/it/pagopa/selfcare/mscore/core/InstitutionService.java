@@ -33,6 +33,8 @@ public interface InstitutionService {
 
     Institution createInstitutionFromAnac(Institution institution);
 
+    Institution createInstitutionFromIvass(Institution institution);
+
     Institution createInstitutionRaw(Institution institution, String externalId);
 
     Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser);

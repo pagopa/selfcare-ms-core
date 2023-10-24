@@ -1641,6 +1641,68 @@
         } ]
       }
     },
+    "/institutions/from-ivass/" : {
+      "post" : {
+        "tags" : [ "Institution" ],
+        "summary" : "create an institution from ivass CSV",
+        "description" : "create an institution from ivass CSV",
+        "operationId" : "createInstitutionFromIvassUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/insert/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
@@ -5493,7 +5555,7 @@
           },
           "origin" : {
             "type" : "string",
-            "enum" : [ "ADE", "ANAC", "INFOCAMERE", "IPA", "MOCK", "SELC", "UNKNOWN" ]
+            "enum" : [ "ADE", "ANAC", "INFOCAMERE", "IPA", "IVASS", "MOCK", "SELC", "UNKNOWN" ]
           },
           "originId" : {
             "type" : "string"

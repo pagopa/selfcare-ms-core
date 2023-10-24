@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
 import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapper;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.AsMapper;
 import it.pagopa.selfcare.mscore.connector.rest.mapper.SaMapper;
 import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapper;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
@@ -14,7 +15,9 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.registry_proxy.generated.openapi.v1.dto.InsuranceCompanyResource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -32,12 +35,14 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     private final UoMapper uoMapper;
 
     private final SaMapper saMapper;
+    private final AsMapper asMapper;
 
-    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper, SaMapper saMapper) {
+    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper, SaMapper saMapper, AsMapper asMapper) {
         this.restClient = restClient;
         this.aooMapper = aooMapper;
         this.uoMapper = uoMapper;
         this.saMapper = saMapper;
+        this.asMapper = asMapper;
     }
 
     @Override
@@ -167,6 +172,22 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
             log.debug("getSaByTaxId = {}", taxId);
             if (result != null) {
                 return saMapper.toResource(result);
+            }
+            throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), taxId), CREATE_INSTITUTION_NOT_FOUND.getCode());
+        } catch (FeignException e) {
+            throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
+        }
+    }
+
+    @Override
+    public AsResource getASFromIvass(String taxId) {
+        try {
+            log.debug("getAsByTaxId = {}", taxId);
+            Assert.hasText(taxId, "TaxId is required");
+            ResponseEntity<InsuranceCompanyResource> result = restClient._searchByTaxCodeUsingGET(taxId);
+            log.debug("getAsByTaxId = {}", taxId);
+            if (result != null) {
+                return asMapper.toResource(result.getBody());
             }
             throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), taxId), CREATE_INSTITUTION_NOT_FOUND.getCode());
         } catch (FeignException e) {

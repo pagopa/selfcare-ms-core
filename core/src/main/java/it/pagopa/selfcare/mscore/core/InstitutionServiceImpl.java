@@ -155,6 +155,18 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution createInstitutionFromIvass(Institution institution) {
+        return createInstitutionStrategyFactory.createInstitutionStrategyIvass(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .subunitCode(institution.getSubunitCode())
+                        .subunitType(Optional.ofNullable(institution.getSubunitType())
+                                .map(InstitutionPaSubunitType::valueOf)
+                                .orElse(null))
+                        .build());
+    }
+
+    @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
 
