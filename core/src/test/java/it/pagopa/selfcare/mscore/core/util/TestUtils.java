@@ -22,6 +22,10 @@ public class TestUtils {
     public static Institution dummyInstitutionSa() {
         return dummyInstitution(InstitutionType.SA);
     }
+
+    public static Institution dummyInstitutionAs() {
+        return dummyInstitution(InstitutionType.AS);
+    }
     public static Institution dummyInstitutionPt() {
         return dummyInstitution(InstitutionType.PT);
     }

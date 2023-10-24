@@ -11,12 +11,15 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.registry_proxy.generated.openapi.v1.dto.InsuranceCompanyResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -43,10 +46,13 @@ class PartyRegistryProxyConnectorImplTest {
 
     @Spy
     private SaMapper saMapper = new SaMapperImpl();
+    @Spy
+    private AsMapper asMapper = new AsMapperImpl();
 
     private final static AooResponse aooResponse;
     private final static UoResponse uoResponse;
     private final static PdndResponse pdndResponse;
+    private final static InsuranceCompanyResource asResponse;
 
     static {
         aooResponse = new AooResponse();
@@ -59,6 +65,7 @@ class PartyRegistryProxyConnectorImplTest {
         uoResponse.setId("id");
         uoResponse.setOrigin(Origin.IPA);
         pdndResponse = mockInstance(new PdndResponse());
+        asResponse = mockInstance(new InsuranceCompanyResource());
     }
 
     /**
@@ -547,6 +554,31 @@ class PartyRegistryProxyConnectorImplTest {
         //then
         assertThrows(ResourceNotFoundException.class, executable);
         verify(partyRegistryProxyRestClient, times(1)).getSaByTaxId(taxId);
+    }
+
+    @Test
+    void getASFromIvass(){
+        //given
+        ResponseEntity<InsuranceCompanyResource> response =  new ResponseEntity<>(asResponse, HttpStatus.FOUND);
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient._searchByTaxCodeUsingGET(anyString())).thenReturn(response);
+        //when
+        AsResource result = partyRegistryProxyConnectorImpl.getASFromIvass(taxId);
+        //then
+        checkNotNullFields(result);
+        verify(partyRegistryProxyRestClient, times(1))._searchByTaxCodeUsingGET(taxId);
+    }
+
+    @Test
+    void getASFromIvassNotFound(){
+        //given
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient._searchByTaxCodeUsingGET(anyString())).thenThrow(ResourceNotFoundException.class);
+        //when
+        Executable executable = () -> partyRegistryProxyConnectorImpl.getASFromIvass(taxId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        verify(partyRegistryProxyRestClient, times(1))._searchByTaxCodeUsingGET(taxId);
     }
 
 }

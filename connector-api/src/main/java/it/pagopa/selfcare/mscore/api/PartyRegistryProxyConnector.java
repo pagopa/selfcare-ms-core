@@ -23,4 +23,6 @@ public interface PartyRegistryProxyConnector {
     UnitaOrganizzativa getUoById(String uoId);
 
     SaResource getSAFromAnac(String taxId);
+
+    AsResource getASFromIvass(String taxId);
 }
