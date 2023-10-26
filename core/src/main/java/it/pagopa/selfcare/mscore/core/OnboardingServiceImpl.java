@@ -14,7 +14,10 @@ import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
-import it.pagopa.selfcare.mscore.core.util.*;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
+import it.pagopa.selfcare.mscore.core.util.TokenUtils;
+import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -199,11 +202,14 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
+        User manager = null;
+        if (!validManagerList.isEmpty()) {
+            manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
+        }
         List<User> delegate = onboardedUsers
                 .stream()
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId())).collect(Collectors.toList());
-
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = productConnector.getProductById(token.getProductId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution, product);
@@ -215,7 +221,6 @@ public class OnboardingServiceImpl implements OnboardingService {
                 String templatePath = mailTemplateConfig.getCompletePathPt();
                 notificationService.sendCompletedEmail(delegate, institution, product, logoFile, templatePath);
             } else {
-                User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
                 String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
                 File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
                 String digest = TokenUtils.createDigest(pdf);
