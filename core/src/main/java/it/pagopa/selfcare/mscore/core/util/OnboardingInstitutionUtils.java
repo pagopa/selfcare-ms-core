@@ -89,6 +89,7 @@ public class OnboardingInstitutionUtils {
         switch (institutionType) {
             case PA:
             case SA:
+            case AS:
                 return RelationshipState.PENDING;
             case PG:
                 return RelationshipState.ACTIVE;
