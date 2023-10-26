@@ -153,7 +153,7 @@ public class OnboardingInstitutionUtils {
                     .map(TokenUser::getUserId).collect(Collectors.toList());
         }
         if (managerList.isEmpty() && !InstitutionType.PT.equals(token.getInstitutionUpdate().getInstitutionType())) {
-            throw new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_ERROR.getMessage(), CustomError.MANAGER_NOT_FOUND_ERROR.getCode());
+            throw new InvalidRequestException(String.format(CustomError.MANAGER_NOT_FOUND_ERROR.getMessage(), token.getInstitutionId(), token.getProductId()), CustomError.MANAGER_NOT_FOUND_ERROR.getCode());
         }
         return managerList;
     }
