@@ -14,7 +14,10 @@ import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
-import it.pagopa.selfcare.mscore.core.util.*;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
+import it.pagopa.selfcare.mscore.core.util.TokenUtils;
+import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -157,7 +160,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         checkAndHandleExpiring(token);
         List<String> managerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         List<User> managersData = managerList.stream()
-                .map(user -> userService.retrieveUserFromUserRegistry(user))
+                .map(userService::retrieveUserFromUserRegistry)
                 .collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
@@ -199,12 +202,14 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
+        User manager = null;
+        if (!validManagerList.isEmpty()) {
+            manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
+        }
         List<User> delegate = onboardedUsers
                 .stream()
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId())).collect(Collectors.toList());
-
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         Product product = productConnector.getProductById(token.getProductId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution, product);

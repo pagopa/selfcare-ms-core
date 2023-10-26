@@ -30,6 +30,7 @@ public interface TokenMapper {
                     .filter(userBinding -> tokenRelationships.getInstitutionId().equalsIgnoreCase(userBinding.getInstitutionId()))
                     .flatMap(userBinding -> userBinding.getProducts().stream())
                     .filter(onboardedProduct -> tokenRelationships.getProductId().equalsIgnoreCase(onboardedProduct.getProductId()))
+                    .filter(onboardedProduct -> tokenRelationships.getTokenId().equals(onboardedProduct.getTokenId()))
                     .map(product -> {
                         LegalsResponse legalsResponse = new LegalsResponse();
                         legalsResponse.setPartyId(user.getId());
