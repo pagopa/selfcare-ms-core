@@ -202,7 +202,6 @@ public class OnboardingServiceImpl implements OnboardingService {
         List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
 
         List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
         List<User> delegate = onboardedUsers
                 .stream()
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
@@ -219,6 +218,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 String templatePath = mailTemplateConfig.getCompletePathPt();
                 notificationService.sendCompletedEmail(delegate, institution, product, logoFile, templatePath);
             } else {
+                User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
                 String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
                 File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
                 String digest = TokenUtils.createDigest(pdf);
