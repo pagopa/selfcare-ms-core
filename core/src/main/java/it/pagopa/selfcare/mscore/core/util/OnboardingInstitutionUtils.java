@@ -152,7 +152,7 @@ public class OnboardingInstitutionUtils {
             managerList = token.getUsers().stream().filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
                     .map(TokenUser::getUserId).collect(Collectors.toList());
         }
-        if (managerList.isEmpty()) {
+        if (managerList.isEmpty() && !InstitutionType.PT.equals(token.getInstitutionUpdate().getInstitutionType())) {
             throw new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_ERROR.getMessage(), CustomError.MANAGER_NOT_FOUND_ERROR.getCode());
         }
         return managerList;

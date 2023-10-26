@@ -160,7 +160,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         checkAndHandleExpiring(token);
         List<String> managerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
         List<User> managersData = managerList.stream()
-                .map(user -> userService.retrieveUserFromUserRegistry(user))
+                .map(userService::retrieveUserFromUserRegistry)
                 .collect(Collectors.toList());
 
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
