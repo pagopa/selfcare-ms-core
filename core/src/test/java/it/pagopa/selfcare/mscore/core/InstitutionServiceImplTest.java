@@ -323,6 +323,14 @@ class InstitutionServiceImplTest {
         assertNotNull(institution);
     }
 
+    @Test
+    void testCreateInstitutionFromIvass() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategyIvass(any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitutionFromIvass(new Institution());
+        assertNotNull(institution);
+    }
+
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}
      */

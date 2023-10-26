@@ -94,6 +94,32 @@ public class TestUtils {
         return institution;
     }
 
+    public static Institution createSimpleInstitutionAS() {
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(new ArrayList<>());
+        institution.setBilling(createSimpleBilling());
+
+        institution.setDataProtectionOfficer(createSimpleDataProtectionOfficer());
+        institution.setDescription("The characteristics of someone or something");
+        institution.setDigitalAddress("42 Main St");
+        institution.setExternalId("42");
+        institution.setGeographicTaxonomies(new ArrayList<>());
+        institution.setId("42");
+        institution.setInstitutionType(InstitutionType.AS);
+        institution.setOriginId("IVASS Code");
+        institution.setOrigin(Origin.IVASS.name());
+        institution.setOnboarding(new ArrayList<>());
+
+        institution.setPaymentServiceProvider(createSimplePaymentServiceProvider());
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        institution.setShareCapital("Share Capital");
+        institution.setRea("Rea");
+
+        return institution;
+    }
+
     public static InstitutionRequest createSimpleInstitutionRequest() {
         InstitutionRequest institution = new InstitutionRequest();
         institution.setAddress("42 Main St");

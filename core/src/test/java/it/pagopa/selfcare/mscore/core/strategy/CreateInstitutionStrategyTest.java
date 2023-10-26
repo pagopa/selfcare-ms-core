@@ -14,10 +14,7 @@ import it.pagopa.selfcare.mscore.core.util.TestUtils;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.SaResource;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -146,6 +143,40 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getSubunitCode()).isNull();
         assertThat(actual.getSubunitType()).isNull();
         assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.SA);
+        assertThat(actual.getSubunitType()).isNull();
+
+        verify(institutionConnector).save(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionFromIvass() {
+
+        Institution institution = TestUtils.dummyInstitutionAs();
+        AsResource asResource = new AsResource();
+        asResource.setOriginId("originId");
+        asResource.setTaxCode("taxCode");
+        asResource.setDescription("desc");
+        asResource.setDigitalAddress("test@test.it");
+        when(partyRegistryProxyConnector.getASFromIvass(any())).thenReturn(asResource);
+        when(institutionConnector.save(any())).thenReturn(institution);
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyIvass(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .build());
+
+        //Then
+        assertThat(actual.getDescription()).isEqualTo(institution.getDescription());
+        assertThat(actual.getDigitalAddress()).isEqualTo(institution.getDigitalAddress());
+        assertThat(actual.getAddress()).isEqualTo(institution.getAddress());
+        assertThat(actual.getZipCode()).isEqualTo(institution.getZipCode());
+        assertThat(actual.getTaxCode()).isEqualTo(institution.getTaxCode());
+        assertThat(actual.getSubunitCode()).isNull();
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.AS);
         assertThat(actual.getSubunitType()).isNull();
 
         verify(institutionConnector).save(any());
