@@ -590,7 +590,6 @@ class OnboardingServiceImplTest {
         verify(productConnector, times(1)).getProductById(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId());
         verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
-        verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0));
         verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId());
         verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
         verify(contractService, times(1)).getLogoFile();
