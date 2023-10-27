@@ -68,6 +68,26 @@ public class TestUtils {
         return institution;
     }
 
+    public static Institution createSimpleInstitutionPda() {
+        Institution institution = new Institution();
+        institution.setAddress("42 Main St");
+        institution.setAttributes(new ArrayList<>());
+        institution.setBilling(createSimpleBilling());
+
+        institution.setDescription("The characteristics of someone or something");
+        institution.setExternalId("42");
+        institution.setId("42");
+        institution.setInstitutionType(InstitutionType.PA);
+        institution.setOriginId("Ipa Code");
+        institution.setOrigin(Origin.MOCK.name());
+
+        institution.setTaxCode("Tax Code");
+        institution.setZipCode("21654");
+        institution.setImported(true);
+
+        return institution;
+    }
+
     public static Institution createSimpleInstitutionSA() {
         Institution institution = new Institution();
         institution.setAddress("42 Main St");

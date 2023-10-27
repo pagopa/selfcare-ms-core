@@ -29,6 +29,8 @@ public interface InstitutionService {
 
     Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode);
 
+    Institution createInstitutionFromPda(Institution institution, String injestionInstitutionType);
+
     Institution createInstitutionByExternalId(String externalId);
 
     Institution createInstitutionFromAnac(Institution institution);

@@ -420,6 +420,63 @@ class InstitutionControllerTest {
      * Method under test: {@link InstitutionController#createInstitutionFromIpa(InstitutionFromIpaPost)}}
      */
     @Test
+    void shouldCreateInstitutionFromPda() throws Exception {
+        // Given
+        PdaInstitutionRequest institutionRequest = new PdaInstitutionRequest();
+        institutionRequest.setInjestionInstitutionType("EC");
+        institutionRequest.setDescription("test ec");
+        institutionRequest.setTaxCode("taxCode");
+        String content = objectMapper.writeValueAsString(institutionRequest);
+
+        Institution institution = TestUtils.createSimpleInstitutionPda();
+
+        when(institutionService.createInstitutionFromPda(any(), any())).thenReturn(institution);
+
+        //Then
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-pda")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"attributes\":[],\"imported\":true}"));
+    }
+
+    @Test
+    void shouldCreateInstitutionFromInfocamere() throws Exception {
+        // Given
+        InstitutionFromIpaPost institutionFromIpaPost = new InstitutionFromIpaPost();
+        institutionFromIpaPost.setTaxCode("123456");
+        institutionFromIpaPost.setSubunitType(InstitutionPaSubunitType.AOO);
+        institutionFromIpaPost.setSubunitCode("1234");
+        String content = objectMapper.writeValueAsString(institutionFromIpaPost);
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+        institution.setSubunitCode(institutionFromIpaPost.getSubunitCode());
+        institution.setSubunitType(institutionFromIpaPost.getSubunitType().name());
+        institution.setParentDescription("parentDescription");
+        institution.setRootParentId("rootParentId");
+
+        when(institutionService.createInstitutionFromIpa(any(), any(), any())).thenReturn(institution);
+
+        //Then
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"1234\",\"subunitType\":\"AOO\"}"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#createInstitutionFromIpa(InstitutionFromIpaPost)}}
+     */
+    @Test
     void shouldThrowValidationExceptionWhenCreateInstitutionFromIpaWithoutTax() throws Exception {
 
         String content = objectMapper.writeValueAsString(new InstitutionFromIpaPost());

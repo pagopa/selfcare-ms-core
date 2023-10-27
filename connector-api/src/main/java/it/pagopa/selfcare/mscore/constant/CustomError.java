@@ -37,7 +37,8 @@ public enum CustomError {
     RELATIONSHIP_NOT_SUSPENDABLE("0010", "Relationship %s cannot be suspended"),
     MISSING_QUERY_PARAMETER("0045", "At least one query parameter between [userId, institutionId] must be passed"),
     RELATIONSHIP_NOT_FOUND("0008", "Relationship not found for Institution %s, User %s and Role %s"),
-    CREATE_DELEGATION_CONFLICT("0041", "Delegation with parameters [from, to, productId, type] already exists");
+    CREATE_DELEGATION_CONFLICT("0041", "Delegation with parameters [from, to, productId, type] already exists"),
+    INSTITUTION_NOT_FOUND_IN_REGISTRY("0042", "NOT_FOUND_IN_REGISTRY");
 
     private final String code;
     private final String detail;
