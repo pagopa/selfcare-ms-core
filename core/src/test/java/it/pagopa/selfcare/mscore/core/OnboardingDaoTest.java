@@ -1645,19 +1645,46 @@ class OnboardingDaoTest {
         assertTrue(onboardingDao.onboardOperator(new Institution(), "productId", List.of(user)).isEmpty());
     }
 
-
     @Test
-    void testOnboardOperator1() {
+    void testOnboardOperator12() {
+        Institution institution = TestUtils.dummyInstitution();
         OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
         UserBinding userBinding = TestUtils.dummyUserBinding();
         OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
-        onboardedProduct.setProductId("42");
-        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedProduct.setProductId("productId");
+        onboardedProduct.setRole(PartyRole.OPERATOR);
+        onboardedProduct.setProductRole("api");
+        OnboardedProduct onboardedProduct1 = TestUtils.dummyOnboardedProduct();
+        userBinding.setProducts(List.of(onboardedProduct, onboardedProduct1));
+        userBinding.setInstitutionId("institutionId");
         onboardedUser.setBindings(List.of(userBinding));
         UserToOnboard user = new UserToOnboard();
         user.setId("id");
+        user.setRole(PartyRole.DELEGATE);
+        user.setProductRole("admin");
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        assertFalse(onboardingDao.onboardOperator(new Institution(), "productId", List.of(user)).isEmpty());
+        assertFalse(onboardingDao.onboardOperator(institution, "productId", List.of(user)).isEmpty());
+    }
+
+    @Test
+    void testOnboardOperator1() {
+        Institution institution = TestUtils.dummyInstitution();
+        OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
+        UserBinding userBinding = TestUtils.dummyUserBinding();
+        OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
+        onboardedProduct.setProductId("productId");
+        onboardedProduct.setRole(PartyRole.OPERATOR);
+        onboardedProduct.setProductRole("api");
+        OnboardedProduct onboardedProduct1 = TestUtils.dummyOnboardedProduct();
+        userBinding.setProducts(List.of(onboardedProduct, onboardedProduct1));
+        userBinding.setInstitutionId("institutionId");
+        onboardedUser.setBindings(List.of(userBinding));
+        UserToOnboard user = new UserToOnboard();
+        user.setId("id");
+        user.setRole(PartyRole.OPERATOR);
+        user.setProductRole("api");
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        assertFalse(onboardingDao.onboardOperator(institution, "productId", List.of(user)).isEmpty());
     }
 
     /**
