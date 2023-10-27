@@ -8,7 +8,6 @@ import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.utils.MaskDataUtils;
@@ -23,11 +22,9 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION
 
 @Slf4j
 @Component
-public class CreateInstitutionStrategyPda implements CreateInstitutionStrategy {
+public class CreateInstitutionStrategyPda extends CreateInstitutionStrategyCommon implements CreateInstitutionStrategy {
 
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-
-    private final InstitutionConnector institutionConnector;
 
     private final InstitutionMapper institutionMapper;
 
@@ -36,8 +33,8 @@ public class CreateInstitutionStrategyPda implements CreateInstitutionStrategy {
     public CreateInstitutionStrategyPda(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                         InstitutionConnector institutionConnector,
                                         InstitutionMapper institutionMapper) {
+        super(institutionConnector);
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
-        this.institutionConnector = institutionConnector;
         this.institutionMapper = institutionMapper;
     }
 
@@ -103,7 +100,7 @@ public class CreateInstitutionStrategyPda implements CreateInstitutionStrategy {
         newInstitution.setDescription(description);
         newInstitution.setExternalId(taxCode);
         newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
-        if(injestionInstitutionType.equalsIgnoreCase("PT")) {
+        if(injestionInstitutionType.equalsIgnoreCase(InstitutionType.PT.name())) {
             newInstitution.setInstitutionType(InstitutionType.PT);
         }else{
             newInstitution.setInstitutionType(InstitutionType.PG);
@@ -131,15 +128,6 @@ public class CreateInstitutionStrategyPda implements CreateInstitutionStrategy {
         newInstitution.setAttributes(List.of(attributes));
 
         return newInstitution;
-    }
-
-    private void checkIfAlreadyExistsByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
-
-        List<Institution> institutions = institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
-        if (!institutions.isEmpty())
-            throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
-                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
     }
 
     public void setInjestionInstitutionType(String injestionInstitutionType) {
