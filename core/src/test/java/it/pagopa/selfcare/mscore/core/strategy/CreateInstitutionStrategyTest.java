@@ -11,7 +11,9 @@ import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategy
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.core.util.TestUtils;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -415,5 +417,104 @@ class CreateInstitutionStrategyTest {
         verify(institutionConnector).findByTaxCodeSubunitCode(anyString(), anyString());
         verify(partyRegistryProxyConnector).getCategory(any(), any());
         verify(partyRegistryProxyConnector).getInstitutionById(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionForECFromIpaWithPda() {
+
+        Institution institutionToReturn = new Institution();
+        institutionToReturn.setId("id");
+        institutionToReturn.setDescription("test");
+
+        //Given
+        when(institutionConnector.findByTaxCodeSubunitCode(any(), any()))
+                .thenReturn(List.of());
+
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(dummyCategoryProxyInfo);
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
+        when(institutionConnector.save(any())).thenReturn(institutionToReturn);
+
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyPda("EC")
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode("test")
+                        .build());
+
+        assertThat(actual.getId()).isEqualTo(institutionToReturn.getId());
+        assertThat(actual.getDescription()).isEqualTo(institutionToReturn.getDescription());
+
+        verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+        verify(partyRegistryProxyConnector).getCategory(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionForECFromInfocamereWithPda() {
+
+        Institution institutionToReturn = new Institution();
+        institutionToReturn.setId("id");
+        institutionToReturn.setDescription("test");
+
+        NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
+        nationalRegistriesProfessionalAddress.setZipCode("test");
+        nationalRegistriesProfessionalAddress.setAddress("test");
+
+        //Given
+        when(institutionConnector.findByTaxCodeSubunitCode(any(), any()))
+                .thenReturn(List.of());
+
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenThrow(new MsCoreException("NOT_FOUND", "404"));
+        when(partyRegistryProxyConnector.getLegalAddress(any())).thenReturn(nationalRegistriesProfessionalAddress);
+        when(institutionConnector.save(any())).thenReturn(institutionToReturn);
+
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyPda("EC")
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode("test")
+                        .build());
+
+        assertThat(actual.getId()).isEqualTo(institutionToReturn.getId());
+        assertThat(actual.getDescription()).isEqualTo(institutionToReturn.getDescription());
+
+        verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
+        verify(partyRegistryProxyConnector).getLegalAddress(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldThrowErrorWhenInstitutionDoesNotExistsOnIpaAndInfocamere() {
+
+        Institution institutionToReturn = new Institution();
+        institutionToReturn.setId("id");
+        institutionToReturn.setDescription("test");
+
+        NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
+        nationalRegistriesProfessionalAddress.setZipCode("test");
+        nationalRegistriesProfessionalAddress.setAddress("test");
+
+        //Given
+        when(institutionConnector.findByTaxCodeSubunitCode(any(), any()))
+                .thenReturn(List.of());
+
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenThrow(new MsCoreException("NOT_FOUND", "404"));
+        when(partyRegistryProxyConnector.getLegalAddress(any())).thenThrow(new MsCoreException("NOT_FOUND", "404"));
+
+        //When
+        assertThrows(ResourceNotFoundException.class, () -> strategyFactory.createInstitutionStrategyPda("EC")
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode("test")
+                        .build()));
+        verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
+        verify(partyRegistryProxyConnector).getLegalAddress(any());
     }
 }
