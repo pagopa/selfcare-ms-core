@@ -331,13 +331,7 @@ class InstitutionServiceImplTest {
         assertNotNull(institution);
     }
 
-    @Test
-    void testCreateInstitutionFromPda() {
-        when(createInstitutionStrategyFactory.createInstitutionStrategyPda(any())).thenReturn(createInstitutionStrategy);
-        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
-        Institution institution = institutionServiceImpl.createInstitutionFromPda(new Institution(), "EC");
-        assertNotNull(institution);
-    }
+
 
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}

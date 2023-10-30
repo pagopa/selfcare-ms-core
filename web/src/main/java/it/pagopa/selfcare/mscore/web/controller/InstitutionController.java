@@ -174,7 +174,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-pda}", notes = "${swagger.mscore.institution.create.from-ipa}")
-    @PostMapping(value = "/from-pda")
+    @PostMapping(value = "/from-pda/")
     public ResponseEntity<InstitutionResponse> createInstitutionFromPda(@RequestBody @Valid PdaInstitutionRequest institutionRequest) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
