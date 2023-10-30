@@ -131,8 +131,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createInstitutionFromPda(Institution institution, String injestionInstitutionType) {
-        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyPda(injestionInstitutionType);
+    public Institution createInstitutionFromPda(Institution institution, String injectionInstitutionType) {
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyPda(injectionInstitutionType);
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
                 .taxCode(institution.getTaxCode())
                 .build());

@@ -28,7 +28,7 @@ public class CreateInstitutionStrategyPda extends CreateInstitutionStrategyCommo
 
     private final InstitutionMapper institutionMapper;
 
-    private String injestionInstitutionType;
+    private String injectionInstitutionType;
 
     public CreateInstitutionStrategyPda(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                         InstitutionConnector institutionConnector,
@@ -100,7 +100,7 @@ public class CreateInstitutionStrategyPda extends CreateInstitutionStrategyCommo
         newInstitution.setDescription(description);
         newInstitution.setExternalId(taxCode);
         newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
-        if(injestionInstitutionType.equalsIgnoreCase(InstitutionType.PT.name())) {
+        if(injectionInstitutionType.equalsIgnoreCase(InstitutionType.PT.name())) {
             newInstitution.setInstitutionType(InstitutionType.PT);
         }else{
             newInstitution.setInstitutionType(InstitutionType.PG);
@@ -130,7 +130,7 @@ public class CreateInstitutionStrategyPda extends CreateInstitutionStrategyCommo
         return newInstitution;
     }
 
-    public void setInjestionInstitutionType(String injestionInstitutionType) {
-        this.injestionInstitutionType = injestionInstitutionType;
+    public void setInjectionInstitutionType(String injectionInstitutionType) {
+        this.injectionInstitutionType = injectionInstitutionType;
     }
 }

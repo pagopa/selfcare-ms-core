@@ -29,7 +29,7 @@ public interface InstitutionService {
 
     Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode);
 
-    Institution createInstitutionFromPda(Institution institution, String injestionInstitutionType);
+    Institution createInstitutionFromPda(Institution institution, String injectionInstitutionType);
 
     Institution createInstitutionByExternalId(String externalId);
 
