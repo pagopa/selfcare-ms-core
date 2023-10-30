@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
@@ -226,13 +227,13 @@ public class OnboardingDao {
                 institution.getDescription(),
                 institution.getParentDescription(),
                 List.of(product));
-        relationshipExistAndDelete(onboardedUser, productId, institution.getId());
+        relationshipExistAndDelete(onboardedUser, productId, institution.getId(), user);
         userConnector.findAndUpdate(onboardedUser, user.getId(), institution.getId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
         return product;
     }
 
-    private void relationshipExistAndDelete(OnboardedUser onboardedUser, String productId, String institutionId){
+    private void relationshipExistAndDelete(OnboardedUser onboardedUser, String productId, String institutionId, UserToOnboard user){
         List<OnboardedProduct> products = onboardedUser.getBindings().stream()
                 .flatMap(userBinding -> userBinding.getProducts().stream()
                         .filter(userProduct -> userProduct.getProductId().equalsIgnoreCase(productId)
@@ -240,7 +241,14 @@ public class OnboardingDao {
                         && userBinding.getInstitutionId().equals(institutionId)))
                 .collect(Collectors.toList());
         if(!products.isEmpty()) {
-            products.stream().forEach(singleProduct -> updateUserProductState(onboardedUser, singleProduct.getRelationshipId(), RelationshipState.DELETED));
+            if (user.getRole().equals(PartyRole.OPERATOR)) {
+                products.stream()
+                        .filter(singleProduct -> !singleProduct.getRole().equals(user.getRole()) || singleProduct.getProductRole().equals(user.getProductRole()))
+                        .collect(Collectors.toList())
+                        .forEach(productToDelete -> updateUserProductState(onboardedUser, productToDelete.getRelationshipId(), RelationshipState.DELETED));
+            } else {
+                products.forEach(productToDelete -> updateUserProductState(onboardedUser, productToDelete.getRelationshipId(), RelationshipState.DELETED));
+            }
         }
     }
 
