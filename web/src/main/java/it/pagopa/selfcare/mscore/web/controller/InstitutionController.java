@@ -178,7 +178,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> createInstitutionFromPda(@RequestBody @Valid PdaInstitutionRequest institutionRequest) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
-        Institution saved = institutionService.createInstitutionFromPda(InstitutionMapperCustom.toInstitution(institutionRequest, null), institutionRequest.getInjestionInstitutionType());
+        Institution saved = institutionService.createInstitutionFromPda(InstitutionMapperCustom.toInstitution(institutionRequest, null), institutionRequest.getInjectionInstitutionType());
         return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
     }
 

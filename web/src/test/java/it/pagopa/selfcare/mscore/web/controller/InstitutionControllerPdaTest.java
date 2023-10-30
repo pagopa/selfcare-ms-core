@@ -48,7 +48,7 @@ public class InstitutionControllerPdaTest {
     void shouldCreateInstitutionFromPda() throws Exception {
         // Given
         PdaInstitutionRequest institutionRequest = new PdaInstitutionRequest();
-        institutionRequest.setInjestionInstitutionType("EC");
+        institutionRequest.setInjectionInstitutionType("EC");
         institutionRequest.setDescription("test ec");
         institutionRequest.setTaxCode("taxCode");
         String content = objectMapper.writeValueAsString(institutionRequest);

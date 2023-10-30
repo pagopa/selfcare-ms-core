@@ -7,8 +7,8 @@ import javax.validation.constraints.NotEmpty;
 @Data
 public class PdaInstitutionRequest {
 
-    @NotEmpty(message = "InjestionInstitutionType is required")
-    private String injestionInstitutionType;
+    @NotEmpty(message = "InjectionInstitutionType is required")
+    private String injectionInstitutionType;
 
     @NotEmpty(message = "TaxCode is required")
     private String taxCode;
