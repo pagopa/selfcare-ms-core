@@ -175,6 +175,14 @@ public class InstitutionMapperCustom {
         return institution;
     }
 
+    public static Institution toInstitution(PdaInstitutionRequest request, String externalId) {
+        Institution institution = new Institution();
+        institution.setExternalId(externalId);
+        institution.setDescription(request.getDescription());
+        institution.setTaxCode(request.getTaxCode());
+        return institution;
+    }
+
     private static BillingResponse toBillingResponse(Billing billing, Institution institution) {
         BillingResponse billingResponse = new BillingResponse();
         if (billing != null) {

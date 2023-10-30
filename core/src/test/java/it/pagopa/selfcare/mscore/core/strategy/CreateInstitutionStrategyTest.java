@@ -416,4 +416,5 @@ class CreateInstitutionStrategyTest {
         verify(partyRegistryProxyConnector).getCategory(any(), any());
         verify(partyRegistryProxyConnector).getInstitutionById(any());
     }
+
 }

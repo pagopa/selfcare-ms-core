@@ -163,6 +163,26 @@ public class InstitutionController {
     }
 
     /**
+     * The function create an institution retriving values from IPA
+     *
+     * @param institutionRequest InstitutionRequest
+     * @return InstitutionResponse
+     * * Code: 201, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.create.from-pda}", notes = "${swagger.mscore.institution.create.from-ipa}")
+    @PostMapping(value = "/from-pda/")
+    public ResponseEntity<InstitutionResponse> createInstitutionFromPda(@RequestBody @Valid PdaInstitutionRequest institutionRequest) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
+
+        Institution saved = institutionService.createInstitutionFromPda(InstitutionMapperCustom.toInstitution(institutionRequest, null), institutionRequest.getInjestionInstitutionType());
+        return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
+    }
+
+    /**
      * The function persist PA institution
      *
      * @param externalId String
