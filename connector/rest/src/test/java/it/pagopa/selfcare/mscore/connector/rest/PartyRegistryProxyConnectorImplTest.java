@@ -436,10 +436,7 @@ class PartyRegistryProxyConnectorImplTest {
     void testGetLegalAddress() {
         NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
         nationalRegistriesProfessionalAddress.setAddress("42 Main St");
-        nationalRegistriesProfessionalAddress.setDescription("The characteristics of someone or something");
-        nationalRegistriesProfessionalAddress.setMunicipality("Municipality");
-        nationalRegistriesProfessionalAddress.setProvince("Province");
-        nationalRegistriesProfessionalAddress.setZip("21654");
+        nationalRegistriesProfessionalAddress.setZipCode("21654");
         when(partyRegistryProxyRestClient.getLegalAddress(any()))
                 .thenReturn(nationalRegistriesProfessionalAddress);
         assertSame(nationalRegistriesProfessionalAddress, partyRegistryProxyConnectorImpl.getLegalAddress("42"));

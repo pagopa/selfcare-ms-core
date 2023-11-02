@@ -44,4 +44,10 @@ public class CreateInstitutionStrategyFactory {
         strategy.setInstitution(institution);
         return strategy;
     }
+
+    public CreateInstitutionStrategy createInstitutionStrategyPda(String injectionInstitutionType) {
+        CreateInstitutionStrategyPda strategy = new CreateInstitutionStrategyPda(partyRegistryProxyConnector, institutionConnector, institutionMapper);
+        strategy.setInjectionInstitutionType(injectionInstitutionType);
+        return strategy;
+    }
 }

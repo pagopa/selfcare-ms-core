@@ -131,6 +131,14 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution createInstitutionFromPda(Institution institution, String injectionInstitutionType) {
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyPda(injectionInstitutionType);
+        return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                .taxCode(institution.getTaxCode())
+                .build());
+    }
+
+    @Override
     public Institution createInstitution(Institution institution) {
         return createInstitutionStrategyFactory.createInstitutionStrategy(institution)
                 .createInstitution(CreateInstitutionStrategyInput.builder()
@@ -234,7 +242,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 NationalRegistriesProfessionalAddress professionalAddress = partyRegistryProxyConnector.getLegalAddress(taxId);
                 if (professionalAddress != null) {
                     newInstitution.setAddress(professionalAddress.getAddress());
-                    newInstitution.setZipCode(professionalAddress.getZip());
+                    newInstitution.setZipCode(professionalAddress.getZipCode());
                 }
             }
             newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
