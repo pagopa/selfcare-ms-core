@@ -351,18 +351,9 @@ class ContractServiceTest {
         token.setContractSigned("docs/parties".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-
-        InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
-        institutionProxyInfoMock.setTaxCode(institution.getExternalId());
-
-        when(partyRegistryProxyConnector.getInstitutionById(any()))
-                .thenReturn(institutionProxyInfoMock);
-
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
-        verify(partyRegistryProxyConnector, times(1))
-                .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
 
@@ -391,7 +382,7 @@ class ContractServiceTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(), "setCity");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -437,8 +428,6 @@ class ContractServiceTest {
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
-        verify(partyRegistryProxyConnector, times(1))
-                .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
 
