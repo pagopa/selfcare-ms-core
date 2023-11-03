@@ -30,6 +30,10 @@ public class TestUtils {
         return dummyInstitution(InstitutionType.PT);
     }
 
+    public static Institution dummyInstitutionPg() {
+        return dummyInstitution(InstitutionType.PG);
+    }
+
     private static Institution dummyInstitution(InstitutionType institutionType) {
 
         Billing billing = new Billing();

@@ -183,6 +183,26 @@ public class InstitutionController {
     }
 
     /**
+     * The function create an institution retriving values from INFOCAMERE
+     *
+     * @param institutionRequest InstitutionRequest
+     * @return InstitutionResponse
+     * * Code: 201, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 404, Message: Institution data not found on Ipa, DataType: Problem
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.create.from-infocamere}", notes = "${swagger.mscore.institution.create.from-infocamere}")
+    @PostMapping(value = "/from-infocamere/")
+    public ResponseEntity<InstitutionResponse> createInstitutionFromInfocamere(@RequestBody @Valid InstitutionRequest institutionRequest) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
+
+        Institution saved = institutionService.createInstitutionFromInfocamere(InstitutionMapperCustom.toInstitution(institutionRequest, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
+    }
+
+    /**
      * The function persist PA institution
      *
      * @param externalId String

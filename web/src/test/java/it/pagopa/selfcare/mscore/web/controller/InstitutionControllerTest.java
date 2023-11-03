@@ -417,6 +417,35 @@ class InstitutionControllerTest {
     }
 
     /**
+     * Method under test: {@link InstitutionController#createInstitutionFromInfocamere(InstitutionRequest)}}
+     */
+    @Test
+    void shouldCreateInstitutionFromInfocamere() throws Exception {
+        // Given
+        InstitutionRequest institutionRequest = new InstitutionRequest();
+        institutionRequest.setAddress("42 Main St");
+        institutionRequest.setInstitutionType(InstitutionType.PG);
+        institutionRequest.setTaxCode("42");
+        institutionRequest.setExternalId("42");
+        String content = objectMapper.writeValueAsString(institutionRequest);
+
+        Institution institution = TestUtils.createSimpleInstitutionPA();
+
+        when(institutionService.createInstitutionFromInfocamere(any())).thenReturn(institution);
+
+        //Then
+        MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-infocamere/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false}"));
+    }
+
+    /**
      * Method under test: {@link InstitutionController#createInstitutionFromIpa(InstitutionFromIpaPost)}}
      */
     @Test
