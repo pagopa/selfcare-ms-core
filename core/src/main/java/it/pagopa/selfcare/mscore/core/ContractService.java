@@ -326,6 +326,10 @@ public class ContractService {
                 toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
                 toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
                 toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
+            } else {
+                toNotify.setCounty(institution.getCounty());
+                toNotify.setCountry(institution.getCountry());
+                toNotify.setCity(institution.getCity().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
             }
         } catch (MsCoreException | ResourceNotFoundException e) {
             log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
