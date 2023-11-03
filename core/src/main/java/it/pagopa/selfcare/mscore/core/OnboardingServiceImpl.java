@@ -142,15 +142,17 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType(), institution)
                 .onboardingInstitution(request, principal);
     }
+
     @Override
-    public void completeOnboarding(Token token, MultipartFile contract){
+    public void completeOnboarding(Token token, MultipartFile contract) {
         Consumer<List<User>> verification = users -> contractService.verifySignature(contract, token, users);
         this.completeOnboarding(token, contract, verification);
     }
 
     @Override
-    public void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract){
-        Consumer<List<User>> verification = ignored -> {};
+    public void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract) {
+        Consumer<List<User>> verification = ignored -> {
+        };
         this.completeOnboarding(token, contract, verification);
     }
 
@@ -215,7 +217,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution, product);
         InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         try {
-            if(InstitutionType.PT.equals(institutionType)) {
+            if (InstitutionType.PT.equals(institutionType)) {
                 onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
                 File logoFile = contractService.getLogoFile();
                 String templatePath = mailTemplateConfig.getCompletePathPt();
@@ -228,7 +230,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
                 notificationService.sendMailWithContract(pdf, institution, currentUser, request, token.getId(), true);
             }
-        }  catch (Exception e) {
+        } catch (Exception e) {
             onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
         }
     }
@@ -271,20 +273,21 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, request.getProductId(), request.getUsers());
 
-        request.getUsers().forEach(userToOnboard -> userNotificationService.sendCreateUserNotification(institution.getDescription(),
-                            product.getTitle(), userToOnboard.getEmail(), roleLabels, loggedUserName, loggedUserSurname));
+        if (request.getSendCreateUserNotificationEmail()) {
+            request.getUsers().forEach(userToOnboard -> userNotificationService.sendCreateUserNotification(institution.getDescription(),
+                    product.getTitle(), userToOnboard.getEmail(), roleLabels, loggedUserName, loggedUserSurname));
+        }
 
         relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
 
         return relationshipInfoList;
     }
 
-    private void fillUserIdAndCreateIfNotExist(UserToOnboard user, String institutionId){
+    private void fillUserIdAndCreateIfNotExist(UserToOnboard user, String institutionId) {
         User userRegistry;
         try {
-            userRegistry =  userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
-        }
-        catch (FeignException.NotFound e) {
+            userRegistry = userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
+        } catch (FeignException.NotFound e) {
             userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
         }
         user.setId(userRegistry.getId());
