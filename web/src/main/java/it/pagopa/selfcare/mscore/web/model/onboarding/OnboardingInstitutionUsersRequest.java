@@ -19,5 +19,6 @@ public class OnboardingInstitutionUsersRequest {
     private String institutionTaxCode;
 
     private String institutionSubunitCode;
+    private Boolean sendCreateUserNotificationEmail = Boolean.TRUE;
 
 }
