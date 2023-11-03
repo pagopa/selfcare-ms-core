@@ -20,7 +20,9 @@ public class InstitutionRequest {
     private String digitalAddress;
     private String address;
     private String zipCode;
-
+    private String city;
+    private String county;
+    private String country;
     @NotEmpty(message = "TaxCode is required")
     private String taxCode;
 

@@ -25,6 +25,9 @@ public class Institution {
     private String address;
     private String zipCode;
     private String taxCode;
+    private String city;
+    private String county;
+    private String country;
     private Billing billing;
     private List<Onboarding> onboarding;
     private List<InstitutionGeographicTaxonomies> geographicTaxonomies;
