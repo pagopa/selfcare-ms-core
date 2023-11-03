@@ -175,6 +175,13 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution createInstitutionFromInfocamere(Institution institution) {
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyInfocamere(institution);
+        return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                .taxCode(institution.getTaxCode())
+                .build());
+    }
+    @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
 

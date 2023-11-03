@@ -8,6 +8,7 @@ public enum GenericError {
     INSTITUTION_MANAGER_ERROR("0042", "Error while retrieving institution having externalId %s"),
     INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s"),
     CREATE_INSTITUTION_ERROR("0037", "Error while creating requested institution"),
+    INSTITUTION_INFOCAMERE_NOTFOUND("0039", "Institution %s not found on INFOCAMERE"),
     ONBOARDING_OPERATION_ERROR("0017", "Error while performing onboarding operation"),
     CREATE_DELEGATION_ERROR("0027", "Error while creating requested delegation"),
     ONBOARDING_VERIFICATION_ERROR("0015", "Error while verifying onboarding"),
