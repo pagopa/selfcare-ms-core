@@ -50,4 +50,11 @@ public class CreateInstitutionStrategyFactory {
         strategy.setInjectionInstitutionType(injectionInstitutionType);
         return strategy;
     }
+
+    public CreateInstitutionStrategy createInstitutionStrategyInfocamere(Institution institution) {
+        CreateInstitutionStrategyInfocamere strategy =  new CreateInstitutionStrategyInfocamere(partyRegistryProxyConnector, institutionConnector);
+        strategy.setInstitution(institution);
+        return strategy;
+    }
+
 }
