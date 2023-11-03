@@ -321,10 +321,12 @@ public class ContractService {
         try {
             InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
             toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
-            GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
-            toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
-            toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
-            toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
+            if (institution.getCity()==null) {
+                GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+                toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
+                toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
+                toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
+            }
         } catch (MsCoreException | ResourceNotFoundException e) {
             log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
             toNotify.setIstatCode(null);
