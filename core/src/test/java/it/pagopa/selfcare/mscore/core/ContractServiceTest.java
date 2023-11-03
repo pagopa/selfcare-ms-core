@@ -314,6 +314,57 @@ class ContractServiceTest {
                 .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
+    @Test
+    void testSendDataLakeNotification3() throws ExecutionException, InterruptedException {
+        ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
+        when(producerFactory.transactionCapable()).thenReturn(true);
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
+        CoreConfig coreConfig = new CoreConfig();
+        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
+        ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector);
+
+        Onboarding onboarding = mockInstance(new Onboarding());
+        onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
+        institution.setOnboarding(List.of(onboarding));
+
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
+
+        TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
+        TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
+
+        Token token = mockInstance(new Token());
+        token.setId(UUID.randomUUID().toString());
+        token.setProductId("prod");
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setDeletedAt(null);
+        token.setUsers(List.of(tokenUser1, tokenUser2));
+        token.setContractSigned("docs/parties".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+
+        InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
+        institutionProxyInfoMock.setTaxCode(institution.getExternalId());
+
+        when(partyRegistryProxyConnector.getInstitutionById(any()))
+                .thenReturn(institutionProxyInfoMock);
+
+        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
+                "Topic cannot be null");
+
+        verify(partyRegistryProxyConnector, times(1))
+                .getInstitutionById(institution.getExternalId());
+        verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
+    }
 
     /**
      * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token, QueueEvent)}
