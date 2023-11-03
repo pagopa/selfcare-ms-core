@@ -12,5 +12,6 @@ public class OnboardingUsersRequest {
     private List<UserToOnboard> users;
     private String institutionTaxCode;
     private String institutionSubunitCode;
+    private Boolean sendCreateUserNotificationEmail;
 
 }

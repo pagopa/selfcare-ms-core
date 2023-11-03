@@ -751,6 +751,27 @@ class OnboardingServiceImplTest {
         OnboardingUsersRequest request = new OnboardingUsersRequest();
         request.setInstitutionTaxCode("taxCode");
         request.setProductId("productId");
+        request.setSendCreateUserNotificationEmail(Boolean.TRUE);
+        UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        request.setUsers(List.of(userToOnboard));
+
+        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
+        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
+        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
+
+        onboardingServiceImpl.onboardingUsers(request, null, null);
+
+        verify(userService, times(1))
+                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
+        verifyNoMoreInteractions(userService);
+    }
+
+    @Test
+    void onboardingUsers_whenUserExistsOnRegistryAndSendMailIsFalse() {
+        OnboardingUsersRequest request = new OnboardingUsersRequest();
+        request.setInstitutionTaxCode("taxCode");
+        request.setProductId("productId");
+        request.setSendCreateUserNotificationEmail(Boolean.FALSE);
         UserToOnboard userToOnboard = createSimpleUserToOnboard();
         request.setUsers(List.of(userToOnboard));
 
@@ -773,6 +794,7 @@ class OnboardingServiceImplTest {
         OnboardingUsersRequest request = new OnboardingUsersRequest();
         request.setInstitutionTaxCode("taxCode");
         request.setProductId("productId");
+        request.setSendCreateUserNotificationEmail(Boolean.TRUE);
         UserToOnboard userToOnboard = createSimpleUserToOnboard();
         User user = new User();
         user.setId("42");
