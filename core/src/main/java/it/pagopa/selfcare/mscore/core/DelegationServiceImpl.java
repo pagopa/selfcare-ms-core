@@ -33,11 +33,11 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public Delegation createDelegation(Delegation delegation) {
-        if(checkIfExists(delegation)) {
+        if (checkIfExists(delegation)) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
         }
-        if(PROD_PAGOPA.equals(delegation.getProductId())) {
+        if (PROD_PAGOPA.equals(delegation.getProductId())) {
             List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
             String partnerIdentifier = institutions.stream()
                     .findFirst()
@@ -54,6 +54,38 @@ public class DelegationServiceImpl implements DelegationService {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }
     }
+
+    @Override
+    public Delegation createDelegationFromTaxCode(Delegation delegation) {
+
+        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), null);
+        String partnerIdentifier = institutionsTo.stream()
+                .findFirst()
+                .map(Institution::getId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
+                        INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
+        delegation.setTo(partnerIdentifier);
+
+        List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFrom(), null);
+        String from = institutionsFrom.stream()
+                .findFirst()
+                .map(Institution::getId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
+                        INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
+        delegation.setFrom(from);
+
+        if(checkIfExists(delegation)) {
+            throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
+                    CustomError.CREATE_DELEGATION_CONFLICT.getCode());
+        }
+
+        try {
+            return delegationConnector.save(delegation);
+        } catch (Exception e) {
+            throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
+        }
+    }
+
 
     @Override
     public boolean checkIfExists(Delegation delegation) {
