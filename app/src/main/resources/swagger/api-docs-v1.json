@@ -1579,6 +1579,68 @@
         } ]
       }
     },
+    "/institutions/from-infocamere/" : {
+      "post" : {
+        "tags" : [ "Institution" ],
+        "summary" : "create an institution from infocamere registry",
+        "description" : "create an institution from infocamere registry",
+        "operationId" : "createInstitutionFromInfocamereUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/from-ipa/" : {
       "post" : {
         "tags" : [ "Institution" ],
@@ -6906,6 +6968,9 @@
           "productName" : {
             "type" : "string"
           },
+          "sendCompleteOnboardingEmail" : {
+            "type" : "boolean"
+          },
           "signContract" : {
             "type" : "boolean"
           },
@@ -6972,6 +7037,9 @@
           },
           "productName" : {
             "type" : "string"
+          },
+          "sendCompleteOnboardingEmail" : {
+            "type" : "boolean"
           },
           "signContract" : {
             "type" : "boolean"
