@@ -245,7 +245,9 @@ public class OnboardingInstitutionStrategyFactory {
 
                     File logoFile = contractService.getLogoFile();
 
-                    notificationService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, NotificationServiceImpl.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
+                    if(Boolean.TRUE.equals(strategyInput.getOnboardingRequest().getSendCompleteOnboardingEmail())) {
+                        notificationService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, NotificationServiceImpl.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
+                    }
                 }
 
                 //[TODO https://pagopa.atlassian.net/wiki/spaces/SCP/pages/710901785/RFC+Proposta+per+gestione+asincrona+degli+eventi]

@@ -33,5 +33,6 @@ public class OnboardingInstitutionRequest {
     private ContractRequest contract;
     private OnboardingImportContract contractImported;
     private Boolean signContract;
+    private Boolean sendCompleteOnboardingEmail;
 
 }
