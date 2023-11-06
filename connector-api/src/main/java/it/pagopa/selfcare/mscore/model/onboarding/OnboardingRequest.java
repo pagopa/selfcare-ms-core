@@ -30,6 +30,7 @@ public class OnboardingRequest {
     private TokenType tokenType;
     private String contractFilePath;
     private OffsetDateTime contractCreatedAt;
+    private Boolean sendCompleteOnboardingEmail;
 
     public Contract getContract() {
         if ((institutionUpdate != null && InstitutionType.PG == institutionUpdate.getInstitutionType())
