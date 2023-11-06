@@ -245,7 +245,10 @@ public class OnboardingInstitutionStrategyFactory {
 
                     File logoFile = contractService.getLogoFile();
 
-                    notificationService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, NotificationServiceImpl.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
+                    if (strategyInput.getOnboardingRequest().getSendCompleteOnboardingEmail() == null
+                            || Boolean.TRUE.equals(strategyInput.getOnboardingRequest().getSendCompleteOnboardingEmail())) {
+                        notificationService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, NotificationServiceImpl.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
+                    }
                 }
 
                 //[TODO https://pagopa.atlassian.net/wiki/spaces/SCP/pages/710901785/RFC+Proposta+per+gestione+asincrona+degli+eventi]
@@ -278,7 +281,7 @@ public class OnboardingInstitutionStrategyFactory {
     }
 
     private void rejectTokenExpired(Institution institution, String productId) {
-        if(Objects.nonNull(institution.getOnboarding())) {
+        if (Objects.nonNull(institution.getOnboarding())) {
 
             /* set state REJECTED for tokens expired and throw an exception if there are token not expired PENDING or TOBEVALIDATED for the product */
             institution.getOnboarding().stream()
@@ -286,7 +289,7 @@ public class OnboardingInstitutionStrategyFactory {
                             && (onboarding.getStatus() == RelationshipState.PENDING || onboarding.getStatus() == RelationshipState.TOBEVALIDATED))
                     .map(onboarding -> onboardingDao.getTokenById(onboarding.getTokenId()))
                     .filter(TokenUtils::isTokenExpired)
-                        .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null));
+                    .forEach(token -> onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null));
         }
     }
 
@@ -296,12 +299,12 @@ public class OnboardingInstitutionStrategyFactory {
         }
 
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = geographicTaxonomieDtos.stream()
-                    .map(InstitutionGeographicTaxonomies::getCode)
-                    .map(institutionService::retrieveGeoTaxonomies)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
-                    .collect(Collectors.toList());
+                .map(InstitutionGeographicTaxonomies::getCode)
+                .map(institutionService::retrieveGeoTaxonomies)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
+                .collect(Collectors.toList());
 
         if (geographicTaxonomies.size() != geographicTaxonomieDtos.size()) {
             log.error(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geographicTaxonomieDtos),

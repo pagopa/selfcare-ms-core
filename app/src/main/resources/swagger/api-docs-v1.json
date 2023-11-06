@@ -7109,6 +7109,11 @@
           "productName" : {
             "type" : "string"
           },
+          "sendCompleteOnboardingEmail" : {
+            "type" : "boolean",
+            "description" : "Parameter that allows you to specify whether following completion of onboarding you want to receive an email",
+            "example" : false
+          },
           "signContract" : {
             "type" : "boolean"
           },
@@ -7175,6 +7180,9 @@
           },
           "productName" : {
             "type" : "string"
+          },
+          "sendCompleteOnboardingEmail" : {
+            "type" : "boolean"
           },
           "signContract" : {
             "type" : "boolean"
