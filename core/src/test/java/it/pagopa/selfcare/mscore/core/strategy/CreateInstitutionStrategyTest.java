@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyIn
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.core.util.TestUtils;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -415,6 +416,71 @@ class CreateInstitutionStrategyTest {
         verify(institutionConnector).findByTaxCodeSubunitCode(anyString(), anyString());
         verify(partyRegistryProxyConnector).getCategory(any(), any());
         verify(partyRegistryProxyConnector).getInstitutionById(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionWithOriginInfocamereWhenLegalAddressIsFound() {
+
+        Institution institution = TestUtils.dummyInstitutionPg();
+
+        NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
+        nationalRegistriesProfessionalAddress.setAddress("test address");
+        nationalRegistriesProfessionalAddress.setZipCode("00000");
+        when(partyRegistryProxyConnector.getLegalAddress(any())).thenReturn(nationalRegistriesProfessionalAddress);
+
+        when(institutionConnector.save(any())).thenReturn(institution);
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyInfocamere(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .description(institution.getDescription())
+                        .build());
+
+        //Then
+        assertThat(actual.getDescription()).isEqualTo(institution.getDescription());
+        assertThat(actual.getDigitalAddress()).isEqualTo(institution.getDigitalAddress());
+        assertThat(actual.getAddress()).isEqualTo(nationalRegistriesProfessionalAddress.getAddress());
+        assertThat(actual.getZipCode()).isEqualTo(nationalRegistriesProfessionalAddress.getZipCode());
+        assertThat(actual.getTaxCode()).isEqualTo(institution.getTaxCode());
+        assertThat(actual.getSubunitCode()).isNull();
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PG);
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getOrigin()).isEqualTo(Origin.INFOCAMERE.getValue());
+
+        verify(institutionConnector).save(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionWithOriginSelcWhenLegalAddressIsNotFound() {
+
+        Institution institution = TestUtils.dummyInstitutionPg();
+
+        when(partyRegistryProxyConnector.getLegalAddress(any())).thenThrow(ResourceNotFoundException.class);
+
+        when(institutionConnector.save(any())).thenReturn(institution);
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyInfocamere(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .description(institution.getDescription())
+                        .build());
+
+        //Then
+        assertThat(actual.getTaxCode()).isEqualTo(institution.getTaxCode());
+        assertThat(actual.getSubunitCode()).isNull();
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PG);
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getOriginId()).isEqualTo("SELC_" + institution.getExternalId());
+
+        verify(institutionConnector).save(any());
     }
 
 }

@@ -16,7 +16,9 @@ public class InstitutionUpdateRequest {
     private String description;
     private String digitalAddress;
     private String address;
-
+    private String city;
+    private String county;
+    private String country;
     @NotEmpty(message = "taxCode is required")
     private String taxCode;
 

@@ -55,7 +55,9 @@ public class TokenMapper {
         entity.setAddress(institutionUpdate.getAddress());
         entity.setTaxCode(institutionUpdate.getTaxCode());
         entity.setZipCode(institutionUpdate.getZipCode());
-
+        entity.setCity(institutionUpdate.getCity());
+        entity.setCounty(institutionUpdate.getCounty());
+        entity.setCountry(institutionUpdate.getCountry());
         if (geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
             entity.setGeographicTaxonomies(toGeoTaxonomyEntity(geographicTaxonomies));
         }else {
@@ -113,7 +115,9 @@ public class TokenMapper {
         response.setAddress(entity.getAddress());
         response.setTaxCode(entity.getTaxCode());
         response.setZipCode(entity.getZipCode());
-
+        response.setCity(entity.getCity());
+        response.setCounty(entity.getCounty());
+        response.setCountry(entity.getCountry());
         if (entity.getGeographicTaxonomies() != null && !entity.getGeographicTaxonomies().isEmpty()) {
             response.setGeographicTaxonomies(entity.getGeographicTaxonomies().stream().map(geoTaxonomyEntity -> new InstitutionGeographicTaxonomies(geoTaxonomyEntity.getCode(), geoTaxonomyEntity.getDesc())).collect(Collectors.toList()));
         }

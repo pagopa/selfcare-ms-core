@@ -159,6 +159,9 @@ public class InstitutionMapperCustom {
         institution.setDescription(request.getDescription());
         institution.setAddress(request.getAddress());
         institution.setDigitalAddress(request.getDigitalAddress());
+        institution.setCity(request.getCity());
+        institution.setCounty(request.getCounty());
+        institution.setCountry(request.getCountry());
         institution.setTaxCode(request.getTaxCode());
         institution.setZipCode(request.getZipCode());
         institution.setGeographicTaxonomies(toGeographicTaxonomies(request.getGeographicTaxonomies()));

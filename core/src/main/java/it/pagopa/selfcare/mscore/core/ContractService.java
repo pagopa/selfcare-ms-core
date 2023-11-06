@@ -124,9 +124,9 @@ public class ContractService {
                     || PROD_IO_PREMIUM.getValue().equalsIgnoreCase(request.getProductId())
                     || PROD_IO_SIGN.getValue().equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
-            } else if (PROD_PN.getValue().equalsIgnoreCase(request.getProductId())){
+            } else if (PROD_PN.getValue().equalsIgnoreCase(request.getProductId())) {
                 setupProdPNData(data, institution, request);
-            } else if (PROD_INTEROP.getValue().equalsIgnoreCase(request.getProductId())){
+            } else if (PROD_INTEROP.getValue().equalsIgnoreCase(request.getProductId())) {
                 setupSAProdInteropData(data, request.getInstitutionUpdate());
             }
             log.debug("data Map for PDF: {}", data);
@@ -137,8 +137,6 @@ public class ContractService {
             throw new InvalidRequestException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
         }
     }
-
-
 
 
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
@@ -276,7 +274,7 @@ public class ContractService {
 
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
-        notification.setFileName(token.getContractSigned() == null? "":  Paths.get(token.getContractSigned()).getFileName().toString());
+        notification.setFileName(token.getContractSigned() == null ? "" : Paths.get(token.getContractSigned()).getFileName().toString());
         notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
@@ -312,22 +310,30 @@ public class ContractService {
         }
         RootParent rootParent = new RootParent();
         rootParent.setDescription(institution.getParentDescription());
-        if(StringUtils.hasText(institution.getRootParentId())){
+        if (StringUtils.hasText(institution.getRootParentId())) {
             rootParent.setId(institution.getRootParentId());
             Institution rootParentInstitution = institutionConnector.findById(institution.getRootParentId());
             rootParent.setOriginId(Objects.nonNull(rootParentInstitution) ? rootParentInstitution.getOriginId() : null);
         }
         toNotify.setRootParent(rootParent);
-        try {
-            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
-            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
-            GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
-            toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
-            toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
-            toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
-        } catch (MsCoreException | ResourceNotFoundException e) {
-            log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
-            toNotify.setIstatCode(null);
+        if (institution.getCity() == null) {
+            try {
+                InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
+                toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+
+                GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+                toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
+                toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
+                toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
+            } catch (MsCoreException | ResourceNotFoundException e) {
+                log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+                toNotify.setIstatCode(null);
+            }
+
+        } else {
+            toNotify.setCounty(institution.getCounty());
+            toNotify.setCountry(institution.getCountry());
+            toNotify.setCity(institution.getCity().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
         }
         return toNotify;
     }
@@ -350,7 +356,6 @@ public class ContractService {
         });
 
     }
-
 
 
     public String uploadContract(String tokenId, MultipartFile contract) {

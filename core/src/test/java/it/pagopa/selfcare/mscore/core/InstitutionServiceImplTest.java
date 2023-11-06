@@ -333,6 +333,14 @@ class InstitutionServiceImplTest {
 
 
 
+    @Test
+    void testCreateInstitutionFromInfocamere() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategyInfocamere(any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitutionFromInfocamere(new Institution());
+        assertNotNull(institution);
+    }
+
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}
      */

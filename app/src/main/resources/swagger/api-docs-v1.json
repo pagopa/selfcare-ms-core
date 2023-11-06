@@ -1703,6 +1703,68 @@
         } ]
       }
     },
+    "/institutions/from-pda/" : {
+      "post" : {
+        "tags" : [ "Institution" ],
+        "summary" : "${swagger.mscore.institution.create.from-pda}",
+        "description" : "create an institution from ipa registry",
+        "operationId" : "createInstitutionFromPdaUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PdaInstitutionRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/insert/{externalId}" : {
       "post" : {
         "tags" : [ "Institution" ],
@@ -5438,6 +5500,15 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
+            "type" : "string"
+          },
           "createdAt" : {
             "type" : "string",
             "format" : "date-time"
@@ -5943,6 +6014,15 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
+            "type" : "string"
+          },
           "createdAt" : {
             "type" : "string",
             "format" : "date-time"
@@ -6031,6 +6111,15 @@
             }
           },
           "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
             "type" : "string"
           },
           "createdAt" : {
@@ -6135,6 +6224,15 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
+            "type" : "string"
+          },
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficer"
           },
@@ -6191,6 +6289,15 @@
             "type" : "string"
           },
           "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
             "type" : "string"
           },
           "dataProtectionOfficer" : {
@@ -6252,6 +6359,15 @@
             "type" : "string"
           },
           "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
             "type" : "string"
           },
           "dataProtectionOfficer" : {
@@ -6868,6 +6984,9 @@
           "productId" : {
             "type" : "string"
           },
+          "sendCreateUserNotificationEmail" : {
+            "type" : "boolean"
+          },
           "users" : {
             "type" : "array",
             "items" : {
@@ -7041,6 +7160,24 @@
           },
           "vatNumberGroup" : {
             "type" : "boolean"
+          }
+        }
+      },
+      "PdaInstitutionRequest" : {
+        "title" : "PdaInstitutionRequest",
+        "type" : "object",
+        "properties" : {
+          "billing" : {
+            "$ref" : "#/components/schemas/BillingRequest"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "injectionInstitutionType" : {
+            "type" : "string"
+          },
+          "taxCode" : {
+            "type" : "string"
           }
         }
       },
