@@ -72,7 +72,7 @@ public class DelegationController {
     @PostMapping("/from-taxcode")
     public ResponseEntity<DelegationResponse> createDelegationFromInstitutionsTaxCode(@RequestBody @Valid DelegationRequestFromTaxcode delegation) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
-        Delegation saved = delegationService.createDelegationFromTaxCode(delegationMapper.toDelegation(delegation));
+        Delegation saved = delegationService.createDelegationFromInstitutionsTaxCode(delegationMapper.toDelegation(delegation));
         return ResponseEntity.status(HttpStatus.CREATED).body(delegationMapper.toDelegationResponse(saved));
     }
 

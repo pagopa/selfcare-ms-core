@@ -10,5 +10,5 @@ public interface DelegationService {
     Delegation createDelegation(Delegation delegation);
     boolean checkIfExists(Delegation delegation);
     List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode);
-    Delegation createDelegationFromTaxCode(Delegation delegation);
+    Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation);
 }

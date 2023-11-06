@@ -56,7 +56,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
     @Override
-    public Delegation createDelegationFromTaxCode(Delegation delegation) {
+    public Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation) {
 
         List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), null);
         String partnerIdentifier = institutionsTo.stream()

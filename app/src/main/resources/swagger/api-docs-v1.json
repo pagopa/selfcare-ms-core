@@ -859,7 +859,7 @@
         "tags" : [ "Delegation" ],
         "summary" : "Create an association between institution id and technical partner",
         "description" : "Create an association between institution id and technical partner",
-        "operationId" : "createDelegationFromTaxCodeUsingPOST",
+        "operationId" : "createDelegationFromInstitutionsTaxCodeUsingPOST",
         "requestBody" : {
           "content" : {
             "application/json" : {

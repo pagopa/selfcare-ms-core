@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
+import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequestFromTaxcode;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapperImpl;
@@ -209,6 +210,50 @@ class DelegationControllerTest {
         delegation.setInstitutionFromName("setInstitutionFromName");
         delegation.setInstitutionFromRootName("setInstitutionFromRootName");
         return delegation;
+    }
+
+    /**
+     * Method under test: {@link DelegationController#createDelegation(DelegationRequest)}
+     */
+    @Test
+    void testCreateDelegationUsingTaxCode() throws Exception {
+
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setTo("to");
+        delegation.setFrom("from");
+        when(delegationService.createDelegationFromInstitutionsTaxCode(any())).thenReturn(delegation);
+
+        DelegationRequestFromTaxcode delegationRequest = new DelegationRequestFromTaxcode();
+        delegationRequest.setFromTaxCode("111111");
+        delegationRequest.setToTaxCode("2222222");
+        delegationRequest.setInstitutionFromName("Test name");
+        delegationRequest.setInstitutionToName("Test to name");
+        delegationRequest.setProductId("productId");
+        delegationRequest.setType(DelegationType.PT);
+        String content = (new ObjectMapper()).writeValueAsString(delegationRequest);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/delegations/from-taxcode")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        MvcResult result =  MockMvcBuilders.standaloneSetup(delegationController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+
+
+
+        DelegationResponse response = objectMapper.readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals(delegation.getId(), response.getId());
     }
 
 }
