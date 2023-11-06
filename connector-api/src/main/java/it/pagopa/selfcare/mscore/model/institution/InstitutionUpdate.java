@@ -17,6 +17,9 @@ public class InstitutionUpdate {
     private String address;
     private String taxCode;
     private String zipCode;
+    private String city;
+    private String county;
+    private String country;
     private PaymentServiceProvider paymentServiceProvider;
     private DataProtectionOfficer dataProtectionOfficer;
     private List<InstitutionGeographicTaxonomies> geographicTaxonomies;

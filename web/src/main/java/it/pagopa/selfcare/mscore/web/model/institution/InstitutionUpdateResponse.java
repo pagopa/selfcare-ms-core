@@ -24,7 +24,9 @@ public class InstitutionUpdateResponse {
     private String supportEmail;
     private String supportPhone;
     private boolean imported;
-
+    private String city;
+    private String county;
+    private String country;
     private String subunitCode;
     private String subunitType;
     private String aooParentCode;
