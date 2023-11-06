@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
@@ -147,6 +148,93 @@ class DelegationServiceImplTest {
         assertNotNull(response);
         assertFalse(response.isEmpty());
         assertEquals(delegation.getId(), response.get(0).getId());
+    }
+
+    @Test
+    void testCreateDelegationFromTaxCode() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-pagopa");
+        delegation.setTo("fromToCode");
+        delegation.setFrom("fromTaxCode");
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(delegationConnector.save(any())).thenReturn(delegation);
+        when(institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode())).thenReturn(List.of(institution));
+        when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
+        Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation);
+        verify(delegationConnector).save(any());
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals(delegation.getId(), response.getId());
+    }
+
+    @Test
+    void testCreateDelegationFromTaxCodeWithSubunitCode() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-pagopa");
+        delegation.setTo("fromToCode");
+        delegation.setFromSubunitCode("fromSubunit");
+        delegation.setToSubunitCode("toSubunit");
+        delegation.setFrom("fromTaxCode");
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(delegationConnector.save(any())).thenReturn(delegation);
+        when(institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode())).thenReturn(List.of(institution));
+        when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
+        Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation);
+        verify(delegationConnector).save(any());
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals(delegation.getId(), response.getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationFromTaxCodeWithError() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-pagopa");
+        delegation.setTo("fromToCode");
+        delegation.setFrom("fromTaxCode");
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(institutionService.getInstitutions(delegation.getTo(), null)).thenReturn(List.of(institution));
+        when(institutionService.getInstitutions(delegation.getFrom(), null)).thenReturn(List.of(institution));
+        when(delegationConnector.save(any())).thenThrow(new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode()));
+        assertThrows(MsCoreException.class, () -> delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation));
+        verify(delegationConnector).save(any());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationFromTaxCodeWithResourceNotFoundException() {
+        Delegation delegation = new Delegation();
+        delegation.setProductId("prod-pagopa");
+        when(institutionService.getInstitutions(delegation.getTo(), null)).thenReturn(Collections.emptyList());
+        when(institutionService.getInstitutions(delegation.getFrom(), null)).thenReturn(Collections.emptyList());
+        when(institutionService.getInstitutions(any(), any())).thenReturn(List.of());
+        assertThrows(ResourceNotFoundException.class, () -> delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation));
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationFromTaxCodeConflict() {
+        Delegation delegation = new Delegation();
+        delegation.setProductId("prod-pagopa");
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode())).thenReturn(List.of(institution));
+        when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
+        when(delegationConnector.checkIfExists(any())).thenReturn(true);
+        assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation));
     }
 
 }

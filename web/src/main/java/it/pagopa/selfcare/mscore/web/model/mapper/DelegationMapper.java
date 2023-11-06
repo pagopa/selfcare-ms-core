@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
+import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequestFromTaxcode;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,6 +11,11 @@ import org.mapstruct.Mapping;
 public interface DelegationMapper {
 
     Delegation toDelegation(DelegationRequest delegation);
+
+    @Mapping(source = "fromTaxCode", target = "from")
+    @Mapping(source = "toTaxCode", target = "to")
+    Delegation toDelegation(DelegationRequestFromTaxcode delegation);
+
     @Mapping(source = "from", target = "institutionId")
     @Mapping(source = "to", target = "brokerId")
     @Mapping(source = "institutionFromName", target = "institutionName")

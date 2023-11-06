@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.web.controller;
+    package it.pagopa.selfcare.mscore.web.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
+import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequestFromTaxcode;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapper;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -53,6 +54,25 @@ public class DelegationController {
     public ResponseEntity<DelegationResponse> createDelegation(@RequestBody @Valid DelegationRequest delegation) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
         Delegation saved = delegationService.createDelegation(delegationMapper.toDelegation(delegation));
+        return ResponseEntity.status(HttpStatus.CREATED).body(delegationMapper.toDelegationResponse(saved));
+    }
+
+
+    /**
+     * The function persist delegation
+     *
+     * @param delegation DelegationRequest
+     * @return InstitutionResponse
+     * * Code: 201, Message: successful operation, DataType: DelegationResponse
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.delegation.createFromTaxCode}", notes = "${swagger.mscore.delegation.createFromTaxCode}")
+    @PostMapping("/from-taxcode")
+    public ResponseEntity<DelegationResponse> createDelegationFromInstitutionsTaxCode(@RequestBody @Valid DelegationRequestFromTaxcode delegation) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
+        Delegation saved = delegationService.createDelegationFromInstitutionsTaxCode(delegationMapper.toDelegation(delegation));
         return ResponseEntity.status(HttpStatus.CREATED).body(delegationMapper.toDelegationResponse(saved));
     }
 

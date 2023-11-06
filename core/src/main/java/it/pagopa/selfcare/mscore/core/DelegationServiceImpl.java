@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -33,11 +34,11 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public Delegation createDelegation(Delegation delegation) {
-        if(checkIfExists(delegation)) {
+        if (checkIfExists(delegation)) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
         }
-        if(PROD_PAGOPA.equals(delegation.getProductId())) {
+        if (PROD_PAGOPA.equals(delegation.getProductId())) {
             List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
             String partnerIdentifier = institutions.stream()
                     .findFirst()
@@ -54,6 +55,50 @@ public class DelegationServiceImpl implements DelegationService {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }
     }
+
+    @Override
+    public Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation) {
+
+        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode());
+        // TODO: remove filter when getInstitutions API will be fixed.
+        /*
+            If we call getInstitutions by empty subunitCode parameter, we have to filter retrieved list for institution
+            with blank subunitCode field, otherwise we take first element returned by api.
+        */
+        String partnerIdentifier = institutionsTo.stream()
+                .filter(institution -> StringUtils.hasText(delegation.getToSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
+                .findFirst()
+                .map(Institution::getId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
+                        INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
+        delegation.setTo(partnerIdentifier);
+
+        // TODO: remove filter when getInstitutions API will be fixed.
+        /*
+            If we call getInstitutions by empty subunitCode parameter, we have to filter retrieved list for institution
+            with blank subunitCode field, otherwise we take first element returned by api.
+        */
+        List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode());
+        String from = institutionsFrom.stream()
+                .filter(institution -> StringUtils.hasText(delegation.getFromSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
+                .findFirst()
+                .map(Institution::getId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
+                        INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
+        delegation.setFrom(from);
+
+        if(checkIfExists(delegation)) {
+            throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
+                    CustomError.CREATE_DELEGATION_CONFLICT.getCode());
+        }
+
+        try {
+            return delegationConnector.save(delegation);
+        } catch (Exception e) {
+            throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
+        }
+    }
+
 
     @Override
     public boolean checkIfExists(Delegation delegation) {
