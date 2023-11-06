@@ -7023,7 +7023,9 @@
             "type" : "string"
           },
           "sendCompleteOnboardingEmail" : {
-            "type" : "boolean"
+            "type" : "boolean",
+            "description" : "Parameter that allows you to specify whether following completion of onboarding you want to receive an email",
+            "example" : false
           },
           "signContract" : {
             "type" : "boolean"
