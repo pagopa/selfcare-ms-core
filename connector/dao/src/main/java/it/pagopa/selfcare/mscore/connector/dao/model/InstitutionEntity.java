@@ -33,6 +33,9 @@ public class InstitutionEntity {
     private String address;
     private String zipCode;
     private String taxCode;
+    private String city;
+    private String county;
+    private String country;
     private BillingEntity billing;
     private List<OnboardingEntity> onboarding;
     private List<GeoTaxonomyEntity> geographicTaxonomies;
