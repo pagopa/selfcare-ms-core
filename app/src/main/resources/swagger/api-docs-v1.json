@@ -5562,6 +5562,15 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
+            "type" : "string"
+          },
           "createdAt" : {
             "type" : "string",
             "format" : "date-time"
@@ -6067,6 +6076,15 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
+            "type" : "string"
+          },
           "createdAt" : {
             "type" : "string",
             "format" : "date-time"
@@ -6155,6 +6173,15 @@
             }
           },
           "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
             "type" : "string"
           },
           "createdAt" : {
@@ -6259,6 +6286,15 @@
           "businessRegisterPlace" : {
             "type" : "string"
           },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
+            "type" : "string"
+          },
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficer"
           },
@@ -6315,6 +6351,15 @@
             "type" : "string"
           },
           "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
             "type" : "string"
           },
           "dataProtectionOfficer" : {
@@ -6376,6 +6421,15 @@
             "type" : "string"
           },
           "businessRegisterPlace" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "country" : {
+            "type" : "string"
+          },
+          "county" : {
             "type" : "string"
           },
           "dataProtectionOfficer" : {
