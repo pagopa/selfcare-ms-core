@@ -61,6 +61,11 @@ public class DelegationServiceImpl implements DelegationService {
 
         List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode());
         // TODO: remove filter when getInstitutions API will be fixed.
+        /*
+            Filtriamo in base alla presenza del campo toSubunitCode nel RequestBody:
+            Se è presente, possiamo prendere la prima institution trovata, che avrà un subunitCode corrispondente a quello richiesto.
+            Se non è presente, prendiamo solo l'institution che non ha un subunitCode.
+        */
         String partnerIdentifier = institutionsTo.stream()
                 .filter(institution -> StringUtils.hasText(delegation.getToSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
                 .findFirst()
@@ -70,6 +75,11 @@ public class DelegationServiceImpl implements DelegationService {
         delegation.setTo(partnerIdentifier);
 
         // TODO: remove filter when getInstitutions API will be fixed.
+        /*
+            Filtriamo in base alla presenza del campo fromSubunitCode nel RequestBody:
+            Se è presente, possiamo prendere la prima institution trovata, che avrà un subunitCode corrispondente a quello richiesto.
+            Se non è presente, prendiamo solo l'institution che non ha un subunitCode.
+        */
         List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode());
         String from = institutionsFrom.stream()
                 .filter(institution -> StringUtils.hasText(delegation.getFromSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
