@@ -21,5 +21,6 @@ public class DelegationRequestFromTaxcode {
     private String productId;
     @NotNull
     private DelegationType type;
-
+    private String fromSubunitCode;
+    private String toSubunitCode;
 }

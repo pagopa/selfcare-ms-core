@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.mscore.web.controller;
+    package it.pagopa.selfcare.mscore.web.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -68,7 +68,7 @@ public class DelegationController {
      * * Code: 409, Message: Conflict, DataType: Problem
      */
     @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "${swagger.mscore.delegation.create}", notes = "${swagger.mscore.delegation.create}")
+    @ApiOperation(value = "${swagger.mscore.delegation.createFromTaxCode}", notes = "${swagger.mscore.delegation.createFromTaxCode}")
     @PostMapping("/from-taxcode")
     public ResponseEntity<DelegationResponse> createDelegationFromInstitutionsTaxCode(@RequestBody @Valid DelegationRequestFromTaxcode delegation) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);

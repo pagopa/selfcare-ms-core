@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -58,16 +59,20 @@ public class DelegationServiceImpl implements DelegationService {
     @Override
     public Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation) {
 
-        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), null);
+        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode());
+        // TODO: remove filter when getInstitutions API will be fixed.
         String partnerIdentifier = institutionsTo.stream()
+                .filter(institution -> StringUtils.hasText(delegation.getToSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
                 .findFirst()
                 .map(Institution::getId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
                         INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
         delegation.setTo(partnerIdentifier);
 
-        List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFrom(), null);
+        // TODO: remove filter when getInstitutions API will be fixed.
+        List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode());
         String from = institutionsFrom.stream()
+                .filter(institution -> StringUtils.hasText(delegation.getFromSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
                 .findFirst()
                 .map(Institution::getId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
