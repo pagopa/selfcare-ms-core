@@ -825,14 +825,14 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
-    void findByTaxCodeAndSubunitCode() {
+    void findByOriginOriginId() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
 
         when(institutionRepository.find(any(), any()))
                 .thenReturn(List.of(institutionEntity));
 
         List<Institution> onboardings = institutionConnectorImpl
-                .findByTaxCodeSubunitCode("example", "example");
+                .findByOriginOriginId("example", "example");
 
         assertFalse(onboardings.isEmpty());
     }
