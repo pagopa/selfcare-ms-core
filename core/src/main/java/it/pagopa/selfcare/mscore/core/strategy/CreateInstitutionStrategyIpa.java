@@ -25,7 +25,7 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION
 public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommon implements CreateInstitutionStrategy {
 
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-
+    static final String DESCRIPTION_TO_REPLACE_REGEX = " - (COMUNE|PROVINCIA)";
     private final InstitutionMapper institutionMapper;
 
     public CreateInstitutionStrategyIpa(PartyRegistryProxyConnector partyRegistryProxyConnector,
@@ -84,10 +84,14 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
     private Institution getInstitutionEC(String taxCode, InstitutionProxyInfo institutionProxyInfo, CategoryProxyInfo categoryProxyInfo) {
 
         Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
+        GeographicTaxonomies geotax = partyRegistryProxyConnector.getExtByCode(institutionProxyInfo.getIstatCode());
+
         newInstitution.setExternalId(taxCode);
         newInstitution.setOrigin(Origin.IPA.getValue());
         newInstitution.setCreatedAt(OffsetDateTime.now());
-
+        newInstitution.setCity(geotax.getDescription().replaceAll(DESCRIPTION_TO_REPLACE_REGEX, ""));
+        newInstitution.setCounty(geotax.getProvinceAbbreviation());
+        newInstitution.setCountry(geotax.getCountryAbbreviation());
         Attributes attributes = new Attributes();
         attributes.setOrigin(categoryProxyInfo.getOrigin());
         attributes.setCode(categoryProxyInfo.getCode());
@@ -104,7 +108,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
                                                    CategoryProxyInfo categoryProxyInfo) {
 
         AreaOrganizzativaOmogenea areaOrganizzativaOmogenea = partyRegistryProxyConnector.getAooById(strategyInput.getSubunitCode());
-
+        GeographicTaxonomies geotax = partyRegistryProxyConnector.getExtByCode(areaOrganizzativaOmogenea.getCodiceComuneISTAT());
         Institution newInstitution = new Institution();
         newInstitution.setOriginId( areaOrganizzativaOmogenea.getId() );
         newInstitution.setDescription( areaOrganizzativaOmogenea.getDenominazioneAoo() );
@@ -117,13 +121,14 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         newInstitution.setSubunitType(InstitutionPaSubunitType.AOO.name());
         newInstitution.setParentDescription(institutionProxyInfo.getDescription());
         newInstitution.setRootParentId(rootParentInstitutionId);
-
         newInstitution.setExternalId(getExternalId(strategyInput));
         newInstitution.setOrigin(Optional.ofNullable(areaOrganizzativaOmogenea.getOrigin())
                 .map(Origin::name)
                 .orElse(null));
         newInstitution.setCreatedAt(OffsetDateTime.now());
-
+        newInstitution.setCity(geotax.getDescription().replaceAll(DESCRIPTION_TO_REPLACE_REGEX, ""));
+        newInstitution.setCounty(geotax.getProvinceAbbreviation());
+        newInstitution.setCountry(geotax.getCountryAbbreviation());
         Attributes attributes = new Attributes();
         attributes.setOrigin(categoryProxyInfo.getOrigin());
         attributes.setCode(categoryProxyInfo.getCode());
@@ -139,7 +144,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
                                                   CategoryProxyInfo categoryProxyInfo) {
 
         UnitaOrganizzativa unitaOrganizzativa = partyRegistryProxyConnector.getUoById(strategyInput.getSubunitCode());
-
+        GeographicTaxonomies geotax = partyRegistryProxyConnector.getExtByCode(unitaOrganizzativa.getCodiceComuneISTAT());
         Institution newInstitution = new Institution();
         newInstitution.setOriginId( unitaOrganizzativa.getId() );
         newInstitution.setDescription( unitaOrganizzativa.getDescrizioneUo() );
@@ -152,7 +157,9 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
         newInstitution.setParentDescription(institutionProxyInfo.getDescription());
         newInstitution.setRootParentId(rootParentInstitutionId);
-
+        newInstitution.setCity(geotax.getDescription().replaceAll(DESCRIPTION_TO_REPLACE_REGEX, ""));
+        newInstitution.setCounty(geotax.getProvinceAbbreviation());
+        newInstitution.setCountry(geotax.getCountryAbbreviation());
         if(StringUtils.isNotBlank(unitaOrganizzativa.getCodiceUniAoo())) {
             PaAttributes paAttributes = new PaAttributes();
             paAttributes.setAooParentCode(unitaOrganizzativa.getCodiceUniAoo());

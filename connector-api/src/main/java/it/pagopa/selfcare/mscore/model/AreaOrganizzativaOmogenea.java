@@ -18,4 +18,5 @@ public class AreaOrganizzativaOmogenea {
     private Origin origin;
     private String indirizzo;
     private String CAP;
+    private String codiceComuneISTAT;
 }
