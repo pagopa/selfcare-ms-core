@@ -302,7 +302,7 @@ class InstitutionServiceImplTest {
     void testGetInstitutionsWithOriginOriginId() {
         List<Institution> institutionList = new ArrayList<>();
         when(institutionConnector.findByOriginOriginId(any(), any())).thenReturn(institutionList);
-        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", null, null);
+        List<Institution> institutions = institutionServiceImpl.getInstitutions(null, null, "id", "id");
         assertTrue(institutions.isEmpty());
         Mockito.verify(institutionConnector).findByOriginOriginId(any(), any());
     }
