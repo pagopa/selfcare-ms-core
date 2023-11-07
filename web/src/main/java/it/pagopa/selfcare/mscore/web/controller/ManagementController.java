@@ -29,15 +29,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_ATTRIBUTES_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_EXTERNAL_ID_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_GEOTAXONOMY_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_ID_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_INSTITUTION_BY_PRODUCTID_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_RELATIONSHIP_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.GET_USER_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.VERIFY_TOKEN_FAILED;
-import static it.pagopa.selfcare.mscore.constant.GenericError.VERIFY_USER_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @RestController
@@ -47,11 +39,13 @@ public class ManagementController {
     private final UserService userService;
     private final InstitutionService institutionService;
     private final TokenService tokenService;
+    private final TokenMapper tokenMapper;
 
-    public ManagementController(UserService userService, InstitutionService institutionService, TokenService tokenService) {
+    public ManagementController(UserService userService, InstitutionService institutionService, TokenService tokenService, TokenMapper tokenMapper) {
         this.userService = userService;
         this.institutionService = institutionService;
         this.tokenService = tokenService;
+        this.tokenMapper = tokenMapper;
     }
 
     /**
@@ -197,7 +191,7 @@ public class ManagementController {
                                                   @PathVariable("tokenId") String tokenId) {
         CustomExceptionMessage.setCustomMessage(VERIFY_TOKEN_FAILED);
         TokenRelationships tokenRelationships = tokenService.retrieveToken(tokenId);
-        return ResponseEntity.ok().body(TokenMapper.toTokenResponse(tokenRelationships));
+        return ResponseEntity.ok().body(tokenMapper.toTokenResponse(tokenRelationships));
     }
 
     @ResponseStatus(HttpStatus.OK)

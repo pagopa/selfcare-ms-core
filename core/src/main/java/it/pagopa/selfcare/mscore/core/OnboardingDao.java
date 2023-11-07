@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
@@ -220,15 +221,35 @@ public class OnboardingDao {
         }
     }
 
-    private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
-        UserBinding binding = new UserBinding(request.getInstitutionId(),
+    private OnboardedProduct updateOperator(List<RelationshipInfo> response, OnboardedUser onboardedUser, UserToOnboard user, Institution institution, String productId) {
+        OnboardedProduct product = constructOperatorProduct(user, productId);
+        UserBinding binding = new UserBinding(institution.getId(),
                 institution.getDescription(),
                 institution.getParentDescription(),
                 List.of(product));
-        userConnector.findAndUpdate(onboardedUser, user.getId(), request.getInstitutionId(), product, binding);
+        relationshipExistAndDelete(onboardedUser, productId, institution.getId(), user);
+        userConnector.findAndUpdate(onboardedUser, user.getId(), institution.getId(), product, binding);
         response.add(new RelationshipInfo(institution, user.getId(), product));
         return product;
+    }
+
+    private void relationshipExistAndDelete(OnboardedUser onboardedUser, String productId, String institutionId, UserToOnboard user){
+        List<OnboardedProduct> products = onboardedUser.getBindings().stream()
+                .flatMap(userBinding -> userBinding.getProducts().stream()
+                        .filter(userProduct -> userProduct.getProductId().equalsIgnoreCase(productId)
+                        && !userProduct.getStatus().equals(RelationshipState.DELETED)
+                        && userBinding.getInstitutionId().equals(institutionId)))
+                .collect(Collectors.toList());
+        if(!products.isEmpty()) {
+            if (user.getRole().equals(PartyRole.OPERATOR)) {
+                products.stream()
+                        .filter(singleProduct -> !singleProduct.getRole().equals(user.getRole()) || singleProduct.getProductRole().equals(user.getProductRole()))
+                        .collect(Collectors.toList())
+                        .forEach(productToDelete -> updateUserProductState(onboardedUser, productToDelete.getRelationshipId(), RelationshipState.DELETED));
+            } else {
+                products.forEach(productToDelete -> updateUserProductState(onboardedUser, productToDelete.getRelationshipId(), RelationshipState.DELETED));
+            }
+        }
     }
 
     private Token updateToken(Token token, RelationshipState state, String digest) {
@@ -291,30 +312,29 @@ public class OnboardingDao {
         return Optional.empty();
     }
 
-    public List<RelationshipInfo> onboardOperator(OnboardingOperatorsRequest request, Institution institution) {
+    public List<RelationshipInfo> onboardOperator(Institution institution, String productId, List<UserToOnboard> users) {
         List<RelationshipInfo> response = new ArrayList<>();
         List<String> toUpdate = new ArrayList<>();
-        List<String> usersId = request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList());
+        List<String> usersId = users.stream().map(UserToOnboard::getId).collect(Collectors.toList());
         Map<String, OnboardedProduct> productMap = new HashMap<>();
         try {
-            request.getUsers()
-                    .forEach(userToOnboard -> updateOrCreateOperator(toUpdate, userToOnboard, response, institution, request, productMap));
+            users.forEach(userToOnboard -> updateOrCreateOperator(toUpdate, userToOnboard, response, institution, productMap, productId));
             log.debug("users to update: {}", toUpdate);
         } catch (Exception e) {
             log.warn("can not onboard operators", e);
             List<String> toDelete = usersId.stream().filter(id -> !toUpdate.contains(id)).collect(Collectors.toList());
-            rollbackUser(toUpdate, toDelete, request.getInstitutionId(), productMap);
+            rollbackUser(toUpdate, toDelete, institution.getId(), productMap);
         }
         return response;
     }
 
-    private void updateOrCreateOperator(List<String> toUpdate, UserToOnboard userToOnboard, List<RelationshipInfo> response, Institution institution, OnboardingOperatorsRequest request, Map<String, OnboardedProduct> productMap) {
+    private void updateOrCreateOperator(List<String> toUpdate, UserToOnboard userToOnboard, List<RelationshipInfo> response, Institution institution, Map<String, OnboardedProduct> productMap, String productId) {
         try {
             OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
-            OnboardedProduct currentProduct = updateOperator(response, onboardedUser, userToOnboard, institution, request);
+            OnboardedProduct currentProduct = updateOperator(response, onboardedUser, userToOnboard, institution, productId);
             productMap.put(userToOnboard.getId(), currentProduct);
         } catch (ResourceNotFoundException e) {
-            createOperator(response, userToOnboard, institution, request);
+            createOperator(response, userToOnboard, institution, productId);
         }
     }
 
@@ -329,9 +349,9 @@ public class OnboardingDao {
         userConnector.findAndCreate(user.getId(), binding);
     }
 
-    private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, OnboardingOperatorsRequest request) {
-        OnboardedProduct product = constructOperatorProduct(user, request.getProductId());
-        UserBinding binding = new UserBinding(request.getInstitutionId(),
+    private void createOperator(List<RelationshipInfo> response, UserToOnboard user, Institution institution, String productId) {
+        OnboardedProduct product = constructOperatorProduct(user, productId);
+        UserBinding binding = new UserBinding(institution.getId(),
                 institution.getDescription(),
                 institution.getParentDescription(),
                 List.of(product));
@@ -396,7 +416,6 @@ public class OnboardingDao {
     private void rollbackUser(List<String> toUpdate, List<String> toDelete, String institutionId, Map<String, OnboardedProduct> productMap) {
         toUpdate.forEach(userId -> userConnector.findAndRemoveProduct(userId, institutionId, productMap.get(userId)));
         toDelete.forEach(userId -> userConnector.findAndRemoveProduct(userId, institutionId, productMap.get(userId)));
-        //toDelete.forEach(userConnector::deleteById);
         log.debug("rollback second step completed");
     }
 

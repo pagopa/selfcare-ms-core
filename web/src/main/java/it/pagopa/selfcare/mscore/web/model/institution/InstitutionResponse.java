@@ -22,6 +22,9 @@ public class InstitutionResponse {
     private String address;
     private String zipCode;
     private String taxCode;
+    private String city;
+    private String county;
+    private String country;
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesResponse> attributes;
     private List<OnboardedProductResponse> onboarding;

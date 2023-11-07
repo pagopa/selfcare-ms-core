@@ -3,8 +3,10 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingUsersRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.OnboardingResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -21,6 +23,8 @@ public interface OnboardingResourceMapper {
     @Mapping(target = "billingRequest", source = "billing")
     @Mapping(target = "signContract", source = "signContract", qualifiedByName = "mapSignContract")
     OnboardingRequest toOnboardingRequest(OnboardingInstitutionRequest onboardingInstitutionRequest);
+
+    OnboardingUsersRequest toOnboardingUsersRequest(OnboardingInstitutionUsersRequest request);
 
     @Named("mapSignContract")
     default Boolean mapSignContract(Boolean signContract) {

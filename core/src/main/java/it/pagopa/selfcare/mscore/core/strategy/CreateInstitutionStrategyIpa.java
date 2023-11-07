@@ -2,13 +2,11 @@ package it.pagopa.selfcare.mscore.core.strategy;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
 import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
 import it.pagopa.selfcare.mscore.model.institution.*;
@@ -24,19 +22,17 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION
 
 @Slf4j
 @Component
-public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
+public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommon implements CreateInstitutionStrategy {
 
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-
-    private final InstitutionConnector institutionConnector;
 
     private final InstitutionMapper institutionMapper;
 
     public CreateInstitutionStrategyIpa(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                         InstitutionConnector institutionConnector,
                                         InstitutionMapper institutionMapper) {
+        super(institutionConnector);
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
-        this.institutionConnector = institutionConnector;
         this.institutionMapper = institutionMapper;
     }
 
@@ -178,13 +174,4 @@ public class CreateInstitutionStrategyIpa implements CreateInstitutionStrategy {
         return newInstitution;
     }
 
-
-    private void checkIfAlreadyExistsByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
-
-        List<Institution> institutions = institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
-        if (!institutions.isEmpty())
-            throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
-                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
-    }
 }

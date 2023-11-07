@@ -26,4 +26,13 @@ public class ProductConnectorImpl implements ProductConnector {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById result = {}", result);
         return result;
     }
+
+    @Override
+    public Product getProductValidById(String productId) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductValidById productId = {}", productId);
+        Assert.hasText(productId, "A productId is required");
+        Product result = restClient.getProductValid(productId);
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductValidById result = {}", result);
+        return result;
+    }
 }

@@ -33,7 +33,6 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -91,7 +90,7 @@ class UserEventServiceTest {
         UserBinding userBinding = new UserBinding(institutionId, List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser(institutionId);
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
@@ -108,7 +107,7 @@ class UserEventServiceTest {
         //then
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verify(kafkaTemplateUsers, times(1)).send(any(), any());
         verifyNoMoreInteractions(userConnector, userRegistryConnector, kafkaTemplateUsers);
 
@@ -137,7 +136,7 @@ class UserEventServiceTest {
         UserBinding userBinding = new UserBinding(institutionId, List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser("institutionId");
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
@@ -155,7 +154,7 @@ class UserEventServiceTest {
         //then
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verify(kafkaTemplateUsers, times(1)).send(any(), any());
         verifyNoMoreInteractions(userConnector, userRegistryConnector, kafkaTemplateUsers);
     }
@@ -182,7 +181,7 @@ class UserEventServiceTest {
         userBinding.setInstitutionId(institutionId);
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser(institutionId);
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         when(kafkaTemplateUsers.send(any(), any()))
@@ -197,7 +196,7 @@ class UserEventServiceTest {
         //then
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verify(kafkaTemplateUsers, times(1)).send(any(), any());
         verifyNoMoreInteractions(userConnector, userRegistryConnector, kafkaTemplateUsers);
 
@@ -225,7 +224,7 @@ class UserEventServiceTest {
         userBinding.setInstitutionId(institutionId);
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser(institutionId);
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
@@ -235,7 +234,7 @@ class UserEventServiceTest {
         //then
         assertDoesNotThrow(executable);
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoMoreInteractions(userConnector, userRegistryConnector);
     }
     @Test
@@ -256,7 +255,7 @@ class UserEventServiceTest {
         final User userMock = new DummyUser(institutionId);
 
 
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
@@ -266,7 +265,7 @@ class UserEventServiceTest {
         //then
         assertEquals(1, usersToNotify.size());
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoMoreInteractions(userConnector, userRegistryConnector);
     }
 
@@ -286,7 +285,7 @@ class UserEventServiceTest {
         UserBinding userBinding = new UserBinding(institutionId, List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser(institutionId);
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         //when
@@ -294,7 +293,7 @@ class UserEventServiceTest {
         //then
         assertEquals(1, usersToNotify.size());
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoMoreInteractions(userConnector, userRegistryConnector);
     }
 
@@ -314,7 +313,7 @@ class UserEventServiceTest {
         UserBinding userBinding = new UserBinding(institutionId, List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser(institutionId);
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         //when
@@ -322,7 +321,7 @@ class UserEventServiceTest {
         //then
         assertEquals(0, usersToNotify.size());
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoMoreInteractions(userConnector, userRegistryConnector);
     }
 
@@ -342,7 +341,7 @@ class UserEventServiceTest {
         UserBinding userBinding = new UserBinding(UUID.randomUUID().toString(), List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
         final User userMock = new DummyUser(institutionId);
-        when(userRegistryConnector.getUserByInternalId(any(), any()))
+        when(userRegistryConnector.getUserByInternalId(any()))
                 .thenReturn(userMock);
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         //when
@@ -350,7 +349,7 @@ class UserEventServiceTest {
         //then
         assertEquals(0, usersToNotify.size());
         verify(userConnector, times(1)).findById(userId);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, EnumSet.allOf(User.Fields.class));
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoMoreInteractions(userConnector, userRegistryConnector);
     }
 

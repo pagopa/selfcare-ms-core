@@ -159,6 +159,9 @@ public class InstitutionMapperCustom {
         institution.setDescription(request.getDescription());
         institution.setAddress(request.getAddress());
         institution.setDigitalAddress(request.getDigitalAddress());
+        institution.setCity(request.getCity());
+        institution.setCounty(request.getCounty());
+        institution.setCountry(request.getCountry());
         institution.setTaxCode(request.getTaxCode());
         institution.setZipCode(request.getZipCode());
         institution.setGeographicTaxonomies(toGeographicTaxonomies(request.getGeographicTaxonomies()));
@@ -172,6 +175,14 @@ public class InstitutionMapperCustom {
             institution.setPaymentServiceProvider(toPaymentServiceProvider(request.getPaymentServiceProvider()));
         if (request.getDataProtectionOfficer() != null)
             institution.setDataProtectionOfficer(toDataProtectionOfficer(request.getDataProtectionOfficer()));
+        return institution;
+    }
+
+    public static Institution toInstitution(PdaInstitutionRequest request, String externalId) {
+        Institution institution = new Institution();
+        institution.setExternalId(externalId);
+        institution.setDescription(request.getDescription());
+        institution.setTaxCode(request.getTaxCode());
         return institution;
     }
 

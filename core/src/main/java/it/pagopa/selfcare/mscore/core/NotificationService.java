@@ -22,6 +22,7 @@ public interface NotificationService {
     void sendMailForRegistrationNotificationApprove(User user, OnboardingRequest request, String token);
 
     void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo);
+    void sendCompletedEmail(List<User> managers, Institution institution, Product product, File logo, String templatePath);
 
     void sendRejectMail(File logo, Institution institution, Product product);
 

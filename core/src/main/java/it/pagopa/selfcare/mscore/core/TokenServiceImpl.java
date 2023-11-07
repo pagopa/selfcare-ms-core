@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_ALREADY_CONSUMED;
@@ -63,7 +64,7 @@ public class TokenServiceImpl implements TokenService {
         return tokenConnector.findWithFilter(institutionId, productId);
     }
 
-    public Token getToken(String institutionId, String productId){
+    public Token getToken(String institutionId, String productId) {
         log.trace("getToken start");
         log.debug("getToken institutionId = {}, productId = {}", institutionId, productId);
         Token token = tokenConnector.findWithFilter(institutionId, productId);
@@ -74,15 +75,23 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public TokenRelationships retrieveToken(String tokenId) {
+        log.trace("retrieveToken start");
+        log.debug("retrieveToken tokenId = {}", tokenId);
+        TokenRelationships tokenRelationships = retrieveToken(tokenId, false);
+        log.debug("retrieveToken tokenRelationships = {}", tokenRelationships);
+        log.trace("retrieveToken end");
+        return tokenRelationships;
+    }
+
+    private TokenRelationships retrieveToken(String tokenId, boolean existingOnly){
         Token token = tokenConnector.findById(tokenId);
-        List<OnboardedUser> users;
-        if (token.getUsers() != null) {
-            var ids = token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
-            users = userService.findAllByIds(ids);
-        } else {
-            users = Collections.emptyList();
-        }
-        return TokenUtils.toTokenRelationships(token, users);
+        List<OnboardedUser> onboardedUsers = Optional.ofNullable(token.getUsers())
+                .map(users -> {
+                    var ids = users.stream().map(TokenUser::getUserId).collect(Collectors.toList());
+                    return existingOnly ? userService.findAllExistingByIds(ids) : userService.findAllByIds(ids);
+                })
+                .orElse(Collections.emptyList());
+        return TokenUtils.toTokenRelationships(token, onboardedUsers);
     }
 
     private boolean hasTokenExpired(Token token, OffsetDateTime now) {
@@ -90,8 +99,16 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public List<Token> getTokensByProductId(String productId, Integer page, Integer size) {
-        return tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.PENDING),
+    public List<TokenRelationships> getTokensByProductId(String productId, Integer page, Integer size) {
+        log.trace("getTokensByProductId start");
+        log.debug("getTokensByProductId productId = {}, page = {}, size = {}", productId, page, size);
+        List<Token> tokensByStatusAndProduct = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.PENDING),
                 productId, page, size);
+        List<TokenRelationships> tokens = tokensByStatusAndProduct.stream()
+                .map(token -> retrieveToken(token.getId(), true))
+                .collect(Collectors.toList());
+        log.debug("getTokensByProductId result = {}", tokens);
+        log.trace("getTokensByProductId end");
+        return tokens;
     }
 }

@@ -9,6 +9,7 @@ import lombok.Data;
 public class CreateInstitutionStrategyInput {
 
     private String taxCode;
+    private String description;
     private InstitutionPaSubunitType subunitType;
     private String subunitCode;
 }

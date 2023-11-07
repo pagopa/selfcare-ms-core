@@ -3,12 +3,8 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
-import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.TokenConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Origin;
@@ -27,7 +23,6 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +37,6 @@ import java.util.stream.Collectors;
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
-import static it.pagopa.selfcare.mscore.model.user.User.Fields.*;
 
 @Slf4j
 @Service
@@ -50,7 +44,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 
 
     private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
-    private static final EnumSet<User.Fields> USER_FIELD_LIST = EnumSet.of(fiscalCode, name, familyName, workContacts);
     private final InstitutionConnector institutionConnector;
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
@@ -138,6 +131,14 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution createInstitutionFromPda(Institution institution, String injectionInstitutionType) {
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyPda(injectionInstitutionType);
+        return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                .taxCode(institution.getTaxCode())
+                .build());
+    }
+
+    @Override
     public Institution createInstitution(Institution institution) {
         return createInstitutionStrategyFactory.createInstitutionStrategy(institution)
                 .createInstitution(CreateInstitutionStrategyInput.builder()
@@ -161,6 +162,25 @@ public class InstitutionServiceImpl implements InstitutionService {
                         .build());
     }
 
+    @Override
+    public Institution createInstitutionFromIvass(Institution institution) {
+        return createInstitutionStrategyFactory.createInstitutionStrategyIvass(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .subunitCode(institution.getSubunitCode())
+                        .subunitType(Optional.ofNullable(institution.getSubunitType())
+                                .map(InstitutionPaSubunitType::valueOf)
+                                .orElse(null))
+                        .build());
+    }
+
+    @Override
+    public Institution createInstitutionFromInfocamere(Institution institution) {
+        CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyInfocamere(institution);
+        return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
+                .taxCode(institution.getTaxCode())
+                .build());
+    }
     @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
@@ -229,7 +249,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 NationalRegistriesProfessionalAddress professionalAddress = partyRegistryProxyConnector.getLegalAddress(taxId);
                 if (professionalAddress != null) {
                     newInstitution.setAddress(professionalAddress.getAddress());
-                    newInstitution.setZipCode(professionalAddress.getZip());
+                    newInstitution.setZipCode(professionalAddress.getZipCode());
                 }
             }
             newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
@@ -462,7 +482,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.debug("getInstitutionUsers institutionId = {}, productId = {}", institutionId);
         Assert.hasText(institutionId, REQUIRED_INSTITUTION_MESSAGE);
         List<UserInfo> userInfos = userConnector.findByInstitutionId(institutionId);
-        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalId(userInfo.getId(), USER_FIELD_LIST)));
+        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalId(userInfo.getId())));
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getInstitutionUsers result = {}", userInfos);
         log.trace("getInstitutionUsers end");
         return userInfos;

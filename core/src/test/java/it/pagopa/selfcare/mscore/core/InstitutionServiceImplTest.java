@@ -323,6 +323,24 @@ class InstitutionServiceImplTest {
         assertNotNull(institution);
     }
 
+    @Test
+    void testCreateInstitutionFromIvass() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategyIvass(any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitutionFromIvass(new Institution());
+        assertNotNull(institution);
+    }
+
+
+
+    @Test
+    void testCreateInstitutionFromInfocamere() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategyInfocamere(any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitutionFromInfocamere(new Institution());
+        assertNotNull(institution);
+    }
+
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionsByProductId(String, Integer, Integer)}
      */
@@ -431,10 +449,7 @@ class InstitutionServiceImplTest {
 
         NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
         nationalRegistriesProfessionalAddress.setAddress("42 Main St");
-        nationalRegistriesProfessionalAddress.setDescription("The characteristics of someone or something");
-        nationalRegistriesProfessionalAddress.setMunicipality("Municipality");
-        nationalRegistriesProfessionalAddress.setProvince("Province");
-        nationalRegistriesProfessionalAddress.setZip("21654");
+        nationalRegistriesProfessionalAddress.setZipCode("21654");
         Institution institution = new Institution();
         when(institutionConnector.save(any())).thenReturn(institution);
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
@@ -453,10 +468,7 @@ class InstitutionServiceImplTest {
 
         NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
         nationalRegistriesProfessionalAddress.setAddress("42 Main St");
-        nationalRegistriesProfessionalAddress.setDescription("The characteristics of someone or something");
-        nationalRegistriesProfessionalAddress.setMunicipality("Municipality");
-        nationalRegistriesProfessionalAddress.setProvince("Province");
-        nationalRegistriesProfessionalAddress.setZip("21654");
+        nationalRegistriesProfessionalAddress.setZipCode("21654");
         Institution institution = new Institution();
         when(institutionConnector.save(any())).thenReturn(institution);
         when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
@@ -1539,7 +1551,7 @@ class InstitutionServiceImplTest {
         User user = new User();
         user.setId("id");
         when(userConnector.findByInstitutionId(any())).thenReturn(List.of(userInfo));
-        when(userRegistryConnector.getUserByInternalId(any(), any())).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
         List<UserInfo> userInfos = institutionServiceImpl.getInstitutionUsers("test");
         assertNotNull(userInfos);
         assertFalse(userInfos.isEmpty());

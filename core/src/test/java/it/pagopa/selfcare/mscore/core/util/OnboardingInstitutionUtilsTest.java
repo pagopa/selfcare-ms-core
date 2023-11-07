@@ -305,10 +305,23 @@ class OnboardingInstitutionUtilsTest {
     @Test
     void testGetOnboardedValidManager() {
         Token token = new Token();
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        token.setInstitutionUpdate(institutionUpdate);
         assertThrows(InvalidRequestException.class,
                 () -> OnboardingInstitutionUtils.getOnboardedValidManager(token));
     }
 
+    @Test
+    void testGetOnboardedValidManager_PTInstitution(){
+        Token token = new Token();
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.PT);
+        token.setInstitutionUpdate(institutionUpdate);
+        List<String> onboardedValidManager = OnboardingInstitutionUtils.getOnboardedValidManager(token);
+
+        assertTrue(onboardedValidManager.isEmpty());
+
+    }
     /**
      * Method under test: {@link OnboardingInstitutionUtils#constructOnboardingRequest(OnboardingLegalsRequest)}
      */

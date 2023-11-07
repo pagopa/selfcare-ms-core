@@ -3,10 +3,7 @@ package it.pagopa.selfcare.mscore.core.strategy.factory;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
-import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
-import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategyAnac;
-import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategyIpa;
-import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategyRaw;
+import it.pagopa.selfcare.mscore.core.strategy.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -42,4 +39,22 @@ public class CreateInstitutionStrategyFactory {
         strategy.setInstitution(institution);
         return strategy;
     }
+    public CreateInstitutionStrategy createInstitutionStrategyIvass(Institution institution) {
+        CreateInstitutionStrategyIvass strategy = new CreateInstitutionStrategyIvass(partyRegistryProxyConnector, institutionConnector);
+        strategy.setInstitution(institution);
+        return strategy;
+    }
+
+    public CreateInstitutionStrategy createInstitutionStrategyPda(String injectionInstitutionType) {
+        CreateInstitutionStrategyPda strategy = new CreateInstitutionStrategyPda(partyRegistryProxyConnector, institutionConnector, institutionMapper);
+        strategy.setInjectionInstitutionType(injectionInstitutionType);
+        return strategy;
+    }
+
+    public CreateInstitutionStrategy createInstitutionStrategyInfocamere(Institution institution) {
+        CreateInstitutionStrategyInfocamere strategy =  new CreateInstitutionStrategyInfocamere(partyRegistryProxyConnector, institutionConnector);
+        strategy.setInstitution(institution);
+        return strategy;
+    }
+
 }

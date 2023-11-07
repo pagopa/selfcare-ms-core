@@ -51,7 +51,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.*;
-
 import java.util.concurrent.ExecutionException;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
@@ -259,7 +258,7 @@ class ContractServiceTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -315,6 +314,48 @@ class ContractServiceTest {
                 .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
+    @Test
+    void testSendDataLakeNotification3() throws ExecutionException, InterruptedException {
+        ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
+        when(producerFactory.transactionCapable()).thenReturn(true);
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
+        CoreConfig coreConfig = new CoreConfig();
+        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
+        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
+        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
+        ContractService contractService = new ContractService(pagoPaSignatureConfig, null, coreConfig,
+                pkcs7HashSignService, signatureService, kafkaTemplate, new KafkaPropertiesConfig(), partyRegistryProxyConnector, institutionConnector);
+
+        Onboarding onboarding = mockInstance(new Onboarding());
+        onboarding.setProductId("prod");
+
+        Institution institution = mockInstance(new Institution());
+        institution.setOrigin("IPA");
+        institution.setOnboarding(List.of(onboarding));
+
+        InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
+
+        TokenUser tokenUser1 = new TokenUser("tokenUserId1", PartyRole.MANAGER);
+        TokenUser tokenUser2 = new TokenUser("tokenUserId2", PartyRole.DELEGATE);
+
+        Token token = mockInstance(new Token());
+        token.setId(UUID.randomUUID().toString());
+        token.setProductId("prod");
+        token.setStatus(RelationshipState.ACTIVE);
+        token.setInstitutionUpdate(institutionUpdate);
+        token.setDeletedAt(null);
+        token.setUsers(List.of(tokenUser1, tokenUser2));
+        token.setContractSigned("docs/parties".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
+        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
+                "Topic cannot be null");
+
+        verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
+    }
 
     /**
      * Method under test: {@link ContractService#sendDataLakeNotification(Institution, Token, QueueEvent)}
@@ -341,7 +382,7 @@ class ContractServiceTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(), "setCity");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -387,8 +428,6 @@ class ContractServiceTest {
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
-        verify(partyRegistryProxyConnector, times(1))
-                .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
 
@@ -410,7 +449,7 @@ class ContractServiceTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(),"setCity", "setCounty", "setCountry");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -493,7 +532,7 @@ class ContractServiceTest {
         String tokenId = "t1";
 
         Onboarding onboarding = createOnboarding(tokenId, "prod");
-        Institution institution = createInstitution(institutionId, onboarding);
+        Institution institution = createInstitutionWithoutLocation(institutionId, onboarding);
         InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
         Token token = createToken(institutionId, tokenId, institutionUpdate,
                 RelationshipState.ACTIVE,
@@ -528,7 +567,7 @@ class ContractServiceTest {
         String tokenId = "t1";
 
         Onboarding onboarding = createOnboarding(tokenId, "prod");
-        Institution institution = createInstitution(institutionId, onboarding);
+        Institution institution = createInstitutionWithoutLocation(institutionId, onboarding);
         InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
         Token token = createToken(institutionId, tokenId, institutionUpdate,
                 RelationshipState.ACTIVE,
@@ -563,7 +602,7 @@ class ContractServiceTest {
         String tokenId = "t1";
 
         Onboarding onboarding = createOnboarding(tokenId, "prod");
-        Institution institution = createInstitution(institutionId, onboarding);
+        Institution institution = createInstitutionWithoutLocation(institutionId, onboarding);
         InstitutionUpdate institutionUpdate = mockInstance(new InstitutionUpdate());
         Token token = createToken(institutionId, tokenId, institutionUpdate,
                 RelationshipState.DELETED,
@@ -587,6 +626,14 @@ class ContractServiceTest {
 
     private static Institution createInstitution(String institutionId, Onboarding onboarding) {
         Institution institution = mockInstance(new Institution());
+        institution.setId(institutionId);
+        institution.setOrigin("IPA");
+        institution.setOnboarding(List.of(onboarding));
+        return institution;
+    }
+
+    private static Institution createInstitutionWithoutLocation(String institutionId, Onboarding onboarding){
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
         institution.setId(institutionId);
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
@@ -624,7 +671,7 @@ class ContractServiceTest {
     }
 
     private static void mockPartyRegistryProxy(PartyRegistryProxyConnector partyRegistryProxyConnector, Institution institution) {
-        InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo());
+        InstitutionProxyInfo institutionProxyInfoMock = mockInstance(new InstitutionProxyInfo(), "setCity", "setCounty", "setCountry");
         institutionProxyInfoMock.setTaxCode(institution.getExternalId());
 
         GeographicTaxonomies geographicTaxonomiesMock = mockInstance(new GeographicTaxonomies());
