@@ -92,6 +92,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         newInstitution.setCity(geotax.getDescription().replaceAll(DESCRIPTION_TO_REPLACE_REGEX, ""));
         newInstitution.setCounty(geotax.getProvinceAbbreviation());
         newInstitution.setCountry(geotax.getCountryAbbreviation());
+
         Attributes attributes = new Attributes();
         attributes.setOrigin(categoryProxyInfo.getOrigin());
         attributes.setCode(categoryProxyInfo.getCode());
