@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -289,11 +290,26 @@ class InstitutionServiceImplTest {
     }
 
     @Test
-    void testGetInstitutions() {
+    void testGetInstitutionsWithTaxCodeSubunitCode() {
         List<Institution> institutionList = new ArrayList<>();
-        when(institutionConnector.findByTaxCodeSubunitCodeAndOrigin(any(), any(), any(), any())).thenReturn(institutionList);
-        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", "id", "id");
+        when(institutionConnector.findByTaxCodeSubunitCode(any(), any())).thenReturn(institutionList);
+        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", null, null);
         assertTrue(institutions.isEmpty());
+        Mockito.verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+    }
+
+    @Test
+    void testGetInstitutionsWithOriginOriginId() {
+        List<Institution> institutionList = new ArrayList<>();
+        when(institutionConnector.findByOriginOriginId(any(), any())).thenReturn(institutionList);
+        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", null, null);
+        assertTrue(institutions.isEmpty());
+        Mockito.verify(institutionConnector).findByOriginOriginId(any(), any());
+    }
+
+    @Test
+    void testGetInstitutionsFails() {
+        assertThrows(InvalidRequestException.class, () -> institutionServiceImpl.getInstitutions("id", "id", "id", "id"));
     }
 
     /**

@@ -8,37 +8,32 @@ import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.utils.MaskDataUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
 
 @Slf4j
 @Component
-public class CreateInstitutionStrategyPda implements CreateInstitutionStrategy {
+public class CreateInstitutionStrategyPda extends CreateInstitutionStrategyCommon implements CreateInstitutionStrategy {
 
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
 
     private final InstitutionMapper institutionMapper;
-
-    private final InstitutionConnector institutionConnector;
 
     private String injectionInstitutionType;
 
     public CreateInstitutionStrategyPda(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                         InstitutionConnector institutionConnector,
                                         InstitutionMapper institutionMapper) {
-        this.institutionConnector = institutionConnector;
+        super(institutionConnector);
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionMapper = institutionMapper;
     }
@@ -133,23 +128,6 @@ public class CreateInstitutionStrategyPda implements CreateInstitutionStrategy {
         newInstitution.setAttributes(List.of(attributes));
 
         return newInstitution;
-    }
-
-    private void checkIfAlreadyExistsByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
-        /*
-            When subunitCode is null method findByTaxCodeSubunitCode retrieves also institutions with subunitCode.
-            We need to filter with !StringUtils.hasText(institution.getSubunitCode()) to ignore AO/UOO institutions because we are looking for
-            parent institutions.
-        */
-        List<Institution> institutions = institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode)
-                .stream()
-                .filter(institution -> !StringUtils.hasText(institution.getSubunitCode()))
-                .collect(Collectors.toList());
-
-        if (!institutions.isEmpty())
-            throw new ResourceConflictException(String
-                    .format(CustomError.CREATE_INSTITUTION_IPA_CONFLICT.getMessage(), taxCode, subunitCode),
-                    CustomError.CREATE_INSTITUTION_CONFLICT.getCode());
     }
 
     public void setInjectionInstitutionType(String injectionInstitutionType) {
