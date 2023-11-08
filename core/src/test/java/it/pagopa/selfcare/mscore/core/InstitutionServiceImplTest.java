@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -289,11 +290,26 @@ class InstitutionServiceImplTest {
     }
 
     @Test
-    void testGetInstitutions() {
+    void testGetInstitutionsWithTaxCodeSubunitCode() {
         List<Institution> institutionList = new ArrayList<>();
-        when(institutionConnector.findByTaxCodeSubunitCodeAndOrigin(any(), any(), any(), any())).thenReturn(institutionList);
-        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", "id", "id");
+        when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any())).thenReturn(institutionList);
+        List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", null, null);
         assertTrue(institutions.isEmpty());
+        Mockito.verify(institutionConnector).findByTaxCodeAndSubunitCode(any(), any());
+    }
+
+    @Test
+    void testGetInstitutionsWithOriginOriginId() {
+        List<Institution> institutionList = new ArrayList<>();
+        when(institutionConnector.findByOriginAndOriginId(any(), any())).thenReturn(institutionList);
+        List<Institution> institutions = institutionServiceImpl.getInstitutions(null, null, "id", "id");
+        assertTrue(institutions.isEmpty());
+        Mockito.verify(institutionConnector).findByOriginAndOriginId(any(), any());
+    }
+
+    @Test
+    void testGetInstitutionsFails() {
+        assertThrows(InvalidRequestException.class, () -> institutionServiceImpl.getInstitutions("id", "id", "id", "id"));
     }
 
     /**
@@ -1531,13 +1547,13 @@ class InstitutionServiceImplTest {
 
         Institution institution = new Institution();
         institution.setId("id");
-        when(institutionConnector.findByTaxCodeSubunitCode(any(), any())).thenReturn(List.of(institution));
+        when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any())).thenReturn(List.of(institution));
         List<Institution> institutions = institutionServiceImpl.getInstitutions("1111111", null);
         assertNotNull(institutions);
         assertFalse(institutions.isEmpty());
         assertNotNull(institutions.get(0));
         assertEquals(institutions.get(0).getId(), institution.getId());
-        verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+        verify(institutionConnector).findByTaxCodeAndSubunitCode(any(), any());
 
     }
 
