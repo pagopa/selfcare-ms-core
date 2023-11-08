@@ -114,16 +114,16 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
 
         if(StringUtils.hasText(taxCode)) {
-            return institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
+            return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
         } else {
-            return institutionConnector.findByOriginOriginId(origin, originId);
+            return institutionConnector.findByOriginAndOriginId(origin, originId);
         }
 
     }
 
     @Override
     public List<Institution> getInstitutions(String taxCode, String subunitCode) {
-        return institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
+        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
     }
 
     @Override

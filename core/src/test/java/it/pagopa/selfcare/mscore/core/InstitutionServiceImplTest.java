@@ -292,19 +292,19 @@ class InstitutionServiceImplTest {
     @Test
     void testGetInstitutionsWithTaxCodeSubunitCode() {
         List<Institution> institutionList = new ArrayList<>();
-        when(institutionConnector.findByTaxCodeSubunitCode(any(), any())).thenReturn(institutionList);
+        when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any())).thenReturn(institutionList);
         List<Institution> institutions = institutionServiceImpl.getInstitutions("id", "id", null, null);
         assertTrue(institutions.isEmpty());
-        Mockito.verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+        Mockito.verify(institutionConnector).findByTaxCodeAndSubunitCode(any(), any());
     }
 
     @Test
     void testGetInstitutionsWithOriginOriginId() {
         List<Institution> institutionList = new ArrayList<>();
-        when(institutionConnector.findByOriginOriginId(any(), any())).thenReturn(institutionList);
+        when(institutionConnector.findByOriginAndOriginId(any(), any())).thenReturn(institutionList);
         List<Institution> institutions = institutionServiceImpl.getInstitutions(null, null, "id", "id");
         assertTrue(institutions.isEmpty());
-        Mockito.verify(institutionConnector).findByOriginOriginId(any(), any());
+        Mockito.verify(institutionConnector).findByOriginAndOriginId(any(), any());
     }
 
     @Test
@@ -1547,13 +1547,13 @@ class InstitutionServiceImplTest {
 
         Institution institution = new Institution();
         institution.setId("id");
-        when(institutionConnector.findByTaxCodeSubunitCode(any(), any())).thenReturn(List.of(institution));
+        when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any())).thenReturn(List.of(institution));
         List<Institution> institutions = institutionServiceImpl.getInstitutions("1111111", null);
         assertNotNull(institutions);
         assertFalse(institutions.isEmpty());
         assertNotNull(institutions.get(0));
         assertEquals(institutions.get(0).getId(), institution.getId());
-        verify(institutionConnector).findByTaxCodeSubunitCode(any(), any());
+        verify(institutionConnector).findByTaxCodeAndSubunitCode(any(), any());
 
     }
 

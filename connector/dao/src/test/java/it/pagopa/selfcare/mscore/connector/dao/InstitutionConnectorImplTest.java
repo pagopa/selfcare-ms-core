@@ -661,7 +661,7 @@ class InstitutionConnectorImplTest {
                 .thenReturn(List.of(institutionEntity));
 
         List<Institution> onboardings = institutionConnectorImpl
-                .findByTaxCodeSubunitCode("example", "example");
+                .findByTaxCodeAndSubunitCode("example", "example");
 
         assertFalse(onboardings.isEmpty());
     }
@@ -832,7 +832,7 @@ class InstitutionConnectorImplTest {
                 .thenReturn(List.of(institutionEntity));
 
         List<Institution> onboardings = institutionConnectorImpl
-                .findByOriginOriginId("example", "example");
+                .findByOriginAndOriginId("example", "example");
 
         assertFalse(onboardings.isEmpty());
     }

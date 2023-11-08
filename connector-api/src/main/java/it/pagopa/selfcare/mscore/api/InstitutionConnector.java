@@ -56,7 +56,7 @@ public interface InstitutionConnector {
 
     List<Institution> findBrokers(String productId, InstitutionType type);
 
-    List<Institution> findByTaxCodeSubunitCode(String taxCode, String subunitCode);
+    List<Institution> findByTaxCodeAndSubunitCode(String taxCode, String subunitCode);
 
-    List<Institution> findByOriginOriginId(String origin, String originId);
+    List<Institution> findByOriginAndOriginId(String origin, String originId);
 }

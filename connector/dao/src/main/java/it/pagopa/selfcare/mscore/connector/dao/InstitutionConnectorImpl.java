@@ -315,7 +315,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findByTaxCodeSubunitCode(String taxCode, String subunitCode) {
+    public List<Institution> findByTaxCodeAndSubunitCode(String taxCode, String subunitCode) {
         return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxCode)
                                 .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode)
                         ),
@@ -325,7 +325,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findByOriginOriginId(String origin, String originId) {
+    public List<Institution> findByOriginAndOriginId(String origin, String originId) {
         return repository.find(Query.query(CriteriaBuilder.builder()
                                 .isIfNotNull(InstitutionEntity.Fields.origin.name(), origin)
                                 .isIfNotNull(InstitutionEntity.Fields.originId.name(), originId)
