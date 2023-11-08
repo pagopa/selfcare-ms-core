@@ -130,6 +130,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         newInstitution.setCity(geotax.getDescription().replaceAll(DESCRIPTION_TO_REPLACE_REGEX, ""));
         newInstitution.setCounty(geotax.getProvinceAbbreviation());
         newInstitution.setCountry(geotax.getCountryAbbreviation());
+        newInstitution.setIstatCode(areaOrganizzativaOmogenea.getCodiceComuneISTAT());
         Attributes attributes = new Attributes();
         attributes.setOrigin(categoryProxyInfo.getOrigin());
         attributes.setCode(categoryProxyInfo.getCode());
@@ -161,6 +162,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         newInstitution.setCity(geotax.getDescription().replaceAll(DESCRIPTION_TO_REPLACE_REGEX, ""));
         newInstitution.setCounty(geotax.getProvinceAbbreviation());
         newInstitution.setCountry(geotax.getCountryAbbreviation());
+        newInstitution.setIstatCode(unitaOrganizzativa.getCodiceComuneISTAT());
         if(StringUtils.isNotBlank(unitaOrganizzativa.getCodiceUniAoo())) {
             PaAttributes paAttributes = new PaAttributes();
             paAttributes.setAooParentCode(unitaOrganizzativa.getCodiceUniAoo());
