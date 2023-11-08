@@ -18,8 +18,6 @@ public interface InstitutionConnector {
 
     void deleteById(String id);
 
-    List<Institution> findByTaxCodeSubunitCodeAndOrigin(String taxtCode, String subunitCode, String origin, String originId);
-
     Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> subunitCode, Optional<String> productId, List<RelationshipState> validRelationshipStates);
 
     Optional<Institution> findByExternalId(String externalId);
@@ -58,5 +56,7 @@ public interface InstitutionConnector {
 
     List<Institution> findBrokers(String productId, InstitutionType type);
 
-    List<Institution> findByTaxCodeSubunitCode(String taxCode, String subunitCode);
+    List<Institution> findByTaxCodeAndSubunitCode(String taxCode, String subunitCode);
+
+    List<Institution> findByOriginAndOriginId(String origin, String originId);
 }
