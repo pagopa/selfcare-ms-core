@@ -333,6 +333,7 @@ public class ContractService {
         } else {
             toNotify.setCounty(institution.getCounty());
             toNotify.setCountry(institution.getCountry());
+            toNotify.setIstatCode(institution.getIstatCode());
             toNotify.setCity(institution.getCity().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
         }
         return toNotify;
