@@ -249,11 +249,25 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> optSubunitCode,
+    public List<Institution> findByTaxCodeSubunitCodeAndOrigin(String taxCode, String subunitCode, String origin, String originId) {
+        return repository.find(Query.query(CriteriaBuilder.builder()
+                                .isIfNotNull(InstitutionEntity.Fields.taxCode.name(), taxCode)
+                                .isIfNotNull(InstitutionEntity.Fields.subunitCode.name(), subunitCode)
+                                .isIfNotNull(InstitutionEntity.Fields.origin.name(), origin)
+                                .isIfNotNull(InstitutionEntity.Fields.originId.name(), originId)
+                                .build()
+                        ),
+                        InstitutionEntity.class).stream()
+                .map(institutionMapper::convertToInstitution)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxCode, String subunitCode,
                                                                         Optional<String> optProductId, List<RelationshipState> validRelationshipStates) {
 
-        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode);
-        optSubunitCode.ifPresent(code -> criteriaInstitution.and(InstitutionEntity.Fields.subunitCode.name()).is(code));
+        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxCode)
+                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode);
 
         Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(validRelationshipStates);
         optProductId.ifPresent(productId -> criteriaOnboarding.and(Onboarding.Fields.productId.name()).is(productId));
