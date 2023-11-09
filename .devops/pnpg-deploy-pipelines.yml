@@ -105,7 +105,7 @@ stages:
             inputs:
               secureFile: '$(settingsXmlsecureFileName)'
               retryCount: '2'
-          - task: Maven@3
+          - task: Maven@4
             inputs:
               mavenPomFile: 'pom.xml'
               goals: '$(mavenGoals)'
