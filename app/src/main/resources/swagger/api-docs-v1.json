@@ -5696,6 +5696,9 @@
             "type" : "string",
             "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
           },
+          "istatCode" : {
+            "type" : "string"
+          },
           "onboarding" : {
             "type" : "array",
             "items" : {

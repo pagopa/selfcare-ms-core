@@ -36,6 +36,7 @@ public class InstitutionEntity {
     private String city;
     private String county;
     private String country;
+    private String istatCode;
     private BillingEntity billing;
     private List<OnboardingEntity> onboarding;
     private List<GeoTaxonomyEntity> geographicTaxonomies;

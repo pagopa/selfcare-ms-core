@@ -19,4 +19,5 @@ public class UnitaOrganizzativa {
     private Origin origin;
     private String indirizzo;
     private String CAP;
+    private String codiceComuneISTAT;
 }

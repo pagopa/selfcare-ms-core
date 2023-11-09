@@ -28,6 +28,7 @@ public class Institution {
     private String city;
     private String county;
     private String country;
+    private String istatCode;
     private Billing billing;
     private List<Onboarding> onboarding;
     private List<InstitutionGeographicTaxonomies> geographicTaxonomies;
