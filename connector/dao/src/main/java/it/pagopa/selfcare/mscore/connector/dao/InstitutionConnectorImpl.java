@@ -263,11 +263,11 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> optSubunitCode,
+    public Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxCode, String subunitCode,
                                                                         Optional<String> optProductId, List<RelationshipState> validRelationshipStates) {
 
-        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxtCode);
-        optSubunitCode.ifPresent(code -> criteriaInstitution.and(InstitutionEntity.Fields.subunitCode.name()).is(code));
+        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.taxCode.name()).is(taxCode)
+                .and(InstitutionEntity.Fields.subunitCode.name()).is(subunitCode);
 
         Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(validRelationshipStates);
         optProductId.ifPresent(productId -> criteriaOnboarding.and(Onboarding.Fields.productId.name()).is(productId));
