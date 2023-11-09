@@ -283,7 +283,7 @@ class CreateInstitutionStrategyTest {
         when(partyRegistryProxyConnector.getUoById(any())).thenReturn(dummyUnitaOrganizzativa);
         when(partyRegistryProxyConnector.getExtByCode(anyString())).thenReturn(dummyGeotaxonomies).thenReturn(dummyGeotaxonomies);
 
-       Institution actual = strategyFactory.createInstitutionStrategyIpa()
+        Institution actual = strategyFactory.createInstitutionStrategyIpa()
                 .createInstitution(CreateInstitutionStrategyInput.builder()
                         .taxCode(dummyUnitaOrganizzativa.getCodiceFiscaleEnte())
                         .subunitType(InstitutionPaSubunitType.UO)
@@ -310,6 +310,36 @@ class CreateInstitutionStrategyTest {
         verify(partyRegistryProxyConnector).getInstitutionById(any());
         verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyInstitutionProxyInfo.getIstatCode());
         verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyUnitaOrganizzativa.getCodiceComuneISTAT());
+
+    }
+
+    @Test
+    void createAooFromIpa_nullGeotax() {
+        //Given
+        when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
+        when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), anyString()))
+                .thenReturn(List.of());
+
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(dummyCategoryProxyInfo);
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
+        when(partyRegistryProxyConnector.getAooById(any())).thenReturn(dummyAreaOrganizzativaOmogenea);
+        when(partyRegistryProxyConnector.getExtByCode(anyString())).thenReturn(dummyGeotaxonomies).thenReturn(new GeographicTaxonomies());
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyIpa()
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(dummyAreaOrganizzativaOmogenea.getCodiceFiscaleEnte())
+                        .subunitType(InstitutionPaSubunitType.AOO)
+                        .subunitCode(dummyAreaOrganizzativaOmogenea.getCodAoo())
+                        .build());
+
+        //Then
+        assertThat(actual.getCity()).isEqualTo(null);
+        verify(institutionConnector, times(2)).save(any());
+        verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
+        verify(partyRegistryProxyConnector).getCategory(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
+        verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyInstitutionProxyInfo.getIstatCode());
+        verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyAreaOrganizzativaOmogenea.getCodiceComuneISTAT());
 
     }
 
