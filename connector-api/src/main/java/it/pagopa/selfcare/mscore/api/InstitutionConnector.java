@@ -20,7 +20,7 @@ public interface InstitutionConnector {
 
     List<Institution> findByTaxCodeSubunitCodeAndOrigin(String taxtCode, String subunitCode, String origin, String originId);
 
-    Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, Optional<String> subunitCode, Optional<String> productId, List<RelationshipState> validRelationshipStates);
+    Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, String subunitCode, Optional<String> productId, List<RelationshipState> validRelationshipStates);
 
     Optional<Institution> findByExternalId(String externalId);
 

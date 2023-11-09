@@ -672,7 +672,7 @@ class InstitutionConnectorImplTest {
         when(institutionRepository.exists(any(), any())).thenReturn(Boolean.TRUE);
 
         Boolean exists = institutionConnectorImpl.existsByTaxCodeAndSubunitCodeAndProductAndStatusList("example",
-                Optional.of("example"), Optional.of("example"), List.of());
+                "example", Optional.of("example"), List.of());
 
         assertTrue(exists);
     }
