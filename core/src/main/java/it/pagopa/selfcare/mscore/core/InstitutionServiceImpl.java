@@ -141,6 +141,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyPda(injectionInstitutionType);
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
                 .taxCode(institution.getTaxCode())
+                .description(institution.getDescription())
                 .build());
     }
 
