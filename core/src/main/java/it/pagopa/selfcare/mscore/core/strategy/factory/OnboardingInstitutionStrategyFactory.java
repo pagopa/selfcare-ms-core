@@ -44,7 +44,7 @@ public class OnboardingInstitutionStrategyFactory {
     private final InstitutionService institutionService;
     private final CoreConfig coreConfig;
     private final FileStorageConnector fileStorageConnector;
-
+    private final UserEventService userEventService;
     private final NotificationService notificationService;
 
     public OnboardingInstitutionStrategyFactory(OnboardingDao onboardingDao,
@@ -52,7 +52,7 @@ public class OnboardingInstitutionStrategyFactory {
                                                 UserService userService,
                                                 InstitutionService institutionService,
                                                 CoreConfig coreConfig,
-                                                NotificationService notificationService, FileStorageConnector fileStorageConnector) {
+                                                NotificationService notificationService, FileStorageConnector fileStorageConnector, UserEventService userEventService) {
         this.onboardingDao = onboardingDao;
         this.contractService = contractService;
         this.userService = userService;
@@ -60,6 +60,7 @@ public class OnboardingInstitutionStrategyFactory {
         this.coreConfig = coreConfig;
         this.notificationService = notificationService;
         this.fileStorageConnector = fileStorageConnector;
+        this.userEventService = userEventService;
     }
 
     public OnboardingInstitutionStrategy retrieveOnboardingInstitutionStrategy(InstitutionType institutionType, String productId, Institution institution) {
@@ -253,7 +254,7 @@ public class OnboardingInstitutionStrategyFactory {
 
                 //[TODO https://pagopa.atlassian.net/wiki/spaces/SCP/pages/710901785/RFC+Proposta+per+gestione+asincrona+degli+eventi]
                 contractService.sendDataLakeNotification(strategyInput.getOnboardingRollback().getUpdatedInstitution(), strategyInput.getOnboardingRollback().getToken(), QueueEvent.ADD);
-
+                userEventService.sendLegalTokenUserNotification(strategyInput.getOnboardingRollback().getToken());
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
