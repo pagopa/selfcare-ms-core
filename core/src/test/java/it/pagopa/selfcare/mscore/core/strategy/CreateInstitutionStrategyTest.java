@@ -526,7 +526,7 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getSubunitType()).isNull();
         assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PG);
         assertThat(actual.getSubunitType()).isNull();
-        assertThat(actual.getOriginId()).isEqualTo("SELC_" + institution.getExternalId());
+        assertThat(actual.getOriginId()).isEqualTo(institution.getTaxCode());
 
         verify(institutionConnector).save(any());
     }

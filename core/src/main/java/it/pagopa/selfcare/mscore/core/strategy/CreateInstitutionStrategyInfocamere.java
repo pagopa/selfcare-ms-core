@@ -59,7 +59,8 @@ public class CreateInstitutionStrategyInfocamere extends CreateInstitutionStrate
 
     private void getInstitutionRaw(CreateInstitutionStrategyInput strategyInput) {
         institution.setExternalId(getExternalId(strategyInput));
-        institution.setOriginId("SELC_" + institution.getExternalId());
+        institution.setOrigin(Origin.ADE.getValue());
+        institution.setOriginId(strategyInput.getTaxCode());
         institution.setCreatedAt(OffsetDateTime.now());
     }
 
