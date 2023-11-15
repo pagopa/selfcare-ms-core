@@ -690,6 +690,31 @@ class ContractServiceTest {
         assertNull(notificationToSend.getInstitution().getCategory());
     }
 
+    @Test
+    void toNotificationAttributesNotNull(){
+        //given
+        final String institutionId = UUID.randomUUID().toString();
+        final String tokenId = UUID.randomUUID().toString();
+        Institution institutionMock = createInstitution(institutionId, createOnboarding(tokenId, "product"));
+        Attributes attribute = new Attributes();
+        attribute.setCode("code");
+        institutionMock.setAttributes(List.of(attribute));
+        institutionMock.setOrigin("IPA");
+        institutionMock.setRootParentId(null);
+        Token tokenMock = createToken(institutionId, tokenId, null,
+                RelationshipState.ACTIVE,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+        tokenMock.setProductId("product");
+        //when
+        NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
+        //then
+        assertEquals(attribute.getCode(),notificationToSend.getInstitution().getCategory());
+
+    }
+
     private static Institution createInstitution(String institutionId, Onboarding onboarding) {
         Institution institution = mockInstance(new Institution());
         institution.setId(institutionId);
