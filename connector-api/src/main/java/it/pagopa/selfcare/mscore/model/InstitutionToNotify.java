@@ -25,6 +25,7 @@ public class InstitutionToNotify {
     private String country;
     private String county;
     private String subUnitCode;
+    private String category;
     private String subUnitType;
     private RootParent rootParent;
 
