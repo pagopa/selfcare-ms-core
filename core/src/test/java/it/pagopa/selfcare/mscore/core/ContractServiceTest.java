@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
 import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
 import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
@@ -59,7 +60,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ContractServiceTest {
-
     @Mock
     private KafkaTemplate<String, String> kafkaTemplate;
 
@@ -624,12 +624,82 @@ class ContractServiceTest {
         assertEquals(QueueEvent.UPDATE, notification.getNotificationType());
     }
 
+    @Test
+    void toNotificationToSend_attributesNull() throws JsonProcessingException {
+        //given
+        final String institutionId = UUID.randomUUID().toString();
+        final String tokenId = UUID.randomUUID().toString();
+        Institution institutionMock = createInstitution(institutionId, createOnboarding(tokenId, "product"));
+        institutionMock.setAttributes(null);
+        institutionMock.setOrigin("IPA");
+        institutionMock.setRootParentId(null);
+        Token tokenMock = createToken(institutionId, tokenId, null,
+                RelationshipState.ACTIVE,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+        tokenMock.setProductId("product");
+        //when
+        NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
+        //then
+        assertNull(notificationToSend.getInstitution().getCategory());
+    }
+
+    @Test
+    void toNotificationToSend_notIpa(){
+        //given
+        final String institutionId = UUID.randomUUID().toString();
+        final String tokenId = UUID.randomUUID().toString();
+        Institution institutionMock = createInstitution(institutionId, createOnboarding(tokenId, "product"));
+        institutionMock.setAttributes(new ArrayList<>());
+        institutionMock.setOrigin("SELC");
+        institutionMock.setRootParentId(null);
+        Token tokenMock = createToken(institutionId, tokenId, null,
+                RelationshipState.ACTIVE,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+        tokenMock.setProductId("product");
+        //when
+        NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
+        //then
+        assertNull(notificationToSend.getInstitution().getCategory());
+    }
+
+    @Test
+    void toNotificationToSend_emptyAttributes(){
+        //given
+        final String institutionId = UUID.randomUUID().toString();
+        final String tokenId = UUID.randomUUID().toString();
+        Institution institutionMock = createInstitution(institutionId, createOnboarding(tokenId, "product"));
+        institutionMock.setAttributes(new ArrayList<>());
+        institutionMock.setOrigin("IPA");
+        institutionMock.setRootParentId(null);
+        Token tokenMock = createToken(institutionId, tokenId, null,
+                RelationshipState.ACTIVE,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+        tokenMock.setProductId("product");
+        //when
+        NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
+        //then
+        assertNull(notificationToSend.getInstitution().getCategory());
+    }
+
     private static Institution createInstitution(String institutionId, Onboarding onboarding) {
         Institution institution = mockInstance(new Institution());
         institution.setId(institutionId);
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
         return institution;
+    }
+
+    private static Onboarding createOnboarding(){
+        return mockInstance(new Onboarding());
     }
 
     private static Institution createInstitutionWithoutLocation(String institutionId, Onboarding onboarding){
@@ -639,6 +709,7 @@ class ContractServiceTest {
         institution.setOnboarding(List.of(onboarding));
         return institution;
     }
+
 
     private static Onboarding createOnboarding(String tokenId, String productId) {
         Onboarding onboarding = mockInstance(new Onboarding());
