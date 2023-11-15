@@ -360,7 +360,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, SearchMode searchMode) {
         List<String> geo = Arrays.stream(geoTaxonomies.split(","))
-                .filter(StringUtils::hasText).collect(Collectors.toList());
+                .filter(StringUtils::hasText).toList();
         validateGeoTaxonomies(geo, searchMode);
         return institutionConnector.findByGeotaxonomies(geo, searchMode);
     }
