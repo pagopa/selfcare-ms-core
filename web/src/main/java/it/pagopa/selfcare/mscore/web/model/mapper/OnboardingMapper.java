@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -71,7 +72,9 @@ public class OnboardingMapper {
         productInfo.setRole(product.getProductRole());
         productInfo.setId(product.getProductId());
         productInfo.setCreatedAt(product.getCreatedAt());
-        productInfo.setStatus(product.getStatus().name());
+        if(Objects.nonNull(product.getStatus())){
+            productInfo.setStatus(product.getStatus().name());
+        }
         institutionResponse.setState(product.getStatus().name());
         institutionResponse.setRole(product.getRole());
         institutionResponse.setProductInfo(productInfo);
