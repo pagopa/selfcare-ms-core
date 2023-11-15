@@ -7462,6 +7462,9 @@
           },
           "role" : {
             "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
           }
         }
       },

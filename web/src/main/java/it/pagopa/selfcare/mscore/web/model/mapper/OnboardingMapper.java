@@ -71,6 +71,7 @@ public class OnboardingMapper {
         productInfo.setRole(product.getProductRole());
         productInfo.setId(product.getProductId());
         productInfo.setCreatedAt(product.getCreatedAt());
+        productInfo.setStatus(product.getStatus().name());
         institutionResponse.setState(product.getStatus().name());
         institutionResponse.setRole(product.getRole());
         institutionResponse.setProductInfo(productInfo);
