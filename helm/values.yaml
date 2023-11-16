@@ -77,9 +77,9 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-#pdb:
-#  enabled: true
-#  minAvailable: 1
+pdb:
+  enabled: true
+  minAvailable: 1
 
 nodeSelector: {}
 
