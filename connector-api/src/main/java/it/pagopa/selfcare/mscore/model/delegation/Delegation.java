@@ -25,5 +25,7 @@ public class Delegation {
     private String taxCode;
     private InstitutionType brokerType;
     private String brokerTaxCode;
+    private String fromSubunitCode;
+    private String toSubunitCode;
 
 }

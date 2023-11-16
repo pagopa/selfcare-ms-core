@@ -661,7 +661,7 @@ class InstitutionConnectorImplTest {
                 .thenReturn(List.of(institutionEntity));
 
         List<Institution> onboardings = institutionConnectorImpl
-                .findByTaxCodeSubunitCodeAndOrigin("example", "example", "example", "example");
+                .findByTaxCodeAndSubunitCode("example", "example");
 
         assertFalse(onboardings.isEmpty());
     }
@@ -825,14 +825,14 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
-    void findByTaxCodeAndSubunitCode() {
+    void findByOriginOriginId() {
         InstitutionEntity institutionEntity = new InstitutionEntity();
 
         when(institutionRepository.find(any(), any()))
                 .thenReturn(List.of(institutionEntity));
 
         List<Institution> onboardings = institutionConnectorImpl
-                .findByTaxCodeSubunitCode("example", "example");
+                .findByOriginAndOriginId("example", "example");
 
         assertFalse(onboardings.isEmpty());
     }

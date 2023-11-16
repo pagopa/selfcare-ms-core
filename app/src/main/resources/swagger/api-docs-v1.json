@@ -854,6 +854,68 @@
         } ]
       }
     },
+    "/delegations/from-taxcode" : {
+      "post" : {
+        "tags" : [ "Delegation" ],
+        "summary" : "Create an association between institution and technical partner using taxCode for both instead of internal id. It is useful when we don't know institution's internal id.",
+        "description" : "Create an association between institution and technical partner using taxCode for both instead of internal id. It is useful when we don't know institution's internal id.",
+        "operationId" : "createDelegationFromInstitutionsTaxCodeUsingPOST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/DelegationRequestFromTaxcode"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DelegationResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/external/institutions" : {
       "get" : {
         "tags" : [ "External" ],
@@ -5454,6 +5516,37 @@
           }
         }
       },
+      "DelegationRequestFromTaxcode" : {
+        "title" : "DelegationRequestFromTaxcode",
+        "type" : "object",
+        "properties" : {
+          "fromSubunitCode" : {
+            "type" : "string"
+          },
+          "fromTaxCode" : {
+            "type" : "string"
+          },
+          "institutionFromName" : {
+            "type" : "string"
+          },
+          "institutionToName" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "toSubunitCode" : {
+            "type" : "string"
+          },
+          "toTaxCode" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "AOO", "PT" ]
+          }
+        }
+      },
       "DelegationResponse" : {
         "title" : "DelegationResponse",
         "type" : "object",
@@ -5602,6 +5695,9 @@
           "institutionType" : {
             "type" : "string",
             "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+          },
+          "istatCode" : {
+            "type" : "string"
           },
           "onboarding" : {
             "type" : "array",
@@ -7022,6 +7118,11 @@
           "productName" : {
             "type" : "string"
           },
+          "sendCompleteOnboardingEmail" : {
+            "type" : "boolean",
+            "description" : "Parameter that allows you to specify whether following completion of onboarding you want to receive an email",
+            "example" : false
+          },
           "signContract" : {
             "type" : "boolean"
           },
@@ -7088,6 +7189,9 @@
           },
           "productName" : {
             "type" : "string"
+          },
+          "sendCompleteOnboardingEmail" : {
+            "type" : "boolean"
           },
           "signContract" : {
             "type" : "boolean"
@@ -7357,6 +7461,9 @@
             "type" : "string"
           },
           "role" : {
+            "type" : "string"
+          },
+          "status" : {
             "type" : "string"
           }
         }

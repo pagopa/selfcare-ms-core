@@ -6,10 +6,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.SearchMode;
+import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
@@ -112,12 +109,21 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<Institution> getInstitutions(String taxCode, String subunitCode, String origin, String originId) {
-        return institutionConnector.findByTaxCodeSubunitCodeAndOrigin(taxCode, subunitCode, origin, originId);
+        if(StringUtils.hasText(taxCode) && (StringUtils.hasText(origin) || StringUtils.hasText(originId))) {
+            throw new InvalidRequestException(GenericError.GET_INSTITUTIONS_REQUEST_ERROR.getMessage(), GenericError.GET_INSTITUTIONS_REQUEST_ERROR.getCode());
+        }
+
+        if(StringUtils.hasText(taxCode)) {
+            return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
+        } else {
+            return institutionConnector.findByOriginAndOriginId(origin, originId);
+        }
+
     }
 
     @Override
     public List<Institution> getInstitutions(String taxCode, String subunitCode) {
-        return institutionConnector.findByTaxCodeSubunitCode(taxCode, subunitCode);
+        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
     }
 
     @Override
@@ -135,6 +141,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyPda(injectionInstitutionType);
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
                 .taxCode(institution.getTaxCode())
+                .description(institution.getDescription())
                 .build());
     }
 
@@ -179,6 +186,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyInfocamere(institution);
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
                 .taxCode(institution.getTaxCode())
+                .description(institution.getDescription())
                 .build());
     }
     @Override
@@ -352,7 +360,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<Institution> findInstitutionsByGeoTaxonomies(String geoTaxonomies, SearchMode searchMode) {
         List<String> geo = Arrays.stream(geoTaxonomies.split(","))
-                .filter(StringUtils::hasText).collect(Collectors.toList());
+                .filter(StringUtils::hasText).toList();
         validateGeoTaxonomies(geo, searchMode);
         return institutionConnector.findByGeotaxonomies(geo, searchMode);
     }
