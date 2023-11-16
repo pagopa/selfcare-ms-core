@@ -21,6 +21,7 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -308,6 +309,9 @@ public class ContractService {
             } catch (IllegalArgumentException ignored) {
             }
         }
+        if (Origin.IPA.getValue().equals(institution.getOrigin()) && institution.getAttributes() != null && !institution.getAttributes().isEmpty()){
+            toNotify.setCategory(institution.getAttributes().get(0).getCode());
+        }
         RootParent rootParent = new RootParent();
         rootParent.setDescription(institution.getParentDescription());
         if (StringUtils.hasText(institution.getRootParentId())) {
@@ -320,7 +324,6 @@ public class ContractService {
             try {
                 InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
                 toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
-
                 GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
                 toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
                 toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
