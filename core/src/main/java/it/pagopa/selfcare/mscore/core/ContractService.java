@@ -325,7 +325,7 @@ public class ContractService {
         }
         toNotify.setRootParent(rootParent);
 
-        if (institution.getAttributes().size() > 0) {
+        if (institution.getAttributes()!= null && institution.getAttributes().size() > 0) {
             toNotify.setCategory(institution.getAttributes().get(0).getCode());
         }
 
