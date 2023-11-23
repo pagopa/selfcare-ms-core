@@ -301,7 +301,7 @@ public class ContractService {
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
-        if (institution.getSubunitType() != null) {
+        if (institution.getSubunitType() != null && !institution.getSubunitType().equals("EC")) {
             try {
                 InstitutionPaSubunitType.valueOf(institution.getSubunitType());
                 toNotify.setSubUnitType(institution.getSubunitType());
@@ -320,10 +320,16 @@ public class ContractService {
             rootParent.setOriginId(Objects.nonNull(rootParentInstitution) ? rootParentInstitution.getOriginId() : null);
         }
         toNotify.setRootParent(rootParent);
-        if (institution.getCity() == null) {
+
+        if (institution.getAttributes().size() > 0) {
+            toNotify.setCategory(institution.getAttributes().get(0).getCode());
+        }
+
+        if (institution.getCity() == null || toNotify.getCategory() == null) {
             try {
                 InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
                 toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+                toNotify.setCategory(institutionProxyInfo.getCategory());
                 GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
                 toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
                 toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
@@ -332,7 +338,6 @@ public class ContractService {
                 log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
                 toNotify.setIstatCode(null);
             }
-
         } else {
             toNotify.setCounty(institution.getCounty());
             toNotify.setCountry(institution.getCountry());
