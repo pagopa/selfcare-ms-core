@@ -264,6 +264,10 @@ public class ContractService {
             if (token.getStatus().equals(RelationshipState.DELETED)) {
                 // Queue.ClosedAt: if token.deleted show closedAt
                 notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+                notification.setUpdatedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getCreatedAt()));
+            } else {
+                // when update last update is updated date
+                notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
             }
         }
         notification.setInternalIstitutionID(institution.getId());
