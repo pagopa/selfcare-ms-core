@@ -324,12 +324,12 @@ public class ContractService {
         if (institution.getAttributes()!= null && institution.getAttributes().size() > 0) {
             toNotify.setCategory(institution.getAttributes().get(0).getCode());
         }
-
-        if (institution.getCity() == null || toNotify.getCategory() == null) {
+        if (institution.getCity() == null) {
             try {
                 InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
                 toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
-                toNotify.setCategory(institutionProxyInfo.getCategory());
+                if(toNotify.getCategory() == null)
+                    toNotify.setCategory(institutionProxyInfo.getCategory());
                 GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
                 toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
                 toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());

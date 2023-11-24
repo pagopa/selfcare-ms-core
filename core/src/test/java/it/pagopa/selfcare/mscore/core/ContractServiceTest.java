@@ -356,7 +356,6 @@ class ContractServiceTest {
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("docs/parties".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        mockPartyRegistryProxy(partyRegistryProxyConnector, institution);
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
@@ -648,7 +647,6 @@ class ContractServiceTest {
                 OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
                 null); // deletedAt
         tokenMock.setProductId("product");
-        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
         //when
         NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
         //then
@@ -671,11 +669,35 @@ class ContractServiceTest {
                 OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
                 null); // deletedAt
         tokenMock.setProductId("product");
-        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
         //when
         NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
         //then
         checkNotNullFields(notificationToSend, "closedAt");
+    }
+
+    @Test
+    void toNotificationToSend_nullLocation(){
+        //given
+        final String institutionId = UUID.randomUUID().toString();
+        final String tokenId = UUID.randomUUID().toString();
+        Onboarding onboarding = createOnboarding(tokenId, "prod");
+        Institution institutionMock = createInstitutionWithoutLocation(institutionId, onboarding);
+        institutionMock.setRootParentId(null);
+        Token tokenMock = createToken(institutionId, tokenId, null,
+                RelationshipState.DELETED,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+        tokenMock.setProductId("prod");
+        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
+        //when
+        NotificationToSend notification = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.UPDATE);
+        //then
+        assertNotNull(notification.getInstitution().getCategory());
+        assertNotNull(notification.getInstitution().getCity());
+        verify(partyRegistryProxyConnectorMock, times(1)).getInstitutionById(institutionMock.getExternalId());
+        verify(partyRegistryProxyConnectorMock, times(1)).getExtByCode(any());
     }
 
     @Test
