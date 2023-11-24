@@ -54,6 +54,7 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.checkNotNullFields;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -80,6 +81,9 @@ class ContractServiceTest {
 
     @Mock
     private CoreConfig coreConfig;
+
+    @Mock
+    private PartyRegistryProxyConnector partyRegistryProxyConnectorMock;
 
     @Mock
     private KafkaPropertiesConfig kafkaPropertiesConfig;
@@ -169,6 +173,7 @@ class ContractServiceTest {
         when(pagoPaSignatureConfig.isApplyOnboardingEnabled()).thenReturn(false);
         assertNotNull(contractService.createContractPDF(contract, validManager, users, institution, request, geographicTaxonomies, institutionType));
     }
+
     @ParameterizedTest
     @CsvSource(value = {
             "prod-io-sign",
@@ -314,6 +319,7 @@ class ContractServiceTest {
                 .getInstitutionById(institution.getExternalId());
         verifyNoMoreInteractions(userRegistryConnector, partyRegistryProxyConnector);
     }
+
     @Test
     void testSendDataLakeNotification3() throws ExecutionException, InterruptedException {
         ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
@@ -350,7 +356,7 @@ class ContractServiceTest {
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("docs/parties".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
+        mockPartyRegistryProxy(partyRegistryProxyConnector, institution);
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
@@ -449,7 +455,7 @@ class ContractServiceTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution(),"setCity", "setCounty", "setCountry");
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -633,6 +639,8 @@ class ContractServiceTest {
         institutionMock.setAttributes(null);
         institutionMock.setOrigin("IPA");
         institutionMock.setRootParentId(null);
+        InstitutionProxyInfo institutionProxyInfoMock = createInstitutionProxyMock();
+        institutionProxyInfoMock.setTaxCode(institutionMock.getTaxCode());
         Token tokenMock = createToken(institutionId, tokenId, null,
                 RelationshipState.ACTIVE,
                 OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
@@ -640,36 +648,15 @@ class ContractServiceTest {
                 OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
                 null); // deletedAt
         tokenMock.setProductId("product");
+        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
         //when
         NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
         //then
-        assertNull(notificationToSend.getInstitution().getCategory());
+        checkNotNullFields(notificationToSend, "closedAt");
     }
 
     @Test
-    void toNotificationToSend_notIpa(){
-        //given
-        final String institutionId = UUID.randomUUID().toString();
-        final String tokenId = UUID.randomUUID().toString();
-        Institution institutionMock = createInstitution(institutionId, createOnboarding(tokenId, "product"));
-        institutionMock.setAttributes(new ArrayList<>());
-        institutionMock.setOrigin("SELC");
-        institutionMock.setRootParentId(null);
-        Token tokenMock = createToken(institutionId, tokenId, null,
-                RelationshipState.ACTIVE,
-                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
-                null, // activatedAt
-                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
-                null); // deletedAt
-        tokenMock.setProductId("product");
-        //when
-        NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
-        //then
-        assertNull(notificationToSend.getInstitution().getCategory());
-    }
-
-    @Test
-    void toNotificationToSend_emptyAttributes(){
+    void toNotificationToSend_emptyAttributes() {
         //given
         final String institutionId = UUID.randomUUID().toString();
         final String tokenId = UUID.randomUUID().toString();
@@ -684,14 +671,15 @@ class ContractServiceTest {
                 OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
                 null); // deletedAt
         tokenMock.setProductId("product");
+        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
         //when
         NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
         //then
-        assertNull(notificationToSend.getInstitution().getCategory());
+        checkNotNullFields(notificationToSend, "closedAt");
     }
 
     @Test
-    void toNotificationAttributesNotNull(){
+    void toNotificationAttributesNotNull() {
         //given
         final String institutionId = UUID.randomUUID().toString();
         final String tokenId = UUID.randomUUID().toString();
@@ -711,7 +699,7 @@ class ContractServiceTest {
         //when
         NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
         //then
-        assertEquals(attribute.getCode(),notificationToSend.getInstitution().getCategory());
+        assertEquals(attribute.getCode(), notificationToSend.getInstitution().getCategory());
 
     }
 
@@ -723,11 +711,11 @@ class ContractServiceTest {
         return institution;
     }
 
-    private static Onboarding createOnboarding(){
+    private static Onboarding createOnboarding() {
         return mockInstance(new Onboarding());
     }
 
-    private static Institution createInstitutionWithoutLocation(String institutionId, Onboarding onboarding){
+    private static Institution createInstitutionWithoutLocation(String institutionId, Onboarding onboarding) {
         Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
         institution.setId(institutionId);
         institution.setOrigin("IPA");
@@ -866,6 +854,10 @@ class ContractServiceTest {
     void deleteContract() {
         doNothing().when(fileStorageConnector).removeContract(any(), any());
         assertDoesNotThrow(() -> contractService.deleteContract("fileName", "tokenId"));
+    }
+
+    private static InstitutionProxyInfo createInstitutionProxyMock() {
+        return mockInstance(new InstitutionProxyInfo());
     }
 
     @Test

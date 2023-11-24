@@ -274,7 +274,7 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter){
+    public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
         List<UserInstitutionAggregationEntity> userInstitutionAggregationEntities =
                 repository.findUserInstitutionAggregation(filter, UserInstitutionAggregationEntity.class);
         return userInstitutionAggregationEntities.stream()

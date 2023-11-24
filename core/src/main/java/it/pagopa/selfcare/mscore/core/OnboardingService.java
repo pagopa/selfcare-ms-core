@@ -17,7 +17,7 @@ public interface OnboardingService {
 
     List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId);
 
-    List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId);
+    List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId, String[] states);
 
     void onboardingInstitution(OnboardingRequest request, SelfCareUser principal);
 
