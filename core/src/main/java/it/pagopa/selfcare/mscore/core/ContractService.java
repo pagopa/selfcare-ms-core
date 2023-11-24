@@ -40,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.jsoup.Jsoup;
 import org.jsoup.helper.W3CDom;
-import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -279,7 +278,7 @@ public class ContractService {
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
         notification.setFileName(token.getContractSigned() == null ? "" : Paths.get(token.getContractSigned()).getFileName().toString());
-        notification.setContentType(token.getContentType() == null ? MediaType.APPLICATION_OCTET_STREAM_VALUE : token.getContentType());
+        notification.setContentType(token.getContentType() == null ? "" : token.getContentType());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
@@ -318,26 +317,14 @@ public class ContractService {
             rootParent.setId(institution.getRootParentId());
             Institution rootParentInstitution = institutionConnector.findById(institution.getRootParentId());
             rootParent.setOriginId(Objects.nonNull(rootParentInstitution) ? rootParentInstitution.getOriginId() : null);
+            toNotify.setRootParent(rootParent);
         }
-        toNotify.setRootParent(rootParent);
 
-        if (institution.getAttributes()!= null && institution.getAttributes().size() > 0) {
+        if (institution.getAttributes() != null && institution.getAttributes().size() > 0) {
             toNotify.setCategory(institution.getAttributes().get(0).getCode());
         }
         if (institution.getCity() == null) {
-            try {
-                InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
-                toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
-                if(toNotify.getCategory() == null)
-                    toNotify.setCategory(institutionProxyInfo.getCategory());
-                GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
-                toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
-                toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
-                toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
-            } catch (MsCoreException | ResourceNotFoundException e) {
-                log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
-                toNotify.setIstatCode(null);
-            }
+            setInstitutionLocation(toNotify, institution);
         } else {
             toNotify.setCounty(institution.getCounty());
             toNotify.setCountry(institution.getCountry());
@@ -366,6 +353,20 @@ public class ContractService {
 
     }
 
+    private void setInstitutionLocation(InstitutionToNotify toNotify, Institution institution) {
+        try {
+            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
+            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+            toNotify.setCategory(institutionProxyInfo.getCategory());
+            GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+            toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
+            toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
+            toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
+        } catch (MsCoreException | ResourceNotFoundException e) {
+            log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+            toNotify.setIstatCode(null);
+        }
+    }
 
     public String uploadContract(String tokenId, MultipartFile contract) {
         return fileStorageConnector.uploadContract(tokenId, contract);
