@@ -123,8 +123,8 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId) {
-        return this.getOnboardingInfo(institutionId, null, null, userId);
+    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId, String[] states) {
+        return this.getOnboardingInfo(institutionId, null, states, userId);
     }
 
     @Override

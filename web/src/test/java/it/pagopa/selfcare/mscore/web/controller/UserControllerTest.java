@@ -284,7 +284,7 @@ class UserControllerTest {
 
 
     /**
-     * Method under test: {@link UserController#getInstitutionProductsInfo(String, String)}
+     * Method under test: {@link UserController#getInstitutionProductsInfo(String, String, String[])}
      */
     @Test
     void testGetInstitutionProductsInfo() throws Exception {
@@ -306,7 +306,7 @@ class UserControllerTest {
         institution.setOnboarding(List.of(onboarding));
         onboardingInfo.setInstitution(institution);
 
-        when(onboardingService.getOnboardingInfo(anyString(), anyString())).thenReturn(List.of(onboardingInfo));
+        when(onboardingService.getOnboardingInfo(anyString(), anyString(), any())).thenReturn(List.of(onboardingInfo));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/users/id/institution-products?institutionId=test")

@@ -158,9 +158,11 @@ public class UserController {
     public ResponseEntity<OnboardingInfoResponse> getInstitutionProductsInfo(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                                              @PathVariable("userId") String userId,
                                                                              @ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                             @RequestParam(value = "institutionId", required = false) String institutionId) {
+                                                                             @RequestParam(value = "institutionId", required = false) String institutionId,
+                                                                             @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
+                                                                             @RequestParam(value = "states", required = false) String[] states) {
         CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
-        List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, userId);
+        List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, userId, states);
         OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
         log.debug("onboardingInfo result = {}", onboardingInfoResponse);
         return ResponseEntity.ok().body(onboardingInfoResponse);
