@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.api.ConfigConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -29,7 +28,6 @@ public class SchedulerServiceImpl implements SchedulerService{
 
     private final TokenConnector tokenConnector;
     private final InstitutionConnector institutionConnector;
-    private final ConfigConnector configConnector;
     private Optional<List<String>> productsFilter;
 
     private final SchedulerConfig schedulerConfig;
@@ -38,22 +36,18 @@ public class SchedulerServiceImpl implements SchedulerService{
     public SchedulerServiceImpl(ContractService contractService,
                                 SchedulerConfig schedulerConfig,
                                 TokenConnector tokenConnector,
-                                InstitutionConnector institutionConnector,
-                                ConfigConnector configConnector) {
+                                InstitutionConnector institutionConnector) {
         log.info("Initializing {}...", SchedulerServiceImpl.class.getSimpleName());
         this.contractService = contractService;
         this.schedulerConfig = schedulerConfig;
         this.tokenConnector = tokenConnector;
         this.institutionConnector = institutionConnector;
-        this.configConnector = configConnector;
     }
 
 
     @Async
     public void regenerateQueueNotifications() {
         log.trace("regenerateQueueNotifications start");
-
-
             if (schedulerConfig.getSendOldEvent() && productsFilter.isPresent()) {
                 for (String productId: productsFilter.get()) {
                     log.debug("Regenerating notifications on queue with product filter {}", productId);
