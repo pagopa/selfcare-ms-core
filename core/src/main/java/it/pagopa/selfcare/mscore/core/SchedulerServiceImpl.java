@@ -46,7 +46,7 @@ public class SchedulerServiceImpl implements SchedulerService{
 
 
     @Async
-    public void regenerateQueueNotifications() {
+    private void regenerateQueueNotifications() {
         log.trace("regenerateQueueNotifications start");
             if (schedulerConfig.getSendOldEvent() && productsFilter.isPresent()) {
                 for (String productId: productsFilter.get()) {
