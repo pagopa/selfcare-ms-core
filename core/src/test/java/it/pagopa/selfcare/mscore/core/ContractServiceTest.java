@@ -356,7 +356,6 @@ class ContractServiceTest {
         token.setUsers(List.of(tokenUser1, tokenUser2));
         token.setContractSigned("docs/parties".concat("/").concat(token.getId()).concat("/").concat("fileName.pdf"));
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        mockPartyRegistryProxy(partyRegistryProxyConnector, institution);
         assertThrows(IllegalArgumentException.class, () -> contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD),
                 "Topic cannot be null");
 
@@ -637,7 +636,7 @@ class ContractServiceTest {
         final String tokenId = UUID.randomUUID().toString();
         Institution institutionMock = createInstitution(institutionId, createOnboarding(tokenId, "product"));
         institutionMock.setAttributes(null);
-        institutionMock.setOrigin("IPA");
+        institutionMock.setOrigin("SELC");
         institutionMock.setRootParentId(null);
         InstitutionProxyInfo institutionProxyInfoMock = createInstitutionProxyMock();
         institutionProxyInfoMock.setTaxCode(institutionMock.getTaxCode());
@@ -648,7 +647,6 @@ class ContractServiceTest {
                 OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
                 null); // deletedAt
         tokenMock.setProductId("product");
-        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
         //when
         NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
         //then
@@ -660,7 +658,7 @@ class ContractServiceTest {
         //given
         final String institutionId = UUID.randomUUID().toString();
         final String tokenId = UUID.randomUUID().toString();
-        Institution institutionMock = createInstitution(institutionId, createOnboarding(tokenId, "product"));
+        Institution institutionMock = createInstitutionWithoutLocation(institutionId, createOnboarding(tokenId, "product"));
         institutionMock.setAttributes(new ArrayList<>());
         institutionMock.setOrigin("IPA");
         institutionMock.setRootParentId(null);
@@ -679,6 +677,31 @@ class ContractServiceTest {
     }
 
     @Test
+    void toNotificationToSend_nullLocation() {
+        //given
+        final String institutionId = UUID.randomUUID().toString();
+        final String tokenId = UUID.randomUUID().toString();
+        Onboarding onboarding = createOnboarding(tokenId, "prod");
+        Institution institutionMock = createInstitutionWithoutLocation(institutionId, onboarding);
+        institutionMock.setRootParentId(null);
+        Token tokenMock = createToken(institutionId, tokenId, null,
+                RelationshipState.DELETED,
+                OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
+                null, // activatedAt
+                OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
+                null); // deletedAt
+        tokenMock.setProductId("prod");
+        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
+        //when
+        NotificationToSend notification = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.UPDATE);
+        //then
+        assertNotNull(notification.getInstitution().getCategory());
+        assertNotNull(notification.getInstitution().getCity());
+        verify(partyRegistryProxyConnectorMock, times(1)).getInstitutionById(institutionMock.getExternalId());
+        verify(partyRegistryProxyConnectorMock, times(1)).getExtByCode(any());
+    }
+
+    @Test
     void toNotificationAttributesNotNull() {
         //given
         final String institutionId = UUID.randomUUID().toString();
@@ -688,6 +711,7 @@ class ContractServiceTest {
         attribute.setCode("code");
         institutionMock.setAttributes(List.of(attribute));
         institutionMock.setOrigin("IPA");
+        institutionMock.setCity(null);
         institutionMock.setRootParentId(null);
         Token tokenMock = createToken(institutionId, tokenId, null,
                 RelationshipState.ACTIVE,
@@ -696,10 +720,11 @@ class ContractServiceTest {
                 OffsetDateTime.parse("2020-11-02T10:00:00Z"), // updatedAt
                 null); // deletedAt
         tokenMock.setProductId("product");
+        mockPartyRegistryProxy(partyRegistryProxyConnectorMock, institutionMock);
         //when
         NotificationToSend notificationToSend = contractService.toNotificationToSend(institutionMock, tokenMock, QueueEvent.ADD);
         //then
-        assertEquals(attribute.getCode(), notificationToSend.getInstitution().getCategory());
+        checkNotNullFields(notificationToSend, "closedAt");
 
     }
 
