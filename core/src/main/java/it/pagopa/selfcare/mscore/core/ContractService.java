@@ -296,7 +296,7 @@ public class ContractService {
         InstitutionToNotify toNotify = new InstitutionToNotify();
         toNotify.setInstitutionType(institution.getInstitutionType());
         toNotify.setDescription(institution.getDescription());
-        toNotify.setDigitalAddress(institution.getDigitalAddress());
+        toNotify.setDigitalAddress(institution.getDigitalAddress() == null? coreConfig.getInstitutionAlternativeEmail(): institution.getDigitalAddress());
         toNotify.setAddress(institution.getAddress());
         toNotify.setTaxCode(institution.getTaxCode());
         toNotify.setOrigin(institution.getOrigin());

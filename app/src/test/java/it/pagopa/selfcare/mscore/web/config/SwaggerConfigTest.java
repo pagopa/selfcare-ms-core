@@ -49,6 +49,9 @@ class SwaggerConfigTest {
     @MockBean
     UserService userService;
 
+    @MockBean
+    SchedulerService schedulerService;
+
     @Autowired
     WebApplicationContext context;
 

@@ -34,7 +34,16 @@ public class SchedulerConfig implements SchedulingConfigurer {
         taskRegistrar.setTaskScheduler(taskScheduler);
     }
 
-    public Long getFixedDelay() {
+    private boolean sendOldEvent;
+    public boolean getSendOldEvent() {
+        return sendOldEvent;
+    }
+
+    public void setScheduler(boolean sendOldEvent) {
+        this.sendOldEvent = sendOldEvent;
+    }
+
+    public Long getFixedDelay(){
         return fixedDelay;
     }
 
