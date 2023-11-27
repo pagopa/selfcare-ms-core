@@ -37,7 +37,7 @@ class SchedulerControllerTest {
                         .post(BASE_URL)
                         .param("size", String.valueOf(size))
                         .param("productsFilter", String.valueOf(List.of(productId))))
-                .andExpect(status().isAccepted());
+                .andExpect(status().isOk());
 
         Mockito.verify(schedulerService, Mockito.times(1)).startScheduler(Optional.of(size), List.of(productId));
     }
