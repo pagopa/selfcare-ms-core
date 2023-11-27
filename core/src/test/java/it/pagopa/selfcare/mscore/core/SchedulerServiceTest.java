@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 class SchedulerServiceTest {
 
     @InjectMocks
-    private SchedulerService scheduler;
+    private SchedulerServiceImpl scheduler;
     @Mock
     private ContractService contractService;
     @Mock
