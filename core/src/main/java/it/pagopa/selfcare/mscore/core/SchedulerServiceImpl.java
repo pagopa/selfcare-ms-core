@@ -11,7 +11,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -49,7 +49,7 @@ public class SchedulerServiceImpl implements SchedulerService{
     }
 
 
-    @Scheduled(fixedDelayString = "${scheduler.fixed-delay.delay}")
+    @Async
     public void regenerateQueueNotifications() {
         log.trace("regenerateQueueNotifications start");
 
@@ -101,6 +101,6 @@ public class SchedulerServiceImpl implements SchedulerService{
         this.token_page_size_api = size;
         this.productsFilter = Optional.of(productsFilter);
         schedulerConfig.setScheduler(true);
-
+        regenerateQueueNotifications();
     }
 }

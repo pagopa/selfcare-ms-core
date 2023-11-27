@@ -21,9 +21,9 @@ public class SchedulerController {
     public SchedulerController(SchedulerService schedulerService) {
         this.schedulerService = schedulerService;
     }
-    @ApiOperation(value = "", notes = "${swagger.external-interceptor.scheduler.api.start}")
+    @ApiOperation(value = "", notes = "${swagger.ms-core.scheduler.api.start}")
     @PostMapping(value = "")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     public void start(@RequestParam(name = "size", required = false) Optional<Integer> size,
                       @RequestParam(name = "productsFilter") List<String> productsFilter){
 
