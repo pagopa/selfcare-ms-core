@@ -19,7 +19,7 @@ resources:
     cpu: 500m
     memory: 700M
   limits:
-    cpu: 1000m
+    cpu: 1600m
     memory: 900M
 
 autoscaling:
