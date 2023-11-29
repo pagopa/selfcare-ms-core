@@ -3,6 +3,7 @@
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.core.DelegationService;
@@ -87,6 +88,7 @@ public class DelegationController {
      * * Code: 404, Message: Institution data not found, DataType: Problem
      * * Code: 400, Message: Bad Request, DataType: Problem
      */
+    @Tag(name = "support")
     @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
     @GetMapping()
     public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")

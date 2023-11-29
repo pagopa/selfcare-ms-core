@@ -715,7 +715,7 @@
     },
     "/delegations" : {
       "get" : {
-        "tags" : [ "Delegation" ],
+        "tags" : [ "support" ],
         "summary" : "Retrieve institution's delegations",
         "description" : "Retrieve institution's delegations",
         "operationId" : "getDelegationsUsingGET",
@@ -1444,7 +1444,7 @@
     },
     "/institutions/" : {
       "get" : {
-        "tags" : [ "Institution" ],
+        "tags" : [ "support" ],
         "summary" : "Gets institutions filtering by taxCode and/or subunitCode",
         "description" : "Gets institutions filtering by taxCode and/or subunitCode",
         "operationId" : "getInstitutionsUsingGET",
@@ -2776,7 +2776,7 @@
     },
     "/institutions/{institutionId}/users" : {
       "get" : {
-        "tags" : [ "Institution" ],
+        "tags" : [ "support" ],
         "summary" : "getInstitutionUsers",
         "description" : "Retrieve institution's users",
         "operationId" : "getInstitutionUsersUsingGET",
@@ -4280,7 +4280,7 @@
     },
     "/onboarding/users" : {
       "post" : {
-        "tags" : [ "Onboarding" ],
+        "tags" : [ "support" ],
         "summary" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
         "description" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
         "operationId" : "onboardingInstitutionUsersUsingPOST",
@@ -4901,7 +4901,7 @@
     },
     "/users/{id}" : {
       "get" : {
-        "tags" : [ "Persons" ],
+        "tags" : [ "support" ],
         "summary" : "Retrieves user given userId and optional ProductId",
         "description" : "Retrieves user given userId and optional ProductId",
         "operationId" : "getUserInfoUsingGET",
