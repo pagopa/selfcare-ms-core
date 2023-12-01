@@ -1442,7 +1442,7 @@
         } ]
       }
     },
-    "/institutions/" : {
+    "/institutions" : {
       "get" : {
         "tags" : [ "Institution" ],
         "summary" : "Gets institutions filtering by taxCode and/or subunitCode",
@@ -1582,7 +1582,7 @@
         } ]
       }
     },
-    "/institutions/from-anac/" : {
+    "/institutions/from-anac" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "${swagger.mscore.institution.create.from-anac}",
@@ -1644,7 +1644,7 @@
         } ]
       }
     },
-    "/institutions/from-infocamere/" : {
+    "/institutions/from-infocamere" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "create an institution from infocamere registry",
@@ -1706,7 +1706,7 @@
         } ]
       }
     },
-    "/institutions/from-ipa/" : {
+    "/institutions/from-ipa" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "create an institution from ipa registry",
@@ -1768,7 +1768,7 @@
         } ]
       }
     },
-    "/institutions/from-ivass/" : {
+    "/institutions/from-ivass" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "create an institution from ivass CSV",
@@ -1830,7 +1830,7 @@
         } ]
       }
     },
-    "/institutions/from-pda/" : {
+    "/institutions/from-pda" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "${swagger.mscore.institution.create.from-pda}",
