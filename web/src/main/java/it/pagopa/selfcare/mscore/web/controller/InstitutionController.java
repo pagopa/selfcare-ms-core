@@ -74,7 +74,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
-    @GetMapping(value = "/")
+    @GetMapping
     public ResponseEntity<InstitutionsResponse> getInstitutions(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
                                                                 @RequestParam(value = "taxCode", required = false) String taxCode,
                                                                 @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
@@ -111,7 +111,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-ipa}", notes = "${swagger.mscore.institution.create.from-ipa}")
-    @PostMapping(value = "/from-ipa/")
+    @PostMapping(value = "/from-ipa")
     public ResponseEntity<InstitutionResponse> createInstitutionFromIpa(@RequestBody @Valid InstitutionFromIpaPost institutionFromIpaPost) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
@@ -136,7 +136,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-anac}", notes = "${swagger.mscore.institution.create.from-anac}")
-    @PostMapping(value = "/from-anac/")
+    @PostMapping(value = "/from-anac")
     public ResponseEntity<InstitutionResponse> createInstitutionFromAnac(@RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionFromAnac(InstitutionMapperCustom.toInstitution(institution, null));
@@ -155,7 +155,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-ivass}", notes = "${swagger.mscore.institution.create.from-ivass}")
-    @PostMapping(value = "/from-ivass/")
+    @PostMapping(value = "/from-ivass")
     public ResponseEntity<InstitutionResponse> createInstitutionFromIvass(@RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionFromIvass(InstitutionMapperCustom.toInstitution(institution, null));
@@ -174,7 +174,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-pda}", notes = "${swagger.mscore.institution.create.from-ipa}")
-    @PostMapping(value = "/from-pda/")
+    @PostMapping(value = "/from-pda")
     public ResponseEntity<InstitutionResponse> createInstitutionFromPda(@RequestBody @Valid PdaInstitutionRequest institutionRequest) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
@@ -194,7 +194,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-infocamere}", notes = "${swagger.mscore.institution.create.from-infocamere}")
-    @PostMapping(value = "/from-infocamere/")
+    @PostMapping(value = "/from-infocamere")
     public ResponseEntity<InstitutionResponse> createInstitutionFromInfocamere(@RequestBody @Valid InstitutionRequest institutionRequest) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
@@ -235,7 +235,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create}", notes = "${swagger.mscore.institution.create}")
-    @PostMapping(value = "/")
+    @PostMapping
     public ResponseEntity<InstitutionResponse> createInstitution(@RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitution(InstitutionMapperCustom.toInstitution(institution, null));
