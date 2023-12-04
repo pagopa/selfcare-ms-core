@@ -7,6 +7,7 @@ import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
+import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -14,6 +15,8 @@ import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
+import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,6 +64,9 @@ class InstitutionControllerTest {
 
     @Mock
     private InstitutionService institutionService;
+
+    @Mock
+    private OnboardingService onboardingService;
 
     @Mock
     private DelegationService delegationService;
@@ -1377,6 +1383,31 @@ class InstitutionControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#onboardingInstitution(InstitutionOnboardingRequest, String)}
+     */
+    @Test
+    void institutionOnboarding() throws Exception {
+
+
+        final String institutionId = "institutionId";
+        InstitutionOnboardingRequest request = new InstitutionOnboardingRequest();
+        request.setProductId("id");
+        request.setUsers(List.of(new Person()));
+
+        doNothing().when(onboardingService).persistOnboarding(any(), any(), any(), any(), any());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post(BASE_URL + "/{id}/onboarding/", institutionId)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
 }

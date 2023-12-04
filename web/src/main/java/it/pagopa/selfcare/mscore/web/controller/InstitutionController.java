@@ -9,12 +9,11 @@ import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.core.OnboardingService;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -34,6 +33,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,17 +43,19 @@ import java.util.stream.Collectors;
 public class InstitutionController {
 
     private final InstitutionService institutionService;
+    private final OnboardingService onboardingService;
     private final OnboardingResourceMapper onboardingResourceMapper;
     private final InstitutionResourceMapper institutionResourceMapper;
     private final BrokerMapper brokerMapper;
     private final UserMapper userMapper;
 
     public InstitutionController(InstitutionService institutionService,
-                                 OnboardingResourceMapper onboardingResourceMapper,
+                                 OnboardingService onboardingService, OnboardingResourceMapper onboardingResourceMapper,
                                  InstitutionResourceMapper institutionResourceMapper,
                                  BrokerMapper brokerMapper,
                                  UserMapper userMapper) {
         this.institutionService = institutionService;
+        this.onboardingService = onboardingService;
         this.onboardingResourceMapper = onboardingResourceMapper;
         this.institutionResourceMapper = institutionResourceMapper;
         this.userMapper = userMapper;
@@ -330,6 +332,31 @@ public class InstitutionController {
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         Institution saved = institutionService.updateInstitution(institutionId, InstitutionMapperCustom.toInstitutionUpdate(institutionPut), selfCareUser.getId());
         return ResponseEntity.ok().body(institutionResourceMapper.toInstitutionResponse(saved));
+    }
+
+    /**
+     * The function persist user on registry if not exists and add relation with institution-product
+     *
+     * @param request OnboardingInstitutionUsersRequest
+     * @return no content
+     * * Code: 204, Message: successful operation
+     * * Code: 404, Message: Not found, DataType: Problem
+     * * Code: 400, Message: Invalid request, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
+    @PostMapping(value = "/{id}/onboarding")
+    public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
+                                                      @PathVariable("id") String id) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
+        List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
+                .map(users -> users.stream().map(userMapper::toUserToOnboard).toList())
+                .orElse(List.of());
+        Billing billing = Optional.ofNullable(request.getBilling())
+                .map(institutionResourceMapper::billingRequestToBilling)
+                .orElse(null);
+        onboardingService.persistOnboarding(id, request.getProductId(), request.getPricingPlan(), billing, usersToOnboard);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
