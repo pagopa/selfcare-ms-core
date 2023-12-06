@@ -343,10 +343,10 @@ public class InstitutionController {
      * * Code: 404, Message: Not found, DataType: Problem
      * * Code: 400, Message: Invalid request, DataType: Problem
      */
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
     @PostMapping(value = "/{id}/onboarding")
-    public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
+    public ResponseEntity<InstitutionResponse> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
                                                       @PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
@@ -355,8 +355,10 @@ public class InstitutionController {
         Billing billing = Optional.ofNullable(request.getBilling())
                 .map(institutionResourceMapper::billingRequestToBilling)
                 .orElse(null);
-        onboardingService.persistOnboarding(id, request.getProductId(), request.getPricingPlan(), billing, usersToOnboard);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), request.getPricingPlan(), billing, usersToOnboard);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(institutionResourceMapper.toInstitutionResponse(institution));
     }
 
     /**

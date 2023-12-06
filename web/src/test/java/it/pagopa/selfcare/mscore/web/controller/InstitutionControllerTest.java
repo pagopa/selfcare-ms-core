@@ -1397,7 +1397,8 @@ class InstitutionControllerTest {
         request.setProductId("id");
         request.setUsers(List.of(new Person()));
 
-        doNothing().when(onboardingService).persistOnboarding(any(), any(), any(), any(), any());
+        when(onboardingService.persistOnboarding(any(), any(), any(), any(), any()))
+                .thenReturn(new Institution());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post(BASE_URL + "/{id}/onboarding/", institutionId)

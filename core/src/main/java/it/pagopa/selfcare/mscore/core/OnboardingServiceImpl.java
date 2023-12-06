@@ -160,7 +160,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void persistOnboarding(String institutionId, String productId, String pricingPlan, Billing billing, List<UserToOnboard> users) {
+    public Institution persistOnboarding(String institutionId, String productId, String pricingPlan, Billing billing, List<UserToOnboard> users) {
 
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
@@ -177,12 +177,12 @@ public class OnboardingServiceImpl implements OnboardingService {
         if(Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
                 .filter(item -> item.getProductId().equals(productId) && UtilEnumList.VALID_RELATIONSHIP_STATES.contains(item.getStatus()))
                 .findAny()).isPresent()){
-            throw new InvalidRequestException(String.format(CustomError.INSTITUTION_NOT_ONBOARDED.getMessage(), institution.getTaxCode(), productId),
-                        CustomError.INSTITUTION_NOT_ONBOARDED.getCode());
+            throw new InvalidRequestException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), institution.getTaxCode(), productId),
+                        CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
         }
 
         //If not exists, persist a new onboarding for product
-        institutionConnector.findAndUpdate(institutionId, onboarding, List.of(), null);
+        final Institution institutionUpdated = institutionConnector.findAndUpdate(institutionId, onboarding, List.of(), null);
 
 
         //fillUserIdAndCreateIfNotExist is for adding mail institution to pdv because user already exists there
@@ -192,6 +192,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         onboardingDao.onboardOperator(institution, productId, users);
 
         log.trace("persistForUpdate end");
+
+        return institutionUpdated;
     }
 
     public void completeOnboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
