@@ -328,9 +328,10 @@ public class OnboardingServiceImpl implements OnboardingService {
         try {
             userRegistry = userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
             //We must save mail institution if it is not found on WorkContracts
-            if(Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId))
-                throw new ResourceNotFoundException("WorkContract not found!", "0000");
-        } catch (FeignException.NotFound | ResourceNotFoundException e) {
+            if(Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId)) {
+                userRegistry = userService.persistWorksContractToUserRegistry(user.getTaxCode(), user.getEmail(), institutionId);
+            }
+        } catch (FeignException.NotFound e) {
             userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
         }
         user.setId(userRegistry.getId());

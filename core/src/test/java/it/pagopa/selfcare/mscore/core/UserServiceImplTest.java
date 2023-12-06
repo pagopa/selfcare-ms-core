@@ -510,5 +510,13 @@ class UserServiceImplTest {
         when(userRegistryConnector.persistUserUsingPatch(any(), any(), any(), any(), any())).thenReturn(user);
         Assertions.assertDoesNotThrow(() -> userServiceImpl.persistUserRegistry("name", "familyName", "fiscalCode", "email", "institutionId"));
     }
+
+    @Test
+    void persistWorksContractToUserRegistry() {
+        User user = new User();
+        user.setId("fiscalCode");
+        when(userRegistryConnector.persistUserWorksContractUsingPatch("fiscalCode", "email", "institutionId")).thenReturn(user);
+        Assertions.assertDoesNotThrow(() -> userServiceImpl.persistWorksContractToUserRegistry( "fiscalCode", "email", "institutionId"));
+    }
 }
 

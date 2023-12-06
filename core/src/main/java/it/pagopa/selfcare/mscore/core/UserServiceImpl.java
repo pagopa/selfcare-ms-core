@@ -113,6 +113,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User persistWorksContractToUserRegistry(String fiscalCode, String email, String institutionId) {
+        return userRegistryConnector.persistUserWorksContractUsingPatch(fiscalCode ,email , institutionId);
+    }
+
+    @Override
     public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
         return userConnector.findUserInstitutionAggregation(filter);
     }

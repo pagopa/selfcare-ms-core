@@ -83,6 +83,27 @@ class UserRegistryConnectorImplTest {
         verify(userRegistryRestClient)._saveUsingPATCH(saveUserDto);
     }
 
+    @Test
+    void persistUserWorksContractUsingPatch() {
+        UUID id = UUID.randomUUID();
+        UserId userId = new UserId();
+        userId.setId(id);
+        ResponseEntity<UserId> userIdResponseEntity = ResponseEntity.ok(userId);
+        when(userRegistryRestClient._saveUsingPATCH(any())).thenReturn(userIdResponseEntity);
+        User user = userRegistryConnector.persistUserWorksContractUsingPatch( "fiscalCode", "email","institutionId");
+        assertEquals(user.getId(), id.toString());
+        SaveUserDto saveUserDto = SaveUserDto.builder()
+                .fiscalCode("fiscalCode")
+                .workContacts(Map.of("institutionId", WorkContactResource.builder()
+                        .email(CertifiableFieldResourceOfstring.builder()
+                                .value("email")
+                                .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                                .build())
+                        .build()))
+                .build();
+        verify(userRegistryRestClient)._saveUsingPATCH(saveUserDto);
+    }
+
 
 }
 
