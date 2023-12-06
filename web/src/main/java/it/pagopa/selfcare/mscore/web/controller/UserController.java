@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -241,7 +242,7 @@ public class UserController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      */
-    @Tag(name = "support")
+    @Tags({@Tag(name = "support"), @Tag(name = "external-v2")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.users}", notes = "${swagger.mscore.users}")
     @GetMapping(value = "/users/{id}")

@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
@@ -73,7 +74,7 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
      */
-    @Tag(name = "support")
+    @Tags({@Tag(name = "support"), @Tag(name = "external-v2")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
     @GetMapping(value = "/")
@@ -362,6 +363,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
+    @Tag(name = "external-v2")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
     @GetMapping(value = "/{id}")
@@ -413,6 +415,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
+    @Tag(name = "external-v2")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
     @GetMapping(value = "/{institutionId}/onboardings")
