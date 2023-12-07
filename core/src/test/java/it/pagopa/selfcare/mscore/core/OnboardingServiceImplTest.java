@@ -754,7 +754,7 @@ class OnboardingServiceImplTest {
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
         when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
-        when(userService.persistUserRegistry(any(), any(), any(), any(), any())).thenReturn(new User());
+        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
 
         onboardingServiceImpl.onboardingUsers(request, null, null);
 
@@ -775,7 +775,7 @@ class OnboardingServiceImplTest {
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
         when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
-        when(userService.persistUserRegistry(any(), any(), any(), any(), any())).thenReturn(new User());
+        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
 
         onboardingServiceImpl.onboardingUsers(request, null, null);
 
@@ -1547,7 +1547,7 @@ class OnboardingServiceImplTest {
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
 
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
-        when(userService.persistUserRegistry(any(), any(), any(), any(),any())).thenReturn(user);
+        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(user);
 
         onboardingServiceImpl.persistOnboarding(institution.getId(), productId, pricingPlan, new Billing(), userToOnboards);
 
