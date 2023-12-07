@@ -34,15 +34,19 @@ public class OnboardingMapper {
         OnboardingInfoResponse response = new OnboardingInfoResponse();
         response.setUserId(userId);
         List<OnboardedInstitutionResponse> institutionResponseList = new ArrayList<>();
-        onboardingInfos.forEach(onboardingInfo ->
-                onboardingInfo.getInstitution().getOnboarding().stream()
-                        .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(onboardingInfo.getBinding().getProducts().getProductId())
-                                && onboarding.getStatus().equals(onboardingInfo.getBinding().getProducts().getStatus()))
-                        .findFirst()
-                        .ifPresent(onboarding -> institutionResponseList.add(constructOnboardedInstitutionResponse(onboardingInfo.getInstitution(),
-                                onboardingInfo.getBinding().getProducts(),
-                                onboarding)))
-        );
+        if(Objects.nonNull(onboardingInfos)) {
+            onboardingInfos.stream()
+                    .filter(item -> Objects.nonNull(item.getInstitution()) && Objects.nonNull(item.getInstitution().getOnboarding())
+                            && Objects.nonNull(item.getBinding()))
+                    .forEach(onboardingInfo -> onboardingInfo.getInstitution().getOnboarding().stream()
+                            .filter(onboarding -> onboarding.getProductId().equalsIgnoreCase(onboardingInfo.getBinding().getProducts().getProductId())
+                                    && onboarding.getStatus().equals(onboardingInfo.getBinding().getProducts().getStatus()))
+                            .findFirst()
+                            .ifPresent(onboarding -> institutionResponseList.add(constructOnboardedInstitutionResponse(onboardingInfo.getInstitution(),
+                                    onboardingInfo.getBinding().getProducts(),
+                                    onboarding)))
+            );
+        }
         response.setInstitutions(institutionResponseList);
         return response;
     }
