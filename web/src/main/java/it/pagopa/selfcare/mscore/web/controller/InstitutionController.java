@@ -74,7 +74,7 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
      */
-    @Tags({@Tag(name = "support"), @Tag(name = "external-v2")})
+    @Tags({@Tag(name = "support"), @Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
     @GetMapping(value = "/")
@@ -363,7 +363,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
-    @Tag(name = "external-v2")
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
     @GetMapping(value = "/{id}")
@@ -415,7 +415,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
-    @Tag(name = "external-v2")
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
     @GetMapping(value = "/{institutionId}/onboardings")
@@ -527,7 +527,7 @@ public class InstitutionController {
         return result;
     }
 
-    @Tag(name = "support")
+    @Tags({@Tag(name = "support"), @Tag(name = "Institution")})
     @GetMapping(value = "/{institutionId}/users")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.institutions.api.getInstitutionUsers}")

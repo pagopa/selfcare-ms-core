@@ -89,7 +89,7 @@ public class DelegationController {
      * * Code: 404, Message: Institution data not found, DataType: Problem
      * * Code: 400, Message: Bad Request, DataType: Problem
      */
-    @Tags({@Tag(name = "external-v2"), @Tag(name = "support")})
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "support"), @Tag(name = "Delegation")})
     @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
     @GetMapping()
     public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")

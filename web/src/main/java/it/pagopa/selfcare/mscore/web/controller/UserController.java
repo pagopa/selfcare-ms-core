@@ -242,7 +242,7 @@ public class UserController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      */
-    @Tags({@Tag(name = "support"), @Tag(name = "external-v2")})
+    @Tags({@Tag(name = "support"), @Tag(name = "external-v2"), @Tag(name = "Persons")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.users}", notes = "${swagger.mscore.users}")
     @GetMapping(value = "/users/{id}")

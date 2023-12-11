@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -90,7 +91,7 @@ public class TokenController {
      * * Code: 200, Message: successful operation
      * * Code: 404, Message: product not found
      */
-    @Tag(name = "external-v2")
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "Token")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.tokens.findFromProduct}", notes = "${swagger.mscore.tokens.findFromProduct}")
     @GetMapping(value = "/tokens/products/{productId}")
