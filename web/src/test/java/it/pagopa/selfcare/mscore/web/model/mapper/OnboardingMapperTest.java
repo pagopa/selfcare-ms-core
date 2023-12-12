@@ -4,13 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.Contract;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -71,6 +78,38 @@ class OnboardingMapperTest {
         assertEquals(TokenType.LEGALS, actualToOnboardingLegalsRequestResult.getTokenType());
         assertEquals("Product Name", actualToOnboardingLegalsRequestResult.getProductName());
         assertEquals("42", actualToOnboardingLegalsRequestResult.getInstitutionId());
+    }
+
+    @Test
+    void toOnboardingInfoResponse_onboardingEmpty() {
+        String userId = "userId";
+        List<OnboardingInfo> onboardingInfos = new ArrayList<>();
+        onboardingInfos.add(new OnboardingInfo());
+
+        OnboardingInfoResponse actual = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfos);
+        assertEquals(actual.getUserId(), userId);
+    }
+
+    @Test
+    void toOnboardingInfoResponse() {
+        String userId = "userId";
+        List<OnboardingInfo> onboardingInfos = new ArrayList<>();
+        OnboardingInfo onboardingInfo = new OnboardingInfo();
+        Institution institution = new Institution();
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("prod-io");
+        institution.setOnboarding(List.of(onboarding));
+
+        onboardingInfo.setInstitution(institution);
+        UserInstitutionBinding institutionBinding = new UserInstitutionBinding();
+        institutionBinding.setProducts(new OnboardedProduct());
+        onboardingInfo.setBinding(institutionBinding);
+        onboardingInfos.add(onboardingInfo);
+
+        OnboardingInfoResponse actual = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfos);
+        assertEquals(actual.getUserId(), userId);
+        assertEquals(actual.getInstitutions().size(), 0);
     }
 }
 
