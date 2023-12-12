@@ -33,6 +33,8 @@ public interface UserService {
 
     User persistUserRegistry(String name, String familyName, String fiscalCode, String email, String institutionId);
 
+    User persistWorksContractToUserRegistry(String fiscalCode, String email, String institutionId);
+
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 
     void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);

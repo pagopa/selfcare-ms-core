@@ -131,7 +131,7 @@ public class OnboardingController {
 
 
     /**
-     * The function persist onboarding data
+     * The function is responsible for saving the association between an institution and a product. It also creates occurrences in the Users collection as part of this process.
      *
      * @param request OnboardingInstitutionRequest
      * @return no content
@@ -141,7 +141,7 @@ public class OnboardingController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.institution}", notes = "${swagger.mscore.onboarding.institution}")
+    @ApiOperation(value = "${swagger.mscore.onboarding.institution.persist}", notes = "${swagger.mscore.onboarding.institution.persist}")
     @PostMapping(value = "/institution")
     public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest request,
                                                       Authentication authentication) {

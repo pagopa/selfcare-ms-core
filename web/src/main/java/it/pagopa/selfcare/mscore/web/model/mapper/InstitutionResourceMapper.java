@@ -1,7 +1,9 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 
+import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.RootParentResponse;
 import org.mapstruct.Mapper;
@@ -26,6 +28,9 @@ public interface InstitutionResourceMapper {
         }
         return null;
     }
+
+
+    Billing billingRequestToBilling(BillingRequest billingRequest);
 
 
 }
