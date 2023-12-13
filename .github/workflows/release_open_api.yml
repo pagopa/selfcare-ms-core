@@ -39,7 +39,6 @@ jobs:
             base-spec: base/app/src/main/resources/swagger/api-docs.json
     - name: Check report diff
       run: |
-        echo ${{ github.head_ref }}
         cd output
         result=$(sed -n '/<span class="badge badge-Incompatible">/,/<\/span>/p'  api-docs.html)
         echo $result;

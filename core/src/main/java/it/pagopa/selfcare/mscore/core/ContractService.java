@@ -278,7 +278,7 @@ public class ContractService {
         // ADD or UPDATE msg event
         notification.setNotificationType(queueEvent);
         notification.setFileName(token.getContractSigned() == null ? "" : Paths.get(token.getContractSigned()).getFileName().toString());
-        notification.setContentType(token.getContentType() == null ? "" : token.getContentType());
+        notification.setContentType(token.getContentTypes() == null ? "" : token.getContentTypes());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()

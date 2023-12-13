@@ -99,8 +99,8 @@ public class TokenConnectorImpl implements TokenConnector {
         if (token.getContractSigned() != null) {
             updateDefinition.set(TokenEntity.Fields.contractSigned.name(), token.getContractSigned());
         }
-        if (token.getContentType() != null) {
-            updateDefinition.set(TokenEntity.Fields.contentType.name(), token.getContentType());
+        if (token.getContentTypes() != null) {
+            updateDefinition.set(TokenEntity.Fields.contentType.name(), token.getContentTypes());
         }
         if (status == RelationshipState.ACTIVE){
             updateDefinition.set(TokenEntity.Fields.activatedAt.name(), now);

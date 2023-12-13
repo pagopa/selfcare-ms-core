@@ -25,7 +25,7 @@ public class Token {
     private String contractVersion;
     private String contractTemplate;
     private String contractSigned;
-    private String contentType;
+    private String contentTypes;
     private List<TokenUser> users;
     private InstitutionUpdate institutionUpdate;
     private OffsetDateTime createdAt;

@@ -83,7 +83,7 @@ public class OnboardingDao {
         Token token = TokenUtils.toToken(request, institution, digest, null);
         token.setStatus(RelationshipState.ACTIVE);
         token.setContractSigned(request.getContractFilePath());
-        token.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        token.setContentTypes(MediaType.APPLICATION_JSON_VALUE);
         token.setCreatedAt(createdAt);
         token = tokenConnector.save(token, geographicTaxonomies);
 

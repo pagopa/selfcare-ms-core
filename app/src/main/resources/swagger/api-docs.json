@@ -7749,7 +7749,7 @@
           "checksum" : {
             "type" : "string"
           },
-          "contentType" : {
+          "contentTypes" : {
             "type" : "string"
           },
           "contractSigned" : {
