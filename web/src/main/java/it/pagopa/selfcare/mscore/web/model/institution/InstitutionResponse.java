@@ -42,5 +42,6 @@ public class InstitutionResponse {
     private String aooParentCode;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private boolean test;
 
 }
