@@ -40,7 +40,7 @@ public class MockUtils {
         tokenMock.setContractVersion("ContractVersion");
         tokenMock.setContractTemplate("ContractTemplate");
         tokenMock.setContractSigned("ContractPath/" + tokenMock.getId() + "/FileName");
-        tokenMock.setContentTypes("application/pdf");
+        tokenMock.setContentType("application/pdf");
         tokenMock.setUsers(List.of(createTokenUserMock(1, PartyRole.MANAGER), createTokenUserMock(2, PartyRole.DELEGATE)));
         tokenMock.setInstitutionUpdate(createInstitutionUpdateMock(bias, institutionType));
         tokenMock.setCreatedAt(OffsetDateTime.now().minusDays(2));

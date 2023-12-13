@@ -221,7 +221,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         File logoFile = contractService.getLogoFile();
         String fileName = contractService.uploadContract(token.getId(), contract);
         token.setContractSigned(fileName);
-        token.setContentTypes(contract.getContentType());
+        token.setContentType(contract.getContentType());
         OnboardingUpdateRollback rollback = onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding persistedOnboardingRollBack = {}", rollback);
         try {

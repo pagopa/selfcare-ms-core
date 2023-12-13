@@ -1090,7 +1090,7 @@ class TokenConnectorImplTest {
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.deletedAt.name()) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(digestMock) &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContractSigned()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContentTypes()));
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContentType()));
         verifyNoMoreInteractions(tokenRepository);
     }
 
@@ -1099,7 +1099,7 @@ class TokenConnectorImplTest {
         // Given
         Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.TOBEVALIDATED, InstitutionType.GSP);
         tokenMock.setContractSigned(null);
-        tokenMock.setContentTypes(null);
+        tokenMock.setContentType(null);
         RelationshipState statusMock = RelationshipState.PENDING;
         TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.PENDING);
 
@@ -1125,7 +1125,7 @@ class TokenConnectorImplTest {
         // Given
         Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.ACTIVE, InstitutionType.GSP);
         tokenMock.setContractSigned(null);
-        tokenMock.setContentTypes(null);
+        tokenMock.setContentType(null);
         RelationshipState statusMock = RelationshipState.ACTIVE;
         TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE);
 
