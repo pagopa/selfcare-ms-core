@@ -35,10 +35,8 @@ jobs:
     - name: Run OpenAPI Diff (from HEAD revision)
       uses: mvegter/openapi-diff-action@v0.23.5
       with:
-            head_spec: head/app/src/main/resources/swagger/api-docs.json
-            base_spec: base/app/src/main/resources/swagger/api-docs.json
-            output_path: ./output
-            github_token: ${{ github.token }}
+            head-spec: head/app/src/main/resources/swagger/api-docs.json
+            base-spec: base/app/src/main/resources/swagger/api-docs.json
     - name: Check report diff
       run: |
         cd output
