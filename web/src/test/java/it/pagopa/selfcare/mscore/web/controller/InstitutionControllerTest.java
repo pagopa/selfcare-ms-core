@@ -1397,7 +1397,7 @@ class InstitutionControllerTest {
         request.setProductId("id");
         request.setUsers(List.of(new Person()));
 
-        when(onboardingService.persistOnboarding(any(), any(), any(), any(), any()))
+        when(onboardingService.persistOnboarding(any(), any(), any(), any()))
                 .thenReturn(new Institution());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders

@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
@@ -31,7 +32,7 @@ public interface OnboardingService {
 
     void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract);
 
-    Institution persistOnboarding(String institutionId, String productId, String pricingPlan, Billing billing, List<UserToOnboard> users);
+    Institution persistOnboarding(String institutionId, String productId, List<UserToOnboard> users, Onboarding onboarding);
 
     void approveOnboarding(Token token, SelfCareUser selfCareUser);
 
