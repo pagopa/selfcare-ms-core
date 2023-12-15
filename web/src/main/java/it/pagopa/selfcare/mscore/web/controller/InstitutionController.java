@@ -352,10 +352,7 @@ public class InstitutionController {
         List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
                 .map(users -> users.stream().map(userMapper::toUserToOnboard).toList())
                 .orElse(List.of());
-        Billing billing = Optional.ofNullable(request.getBilling())
-                .map(institutionResourceMapper::billingRequestToBilling)
-                .orElse(null);
-        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), request.getPricingPlan(), billing, usersToOnboard);
+        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), usersToOnboard, onboardingResourceMapper.toOnboarding(request));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(institutionResourceMapper.toInstitutionResponse(institution));
