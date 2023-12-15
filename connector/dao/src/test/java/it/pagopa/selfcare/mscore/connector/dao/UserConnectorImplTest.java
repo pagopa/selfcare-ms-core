@@ -13,7 +13,10 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.*;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -24,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
@@ -61,6 +67,24 @@ class UserConnectorImplTest {
 
     @Captor
     ArgumentCaptor<FindAndModifyOptions> findAndModifyOptionsArgumentCaptor;
+
+    @Mock
+    private MongoTemplate mongoTemplate;
+
+    static UserInstitutionAggregation dummyUserInstitution;
+
+    static {
+        dummyUserInstitution = new UserInstitutionAggregation();
+        dummyUserInstitution.setId("userId");
+        Institution institution = new Institution();
+        institution.setId("id");
+        dummyUserInstitution.setInstitutions(List.of(institution));
+        UserInstitutionBinding bindings = new UserInstitutionBinding();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setProductId("prod-io");
+        bindings.setProducts(onboardedProduct);
+        dummyUserInstitution.setBindings(bindings);
+    }
 
     /**
      * Method under test: {@link UserConnectorImpl#findAll()}
@@ -732,7 +756,6 @@ class UserConnectorImplTest {
     @Test
     void testFindAdminWithFilter() {
         when(userRepository.find(any(), any())).thenReturn(new ArrayList<>());
-        ArrayList<PartyRole> roles = new ArrayList<>();
         assertTrue(userConnectorImpl.findActiveInstitutionUser("42", "42").isEmpty());
         verify(userRepository).find(any(), any());
     }
@@ -744,8 +767,6 @@ class UserConnectorImplTest {
     void testFindAdminWithFilter4() {
         when(userRepository.find(any(), any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "."));
-        ArrayList<PartyRole> roles = new ArrayList<>();
-        List<RelationshipState> states = new ArrayList<>();
         assertThrows(ResourceNotFoundException.class,
                 () -> userConnectorImpl.findActiveInstitutionUser("42", "42"));
         verify(userRepository).find(any(), any());
@@ -983,5 +1004,49 @@ class UserConnectorImplTest {
         when(userRepository.find(any(), any()))
                 .thenReturn(List.of(userEntity));
         Assertions.assertDoesNotThrow(() -> userConnectorImpl.findByInstitutionId("institutionId"));
+    }
+
+    @Test
+    void getUserInfo() {
+        //Given
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getMappedResults()).thenReturn(List.of(dummyUserInstitution));
+
+        //When
+        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
+                thenReturn(results);
+
+        List<UserInstitutionAggregation> response = userConnectorImpl.getUserInfo("userId", null, null);
+
+        //Then
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        UserInstitutionAggregation actual = response.get(0);
+
+        assertEquals(actual.getId(), dummyUserInstitution.getId());
+        assertEquals(actual.getInstitutions().get(0).getId(), dummyUserInstitution.getInstitutions().get(0).getId());
+        assertEquals(actual.getBindings().getProducts().getProductId(), dummyUserInstitution.getBindings().getProducts().getProductId());
+    }
+
+    @Test
+    void getUserInfoWithFilters() {
+        //Given
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getMappedResults()).thenReturn(List.of(dummyUserInstitution));
+
+        //When
+        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
+                thenReturn(results);
+
+        List<UserInstitutionAggregation> response = userConnectorImpl.getUserInfo("userId", "id", new String[]{"PENDING"});
+
+        //Then
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        UserInstitutionAggregation actual = response.get(0);
+
+        assertEquals(actual.getId(), dummyUserInstitution.getId());
+        assertEquals(actual.getInstitutions().get(0).getId(), dummyUserInstitution.getInstitutions().get(0).getId());
+        assertEquals(actual.getBindings().getProducts().getProductId(), dummyUserInstitution.getBindings().getProducts().getProductId());
     }
 }

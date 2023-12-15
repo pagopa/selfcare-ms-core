@@ -60,4 +60,6 @@ public interface UserConnector {
 
     List<UserInfo> findByInstitutionId(String institutionId);
 
+    List<UserInstitutionAggregation>  getUserInfo(String userId, String institutionId, String[] states);
+
 }
