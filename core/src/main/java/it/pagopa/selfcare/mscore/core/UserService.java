@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
@@ -19,6 +20,7 @@ public interface UserService {
     List<OnboardedUser> findAllByIds(List<String> users);
 
     List<OnboardedUser> findAllExistingByIds(List<String> users);
+
     List<UserBinding> retrieveBindings(String institutionId, String userId, String[] states, List<String> products);
 
     List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
@@ -33,9 +35,13 @@ public interface UserService {
 
     User persistUserRegistry(String name, String familyName, String fiscalCode, String email, String institutionId);
 
+    User persistWorksContractToUserRegistry(String fiscalCode, String email, String institutionId);
+
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 
     void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);
 
     User retrievePerson(String userId, String productId, String institutionId);
+
+    List<OnboardingInfo> getUserInfo(String userId, String institutionId, String[] states);
 }

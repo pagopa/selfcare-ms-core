@@ -9,10 +9,13 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
@@ -509,6 +512,36 @@ class UserServiceImplTest {
         user.setId("fiscalCode");
         when(userRegistryConnector.persistUserUsingPatch(any(), any(), any(), any(), any())).thenReturn(user);
         Assertions.assertDoesNotThrow(() -> userServiceImpl.persistUserRegistry("name", "familyName", "fiscalCode", "email", "institutionId"));
+    }
+
+    @Test
+    void persistWorksContractToUserRegistry() {
+        User user = new User();
+        user.setId("fiscalCode");
+        when(userRegistryConnector.persistUserWorksContractUsingPatch("fiscalCode", "email", "institutionId")).thenReturn(user);
+        Assertions.assertDoesNotThrow(() -> userServiceImpl.persistWorksContractToUserRegistry( "fiscalCode", "email", "institutionId"));
+    }
+
+    @Test
+    void getUserInfo() {
+        UserInstitutionAggregation userInstitution = new UserInstitutionAggregation();
+        userInstitution.setId("userId");
+        UserInstitutionBinding binding = new UserInstitutionBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(product);
+        userInstitution.setBindings(binding);
+        Institution institution = new Institution();
+        institution.setId("id");
+        userInstitution.setInstitutions(List.of(institution));
+        when(userConnector.getUserInfo(any(), any(), any())).thenReturn(List.of(userInstitution));
+        List<OnboardingInfo> response = userServiceImpl.getUserInfo("userId",null, null);
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(1, response.size());
+        assertEquals("userId", response.get(0).getUserId());
+        assertNotNull(response.get(0).getBinding());
+        assertEquals("prod-pn", response.get(0).getBinding().getProducts().getProductId());
     }
 }
 

@@ -77,5 +77,23 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
         return userMapper.fromUserId(result);
     }
 
+    @Override
+    public User persistUserWorksContractUsingPatch(String fiscalCode, String email, String institutionId) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "persistUserByFiscalCode fiscalCode = {}", fiscalCode);
+        Assert.hasText(fiscalCode, "A fiscalCode is required");
+        UserId result = restClient._saveUsingPATCH(SaveUserDto.builder()
+                        .fiscalCode(fiscalCode)
+                        .workContacts(Map.of(institutionId, WorkContactResource.builder()
+                                .email(CertifiableFieldResourceOfstring.builder()
+                                        .value(email)
+                                        .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                                        .build())
+                                .build()))
+                        .build())
+                .getBody();
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "persistUserByFiscalCode result = {}", result);
+        return userMapper.fromUserId(result);
+    }
+
 
 }

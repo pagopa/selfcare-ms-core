@@ -23,7 +23,9 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -35,6 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -123,11 +126,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId, String[] states) {
-        return this.getOnboardingInfo(institutionId, null, states, userId);
-    }
-
-    @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
@@ -154,6 +152,40 @@ public class OnboardingServiceImpl implements OnboardingService {
         Consumer<List<User>> verification = ignored -> {
         };
         this.completeOnboarding(token, contract, verification);
+    }
+
+    @Override
+    public Institution persistOnboarding(String institutionId, String productId,List<UserToOnboard> users, Onboarding onboarding) {
+
+        log.trace("persistForUpdate start");
+        log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        onboarding.setProductId(productId);
+        onboarding.setCreatedAt(OffsetDateTime.now());
+
+        //Verify if onboarding exists, in case onboarding must fail
+        final Institution institution = institutionConnector.findById(institutionId);
+
+        if(Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
+                .filter(item -> item.getProductId().equals(productId) && UtilEnumList.VALID_RELATIONSHIP_STATES.contains(item.getStatus()))
+                .findAny()).isPresent()){
+            throw new InvalidRequestException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), institution.getTaxCode(), productId),
+                        CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
+        }
+
+        //If not exists, persist a new onboarding for product
+        final Institution institutionUpdated = institutionConnector.findAndUpdate(institutionId, onboarding, List.of(), null);
+
+
+        //fillUserIdAndCreateIfNotExist is for adding mail institution to pdv because user already exists there
+        users.forEach(userToOnboard -> fillUserIdAndCreateIfNotExist(userToOnboard, institutionId));
+
+        //Add users to onboarding adding to collection users
+        onboardingDao.onboardOperator(institution, productId, users);
+
+        log.trace("persistForUpdate end");
+
+        return institutionUpdated;
     }
 
     public void completeOnboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
@@ -287,6 +319,10 @@ public class OnboardingServiceImpl implements OnboardingService {
         User userRegistry;
         try {
             userRegistry = userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
+            //We must save mail institution if it is not found on WorkContracts
+            if(Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId)) {
+                userRegistry = userService.persistWorksContractToUserRegistry(user.getTaxCode(), user.getEmail(), institutionId);
+            }
         } catch (FeignException.NotFound e) {
             userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
         }

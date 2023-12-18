@@ -15,6 +15,7 @@ import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
+import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
@@ -379,12 +380,7 @@ class OnboardingServiceImplTest {
         Institution institution = new Institution();
         institution.setBilling(new Billing());
         List<Onboarding> onboardingList = new ArrayList<>();
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(new Billing());
-        onboarding.setTokenId("42");
-        onboarding.setPricingPlan("C3");
-        onboarding.setProductId("42");
-        onboardingList.add(onboarding);
+        onboardingList.add(dummyOnboarding());
         institution.setOnboarding(onboardingList);
         Token token = getToken(institutionUpdate);
         TokenUser tokenUser = new TokenUser();
@@ -758,6 +754,7 @@ class OnboardingServiceImplTest {
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
         when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
+        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
 
         onboardingServiceImpl.onboardingUsers(request, null, null);
 
@@ -778,6 +775,7 @@ class OnboardingServiceImplTest {
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
         when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
+        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
 
         onboardingServiceImpl.onboardingUsers(request, null, null);
 
@@ -1239,26 +1237,8 @@ class OnboardingServiceImplTest {
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PA);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        CertifiedField<String> certifiedField = new CertifiedField<>();
-        certifiedField.setCertification(Certification.NONE);
-        certifiedField.setValue("42");
 
-        CertifiedField<String> certifiedField1 = new CertifiedField<>();
-        certifiedField1.setCertification(Certification.NONE);
-        certifiedField1.setValue("42");
-
-        CertifiedField<String> certifiedField2 = new CertifiedField<>();
-        certifiedField2.setCertification(Certification.NONE);
-        certifiedField2.setValue("42");
-
-        User user = new User();
-        user.setEmail(certifiedField);
-        user.setFamilyName(certifiedField1);
-        user.setFiscalCode("Fiscal Code");
-        user.setId("42");
-        user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
-        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user);
+        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(dummyUser());
 
         Contract contract = new Contract();
         contract.setPath("Path");
@@ -1525,6 +1505,66 @@ class OnboardingServiceImplTest {
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitutionComplete(onboardingRequest, mock(SelfCareUser.class)));
     }
 
+
+
+    @Test
+    void persistOnboarding_shouldThrowIfOnboardingExists() {
+
+        Onboarding onboarding = dummyOnboarding();
+        onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
+
+        Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setOnboarding(List.of(onboarding, dummyOnboarding()));
+        when(institutionConnector.findById(institution.getId())).thenReturn(institution);
+
+        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(),
+                onboarding.getProductId(), List.of(), new Onboarding()));
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     */
+    @Test
+    void persistOnboarding_whenUserNotExistsOnRegistry() {
+
+        String pricingPlan = "pricingPlan";
+        String productId = "productId";
+        Onboarding onboarding = dummyOnboarding();
+        onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
+
+        Onboarding onboardingToPersist = new Onboarding();
+        onboardingToPersist.setPricingPlan(pricingPlan);
+        onboardingToPersist.setProductId(productId);
+        onboardingToPersist.setBilling(new Billing());
+
+        Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setOnboarding(List.of(onboarding));
+
+        UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        User user = new User();
+        user.setFiscalCode("fiscalCode");
+        user.setId("42");
+        final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
+
+
+        when(institutionConnector.findById(institution.getId())).thenReturn(institution);
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
+
+        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
+        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(user);
+
+        onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist);
+
+        verify(userService, times(1))
+                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
+
+        verify(onboardingDao, times(1))
+                .onboardOperator(any(), any(), any());
+        verifyNoMoreInteractions(userService);
+    }
+
     private OnboardedProduct getOnboardedProduct() {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("START - getUser with id: {}");
@@ -1569,6 +1609,39 @@ class OnboardingServiceImplTest {
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
         return token;
+    }
+
+
+    private User dummyUser() {
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setCertification(Certification.NONE);
+        certifiedField.setValue("42");
+
+        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        certifiedField1.setCertification(Certification.NONE);
+        certifiedField1.setValue("42");
+
+        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        certifiedField2.setCertification(Certification.NONE);
+        certifiedField2.setValue("42");
+
+        User user = new User();
+        user.setEmail(certifiedField);
+        user.setFamilyName(certifiedField1);
+        user.setFiscalCode("Fiscal Code");
+        user.setId("42");
+        user.setName(certifiedField2);
+        user.setWorkContacts(new HashMap<>());
+        return user;
+    }
+
+    private Onboarding dummyOnboarding() {
+        Onboarding onboarding = new Onboarding();
+        onboarding.setBilling(new Billing());
+        onboarding.setTokenId("42");
+        onboarding.setPricingPlan("C3");
+        onboarding.setProductId("42");
+        return onboarding;
     }
 }
 
