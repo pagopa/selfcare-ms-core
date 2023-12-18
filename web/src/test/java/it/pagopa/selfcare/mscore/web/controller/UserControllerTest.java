@@ -7,7 +7,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
@@ -70,9 +69,6 @@ class UserControllerTest {
 
     @Mock
     private UserRelationshipService userRelationshipService;
-
-    @Mock
-    private OnboardingService onboardingService;
 
     @Mock
     private UserService userService;
@@ -306,7 +302,7 @@ class UserControllerTest {
         institution.setOnboarding(List.of(onboarding));
         onboardingInfo.setInstitution(institution);
 
-        when(onboardingService.getOnboardingInfo(anyString(), anyString(), any())).thenReturn(List.of(onboardingInfo));
+        when(userService.getUserInfo(anyString(), anyString(), any())).thenReturn(List.of(onboardingInfo));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/users/id/institution-products?institutionId=test")
@@ -591,5 +587,6 @@ class UserControllerTest {
         Assertions.assertEquals("taxCode", response.getTaxCode());
 
     }
+
 }
 

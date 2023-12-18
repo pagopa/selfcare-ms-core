@@ -19,10 +19,7 @@ import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionUpdateMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionUpdateMapperImpl;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapperImpl;
+import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,6 +73,9 @@ class OnboardingControllerTest {
 
     @Spy
     InstitutionUpdateMapper institutionUpdateMapper = new InstitutionUpdateMapperImpl();
+
+    @Spy
+    InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
 
     ObjectMapper objectMapper = new ObjectMapper();
 

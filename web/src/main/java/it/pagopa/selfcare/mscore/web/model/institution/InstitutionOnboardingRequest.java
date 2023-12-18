@@ -15,6 +15,8 @@ public class InstitutionOnboardingRequest {
     @NotEmpty(message = "at least one user is required")
     private List<Person> users;
 
+    private String tokenId;
+    private String contractPath;
     private String pricingPlan;
     private BillingRequest billing;
 

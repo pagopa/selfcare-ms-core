@@ -126,11 +126,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId, String[] states) {
-        return this.getOnboardingInfo(institutionId, null, states, userId);
-    }
-
-    @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
@@ -160,16 +155,13 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public Institution persistOnboarding(String institutionId, String productId, String pricingPlan, Billing billing, List<UserToOnboard> users) {
+    public Institution persistOnboarding(String institutionId, String productId,List<UserToOnboard> users, Onboarding onboarding) {
 
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
-        Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.ACTIVE);
         onboarding.setProductId(productId);
         onboarding.setCreatedAt(OffsetDateTime.now());
-        onboarding.setPricingPlan(pricingPlan);
-        onboarding.setBilling(billing);
 
         //Verify if onboarding exists, in case onboarding must fail
         final Institution institution = institutionConnector.findById(institutionId);
