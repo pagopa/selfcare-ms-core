@@ -34,5 +34,6 @@ public interface OnboardingResourceMapper {
         return Optional.ofNullable(signContract).orElse(true);
     }
 
+    @Mapping(target = "contract", source = "contractPath")
     Onboarding toOnboarding(InstitutionOnboardingRequest onboardingRequest);
 }
