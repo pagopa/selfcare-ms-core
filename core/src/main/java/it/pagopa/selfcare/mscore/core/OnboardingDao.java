@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -411,6 +412,12 @@ public class OnboardingDao {
         toUpdate.forEach(userId -> userConnector.findAndUpdateState(userId, null, token, token.getStatus()));
         log.debug("rollback second step completed");
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
+    }
+
+    public void rollbackPersistOnboarding(String institutionId, Onboarding onboarding, List<UserToOnboard> users) {
+        institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
+        users.forEach(user -> userConnector.findAndRemoveProduct(user.getId(), institutionId, OnboardingInstitutionUtils.constructOperatorProduct(user, onboarding.getProductId())));
+        log.debug("rollback persistOnboarding");
     }
 
     private void rollbackUser(List<String> toUpdate, List<String> toDelete, String institutionId, Map<String, OnboardedProduct> productMap) {
