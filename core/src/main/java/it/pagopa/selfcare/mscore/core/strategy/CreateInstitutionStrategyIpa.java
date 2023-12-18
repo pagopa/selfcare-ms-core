@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core.strategy;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.constant.Origin;
@@ -87,6 +88,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         GeographicTaxonomies geotax = partyRegistryProxyConnector.getExtByCode(institutionProxyInfo.getIstatCode());
 
         newInstitution.setExternalId(taxCode);
+        newInstitution.setInstitutionType(InstitutionType.PA);
         newInstitution.setOrigin(Origin.IPA.getValue());
         newInstitution.setCreatedAt(OffsetDateTime.now());
         newInstitution.setCity(Optional.ofNullable(geotax.getDescription())
@@ -113,6 +115,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         AreaOrganizzativaOmogenea areaOrganizzativaOmogenea = partyRegistryProxyConnector.getAooById(strategyInput.getSubunitCode());
         GeographicTaxonomies geotax = partyRegistryProxyConnector.getExtByCode(areaOrganizzativaOmogenea.getCodiceComuneISTAT());
         Institution newInstitution = new Institution();
+        newInstitution.setInstitutionType(InstitutionType.PA);
         newInstitution.setOriginId(areaOrganizzativaOmogenea.getId());
         newInstitution.setDescription(areaOrganizzativaOmogenea.getDenominazioneAoo());
         newInstitution.setDigitalAddress(TYPE_MAIL_PEC.equals(areaOrganizzativaOmogenea.getTipoMail1())
@@ -152,6 +155,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         UnitaOrganizzativa unitaOrganizzativa = partyRegistryProxyConnector.getUoById(strategyInput.getSubunitCode());
         GeographicTaxonomies geotax = partyRegistryProxyConnector.getExtByCode(unitaOrganizzativa.getCodiceComuneISTAT());
         Institution newInstitution = new Institution();
+        newInstitution.setInstitutionType(InstitutionType.PA);
         newInstitution.setOriginId(unitaOrganizzativa.getId());
         newInstitution.setDescription(unitaOrganizzativa.getDescrizioneUo());
         newInstitution.setDigitalAddress(TYPE_MAIL_PEC.equals(unitaOrganizzativa.getTipoMail1())
