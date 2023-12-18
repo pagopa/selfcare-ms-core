@@ -1522,6 +1522,47 @@ class OnboardingServiceImplTest {
                 onboarding.getProductId(), List.of(), new Onboarding()));
     }
 
+
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     */
+    @Test
+    void persistOnboarding_shouldRollback() {
+
+        String pricingPlan = "pricingPlan";
+        String productId = "productId";
+        Onboarding onboarding = dummyOnboarding();
+        onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
+
+        Onboarding onboardingToPersist = new Onboarding();
+        onboardingToPersist.setPricingPlan(pricingPlan);
+        onboardingToPersist.setProductId(productId);
+        onboardingToPersist.setBilling(new Billing());
+
+        Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setOnboarding(List.of(onboarding));
+
+        UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        User user = new User();
+        user.setFiscalCode("fiscalCode");
+        user.setId("42");
+        final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
+
+
+        when(institutionConnector.findById(institution.getId())).thenReturn(institution);
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
+
+        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
+        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenThrow(new RuntimeException());
+
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist));
+
+        verify(onboardingDao, times(1))
+                .rollbackPersistOnboarding(any(), any(), any());
+    }
+
     /**
      * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
      */
