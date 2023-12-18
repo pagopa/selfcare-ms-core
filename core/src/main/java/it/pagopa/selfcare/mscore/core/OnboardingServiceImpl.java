@@ -185,7 +185,29 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         log.trace("persistForUpdate end");
 
+        //Prepare data for sending to queue ScContract and ScUsers using method exists
+        //using Token pojo as temporary solution, these methods will be refactored or moved as CDC of institution
+        //https://pagopa.atlassian.net/browse/SELC-3571
+        Token token = new Token();
+        token.setId(onboarding.getTokenId());
+        token.setInstitutionId(institutionId);
+        token.setProductId(productId);
+        token.setUsers(users.stream().map(this::toTokenUser).toList());
+        token.setCreatedAt(onboarding.getCreatedAt());
+        token.setUpdatedAt(onboarding.getUpdatedAt());
+        token.setStatus(onboarding.getStatus());
+        token.setContractSigned(onboarding.getContract());
+        contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
+        userEventService.sendLegalTokenUserNotification(token);
+
         return institutionUpdated;
+    }
+
+    private TokenUser toTokenUser(UserToOnboard user) {
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId(user.getId());
+        tokenUser.setRole(user.getRole());
+        return tokenUser;
     }
 
     public void completeOnboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
