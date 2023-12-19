@@ -4,7 +4,7 @@ import it.pagopa.selfcare.mscore.model.user.User;
 
 public interface UserRegistryConnector {
 
-    User getUserByInternalId(String userId);
+    User getUserByInternalId(String userId, boolean withFiscalCode);
 
     User getUserByFiscalCode(String fiscalCode);
 

@@ -33,6 +33,8 @@ class SchedulerServiceTest {
     @Mock
     private ContractService contractService;
     @Mock
+    private UserEventService userEventService;
+    @Mock
     private SchedulerConfig scheduledConfig;
     @Mock
     private InstitutionConnector institutionConnector;
@@ -49,7 +51,7 @@ class SchedulerServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new SchedulerServiceImpl(contractService, scheduledConfig, tokenConnector, institutionConnector);
+        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
@@ -74,7 +76,7 @@ class SchedulerServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new SchedulerServiceImpl(contractService, scheduledConfig, tokenConnector, institutionConnector);
+        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
@@ -96,7 +98,7 @@ class SchedulerServiceTest {
         final Token token = mockInstance(new Token());
         token.setStatus(RelationshipState.DELETED);
 
-        schedulerService = new SchedulerServiceImpl(contractService, scheduledConfig, tokenConnector, institutionConnector);
+        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenThrow(ResourceNotFoundException.class);

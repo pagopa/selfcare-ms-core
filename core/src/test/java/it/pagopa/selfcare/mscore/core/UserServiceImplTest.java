@@ -141,9 +141,9 @@ class UserServiceImplTest {
         user.setId("42");
         user.setName(certifiedField2);
         user.setWorkContacts(new HashMap<>());
-        when(userRegistryConnector.getUserByInternalId( any())).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalId( any(), true)).thenReturn(user);
         assertSame(user, userServiceImpl.retrieveUserFromUserRegistry("42"));
-        verify(userRegistryConnector).getUserByInternalId( any());
+        verify(userRegistryConnector).getUserByInternalId( any(), true);
     }
 
     /**
@@ -417,7 +417,7 @@ class UserServiceImplTest {
         CertifiedField<String> certMail = new CertifiedField<>();
         certMail.setValue("mail@test.it");
         user.setEmail(certMail);
-        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalId(any(), true)).thenReturn(user);
         Map<String, WorkContact> map = new HashMap<>();
         WorkContact contact = new WorkContact();
         CertifiedField<String> mail = new CertifiedField<>();
@@ -458,7 +458,7 @@ class UserServiceImplTest {
         contact.setEmail(mail);
         map.put("id", contact);
         user.setWorkContacts(map);
-        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalId(any(), true)).thenReturn(user);
 
         User response = userServiceImpl.retrievePerson("userId",null, null);
 

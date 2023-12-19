@@ -19,6 +19,8 @@ import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -57,6 +59,15 @@ public class UserConnectorImpl implements UserConnector {
     @Override
     public List<OnboardedUser> findAll() {
         return repository.findAll().stream().map(userMapper::toOnboardedUser).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OnboardedUser> findAll(Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.find(null, pageable, UserEntity.class)
+                .stream()
+                .map(userMapper::toOnboardedUser)
+                .collect(Collectors.toList());
     }
 
     @Override

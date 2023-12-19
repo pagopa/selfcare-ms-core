@@ -30,4 +30,14 @@ public class SchedulerController {
         log.trace("Scheduler Started");
         schedulerService.startScheduler(size, productsFilter);
     }
+
+    @ApiOperation(value = "", notes = "${swagger.ms-core.scheduler.api.start.users}")
+    @PostMapping(value = "/users")
+    @ResponseStatus(HttpStatus.OK)
+    public void startUsers(@RequestParam(name = "size", required = false)Optional<Integer> size,
+                           @RequestParam(name = "productsFilter")List<String> productsFilter,
+                           @PathVariable(name = "userId", required = false)Optional<String> userId){
+        log.trace("Scheduler started for Users");
+        schedulerService.startUsersScheduler(size, productsFilter, userId);
+    }
 }

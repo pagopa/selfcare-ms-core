@@ -19,6 +19,7 @@ public interface UserConnector {
     OnboardedUser save(OnboardedUser example);
 
     List<OnboardedUser> findAll();
+    List<OnboardedUser> findAll(Integer page, Integer size);
 
     void deleteById(String id);
 

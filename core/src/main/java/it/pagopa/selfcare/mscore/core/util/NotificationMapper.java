@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core.util;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import org.mapstruct.Mapper;
@@ -24,8 +25,14 @@ public interface NotificationMapper {
     @Mapping(source  = "token.id", target = "onboardingTokenId")
     @Mapping(source  = "token.createdAt", target = "createdAt")
     @Mapping(source  = "token.updatedAt", target = "updatedAt")
-    @Mapping(target = "id", expression = "java(UUID.randomUUID().toString())")
     UserNotificationToSend setNotificationDetailsFromToken(Token token, UserToNotify user, QueueEvent eventType);
+
+
+    @Mapping(source = "onboardedProduct.createdAt", target = "createdAt")
+    @Mapping(source = "onboardedProduct.updatedAt", target = "updatedAt")
+    @Mapping(source = "onboardedProduct.tokenId", target = "onboardingTokenId")
+    @Mapping(source = "onboardedProduct.productId", target = "productId")
+    UserNotificationToSend setNotificationDetailsFromOnboardedProduct(UserToNotify user, OnboardedProduct onboardedProduct, String institutionId);
 
     UserNotificationToSend setUpdateUserNotification(String institutionId, UserToNotify user);
 }
