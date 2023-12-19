@@ -117,9 +117,16 @@ public class SchedulerServiceImpl implements SchedulerService{
                 else {
                     do {
                         List<OnboardedUser> users = userConnector.findAll(page, page_size_api.orElse(USER_PAGE_SIZE));
-
+                        sendDataLakeUserNotifications(users, productId);
+                        page += 1;
+                        if (users.size() < USER_PAGE_SIZE) {
+                            nextPage = false;
+                            log.debug("[KAFKA] USER TOTAL NUMBER {}", page * USER_PAGE_SIZE + users.size());
+                        }
                     }while(nextPage);
                 }
+                page_size_api = Optional.empty();
+                schedulerConfig.setScheduler(false);
             }
 
         }

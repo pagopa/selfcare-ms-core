@@ -1567,7 +1567,7 @@ class InstitutionServiceImplTest {
         User user = new User();
         user.setId("id");
         when(userConnector.findByInstitutionId(any())).thenReturn(List.of(userInfo));
-        when(userRegistryConnector.getUserByInternalId(any(), true)).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalId(any(), anyBoolean())).thenReturn(user);
         List<UserInfo> userInfos = institutionServiceImpl.getInstitutionUsers("test");
         assertNotNull(userInfos);
         assertFalse(userInfos.isEmpty());
