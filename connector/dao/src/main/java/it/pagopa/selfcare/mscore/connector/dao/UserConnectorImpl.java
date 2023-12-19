@@ -22,6 +22,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -50,10 +55,16 @@ public class UserConnectorImpl implements UserConnector {
 
     private final UserInstitutionAggregationMapper userInstitutionAggregationMapper;
 
-    public UserConnectorImpl(UserRepository userRepository, UserEntityMapper userMapper, UserInstitutionAggregationMapper userInstitutionAggregationMapper) {
+    private final MongoOperations mongoOperations;
+
+    public UserConnectorImpl(UserRepository userRepository,
+                             UserEntityMapper userMapper,
+                             UserInstitutionAggregationMapper userInstitutionAggregationMapper,
+                             MongoOperations mongoOperations) {
         this.repository = userRepository;
         this.userMapper = userMapper;
         this.userInstitutionAggregationMapper = userInstitutionAggregationMapper;
+        this.mongoOperations = mongoOperations;
     }
 
     @Override
@@ -282,6 +293,34 @@ public class UserConnectorImpl implements UserConnector {
         return repository.find(new Query(criteria), UserEntity.class).stream()
                 .map(userEntity -> userMapper.toUserInfoByFirstInstitution(userEntity, institutionId))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserInstitutionAggregation> getUserInfo(String userId, String institutionId, String[] states) {
+
+        List<Criteria> criterias = new ArrayList<>();
+        criterias.add(Criteria.where("_id").is(userId));
+
+        GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
+                .startWith("$bindings.institutionId")
+                .connectFrom("institutionId")
+                .connectTo("_id");
+
+        UnwindOperation unwindBindings = Aggregation.unwind("$bindings");
+        UnwindOperation unwindProducts = Aggregation.unwind("$bindings.products");
+
+        if(Objects.nonNull(states) && states.length > 0) {
+            criterias.add(Criteria.where("bindings.products.status").in(states));
+        }
+
+        if(Objects.nonNull(institutionId)) {
+            criterias.add(Criteria.where("bindings.institutionId").is(institutionId));
+        }
+
+        MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
+        Aggregation aggregation = Aggregation.newAggregation(matchOperation, unwindBindings, lookup.as("institutions"), unwindProducts);
+
+        return mongoOperations.aggregate(aggregation, "User", UserInstitutionAggregation.class).getMappedResults();
     }
 
     @Override

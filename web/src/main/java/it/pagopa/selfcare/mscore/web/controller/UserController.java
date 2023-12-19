@@ -3,10 +3,11 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.UserEventService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
@@ -40,16 +41,16 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 public class UserController {
 
     private final UserRelationshipService userRelationshipService;
-    private final OnboardingService onboardingService;
     private final UserService userService;
     private final UserEventService userEventService;
 
     private final UserMapper userMapper;
 
     public UserController(UserRelationshipService userRelationshipService,
-                          OnboardingService onboardingService, UserService userService, UserEventService userEventService, UserMapper userMapper) {
+                          UserService userService,
+                          UserEventService userEventService,
+                          UserMapper userMapper) {
         this.userRelationshipService = userRelationshipService;
-        this.onboardingService = onboardingService;
         this.userService = userService;
         this.userEventService = userEventService;
         this.userMapper = userMapper;
@@ -162,9 +163,9 @@ public class UserController {
                                                                              @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
                                                                              @RequestParam(value = "states", required = false) String[] states) {
         CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
-        List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, userId, states);
-        OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
-        log.debug("onboardingInfo result = {}", onboardingInfoResponse);
+        List<OnboardingInfo> onboardingInfoList = userService.getUserInfo(userId, institutionId, states);
+        OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toUserInfoResponse(userId, onboardingInfoList);
+        log.debug("getInstitutionProductsInfo result = {}", onboardingInfoResponse);
         return ResponseEntity.ok().body(onboardingInfoResponse);
     }
 
@@ -240,6 +241,7 @@ public class UserController {
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
      * * Code: 404, Message: Not found, DataType: Problem
      */
+    @Tags({@Tag(name = "support"), @Tag(name = "external-v2"), @Tag(name = "Persons")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.users}", notes = "${swagger.mscore.users}")
     @GetMapping(value = "/users/{id}")

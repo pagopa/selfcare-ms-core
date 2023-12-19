@@ -3,6 +3,8 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
@@ -74,6 +76,7 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
      */
+    @Tags({@Tag(name = "support"), @Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
     @GetMapping
@@ -352,10 +355,7 @@ public class InstitutionController {
         List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
                 .map(users -> users.stream().map(userMapper::toUserToOnboard).toList())
                 .orElse(List.of());
-        Billing billing = Optional.ofNullable(request.getBilling())
-                .map(institutionResourceMapper::billingRequestToBilling)
-                .orElse(null);
-        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), request.getPricingPlan(), billing, usersToOnboard);
+        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), usersToOnboard, onboardingResourceMapper.toOnboarding(request));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(institutionResourceMapper.toInstitutionResponse(institution));
@@ -389,6 +389,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
     @GetMapping(value = "/{id}")
@@ -440,6 +441,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
     @GetMapping(value = "/{institutionId}/onboardings")
@@ -551,6 +553,7 @@ public class InstitutionController {
         return result;
     }
 
+    @Tags({@Tag(name = "support"), @Tag(name = "Institution")})
     @GetMapping(value = "/{institutionId}/users")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.institutions.api.getInstitutionUsers}")

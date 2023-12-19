@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INFO_INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
@@ -126,11 +127,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String userId, String[] states) {
-        return this.getOnboardingInfo(institutionId, null, states, userId);
-    }
-
-    @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
@@ -160,16 +156,13 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public Institution persistOnboarding(String institutionId, String productId, String pricingPlan, Billing billing, List<UserToOnboard> users) {
+    public Institution persistOnboarding(String institutionId, String productId,List<UserToOnboard> users, Onboarding onboarding) {
 
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
-        Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.ACTIVE);
         onboarding.setProductId(productId);
         onboarding.setCreatedAt(OffsetDateTime.now());
-        onboarding.setPricingPlan(pricingPlan);
-        onboarding.setBilling(billing);
 
         //Verify if onboarding exists, in case onboarding must fail
         final Institution institution = institutionConnector.findById(institutionId);
@@ -181,19 +174,49 @@ public class OnboardingServiceImpl implements OnboardingService {
                         CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
         }
 
-        //If not exists, persist a new onboarding for product
-        final Institution institutionUpdated = institutionConnector.findAndUpdate(institutionId, onboarding, List.of(), null);
+        try {
+            //If not exists, persist a new onboarding for product
+            final Institution institutionUpdated = institutionConnector.findAndUpdate(institutionId, onboarding, List.of(), null);
 
 
-        //fillUserIdAndCreateIfNotExist is for adding mail institution to pdv because user already exists there
-        users.forEach(userToOnboard -> fillUserIdAndCreateIfNotExist(userToOnboard, institutionId));
+            //fillUserIdAndCreateIfNotExist is for adding mail institution to pdv because user already exists there
+            users.forEach(userToOnboard -> fillUserIdAndCreateIfNotExist(userToOnboard, institutionId));
 
-        //Add users to onboarding adding to collection users
-        onboardingDao.onboardOperator(institution, productId, users);
+            //Add users to onboarding adding to collection users
+            onboardingDao.onboardOperator(institution, productId, users);
 
-        log.trace("persistForUpdate end");
+            log.trace("persistForUpdate end");
 
-        return institutionUpdated;
+            //Prepare data for sending to queue ScContract and ScUsers using method exists
+            //using Token pojo as temporary solution, these methods will be refactored or moved as CDC of institution
+            //https://pagopa.atlassian.net/browse/SELC-3571
+            Token token = new Token();
+            token.setId(onboarding.getTokenId());
+            token.setInstitutionId(institutionId);
+            token.setProductId(productId);
+            token.setUsers(users.stream().map(this::toTokenUser).toList());
+            token.setCreatedAt(onboarding.getCreatedAt());
+            token.setUpdatedAt(onboarding.getUpdatedAt());
+            token.setStatus(onboarding.getStatus());
+            token.setContractSigned(onboarding.getContract());
+            institution.setOnboarding(List.of(onboarding));
+            contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
+            userEventService.sendLegalTokenUserNotification(token);
+
+            return institutionUpdated;
+        } catch (Exception e) {
+            onboardingDao.rollbackPersistOnboarding(institutionId, onboarding, users);
+            log.info("rollbackPersistOnboarding completed for institution {} and product {}", institutionId, productId);
+            throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage() + " " + e.getMessage(),
+                    ONBOARDING_OPERATION_ERROR.getCode());
+        }
+    }
+
+    private TokenUser toTokenUser(UserToOnboard user) {
+        TokenUser tokenUser = new TokenUser();
+        tokenUser.setUserId(user.getId());
+        tokenUser.setRole(user.getRole());
+        return tokenUser;
     }
 
     public void completeOnboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
