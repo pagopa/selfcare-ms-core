@@ -135,7 +135,7 @@ public class UserEventServiceImpl implements UserEventService {
         UserToNotify userToNotify = new UserToNotify();
         userToNotify.setUserId(userId);
         UserNotificationToSend notification = new UserNotificationToSend();
-        String id = userToNotify.getUserId().concat(notification.getInstitutionId()).concat(notification.getProductId()).concat(userToNotify.getProductRole());
+        String id = userToNotify.getUserId().concat(institutionId);
         notification.setId(id);
         notification.setUpdatedAt(OffsetDateTime.now());
         notification.setInstitutionId(institutionId);
