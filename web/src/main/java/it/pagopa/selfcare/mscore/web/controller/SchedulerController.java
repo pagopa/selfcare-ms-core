@@ -36,7 +36,7 @@ public class SchedulerController {
     @ResponseStatus(HttpStatus.OK)
     public void startUsers(@RequestParam(name = "size", required = false)Optional<Integer> size,
                            @RequestParam(name = "productsFilter")List<String> productsFilter,
-                           @PathVariable(name = "userId", required = false)Optional<String> userId){
+                           @RequestParam(name = "userId", required = false)Optional<String> userId){
         log.trace("Scheduler started for Users");
         schedulerService.startUsersScheduler(size, productsFilter, userId);
     }
