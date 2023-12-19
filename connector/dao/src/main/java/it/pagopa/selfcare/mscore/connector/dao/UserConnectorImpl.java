@@ -288,12 +288,12 @@ public class UserConnectorImpl implements UserConnector {
     public List<UserInstitutionAggregation> getUserInfo(String userId, String institutionId, String[] states) {
 
         List<Criteria> criterias = new ArrayList<>();
-        criterias.add(Criteria.where("_id").is(userId));
+        MatchOperation matchUserId = Aggregation.match(Criteria.where("_id").is(userId));
 
-        GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
+        GraphLookupOperation lookup = Aggregation.graphLookup("Institution")
                 .startWith("$bindings.institutionId")
                 .connectFrom("institutionId")
-                .connectTo("_id");
+                .connectTo("_id").as("institutions");
 
         UnwindOperation unwindBindings = Aggregation.unwind("$bindings");
         UnwindOperation unwindProducts = Aggregation.unwind("$bindings.products");
@@ -306,8 +306,9 @@ public class UserConnectorImpl implements UserConnector {
             criterias.add(Criteria.where("bindings.institutionId").is(institutionId));
         }
 
+        MatchOperation matchInstitutionExist = Aggregation.match(Criteria.where("institutions").size(1));
         MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
-        Aggregation aggregation = Aggregation.newAggregation(matchOperation, unwindBindings, lookup.as("institutions"), unwindProducts);
+        Aggregation aggregation = Aggregation.newAggregation(matchUserId, unwindBindings, lookup, matchInstitutionExist, unwindProducts, matchOperation);
 
         return mongoOperations.aggregate(aggregation, "User", UserInstitutionAggregation.class).getMappedResults();
     }
