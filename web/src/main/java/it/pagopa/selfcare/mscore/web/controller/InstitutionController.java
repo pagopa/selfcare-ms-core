@@ -124,8 +124,12 @@ public class InstitutionController {
             throw new ValidationException("subunitCode and subunitType must both be evaluated.");
         }
 
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = Optional.ofNullable(institutionFromIpaPost.getGeographicTaxonomies())
+                .map(geoTaxonomies -> geoTaxonomies.stream().map(institutionResourceMapper::toInstitutionGeographicTaxonomies).toList())
+                .orElse(List.of());
+
         Institution saved = institutionService.createInstitutionFromIpa(institutionFromIpaPost.getTaxCode(),
-                institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode());
+                institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode(), geographicTaxonomies);
         return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
     }
 

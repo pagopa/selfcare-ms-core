@@ -6038,6 +6038,12 @@
         "title" : "InstitutionFromIpaPost",
         "type" : "object",
         "properties" : {
+          "geographicTaxonomies" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/GeoTaxonomies"
+            }
+          },
           "subunitCode" : {
             "type" : "string"
           },

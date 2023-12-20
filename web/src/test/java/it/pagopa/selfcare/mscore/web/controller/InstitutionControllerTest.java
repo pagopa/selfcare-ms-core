@@ -20,10 +20,7 @@ import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -342,6 +339,10 @@ class InstitutionControllerTest {
         institutionFromIpaPost.setTaxCode("123456");
         institutionFromIpaPost.setSubunitType(InstitutionPaSubunitType.AOO);
         institutionFromIpaPost.setSubunitCode("1234");
+        GeoTaxonomies geoTaxonomies = new GeoTaxonomies();
+        geoTaxonomies.setCode("code");
+        geoTaxonomies.setDesc("desc");
+        institutionFromIpaPost.setGeographicTaxonomies(List.of(geoTaxonomies));
         String content = objectMapper.writeValueAsString(institutionFromIpaPost);
 
         Institution institution = TestUtils.createSimpleInstitutionPA();
@@ -350,7 +351,7 @@ class InstitutionControllerTest {
         institution.setParentDescription("parentDescription");
         institution.setRootParentId("rootParentId");
 
-        when(institutionService.createInstitutionFromIpa(any(), any(), any())).thenReturn(institution);
+        when(institutionService.createInstitutionFromIpa(any(), any(), any(), any())).thenReturn(institution);
 
         //Then
         MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
@@ -362,6 +363,13 @@ class InstitutionControllerTest {
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"externalId\":\"42\",\"origin\":\"MOCK\",\"originId\":\"Ipa Code\",\"description\":\"The characteristics of someone or something\",\"institutionType\":\"PA\",\"digitalAddress\":\"42 Main St\",\"address\":\"42 Main St\",\"zipCode\":\"21654\",\"taxCode\":\"Tax Code\",\"geographicTaxonomies\":[],\"attributes\":[],\"onboarding\":[],\"paymentServiceProvider\":{\"abiCode\":\"Abi Code\",\"businessRegisterNumber\":\"42\",\"legalRegisterNumber\":\"42\",\"legalRegisterName\":\"Legal Register Name\",\"vatNumberGroup\":true},\"dataProtectionOfficer\":{\"address\":\"42 Main St\",\"email\":\"jane.doe@example.org\",\"pec\":\"Pec\"},\"rootParent\":{\"description\":\"parentDescription\",\"id\":\"rootParentId\"},\"rea\":\"Rea\",\"shareCapital\":\"Share Capital\",\"imported\":false,\"subunitCode\":\"1234\",\"subunitType\":\"AOO\"}"));
+
+        ArgumentCaptor<List<InstitutionGeographicTaxonomies>> captorGeo = ArgumentCaptor.forClass(List.class);
+        verify(institutionService, times(1))
+                .createInstitutionFromIpa(any(),any(),any(),captorGeo.capture());
+        assertEquals(institutionFromIpaPost.getGeographicTaxonomies().size(), captorGeo.getValue().size());
+        assertEquals(geoTaxonomies.getCode(), captorGeo.getValue().get(0).getCode());
+        assertEquals(geoTaxonomies.getDesc(), captorGeo.getValue().get(0).getDesc());
     }
 
     /**
