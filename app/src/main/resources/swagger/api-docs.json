@@ -4572,6 +4572,16 @@
             "format" : "int32"
           }
         }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "page",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
           "name" : "productsFilter",
           "in" : "query",
           "description" : "productsFilter",
