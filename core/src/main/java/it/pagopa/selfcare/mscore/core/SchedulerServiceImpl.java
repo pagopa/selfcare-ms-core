@@ -136,7 +136,7 @@ public class SchedulerServiceImpl implements SchedulerService{
     @Override
     public void startScheduler(Optional<Integer> size, List<String> productsFilter) {
         this.page_size_api = size;
-        this.productsFilter = Optional.of(productsFilter);
+        this.productsFilter = Optional.ofNullable(productsFilter);
         schedulerConfig.setScheduler(true);
         regenerateQueueNotifications();
     }
@@ -144,7 +144,7 @@ public class SchedulerServiceImpl implements SchedulerService{
     @Override
     public void startUsersScheduler(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
         this.page_size_api = size;
-        this.productsFilter = Optional.of(productsFilter);
+        this.productsFilter = Optional.ofNullable(productsFilter);
         this.page=page;
         regenerateUserNotifications(userId);
     }

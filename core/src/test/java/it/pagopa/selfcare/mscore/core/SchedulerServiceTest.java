@@ -2,12 +2,14 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.SchedulerConfig;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +34,9 @@ class SchedulerServiceTest {
     private SchedulerServiceImpl schedulerService;
     @Mock
     private ContractService contractService;
+
+    @Mock
+    private UserConnector userConnector;
     @Mock
     private UserEventService userEventService;
     @Mock
@@ -123,5 +128,52 @@ class SchedulerServiceTest {
     void productsFilterNotPresent(){
         Executable executable = () -> schedulerService.startScheduler(Optional.of(1), null);
         verifyNoInteractions(tokenConnector, institutionConnector, contractService);
+    }
+
+    @Test
+    void startUserScheduler(){
+        //given
+        final List<String> productIds = List.of("productId");
+        final Optional<Integer> size = Optional.of(1);
+        final Optional<Integer> page = Optional.of(0);
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        when(userConnector.findAll(any(), any(), any())).thenReturn(List.of(onboardedUser));
+        //when
+        Executable executable = () -> schedulerService.startUsersScheduler(size, page, productIds, Optional.empty());
+        //then
+        assertDoesNotThrow(executable);
+        verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
+    }
+
+    @Test
+    void startUserScheduler_singleUser(){
+        //given
+        final List<String> productIds = List.of("productId");
+        final Optional<Integer> size = Optional.of(1);
+        final Optional<Integer> page = Optional.of(0);
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        final Optional<String> userId = Optional.of("userId");
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        //when
+        Executable executable = () -> schedulerService.startUsersScheduler(size, page, productIds, userId);
+        //then
+        assertDoesNotThrow(executable);
+        verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
+
+    }
+
+    @Test
+    void startUserScheduler_noProducts(){
+        //given
+        final Optional<Integer> size = Optional.of(1);
+        final Optional<Integer> page = Optional.of(0);
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        final Optional<String> userId = Optional.of("userId");
+        //when
+        Executable executable = () -> schedulerService.startUsersScheduler(size, page, null, null);
+        //then
+        assertDoesNotThrow(executable);
+        verifyNoInteractions(userEventService, userConnector);
+
     }
 }
