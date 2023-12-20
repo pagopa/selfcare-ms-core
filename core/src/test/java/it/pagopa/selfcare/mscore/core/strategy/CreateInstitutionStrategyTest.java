@@ -51,6 +51,7 @@ class CreateInstitutionStrategyTest {
 
     private static final AreaOrganizzativaOmogenea dummyAreaOrganizzativaOmogenea;
     private static final GeographicTaxonomies dummyGeotaxonomies;
+    private static final InstitutionGeographicTaxonomies dummyInstitutionGeotaxonomies;
 
     static {
         dummyInstitutionProxyInfo = new InstitutionProxyInfo();
@@ -87,6 +88,10 @@ class CreateInstitutionStrategyTest {
         dummyGeotaxonomies.setDescription("nomeCittà - COMUNE");
         dummyGeotaxonomies.setProvinceAbbreviation("proAbbrv");
         dummyGeotaxonomies.setCountryAbbreviation("countryAbbrv");
+
+        dummyInstitutionGeotaxonomies = new InstitutionGeographicTaxonomies();
+        dummyInstitutionGeotaxonomies.setCode("code");
+        dummyInstitutionGeotaxonomies.setDesc("desc");
     }
 
     private UnitaOrganizzativa dummyUnitaOrganizzativa() {
@@ -245,6 +250,7 @@ class CreateInstitutionStrategyTest {
                         .taxCode(dummyAreaOrganizzativaOmogenea.getCodiceFiscaleEnte())
                         .subunitType(InstitutionPaSubunitType.AOO)
                         .subunitCode(dummyAreaOrganizzativaOmogenea.getCodAoo())
+                        .geographicTaxonomies(List.of(dummyInstitutionGeotaxonomies))
                         .build());
 
         //Then
@@ -259,6 +265,9 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.AOO.name());
         assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
         assertThat(actual.getCity()).isEqualTo(dummyGeotaxonomies.getDescription().replace(" - COMUNE", ""));
+        assertThat(actual.getGeographicTaxonomies().size()).isEqualTo(1);
+        assertThat(actual.getGeographicTaxonomies().get(0).getCode()).isEqualTo(dummyInstitutionGeotaxonomies.getCode());
+
         verify(institutionConnector, times(2)).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
         verify(partyRegistryProxyConnector).getCategory(any(), any());
