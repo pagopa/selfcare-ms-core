@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapperImpl;
 import it.pagopa.selfcare.mscore.core.util.model.DummyUser;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
@@ -462,6 +463,30 @@ class UserEventServiceTest {
         verify(userRegistryConnector, times(1)).getUserByInternalId(userId, false);
         verifyNoInteractions(kafkaTemplateUsers);
 
+    }
+
+    @Test
+    void sendOnboardedUserNotifications_userNotFound(){
+        //given
+        final String userId = UUID.randomUUID().toString();
+        final String institutionId = UUID.randomUUID().toString();
+        final String productId = "product-test";
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        onboardedUser.setId(userId);
+        final OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setProductId(productId);
+        final UserBinding userBinding = mockInstance(new UserBinding());
+        final User user = new DummyUser(institutionId);
+        user.setId(userId);
+        userBinding.setInstitutionId(institutionId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userRegistryConnector.getUserByInternalId(any(), anyBoolean())).thenThrow(ResourceNotFoundException.class);
+        //when
+        Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
+        //then
+        assertDoesNotThrow(executable);
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, false);
     }
 
 }

@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.UserToNotify;
@@ -95,23 +96,26 @@ public class UserEventServiceImpl implements UserEventService {
 
     @Override
     public void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId) {
-
-        User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId(), false);
-        onboardedUser.getBindings().forEach(userBinding -> {
-            for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
-                if (productId.equals(onboardedProduct.getProductId()) && ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus())) {
-                    UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromOnboardedProduct(toUserToNotify(user.getId(), userBinding.getInstitutionId(), user, onboardedProduct), onboardedProduct, userBinding.getInstitutionId());
-                    String id = user.getId().concat("_"+notification.getInstitutionId()).concat("_"+notification.getProductId()).concat("_"+onboardedProduct.getProductRole());
-                    notification.setId(id);
-                    try {
-                        String msg = mapper.writeValueAsString(notification);
-                        sendUserNotification(msg, user.getId());
-                    } catch (JsonProcessingException e) {
-                        log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getId());
+        try {
+            User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId(), false);
+            onboardedUser.getBindings().forEach(userBinding -> {
+                for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
+                    if (productId.equals(onboardedProduct.getProductId()) && ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus())) {
+                        UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromOnboardedProduct(toUserToNotify(user.getId(), userBinding.getInstitutionId(), user, onboardedProduct), onboardedProduct, userBinding.getInstitutionId());
+                        String id = user.getId().concat("_" + notification.getInstitutionId()).concat("_" + notification.getProductId()).concat("_" + onboardedProduct.getProductRole());
+                        notification.setId(id);
+                        try {
+                            String msg = mapper.writeValueAsString(notification);
+                            sendUserNotification(msg, user.getId());
+                        } catch (JsonProcessingException e) {
+                            log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getId());
+                        }
                     }
                 }
-            }
-        });
+            });
+        }catch (ResourceNotFoundException e){
+            log.error("Error while operating on user: {}", onboardedUser.getId());
+        }
 
     }
 
