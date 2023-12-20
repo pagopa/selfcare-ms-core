@@ -10,4 +10,5 @@ public interface UserRegistryConnector {
 
     User persistUserUsingPatch(String name, String familyName, String fiscalCode, String email, String institutionId);
 
+    User persistUserWorksContractUsingPatch(String fiscalCode, String email, String institutionId);
 }

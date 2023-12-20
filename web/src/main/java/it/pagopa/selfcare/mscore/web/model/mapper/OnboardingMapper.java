@@ -30,6 +30,20 @@ public class OnboardingMapper {
         return contract;
     }
 
+    public static OnboardingInfoResponse toUserInfoResponse(String userId, List<OnboardingInfo> onboardingInfos) {
+        OnboardingInfoResponse response = new OnboardingInfoResponse();
+        response.setUserId(userId);
+        List<OnboardedInstitutionResponse> institutionResponseList = new ArrayList<>();
+        if(Objects.nonNull(onboardingInfos)) {
+            onboardingInfos.forEach(onboardingInfo -> {
+                institutionResponseList.add(constructOnboardedInstitutionResponse(onboardingInfo.getInstitution(),
+                        onboardingInfo.getBinding().getProducts()));
+            });
+        }
+        response.setInstitutions(institutionResponseList);
+        return response;
+    }
+
     public static OnboardingInfoResponse toOnboardingInfoResponse(String userId, List<OnboardingInfo> onboardingInfos) {
         OnboardingInfoResponse response = new OnboardingInfoResponse();
         response.setUserId(userId);
@@ -52,6 +66,14 @@ public class OnboardingMapper {
     }
 
     private static OnboardedInstitutionResponse constructOnboardedInstitutionResponse(Institution institution, OnboardedProduct product, Onboarding onboarding) {
+        OnboardedInstitutionResponse institutionResponse = constructOnboardedInstitutionResponse(institution, product);
+        institutionResponse.setPricingPlan(onboarding.getPricingPlan());
+        Billing billing = InstitutionMapperCustom.getBillingFromOnboarding(onboarding, institution);
+        institutionResponse.setBilling(billing);
+        return institutionResponse;
+    }
+
+    private static OnboardedInstitutionResponse constructOnboardedInstitutionResponse(Institution institution, OnboardedProduct product) {
         OnboardedInstitutionResponse institutionResponse = new OnboardedInstitutionResponse();
         institutionResponse.setId(institution.getId());
         institutionResponse.setExternalId(institution.getExternalId());
@@ -69,9 +91,6 @@ public class OnboardingMapper {
         if (institution.getAttributes() != null) {
             institutionResponse.setAttributes(InstitutionMapperCustom.toAttributeResponse(institution.getAttributes()));
         }
-        institutionResponse.setPricingPlan(onboarding.getPricingPlan());
-        Billing billing = InstitutionMapperCustom.getBillingFromOnboarding(onboarding, institution);
-        institutionResponse.setBilling(billing);
         ProductInfo productInfo = new ProductInfo();
         productInfo.setRole(product.getProductRole());
         productInfo.setId(product.getProductId());

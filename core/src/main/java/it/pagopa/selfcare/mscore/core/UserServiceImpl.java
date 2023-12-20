@@ -9,16 +9,14 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.USER_NOT_FOUND_ERROR;
@@ -113,6 +111,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User persistWorksContractToUserRegistry(String fiscalCode, String email, String institutionId) {
+        return userRegistryConnector.persistUserWorksContractUsingPatch(fiscalCode ,email , institutionId);
+    }
+
+    @Override
     public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
         return userConnector.findUserInstitutionAggregation(filter);
     }
@@ -130,6 +133,14 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
         }
         return userRegistryConnector.getUserByInternalId(userId);
+    }
+
+    @Override
+    public List<OnboardingInfo> getUserInfo(String userId, String institutionId, String[] states) {
+        List<OnboardingInfo> onboardingInfos = new ArrayList<>();
+        List<UserInstitutionAggregation> userInfos = userConnector.getUserInfo(userId, institutionId, states);
+        userInfos.forEach(userBinding -> onboardingInfos.add(new OnboardingInfo(userId, userBinding.getInstitutions().get(0), userBinding.getBindings())));
+        return onboardingInfos;
     }
 
     private boolean verifyBindings(OnboardedUser onboardedUser, String productId) {

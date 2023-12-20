@@ -3,18 +3,19 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
-import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.ValidInstitution;
+import it.pagopa.selfcare.mscore.core.OnboardingService;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -34,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,17 +45,19 @@ import java.util.stream.Collectors;
 public class InstitutionController {
 
     private final InstitutionService institutionService;
+    private final OnboardingService onboardingService;
     private final OnboardingResourceMapper onboardingResourceMapper;
     private final InstitutionResourceMapper institutionResourceMapper;
     private final BrokerMapper brokerMapper;
     private final UserMapper userMapper;
 
     public InstitutionController(InstitutionService institutionService,
-                                 OnboardingResourceMapper onboardingResourceMapper,
+                                 OnboardingService onboardingService, OnboardingResourceMapper onboardingResourceMapper,
                                  InstitutionResourceMapper institutionResourceMapper,
                                  BrokerMapper brokerMapper,
                                  UserMapper userMapper) {
         this.institutionService = institutionService;
+        this.onboardingService = onboardingService;
         this.onboardingResourceMapper = onboardingResourceMapper;
         this.institutionResourceMapper = institutionResourceMapper;
         this.userMapper = userMapper;
@@ -72,9 +76,10 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
      */
+    @Tags({@Tag(name = "support"), @Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
-    @GetMapping(value = "/")
+    @GetMapping
     public ResponseEntity<InstitutionsResponse> getInstitutions(@ApiParam("${swagger.mscore.institutions.model.taxCode}")
                                                                 @RequestParam(value = "taxCode", required = false) String taxCode,
                                                                 @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
@@ -111,7 +116,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-ipa}", notes = "${swagger.mscore.institution.create.from-ipa}")
-    @PostMapping(value = "/from-ipa/")
+    @PostMapping(value = "/from-ipa")
     public ResponseEntity<InstitutionResponse> createInstitutionFromIpa(@RequestBody @Valid InstitutionFromIpaPost institutionFromIpaPost) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
@@ -136,7 +141,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-anac}", notes = "${swagger.mscore.institution.create.from-anac}")
-    @PostMapping(value = "/from-anac/")
+    @PostMapping(value = "/from-anac")
     public ResponseEntity<InstitutionResponse> createInstitutionFromAnac(@RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionFromAnac(InstitutionMapperCustom.toInstitution(institution, null));
@@ -155,7 +160,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-ivass}", notes = "${swagger.mscore.institution.create.from-ivass}")
-    @PostMapping(value = "/from-ivass/")
+    @PostMapping(value = "/from-ivass")
     public ResponseEntity<InstitutionResponse> createInstitutionFromIvass(@RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionFromIvass(InstitutionMapperCustom.toInstitution(institution, null));
@@ -174,7 +179,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-pda}", notes = "${swagger.mscore.institution.create.from-ipa}")
-    @PostMapping(value = "/from-pda/")
+    @PostMapping(value = "/from-pda")
     public ResponseEntity<InstitutionResponse> createInstitutionFromPda(@RequestBody @Valid PdaInstitutionRequest institutionRequest) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
@@ -194,7 +199,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create.from-infocamere}", notes = "${swagger.mscore.institution.create.from-infocamere}")
-    @PostMapping(value = "/from-infocamere/")
+    @PostMapping(value = "/from-infocamere")
     public ResponseEntity<InstitutionResponse> createInstitutionFromInfocamere(@RequestBody @Valid InstitutionRequest institutionRequest) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
 
@@ -235,7 +240,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.institution.create}", notes = "${swagger.mscore.institution.create}")
-    @PostMapping(value = "/")
+    @PostMapping
     public ResponseEntity<InstitutionResponse> createInstitution(@RequestBody @Valid InstitutionRequest institution) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitution(InstitutionMapperCustom.toInstitution(institution, null));
@@ -333,6 +338,30 @@ public class InstitutionController {
     }
 
     /**
+     * The function persist user on registry if not exists and add relation with institution-product
+     *
+     * @param request OnboardingInstitutionUsersRequest
+     * @return no content
+     * * Code: 204, Message: successful operation
+     * * Code: 404, Message: Not found, DataType: Problem
+     * * Code: 400, Message: Invalid request, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
+    @PostMapping(value = "/{id}/onboarding")
+    public ResponseEntity<InstitutionResponse> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
+                                                      @PathVariable("id") String id) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
+        List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
+                .map(users -> users.stream().map(userMapper::toUserToOnboard).toList())
+                .orElse(List.of());
+        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), usersToOnboard, onboardingResourceMapper.toOnboarding(request));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(institutionResourceMapper.toInstitutionResponse(institution));
+    }
+
+    /**
      * The function return geographic taxonomies related to institution
      *
      * @param id String
@@ -360,6 +389,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
     @GetMapping(value = "/{id}")
@@ -411,6 +441,7 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
+    @Tags({@Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution.info}", notes = "${swagger.mscore.institution.info}")
     @GetMapping(value = "/{institutionId}/onboardings")
@@ -522,6 +553,7 @@ public class InstitutionController {
         return result;
     }
 
+    @Tags({@Tag(name = "support"), @Tag(name = "Institution")})
     @GetMapping(value = "/{institutionId}/users")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.mscore.institutions.api.getInstitutionUsers}")

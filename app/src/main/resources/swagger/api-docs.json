@@ -715,7 +715,7 @@
     },
     "/delegations" : {
       "get" : {
-        "tags" : [ "Delegation" ],
+        "tags" : [ "Delegation", "external-v2", "support" ],
         "summary" : "Retrieve institution's delegations",
         "description" : "Retrieve institution's delegations",
         "operationId" : "getDelegationsUsingGET",
@@ -1442,9 +1442,9 @@
         } ]
       }
     },
-    "/institutions/" : {
+    "/institutions" : {
       "get" : {
-        "tags" : [ "Institution" ],
+        "tags" : [ "Institution", "external-v2", "support" ],
         "summary" : "Gets institutions filtering by taxCode and/or subunitCode",
         "description" : "Gets institutions filtering by taxCode and/or subunitCode",
         "operationId" : "getInstitutionsUsingGET",
@@ -1582,7 +1582,7 @@
         } ]
       }
     },
-    "/institutions/from-anac/" : {
+    "/institutions/from-anac" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "${swagger.mscore.institution.create.from-anac}",
@@ -1644,7 +1644,7 @@
         } ]
       }
     },
-    "/institutions/from-infocamere/" : {
+    "/institutions/from-infocamere" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "create an institution from infocamere registry",
@@ -1706,7 +1706,7 @@
         } ]
       }
     },
-    "/institutions/from-ipa/" : {
+    "/institutions/from-ipa" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "create an institution from ipa registry",
@@ -1768,7 +1768,7 @@
         } ]
       }
     },
-    "/institutions/from-ivass/" : {
+    "/institutions/from-ivass" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "create an institution from ivass CSV",
@@ -1830,7 +1830,7 @@
         } ]
       }
     },
-    "/institutions/from-pda/" : {
+    "/institutions/from-pda" : {
       "post" : {
         "tags" : [ "Institution" ],
         "summary" : "${swagger.mscore.institution.create.from-pda}",
@@ -2244,7 +2244,7 @@
     },
     "/institutions/{id}" : {
       "get" : {
-        "tags" : [ "Institution" ],
+        "tags" : [ "Institution", "external-v2" ],
         "summary" : "Gets the corresponding institution using internal institution id",
         "description" : "Gets the corresponding institution using internal institution id",
         "operationId" : "retrieveInstitutionByIdUsingGET",
@@ -2466,6 +2466,78 @@
         } ]
       }
     },
+    "/institutions/{id}/onboarding" : {
+      "post" : {
+        "tags" : [ "Institution" ],
+        "summary" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
+        "description" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
+        "operationId" : "onboardingInstitutionUsingPOST",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "id",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InstitutionOnboardingRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/institutions/{id}/products" : {
       "get" : {
         "tags" : [ "Institution" ],
@@ -2639,7 +2711,7 @@
     },
     "/institutions/{institutionId}/onboardings" : {
       "get" : {
-        "tags" : [ "Institution" ],
+        "tags" : [ "Institution", "external-v2" ],
         "summary" : "${swagger.mscore.institution.info}",
         "description" : "${swagger.mscore.institution.info}",
         "operationId" : "getOnboardingsInstitutionUsingGET",
@@ -2776,7 +2848,7 @@
     },
     "/institutions/{institutionId}/users" : {
       "get" : {
-        "tags" : [ "Institution" ],
+        "tags" : [ "Institution", "support" ],
         "summary" : "getInstitutionUsers",
         "description" : "Retrieve institution's users",
         "operationId" : "getInstitutionUsersUsingGET",
@@ -3821,9 +3893,9 @@
     "/onboarding/institution" : {
       "post" : {
         "tags" : [ "Onboarding" ],
-        "summary" : "create a new Token (contract), and update institution and users data",
-        "description" : "create a new Token (contract), and update institution and users data",
-        "operationId" : "onboardingInstitutionUsingPOST",
+        "summary" : "Responsible for saving the association between an institution and a product. It also creates occurrences in the Users collection as part of this process.",
+        "description" : "Responsible for saving the association between an institution and a product. It also creates occurrences in the Users collection as part of this process.",
+        "operationId" : "onboardingInstitutionUsingPOST_1",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -4280,7 +4352,7 @@
     },
     "/onboarding/users" : {
       "post" : {
-        "tags" : [ "Onboarding" ],
+        "tags" : [ "Onboarding", "support" ],
         "summary" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
         "description" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
         "operationId" : "onboardingInstitutionUsersUsingPOST",
@@ -4485,7 +4557,7 @@
     },
     "/tokens/products/{productId}" : {
       "get" : {
-        "tags" : [ "Token" ],
+        "tags" : [ "Token", "external-v2" ],
         "summary" : "${swagger.mscore.tokens.findFromProduct}",
         "description" : "${swagger.mscore.tokens.findFromProduct}",
         "operationId" : "findFromProductUsingGET_1",
@@ -4901,7 +4973,7 @@
     },
     "/users/{id}" : {
       "get" : {
-        "tags" : [ "Persons" ],
+        "tags" : [ "Persons", "external-v2", "support" ],
         "summary" : "Retrieves user given userId and optional ProductId",
         "description" : "Retrieves user given userId and optional ProductId",
         "operationId" : "getUserInfoUsingGET",
@@ -6072,6 +6144,33 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/InstitutionOnboardingResponse"
+            }
+          }
+        }
+      },
+      "InstitutionOnboardingRequest" : {
+        "title" : "InstitutionOnboardingRequest",
+        "type" : "object",
+        "properties" : {
+          "billing" : {
+            "$ref" : "#/components/schemas/BillingRequest"
+          },
+          "contractPath" : {
+            "type" : "string"
+          },
+          "pricingPlan" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "tokenId" : {
+            "type" : "string"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Person"
             }
           }
         }

@@ -248,6 +248,7 @@ class CreateInstitutionStrategyTest {
                         .build());
 
         //Then
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PA);
         assertThat(actual.getOriginId()).isEqualTo(dummyAreaOrganizzativaOmogenea.getId());
         assertThat(actual.getDescription()).isEqualTo(dummyAreaOrganizzativaOmogenea.getDenominazioneAoo());
         assertThat(actual.getDigitalAddress()).isEqualTo(dummyInstitutionProxyInfo.getDigitalAddress());
@@ -294,6 +295,7 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getOriginId()).isEqualTo(dummyUnitaOrganizzativa.getId());
         assertThat(actual.getDescription()).isEqualTo(dummyUnitaOrganizzativa.getDescrizioneUo());
 
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PA);
         assertThat(actual.getDigitalAddress()).isEqualTo(dummyInstitutionProxyInfo.getDigitalAddress());
         assertThat(actual.getAddress()).isEqualTo(dummyUnitaOrganizzativa.getIndirizzo());
         assertThat(actual.getZipCode()).isEqualTo(dummyUnitaOrganizzativa.getCAP());
@@ -371,6 +373,7 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getOriginId()).isEqualTo(dummyUnitaOrganizzativa.getId());
         assertThat(actual.getDescription()).isEqualTo(dummyUnitaOrganizzativa.getDescrizioneUo());
 
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PA);
         assertThat(actual.getDigitalAddress()).isEqualTo(dummyInstitutionProxyInfo.getDigitalAddress());
         assertThat(actual.getAddress()).isEqualTo(dummyUnitaOrganizzativa.getIndirizzo());
         assertThat(actual.getZipCode()).isEqualTo(dummyUnitaOrganizzativa.getCAP());

@@ -1111,6 +1111,33 @@ class OnboardingDaoTest {
         Assertions.assertThrows(InvalidRequestException.class, () -> onboardingDao.rollbackSecondStepOfUpdate(toUpdate, institution, token));
     }
 
+    UserToOnboard dummyUserToOnboard() {
+        UserToOnboard user = new UserToOnboard();
+        user.setId("id");
+        return user;
+    }
+
+    @Test
+    void rollbackPersistOnboarding() {
+
+        final String institutionId = "institutionId";
+        final Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("productId");
+        final List<UserToOnboard> users = new ArrayList<>();
+        UserToOnboard user = dummyUserToOnboard();
+        users.add(user);
+
+        onboardingDao.rollbackPersistOnboarding(institutionId, onboarding, users);
+
+        verify(institutionConnector, times(1))
+                .findAndRemoveOnboarding(institutionId, onboarding);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(userConnector, times(1))
+                .findAndRemoveProduct(captor.capture(), any(), any());
+        assertEquals(user.getId(), captor.getValue());
+    }
+
     /**
      * Method under test: {@link OnboardingDao#updateUserProductState(OnboardedUser, String, RelationshipState)}
      */

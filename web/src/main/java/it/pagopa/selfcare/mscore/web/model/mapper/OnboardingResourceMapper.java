@@ -1,9 +1,12 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 
+import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingUsersRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionOnboardingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.OnboardingResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
@@ -30,4 +33,7 @@ public interface OnboardingResourceMapper {
     default Boolean mapSignContract(Boolean signContract) {
         return Optional.ofNullable(signContract).orElse(true);
     }
+
+    @Mapping(target = "contract", source = "contractPath")
+    Onboarding toOnboarding(InstitutionOnboardingRequest onboardingRequest);
 }
