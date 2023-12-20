@@ -105,7 +105,7 @@ public class SchedulerServiceImpl implements SchedulerService{
     }
 
     @Async
-    private void regenerateUserNotifications(Optional<String> userId){
+    public void regenerateUserNotifications(Optional<String> userId){
         if (productsFilter.isPresent()){
             for (String productId: productsFilter.get()){
                 boolean nextPage = true;
