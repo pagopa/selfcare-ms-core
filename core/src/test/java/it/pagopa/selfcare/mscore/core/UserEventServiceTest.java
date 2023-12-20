@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapperImpl;
@@ -23,6 +24,8 @@ import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -376,5 +379,89 @@ class UserEventServiceTest {
         checkNotNullFields(message, "onboardingTokenId", "productId", "user.name", "user.familyName", "user.fiscalCode", "user.email", "user.productRole", "user.role", "createdAt");
     }
 
+    @ParameterizedTest
+    @EnumSource(value = RelationshipState.class, names = {"ACTIVE", "DELETED", "SUSPENDED"})
+    void sendOnboardedUserNotification(RelationshipState state){
+        //given
+        final String userId = UUID.randomUUID().toString();
+        final String institutionId = UUID.randomUUID().toString();
+        final String productId = "product-test";
+        when(kafkaTemplateUsers.send(any(), any()))
+                .thenReturn(mockFuture);
+        doAnswer(invocationOnMock -> {
+            ListenableFutureCallback callback = invocationOnMock.getArgument(0);
+            callback.onSuccess(mockSendResult);
+            return null;
+        }).when(mockFuture).addCallback(any(ListenableFutureCallback.class));
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        onboardedUser.setId(userId);
+        final OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setProductId(productId);
+        onboardedProduct.setStatus(state);
+        final UserBinding userBinding = mockInstance(new UserBinding());
+        final User user = new DummyUser(institutionId);
+        user.setId(userId);
+        userBinding.setInstitutionId(institutionId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userRegistryConnector.getUserByInternalId(any(), anyBoolean())).thenReturn(user);
+        //when
+        Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
+        //then
+        assertDoesNotThrow(executable);
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, false);
+    }
+
+    @Test
+    void sendOnboardedUserNotification1(){
+        //given
+        final String userId = UUID.randomUUID().toString();
+        final String institutionId = UUID.randomUUID().toString();
+        final String productId = "product-test";
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        onboardedUser.setId(userId);
+        final OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setProductId(productId);
+        onboardedProduct.setStatus(RelationshipState.PENDING);
+        final UserBinding userBinding = mockInstance(new UserBinding());
+        final User user = new DummyUser(institutionId);
+        user.setId(userId);
+        userBinding.setInstitutionId(institutionId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userRegistryConnector.getUserByInternalId(any(), anyBoolean())).thenReturn(user);
+        //when
+        Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
+        //then
+        assertDoesNotThrow(executable);
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, false);
+        verifyNoInteractions(kafkaTemplateUsers);
+    }
+    @Test
+    void sendOnboardedUserNotification2(){
+        //given
+        final String userId = UUID.randomUUID().toString();
+        final String institutionId = UUID.randomUUID().toString();
+        final String productId = "product-test";
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        onboardedUser.setId(userId);
+        final OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setProductId("product");
+        onboardedProduct.setStatus(RelationshipState.ACTIVE);
+        final UserBinding userBinding = mockInstance(new UserBinding());
+        final User user = new DummyUser(institutionId);
+        user.setId(userId);
+        userBinding.setInstitutionId(institutionId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userRegistryConnector.getUserByInternalId(any(), anyBoolean())).thenReturn(user);
+        //when
+        Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
+        //then
+        assertDoesNotThrow(executable);
+        verify(userRegistryConnector, times(1)).getUserByInternalId(userId, false);
+        verifyNoInteractions(kafkaTemplateUsers);
+
+    }
 
 }

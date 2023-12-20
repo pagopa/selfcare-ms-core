@@ -176,4 +176,19 @@ class SchedulerServiceTest {
         verifyNoInteractions(userEventService, userConnector);
 
     }
+
+    @Test
+    void startUserScheduler_pageDefault(){
+        //given
+        final List<String> productIds = List.of("productId");
+        final Optional<Integer> size = Optional.of(1);
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        when(userConnector.findAll(any(), any(), any())).thenReturn(List.of(onboardedUser));
+        //when
+        Executable executable = () -> schedulerService.startUsersScheduler(Optional.empty(), Optional.empty(), productIds, Optional.empty());
+        //then
+        assertDoesNotThrow(executable);
+        verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
+
+    }
 }
