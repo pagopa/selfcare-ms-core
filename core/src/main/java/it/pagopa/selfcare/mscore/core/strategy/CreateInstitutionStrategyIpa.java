@@ -59,6 +59,8 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
             institution = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo);
         }
 
+        institution.setGeographicTaxonomies(strategyInput.getGeographicTaxonomies());
+
         try {
             return institutionConnector.save(institution);
         } catch (Exception e) {
