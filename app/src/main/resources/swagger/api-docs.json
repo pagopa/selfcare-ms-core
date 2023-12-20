@@ -4559,7 +4559,7 @@
       "post" : {
         "tags" : [ "scheduler" ],
         "summary" : "startUsers",
-        "description" : "${swagger.ms-core.scheduler.api.start.users}",
+        "description" : "Service to resend old user onboardings to DL",
         "operationId" : "startUsersUsingPOST",
         "parameters" : [ {
           "name" : "size",
@@ -4583,10 +4583,10 @@
           }
         }, {
           "name" : "userId",
-          "in" : "path",
+          "in" : "query",
           "description" : "userId",
-          "required" : true,
-          "style" : "simple",
+          "required" : false,
+          "style" : "form",
           "schema" : {
             "type" : "string"
           }

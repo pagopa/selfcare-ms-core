@@ -29,7 +29,7 @@ public class SchedulerServiceImpl implements SchedulerService{
     private final ContractService contractService;
     private final UserEventService userEventService;
     private Optional<Integer> page_size_api = Optional.empty();
-
+    private Optional<Integer> page = Optional.empty();
     private final TokenConnector tokenConnector;
     private final InstitutionConnector institutionConnector;
     private Optional<List<String>> productsFilter;
@@ -109,17 +109,17 @@ public class SchedulerServiceImpl implements SchedulerService{
         if (productsFilter.isPresent()){
             for (String productId: productsFilter.get()){
                 boolean nextPage = true;
-                int page = 0;
+                int page = this.page.orElse(0);
                 if (userId.isPresent()){
                     OnboardedUser user = userConnector.findById(userId.get());
                     userEventService.sendOnboardedUserNotification(user, productId);
                 }
                 else {
                     do {
-                        List<OnboardedUser> users = userConnector.findAll(page, page_size_api.orElse(USER_PAGE_SIZE));
+                        List<OnboardedUser> users = userConnector.findAll(page, page_size_api.orElse(USER_PAGE_SIZE), productId);
                         sendDataLakeUserNotifications(users, productId);
                         page += 1;
-                        if (users.size() < USER_PAGE_SIZE) {
+                        if (users.size() < USER_PAGE_SIZE || this.page.isPresent()) {
                             nextPage = false;
                             log.debug("[KAFKA] USER TOTAL NUMBER {}", page * USER_PAGE_SIZE + users.size());
                         }
@@ -142,9 +142,10 @@ public class SchedulerServiceImpl implements SchedulerService{
     }
 
     @Override
-    public void startUsersScheduler(Optional<Integer> size, List<String> productsFilter, Optional<String> userId) {
+    public void startUsersScheduler(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
         this.page_size_api = size;
         this.productsFilter = Optional.of(productsFilter);
+        this.page=page;
         regenerateUserNotifications(userId);
     }
 }

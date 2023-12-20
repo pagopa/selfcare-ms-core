@@ -73,9 +73,13 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public List<OnboardedUser> findAll(Integer page, Integer size) {
+    public List<OnboardedUser> findAll(Integer page, Integer size, String productId) {
         Pageable pageable = PageRequest.of(page, size);
-        return repository.find(null, pageable, UserEntity.class)
+        Query queryMatch = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.products.name())
+                        .elemMatch(Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                                .and(OnboardedProductEntity.Fields.status.name()).in(List.of(RelationshipState.ACTIVE.name(), RelationshipState.DELETED.name(), RelationshipState.SUSPENDED.name())))));
+        return repository.find(queryMatch, pageable, UserEntity.class)
                 .stream()
                 .map(userMapper::toOnboardedUser)
                 .collect(Collectors.toList());
@@ -112,7 +116,7 @@ public class UserConnectorImpl implements UserConnector {
         return findAll(users, true);
     }
 
-    private List<OnboardedUser> findAll(List<String> userIds, boolean existingOnly){
+    private List<OnboardedUser> findAll(List<String> userIds, boolean existingOnly) {
         List<OnboardedUser> userList = new ArrayList<>();
         Set<String> remainingUserIds = new HashSet<>(userIds);
 
@@ -136,7 +140,7 @@ public class UserConnectorImpl implements UserConnector {
                 .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
                 .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
         if (relationshipId != null) {
-            update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.relationshipId.name()).is(relationshipId));
+            update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.relationshipId.name()).is(relationshipId));
         }
         if (token != null) {
             update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.tokenId.name()).is(token.getId()));
@@ -156,8 +160,8 @@ public class UserConnectorImpl implements UserConnector {
                 .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
                 .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
 
-        update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.productId.name()).is(productId)
-                .and(CURRENT_PRODUCT  + OnboardedProduct.Fields.status.name()).is(RelationshipState.ACTIVE.name()));
+        update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.productId.name()).is(productId)
+                .and(CURRENT_PRODUCT + OnboardedProduct.Fields.status.name()).is(RelationshipState.ACTIVE.name()));
         update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
@@ -309,11 +313,11 @@ public class UserConnectorImpl implements UserConnector {
         UnwindOperation unwindBindings = Aggregation.unwind("$bindings");
         UnwindOperation unwindProducts = Aggregation.unwind("$bindings.products");
 
-        if(Objects.nonNull(states) && states.length > 0) {
+        if (Objects.nonNull(states) && states.length > 0) {
             criterias.add(Criteria.where("bindings.products.status").in(states));
         }
 
-        if(Objects.nonNull(institutionId)) {
+        if (Objects.nonNull(institutionId)) {
             criterias.add(Criteria.where("bindings.institutionId").is(institutionId));
         }
 

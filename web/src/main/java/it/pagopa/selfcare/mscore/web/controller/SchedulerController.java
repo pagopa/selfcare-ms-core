@@ -35,9 +35,10 @@ public class SchedulerController {
     @PostMapping(value = "/users")
     @ResponseStatus(HttpStatus.OK)
     public void startUsers(@RequestParam(name = "size", required = false)Optional<Integer> size,
+                           @RequestParam(name = "page", required = false)Optional<Integer> page,
                            @RequestParam(name = "productsFilter")List<String> productsFilter,
                            @RequestParam(name = "userId", required = false)Optional<String> userId){
         log.trace("Scheduler started for Users");
-        schedulerService.startUsersScheduler(size, productsFilter, userId);
+        schedulerService.startUsersScheduler(size, page, productsFilter, userId);
     }
 }
