@@ -127,12 +127,13 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode) {
+    public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
         CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyIpa();
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
                 .taxCode(taxCode)
                 .subunitCode(subunitCode)
                 .subunitType(subunitType)
+                .geographicTaxonomies(geographicTaxonomies)
                 .build());
     }
 
@@ -490,7 +491,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.debug("getInstitutionUsers institutionId = {}, productId = {}", institutionId);
         Assert.hasText(institutionId, REQUIRED_INSTITUTION_MESSAGE);
         List<UserInfo> userInfos = userConnector.findByInstitutionId(institutionId);
-        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalId(userInfo.getId())));
+        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalIdWithFiscalCode(userInfo.getId())));
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getInstitutionUsers result = {}", userInfos);
         log.trace("getInstitutionUsers end");
         return userInfos;

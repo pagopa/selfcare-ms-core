@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,11 @@ public class UserEventServiceIgnore implements UserEventService{
 
     @Override
     public void sendUpdateUserNotificationToQueue(String userId, String institutionId) {
+
+    }
+
+    @Override
+    public void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId) {
 
     }
 }
