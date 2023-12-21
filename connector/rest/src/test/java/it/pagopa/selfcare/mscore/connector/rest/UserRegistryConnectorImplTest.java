@@ -43,13 +43,13 @@ class UserRegistryConnectorImplTest {
     }
 
     @Test
-    void testGetUserByInternalId() {
+    void testGetUserByInternalIdWithFiscalCode() {
         UUID id = UUID.randomUUID();
         UserResource userResource = new UserResource();
         userResource.setId(id);
         ResponseEntity<UserResource> userIdResponseEntity = ResponseEntity.ok(userResource);
         when(userRegistryRestClient._findByIdUsingGET(any(), any())).thenReturn(userIdResponseEntity);
-        User user = userRegistryConnector.getUserByInternalId(id.toString());
+        User user = userRegistryConnector.getUserByInternalIdWithFiscalCode(id.toString());
         assertEquals(user.getId(), userResource.getId().toString());
         verify(userRegistryRestClient)._findByIdUsingGET("fiscalCode,name,familyName,workContacts", id.toString());
     }
@@ -104,6 +104,17 @@ class UserRegistryConnectorImplTest {
         verify(userRegistryRestClient)._saveUsingPATCH(saveUserDto);
     }
 
+    @Test
+    void testGetUserById(){
+        UUID id = UUID.randomUUID();
+        UserResource userResource = new UserResource();
+        userResource.setId(id);
+        ResponseEntity<UserResource> userIdResponseEntity = ResponseEntity.ok(userResource);
+        when(userRegistryRestClient._findByIdUsingGET(any(), any())).thenReturn(userIdResponseEntity);
+        User user = userRegistryConnector.getUserByInternalId(id.toString());
+        assertEquals(user.getId(), userResource.getId().toString());
+        verify(userRegistryRestClient)._findByIdUsingGET("name,familyName,workContacts", id.toString());
+    }
 
 }
 

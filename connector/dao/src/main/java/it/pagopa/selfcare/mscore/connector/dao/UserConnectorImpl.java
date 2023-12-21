@@ -19,6 +19,8 @@ import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -47,6 +49,7 @@ public class UserConnectorImpl implements UserConnector {
     private static final String CURRENT_USER_BINDING = "currentUserBinding.";
     private static final String CURRENT_USER_BINDING_REF = "$[currentUserBinding]";
 
+    private static final List<String> VALID_USER_RELATIONSHIPS = List.of(RelationshipState.ACTIVE.name(), RelationshipState.DELETED.name(), RelationshipState.SUSPENDED.name());
     private final UserRepository repository;
 
     private final UserEntityMapper userMapper;
@@ -68,6 +71,26 @@ public class UserConnectorImpl implements UserConnector {
     @Override
     public List<OnboardedUser> findAll() {
         return repository.findAll().stream().map(userMapper::toOnboardedUser).collect(Collectors.toList());
+    }
+
+    /**
+     * This query retrieves all the users having status in VALID_USER_RELATIONSHIPS for the given productId
+     * @param page
+     * @param size
+     * @param productId
+     * @return List of onboarded users
+     */
+    @Override
+    public List<OnboardedUser> findAllValidUsers(Integer page, Integer size, String productId) {
+        Pageable pageable = PageRequest.of(page, size);
+        Query queryMatch = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.products.name())
+                        .elemMatch(Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                                .and(OnboardedProductEntity.Fields.status.name()).in(VALID_USER_RELATIONSHIPS))));
+        return repository.find(queryMatch, pageable, UserEntity.class)
+                .stream()
+                .map(userMapper::toOnboardedUser)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -101,7 +124,7 @@ public class UserConnectorImpl implements UserConnector {
         return findAll(users, true);
     }
 
-    private List<OnboardedUser> findAll(List<String> userIds, boolean existingOnly){
+    private List<OnboardedUser> findAll(List<String> userIds, boolean existingOnly) {
         List<OnboardedUser> userList = new ArrayList<>();
         Set<String> remainingUserIds = new HashSet<>(userIds);
 
@@ -125,7 +148,7 @@ public class UserConnectorImpl implements UserConnector {
                 .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
                 .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
         if (relationshipId != null) {
-            update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.relationshipId.name()).is(relationshipId));
+            update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.relationshipId.name()).is(relationshipId));
         }
         if (token != null) {
             update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.tokenId.name()).is(token.getId()));
@@ -145,8 +168,8 @@ public class UserConnectorImpl implements UserConnector {
                 .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
                 .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
 
-        update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.productId.name()).is(productId)
-                .and(CURRENT_PRODUCT  + OnboardedProduct.Fields.status.name()).is(RelationshipState.ACTIVE.name()));
+        update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.productId.name()).is(productId)
+                .and(CURRENT_PRODUCT + OnboardedProduct.Fields.status.name()).is(RelationshipState.ACTIVE.name()));
         update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
@@ -298,11 +321,11 @@ public class UserConnectorImpl implements UserConnector {
         UnwindOperation unwindBindings = Aggregation.unwind("$bindings");
         UnwindOperation unwindProducts = Aggregation.unwind("$bindings.products");
 
-        if(Objects.nonNull(states) && states.length > 0) {
+        if (Objects.nonNull(states) && states.length > 0) {
             criterias.add(Criteria.where("bindings.products.status").in(states));
         }
 
-        if(Objects.nonNull(institutionId)) {
+        if (Objects.nonNull(institutionId)) {
             criterias.add(Criteria.where("bindings.institutionId").is(institutionId));
         }
 

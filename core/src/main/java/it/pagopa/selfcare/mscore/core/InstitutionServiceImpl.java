@@ -491,7 +491,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.debug("getInstitutionUsers institutionId = {}, productId = {}", institutionId);
         Assert.hasText(institutionId, REQUIRED_INSTITUTION_MESSAGE);
         List<UserInfo> userInfos = userConnector.findByInstitutionId(institutionId);
-        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalId(userInfo.getId())));
+        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalIdWithFiscalCode(userInfo.getId())));
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getInstitutionUsers result = {}", userInfos);
         log.trace("getInstitutionUsers end");
         return userInfos;
