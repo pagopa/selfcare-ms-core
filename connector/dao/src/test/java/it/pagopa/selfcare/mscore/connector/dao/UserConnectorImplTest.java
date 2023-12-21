@@ -175,7 +175,7 @@ class UserConnectorImplTest {
 
         doReturn(userEntities).when(userRepository).find(any(), any(), any());
         //when
-        List<OnboardedUser> users = userConnectorImpl.findAll(page, size, productId);
+        List<OnboardedUser> users = userConnectorImpl.findAllValidUsers(page, size, productId);
         //then
         assertFalse(users.isEmpty());
         assertEquals(1, users.size());

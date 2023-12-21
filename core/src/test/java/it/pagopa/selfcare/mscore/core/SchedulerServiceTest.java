@@ -137,7 +137,7 @@ class SchedulerServiceTest {
         final Optional<Integer> size = Optional.of(1);
         final Optional<Integer> page = Optional.of(0);
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
-        when(userConnector.findAll(any(), any(), any())).thenReturn(List.of(onboardedUser));
+        when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(onboardedUser));
         //when
         Executable executable = () -> schedulerService.startUsersScheduler(size, page, productIds, Optional.empty());
         //then
@@ -183,7 +183,7 @@ class SchedulerServiceTest {
         final List<String> productIds = List.of("productId");
         final Optional<Integer> size = Optional.of(1);
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
-        when(userConnector.findAll(any(), any(), any())).thenReturn(List.of(onboardedUser));
+        when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(onboardedUser));
         //when
         Executable executable = () -> schedulerService.startUsersScheduler(Optional.empty(), Optional.empty(), productIds, Optional.empty());
         //then

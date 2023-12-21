@@ -82,7 +82,7 @@ public class UserEventServiceImpl implements UserEventService {
             List<UserToNotify> usersToNotify = toUserToNotify(tokenUser.getUserId(), token.getInstitutionId(), token.getProductId(), Optional.empty(), Optional.of(token.getId()));
             usersToNotify.forEach(user -> {
                 UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromToken(token, user, QueueEvent.ADD);
-                String id = user.getUserId().concat("_"+notification.getInstitutionId()).concat("_"+notification.getProductId()).concat("_"+user.getProductRole());
+                String id = idBuilder(user.getUserId(), token.getInstitutionId(), token.getProductId(), user.getProductRole());
                 notification.setId(id);
                 try {
                     String msg = mapper.writeValueAsString(notification);
@@ -97,12 +97,12 @@ public class UserEventServiceImpl implements UserEventService {
     @Override
     public void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId) {
         try {
-            User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId(), false);
+            User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId());
             onboardedUser.getBindings().forEach(userBinding -> {
                 for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
                     if (productId.equals(onboardedProduct.getProductId()) && ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus())) {
                         UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromOnboardedProduct(toUserToNotify(user.getId(), userBinding.getInstitutionId(), user, onboardedProduct), onboardedProduct, userBinding.getInstitutionId());
-                        String id = user.getId().concat("_" + notification.getInstitutionId()).concat("_" + notification.getProductId()).concat("_" + onboardedProduct.getProductRole());
+                        String id = idBuilder(user.getId(), userBinding.getInstitutionId(), onboardedProduct.getProductId(), onboardedProduct.getProductRole());
                         notification.setId(id);
                         try {
                             String msg = mapper.writeValueAsString(notification);
@@ -120,7 +120,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     protected List<UserToNotify> toUserToNotify(String userId, String institutionId, String productId, Optional<String> relationshipId, Optional<String> tokenId) {
-        User user = userRegistryConnector.getUserByInternalId(userId, false);
+        User user = userRegistryConnector.getUserByInternalId(userId);
         OnboardedUser onboardedUser = userConnector.findById(userId);
         return onboardedUser.getBindings().stream()
                 .filter(userBinding -> institutionId.equals(userBinding.getInstitutionId()))
@@ -175,7 +175,7 @@ public class UserEventServiceImpl implements UserEventService {
             log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
             usersToNotify.forEach(user -> {
                 UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromRelationship(relationshipInfo, user, eventType);
-                String id = user.getUserId().concat("_"+notification.getInstitutionId()).concat("_"+notification.getProductId()).concat("_"+user.getProductRole());
+                String id = idBuilder(user.getUserId(), notification.getInstitutionId(), notification.getProductId(), user.getProductRole());
                 notification.setId(id);
                 try {
                     String msg = mapper.writeValueAsString(notification);
@@ -187,7 +187,9 @@ public class UserEventServiceImpl implements UserEventService {
         }
     }
 
-
+    private String idBuilder(String userId, String institutionId, String productId, String productRole){
+        return String.format("%s_%s_%s_%s", userId, institutionId, productId, productRole);
+    }
     private void sendUserNotification(String message, String userId) {
         ListenableFuture<SendResult<String, String>> future =
                 kafkaTemplateUsers.send(kafkaPropertiesConfig.getScUsersTopic(), message);

@@ -116,7 +116,7 @@ public class SchedulerServiceImpl implements SchedulerService{
                 }
                 else {
                     do {
-                        List<OnboardedUser> users = userConnector.findAll(page, page_size_api.orElse(USER_PAGE_SIZE), productId);
+                        List<OnboardedUser> users = userConnector.findAllValidUsers(page, page_size_api.orElse(USER_PAGE_SIZE), productId);
                         sendDataLakeUserNotifications(users, productId);
                         page += 1;
                         if (users.size() < USER_PAGE_SIZE || this.page.isPresent()) {

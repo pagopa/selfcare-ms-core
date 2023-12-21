@@ -49,6 +49,7 @@ public class UserConnectorImpl implements UserConnector {
     private static final String CURRENT_USER_BINDING = "currentUserBinding.";
     private static final String CURRENT_USER_BINDING_REF = "$[currentUserBinding]";
 
+    private static final List<String> VALID_USER_RELATIONSHIPS = List.of(RelationshipState.ACTIVE.name(), RelationshipState.DELETED.name(), RelationshipState.SUSPENDED.name());
     private final UserRepository repository;
 
     private final UserEntityMapper userMapper;
@@ -72,13 +73,20 @@ public class UserConnectorImpl implements UserConnector {
         return repository.findAll().stream().map(userMapper::toOnboardedUser).collect(Collectors.toList());
     }
 
+    /**
+     * This query retrieves all the users having status in VALID_USER_RELATIONSHIPS for the given productId
+     * @param page
+     * @param size
+     * @param productId
+     * @return List of onboarded users
+     */
     @Override
-    public List<OnboardedUser> findAll(Integer page, Integer size, String productId) {
+    public List<OnboardedUser> findAllValidUsers(Integer page, Integer size, String productId) {
         Pageable pageable = PageRequest.of(page, size);
         Query queryMatch = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
                 .elemMatch(Criteria.where(UserBinding.Fields.products.name())
                         .elemMatch(Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
-                                .and(OnboardedProductEntity.Fields.status.name()).in(List.of(RelationshipState.ACTIVE.name(), RelationshipState.DELETED.name(), RelationshipState.SUSPENDED.name())))));
+                                .and(OnboardedProductEntity.Fields.status.name()).in(VALID_USER_RELATIONSHIPS))));
         return repository.find(queryMatch, pageable, UserEntity.class)
                 .stream()
                 .map(userMapper::toOnboardedUser)

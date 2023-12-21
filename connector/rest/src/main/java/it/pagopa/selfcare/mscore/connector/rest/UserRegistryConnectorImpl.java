@@ -32,14 +32,25 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
     }
 
     @Override
-    public User getUserByInternalId(String userId, boolean withFiscalCode) {
+    public User getUserByInternalIdWithFiscalCode(String userId) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalIdWithFiscalCode userId = {}", userId);
+        Assert.hasText(userId, "A userId is required");
+        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(USERS_FIELD_LIST, userId);
+        User user = userMapper.toUser(result.getBody());
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalIdWithFiscalCode result = {}", result);
+        return user;
+    }
+
+    @Override
+    public User getUserByInternalId(String userId) {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId userId = {}", userId);
         Assert.hasText(userId, "A userId is required");
-        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(withFiscalCode?USERS_FIELD_LIST:USERS_FIELD_LIST_WITHOUT_FISCAL_CODE, userId);
+        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(USERS_FIELD_LIST_WITHOUT_FISCAL_CODE, userId);
         User user = userMapper.toUser(result.getBody());
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId result = {}", result);
         return user;
     }
+
 
     @Override
     public User getUserByFiscalCode(String fiscalCode) {
