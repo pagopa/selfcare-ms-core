@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -190,5 +191,17 @@ class SchedulerServiceTest {
         assertDoesNotThrow(executable);
         verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
 
+    }
+
+    @Test
+    void startScheduler_emptyProductList(){
+        //given
+        final List<String> productIds = new ArrayList<>();
+        final Optional<Integer> size = Optional.of(1);
+        //when
+        Executable executable = () -> schedulerService.startUsersScheduler(Optional.empty(), Optional.empty(), productIds, Optional.empty());
+        //then
+        assertDoesNotThrow(executable);
+        verifyNoInteractions(userEventService);
     }
 }

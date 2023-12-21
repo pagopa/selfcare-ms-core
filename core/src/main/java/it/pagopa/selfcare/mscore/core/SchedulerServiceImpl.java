@@ -32,7 +32,7 @@ public class SchedulerServiceImpl implements SchedulerService{
     private Optional<Integer> page = Optional.empty();
     private final TokenConnector tokenConnector;
     private final InstitutionConnector institutionConnector;
-    private Optional<List<String>> productsFilter;
+    private Optional<List<String>> productsFilter = Optional.empty();
 
     private final UserConnector userConnector;
 
