@@ -23,6 +23,7 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
     private final UserRegistryRestClient restClient;
     private final UserMapperClient userMapper;
     public static final String USERS_FIELD_LIST = "fiscalCode,name,familyName,workContacts";
+    public static final String USERS_FIELD_LIST_WITHOUT_FISCAL_CODE = "name,familyName,workContacts";
 
     @Autowired
     public UserRegistryConnectorImpl(UserRegistryRestClient restClient, UserMapperClient userMapper) {
@@ -31,14 +32,25 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
     }
 
     @Override
+    public User getUserByInternalIdWithFiscalCode(String userId) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalIdWithFiscalCode userId = {}", userId);
+        Assert.hasText(userId, "A userId is required");
+        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(USERS_FIELD_LIST, userId);
+        User user = userMapper.toUser(result.getBody());
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalIdWithFiscalCode result = {}", result);
+        return user;
+    }
+
+    @Override
     public User getUserByInternalId(String userId) {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId userId = {}", userId);
         Assert.hasText(userId, "A userId is required");
-        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(USERS_FIELD_LIST, userId);
+        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(USERS_FIELD_LIST_WITHOUT_FISCAL_CODE, userId);
         User user = userMapper.toUser(result.getBody());
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId result = {}", result);
         return user;
     }
+
 
     @Override
     public User getUserByFiscalCode(String fiscalCode) {

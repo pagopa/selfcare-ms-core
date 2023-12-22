@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -64,6 +67,8 @@ class UserConnectorImplTest {
 
     @Captor
     ArgumentCaptor<Update> updateArgumentCaptor;
+    @Captor
+    ArgumentCaptor<Pageable> pageableArgumentCaptor;
 
     @Captor
     ArgumentCaptor<FindAndModifyOptions> findAndModifyOptionsArgumentCaptor;
@@ -152,6 +157,32 @@ class UserConnectorImplTest {
         verify(userRepository).findAll();
     }
 
+    @Test
+    void findAllPaged(){
+        //given
+        final String productId = "product";
+        final Integer page = 0;
+        final Integer size = 1;
+        UserEntity userEntity = new UserEntity();
+        UserBindingEntity binding = new UserBindingEntity();
+        OnboardedProductEntity onboardedProductEntity = new OnboardedProductEntity();
+        onboardedProductEntity.setStatus(RelationshipState.ACTIVE);
+        onboardedProductEntity.setProductId(productId);
+        binding.setProducts(List.of(onboardedProductEntity));
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        userEntity.setBindings(userBindingEntityList);
+        Page<UserEntity> userEntities = new PageImpl<>(List.of(userEntity));
+
+        doReturn(userEntities).when(userRepository).find(any(), any(), any());
+        //when
+        List<OnboardedUser> users = userConnectorImpl.findAllValidUsers(page, size, productId);
+        //then
+        assertFalse(users.isEmpty());
+        assertEquals(1, users.size());
+        verify(userRepository, times(1)).find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), eq(UserEntity.class));
+       Query capturedQuery = queryArgumentCaptor.getValue();
+       assertTrue(capturedQuery.getQueryObject().toString().contains(productId));
+    }
     /**
      * Method under test: {@link UserConnectorImpl#findAll()}
      */

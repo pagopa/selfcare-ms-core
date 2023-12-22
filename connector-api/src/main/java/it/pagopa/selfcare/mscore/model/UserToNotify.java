@@ -14,7 +14,6 @@ public class UserToNotify {
     private String userId;
     private String name;
     private String familyName;
-    private String fiscalCode;
     private String email;
     private PartyRole role;
     private String productRole;

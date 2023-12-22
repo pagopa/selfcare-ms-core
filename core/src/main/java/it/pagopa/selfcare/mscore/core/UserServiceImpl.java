@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User retrieveUserFromUserRegistry(String userId) {
-        return userRegistryConnector.getUserByInternalId(userId);
+        return userRegistryConnector.getUserByInternalIdWithFiscalCode(userId);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService {
             log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
             throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
         }
-        return userRegistryConnector.getUserByInternalId(userId);
+        return userRegistryConnector.getUserByInternalIdWithFiscalCode(userId);
     }
 
     @Override

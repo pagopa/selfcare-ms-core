@@ -313,13 +313,13 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String)}
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String, List)}
      */
     @Test
     void testCreateInstitutionFromIpa() {
         when(createInstitutionStrategyFactory.createInstitutionStrategyIpa()).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
-        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id");
+        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id", List.of());
         assertNotNull(institution);
     }
 
@@ -1567,7 +1567,7 @@ class InstitutionServiceImplTest {
         User user = new User();
         user.setId("id");
         when(userConnector.findByInstitutionId(any())).thenReturn(List.of(userInfo));
-        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
+        when(userRegistryConnector.getUserByInternalIdWithFiscalCode(any())).thenReturn(user);
         List<UserInfo> userInfos = institutionServiceImpl.getInstitutionUsers("test");
         assertNotNull(userInfos);
         assertFalse(userInfos.isEmpty());

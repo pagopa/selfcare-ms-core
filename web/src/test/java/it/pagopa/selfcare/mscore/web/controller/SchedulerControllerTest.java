@@ -41,4 +41,19 @@ class SchedulerControllerTest {
 
         Mockito.verify(schedulerService, Mockito.times(1)).startScheduler(Optional.of(size), List.of(productId));
     }
+
+    @Test
+    void startSchedulerUsers() throws Exception{
+        Integer size = 1;
+        Integer page = 0;
+        String productId = "product";
+        mvc.perform(MockMvcRequestBuilders
+                        .post(BASE_URL+"/users")
+                        .param("size", String.valueOf(size))
+                        .param("page",String.valueOf(page))
+                        .param("productsFilter", productId))
+                .andExpect(status().isOk());
+
+        Mockito.verify(schedulerService, Mockito.times(1)).startUsersScheduler(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
+    }
 }
