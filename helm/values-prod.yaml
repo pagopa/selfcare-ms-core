@@ -1,3 +1,5 @@
+replicaCount: 3
+
 image:
   repository: selcpacr.azurecr.io/selfcaremscore
   pullPolicy: Always # TODO change me in IfNotPresent when each build will have a different tag
