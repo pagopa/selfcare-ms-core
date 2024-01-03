@@ -18,6 +18,14 @@ ingress:
         - path: /ms-core/v1/(.*)
           pathType: ImplementationSpecific
 
+resources:
+  requests:
+    cpu: 600m
+    memory: 900M
+  limits:
+    cpu: 1600m
+    memory: 1200M
+
 autoscaling:
   enabled: false
   minReplicas: 1
