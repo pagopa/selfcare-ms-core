@@ -21,13 +21,16 @@ import javax.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_COMPRESS_FILE;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_SEND_MAIL;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_PN;
 
 @Slf4j
 @Service
@@ -79,6 +82,41 @@ public class EmailConnectorImpl implements EmailConnector {
         }
         log.trace("sendMessage end");
     }
+
+    @Override
+    public void sendMailPNPG(String templateName, String destinationMail, String businessName) {
+        log.trace("sendMailPNPG end");
+        log.debug("sendMailPNPG templateName = {}, destinationMail = {}, businessName = {}", templateName, destinationMail, businessName);
+        try {
+            log.info("START - sendMail to {}, for product {}", destinationMail, PROD_PN);
+            String template = fileStorageConnector.getTemplateFile(templateName);
+            MailTemplate mailTemplate = mapper.readValue(template, MailTemplate.class);
+            Map<String, String> mailParameters = new HashMap<>();
+            mailParameters.put("businessName", businessName);
+            String html = StringSubstitutor.replace(mailTemplate.getBody(), mailParameters);
+            log.trace("sendMessage start");
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+            MimeMessageHelper message = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
+                    ? coreConfig.getDestinationMails()
+                    : List.of(destinationMail);
+
+            message.setSubject(mailTemplate.getSubject());
+            message.setFrom(coreConfig.getSenderMail());
+            message.setTo(destinationMails.toArray(new String[0]));
+            message.setText(html, true);
+
+            mailSender.send(mimeMessage);
+            log.info("END - sendMail to {}, for product {}", destinationMail, PROD_PN);
+        } catch (Exception e) {
+            log.error(ERROR_DURING_SEND_MAIL.getMessage() + ":", e.getMessage(), e);
+            throw new MsCoreException(ERROR_DURING_SEND_MAIL.getMessage(), ERROR_DURING_SEND_MAIL.getCode());
+        }
+        log.trace("sendMailPNPG end");
+    }
+
     public byte[] zipBytes(String filename, File pdf)  {
             try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
                  ZipOutputStream zos = new ZipOutputStream(baos)) {
