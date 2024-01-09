@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProductResponse;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -12,15 +13,19 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstitutionResponse {
 
+    @NotBlank
     private String id;
     private String externalId;
+    @NotBlank
     private String origin;
+    @NotBlank
     private String originId;
     private String description;
     private InstitutionType institutionType;
     private String digitalAddress;
     private String address;
     private String zipCode;
+    @NotBlank
     private String taxCode;
     private String city;
     private String county;
