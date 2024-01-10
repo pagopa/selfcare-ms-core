@@ -72,7 +72,8 @@ public class OnboardingInstitutionStrategyFactory {
         Consumer<OnboardingInstitutionStrategyInput> emailsOnboardingInstitutionStrategy;
 
         if (InstitutionType.PG == institutionType) {
-            digestOnboardingInstitutionStrategy = ignore -> {};
+            digestOnboardingInstitutionStrategy = ignore -> {
+            };
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendConfirmationMail();
         } else if (InstitutionType.PA == institutionType
@@ -83,7 +84,8 @@ public class OnboardingInstitutionStrategyFactory {
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithDigestOrRollback();
         } else {
-            digestOnboardingInstitutionStrategy = ignore -> {};
+            digestOnboardingInstitutionStrategy = ignore -> {
+            };
             persitOnboardingInstitutionStrategy = verifyManagerAndDelegateAndPersistWithDigest();
             emailsOnboardingInstitutionStrategy = sendEmailWithoutDigestOrRollback();
         }
@@ -112,7 +114,8 @@ public class OnboardingInstitutionStrategyFactory {
         if (InstitutionType.PG == institutionType) {
 
             persitOnboardingInstitutionStrategy = verifyManagerAndPersistWithDigest();
-            emailsOnboardingInstitutionStrategy = ignore -> {};
+            emailsOnboardingInstitutionStrategy = ignore -> {
+            };
 
         } else {
 
@@ -143,7 +146,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithDigest() {
         return strategyInput -> {
-            validateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
+            validateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest(), strategyInput.getOnboardingRequest().getProductId());
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persist(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -154,7 +157,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private Consumer<OnboardingInstitutionStrategyInput> verifyManagerAndDelegateAndPersistWithContractComplete() {
         return strategyInput -> {
-            validateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest());
+            validateOnboardingByInstitutionType(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType(), strategyInput.getOnboardingRequest().getBillingRequest(), strategyInput.getOnboardingRequest().getProductId());
             OnboardingInstitutionUtils.verifyUsers(strategyInput.getOnboardingRequest().getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
 
             OnboardingRollback onboardingRollback = onboardingDao.persistComplete(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getOnboardingRequest(), strategyInput.getInstitution(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getDigest());
@@ -162,10 +165,11 @@ public class OnboardingInstitutionStrategyFactory {
         };
     }
 
-    private void validateOnboardingByInstitutionType(InstitutionType institutionType, Billing billing) {
+    private void validateOnboardingByInstitutionType(InstitutionType institutionType, Billing billing, String productId) {
         boolean checkRecipientCode = !(institutionType.equals(InstitutionType.SA)
                 || institutionType.equals(InstitutionType.PT)
-                || institutionType.equals(InstitutionType.AS));
+                || institutionType.equals(InstitutionType.AS))
+                || !productId.equalsIgnoreCase(PROD_INTEROP.getValue());
         OnboardingInstitutionUtils.validateOnboarding(billing, checkRecipientCode);
     }
 
@@ -184,7 +188,7 @@ public class OnboardingInstitutionStrategyFactory {
             String productId = strategyInput.getOnboardingRequest().getProductId();
             File pdf = null;
             if (productId.equals(PROD_FD.getValue()) || productId.equals(PROD_FD_GARANTITO.getValue())) {
-                    pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContract().getPath());
+                pdf = fileStorageConnector.getFileAsPdf(strategyInput.getOnboardingRequest().getContract().getPath());
             } else {
                 pdf = contractService.createContractPDF(contractTemplate, manager, delegates, strategyInput.getInstitution(), strategyInput.getOnboardingRequest(), strategyInput.getInstitutionUpdateGeographicTaxonomies(), strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType());
             }
@@ -221,12 +225,12 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId());
-                if(!InstitutionType.PT.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
+                if (!InstitutionType.PT.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
                     notificationService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
                 } else {
                     notificationService.sendMailForRegistration(user, strategyInput.getInstitution(), strategyInput.getOnboardingRequest());
                     notificationService.sendMailForRegistrationNotificationApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
-                    }
+                }
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
@@ -238,7 +242,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
 
-                if(strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
+                if (strategyInput.getOnboardingRequest().getInstitutionUpdate().isImported()) {
 
                     List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                             ? coreConfig.getDestinationMails()
