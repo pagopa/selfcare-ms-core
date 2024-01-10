@@ -60,7 +60,7 @@ class QueueNotificationServiceTest {
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
         //when
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         //then
         assertDoesNotThrow(executable);
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
@@ -83,12 +83,17 @@ class QueueNotificationServiceTest {
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
         //when
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         //then
         assertDoesNotThrow(executable);
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
         verify(institutionConnector, times(1)).findById(token.getInstitutionId());
         verify(contractService, times(1)).sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
+    }
+
+    @Test
+    void startContractScheduler_productNotPresent(){
+
     }
 
     @Test
@@ -104,7 +109,7 @@ class QueueNotificationServiceTest {
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
 
         //when
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         //then
         assertDoesNotThrow(executable);
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
@@ -113,13 +118,13 @@ class QueueNotificationServiceTest {
 
     @Test
     void schedulerNotStarted(){
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         verifyNoInteractions(tokenConnector, institutionConnector, contractService);
     }
 
     @Test
     void productsFilterNotPresent(){
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), null);
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), null);
         verifyNoInteractions(tokenConnector, institutionConnector, contractService);
     }
 
@@ -132,7 +137,7 @@ class QueueNotificationServiceTest {
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(onboardedUser));
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(size, page, productIds, Optional.empty());
+        Executable executable = () -> schedulerService.sendUsers(size, page, productIds, Optional.empty());
         //then
         assertDoesNotThrow(executable);
         verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
@@ -148,7 +153,7 @@ class QueueNotificationServiceTest {
         final Optional<String> userId = Optional.of("userId");
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(size, page, productIds, userId);
+        Executable executable = () -> schedulerService.sendUsers(size, page, productIds, userId);
         //then
         assertDoesNotThrow(executable);
         verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
@@ -163,7 +168,7 @@ class QueueNotificationServiceTest {
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         final Optional<String> userId = Optional.of("userId");
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(size, page, null, null);
+        Executable executable = () -> schedulerService.sendUsers(size, page, null, null);
         //then
         assertDoesNotThrow(executable);
         verifyNoInteractions(userEventService, userConnector);
@@ -178,7 +183,7 @@ class QueueNotificationServiceTest {
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(onboardedUser));
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(Optional.empty(), Optional.empty(), productIds, Optional.empty());
+        Executable executable = () -> schedulerService.sendUsers(Optional.empty(), Optional.empty(), productIds, Optional.empty());
         //then
         assertDoesNotThrow(executable);
         verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
@@ -191,7 +196,7 @@ class QueueNotificationServiceTest {
         final List<String> productIds = new ArrayList<>();
         final Optional<Integer> size = Optional.of(1);
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(Optional.empty(), Optional.empty(), productIds, Optional.empty());
+        Executable executable = () -> schedulerService.sendUsers(Optional.empty(), Optional.empty(), productIds, Optional.empty());
         //then
         assertDoesNotThrow(executable);
         verifyNoInteractions(userEventService);

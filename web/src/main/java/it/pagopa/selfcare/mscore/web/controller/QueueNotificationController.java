@@ -12,8 +12,8 @@ import java.util.Optional;
 
 @RestController
 @Slf4j
-@RequestMapping("/scheduler")
-@Api(tags = "scheduler")
+@RequestMapping("/notification-event")
+@Api(tags = "kafka")
 public class QueueNotificationController {
 
     private final QueueNotificationService queueNotificationService;
@@ -21,17 +21,17 @@ public class QueueNotificationController {
     public QueueNotificationController(QueueNotificationService queueNotificationService) {
         this.queueNotificationService = queueNotificationService;
     }
-    @ApiOperation(value = "", notes = "${swagger.ms-core.scheduler.api.start}")
-    @PostMapping(value = "")
+    @ApiOperation(value = "", notes = "${swagger.ms-core.notification-event.api.start}")
+    @PostMapping(value = "/contracts")
     @ResponseStatus(HttpStatus.OK)
     public void resendContracts(@RequestParam(name = "size", required = false) Optional<Integer> size,
                                 @RequestParam(name = "productsFilter") List<String> productsFilter){
 
         log.trace("Resend contracts events started");
-        queueNotificationService.startScheduler(size, productsFilter);
+        queueNotificationService.sendContracts(size, productsFilter);
     }
 
-    @ApiOperation(value = "", notes = "${swagger.ms-core.scheduler.api.start.users}")
+    @ApiOperation(value = "", notes = "${swagger.ms-core.notification-event.api.start.users}")
     @PostMapping(value = "/users")
     @ResponseStatus(HttpStatus.OK)
     public void resendUsers(@RequestParam(name = "size", required = false)Optional<Integer> size,
@@ -39,6 +39,6 @@ public class QueueNotificationController {
                             @RequestParam(name = "productsFilter")List<String> productsFilter,
                             @RequestParam(name = "userId", required = false)Optional<String> userId){
         log.trace("Resend users events started");
-        queueNotificationService.startUsersScheduler(size, page, productsFilter, userId);
+        queueNotificationService.sendUsers(size, page, productsFilter, userId);
     }
 }

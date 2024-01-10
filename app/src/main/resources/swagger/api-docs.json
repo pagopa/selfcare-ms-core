@@ -43,7 +43,7 @@
     "name" : "Token",
     "description" : "Token Controller"
   }, {
-    "name" : "scheduler",
+    "name" : "kafka",
     "description" : "Queue Notification Controller"
   } ],
   "paths" : {
@@ -4488,11 +4488,11 @@
         } ]
       }
     },
-    "/scheduler" : {
+    "/notification-event/contracts" : {
       "post" : {
-        "tags" : [ "scheduler" ],
+        "tags" : [ "kafka" ],
         "summary" : "resendContracts",
-        "description" : "Service to start scheduler to resend old messages to DL",
+        "description" : "Service to resend contract notifications on SC-Contracts topic",
         "operationId" : "resendContractsUsingPOST",
         "parameters" : [ {
           "name" : "size",
@@ -4555,9 +4555,9 @@
         } ]
       }
     },
-    "/scheduler/users" : {
+    "/notification-event/users" : {
       "post" : {
-        "tags" : [ "scheduler" ],
+        "tags" : [ "kafka" ],
         "summary" : "resendUsers",
         "description" : "Service to resend old user onboardings to the SCUsers kafka queue, it can send the onboardings of a single user or also retrieve all the users for a given set of products in a paged manner by passing page and size",
         "operationId" : "resendUsersUsingPOST",

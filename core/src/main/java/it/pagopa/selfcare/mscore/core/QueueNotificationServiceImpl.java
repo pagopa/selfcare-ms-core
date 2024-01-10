@@ -126,14 +126,14 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
     }
 
     @Override
-    public void startScheduler(Optional<Integer> size, List<String> productsFilter) {
+    public void sendContracts(Optional<Integer> size, List<String> productsFilter) {
         this.page_size_api = size;
         this.productsFilter = Optional.ofNullable(productsFilter);
         regenerateContractsNotifications();
     }
 
     @Override
-    public void startUsersScheduler(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
+    public void sendUsers(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
         this.page_size_api = size;
         this.productsFilter = Optional.ofNullable(productsFilter);
         this.page=page;

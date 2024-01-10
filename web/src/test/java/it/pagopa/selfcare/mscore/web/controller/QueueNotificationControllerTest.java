@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(value = {QueueNotificationController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 @ContextConfiguration(classes = {QueueNotificationController.class})
 class QueueNotificationControllerTest {
-    private static final String BASE_URL = "/scheduler";
+    private static final String BASE_URL = "/notification-event";
     @Autowired
     protected MockMvc mvc;
     @MockBean
@@ -30,20 +30,20 @@ class QueueNotificationControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void startScheduler() throws Exception {
+    void sendContracts() throws Exception {
         Integer size = 1;
         String productId = "product";
         mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL)
+                        .post(BASE_URL+"/contracts")
                         .param("size", String.valueOf(size))
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
 
-        Mockito.verify(queueNotificationService, Mockito.times(1)).startScheduler(Optional.of(size), List.of(productId));
+        Mockito.verify(queueNotificationService, Mockito.times(1)).sendContracts(Optional.of(size), List.of(productId));
     }
 
     @Test
-    void startSchedulerUsers() throws Exception{
+    void sendUsers() throws Exception{
         Integer size = 1;
         Integer page = 0;
         String productId = "product";
@@ -54,6 +54,6 @@ class QueueNotificationControllerTest {
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
 
-        Mockito.verify(queueNotificationService, Mockito.times(1)).startUsersScheduler(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
+        Mockito.verify(queueNotificationService, Mockito.times(1)).sendUsers(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
     }
 }
