@@ -1,18 +1,15 @@
 package it.pagopa.selfcare.mscore.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
-import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -23,6 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
@@ -33,8 +31,6 @@ import java.util.Map;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -91,27 +87,14 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void setCompletedPGOnboardingMail() throws JsonProcessingException {
-        when(mailTemplateConfig.getPath()).thenReturn("path");
-        when(fileStorageConnector.getTemplateFile(any())).thenReturn("templateFile");
-        MailTemplate mailTemplate = new MailTemplate();
-        mailTemplate.setBody("body");
-        mailTemplate.setSubject("subject");
-        when(mapper.readValue("templateFile", MailTemplate.class)).thenReturn(mailTemplate);
-        assertDoesNotThrow(() ->notificationService.setCompletedPGOnboardingMail("dest","buss"));
-    }
-
-    @Test
-    void setCompletedPGOnboardingMailThrow() throws JsonProcessingException {
-        when(mailTemplateConfig.getPath()).thenReturn("path");
-        when(fileStorageConnector.getTemplateFile(any())).thenReturn("templateFile");
-        MailTemplate mailTemplate = new MailTemplate();
-        mailTemplate.setBody("body");
-        mailTemplate.setSubject("subject");
-        when(mapper.readValue("templateFile", MailTemplate.class)).thenReturn(mailTemplate);
-        doThrow(new MsCoreException("An error occurred", "Code")).when(notificationConnector)
-                .sendNotificationToUser(any());
-        assertThrows(MsCoreException.class, () -> notificationService.setCompletedPGOnboardingMail("42","42"));
+    void setCompletedPGOnboardingMail() {
+        final String path = "path";
+        final String destination = "dest";
+        final String businessName = "buss";
+        when(mailTemplateConfig.getPath()).thenReturn(path);
+        assertDoesNotThrow(() ->notificationService.setCompletedPGOnboardingMail(destination,businessName));
+        Mockito.verify(emailConnector, times(1)).sendMailPNPG(path,destination,businessName);
+        Mockito.verifyNoMoreInteractions(emailConnector);
     }
 
     @Test

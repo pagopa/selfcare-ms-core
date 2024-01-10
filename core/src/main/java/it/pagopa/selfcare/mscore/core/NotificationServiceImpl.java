@@ -66,19 +66,6 @@ public class NotificationServiceImpl implements NotificationService {
     public void setCompletedPGOnboardingMail(String destinationMail, String businessName) {
         log.trace("setCompletedPGOnboardingMail start");
         log.debug("setCompletedPGOnboardingMail destinationMail = {}, businessName = {}", destinationMail, businessName);
-        /*try {
-            log.info("START - sendMail to {}, for product {}", destinationMail, PROD_PN);
-            String template = fileStorageConnector.getTemplateFile(mailTemplateConfig.getPath());
-            MailTemplate mailTemplate = mapper.readValue(template, MailTemplate.class);
-            MessageRequest messageRequest = constructMessageRequest(destinationMail, businessName, mailTemplate);
-            log.trace("sendMessage start");
-            notificationConnector.sendNotificationToUser(messageRequest);
-        } catch (Exception e) {
-            log.error(ERROR_DURING_SEND_MAIL.getMessage() + ":", e.getMessage(), e);
-            throw new MsCoreException(ERROR_DURING_SEND_MAIL.getMessage(), ERROR_DURING_SEND_MAIL.getCode());
-        }
-        log.trace("sendMessage end");
-         */
         emailConnector.sendMailPNPG(mailTemplateConfig.getPath(), destinationMail, businessName);
         log.trace("setCompletedPGOnboardingMail end");
     }

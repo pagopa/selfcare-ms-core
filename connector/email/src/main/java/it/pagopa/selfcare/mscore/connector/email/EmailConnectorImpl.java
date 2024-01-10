@@ -85,7 +85,7 @@ public class EmailConnectorImpl implements EmailConnector {
 
     @Override
     public void sendMailPNPG(String templateName, String destinationMail, String businessName) {
-        log.trace("sendMailPNPG end");
+        log.trace("sendMailPNPG start");
         log.debug("sendMailPNPG templateName = {}, destinationMail = {}, businessName = {}", templateName, destinationMail, businessName);
         try {
             log.info("START - sendMail to {}, for product {}", destinationMail, PROD_PN);
@@ -102,6 +102,8 @@ public class EmailConnectorImpl implements EmailConnector {
             List<String> destinationMails = Objects.nonNull(coreConfig.getDestinationMails()) && !coreConfig.getDestinationMails().isEmpty()
                     ? coreConfig.getDestinationMails()
                     : List.of(destinationMail);
+
+            log.debug("sendMailPNPG destinationMails = {}", destinationMails);
 
             message.setSubject(mailTemplate.getSubject());
             message.setFrom(coreConfig.getSenderMail());
