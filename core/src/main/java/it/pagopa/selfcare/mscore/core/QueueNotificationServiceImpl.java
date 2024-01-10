@@ -4,7 +4,6 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.core.config.SchedulerConfig;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -15,14 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
-public class SchedulerServiceImpl implements SchedulerService{
+public class QueueNotificationServiceImpl implements QueueNotificationService {
 
     public static final int TOKEN_PAGE_SIZE = 100;
     public static final int USER_PAGE_SIZE = 100;
@@ -36,27 +34,25 @@ public class SchedulerServiceImpl implements SchedulerService{
 
     private final UserConnector userConnector;
 
-    private final SchedulerConfig schedulerConfig;
 
     @Autowired
-    public SchedulerServiceImpl(ContractService contractService,
-                                UserEventService userEventService, SchedulerConfig schedulerConfig,
-                                TokenConnector tokenConnector,
-                                InstitutionConnector institutionConnector, UserConnector userConnector) {
+    public QueueNotificationServiceImpl(ContractService contractService,
+                                        UserEventService userEventService,
+                                        TokenConnector tokenConnector,
+                                        InstitutionConnector institutionConnector, UserConnector userConnector) {
         this.userEventService = userEventService;
         this.userConnector = userConnector;
-        log.info("Initializing {}...", SchedulerServiceImpl.class.getSimpleName());
+        log.info("Initializing {}...", QueueNotificationServiceImpl.class.getSimpleName());
         this.contractService = contractService;
-        this.schedulerConfig = schedulerConfig;
         this.tokenConnector = tokenConnector;
         this.institutionConnector = institutionConnector;
     }
 
 
     @Async
-    public void regenerateQueueNotifications() {
+    public void regenerateContractsNotifications() {
         log.trace("regenerateQueueNotifications start");
-            if (schedulerConfig.getSendOldEvent() && productsFilter.isPresent()) {
+            if (productsFilter.isPresent()) {
                 for (String productId: productsFilter.get()) {
                     log.debug("Regenerating notifications on queue with product filter {}", productId);
 
@@ -66,7 +62,7 @@ public class SchedulerServiceImpl implements SchedulerService{
                         List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), productId, page, page_size_api.orElse(TOKEN_PAGE_SIZE));
                         log.debug("[KAFKA] TOKEN NUMBER {} PAGE {}", tokens.size(), page);
 
-                        sendDataLakeNotifications(tokens);
+                        sendScContractNotifications(tokens);
 
                         page += 1;
                         if (tokens.size() < TOKEN_PAGE_SIZE) {
@@ -77,14 +73,11 @@ public class SchedulerServiceImpl implements SchedulerService{
                     } while (nextPage);
                 }
                 page_size_api = Optional.empty();
-                schedulerConfig.setScheduler(false);
             }
-
-        log.info("Next scheduled check at {}", OffsetDateTime.now().plusSeconds(schedulerConfig.getFixedDelay() / 1000));
         log.trace("regenerateQueueNotifications end");
     }
 
-    private void sendDataLakeNotifications(List<Token> tokens) {
+    private void sendScContractNotifications(List<Token> tokens) {
         tokens.forEach(token -> {
             try {
                 Institution institution = institutionConnector.findById(token.getInstitutionId());
@@ -126,7 +119,6 @@ public class SchedulerServiceImpl implements SchedulerService{
                     }while(nextPage);
                 }
                 page_size_api = Optional.empty();
-                schedulerConfig.setScheduler(false);
             }
 
         }
@@ -134,15 +126,14 @@ public class SchedulerServiceImpl implements SchedulerService{
     }
 
     @Override
-    public void startScheduler(Optional<Integer> size, List<String> productsFilter) {
+    public void sendContracts(Optional<Integer> size, List<String> productsFilter) {
         this.page_size_api = size;
         this.productsFilter = Optional.ofNullable(productsFilter);
-        schedulerConfig.setScheduler(true);
-        regenerateQueueNotifications();
+        regenerateContractsNotifications();
     }
 
     @Override
-    public void startUsersScheduler(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
+    public void sendUsers(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
         this.page_size_api = size;
         this.productsFilter = Optional.ofNullable(productsFilter);
         this.page=page;
