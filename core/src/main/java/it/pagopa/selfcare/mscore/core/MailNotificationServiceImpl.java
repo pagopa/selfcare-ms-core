@@ -5,7 +5,6 @@ import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
-import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
@@ -22,8 +21,8 @@ import org.springframework.util.StringUtils;
 import java.io.File;
 import java.util.*;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.ERROR_DURING_SEND_MAIL;
-import static it.pagopa.selfcare.mscore.constant.ProductId.*;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_FD;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_FD_GARANTITO;
 
 @Slf4j
 @Service
@@ -65,18 +64,10 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
     @Override
     public void setCompletedPGOnboardingMail(String destinationMail, String businessName) {
-        try {
-            log.info("START - sendMail to {}, for product {}", destinationMail, PROD_PN);
-            String template = fileStorageConnector.getTemplateFile(mailTemplateConfig.getPath());
-            MailTemplate mailTemplate = mapper.readValue(template, MailTemplate.class);
-            MessageRequest messageRequest = constructMessageRequest(destinationMail, businessName, mailTemplate);
-            log.trace("sendMessage start");
-            notificationConnector.sendNotificationToUser(messageRequest);
-        } catch (Exception e) {
-            log.error(ERROR_DURING_SEND_MAIL.getMessage() + ":", e.getMessage(), e);
-            throw new MsCoreException(ERROR_DURING_SEND_MAIL.getMessage(), ERROR_DURING_SEND_MAIL.getCode());
-        }
-        log.trace("sendMessage end");
+        log.trace("setCompletedPGOnboardingMail start");
+        log.debug("setCompletedPGOnboardingMail destinationMail = {}, businessName = {}", destinationMail, businessName);
+        emailConnector.sendMailPNPG(mailTemplateConfig.getPath(), destinationMail, businessName);
+        log.trace("setCompletedPGOnboardingMail end");
     }
 
     public void sendAutocompleteMail(List<String> destinationMail, Map<String, String> templateParameters, File file, String fileName, String productName) {
