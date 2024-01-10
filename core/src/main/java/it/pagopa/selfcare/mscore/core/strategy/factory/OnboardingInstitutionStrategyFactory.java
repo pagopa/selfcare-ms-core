@@ -169,7 +169,7 @@ public class OnboardingInstitutionStrategyFactory {
         boolean checkRecipientCode = !(institutionType.equals(InstitutionType.SA)
                 || institutionType.equals(InstitutionType.PT)
                 || institutionType.equals(InstitutionType.AS))
-                || !productId.equalsIgnoreCase(PROD_INTEROP.getValue());
+                && !productId.equalsIgnoreCase(PROD_INTEROP.getValue());
         OnboardingInstitutionUtils.validateOnboarding(billing, checkRecipientCode);
     }
 
