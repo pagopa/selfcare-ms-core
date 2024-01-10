@@ -148,8 +148,7 @@ class EmailConnectorImplTest {
     void testSendMailPGNG_exception() throws JsonProcessingException {
         final String senderMail = "senderMail";
         final String destinationMail = "destinationMail";
-        ArrayList<String> destinationMails = new ArrayList<>();
-        destinationMails.add(destinationMail);        final String templateName = "templateName";
+        final String templateName = "templateName";
         final String templateFile = "templateFile";
         final String businessName = "businessName";
 
@@ -162,7 +161,7 @@ class EmailConnectorImplTest {
         MimeMessage mimeMessage = mock(MimeMessage.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
         when(coreConfig.getSenderMail()).thenReturn(senderMail);
-        when(coreConfig.getDestinationMails()).thenReturn(destinationMails);
+        when(coreConfig.getDestinationMails()).thenReturn(null);
 
         doThrow(RuntimeException.class).when(javaMailSender).send(any(MimeMessage.class));
         Assertions.assertThrows(MsCoreException.class, () -> emailConnector.sendMailPNPG(templateName,destinationMail,businessName));
