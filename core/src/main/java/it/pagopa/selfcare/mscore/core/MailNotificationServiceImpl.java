@@ -27,7 +27,7 @@ import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Slf4j
 @Service
-public class NotificationServiceImpl implements NotificationService {
+public class MailNotificationServiceImpl implements MailNotificationService {
 
     private static final String MAIL_PARAMETER_LOG = "mailParameters: {}";
     private static final String DESTINATION_MAIL_LOG = "destinationMails: {}";
@@ -43,15 +43,15 @@ public class NotificationServiceImpl implements NotificationService {
     private final CoreConfig coreConfig;
 
     @Autowired
-    public NotificationServiceImpl(NotificationServiceConnector notificationConnector,
-                                   FileStorageConnector fileStorageConnector,
-                                   InstitutionConnector institutionConnector,
-                                   ProductConnector productConnector,
-                                   ObjectMapper mapper,
-                                   MailTemplateConfig mailTemplateConfig,
-                                   EmailConnector emailConnector,
-                                   MailParametersMapper mailParametersMapper,
-                                   CoreConfig coreConfig) {
+    public MailNotificationServiceImpl(NotificationServiceConnector notificationConnector,
+                                       FileStorageConnector fileStorageConnector,
+                                       InstitutionConnector institutionConnector,
+                                       ProductConnector productConnector,
+                                       ObjectMapper mapper,
+                                       MailTemplateConfig mailTemplateConfig,
+                                       EmailConnector emailConnector,
+                                       MailParametersMapper mailParametersMapper,
+                                       CoreConfig coreConfig) {
         this.notificationConnector = notificationConnector;
         this.fileStorageConnector = fileStorageConnector;
         this.institutionConnector = institutionConnector;

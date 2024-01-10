@@ -66,7 +66,7 @@ class OnboardingServiceImplTest {
     @Mock
     private UserService userService;
     @Mock
-    private NotificationService emailService;
+    private MailNotificationService emailService;
 
     @Mock
     private UserRelationshipService userRelationshipService;

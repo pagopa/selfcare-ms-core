@@ -29,7 +29,7 @@ class DelegationServiceImplTest {
     private DelegationServiceImpl delegationServiceImpl;
 
     @Mock
-    private NotificationService notificationService;
+    private MailNotificationService mailNotificationService;
 
     @Mock
     private InstitutionService institutionService;
@@ -42,7 +42,7 @@ class DelegationServiceImplTest {
         Delegation delegation = new Delegation();
         delegation.setId("id");
         when(delegationConnector.save(any())).thenReturn(delegation);
-        doNothing().when(notificationService).sendMailForDelegation(any(), any(), any());
+        doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
@@ -61,7 +61,7 @@ class DelegationServiceImplTest {
         Institution institution = new Institution();
         institution.setId("id");
         when(delegationConnector.save(any())).thenReturn(delegation);
-        doNothing().when(notificationService).sendMailForDelegation(any(), any(), any());
+        doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());

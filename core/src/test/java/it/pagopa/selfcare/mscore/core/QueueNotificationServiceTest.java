@@ -4,7 +4,6 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.core.config.SchedulerConfig;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -30,9 +29,9 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-class SchedulerServiceTest {
+class QueueNotificationServiceTest {
     @InjectMocks
-    private SchedulerServiceImpl schedulerService;
+    private QueueNotificationServiceImpl schedulerService;
     @Mock
     private ContractService contractService;
 
@@ -40,8 +39,6 @@ class SchedulerServiceTest {
     private UserConnector userConnector;
     @Mock
     private UserEventService userEventService;
-    @Mock
-    private SchedulerConfig scheduledConfig;
     @Mock
     private InstitutionConnector institutionConnector;
     @Mock
@@ -57,13 +54,11 @@ class SchedulerServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
-
-        when(scheduledConfig.getSendOldEvent()).thenReturn(true);
         //when
         Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
         //then
@@ -82,13 +77,11 @@ class SchedulerServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
-
-        when(scheduledConfig.getSendOldEvent()).thenReturn(true);
         //when
         Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
         //then
@@ -104,13 +97,12 @@ class SchedulerServiceTest {
         final Token token = mockInstance(new Token());
         token.setStatus(RelationshipState.DELETED);
 
-        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenThrow(ResourceNotFoundException.class);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
 
-        when(scheduledConfig.getSendOldEvent()).thenReturn(true);
         //when
         Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
         //then

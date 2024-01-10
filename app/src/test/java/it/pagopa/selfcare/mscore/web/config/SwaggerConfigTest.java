@@ -50,7 +50,7 @@ class SwaggerConfigTest {
     UserService userService;
 
     @MockBean
-    SchedulerService schedulerService;
+    QueueNotificationService queueNotificationService;
 
     @Autowired
     WebApplicationContext context;

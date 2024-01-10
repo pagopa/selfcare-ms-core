@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.selfcare.mscore.core.SchedulerService;
+import it.pagopa.selfcare.mscore.core.QueueNotificationService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +17,14 @@ import java.util.Optional;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(value = {SchedulerController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
-@ContextConfiguration(classes = {SchedulerController.class})
-class SchedulerControllerTest {
+@WebMvcTest(value = {QueueNotificationController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@ContextConfiguration(classes = {QueueNotificationController.class})
+class QueueNotificationControllerTest {
     private static final String BASE_URL = "/scheduler";
     @Autowired
     protected MockMvc mvc;
     @MockBean
-    private SchedulerService schedulerService;
+    private QueueNotificationService queueNotificationService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -39,7 +39,7 @@ class SchedulerControllerTest {
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
 
-        Mockito.verify(schedulerService, Mockito.times(1)).startScheduler(Optional.of(size), List.of(productId));
+        Mockito.verify(queueNotificationService, Mockito.times(1)).startScheduler(Optional.of(size), List.of(productId));
     }
 
     @Test
@@ -54,6 +54,6 @@ class SchedulerControllerTest {
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
 
-        Mockito.verify(schedulerService, Mockito.times(1)).startUsersScheduler(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
+        Mockito.verify(queueNotificationService, Mockito.times(1)).startUsersScheduler(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
     }
 }
