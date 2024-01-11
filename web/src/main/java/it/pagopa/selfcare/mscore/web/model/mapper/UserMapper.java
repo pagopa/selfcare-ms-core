@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
 
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -10,10 +11,7 @@ import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.UserInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.user.InstitutionProducts;
-import it.pagopa.selfcare.mscore.web.model.user.Person;
-import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
-import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
+import it.pagopa.selfcare.mscore.web.model.user.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -41,6 +39,8 @@ public interface UserMapper {
     InstitutionProducts toInstitutionProducts(UserBinding model);
 
     InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request);
+
+    UserNotificationResponse toUserNotification(UserNotificationToSend user);
 
     @Named("retrieveMailFromWorkContacts")
     default String retrieveMailFromWorkContacts(Map<String, WorkContact> map, String institutionId){
