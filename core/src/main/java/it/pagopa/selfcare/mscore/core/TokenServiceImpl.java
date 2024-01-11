@@ -152,23 +152,6 @@ public class TokenServiceImpl implements TokenService {
                 notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
             }
         }
-        notification.setInternalIstitutionID(institution.getId());
-        notification.setProduct(token.getProductId());
-        notification.setFilePath(token.getContractSigned());
-        notification.setOnboardingTokenId(token.getId());
-        notification.setCreatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
-        notification.setFileName(token.getContractSigned() == null ? "" : Paths.get(token.getContractSigned()).getFileName().toString());
-        notification.setContentType(token.getContentType() == null ? "" : token.getContentType());
-
-        if (token.getProductId() != null && institution.getOnboarding() != null) {
-            Onboarding onboarding = institution.getOnboarding().stream()
-                    .filter(o -> token.getProductId().equalsIgnoreCase(o.getProductId()))
-                    .findFirst().orElseThrow(() -> new InvalidRequestException(String.format("Product %s not found", token.getProductId()), "0000"));
-            notification.setPricingPlan(onboarding.getPricingPlan());
-            notification.setBilling(onboarding.getBilling() != null ? onboarding.getBilling() : institution.getBilling());
-            notification.setInstitution(contractService.toInstitutionToNotify(institution));
-        }
-
-        return notification;
+        return contractService.toNotificationToSend(notification, institution, token);
     }
 }

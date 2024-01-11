@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
+import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
@@ -273,7 +274,7 @@ class TokenServiceImplTest {
                 Mockito.<Integer>any(), Mockito.<Integer>any())).thenReturn(tokenList);
         when(tokenConnector.countAllTokenFilterByStates(List.of(RelationshipState.ACTIVE))).thenReturn(10L);
         when(institutionConnector.findById(Mockito.<String>any())).thenReturn(institution);
-        when(contractService.toInstitutionToNotify(institution)).thenReturn(institutionToNotify);
+        when(contractService.toNotificationToSend((NotificationToSend) any(),any(), any())).thenReturn(new NotificationToSend());
 
         // Assert
         PaginatedToken paginatedToken = tokenServiceImpl.retrieveContractsFilterByStatus(List.of(RelationshipState.ACTIVE), 0, 1);
