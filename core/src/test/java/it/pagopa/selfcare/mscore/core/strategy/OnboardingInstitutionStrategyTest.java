@@ -268,6 +268,7 @@ class OnboardingInstitutionStrategyTest {
 
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.SA);
+        institution.setDigitalAddress(institutionUpdate.getDigitalAddress());
 
         Billing billing = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
@@ -298,8 +299,9 @@ class OnboardingInstitutionStrategyTest {
      * Method under test: {@link OnboardingServiceImpl#onboardingInstitution(OnboardingRequest, SelfCareUser)}
      */
     @Test
-    void testOnboardingInstitutionGSP() throws IOException {
+    void testOnboardingInstitutionGSP() {
 
+        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -308,14 +310,15 @@ class OnboardingInstitutionStrategyTest {
         billing.setVatNumber("42");
 
         Institution institution = new Institution();
-        institution.setOrigin("IPA");
+        institution.setOrigin("SELC");
         institution.setBilling(billing);
         institution.setInstitutionType(InstitutionType.GSP);
+        institution.setDigitalAddress(institutionUpdate1.getDigitalAddress());
 
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
+
 
         OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -341,25 +344,9 @@ class OnboardingInstitutionStrategyTest {
      *Method under test: {@link OnboardingServiceImpl#onboardingInstitution(OnboardingRequest, SelfCareUser)}
      */
     @Test
-    void testOnboardingInstitutionGSP2() throws IOException {
+    void testOnboardingInstitutionGSP2() {
+        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
 
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId(PROD_INTEROP.getValue());
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -368,14 +355,14 @@ class OnboardingInstitutionStrategyTest {
         billing.setVatNumber("42");
 
         Institution institution = new Institution();
-        institution.setOrigin("IPA");
+        institution.setOrigin("SELC");
         institution.setBilling(billing);
         institution.setInstitutionType(InstitutionType.GSP);
+        institution.setDigitalAddress(institutionUpdate1.getDigitalAddress());
 
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = TestUtils.createDummyInstitutionUpdateGSP();
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
@@ -397,8 +384,6 @@ class OnboardingInstitutionStrategyTest {
         onboardingRollback.setToken(token1);
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
         when(onboardingDao.persist(any(), any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
-        when(contractService.extractTemplate(any())).thenReturn("template");
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(File.createTempFile("file",".txt"));
 
         assertDoesNotThrow(() -> strategyFactory.retrieveOnboardingInstitutionStrategy(InstitutionType.GSP, onboardingRequest.getProductId(), institution)
                 .onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
@@ -492,7 +477,7 @@ class OnboardingInstitutionStrategyTest {
      */
     @Test
     void testOnboardingInstitutionPT() {
-
+        InstitutionUpdate institutionUpdate1 = TestUtils.createSimpleInstitutionUpdate();
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -501,14 +486,14 @@ class OnboardingInstitutionStrategyTest {
         billing.setVatNumber("42");
 
         Institution institution = new Institution();
-        institution.setOrigin("IPA");
+        institution.setOrigin("SELC");
         institution.setBilling(billing);
         institution.setInstitutionType(InstitutionType.PT);
+        institution.setDigitalAddress(institutionUpdate1.getDigitalAddress());
 
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
 
-        InstitutionUpdate institutionUpdate1 = TestUtils.createSimpleInstitutionUpdate();
         institutionUpdate1.setInstitutionType(InstitutionType.PT);
 
         OnboardingRequest onboardingRequest = TestUtils.dummyOnboardingRequest();

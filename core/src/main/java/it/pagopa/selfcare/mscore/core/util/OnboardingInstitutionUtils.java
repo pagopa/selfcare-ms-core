@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core.util;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.Origin;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -55,12 +56,14 @@ public class OnboardingInstitutionUtils {
 
     public static void validateOverridingData(InstitutionUpdate institutionUpdate, Institution institution) {
         log.info("START - validateOverridingData for institution having externalId: {}", institution.getExternalId());
-        if (InstitutionType.PA == institutionUpdate.getInstitutionType()
+        if (Origin.IPA.getValue().equals(institution.getOrigin())
                 && (!validateParameter(institution.getDescription(), institutionUpdate.getDescription())
                 || !validateParameter(institution.getTaxCode(), institutionUpdate.getTaxCode())
                 || !validateParameter(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())
                 || !validateParameter(institution.getZipCode(), institutionUpdate.getZipCode())
                 || !validateParameter(institution.getAddress(), institutionUpdate.getAddress()))) {
+            throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
+        } else if (!validateParameter(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())) {
             throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
         }
         log.info("END - validateOverridingData without error");
