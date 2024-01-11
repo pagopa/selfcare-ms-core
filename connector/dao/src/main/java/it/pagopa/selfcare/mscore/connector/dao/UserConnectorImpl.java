@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.UserId;
 import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
@@ -247,8 +246,8 @@ public class UserConnectorImpl implements UserConnector {
                                 .and(OnboardedProductEntity.Fields.status.name()).is(RelationshipState.ACTIVE.name())
                         )));
 
-        return repository.find(query, UserId.class).stream()
-                .map(UserId::getId)
+        return repository.find(query, UserEntity.class).stream()
+                .map(UserEntity::getId)
                 .toList();
     }
 
