@@ -594,9 +594,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionProducts() {
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, null);
-        //InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(partyRegistryProxyConnector, null,
-        //        userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
+        UserServiceImpl userService = new UserServiceImpl(null, null, null, null);
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.PENDING);
@@ -611,10 +609,6 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testRetrieveInstitutionProducts3() {
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, null);
-        //InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(partyRegistryProxyConnector, null,
-        //        userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.PENDING);
@@ -643,7 +637,7 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionGeoTaxonomies2() {
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, null);
+        UserServiceImpl userService = new UserServiceImpl(null, null, null, null);
         //InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(partyRegistryProxyConnector, null,
         //        userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
 
@@ -844,11 +838,6 @@ class InstitutionServiceImplTest {
 
     @Test
     void testFindInstitutionsByGeoTaxonomies1() {
-        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, null);
-        //InstitutionServiceImpl institutionService = (new InstitutionServiceImpl(partyRegistryProxyConnector,
-        //        institutionConnector, userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService));
         assertThrows(InvalidRequestException.class, () -> institutionServiceImpl.findInstitutionsByGeoTaxonomies("", SearchMode.ALL));
     }
 
@@ -947,10 +936,6 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveUserRelationships2() {
 
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, null);
-        //InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(partyRegistryProxyConnector, null,
-        //        userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         ArrayList<PartyRole> roles = new ArrayList<>();
         ArrayList<RelationshipState> states = new ArrayList<>();
         ArrayList<String> products = new ArrayList<>();
@@ -1066,11 +1051,6 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveAllProduct_filterProduct_allEmpty() {
 
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, mock(UserRegistryConnector.class));
-
-        //InstitutionServiceImpl institutionServiceImpl = new InstitutionServiceImpl(partyRegistryProxyConnector, null,
-        //        userService, new CoreConfig(), mock(TokenConnector.class), mock(UserConnector.class), contractService);
         List<RelationshipInfo> relationshipInfoList;
         UserBinding binding = new UserBinding();
         binding.setInstitutionId("42");

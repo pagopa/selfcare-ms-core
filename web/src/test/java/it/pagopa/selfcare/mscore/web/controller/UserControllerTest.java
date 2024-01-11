@@ -9,7 +9,12 @@ import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
+import it.pagopa.selfcare.mscore.core.UserServiceImpl;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapper;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapperImpl;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
+import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
@@ -25,10 +30,7 @@ import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.UserMapperImpl;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedInstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.user.InstitutionProducts;
-import it.pagopa.selfcare.mscore.web.model.user.Product;
-import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
-import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
+import it.pagopa.selfcare.mscore.web.model.user.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,10 +51,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,6 +74,9 @@ class UserControllerTest {
 
     @Spy
     private UserMapper userMapper = new UserMapperImpl();
+
+    @Spy
+    private UserNotificationMapper userNotificationMapper = new UserNotificationMapperImpl();
 
     @BeforeEach
     void resetContext() {
@@ -585,6 +587,48 @@ class UserControllerTest {
         Assertions.assertEquals("nome", response.getName());
         Assertions.assertEquals("cognome", response.getSurname());
         Assertions.assertEquals("taxCode", response.getTaxCode());
+
+    }
+
+    /**
+     * Method under test: {@link UserController#getUsers(Optional, Optional, String)}}
+     */
+    @Test
+    void testFindAllUsers() throws Exception {
+
+        UserNotificationToSend user =  new UserNotificationToSend();
+        user.setInstitutionId("institutionId");
+        UserToNotify userToNotify = new UserToNotify();
+        userToNotify.setName("name");
+        userToNotify.setFamilyName("surname");
+        user.setUser(userToNotify);
+        user.setProductId("prod-io");
+        when(userService.findAll(any(), any(), anyString())).thenReturn(List.of(user));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/users?productId=prod-io")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        UsersNotificationResponse response = new ObjectMapper().readValue(
+                result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+
+        Assertions.assertNotNull(response);
+        Assertions.assertNotNull(response.getUsers());
+        Assertions.assertFalse(response.getUsers().isEmpty());
+        Assertions.assertNotNull(response.getUsers().get(0));
+        Assertions.assertNotNull(response.getUsers().get(0).getUser());
+        Assertions.assertEquals("name", response.getUsers().get(0).getUser().getName());
+        Assertions.assertEquals("surname", response.getUsers().get(0).getUser().getFamilyName());
+        Assertions.assertEquals("prod-io", response.getUsers().get(0).getProductId());
+        Assertions.assertEquals("institutionId", response.getUsers().get(0).getInstitutionId());
 
     }
 

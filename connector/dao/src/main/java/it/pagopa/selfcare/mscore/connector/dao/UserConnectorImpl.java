@@ -85,7 +85,9 @@ public class UserConnectorImpl implements UserConnector {
         Pageable pageable = PageRequest.of(page, size);
         Query queryMatch = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
                 .elemMatch(Criteria.where(UserBinding.Fields.products.name())
-                        .elemMatch(Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                        .elemMatch(CriteriaBuilder.builder()
+                                .isIfNotNull(OnboardedProductEntity.Fields.productId.name(), productId)
+                                .build()
                                 .and(OnboardedProductEntity.Fields.status.name()).in(VALID_USER_RELATIONSHIPS))));
         return repository.find(queryMatch, pageable, UserEntity.class)
                 .stream()
