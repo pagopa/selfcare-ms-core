@@ -464,7 +464,11 @@ class OnboardingInstitutionStrategyTest {
 
         Institution institution = new Institution();
         institution.setExternalId("externalId");
+        institution.setOrigin("IPA");
         institution.setInstitutionType(InstitutionType.GSP);
+        institution.setDescription(institutionUpdate.getDescription());
+        institution.setDigitalAddress(institutionUpdate.getDigitalAddress());
+        institution.setTaxCode(institutionUpdate.getTaxCode());
 
         assertThrows(InvalidRequestException.class,
                 () -> strategyFactory.retrieveOnboardingInstitutionStrategy(institutionUpdate.getInstitutionType(), onboardingRequest.getProductId(), institution)
@@ -585,21 +589,6 @@ class OnboardingInstitutionStrategyTest {
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId(PROD_INTEROP.getValue());
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
 
         Billing billing = new Billing();
         billing.setPublicServices(true);
@@ -608,20 +597,22 @@ class OnboardingInstitutionStrategyTest {
         billing.setVatNumber("42");
 
         Institution institution = new Institution();
-        institution.setOrigin("selc");
+        institution.setOrigin("IPA");
         institution.setInstitutionType(InstitutionType.PA);
+        institution.setDescription(institutionUpdate.getDescription());
+        institution.setAddress(institutionUpdate.getAddress());
+        institution.setDigitalAddress(institutionUpdate.getDigitalAddress());
+        institution.setZipCode(institutionUpdate.getZipCode());
+        institution.setTaxCode(institutionUpdate.getTaxCode());
 
         Billing billing1 = TestUtils.createSimpleBilling();
         Contract contract = TestUtils.createSimpleContract();
-
-        InstitutionUpdate institutionUpdate1 = new InstitutionUpdate();
-        institutionUpdate1.setInstitutionType(InstitutionType.PA);
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
         onboardingRequest.setBillingRequest(billing1);
         onboardingRequest.setContract(contract);
         onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate1);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
         onboardingRequest.setProductId(PROD_INTEROP.getValue());
         onboardingRequest.setProductName("Product Name");
