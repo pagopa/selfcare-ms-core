@@ -45,20 +45,20 @@ public class OnboardingInstitutionStrategyFactory {
     private final CoreConfig coreConfig;
     private final FileStorageConnector fileStorageConnector;
     private final UserEventService userEventService;
-    private final NotificationService notificationService;
+    private final MailNotificationService mailNotificationService;
 
     public OnboardingInstitutionStrategyFactory(OnboardingDao onboardingDao,
                                                 ContractService contractService,
                                                 UserService userService,
                                                 InstitutionService institutionService,
                                                 CoreConfig coreConfig,
-                                                NotificationService notificationService, FileStorageConnector fileStorageConnector, UserEventService userEventService) {
+                                                MailNotificationService mailNotificationService, FileStorageConnector fileStorageConnector, UserEventService userEventService) {
         this.onboardingDao = onboardingDao;
         this.contractService = contractService;
         this.userService = userService;
         this.institutionService = institutionService;
         this.coreConfig = coreConfig;
-        this.notificationService = notificationService;
+        this.mailNotificationService = mailNotificationService;
         this.fileStorageConnector = fileStorageConnector;
         this.userEventService = userEventService;
     }
@@ -202,7 +202,7 @@ public class OnboardingInstitutionStrategyFactory {
     private Consumer<OnboardingInstitutionStrategyInput> sendConfirmationMail() {
         return strategyInput -> {
             try {
-                notificationService.setCompletedPGOnboardingMail(strategyInput.getOnboardingRequest().getInstitutionUpdate().getDigitalAddress(), strategyInput.getInstitution().getDescription());
+                mailNotificationService.setCompletedPGOnboardingMail(strategyInput.getOnboardingRequest().getInstitutionUpdate().getDigitalAddress(), strategyInput.getInstitution().getDescription());
             } catch (Exception e) {
                 log.warn("Error during send completed email for product: {}", PROD_PN);
             }
@@ -213,7 +213,7 @@ public class OnboardingInstitutionStrategyFactory {
         return strategyInput -> {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId());
-                notificationService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false);
+                mailNotificationService.sendMailWithContract(strategyInput.getPdf(), strategyInput.getInstitution(), user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId(), false);
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
                         strategyInput.getOnboardingRollback().getToken(), strategyInput.getOnboardingRollback().getOnboarding(), strategyInput.getOnboardingRollback().getProductMap());
@@ -226,10 +226,10 @@ public class OnboardingInstitutionStrategyFactory {
             try {
                 User user = userService.retrieveUserFromUserRegistry(strategyInput.getPrincipal().getId());
                 if (!InstitutionType.PT.equals(strategyInput.getOnboardingRequest().getInstitutionUpdate().getInstitutionType())) {
-                    notificationService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
+                    mailNotificationService.sendMailForApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
                 } else {
-                    notificationService.sendMailForRegistration(user, strategyInput.getInstitution(), strategyInput.getOnboardingRequest());
-                    notificationService.sendMailForRegistrationNotificationApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
+                    mailNotificationService.sendMailForRegistration(user, strategyInput.getInstitution(), strategyInput.getOnboardingRequest());
+                    mailNotificationService.sendMailForRegistrationNotificationApprove(user, strategyInput.getOnboardingRequest(), strategyInput.getOnboardingRollback().getToken().getId());
                 }
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),
@@ -252,7 +252,7 @@ public class OnboardingInstitutionStrategyFactory {
 
                     if (strategyInput.getOnboardingRequest().getSendCompleteOnboardingEmail() == null
                             || Boolean.TRUE.equals(strategyInput.getOnboardingRequest().getSendCompleteOnboardingEmail())) {
-                        notificationService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, NotificationServiceImpl.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
+                        mailNotificationService.sendAutocompleteMail(destinationMails, new HashMap<>(), logoFile, MailNotificationServiceImpl.PAGOPA_LOGO_FILENAME, strategyInput.getOnboardingRequest().getProductName());
                     }
                 }
 

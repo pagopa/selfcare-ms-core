@@ -4,7 +4,6 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.core.config.SchedulerConfig;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
@@ -30,9 +29,9 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-class SchedulerServiceTest {
+class QueueNotificationServiceTest {
     @InjectMocks
-    private SchedulerServiceImpl schedulerService;
+    private QueueNotificationServiceImpl schedulerService;
     @Mock
     private ContractService contractService;
 
@@ -40,8 +39,6 @@ class SchedulerServiceTest {
     private UserConnector userConnector;
     @Mock
     private UserEventService userEventService;
-    @Mock
-    private SchedulerConfig scheduledConfig;
     @Mock
     private InstitutionConnector institutionConnector;
     @Mock
@@ -57,15 +54,13 @@ class SchedulerServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
-
-        when(scheduledConfig.getSendOldEvent()).thenReturn(true);
         //when
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         //then
         assertDoesNotThrow(executable);
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
@@ -82,15 +77,13 @@ class SchedulerServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
-
-        when(scheduledConfig.getSendOldEvent()).thenReturn(true);
         //when
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         //then
         assertDoesNotThrow(executable);
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
@@ -99,20 +92,24 @@ class SchedulerServiceTest {
     }
 
     @Test
+    void startContractScheduler_productNotPresent(){
+
+    }
+
+    @Test
     void institutionNotFound(){
         //given
         final Token token = mockInstance(new Token());
         token.setStatus(RelationshipState.DELETED);
 
-        schedulerService = new SchedulerServiceImpl(contractService, userEventService, scheduledConfig, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector, null);
 
 
         when(institutionConnector.findById(anyString())).thenThrow(ResourceNotFoundException.class);
         when(tokenConnector.findByStatusAndProductId(any(), any(), any(), any())).thenReturn(List.of(token));
 
-        when(scheduledConfig.getSendOldEvent()).thenReturn(true);
         //when
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         //then
         assertDoesNotThrow(executable);
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
@@ -121,13 +118,13 @@ class SchedulerServiceTest {
 
     @Test
     void schedulerNotStarted(){
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), List.of("product"));
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), List.of("product"));
         verifyNoInteractions(tokenConnector, institutionConnector, contractService);
     }
 
     @Test
     void productsFilterNotPresent(){
-        Executable executable = () -> schedulerService.startScheduler(Optional.of(1), null);
+        Executable executable = () -> schedulerService.sendContracts(Optional.of(1), null);
         verifyNoInteractions(tokenConnector, institutionConnector, contractService);
     }
 
@@ -140,7 +137,7 @@ class SchedulerServiceTest {
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(onboardedUser));
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(size, page, productIds, Optional.empty());
+        Executable executable = () -> schedulerService.sendUsers(size, page, productIds, Optional.empty());
         //then
         assertDoesNotThrow(executable);
         verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
@@ -156,7 +153,7 @@ class SchedulerServiceTest {
         final Optional<String> userId = Optional.of("userId");
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(size, page, productIds, userId);
+        Executable executable = () -> schedulerService.sendUsers(size, page, productIds, userId);
         //then
         assertDoesNotThrow(executable);
         verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
@@ -171,7 +168,7 @@ class SchedulerServiceTest {
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         final Optional<String> userId = Optional.of("userId");
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(size, page, null, null);
+        Executable executable = () -> schedulerService.sendUsers(size, page, null, null);
         //then
         assertDoesNotThrow(executable);
         verifyNoInteractions(userEventService, userConnector);
@@ -186,7 +183,7 @@ class SchedulerServiceTest {
         final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
         when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(onboardedUser));
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(Optional.empty(), Optional.empty(), productIds, Optional.empty());
+        Executable executable = () -> schedulerService.sendUsers(Optional.empty(), Optional.empty(), productIds, Optional.empty());
         //then
         assertDoesNotThrow(executable);
         verify(userEventService, times(1)).sendOnboardedUserNotification(onboardedUser, productIds.get(0));
@@ -199,7 +196,7 @@ class SchedulerServiceTest {
         final List<String> productIds = new ArrayList<>();
         final Optional<Integer> size = Optional.of(1);
         //when
-        Executable executable = () -> schedulerService.startUsersScheduler(Optional.empty(), Optional.empty(), productIds, Optional.empty());
+        Executable executable = () -> schedulerService.sendUsers(Optional.empty(), Optional.empty(), productIds, Optional.empty());
         //then
         assertDoesNotThrow(executable);
         verifyNoInteractions(userEventService);

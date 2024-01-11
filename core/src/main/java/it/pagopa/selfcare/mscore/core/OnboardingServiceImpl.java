@@ -23,7 +23,6 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
@@ -57,7 +56,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final UserRelationshipService userRelationshipService;
     private final UserEventService userEventService;
     private final ContractService contractService;
-    private final NotificationService notificationService;
+    private final MailNotificationService notificationService;
     private final UserNotificationService userNotificationService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
     private final MailTemplateConfig mailTemplateConfig;
@@ -71,7 +70,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
                                  UserEventService userEventService,
-                                 NotificationService notificationService,
+                                 MailNotificationService notificationService,
                                  UserNotificationService userNotificationService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
