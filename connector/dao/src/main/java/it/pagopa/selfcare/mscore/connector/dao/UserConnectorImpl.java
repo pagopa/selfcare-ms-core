@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.UserId;
 import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
@@ -232,6 +233,20 @@ public class UserConnectorImpl implements UserConnector {
 
         return repository.find(query, UserEntity.class).stream()
                 .map(userMapper::toOnboardedUser)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> findUsersByInstitutionIdAndProductId(String institutionId, String productId) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
+                                .and(UserBinding.Fields.products.name()).elemMatch(
+                                        Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                                .and(OnboardedProductEntity.Fields.status.name()).is(RelationshipState.ACTIVE.name())
+                        )));
+
+        return repository.find(query, UserId.class).stream()
+                .map(UserId::getId)
                 .collect(Collectors.toList());
     }
 
