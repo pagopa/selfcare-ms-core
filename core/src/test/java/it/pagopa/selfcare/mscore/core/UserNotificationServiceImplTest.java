@@ -1,14 +1,17 @@
 package it.pagopa.selfcare.mscore.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
+import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
@@ -22,11 +25,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailPreparationException;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +55,12 @@ class UserNotificationServiceImplTest {
     @Mock
     private InstitutionService institutionService;
 
+    @Mock
+    private FileStorageConnector fileStorageConnector;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
 
     @Test
     void sendAddedProductRoleNotification() throws IOException {
@@ -73,6 +83,16 @@ class UserNotificationServiceImplTest {
         Template template = mock(Template.class);
         when(freemarkerConfig.getTemplate(any())).thenReturn(template);
         assertDoesNotThrow(() -> userNotificationService.sendAddedProductRoleNotification("id",institution,"product", labels, "name","surname"));
+    }
+
+    @Test
+    void sendDelegationUserNotification() throws JsonProcessingException {
+        when(fileStorageConnector.getTemplateFile(any())).thenReturn("template");
+        MailTemplate mailTemplate = new MailTemplate();
+        mailTemplate.setBody(Base64.getEncoder().encodeToString("test".getBytes(StandardCharsets.UTF_8)));
+        mailTemplate.setSubject(Base64.getEncoder().encodeToString("test".getBytes(StandardCharsets.UTF_8)));
+        when(objectMapper.readValue(anyString(),(Class) any())).thenReturn(mailTemplate);
+        assertDoesNotThrow(() -> userNotificationService.sendDelegationUserNotification(List.of("id"),"institution","product", new HashMap<>()));
     }
 
 
