@@ -11,6 +11,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.UserEventService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -22,6 +23,7 @@ import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
 import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
+import it.pagopa.selfcare.mscore.web.model.user.UsersNotificationResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
@@ -43,7 +46,6 @@ public class UserController {
     private final UserRelationshipService userRelationshipService;
     private final UserService userService;
     private final UserEventService userEventService;
-
     private final UserMapper userMapper;
 
     public UserController(UserRelationshipService userRelationshipService,
@@ -276,5 +278,31 @@ public class UserController {
                                            @RequestParam(value = "institutionId") String institutionId) {
         userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * The function return onboardingInfo
+     *
+     * @param size          Integer
+     * @param page          Integer
+     * @param productId     String
+     * @return {@link UsersNotificationResponse}
+     * <p>
+     * * Code: 200, Message: successful operation
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ApiOperation(value = "", notes = "${swagger.mscore.api.users.findAll}")
+    @GetMapping(value = "/users")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<UsersNotificationResponse> getUsers(@RequestParam(name = "size", required = false) Optional<Integer> size,
+                                                              @RequestParam(name = "page", required = false) Optional<Integer> page,
+                                                              @RequestParam(name = "productId", required = false) String productId) {
+        List<UserNotificationToSend> users = userService.findAll(size, page, productId);
+        UsersNotificationResponse userNotificationResponse = new UsersNotificationResponse();
+        userNotificationResponse.setUsers(users.stream()
+                .map(userMapper::toUserNotification)
+                .collect(Collectors.toList()));
+        return ResponseEntity.ok(userNotificationResponse);
     }
 }

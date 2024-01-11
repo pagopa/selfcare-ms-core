@@ -32,6 +32,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -85,8 +86,9 @@ public class UserConnectorImpl implements UserConnector {
         Pageable pageable = PageRequest.of(page, size);
         Query queryMatch = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
                 .elemMatch(Criteria.where(UserBinding.Fields.products.name())
-                        .elemMatch(Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
-                                .and(OnboardedProductEntity.Fields.status.name()).in(VALID_USER_RELATIONSHIPS))));
+                                .and(OnboardedProductEntity.Fields.status.name()).in(VALID_USER_RELATIONSHIPS)));
+        if(StringUtils.hasText(productId))
+            queryMatch.addCriteria(Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId));
         return repository.find(queryMatch, pageable, UserEntity.class)
                 .stream()
                 .map(userMapper::toOnboardedUser)

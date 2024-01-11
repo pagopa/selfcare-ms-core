@@ -8,10 +8,8 @@ import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 public interface UserEventService {
 
     void sendLegalTokenUserNotification(Token token);
-
     void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType);
     void sendUpdateUserNotificationToQueue(String userId, String institutionId);
-
     void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId);
 
 }

@@ -5057,6 +5057,79 @@
         } ]
       }
     },
+    "/users" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "getUsers",
+        "description" : "${swagger.mscore.api.users.findAll}",
+        "operationId" : "getUsersUsingGET",
+        "parameters" : [ {
+          "name" : "size",
+          "in" : "query",
+          "description" : "size",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "page",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }, {
+          "name" : "productId",
+          "in" : "query",
+          "description" : "productId",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/UsersNotificationResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/users/{id}" : {
       "get" : {
         "tags" : [ "Persons", "external-v2", "support" ],
@@ -8101,6 +8174,39 @@
           }
         }
       },
+      "UserNotificationResponse" : {
+        "title" : "UserNotificationResponse",
+        "type" : "object",
+        "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "eventType" : {
+            "type" : "string",
+            "enum" : [ "ADD", "UPDATE" ]
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "institutionId" : {
+            "type" : "string"
+          },
+          "onboardingTokenId" : {
+            "type" : "string"
+          },
+          "productId" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "user" : {
+            "$ref" : "#/components/schemas/UserToNotify"
+          }
+        }
+      },
       "UserProductsResponse" : {
         "title" : "UserProductsResponse",
         "type" : "object",
@@ -8137,6 +8243,35 @@
           }
         }
       },
+      "UserToNotify" : {
+        "title" : "UserToNotify",
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          },
+          "familyName" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "productRole" : {
+            "type" : "string"
+          },
+          "relationshipStatus" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          },
+          "role" : {
+            "type" : "string",
+            "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          },
+          "userId" : {
+            "type" : "string"
+          }
+        }
+      },
       "UserToOnboard" : {
         "title" : "UserToOnboard",
         "type" : "object",
@@ -8169,6 +8304,18 @@
           },
           "taxCode" : {
             "type" : "string"
+          }
+        }
+      },
+      "UsersNotificationResponse" : {
+        "title" : "UsersNotificationResponse",
+        "type" : "object",
+        "properties" : {
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserNotificationResponse"
+            }
           }
         }
       }
