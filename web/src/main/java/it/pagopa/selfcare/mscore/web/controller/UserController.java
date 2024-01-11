@@ -295,8 +295,8 @@ public class UserController {
     @ApiOperation(value = "", notes = "${swagger.mscore.api.users.findAll}")
     @GetMapping(value = "/users")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<UsersNotificationResponse> getUsers(@RequestParam(name = "size", required = false) Optional<Integer> size,
-                                                              @RequestParam(name = "page", required = false) Optional<Integer> page,
+    public ResponseEntity<UsersNotificationResponse> getUsers(@RequestParam(name = "size", required = false, defaultValue = "100") Optional<Integer> size,
+                                                              @RequestParam(name = "page", required = false, defaultValue = "0") Optional<Integer> page,
                                                               @RequestParam(name = "productId", required = false) String productId) {
         List<UserNotificationToSend> users = userService.findAll(size, page, productId);
         UsersNotificationResponse userNotificationResponse = new UsersNotificationResponse();

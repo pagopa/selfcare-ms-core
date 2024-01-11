@@ -69,14 +69,16 @@ public class UserServiceImpl implements UserService {
         List<UserNotificationToSend> users = new ArrayList<>();
         final int limit = size.orElse(USER_PAGE_SIZE);
         final int offset = page.orElse(0);
-        List<OnboardedUser> onboardedUsers = userConnector.findAllValidUsers(limit, offset, productId);
+        List<OnboardedUser> onboardedUsers = userConnector.findAllValidUsers(offset, limit, productId);
         onboardedUsers.forEach(onboardedUser -> {
             User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId());
             onboardedUser.getBindings().forEach(userBinding -> {
                 for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
-                    UserToNotify userToNotify = userNotificationMapper.toUserNotify(user, onboardedProduct, userBinding.getInstitutionId());
-                    UserNotificationToSend userNotification = notificationMapper.setNotificationDetailsFromOnboardedProduct(userToNotify, onboardedProduct, userBinding.getInstitutionId());
-                    users.add(userNotification);
+                    if(!StringUtils.hasText(productId) || (StringUtils.hasText(productId) && productId.equals(onboardedProduct.getProductId()))) {
+                        UserToNotify userToNotify = userNotificationMapper.toUserNotify(user, onboardedProduct, userBinding.getInstitutionId());
+                        UserNotificationToSend userNotification = notificationMapper.setNotificationDetailsFromOnboardedProduct(userToNotify, onboardedProduct, userBinding.getInstitutionId());
+                        users.add(userNotification);
+                    }
                 }
             });
         });

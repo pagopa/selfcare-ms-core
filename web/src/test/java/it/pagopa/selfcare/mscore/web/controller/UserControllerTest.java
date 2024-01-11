@@ -603,7 +603,7 @@ class UserControllerTest {
         userToNotify.setFamilyName("surname");
         user.setUser(userToNotify);
         user.setProductId("prod-io");
-        when(userService.findAll(Optional.empty(), Optional.empty(), "prod-io")).thenReturn(List.of(user));
+        when(userService.findAll(any(), any(), anyString())).thenReturn(List.of(user));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .get("/users?productId=prod-io")

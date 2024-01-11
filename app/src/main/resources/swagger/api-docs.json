@@ -5061,7 +5061,7 @@
       "get" : {
         "tags" : [ "Persons" ],
         "summary" : "getUsers",
-        "description" : "${swagger.mscore.api.users.findAll}",
+        "description" : "Retrieve all users according to optional params in input",
         "operationId" : "getUsersUsingGET",
         "parameters" : [ {
           "name" : "size",
