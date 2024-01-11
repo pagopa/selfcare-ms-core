@@ -1262,4 +1262,10 @@ class TokenConnectorImplTest {
         assertEquals(pageNumber, capturedPage.getPageNumber());
         verifyNoMoreInteractions(tokenRepository);
     }
+
+    @Test
+    void countAllTokenFilterByStates(){
+        when(tokenRepository.count(any(), any())).thenReturn(1L);
+        Assertions.assertEquals(1L, tokenConnectorImpl.countAllTokenFilterByStates(List.of(RelationshipState.ACTIVE)));
+    }
 }

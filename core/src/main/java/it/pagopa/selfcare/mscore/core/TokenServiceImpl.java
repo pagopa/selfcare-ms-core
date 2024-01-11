@@ -4,22 +4,22 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.NotificationToSend;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_ALREADY_CONSUMED;
+import static it.pagopa.selfcare.mscore.constant.RelationshipState.ACTIVE;
 import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.VERIFY_TOKEN_RELATIONSHIP_STATES;
 
 @Slf4j
@@ -30,15 +30,18 @@ public class TokenServiceImpl implements TokenService {
     private final UserService userService;
     private final OnboardingDao onboardingDao;
     private final InstitutionConnector institutionConnector;
+    private final ContractService contractService;
 
     public TokenServiceImpl(TokenConnector tokenConnector,
                             UserService userService,
                             OnboardingDao onboardingDao,
-                            InstitutionConnector institutionConnector) {
+                            InstitutionConnector institutionConnector,
+                            ContractService contractService) {
         this.tokenConnector = tokenConnector;
         this.userService = userService;
         this.onboardingDao = onboardingDao;
         this.institutionConnector = institutionConnector;
+        this.contractService = contractService;
     }
 
     @Override
@@ -110,5 +113,45 @@ public class TokenServiceImpl implements TokenService {
         log.debug("getTokensByProductId result = {}", tokens);
         log.trace("getTokensByProductId end");
         return tokens;
+    }
+
+    @Override
+    public PaginatedToken retrieveContractsFilterByStatus(List<RelationshipState> states, Integer page, Integer size) {
+        log.trace("getTokens start");
+        log.debug("getTokens states = {}, page = {}, size = {}", states, page, size);
+        Long totalNumber = tokenConnector.countAllTokenFilterByStates(states);
+        List<Token> tokensByStatusAndProduct = tokenConnector.findByStatusAndProductId(EnumSet.copyOf(states), null, page, size);
+        List<NotificationToSend> notificationToSends = tokensByStatusAndProduct.stream()
+                .map(token -> {
+                    Institution institution = retrieveRelatedInstitution(token.getInstitutionId());
+                    return toNotificationToSend(institution, token);
+                })
+                .toList();
+
+        log.debug("getTokens result = {}", notificationToSends);
+        log.trace("getTokens end");
+        return new PaginatedToken(notificationToSends, totalNumber);
+    }
+
+    private Institution retrieveRelatedInstitution(String institutionId) {
+        return institutionConnector.findById(institutionId);
+    }
+
+    public NotificationToSend toNotificationToSend(Institution institution, Token token) {
+        NotificationToSend notification = new NotificationToSend();
+        notification.setId(token.getId());
+        notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
+        if (ACTIVE.equals(token.getStatus())) {
+            notification.setUpdatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
+        } else {
+            notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
+            if (token.getStatus().equals(RelationshipState.DELETED)) {
+                notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+                notification.setUpdatedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+            } else {
+                notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
+            }
+        }
+        return contractService.toNotificationToSend(notification, institution, token);
     }
 }
