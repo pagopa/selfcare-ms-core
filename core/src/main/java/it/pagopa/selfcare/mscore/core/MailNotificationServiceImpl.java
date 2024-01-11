@@ -1,26 +1,21 @@
 package it.pagopa.selfcare.mscore.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
-import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.StringSubstitutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
@@ -32,11 +27,8 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     private static final String MAIL_PARAMETER_LOG = "mailParameters: {}";
     private static final String DESTINATION_MAIL_LOG = "destinationMails: {}";
     public static final String PAGOPA_LOGO_FILENAME = "pagopa-logo.png";
-    private final NotificationServiceConnector notificationConnector;
-    private final FileStorageConnector fileStorageConnector;
     private final InstitutionConnector institutionConnector;
     private final ProductConnector productConnector;
-    private final ObjectMapper mapper;
     private final MailTemplateConfig mailTemplateConfig;
     private final UserNotificationService userNotificationService;
     private final EmailConnector emailConnector;
@@ -180,17 +172,6 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 .filter(Objects::nonNull)
                 .map(WorkContact::getEmail)
                 .filter(StringUtils::hasText)
-                .collect(Collectors.toList());
-    }
-
-    private MessageRequest constructMessageRequest(String destinationMail, String businessName, MailTemplate mailTemplate) {
-        Map<String, String> mailParameters = new HashMap<>();
-        mailParameters.put("businessName", businessName);
-        String html = StringSubstitutor.replace(mailTemplate.getBody(), mailParameters);
-        MessageRequest messageRequest = new MessageRequest();
-        messageRequest.setSubject(mailTemplate.getSubject());
-        messageRequest.setReceiverEmail(destinationMail);
-        messageRequest.setContent(html);
-        return messageRequest;
+                .toList();
     }
 }

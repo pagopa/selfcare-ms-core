@@ -249,7 +249,7 @@ public class UserConnectorImpl implements UserConnector {
 
         return repository.find(query, UserId.class).stream()
                 .map(UserId::getId)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
