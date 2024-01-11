@@ -4643,7 +4643,7 @@
     },
     "/tokens" : {
       "get" : {
-        "tags" : [ "Token", "external-v2" ],
+        "tags" : [ "Token" ],
         "summary" : "${swagger.mscore.tokens.getAll}",
         "description" : "${swagger.mscore.tokens.getAll}",
         "operationId" : "getAllTokensUsingGET",
