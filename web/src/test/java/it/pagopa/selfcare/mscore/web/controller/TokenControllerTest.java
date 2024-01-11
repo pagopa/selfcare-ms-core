@@ -1,19 +1,26 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.TokenService;
+import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.web.config.WebTestConfig;
 import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapperImpl;
+
+
+import it.pagopa.selfcare.mscore.web.model.token.ScContractResponse;
+import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
 import org.junit.jupiter.api.Test;
-import org.mockito.Spy;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -25,13 +32,20 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith(SpringExtension.class)
 @WebMvcTest(value = {TokenController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
-@ContextConfiguration(classes = {TokenController.class, WebTestConfig.class, TokenMapperImpl.class})
+@ContextConfiguration(classes = {TokenController.class, WebTestConfig.class,})
 class TokenControllerTest {
 
+    @Autowired
+    private TokenController tokenController;
+
+    @MockBean
+    private TokenMapper tokenMapper;
 
     @MockBean
     private TokenService tokenService;
@@ -39,11 +53,40 @@ class TokenControllerTest {
     @Autowired
     protected MockMvc mvc;
 
-    @Spy
-    private TokenMapper tokenMapper = new TokenMapperImpl();
+    /*
+     * @Spy private TokenMapper tokenMapper = new TokenMapperImpl();
+     */
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    /**
+     * Method under test:
+     * {@link TokenController#getAllTokens(List, Integer, Integer)}
+     */
+    @Test
+    void testFindAllTokens() throws Exception {
+        // Arrange
+        PaginatedToken tokenList = new PaginatedToken();
+
+        NotificationToSend notification = mockInstance(new NotificationToSend());
+        tokenList.setItems(List.of(notification));
+        tokenList.setTotalNumber(10L);
+
+        ScContractResponse scContractResponse = mockInstance(new ScContractResponse());
+
+        when(tokenService.retrieveContractsFilterByStatus(Mockito.<List<RelationshipState>>any(), Mockito.<Integer>any(),
+                Mockito.<Integer>any())).thenReturn(tokenList);
+        when(tokenMapper.toScContractResponse(any())).thenReturn(scContractResponse);
+        // Act and Assert
+        mvc.perform(MockMvcRequestBuilders.get("/tokens")
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalNumber", is(10)));
+        verify(tokenService, times(1)).retrieveContractsFilterByStatus(Mockito.<List<RelationshipState>>any(), Mockito.<Integer>any(),
+                Mockito.<Integer>any());
+    }
 
     @Test
     void verifyToken() throws Exception {
@@ -53,12 +96,9 @@ class TokenControllerTest {
         when(tokenService.verifyToken(any())).thenReturn(token);
 
         //when
-        mvc.perform(MockMvcRequestBuilders
-                        .post("/tokens/{tokenId}/verify", id)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(id)));
+        mvc.perform(MockMvcRequestBuilders.post("/tokens/{tokenId}/verify", id)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE)).andExpect(status().isOk()).andExpect(jsonPath("$.id", is(id)));
 
         //then
         verify(tokenService, times(1)).verifyToken(id);
@@ -72,23 +112,25 @@ class TokenControllerTest {
         Token token = mockInstance(new Token());
         TokenUser user = mockInstance(new TokenUser());
         token.setUsers(List.of(user));
+        TokenResource tokenResource = mockInstance(new TokenResource());
+        tokenResource.setUsers(List.of(user));
         when(tokenService.getToken(anyString(), anyString())).thenReturn(token);
+        when(tokenMapper.toTokenResponse(token)).thenReturn(tokenResource);
 
         //when
         mvc.perform(MockMvcRequestBuilders.get("/tokens/token")
-                        .param("institutionId", institutionId)
-                        .param("productId", productId)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", notNullValue()));
+                .param("institutionId", institutionId)
+                .param("productId", productId)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE)).andExpect(status().isOk()).andExpect(jsonPath("$.id", notNullValue()));
         //then
         verify(tokenService, times(1)).getToken(institutionId, productId);
 
     }
 
     /**
-     * Method under test: {@link TokenController#findFromProduct(String, Integer, Integer)}
+     * Method under test:
+     * {@link TokenController#findFromProduct(String, Integer, Integer)}
      */
     @Test
     void findFromProduct() throws Exception {
@@ -112,17 +154,14 @@ class TokenControllerTest {
         // When
         when(tokenService.getTokensByProductId(any(), any(), any())).thenReturn(List.of(token));
 
-
-        mvc.perform(MockMvcRequestBuilders
-                        .get("/tokens/products/{productId}", productIdMock)
+        mvc.perform(MockMvcRequestBuilders.get("/tokens/products/{productId}", productIdMock)
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(APPLICATION_JSON_VALUE));
 
         // Then
-        verify(tokenService, times(1))
-                .getTokensByProductId(productIdMock, pageMock, sizeMock);
+        verify(tokenService, times(1)).getTokensByProductId(productIdMock, pageMock, sizeMock);
         verifyNoMoreInteractions(tokenService);
     }
 }
