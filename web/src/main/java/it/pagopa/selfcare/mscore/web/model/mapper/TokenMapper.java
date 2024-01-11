@@ -1,10 +1,12 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
+import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
 import it.pagopa.selfcare.mscore.web.model.onboarding.LegalsResponse;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
+import it.pagopa.selfcare.mscore.web.model.token.ScContractResponse;
 import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,6 +24,9 @@ public interface TokenMapper {
     TokenResponse toTokenResponse(TokenRelationships tokenRelationships);
 
     TokenResource toTokenResponse(Token token);
+
+    ScContractResponse toScContractResponse(NotificationToSend notification);
+
     @Named("toLegalsResponse")
     default List<LegalsResponse> toLegalsResponse( TokenRelationships tokenRelationships){
         List<LegalsResponse> legalsResponses = new ArrayList<>();

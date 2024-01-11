@@ -292,7 +292,7 @@ public class ContractService {
         return notification;
     }
 
-    private InstitutionToNotify toInstitutionToNotify(Institution institution) {
+    protected InstitutionToNotify toInstitutionToNotify(Institution institution) {
         InstitutionToNotify toNotify = new InstitutionToNotify();
         toNotify.setInstitutionType(institution.getInstitutionType());
         toNotify.setDescription(institution.getDescription());
