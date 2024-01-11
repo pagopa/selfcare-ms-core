@@ -55,25 +55,38 @@ public class OnboardingInstitutionUtils {
     }
 
     public static void validateOverridingData(InstitutionUpdate institutionUpdate, Institution institution) {
-        log.info("START - validateOverridingData for institution having externalId: {}", institution.getExternalId());
-        if (Origin.IPA.getValue().equals(institution.getOrigin())
-                && (!validateParameter(institution.getDescription(), institutionUpdate.getDescription())
-                || !validateParameter(institution.getTaxCode(), institutionUpdate.getTaxCode())
-                || !validateParameter(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())
-                || !validateParameter(institution.getZipCode(), institutionUpdate.getZipCode())
-                || !validateParameter(institution.getAddress(), institutionUpdate.getAddress()))) {
-            throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
-        } else if (!validateParameter(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())) {
-            throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
+        log.info("START - validateOverridingData for institution having externalId: {} and origin: {}", institution.getExternalId(), institution.getOrigin());
+        if (Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin())) {
+            validateIpaOverriding(institutionUpdate, institution);
+        } else {
+            validateDefaultOverriding(institutionUpdate, institution);
         }
+
         log.info("END - validateOverridingData without error");
     }
 
-    private static boolean validateParameter(String startValue, String toValue) {
-        if (!StringUtils.isEmpty(startValue) && !StringUtils.isEmpty(toValue)) {
-            return startValue.equalsIgnoreCase(toValue);
+    private static void validateIpaOverriding(InstitutionUpdate institutionUpdate, Institution institution) {
+        if (isInvalidOverride(institution.getDescription(), institutionUpdate.getDescription())
+                || isInvalidOverride(institution.getTaxCode(), institutionUpdate.getTaxCode())
+                || isInvalidOverride(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())
+                || isInvalidOverride(institution.getZipCode(), institutionUpdate.getZipCode())
+                || isInvalidOverride(institution.getAddress(), institutionUpdate.getAddress())
+        ) {
+            throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
         }
-        return !StringUtils.isEmpty(startValue) || StringUtils.isEmpty(toValue);
+    }
+
+    private static void validateDefaultOverriding(InstitutionUpdate institutionUpdate, Institution institution) {
+        if (isInvalidOverride(institution.getDigitalAddress(), institutionUpdate.getDigitalAddress())) {
+            throw new InvalidRequestException(String.format(ONBOARDING_INVALID_UPDATES.getMessage(), institution.getExternalId()), ONBOARDING_INVALID_UPDATES.getCode());
+        }
+    }
+
+    private static boolean isInvalidOverride(String startValue, String toValue) {
+        if (!StringUtils.isEmpty(startValue) && !StringUtils.isEmpty(toValue)) {
+            return !startValue.equalsIgnoreCase(toValue);
+        }
+        return StringUtils.isEmpty(startValue) && !StringUtils.isEmpty(toValue);
     }
 
     public static RelationshipState getStatus(InstitutionUpdate institutionUpdate, InstitutionType institutionType, String institutionOrigin, String productId) {
