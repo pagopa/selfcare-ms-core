@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.connector.rest.client;
 
 import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
+import it.pagopa.selfcare.mscore.model.notification.MultipleReceiverMessageRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,5 +18,9 @@ public interface NotificationManagerRestClient extends NotificationServiceConnec
     @PostMapping(value = "${rest-client.notification-manager.sendNotificationToUser}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     void sendNotificationToUser(@RequestBody MessageRequest messageRequest);
+
+    @PostMapping(value = "${rest-client.notification-manager.sendNotificationToUsers}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    void sendNotificationToUsers(@RequestBody MultipleReceiverMessageRequest messageRequest);
 
 }

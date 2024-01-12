@@ -1100,4 +1100,13 @@ class UserConnectorImplTest {
         assertEquals(actual.getInstitutions().get(0).getId(), dummyUserInstitution.getInstitutions().get(0).getId());
         assertEquals(actual.getBindings().getProducts().getProductId(), dummyUserInstitution.getBindings().getProducts().getProductId());
     }
+
+    @Test
+    void findUsersByInstitutionIdAndProductId(){
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id");
+        when(userRepository.find(any(), any())).thenReturn(List.of(userEntity));
+        List<String> userIds = userConnectorImpl.findUsersByInstitutionIdAndProductId("institutionId", "productId");
+        assertEquals(1, userIds.size());
+    }
 }

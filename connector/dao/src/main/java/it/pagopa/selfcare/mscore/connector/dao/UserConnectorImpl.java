@@ -238,6 +238,20 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
+    public List<String> findUsersByInstitutionIdAndProductId(String institutionId, String productId) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
+                                .and(UserBinding.Fields.products.name()).elemMatch(
+                                        Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                                .and(OnboardedProductEntity.Fields.status.name()).is(RelationshipState.ACTIVE.name())
+                        )));
+
+        return repository.find(query, UserEntity.class).stream()
+                .map(UserEntity::getId)
+                .toList();
+    }
+
+    @Override
     public List<OnboardedUser> findWithFilter(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
         Criteria criteria = Criteria.where(UserEntity.Fields.bindings.name())
                 .elemMatch(constructElemMatch(institutionId, roles, states, productRoles, products));

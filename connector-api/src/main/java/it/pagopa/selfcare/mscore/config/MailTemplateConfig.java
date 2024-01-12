@@ -23,6 +23,8 @@ public class MailTemplateConfig {
     private String autocompletePath;
 
     private String delegationNotificationPath;
+    private String delegationUserNotificationPath;
+    private String delegationPartnerName;
 
     private String path;
     private String userName;
