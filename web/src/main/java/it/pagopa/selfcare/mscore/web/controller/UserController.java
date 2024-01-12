@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -227,7 +228,7 @@ public class UserController {
                                                @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                @PathVariable(value = "productId") String productId) {
 
-        userService.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, RelationshipState.DELETED);
+        userService.updateUserStatus(userId, institutionId, productId, null, null, RelationshipState.DELETED);
         return ResponseEntity.ok().build();
     }
 
@@ -304,5 +305,35 @@ public class UserController {
                 .map(userMapper::toUserNotification)
                 .collect(Collectors.toList()));
         return ResponseEntity.ok(userNotificationResponse);
+    }
+
+    /**
+     * Update user status and send notification to DL.
+     *
+     * @param userId        User's unique identifier.
+     * @param institutionId User's institution identifier.
+     * @param productId     User's product identifier.
+     * @param role          User's role.
+     * @param productRole   Product's role.
+     * @param status        User's status.
+     * @return ResponseEntity<Void>
+     * <p>
+     * * Code: 204, Message: Update successful, DataType: No Content
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 404, Message: Not Found, DataType: Problem
+     */
+    @Tag(name = "support")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.api.users.updateUserStatus}", notes = "${swagger.mscore.api.users.updateUserStatus}")
+    @PutMapping(value = "/users/{id}/status")
+    public ResponseEntity<Void> updateUserStatus(@ApiParam(value = "${swagger.mscore.users.userId}", required = true) @PathVariable(value = "id") String userId,
+                                                 @ApiParam(value = "${swagger.mscore.institutions.model.institutionId}") @RequestParam(value = "institutionId", required = false) String institutionId,
+                                                 @ApiParam(value = "${swagger.mscore.institutions.model.productId}") @RequestParam(value = "productId", required = false) String productId,
+                                                 @RequestParam(value = "role", required = false) PartyRole role,
+                                                 @RequestParam(value = "productRole", required = false) String productRole,
+                                                 @ApiParam(required = true) @RequestParam(value = "status") RelationshipState status) {
+        log.debug("updateProductStatus - userId: {}", userId);
+        userService.updateUserStatus(userId, institutionId, productId, role, productRole, status);
+        return ResponseEntity.noContent().build();
     }
 }
