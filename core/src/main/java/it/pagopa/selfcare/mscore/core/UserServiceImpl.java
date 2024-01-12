@@ -4,10 +4,15 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapper;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
+import it.pagopa.selfcare.mscore.model.UserToNotify;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -27,10 +32,18 @@ public class UserServiceImpl implements UserService {
 
     private final UserConnector userConnector;
     private final UserRegistryConnector userRegistryConnector;
+    private final NotificationMapper notificationMapper;
+    private final UserNotificationMapper userNotificationMapper;
+    private static final int USER_PAGE_SIZE = 100;
 
-    public UserServiceImpl(UserConnector userConnector, UserRegistryConnector userRegistryConnector) {
+    public UserServiceImpl(UserConnector userConnector,
+                           UserRegistryConnector userRegistryConnector,
+                           NotificationMapper notificationMapper,
+                           UserNotificationMapper userNotificationMapper) {
         this.userConnector = userConnector;
         this.userRegistryConnector = userRegistryConnector;
+        this.notificationMapper = notificationMapper;
+        this.userNotificationMapper = userNotificationMapper;
     }
 
     @Override
@@ -49,6 +62,27 @@ public class UserServiceImpl implements UserService {
             return Collections.emptyList();
         }
         return userConnector.findAllByIds(users);
+    }
+
+    @Override
+    public List<UserNotificationToSend> findAll(Optional<Integer> size, Optional<Integer> page, String productId) {
+        List<UserNotificationToSend> users = new ArrayList<>();
+        final int limit = size.orElse(USER_PAGE_SIZE);
+        final int offset = page.orElse(0);
+        List<OnboardedUser> onboardedUsers = userConnector.findAllValidUsers(offset, limit, productId);
+        onboardedUsers.forEach(onboardedUser -> {
+            User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId());
+            onboardedUser.getBindings().forEach(userBinding -> {
+                for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
+                    if(!StringUtils.hasText(productId) || (StringUtils.hasText(productId) && productId.equals(onboardedProduct.getProductId()))) {
+                        UserToNotify userToNotify = userNotificationMapper.toUserNotify(user, onboardedProduct, userBinding.getInstitutionId());
+                        UserNotificationToSend userNotification = notificationMapper.setNotificationDetailsFromOnboardedProduct(userToNotify, onboardedProduct, userBinding.getInstitutionId());
+                        users.add(userNotification);
+                    }
+                }
+            });
+        });
+        return users;
     }
 
     @Override

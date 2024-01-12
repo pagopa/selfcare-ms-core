@@ -1,66 +1,41 @@
 package it.pagopa.selfcare.mscore.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.api.*;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
-import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.StringSubstitutor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.*;
 
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_FD;
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_FD_GARANTITO;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MailNotificationServiceImpl implements MailNotificationService {
 
     private static final String MAIL_PARAMETER_LOG = "mailParameters: {}";
     private static final String DESTINATION_MAIL_LOG = "destinationMails: {}";
     public static final String PAGOPA_LOGO_FILENAME = "pagopa-logo.png";
-    private final NotificationServiceConnector notificationConnector;
-    private final FileStorageConnector fileStorageConnector;
     private final InstitutionConnector institutionConnector;
     private final ProductConnector productConnector;
-    private final ObjectMapper mapper;
     private final MailTemplateConfig mailTemplateConfig;
+    private final UserNotificationService userNotificationService;
     private final EmailConnector emailConnector;
     private final MailParametersMapper mailParametersMapper;
     private final CoreConfig coreConfig;
-
-    @Autowired
-    public MailNotificationServiceImpl(NotificationServiceConnector notificationConnector,
-                                       FileStorageConnector fileStorageConnector,
-                                       InstitutionConnector institutionConnector,
-                                       ProductConnector productConnector,
-                                       ObjectMapper mapper,
-                                       MailTemplateConfig mailTemplateConfig,
-                                       EmailConnector emailConnector,
-                                       MailParametersMapper mailParametersMapper,
-                                       CoreConfig coreConfig) {
-        this.notificationConnector = notificationConnector;
-        this.fileStorageConnector = fileStorageConnector;
-        this.institutionConnector = institutionConnector;
-        this.productConnector = productConnector;
-        this.mapper = mapper;
-        this.mailTemplateConfig = mailTemplateConfig;
-        this.emailConnector = emailConnector;
-        this.mailParametersMapper = mailParametersMapper;
-        this.coreConfig = coreConfig;
-    }
+    private final UserConnector userConnector;
+    private final UserRegistryConnector userRegistryConnector;
 
     @Override
     public void setCompletedPGOnboardingMail(String destinationMail, String businessName) {
@@ -156,12 +131,17 @@ public class MailNotificationServiceImpl implements MailNotificationService {
                 log.error("create-delegation-email-notification :: Impossible to send email. Error: partner institution or product is null");
                 return;
             }
-            mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle());
+            mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle(), partnerInstitution.getDescription());
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            List<String> destinationMail = getDestinationMails(partnerInstitution);
-            log.info(DESTINATION_MAIL_LOG, destinationMail);
-            emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), destinationMail, null, product.getTitle(), mailParameters, null);
-            log.info("create-delegation-email-notification :: Email successful sent");
+            List<String> userDestinationMail = getUsersEmailByInstitutionAndProduct(partnerInstitution.getId(), productId);
+            log.info(DESTINATION_MAIL_LOG, userDestinationMail);
+            userNotificationService.sendDelegationUserNotification(userDestinationMail, mailParametersMapper.getDelegationUserNotificationPath(), product.getTitle(), mailParameters);
+            log.info("create-delegation-user-email-notification :: Email successful sent");
+
+            List<String> institutionDestinationMail = getDestinationMails(partnerInstitution);
+            log.info(DESTINATION_MAIL_LOG, institutionDestinationMail);
+            emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), institutionDestinationMail, null, product.getTitle(), mailParameters, null);
+            log.info("create-delegation-institution-email-notification :: Email successful sent");
         } catch (Exception e) {
             log.error("create-delegation-email-notification :: Impossible to send email. Error: {}", e.getMessage(), e);
         }
@@ -183,14 +163,15 @@ public class MailNotificationServiceImpl implements MailNotificationService {
         }
     }
 
-    private MessageRequest constructMessageRequest(String destinationMail, String businessName, MailTemplate mailTemplate) {
-        Map<String, String> mailParameters = new HashMap<>();
-        mailParameters.put("businessName", businessName);
-        String html = StringSubstitutor.replace(mailTemplate.getBody(), mailParameters);
-        MessageRequest messageRequest = new MessageRequest();
-        messageRequest.setSubject(mailTemplate.getSubject());
-        messageRequest.setReceiverEmail(destinationMail);
-        messageRequest.setContent(html);
-        return messageRequest;
+    private List<String> getUsersEmailByInstitutionAndProduct(String institutionId, String productId) {
+        return userConnector.findUsersByInstitutionIdAndProductId(institutionId, productId).stream()
+                .map(userId -> userRegistryConnector.getUserByInternalIdWithCustomFields(userId, "workContacts"))
+                .map(User::getWorkContacts)
+                .filter(Objects::nonNull)
+                .map(workContactMap -> workContactMap.get(institutionId))
+                .filter(Objects::nonNull)
+                .map(WorkContact::getEmail)
+                .filter(StringUtils::hasText)
+                .toList();
     }
 }

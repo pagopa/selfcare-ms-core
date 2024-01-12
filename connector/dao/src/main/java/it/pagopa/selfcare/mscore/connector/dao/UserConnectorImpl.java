@@ -85,7 +85,9 @@ public class UserConnectorImpl implements UserConnector {
         Pageable pageable = PageRequest.of(page, size);
         Query queryMatch = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
                 .elemMatch(Criteria.where(UserBinding.Fields.products.name())
-                        .elemMatch(Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                        .elemMatch(CriteriaBuilder.builder()
+                                .isIfNotNull(OnboardedProductEntity.Fields.productId.name(), productId)
+                                .build()
                                 .and(OnboardedProductEntity.Fields.status.name()).in(VALID_USER_RELATIONSHIPS))));
         return repository.find(queryMatch, pageable, UserEntity.class)
                 .stream()
@@ -233,6 +235,20 @@ public class UserConnectorImpl implements UserConnector {
         return repository.find(query, UserEntity.class).stream()
                 .map(userMapper::toOnboardedUser)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> findUsersByInstitutionIdAndProductId(String institutionId, String productId) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
+                                .and(UserBinding.Fields.products.name()).elemMatch(
+                                        Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                                .and(OnboardedProductEntity.Fields.status.name()).is(RelationshipState.ACTIVE.name())
+                        )));
+
+        return repository.find(query, UserEntity.class).stream()
+                .map(UserEntity::getId)
+                .toList();
     }
 
     @Override

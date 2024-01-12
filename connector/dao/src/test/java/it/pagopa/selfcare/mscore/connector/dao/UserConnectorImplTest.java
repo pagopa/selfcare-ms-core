@@ -78,6 +78,8 @@ class UserConnectorImplTest {
 
     static UserInstitutionAggregation dummyUserInstitution;
 
+    static UserEntity dummyUserEntity;
+
     static {
         dummyUserInstitution = new UserInstitutionAggregation();
         dummyUserInstitution.setId("userId");
@@ -89,6 +91,15 @@ class UserConnectorImplTest {
         onboardedProduct.setProductId("prod-io");
         bindings.setProducts(onboardedProduct);
         dummyUserInstitution.setBindings(bindings);
+
+        dummyUserEntity = new UserEntity();
+        UserBindingEntity binding = new UserBindingEntity();
+        OnboardedProductEntity onboardedProductEntity = new OnboardedProductEntity();
+        onboardedProductEntity.setStatus(RelationshipState.ACTIVE);
+        onboardedProductEntity.setProductId("product");
+        binding.setProducts(List.of(onboardedProductEntity));
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        dummyUserEntity.setBindings(userBindingEntityList);
     }
 
     /**
@@ -163,15 +174,7 @@ class UserConnectorImplTest {
         final String productId = "product";
         final Integer page = 0;
         final Integer size = 1;
-        UserEntity userEntity = new UserEntity();
-        UserBindingEntity binding = new UserBindingEntity();
-        OnboardedProductEntity onboardedProductEntity = new OnboardedProductEntity();
-        onboardedProductEntity.setStatus(RelationshipState.ACTIVE);
-        onboardedProductEntity.setProductId(productId);
-        binding.setProducts(List.of(onboardedProductEntity));
-        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        userEntity.setBindings(userBindingEntityList);
-        Page<UserEntity> userEntities = new PageImpl<>(List.of(userEntity));
+        Page<UserEntity> userEntities = new PageImpl<>(List.of(dummyUserEntity));
 
         doReturn(userEntities).when(userRepository).find(any(), any(), any());
         //when
@@ -180,9 +183,26 @@ class UserConnectorImplTest {
         assertFalse(users.isEmpty());
         assertEquals(1, users.size());
         verify(userRepository, times(1)).find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), eq(UserEntity.class));
-       Query capturedQuery = queryArgumentCaptor.getValue();
-       assertTrue(capturedQuery.getQueryObject().toString().contains(productId));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertTrue(capturedQuery.getQueryObject().toString().contains(productId));
     }
+
+    @Test
+    void findAllPagedWithEmptyProductId(){
+        //given
+        final Integer page = 0;
+        final Integer size = 1;
+        dummyUserEntity.getBindings().forEach(obj -> obj.getProducts().get(0).setProductId(null));
+        Page<UserEntity> userEntities = new PageImpl<>(List.of(dummyUserEntity));
+        doReturn(userEntities).when(userRepository).find(any(), any(), any());
+        //when
+        List<OnboardedUser> users = userConnectorImpl.findAllValidUsers(page, size, null);
+        //then
+        assertFalse(users.isEmpty());
+        assertEquals(1, users.size());
+        verify(userRepository, times(1)).find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), eq(UserEntity.class));
+    }
+
     /**
      * Method under test: {@link UserConnectorImpl#findAll()}
      */
@@ -1079,5 +1099,14 @@ class UserConnectorImplTest {
         assertEquals(actual.getId(), dummyUserInstitution.getId());
         assertEquals(actual.getInstitutions().get(0).getId(), dummyUserInstitution.getInstitutions().get(0).getId());
         assertEquals(actual.getBindings().getProducts().getProductId(), dummyUserInstitution.getBindings().getProducts().getProductId());
+    }
+
+    @Test
+    void findUsersByInstitutionIdAndProductId(){
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id");
+        when(userRepository.find(any(), any())).thenReturn(List.of(userEntity));
+        List<String> userIds = userConnectorImpl.findUsersByInstitutionIdAndProductId("institutionId", "productId");
+        assertEquals(1, userIds.size());
     }
 }

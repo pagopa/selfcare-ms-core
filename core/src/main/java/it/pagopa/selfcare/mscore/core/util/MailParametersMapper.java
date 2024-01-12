@@ -68,10 +68,11 @@ public class MailParametersMapper {
         return map;
     }
 
-    public Map<String, String> getDelegationNotificationParameter(String institutionName, String productName) {
+    public Map<String, String> getDelegationNotificationParameter(String institutionName, String productName, String partnerName) {
         Map<String, String> map = new HashMap<>();
         map.put(mailTemplateConfig.getNotificationProductName(), productName);
         map.put(mailTemplateConfig.getInstitutionDescription(), institutionName);
+        map.put(mailTemplateConfig.getDelegationPartnerName(), partnerName);
         return map;
     }
 
@@ -89,6 +90,10 @@ public class MailParametersMapper {
 
     public String getDelegationNotificationPath() {
         return mailTemplateConfig.getDelegationNotificationPath();
+    }
+
+    public String getDelegationUserNotificationPath() {
+        return mailTemplateConfig.getDelegationUserNotificationPath();
     }
 
     public String getOnboardingCompletePath() {

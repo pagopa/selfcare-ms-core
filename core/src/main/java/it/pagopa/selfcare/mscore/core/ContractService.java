@@ -268,6 +268,12 @@ public class ContractService {
                 notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
             }
         }
+        // ADD or UPDATE msg event
+        notification.setNotificationType(queueEvent);
+        return toNotificationToSend(notification, institution, token);
+    }
+
+    public NotificationToSend toNotificationToSend(NotificationToSend notification, Institution institution, Token token) {
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
         notification.setFilePath(token.getContractSigned());
@@ -276,7 +282,6 @@ public class ContractService {
         notification.setCreatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
 
         // ADD or UPDATE msg event
-        notification.setNotificationType(queueEvent);
         notification.setFileName(token.getContractSigned() == null ? "" : Paths.get(token.getContractSigned()).getFileName().toString());
         notification.setContentType(token.getContentType() == null ? "" : token.getContentType());
 
