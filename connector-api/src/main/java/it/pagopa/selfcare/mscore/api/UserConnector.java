@@ -45,6 +45,8 @@ public interface UserConnector {
 
     List<OnboardedUser> findActiveInstitutionUser(String userId, String institutionId);
 
+    List<String> findUsersByInstitutionIdAndProductId(String institutionId, String productId);
+
     List<OnboardedUser> findWithFilter(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 
     OnboardedUser findByRelationshipId(String relationshipId);
