@@ -980,98 +980,78 @@ class OnboardingInstitutionUtilsTest {
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#validateOverridingData(InstitutionUpdate, Institution)}
+     * Method under test:
+     * {@link OnboardingInstitutionUtils#validateOverridingData(InstitutionUpdate, Institution)}
      */
     @Test
-    void testValidateOverridingData2() {
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
+    void testValidateOverridingData() {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
         institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setCity("Oxford");
+        institutionUpdate.setCountry("GB");
+        institutionUpdate.setCounty("3");
+        institutionUpdate.setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
         institutionUpdate.setDescription("The characteristics of someone or something");
         institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setIvassCode("Ivass Code");
+        institutionUpdate
+                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
         institutionUpdate.setRea("Rea");
         institutionUpdate.setShareCapital("Share Capital");
         institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setSupportPhone("6625550144");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
 
-        Institution institution = dummyInstitutionPa();
-
         assertThrows(InvalidRequestException.class,
-                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
+                () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, new Institution()));
     }
 
     /**
-     * Method under test: {@link OnboardingInstitutionUtils#validateOverridingData(InstitutionUpdate, Institution)}
+     * Method under test:
+     * {@link OnboardingInstitutionUtils#validateOverridingData(InstitutionUpdate, Institution)}
      */
     @Test
-    void testValidateOverridingData5() {
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
+    void testValidateOverridingData2() {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
         institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setCity("Oxford");
+        institutionUpdate.setCountry("GB");
+        institutionUpdate.setCounty("3");
+        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer("42 Main St", "jane.doe@example.org",
+                "Pec");
+
         institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("START - validateOverridingData for institution having externalId: {}");
-        institutionUpdate.setDigitalAddress("42 Main St");
         institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
         institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setIvassCode("Ivass Code");
+        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider("Abi Code", "42", "Legal Register Name",
+                "42", true);
+
         institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
         institutionUpdate.setRea("Rea");
         institutionUpdate.setShareCapital("Share Capital");
         institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
+        institutionUpdate.setSupportPhone("6625550144");
+        institutionUpdate.setZipCode(null);
+        institutionUpdate.setAddress("via del corso");
 
-        Institution institution = dummyInstitutionPa();
+        Institution institution = new Institution();
+        institution.setOrigin("IPA");
+        institution.setZipCode(null);
+        institution.setExternalId("42");
+        institution.setAddress("via roma");
+        institution.setDigitalAddress(null);
+        institution.setDescription(null);
+        institution.setTaxCode(null);
 
         assertThrows(InvalidRequestException.class,
                 () -> OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution));
-    }
-
-    /**
-     * Method under test: {@link OnboardingInstitutionUtils#validateOverridingData(InstitutionUpdate, Institution)}
-     */
-    @Test
-    void testValidateOverridingData6() {
-        Institution institution = dummyInstitutionPa();
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setDescription(institution.getDescription());
-        institutionUpdate.setDigitalAddress(institution.getDigitalAddress());
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setInstitutionType(institution.getInstitutionType());
-
-
-        OnboardingInstitutionUtils.validateOverridingData(institutionUpdate, institution);
     }
 
 
