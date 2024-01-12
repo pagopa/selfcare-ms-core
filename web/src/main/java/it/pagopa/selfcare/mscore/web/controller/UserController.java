@@ -322,15 +322,16 @@ public class UserController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Not Found, DataType: Problem
      */
+    @Tag(name = "support")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.api.users.updateUserStatus}", notes = "${swagger.mscore.api.users.updateUserStatus}")
     @PutMapping(value = "/users/{id}/status")
     public ResponseEntity<Void> updateUserStatus(@ApiParam(value = "${swagger.mscore.users.userId}", required = true) @PathVariable(value = "id") String userId,
                                                  @ApiParam(value = "${swagger.mscore.institutions.model.institutionId}") @RequestParam(value = "institutionId", required = false) String institutionId,
                                                  @ApiParam(value = "${swagger.mscore.institutions.model.productId}") @RequestParam(value = "productId", required = false) String productId,
-                                                 @ApiParam(value = "${swagger.mscore.institutions.model.role}") @RequestParam(value = "role", required = false) PartyRole role,
-                                                 @ApiParam(value = "${swagger.mscore.institutions.model.productRole}") @RequestParam(value = "productRole", required = false) String productRole,
-                                                 @ApiParam(value = "${swagger.mscore..model.relationshipState}", required = true) @RequestParam(value = "status") RelationshipState status) {
+                                                 @RequestParam(value = "role", required = false) PartyRole role,
+                                                 @RequestParam(value = "productRole", required = false) String productRole,
+                                                 @ApiParam(required = true) @RequestParam(value = "status") RelationshipState status) {
         log.debug("updateProductStatus - userId: {}", userId);
         userService.updateUserStatus(userId, institutionId, productId, role, productRole, status);
         return ResponseEntity.noContent().build();
