@@ -155,8 +155,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state) {
-        userConnector.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, state);
+    public void updateUserStatus(String userId, String institutionId, String productId, PartyRole role, String productRole, RelationshipState status) {
+        userConnector.findAndUpdateStateWithOptionalFilter(userId, institutionId, productId, role, productRole, status);
     }
 
     @Override

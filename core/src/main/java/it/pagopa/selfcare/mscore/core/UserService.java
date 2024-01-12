@@ -43,9 +43,9 @@ public interface UserService {
 
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 
-    void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);
-
     User retrievePerson(String userId, String productId, String institutionId);
 
     List<OnboardingInfo> getUserInfo(String userId, String institutionId, String[] states);
+
+    void updateUserStatus(String userId, String institutionId, String productId, PartyRole role, String productRole, RelationshipState status);
 }

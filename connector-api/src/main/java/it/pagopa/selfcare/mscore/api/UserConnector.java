@@ -35,7 +35,7 @@ public interface UserConnector {
      */
     void findAndUpdateState(String userId, @Nullable String relationshipId, @Nullable Token token, RelationshipState state);
 
-    void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);
+    void findAndUpdateStateWithOptionalFilter(String userId, String institutionId, String productId, PartyRole role, String productRole, RelationshipState state);
 
     void findAndUpdate(OnboardedUser onboardedUser, String id, String institutionId, OnboardedProduct product, UserBinding bindings);
 

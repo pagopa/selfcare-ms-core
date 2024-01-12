@@ -8,16 +8,21 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntit
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapper;
+import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +37,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -41,6 +48,7 @@ import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserConnectorImpl implements UserConnector {
 
     private static final String CURRENT_PRODUCT = "current.";
@@ -58,15 +66,8 @@ public class UserConnectorImpl implements UserConnector {
 
     private final MongoOperations mongoOperations;
 
-    public UserConnectorImpl(UserRepository userRepository,
-                             UserEntityMapper userMapper,
-                             UserInstitutionAggregationMapper userInstitutionAggregationMapper,
-                             MongoOperations mongoOperations) {
-        this.repository = userRepository;
-        this.userMapper = userMapper;
-        this.userInstitutionAggregationMapper = userInstitutionAggregationMapper;
-        this.mongoOperations = mongoOperations;
-    }
+    private final ProductsRestClient productRestClient;
+
 
     @Override
     public List<OnboardedUser> findAll() {
@@ -75,6 +76,7 @@ public class UserConnectorImpl implements UserConnector {
 
     /**
      * This query retrieves all the users having status in VALID_USER_RELATIONSHIPS for the given productId
+     *
      * @param page
      * @param size
      * @param productId
@@ -163,19 +165,44 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state) {
+    public void findAndUpdateStateWithOptionalFilter(String userId, String institutionId, String productId, PartyRole role, String productRole, RelationshipState state) {
+
+        checkRoles(productId, role, productRole);
+
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
+        Update update = new Update();
 
-        Update update = new Update()
-                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
-                .set(constructQuery(CURRENT_USER_BINDING_REF, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
+        boolean productFilterIsPresent = role != null || StringUtils.hasText(productId) || StringUtils.hasText(productRole);
 
-        update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.productId.name()).is(productId)
-                .and(CURRENT_PRODUCT + OnboardedProduct.Fields.status.name()).is(RelationshipState.ACTIVE.name()));
-        update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
+        if (StringUtils.hasText(institutionId) && productFilterIsPresent) {
+            filterForInstution(update, institutionId);
+            filterForProduct(update, role, productRole, productId);
+            setUpdate(update, state, CURRENT_USER_BINDING_REF, CURRENT_PRODUCT_REF);
+        } else if (StringUtils.hasText(institutionId)) {
+            filterForInstution(update, institutionId);
+            setUpdate(update, state, CURRENT_USER_BINDING_REF, CURRENT_ANY);
+        } else if (productFilterIsPresent) {
+            filterForProduct(update, role, productRole, productId);
+            setUpdate(update, state, CURRENT_ANY, CURRENT_PRODUCT_REF);
+        } else {
+            setUpdate(update, state, CURRENT_ANY, CURRENT_ANY);
+        }
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+    }
+
+    private void filterForProduct(Update update, PartyRole role, String productRole, String productId) {
+        update.filterArray(constructCriteria(role, productRole, productId));
+    }
+
+    private void filterForInstution(Update update, String institutionId) {
+        update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
+    }
+
+    private void setUpdate(Update update, RelationshipState state, String firstCurrent, String secondCurrent) {
+        update.set(constructQuery(firstCurrent, UserBinding.Fields.products.name(), secondCurrent, OnboardedProduct.Fields.status.name()), state)
+                .set(constructQuery(firstCurrent, UserBinding.Fields.products.name(), secondCurrent, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
     }
 
     @Override
@@ -338,6 +365,22 @@ public class UserConnectorImpl implements UserConnector {
         return mongoOperations.aggregate(aggregation, "User", UserInstitutionAggregation.class).getMappedResults();
     }
 
+    private void checkRoles(String productId, PartyRole role, String productRole) {
+        if (StringUtils.hasText(productRole)) {
+            Assert.notNull(role, ROLE_IS_NULL.getMessage());
+            Product product = productRestClient.getProductById(productId, null);
+            ProductRoleInfo productRoleInfo = product.getRoleMappings().get(role);
+            if (productRoleInfo == null) {
+                throw new InvalidRequestException(ROLE_NOT_FOUND.getMessage(), ROLE_NOT_FOUND.getCode());
+            }
+            boolean roleExists = productRoleInfo.getRoles().stream()
+                    .anyMatch(prodRole -> prodRole.getCode().equals(productRole));
+            if (!roleExists) {
+                throw new InvalidRequestException(PRODUCT_ROLE_NOT_FOUND.getMessage(), PRODUCT_ROLE_NOT_FOUND.getCode());
+            }
+        }
+    }
+
     @Override
     public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
         List<UserInstitutionAggregationEntity> userInstitutionAggregationEntities =
@@ -353,6 +396,14 @@ public class UserConnectorImpl implements UserConnector {
                 .build()
                 .and(UserBinding.Fields.products.name())
                 .elemMatch(constructCriteria(roles, states, productRoles, products));
+    }
+
+    private Criteria constructCriteria(PartyRole role, String productRole, String product) {
+        return CriteriaBuilder.builder()
+                .isIfNotNull(CURRENT_PRODUCT + OnboardedProductEntity.Fields.role.name(), role != null ? role.name() : null)
+                .isIfNotNull(CURRENT_PRODUCT + OnboardedProductEntity.Fields.productId.name(), product)
+                .isIfNotNull(CURRENT_PRODUCT + OnboardedProductEntity.Fields.productRole.name(), productRole)
+                .build();
     }
 
     private Criteria constructCriteria(List<PartyRole> roles, List<RelationshipState> states, List<String> productRoles, List<String> products) {
