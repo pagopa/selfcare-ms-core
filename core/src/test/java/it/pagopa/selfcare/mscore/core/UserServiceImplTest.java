@@ -400,11 +400,11 @@ class UserServiceImplTest {
     }
 
     @Test
-    void findAndUpdateStateByInstitutionAndProduct() {
+    void updateUserStatus() {
 
-        doNothing().when(userConnector).findAndUpdateStateByInstitutionAndProduct(anyString(),anyString(),anyString(),any());
+        doNothing().when(userConnector).findAndUpdateStateWithOptionalFilter(anyString(),anyString(),anyString(), eq(null), anyString(), any());
         Assertions.assertDoesNotThrow(() -> userServiceImpl
-                .findAndUpdateStateByInstitutionAndProduct("userId","institutionId","productId",RelationshipState.DELETED));
+                .updateUserStatus("userId","institutionId","productId",null, "", RelationshipState.DELETED));
     }
 
     @Test
