@@ -33,6 +33,11 @@ public class MongoCustomConnectorImpl implements MongoCustomConnector {
     }
 
     @Override
+    public <O> Long count(Query query, Class<O> outputType) {
+        return mongoOperations.count(query, outputType);
+    }
+
+    @Override
     public <O> List<O> find(Query query, Class<O> outputType) {
         return mongoOperations.find(query, outputType);
     }

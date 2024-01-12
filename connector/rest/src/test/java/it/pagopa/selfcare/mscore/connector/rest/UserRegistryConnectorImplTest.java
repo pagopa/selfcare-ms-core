@@ -28,6 +28,18 @@ class UserRegistryConnectorImplTest {
     @MockBean
     private UserRegistryRestClient userRegistryRestClient;
 
+    @Test
+    void getUserByInternalIdWithCustomFields(){
+        UserResource userResource = new UserResource();
+        userResource.setFiscalCode("42");
+        ResponseEntity<UserResource> userIdResponseEntity = ResponseEntity.ok(userResource);
+        when(userRegistryRestClient._findByIdUsingGET(any(), any())).thenReturn(userIdResponseEntity);
+        User user = userRegistryConnector.getUserByInternalIdWithCustomFields("42","workContacts");
+        assertEquals(user.getFiscalCode(), userResource.getFiscalCode());
+        verify(userRegistryRestClient)._findByIdUsingGET("workContacts", "42");
+
+    }
+
     /**
      * Method under test: {@link UserRegistryConnectorImpl#getUserByFiscalCode(String)}
      */

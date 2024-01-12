@@ -1,18 +1,23 @@
 package it.pagopa.selfcare.mscore.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
+import it.pagopa.selfcare.mscore.model.notification.MultipleReceiverMessageRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.text.StringSubstitutor;
 import org.springframework.mail.MailPreparationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -20,14 +25,12 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserNotificationServiceImpl implements UserNotificationService {
 
     private static final String ACTIVATE_SUBJECT = "User has been activated";
@@ -54,18 +57,8 @@ public class UserNotificationServiceImpl implements UserNotificationService {
     private final UserService userService;
     private final InstitutionService institutionService;
 
-    @Autowired
-    public UserNotificationServiceImpl(Configuration freemarkerConfig,
-                                       NotificationServiceConnector notificationConnector,
-                                       ProductConnector productsConnector,
-                                       UserService userService,
-                                       InstitutionService institutionService) {
-        this.freemarkerConfig = freemarkerConfig;
-        this.notificationConnector = notificationConnector;
-        this.productsConnector = productsConnector;
-        this.userService = userService;
-        this.institutionService = institutionService;
-    }
+    private final FileStorageConnector fileStorageConnector;
+    private final ObjectMapper mapper;
 
 
     @Override
@@ -90,6 +83,23 @@ public class UserNotificationServiceImpl implements UserNotificationService {
 
         sendCreateUserNotification(institution.getDescription(), productTitle, email, roleLabels, loggedUserName, loggedUserSurname);
         log.trace("sendAddedProductRoleNotification start");
+    }
+
+    @Override
+    public void sendDelegationUserNotification(List<String> to, String templateName, String productName, Map<String, String> mailParameters) {
+        try {
+            String template =  fileStorageConnector.getTemplateFile(templateName);
+            MailTemplate mailTemplate = mapper.readValue(template, MailTemplate.class);
+            String html = StringSubstitutor.replace(mailTemplate.getBody(), mailParameters);
+
+            MultipleReceiverMessageRequest messageRequest = new MultipleReceiverMessageRequest();
+            messageRequest.setContent(html);
+            messageRequest.setReceiverEmails(to);
+            messageRequest.setSubject(productName + ": " + mailTemplate.getSubject());
+            notificationConnector.sendNotificationToUsers(messageRequest);
+        } catch (Exception e) {
+            throw new MailPreparationException(e);
+        }
     }
 
     @Override

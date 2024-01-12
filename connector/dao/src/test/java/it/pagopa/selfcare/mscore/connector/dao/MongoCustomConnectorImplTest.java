@@ -20,8 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -41,6 +40,14 @@ class MongoCustomConnectorImplTest {
         Query query = new Query();
         assertTrue(mongoCustomConnector.exists(query, Object.class));
     }
+
+    @Test
+    void testCount() {
+        when(mongoOperations.count(any(), (Class<?>) any())).thenReturn(10L);
+        Query query = new Query();
+        assertEquals(10L, mongoCustomConnector.count(query, Object.class));
+    }
+
 
     @Test
     void testFind() {

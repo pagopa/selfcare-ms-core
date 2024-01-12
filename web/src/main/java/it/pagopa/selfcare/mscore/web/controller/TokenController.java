@@ -6,11 +6,14 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.mscore.constant.GenericError;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.TokenService;
+import it.pagopa.selfcare.mscore.model.onboarding.PaginatedToken;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
-import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenListResponse;
+import it.pagopa.selfcare.mscore.web.model.token.PaginatedTokenResponse;
+import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
 import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -111,6 +114,39 @@ public class TokenController {
                         .collect(Collectors.toList()));
 
         log.trace("findFromProduct end");
+        return ResponseEntity.ok().body(tokenListResponse);
+    }
+
+    /**
+     * Retrieve Contract filter by Status
+     *
+     * @param states List<RelationshipState>
+     * @param page   Integer
+     * @param size   Integer
+     * @return List
+     * * Code: 200, Message: successful operation
+     * * Code: 404, Message: product not found
+     */
+    @Tag(name = "Token")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "${swagger.mscore.tokens.getAll}", notes = "${swagger.mscore.tokens.getAll}")
+    @GetMapping(value = "/tokens")
+    public ResponseEntity<PaginatedTokenResponse> getAllTokens(@ApiParam("${swagger.mscore.token.model.states}")
+                                                               @RequestParam(value = "states", defaultValue = "ACTIVE,DELETED") List<RelationshipState> states,
+                                                               @ApiParam("${swagger.mscore.page.number}")
+                                                               @RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                               @ApiParam("${swagger.mscore.page.size}")
+                                                               @RequestParam(name = "size", defaultValue = "100") Integer size) {
+        log.trace("getAllToken start");
+        log.debug("getAllToken page = {}", page);
+        PaginatedToken tokens = tokenService.retrieveContractsFilterByStatus(states, page, size);
+
+        PaginatedTokenResponse tokenListResponse = new PaginatedTokenResponse(
+                tokens.getItems().stream()
+                        .map(tokenMapper::toScContractResponse)
+                        .toList(), tokens.getTotalNumber());
+
+        log.trace("getAllToken end");
         return ResponseEntity.ok().body(tokenListResponse);
     }
 }

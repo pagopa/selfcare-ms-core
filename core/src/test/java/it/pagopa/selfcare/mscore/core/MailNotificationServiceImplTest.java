@@ -65,6 +65,13 @@ class MailNotificationServiceImplTest {
 
     @Mock
     private CoreConfig coreConfig;
+    @Mock
+    private UserConnector userConnector;
+    @Mock
+    private UserRegistryConnector userRegistryConnector;
+    @Mock
+    private UserNotificationService userNotificationService;
+
 
     private static final User user;
 
@@ -156,11 +163,26 @@ class MailNotificationServiceImplTest {
     @Test
     void sendNotificationDelegationMail() {
         Product product = new Product();
+        product.setId("productId");
         product.setTitle("test");
         Institution institution = new Institution();
+        institution.setId("institutionID");
         institution.setDigitalAddress("test@test.com");
+
+        var mail = new CertifiedField<String>();
+        mail.setValue("test@test2.com");
+        var work = new WorkContact();
+        work.setEmail(mail);
+        var map = new HashMap<String, WorkContact>();
+        map.put("institutionID", work);
+        var user = new User();
+        user.setId("userID");
+        user.setWorkContacts(map);
+
         when(productConnector.getProductById(anyString())).thenReturn(product);
         when(institutionConnector.findById(anyString())).thenReturn(institution);
+        when(userConnector.findUsersByInstitutionIdAndProductId(institution.getId(), product.getId())).thenReturn(List.of(user.getId()));
+        when(userRegistryConnector.getUserByInternalIdWithCustomFields(user.getId(), "workContacts")).thenReturn(user);
         when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
         Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
     }

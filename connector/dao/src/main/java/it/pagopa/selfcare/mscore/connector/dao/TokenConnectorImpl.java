@@ -153,7 +153,14 @@ public class TokenConnectorImpl implements TokenConnector {
         return tokenRepository.find(query, pageable, TokenEntity.class)
                 .stream()
                 .map(TokenMapper::convertToToken)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Override
+    public Long countAllTokenFilterByStates(List<RelationshipState> states) {
+        Query query = Query.query(Criteria.where(TokenEntity.Fields.status.name()).in(states))
+                .with(Sort.by(Sort.Direction.ASC, TokenEntity.Fields.id.name()));
+        return tokenRepository.count(query, TokenEntity.class);
     }
 
 }
