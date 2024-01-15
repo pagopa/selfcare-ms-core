@@ -151,7 +151,7 @@ class MailParametersMapperTest {
 
     @Test
     void getNotificationDelegationParameters(){
-        Assertions.assertNotNull(mailParametersMapper.getDelegationNotificationParameter("productName","productId"));
+        Assertions.assertNotNull(mailParametersMapper.getDelegationNotificationParameter("productName","productId", "partnerName"));
     }
 
 }

@@ -51,6 +51,16 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
         return user;
     }
 
+    @Override
+    public User getUserByInternalIdWithCustomFields(String userId, String fieldList) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId userId = {}", userId);
+        Assert.hasText(userId, "A userId is required");
+        ResponseEntity<UserResource> result = restClient._findByIdUsingGET(fieldList, userId);
+        User user = userMapper.toUser(result.getBody());
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getUserByInternalId result = {}", result);
+        return user;
+    }
+
 
     @Override
     public User getUserByFiscalCode(String fiscalCode) {

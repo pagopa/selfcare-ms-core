@@ -469,7 +469,7 @@ class UserControllerTest {
         final String institutionId = "institutionId";
         final String productId = "productId";
 
-        doNothing().when(userService).findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, RelationshipState.DELETED);
+        doNothing().when(userService).updateUserStatus(userId, institutionId, productId, null, null, RelationshipState.DELETED);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .delete("/users/{userId}/institutions/{institutionId}/products/{productId}", userId, institutionId, productId)
@@ -630,6 +630,23 @@ class UserControllerTest {
         Assertions.assertEquals("prod-io", response.getUsers().get(0).getProductId());
         Assertions.assertEquals("institutionId", response.getUsers().get(0).getInstitutionId());
 
+    }
+
+    @Test
+    void updateUserStatus() throws Exception {
+        final String userId = "userId";
+
+        doNothing().when(userService).updateUserStatus(userId, null, null, null, null, RelationshipState.DELETED);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .put("/users/{id}/status", userId)
+                .queryParam("status","DELETED")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
 }
