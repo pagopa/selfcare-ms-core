@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.model.onboarding;
 
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,4 +27,5 @@ public class TokenRelationships {
     private OffsetDateTime activatedAt;
     private RelationshipState status;
     private List<OnboardedUser> users;
+    private InstitutionUpdate institutionUpdate;
 }
