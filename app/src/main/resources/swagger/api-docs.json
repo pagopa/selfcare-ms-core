@@ -6061,6 +6061,9 @@
           "institutionName" : {
             "type" : "string"
           },
+          "institutionRootName" : {
+            "type" : "string"
+          },
           "institutionType" : {
             "type" : "string",
             "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
