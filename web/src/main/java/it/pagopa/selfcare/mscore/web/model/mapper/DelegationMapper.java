@@ -20,7 +20,6 @@ public interface DelegationMapper {
     @Mapping(source = "to", target = "brokerId")
     @Mapping(source = "institutionFromName", target = "institutionName")
     @Mapping(source = "institutionToName", target = "brokerName")
-    @Mapping(source = "institutionFromRootName", target = "institutionRootName")
     DelegationResponse toDelegationResponse(Delegation delegation);
 
 }
