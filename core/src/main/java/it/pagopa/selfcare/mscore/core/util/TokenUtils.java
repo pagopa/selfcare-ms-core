@@ -68,6 +68,7 @@ public class TokenUtils {
         tokenRelationships.setUpdatedAt(token.getUpdatedAt());
         tokenRelationships.setContentType(token.getContentType());
         tokenRelationships.setContractSigned(token.getContractSigned());
+        tokenRelationships.setInstitutionUpdate(token.getInstitutionUpdate());
         return tokenRelationships;
     }
 
