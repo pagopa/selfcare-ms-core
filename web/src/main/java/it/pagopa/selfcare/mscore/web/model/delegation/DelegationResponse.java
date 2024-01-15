@@ -30,4 +30,6 @@ public class DelegationResponse {
     private String brokerType;
     private String brokerName;
 
+    private String test;
+
 }
