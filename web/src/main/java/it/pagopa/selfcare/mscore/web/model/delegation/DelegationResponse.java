@@ -17,7 +17,6 @@ public class DelegationResponse {
     private String institutionId;
     @NotBlank
     private String institutionName;
-    private String institutionRootName;
     @NotBlank
     private DelegationType type;
     @NotBlank
@@ -29,7 +28,5 @@ public class DelegationResponse {
     private String brokerTaxCode;
     private String brokerType;
     private String brokerName;
-
-    private String test;
 
 }
