@@ -43,4 +43,4 @@ jobs:
           git config --global user.email "selfcare-github@pagopa.it"
           git config --global user.name "selfcare-github-bot"
           git commit -m "Update Swagger documentation" || exit 0
-          git push origin ${{ github.ref_name}}
+          git push origin ${{ github.head_ref}}
