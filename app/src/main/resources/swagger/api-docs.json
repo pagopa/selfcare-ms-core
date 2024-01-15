@@ -6074,6 +6074,9 @@
           "taxCode" : {
             "type" : "string"
           },
+          "test" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "string",
             "enum" : [ "AOO", "PT" ]
