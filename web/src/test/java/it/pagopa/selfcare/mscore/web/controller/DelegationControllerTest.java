@@ -154,6 +154,7 @@ class DelegationControllerTest {
         assertThat(actual.getBrokerId()).isEqualTo(expectedDelegation.getTo());
         assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
         assertThat(actual.getInstitutionId()).isEqualTo(expectedDelegation.getFrom());
+        assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
 
         verify(delegationService, times(1))
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL);
