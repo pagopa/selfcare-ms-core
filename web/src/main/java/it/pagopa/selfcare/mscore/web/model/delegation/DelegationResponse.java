@@ -17,6 +17,7 @@ public class DelegationResponse {
     private String institutionId;
     @NotBlank
     private String institutionName;
+    private String institutionRootName;
     @NotBlank
     private DelegationType type;
     @NotBlank
