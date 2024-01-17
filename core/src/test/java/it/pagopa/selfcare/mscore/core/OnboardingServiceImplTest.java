@@ -1496,15 +1496,16 @@ class OnboardingServiceImplTest {
     }
 
     @Test
-    void shouldOnboardingInstitutionProdPagoPa() {
+    void shouldOnboardingInstitutionGSP() {
         OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
         when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
                 .thenReturn(mockInstitutionStrategy);
         doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
-        onboardingRequest.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
 
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
     }
