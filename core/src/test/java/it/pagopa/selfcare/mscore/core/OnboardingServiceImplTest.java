@@ -1495,6 +1495,20 @@ class OnboardingServiceImplTest {
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
     }
 
+    @Test
+    void shouldOnboardingInstitutionProdPagoPa() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
+                .thenReturn(mockInstitutionStrategy);
+        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        onboardingRequest.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
+
+        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"ipa", "regulatedMarket", "establishedByRegulatoryProvision", "agentOfPublicService"})
     void shouldOnboardingInstitutionWithAdditionalInfo(String type) {
