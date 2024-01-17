@@ -7092,7 +7092,7 @@
         "title" : "InstitutionUpdateRequest",
         "type" : "object",
         "properties" : {
-          "additionaIInformations" : {
+          "additionalInformations" : {
             "$ref" : "#/components/schemas/AdditionalInformationsRequest"
           },
           "address" : {
