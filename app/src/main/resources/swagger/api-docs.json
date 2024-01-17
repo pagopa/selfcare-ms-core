@@ -5665,6 +5665,72 @@
   },
   "components" : {
     "schemas" : {
+      "AdditionalInformations" : {
+        "title" : "AdditionalInformations",
+        "type" : "object",
+        "properties" : {
+          "agentOfPublicService" : {
+            "type" : "boolean"
+          },
+          "agentOfPublicServiceNote" : {
+            "type" : "string"
+          },
+          "belongRegulatedMarket" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvision" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvisionNote" : {
+            "type" : "string"
+          },
+          "ipa" : {
+            "type" : "boolean"
+          },
+          "ipaCode" : {
+            "type" : "string"
+          },
+          "otherNote" : {
+            "type" : "string"
+          },
+          "regulatedMarketNote" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AdditionalInformationsRequest" : {
+        "title" : "AdditionalInformationsRequest",
+        "type" : "object",
+        "properties" : {
+          "agentOfPublicService" : {
+            "type" : "boolean"
+          },
+          "agentOfPublicServiceNote" : {
+            "type" : "string"
+          },
+          "belongRegulatedMarket" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvision" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvisionNote" : {
+            "type" : "string"
+          },
+          "ipa" : {
+            "type" : "boolean"
+          },
+          "ipaCode" : {
+            "type" : "string"
+          },
+          "otherNote" : {
+            "type" : "string"
+          },
+          "regulatedMarketNote" : {
+            "type" : "string"
+          }
+        }
+      },
       "Attributes" : {
         "title" : "Attributes",
         "type" : "object",
@@ -6956,6 +7022,9 @@
         "title" : "InstitutionUpdate",
         "type" : "object",
         "properties" : {
+          "additionalInformations" : {
+            "$ref" : "#/components/schemas/AdditionalInformations"
+          },
           "address" : {
             "type" : "string"
           },
@@ -7023,6 +7092,9 @@
         "title" : "InstitutionUpdateRequest",
         "type" : "object",
         "properties" : {
+          "additionaIInformations" : {
+            "$ref" : "#/components/schemas/AdditionalInformationsRequest"
+          },
           "address" : {
             "type" : "string"
           },
