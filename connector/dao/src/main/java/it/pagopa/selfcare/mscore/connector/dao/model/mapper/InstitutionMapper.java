@@ -27,6 +27,20 @@ public class InstitutionMapper {
         return data;
     }
 
+    public static AdditionalInformations toAdditionalInformations(AdditionalInformationsEntity additionalInformations) {
+        AdditionalInformations additionalInfo = new AdditionalInformations();
+        additionalInfo.setIpa(additionalInformations.isIpa());
+        additionalInfo.setIpaCode(additionalInformations.getIpaCode());
+        additionalInfo.setAgentOfPublicService(additionalInfo.isAgentOfPublicService());
+        additionalInfo.setAgentOfPublicServiceNote(additionalInformations.getAgentOfPublicServiceNote());
+        additionalInfo.setBelongRegulatedMarket(additionalInformations.isBelongRegulatedMarket());
+        additionalInfo.setRegulatedMarketNote(additionalInformations.getRegulatedMarketNote());
+        additionalInfo.setEstablishedByRegulatoryProvision(additionalInformations.isEstablishedByRegulatoryProvision());
+        additionalInfo.setEstablishedByRegulatoryProvisionNote(additionalInformations.getEstablishedByRegulatoryProvisionNote());
+        additionalInfo.setOtherNote(additionalInformations.getOtherNote());
+        return additionalInfo;
+    }
+
     public static PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderEntity paymentServiceProvider) {
         PaymentServiceProvider provider = new PaymentServiceProvider();
         provider.setLegalRegisterName(paymentServiceProvider.getLegalRegisterName());

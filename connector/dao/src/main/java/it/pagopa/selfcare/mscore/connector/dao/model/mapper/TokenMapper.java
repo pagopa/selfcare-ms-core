@@ -140,6 +140,9 @@ public class TokenMapper {
         response.setSupportEmail(entity.getSupportEmail());
         response.setSupportPhone(entity.getSupportPhone());
         response.setImported(entity.isImported());
+        if (entity.getAdditionalInformations() != null) {
+            response.setAdditionalInformations(toAdditionalInformations(entity.getAdditionalInformations()));
+        }
         return response;
     }
 
