@@ -1,8 +1,10 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.inner;
 
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 @Data
+@FieldNameConstants(asEnum = true)
 public class AdditionalInformationsEntity {
     private boolean belongRegulatedMarket;
     private String regulatedMarketNote;
