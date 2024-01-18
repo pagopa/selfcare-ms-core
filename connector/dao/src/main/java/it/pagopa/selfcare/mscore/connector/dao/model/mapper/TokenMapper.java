@@ -79,6 +79,9 @@ public class TokenMapper {
         entity.setSupportEmail(institutionUpdate.getSupportEmail());
         entity.setSupportPhone(institutionUpdate.getSupportPhone());
         entity.setImported(institutionUpdate.isImported());
+        if (institutionUpdate.getAdditionalInformations() != null) {
+            entity.setAdditionalInformations(toAdditionalInformationsEntity(institutionUpdate.getAdditionalInformations()));
+        }
         return entity;
     }
 
