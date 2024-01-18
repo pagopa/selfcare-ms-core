@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
@@ -23,6 +24,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.institution.AdditionalInformations;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
@@ -32,6 +34,7 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,7 +52,8 @@ import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 @Slf4j
 @Service
 public class OnboardingServiceImpl implements OnboardingService {
-
+    protected static final String REQUIRED_ADDITIONAL_INFORMATIONS_MESSAGE = "AdditionalInformations is required";
+    protected static final String REQUIRED_OTHER_NOTE_MESSAGE = "Other note is required";
     private final OnboardingDao onboardingDao;
     private final InstitutionService institutionService;
     private final UserService userService;
@@ -127,10 +131,23 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
+        validateAdditionalInformations(request);
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
                 .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType(), request.getProductId(), institution)
                 .onboardingInstitution(request, principal);
+    }
+
+    private static void validateAdditionalInformations(OnboardingRequest request) {
+        if (InstitutionType.GSP.equals(request.getInstitutionUpdate().getInstitutionType())  &&
+                ProductId.PROD_PAGOPA.getValue().equals(request.getProductId())) {
+            Assert.notNull(request.getInstitutionUpdate().getAdditionalInformations(), REQUIRED_ADDITIONAL_INFORMATIONS_MESSAGE);
+            AdditionalInformations additionalInfo = request.getInstitutionUpdate().getAdditionalInformations();
+            if (!additionalInfo.isIpa() && !additionalInfo.isAgentOfPublicService()
+                    && !additionalInfo.isBelongRegulatedMarket() && !additionalInfo.isEstablishedByRegulatoryProvision()){
+                Assert.notNull(additionalInfo.getOtherNote(), REQUIRED_OTHER_NOTE_MESSAGE);
+            }
+        }
     }
 
     @Override
