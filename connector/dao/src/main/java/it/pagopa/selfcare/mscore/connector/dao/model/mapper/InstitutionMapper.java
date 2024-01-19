@@ -1,8 +1,10 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.AdditionalInformationsEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
+import it.pagopa.selfcare.mscore.model.institution.AdditionalInformations;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
@@ -23,6 +25,20 @@ public class InstitutionMapper {
         data.setEmail(dataProtectionOfficer.getEmail());
         data.setAddress(dataProtectionOfficer.getAddress());
         return data;
+    }
+
+    public static AdditionalInformations toAdditionalInformations(AdditionalInformationsEntity additionalInformations) {
+        AdditionalInformations additionalInfo = new AdditionalInformations();
+        additionalInfo.setIpa(additionalInformations.isIpa());
+        additionalInfo.setIpaCode(additionalInformations.getIpaCode());
+        additionalInfo.setAgentOfPublicService(additionalInfo.isAgentOfPublicService());
+        additionalInfo.setAgentOfPublicServiceNote(additionalInformations.getAgentOfPublicServiceNote());
+        additionalInfo.setBelongRegulatedMarket(additionalInformations.isBelongRegulatedMarket());
+        additionalInfo.setRegulatedMarketNote(additionalInformations.getRegulatedMarketNote());
+        additionalInfo.setEstablishedByRegulatoryProvision(additionalInformations.isEstablishedByRegulatoryProvision());
+        additionalInfo.setEstablishedByRegulatoryProvisionNote(additionalInformations.getEstablishedByRegulatoryProvisionNote());
+        additionalInfo.setOtherNote(additionalInformations.getOtherNote());
+        return additionalInfo;
     }
 
     public static PaymentServiceProvider toPaymentServiceProvider(PaymentServiceProviderEntity paymentServiceProvider) {
@@ -52,6 +68,20 @@ public class InstitutionMapper {
         data.setEmail(dataProtectionOfficer.getEmail());
         data.setAddress(dataProtectionOfficer.getAddress());
         return data;
+    }
+
+    public static AdditionalInformationsEntity toAdditionalInformationsEntity(AdditionalInformations additionalInformations) {
+        AdditionalInformationsEntity additionalInfo = new AdditionalInformationsEntity();
+        additionalInfo.setIpa(additionalInformations.isIpa());
+        additionalInfo.setIpaCode(additionalInformations.getIpaCode());
+        additionalInfo.setAgentOfPublicService(additionalInfo.isAgentOfPublicService());
+        additionalInfo.setAgentOfPublicServiceNote(additionalInformations.getAgentOfPublicServiceNote());
+        additionalInfo.setBelongRegulatedMarket(additionalInformations.isBelongRegulatedMarket());
+        additionalInfo.setRegulatedMarketNote(additionalInformations.getRegulatedMarketNote());
+        additionalInfo.setEstablishedByRegulatoryProvision(additionalInformations.isEstablishedByRegulatoryProvision());
+        additionalInfo.setEstablishedByRegulatoryProvisionNote(additionalInformations.getEstablishedByRegulatoryProvisionNote());
+        additionalInfo.setOtherNote(additionalInformations.getOtherNote());
+        return additionalInfo;
     }
 
     public static PaymentServiceProviderEntity toPaymentServiceProviderEntity(PaymentServiceProvider paymentServiceProvider) {

@@ -4,6 +4,7 @@ import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
@@ -33,6 +34,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -1490,6 +1493,92 @@ class OnboardingServiceImplTest {
         onboardingRequest.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
 
         assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    @Test
+    void shouldOnboardingInstitutionGSP() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
+                .thenReturn(mockInstitutionStrategy);
+        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ipa", "regulatedMarket", "establishedByRegulatoryProvision", "agentOfPublicService"})
+    void shouldOnboardingInstitutionWithAdditionalInfo(String type) {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
+                .thenReturn(mockInstitutionStrategy);
+        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        institutionUpdate.setAdditionalInformations(TestUtils.createSimpleAdditionalInformations(type));
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    @Test
+    void shouldOnboardingInstitutionWithAdditionalInfoOther() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
+                .thenReturn(mockInstitutionStrategy);
+        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        AdditionalInformations additionalInformations = TestUtils.createSimpleAdditionalInformations("other");
+        additionalInformations.setOtherNote("test");
+        institutionUpdate.setAdditionalInformations(additionalInformations);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    @Test
+    void shouldOnboardingInstitutionWithAdditionalInfoRequiredException() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+
+    }
+
+    @Test
+    void shouldOnboardingInstitutionWithAdditionalInfoOtherRequiredException() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        AdditionalInformations additionalInformations = TestUtils.createSimpleAdditionalInformations("other");
+        additionalInformations.setIpa(false);
+        institutionUpdate.setAdditionalInformations(additionalInformations);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+
     }
 
     @Test

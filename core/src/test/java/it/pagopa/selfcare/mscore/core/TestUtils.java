@@ -126,6 +126,43 @@ public class TestUtils {
         return institutionUpdate;
     }
 
+    public static AdditionalInformations createSimpleAdditionalInformations(String type) {
+        AdditionalInformations additionalInformations = new AdditionalInformations();
+        switch (type) {
+            case "ipa":
+                additionalInformations.setIpa(true);
+                additionalInformations.setBelongRegulatedMarket(false);
+                additionalInformations.setEstablishedByRegulatoryProvision(false);
+                additionalInformations.setAgentOfPublicService(false);
+                break;
+            case "regulatedMarket":
+                additionalInformations.setIpa(false);
+                additionalInformations.setBelongRegulatedMarket(true);
+                additionalInformations.setEstablishedByRegulatoryProvision(false);
+                additionalInformations.setAgentOfPublicService(false);
+                break;
+            case "establishedByRegulatoryProvision":
+                additionalInformations.setIpa(false);
+                additionalInformations.setBelongRegulatedMarket(false);
+                additionalInformations.setEstablishedByRegulatoryProvision(true);
+                additionalInformations.setAgentOfPublicService(false);
+                break;
+            case "agentOfPublicService":
+                additionalInformations.setIpa(false);
+                additionalInformations.setBelongRegulatedMarket(false);
+                additionalInformations.setEstablishedByRegulatoryProvision(false);
+                additionalInformations.setAgentOfPublicService(true);
+                break;
+            default:
+                additionalInformations.setIpa(false);
+                additionalInformations.setBelongRegulatedMarket(false);
+                additionalInformations.setEstablishedByRegulatoryProvision(false);
+                additionalInformations.setAgentOfPublicService(false);
+        }
+
+        return additionalInformations;
+    }
+
     public static DataProtectionOfficer createSimpleDataProtectionOfficer() {
 
         DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();

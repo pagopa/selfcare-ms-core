@@ -30,4 +30,5 @@ public class InstitutionUpdate {
     private String supportPhone;
     private String ivassCode;
     private boolean imported;
+    private AdditionalInformations additionalInformations;
 }
