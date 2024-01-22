@@ -5,12 +5,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.UserEventService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -22,6 +24,7 @@ import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
 import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
+import it.pagopa.selfcare.mscore.web.model.user.UsersNotificationResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
@@ -43,7 +47,6 @@ public class UserController {
     private final UserRelationshipService userRelationshipService;
     private final UserService userService;
     private final UserEventService userEventService;
-
     private final UserMapper userMapper;
 
     public UserController(UserRelationshipService userRelationshipService,
@@ -225,7 +228,7 @@ public class UserController {
                                                @ApiParam("${swagger.mscore.institutions.model.productId}")
                                                @PathVariable(value = "productId") String productId) {
 
-        userService.findAndUpdateStateByInstitutionAndProduct(userId, institutionId, productId, RelationshipState.DELETED);
+        userService.updateUserStatus(userId, institutionId, productId, null, null, RelationshipState.DELETED);
         return ResponseEntity.ok().build();
     }
 
@@ -275,6 +278,62 @@ public class UserController {
                                            @ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                            @RequestParam(value = "institutionId") String institutionId) {
         userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * The function return onboardingInfo
+     *
+     * @param size          Integer
+     * @param page          Integer
+     * @param productId     String
+     * @return {@link UsersNotificationResponse}
+     * <p>
+     * * Code: 200, Message: successful operation
+     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
+     * * Code: 404, Message: Not found, DataType: Problem
+     */
+    @ApiOperation(value = "", notes = "${swagger.mscore.api.users.findAll}")
+    @GetMapping(value = "/users")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<UsersNotificationResponse> getUsers(@RequestParam(name = "size", required = false, defaultValue = "100") Optional<Integer> size,
+                                                              @RequestParam(name = "page", required = false, defaultValue = "0") Optional<Integer> page,
+                                                              @RequestParam(name = "productId", required = false) String productId) {
+        List<UserNotificationToSend> users = userService.findAll(size, page, productId);
+        UsersNotificationResponse userNotificationResponse = new UsersNotificationResponse();
+        userNotificationResponse.setUsers(users.stream()
+                .map(userMapper::toUserNotification)
+                .collect(Collectors.toList()));
+        return ResponseEntity.ok(userNotificationResponse);
+    }
+
+    /**
+     * Update user status and send notification to DL.
+     *
+     * @param userId        User's unique identifier.
+     * @param institutionId User's institution identifier.
+     * @param productId     User's product identifier.
+     * @param role          User's role.
+     * @param productRole   Product's role.
+     * @param status        User's status.
+     * @return ResponseEntity<Void>
+     * <p>
+     * * Code: 204, Message: Update successful, DataType: No Content
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 404, Message: Not Found, DataType: Problem
+     */
+    @Tag(name = "support")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.api.users.updateUserStatus}", notes = "${swagger.mscore.api.users.updateUserStatus}")
+    @PutMapping(value = "/users/{id}/status")
+    public ResponseEntity<Void> updateUserStatus(@ApiParam(value = "${swagger.mscore.users.userId}", required = true) @PathVariable(value = "id") String userId,
+                                                 @ApiParam(value = "${swagger.mscore.institutions.model.institutionId}") @RequestParam(value = "institutionId", required = false) String institutionId,
+                                                 @ApiParam(value = "${swagger.mscore.institutions.model.productId}") @RequestParam(value = "productId", required = false) String productId,
+                                                 @RequestParam(value = "role", required = false) PartyRole role,
+                                                 @RequestParam(value = "productRole", required = false) String productRole,
+                                                 @ApiParam(required = true) @RequestParam(value = "status") RelationshipState status) {
+        log.debug("updateProductStatus - userId: {}", userId);
+        userService.updateUserStatus(userId, institutionId, productId, role, productRole, status);
         return ResponseEntity.noContent().build();
     }
 }

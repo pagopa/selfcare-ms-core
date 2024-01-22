@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 
 @Data
@@ -18,7 +19,9 @@ public class UserResponse {
     @NotEmpty(message = "User internal id is required")
     private String id;
     private String taxCode;
+    @NotBlank
     private String name;
+    @NotBlank
     private String surname;
     private String email;
 }

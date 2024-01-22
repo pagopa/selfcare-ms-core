@@ -13,6 +13,8 @@ public interface MongoCustomConnector {
 
     <O> boolean exists(Query query, Class<O> outputType);
 
+    <O> Long count(Query query, Class<O> outputType);
+
     <O> List<O> find(Query query, Class<O> outputType);
 
     <O> Page<O> find(Query query, Pageable pageable, Class<O> outputType);

@@ -26,4 +26,5 @@ public class InstitutionUpdateEntity {
     private String supportEmail;
     private String supportPhone;
     private boolean imported;
+    private AdditionalInformationsEntity additionalInformations;
 }

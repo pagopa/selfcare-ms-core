@@ -20,12 +20,12 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_
 public class DelegationServiceImpl implements DelegationService {
 
     private final DelegationConnector delegationConnector;
-    private final NotificationService notificationService;
+    private final MailNotificationService notificationService;
     private final InstitutionService institutionService;
     private static final String PROD_PAGOPA = "prod-pagopa";
 
     public DelegationServiceImpl(DelegationConnector delegationConnector,
-                                 NotificationService notificationService,
+                                 MailNotificationService notificationService,
                                  InstitutionService institutionService) {
         this.delegationConnector = delegationConnector;
         this.notificationService = notificationService;

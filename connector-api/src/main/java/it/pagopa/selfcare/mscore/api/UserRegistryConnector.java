@@ -8,6 +8,7 @@ public interface UserRegistryConnector {
 
     User getUserByInternalId(String userId);
 
+    User getUserByInternalIdWithCustomFields(String userId, String fieldList);
 
     User getUserByFiscalCode(String fiscalCode);
 

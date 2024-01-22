@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -10,6 +11,7 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -18,6 +20,8 @@ public interface UserService {
     OnboardedUser findByUserId(String id);
 
     List<OnboardedUser> findAllByIds(List<String> users);
+
+    List<UserNotificationToSend>  findAll(Optional<Integer> size, Optional<Integer> page, String productId);
 
     List<OnboardedUser> findAllExistingByIds(List<String> users);
 
@@ -39,9 +43,9 @@ public interface UserService {
 
     List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
 
-    void findAndUpdateStateByInstitutionAndProduct(String userId, String institutionId, String productId, RelationshipState state);
-
     User retrievePerson(String userId, String productId, String institutionId);
 
     List<OnboardingInfo> getUserInfo(String userId, String institutionId, String[] states);
+
+    void updateUserStatus(String userId, String institutionId, String productId, PartyRole role, String productRole, RelationshipState status);
 }

@@ -5,9 +5,14 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
+import it.pagopa.selfcare.mscore.core.util.NotificationMapperImpl;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapper;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapperImpl;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
@@ -24,13 +29,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -50,6 +53,11 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
+    @Spy
+    private NotificationMapper notificationMapper = new NotificationMapperImpl();
+
+    @Spy
+    private UserNotificationMapper userNotificationMapper = new UserNotificationMapperImpl();
 
     /**
      * Method under test: {@link UserServiceImpl#findOnboardedManager(String, String, List)}
@@ -392,11 +400,11 @@ class UserServiceImplTest {
     }
 
     @Test
-    void findAndUpdateStateByInstitutionAndProduct() {
+    void updateUserStatus() {
 
-        doNothing().when(userConnector).findAndUpdateStateByInstitutionAndProduct(anyString(),anyString(),anyString(),any());
+        doNothing().when(userConnector).findAndUpdateStateWithOptionalFilter(anyString(),anyString(),anyString(), eq(null), anyString(), any());
         Assertions.assertDoesNotThrow(() -> userServiceImpl
-                .findAndUpdateStateByInstitutionAndProduct("userId","institutionId","productId",RelationshipState.DELETED));
+                .updateUserStatus("userId","institutionId","productId",null, "", RelationshipState.DELETED));
     }
 
     @Test
@@ -542,6 +550,35 @@ class UserServiceImplTest {
         assertEquals("userId", response.get(0).getUserId());
         assertNotNull(response.get(0).getBinding());
         assertEquals("prod-pn", response.get(0).getBinding().getProducts().getProductId());
+    }
+
+    /**
+     * Method under test: {@link UserServiceImpl#findAll(Optional, Optional, String)}
+     */
+    @Test
+    void findAllUsers() {
+        OnboardedUser user = new OnboardedUser();
+        user.setId("userId");
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        binding.setProducts(List.of(product));
+        binding.setInstitutionId("institutionId");
+        user.setBindings(List.of(binding));
+        when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(user));
+        User pdvUser = new User();
+        pdvUser.setId("userId");
+        pdvUser.setWorkContacts(Map.of("institutionId", new WorkContact()));
+        when(userRegistryConnector.getUserByInternalId("userId")).thenReturn(pdvUser);
+        List<UserNotificationToSend> response = userServiceImpl.findAll(Optional.empty(),Optional.empty(), "prod-pn");
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(1, response.size());
+        assertNotNull(response.get(0));
+        assertNotNull(response.get(0).getUser());
+        assertEquals("userId", response.get(0).getUser().getUserId());
+        assertEquals("institutionId", response.get(0).getInstitutionId());
+        assertEquals("prod-pn", response.get(0).getProductId());
     }
 }
 

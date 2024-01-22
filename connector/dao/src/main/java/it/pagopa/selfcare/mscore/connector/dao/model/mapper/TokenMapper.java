@@ -79,6 +79,9 @@ public class TokenMapper {
         entity.setSupportEmail(institutionUpdate.getSupportEmail());
         entity.setSupportPhone(institutionUpdate.getSupportPhone());
         entity.setImported(institutionUpdate.isImported());
+        if (institutionUpdate.getAdditionalInformations() != null) {
+            entity.setAdditionalInformations(toAdditionalInformationsEntity(institutionUpdate.getAdditionalInformations()));
+        }
         return entity;
     }
 
@@ -137,6 +140,9 @@ public class TokenMapper {
         response.setSupportEmail(entity.getSupportEmail());
         response.setSupportPhone(entity.getSupportPhone());
         response.setImported(entity.isImported());
+        if (entity.getAdditionalInformations() != null) {
+            response.setAdditionalInformations(toAdditionalInformations(entity.getAdditionalInformations()));
+        }
         return response;
     }
 

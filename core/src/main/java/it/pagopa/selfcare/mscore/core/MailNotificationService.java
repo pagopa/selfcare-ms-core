@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-public interface NotificationService {
+public interface MailNotificationService {
 
     void setCompletedPGOnboardingMail(String destinationMail, String businessName);
 

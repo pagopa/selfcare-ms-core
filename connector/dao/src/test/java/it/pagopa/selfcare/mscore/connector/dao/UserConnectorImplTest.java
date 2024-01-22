@@ -10,6 +10,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntit
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.*;
+import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -20,6 +21,8 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +59,9 @@ class UserConnectorImplTest {
 
     @Spy
     private UserEntityMapper userMapper = new UserEntityMapperImpl();
+
+    @Mock
+    private ProductsRestClient productsRestClient;
 
     @Spy
     private OnboardedProductMapper productMapper = new OnboardedProductMapperImpl();
@@ -78,6 +85,8 @@ class UserConnectorImplTest {
 
     static UserInstitutionAggregation dummyUserInstitution;
 
+    static UserEntity dummyUserEntity;
+
     static {
         dummyUserInstitution = new UserInstitutionAggregation();
         dummyUserInstitution.setId("userId");
@@ -89,6 +98,15 @@ class UserConnectorImplTest {
         onboardedProduct.setProductId("prod-io");
         bindings.setProducts(onboardedProduct);
         dummyUserInstitution.setBindings(bindings);
+
+        dummyUserEntity = new UserEntity();
+        UserBindingEntity binding = new UserBindingEntity();
+        OnboardedProductEntity onboardedProductEntity = new OnboardedProductEntity();
+        onboardedProductEntity.setStatus(RelationshipState.ACTIVE);
+        onboardedProductEntity.setProductId("product");
+        binding.setProducts(List.of(onboardedProductEntity));
+        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
+        dummyUserEntity.setBindings(userBindingEntityList);
     }
 
     /**
@@ -163,15 +181,7 @@ class UserConnectorImplTest {
         final String productId = "product";
         final Integer page = 0;
         final Integer size = 1;
-        UserEntity userEntity = new UserEntity();
-        UserBindingEntity binding = new UserBindingEntity();
-        OnboardedProductEntity onboardedProductEntity = new OnboardedProductEntity();
-        onboardedProductEntity.setStatus(RelationshipState.ACTIVE);
-        onboardedProductEntity.setProductId(productId);
-        binding.setProducts(List.of(onboardedProductEntity));
-        ArrayList<UserBindingEntity> userBindingEntityList = new ArrayList<>();
-        userEntity.setBindings(userBindingEntityList);
-        Page<UserEntity> userEntities = new PageImpl<>(List.of(userEntity));
+        Page<UserEntity> userEntities = new PageImpl<>(List.of(dummyUserEntity));
 
         doReturn(userEntities).when(userRepository).find(any(), any(), any());
         //when
@@ -180,9 +190,26 @@ class UserConnectorImplTest {
         assertFalse(users.isEmpty());
         assertEquals(1, users.size());
         verify(userRepository, times(1)).find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), eq(UserEntity.class));
-       Query capturedQuery = queryArgumentCaptor.getValue();
-       assertTrue(capturedQuery.getQueryObject().toString().contains(productId));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertTrue(capturedQuery.getQueryObject().toString().contains(productId));
     }
+
+    @Test
+    void findAllPagedWithEmptyProductId(){
+        //given
+        final Integer page = 0;
+        final Integer size = 1;
+        dummyUserEntity.getBindings().forEach(obj -> obj.getProducts().get(0).setProductId(null));
+        Page<UserEntity> userEntities = new PageImpl<>(List.of(dummyUserEntity));
+        doReturn(userEntities).when(userRepository).find(any(), any(), any());
+        //when
+        List<OnboardedUser> users = userConnectorImpl.findAllValidUsers(page, size, null);
+        //then
+        assertFalse(users.isEmpty());
+        assertEquals(1, users.size());
+        verify(userRepository, times(1)).find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), eq(UserEntity.class));
+    }
+
     /**
      * Method under test: {@link UserConnectorImpl#findAll()}
      */
@@ -670,8 +697,51 @@ class UserConnectorImplTest {
     void findAndUpdateStateByInstitutionAndProduct() {
         when(userRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(new UserEntity());
-        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateByInstitutionAndProduct("42", "42", "productId", RelationshipState.PENDING));
+        Product product = mock(Product.class);
+        EnumMap<PartyRole, ProductRoleInfo> map = mock(EnumMap.class);
+        ProductRoleInfo productRoleInfo = mock(ProductRoleInfo.class);
+        ProductRoleInfo.ProductRole productRole = mock(ProductRoleInfo.ProductRole.class);
+        when(productRole.getCode()).thenReturn("productRole");
+        when(productRoleInfo.getRoles()).thenReturn(List.of(productRole));
+        when(map.get(PartyRole.DELEGATE)).thenReturn(productRoleInfo);
+        when(product.getRoleMappings()).thenReturn(map);
+
+        when(productsRestClient.getProductById(anyString(), any())).thenReturn(product);
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateWithOptionalFilter("42", "42", "productId", PartyRole.DELEGATE, "productRole", RelationshipState.PENDING));
     }
+
+    @Test
+    void findAndUpdateStateByInstitutionId() {
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(new UserEntity());
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateWithOptionalFilter("42", "42", null, null, null, RelationshipState.PENDING));
+    }
+
+    @Test
+    void findAndUpdateStateByProductId() {
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(new UserEntity());
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateWithOptionalFilter("42", null, "productId", null, null, RelationshipState.PENDING));
+    }
+
+    @Test
+    void findAndUpdateStateWithoutFilter() {
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(new UserEntity());
+        Product product = mock(Product.class);
+        EnumMap<PartyRole, ProductRoleInfo> map = mock(EnumMap.class);
+        ProductRoleInfo productRoleInfo = mock(ProductRoleInfo.class);
+        ProductRoleInfo.ProductRole productRole = mock(ProductRoleInfo.ProductRole.class);
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateWithOptionalFilter("42", null, null, null, null, RelationshipState.PENDING));
+    }
+
+    @Test
+    void findAndUpdateStateByInstitutionAndProductWithoutProductRole() {
+        when(userRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(new UserEntity());
+        Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateWithOptionalFilter("42", "42", "productId", PartyRole.DELEGATE, null, RelationshipState.PENDING));
+    }
+
 
     @Test
     void testFindAndUpdate() {
@@ -1079,5 +1149,14 @@ class UserConnectorImplTest {
         assertEquals(actual.getId(), dummyUserInstitution.getId());
         assertEquals(actual.getInstitutions().get(0).getId(), dummyUserInstitution.getInstitutions().get(0).getId());
         assertEquals(actual.getBindings().getProducts().getProductId(), dummyUserInstitution.getBindings().getProducts().getProductId());
+    }
+
+    @Test
+    void findUsersByInstitutionIdAndProductId(){
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId("id");
+        when(userRepository.find(any(), any())).thenReturn(List.of(userEntity));
+        List<String> userIds = userConnectorImpl.findUsersByInstitutionIdAndProductId("institutionId", "productId");
+        assertEquals(1, userIds.size());
     }
 }
