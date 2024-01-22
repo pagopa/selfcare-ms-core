@@ -31,7 +31,7 @@ public class InstitutionMapper {
         AdditionalInformations additionalInfo = new AdditionalInformations();
         additionalInfo.setIpa(additionalInformations.isIpa());
         additionalInfo.setIpaCode(additionalInformations.getIpaCode());
-        additionalInfo.setAgentOfPublicService(additionalInfo.isAgentOfPublicService());
+        additionalInfo.setAgentOfPublicService(additionalInformations.isAgentOfPublicService());
         additionalInfo.setAgentOfPublicServiceNote(additionalInformations.getAgentOfPublicServiceNote());
         additionalInfo.setBelongRegulatedMarket(additionalInformations.isBelongRegulatedMarket());
         additionalInfo.setRegulatedMarketNote(additionalInformations.getRegulatedMarketNote());
@@ -74,7 +74,7 @@ public class InstitutionMapper {
         AdditionalInformationsEntity additionalInfo = new AdditionalInformationsEntity();
         additionalInfo.setIpa(additionalInformations.isIpa());
         additionalInfo.setIpaCode(additionalInformations.getIpaCode());
-        additionalInfo.setAgentOfPublicService(additionalInfo.isAgentOfPublicService());
+        additionalInfo.setAgentOfPublicService(additionalInformations.isAgentOfPublicService());
         additionalInfo.setAgentOfPublicServiceNote(additionalInformations.getAgentOfPublicServiceNote());
         additionalInfo.setBelongRegulatedMarket(additionalInformations.isBelongRegulatedMarket());
         additionalInfo.setRegulatedMarketNote(additionalInformations.getRegulatedMarketNote());
