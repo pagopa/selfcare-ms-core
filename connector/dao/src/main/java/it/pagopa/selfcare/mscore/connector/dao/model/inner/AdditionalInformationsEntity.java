@@ -8,11 +8,11 @@ import lombok.experimental.FieldNameConstants;
 public class AdditionalInformationsEntity {
     private boolean belongRegulatedMarket;
     private String regulatedMarketNote;
-    private boolean isIpa;
+    private boolean ipa;
     private String ipaCode;
     private boolean establishedByRegulatoryProvision;
     private String establishedByRegulatoryProvisionNote;
-    private boolean isAgentOfPublicService;
+    private boolean agentOfPublicService;
     private String agentOfPublicServiceNote;
     private String otherNote;
 }
