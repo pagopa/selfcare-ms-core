@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Sharded;
 
@@ -32,10 +33,14 @@ public class TokenEntity {
     private String contractVersion;
     private String contractTemplate;
     private String contractSigned;
+    private String contentType;
     private List<TokenUserEntity> users;
     private InstitutionUpdateEntity institutionUpdate;
+    @Indexed
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-    private OffsetDateTime closedAt;
+    private OffsetDateTime deletedAt;
+    private OffsetDateTime activatedAt;
+
 }
 

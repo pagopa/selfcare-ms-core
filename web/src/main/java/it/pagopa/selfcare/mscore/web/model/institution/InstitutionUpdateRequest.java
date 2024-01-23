@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import lombok.Data;
 
 import javax.validation.constraints.NotEmpty;
@@ -16,7 +16,9 @@ public class InstitutionUpdateRequest {
     private String description;
     private String digitalAddress;
     private String address;
-
+    private String city;
+    private String county;
+    private String country;
     @NotEmpty(message = "taxCode is required")
     private String taxCode;
 
@@ -30,5 +32,7 @@ public class InstitutionUpdateRequest {
     private String businessRegisterPlace;
     private String supportEmail;
     private String supportPhone;
+    private String ivassCode;
     private boolean imported;
+    private AdditionalInformationsRequest additionalInformations;
 }

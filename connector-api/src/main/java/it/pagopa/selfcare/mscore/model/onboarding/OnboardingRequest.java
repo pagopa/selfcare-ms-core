@@ -1,14 +1,15 @@
 package it.pagopa.selfcare.mscore.model.onboarding;
 
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.Data;
 import org.springframework.util.StringUtils;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CONTRACT_PATH_ERROR;
@@ -25,8 +26,12 @@ public class OnboardingRequest {
     private Billing billingRequest;
     private Contract contract;
 
-    private boolean signContract = true;
+    private Boolean signContract;
     private TokenType tokenType;
+    private String contractFilePath;
+    private OffsetDateTime contractCreatedAt;
+    private OffsetDateTime contractActivatedAt;
+    private Boolean sendCompleteOnboardingEmail;
 
     public Contract getContract() {
         if ((institutionUpdate != null && InstitutionType.PG == institutionUpdate.getInstitutionType())

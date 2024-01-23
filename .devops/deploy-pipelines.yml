@@ -105,13 +105,13 @@ stages:
             inputs:
               secureFile: '$(settingsXmlsecureFileName)'
               retryCount: '2'
-          - task: Maven@3
+          - task: Maven@4
             inputs:
               mavenPomFile: 'pom.xml'
               goals: '$(mavenGoals)'
               options: '-B -s $(settingsxml.secureFilePath) -DskipTests=true'
               javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.11'
+              jdkVersionOption: '1.17'
               mavenVersionOption: 'Default'
               mavenOptions: '-Xmx3072m'
               mavenAuthenticateFeed: false
@@ -184,7 +184,7 @@ stages:
                     valueFile: "$(Pipeline.Workspace)/helm/values-${{ lower(variables.environment) }}.yaml"
                     install: true
                     waitForExecution: true
-                    arguments: "--timeout 2m0s"
+                    arguments: "--timeout 5m0s"
                 - task: KubernetesManifest@0
                   displayName: Patch
                   inputs:

@@ -1,69 +1,44 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.constant.TokenType;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
-import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.onboarding.Contract;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class OnboardingDaoTest {
-
-    @MockBean
-    private ProductConnector productConnector;
 
     @Mock
     private InstitutionConnector institutionConnector;
@@ -79,7 +54,7 @@ class OnboardingDaoTest {
 
     @Test
     void testPersist0() {
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenReturn(new Institution());
         when(coreConfig.getOnboardingExpiringDate()).thenReturn(60);
         Token token = new Token();
@@ -151,44 +126,26 @@ class OnboardingDaoTest {
                 list, "Digest"));
     }
 
+
     /**
-     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
+     * Method under test: {@link OnboardingDao#persistComplete(List, List, OnboardingRequest, Institution, List, String)}
      */
     @Test
-    void testPersist() {
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+    void testPersistComplete() {
+        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
                 .thenReturn(new Institution());
+
         Token token = new Token();
         token.setId("tokenId");
         when(tokenConnector.save(any(), any())).thenReturn(token);
+
         ArrayList<String> toUpdate = new ArrayList<>();
         ArrayList<String> toDelete = new ArrayList<>();
 
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
+        Billing billing = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
+        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -216,32 +173,209 @@ class OnboardingDaoTest {
         onboardingRequest.setProductId("42");
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
+        onboardingRequest.setContractFilePath("/example");
+
         UserToOnboard user = new UserToOnboard();
         List<UserToOnboard> users = new ArrayList<>();
         users.add(user);
         onboardingRequest.setUsers(users);
+
         when(userConnector.findById(any())).thenReturn(new OnboardedUser());
-        Institution institution = new Institution();
-        OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
-                new ArrayList<>(), "Digest");
+
+        OnboardingRollback actualPersistResult = onboardingDao.persistComplete(toUpdate, toDelete, onboardingRequest, new Institution(),
+                new ArrayList<>(), null);
+
+        Onboarding onboarding = actualPersistResult.getOnboarding();
+        assertEquals(RelationshipState.ACTIVE, onboarding.getStatus());
+        assertEquals("42", onboarding.getProductId());
+        assertEquals("Pricing Plan", onboarding.getPricingPlan());
+        assertEquals(onboardingRequest.getContractFilePath(), onboarding.getContract());
+        assertSame(billing, onboarding.getBilling());
+        verify(institutionConnector).findAndUpdateInstitutionDataWithNewOnboarding(any(), any(),
+                any());
+        verify(tokenConnector).save(any(), any());
+    }
+
+    @Test
+    void persistComplete_newUser(){
+        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
+                .thenReturn(new Institution());
+
+        Token token = new Token();
+        token.setId("tokenId");
+        when(tokenConnector.save(any(), any())).thenReturn(token);
+
+        ArrayList<String> toUpdate = new ArrayList<>();
+        ArrayList<String> toDelete = new ArrayList<>();
+
+        Billing billing = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
+        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setAddress("42 Main St");
+        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setDescription("The characteristics of someone or something");
+        institutionUpdate.setDigitalAddress("42 Main St");
+        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
+        institutionUpdate.setImported(true);
+        institutionUpdate.setInstitutionType(InstitutionType.PA);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+        institutionUpdate.setRea("Rea");
+        institutionUpdate.setShareCapital("Share Capital");
+        institutionUpdate.setSupportEmail("jane.doe@example.org");
+        institutionUpdate.setSupportPhone("4105551212");
+        institutionUpdate.setTaxCode("Tax Code");
+        institutionUpdate.setZipCode("21654");
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId("42");
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setContractFilePath("/example");
+
+        UserToOnboard user = new UserToOnboard();
+        List<UserToOnboard> users = new ArrayList<>();
+        users.add(user);
+        onboardingRequest.setUsers(users);
+
+        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
+
+        OnboardingRollback actualPersistResult = onboardingDao.persistComplete(toUpdate, toDelete, onboardingRequest, new Institution(),
+                new ArrayList<>(), null);
+
+        Onboarding onboarding = actualPersistResult.getOnboarding();
+        assertEquals(RelationshipState.ACTIVE, onboarding.getStatus());
+        assertEquals("42", onboarding.getProductId());
+        assertEquals("Pricing Plan", onboarding.getPricingPlan());
+        assertEquals(onboardingRequest.getContractFilePath(), onboarding.getContract());
+        assertSame(billing, onboarding.getBilling());
+        verify(institutionConnector).findAndUpdateInstitutionDataWithNewOnboarding(any(), any(),
+                any());
+        verify(tokenConnector).save(any(), any());
+    }
+
+    @Test
+    void testNewUserStandard(){
+        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
+                .thenReturn(new Institution());
+
+        Token token = new Token();
+        token.setId("tokenId");
+        when(tokenConnector.save(any(), any())).thenReturn(token);
+
+        ArrayList<String> toUpdate = new ArrayList<>();
+        ArrayList<String> toDelete = new ArrayList<>();
+
+        OnboardingRequest onboardingRequest = TestUtils.createDummyOnboardingRequest();
+
+        UserToOnboard user = new UserToOnboard();
+        List<UserToOnboard> users = new ArrayList<>();
+        users.add(user);
+        onboardingRequest.setUsers(users);
+
+        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
+
+        OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, new Institution(),
+                new ArrayList<>(), null);
+
         Onboarding onboarding = actualPersistResult.getOnboarding();
         assertEquals(RelationshipState.PENDING, onboarding.getStatus());
         assertEquals("42", onboarding.getProductId());
         assertEquals("Pricing Plan", onboarding.getPricingPlan());
-        assertEquals("Path", onboarding.getContract());
-        assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
-        verify(tokenConnector).save(any(), any());
+        assertSame(onboardingRequest.getBillingRequest(), onboarding.getBilling());
     }
 
     /**
      * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
      */
     @Test
-    void testPersist2() {
+    void persist_shouldPersist() {
+        String expectedProductId = "productId";
+        String expectedDigest = "Digest";
+
+        Billing billing = TestUtils.createSimpleBilling();
+        Contract contract = TestUtils.createSimpleContract();
+        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
+        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
+
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
+        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setBillingRequest(billing);
+        onboardingRequest.setContract(contract);
+        onboardingRequest.setInstitutionExternalId("42");
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        onboardingRequest.setPricingPlan("Pricing Plan");
+        onboardingRequest.setProductId(expectedProductId);
+        onboardingRequest.setProductName("Product Name");
+        onboardingRequest.setSignContract(true);
+        onboardingRequest.setTokenType(TokenType.INSTITUTION);
+
+        UserToOnboard user = new UserToOnboard();
+        onboardingRequest.setUsers(List.of(user));
+
+        Institution expectedInstitution = TestUtils.dummyInstitution();
+
+        RelationshipState expectedTokenRelationshipState = OnboardingInstitutionUtils.getStatus(institutionUpdate,
+                expectedInstitution.getInstitutionType(), expectedInstitution.getOrigin(), expectedProductId);
+
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
+                .thenReturn(new Institution());
+        when(tokenConnector.save(any(), any())).thenAnswer(obj -> obj.getArguments()[0]);
+        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
+
+        //When
+        OnboardingRollback actualPersistResult = onboardingDao.persist(new ArrayList<>(), new ArrayList<>(), onboardingRequest, expectedInstitution,
+                List.of(), expectedDigest);
+
+        //Then
+        Onboarding onboarding = actualPersistResult.getOnboarding();
+        assertEquals(RelationshipState.PENDING, onboarding.getStatus());
+        assertEquals(expectedProductId, onboarding.getProductId());
+        assertEquals("Pricing Plan", onboarding.getPricingPlan());
+        assertEquals("Path", onboarding.getContract());
+        assertSame(billing, onboarding.getBilling());
+
+        ArgumentCaptor<UserBinding> argumentBindings = ArgumentCaptor.forClass(UserBinding.class);
+        ArgumentCaptor<Token> argumentToken = ArgumentCaptor.forClass(Token.class);
+
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
+
+        verify(tokenConnector).save(argumentToken.capture(), any());
+        assertThat(argumentToken.getValue().getInstitutionId()).isEqualTo(expectedInstitution.getId());
+        assertThat(argumentToken.getValue().getProductId()).isEqualTo(expectedProductId);
+        assertThat(argumentToken.getValue().getChecksum()).isEqualTo(expectedDigest);
+        assertThat(argumentToken.getValue().getType()).isEqualTo(onboardingRequest.getTokenType());
+        assertThat(argumentToken.getValue().getChecksum()).isEqualTo(expectedDigest);
+        assertThat(argumentToken.getValue().getStatus()).isEqualTo(expectedTokenRelationshipState);
+
+        verify(userConnector).findAndUpdate(any(), any(), any(), any(), argumentBindings.capture());
+        assertThat(argumentBindings.getValue().getInstitutionId()).isEqualTo(expectedInstitution.getId());
+        assertThat(argumentBindings.getValue().getInstitutionName()).isEqualTo(expectedInstitution.getDescription());
+        assertThat(argumentBindings.getValue().getInstitutionRootName()).isEqualTo(expectedInstitution.getParentDescription());
+        List<OnboardedProduct> expectedOnboardedProducts = argumentBindings.getValue().getProducts();
+        assertThat(expectedOnboardedProducts.size()).isEqualTo(1);
+        assertThat(expectedOnboardedProducts.get(0).getProductId()).isEqualTo(expectedProductId);
+
+    }
+
+    /**
+     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
+     */
+    @Test
+    void persist_shouldThrowInvalidRequestException() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -305,8 +439,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -318,7 +451,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist3() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"))
                 .when(tokenConnector)
@@ -384,8 +517,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
     }
@@ -396,7 +528,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist6() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -460,8 +592,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -473,7 +604,7 @@ class OnboardingDaoTest {
     @Test
     void testPersist7() {
         doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any()))
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
         doNothing().when(tokenConnector).deleteById(any());
         when(tokenConnector.save(any(), any())).thenReturn(new Token());
@@ -537,8 +668,7 @@ class OnboardingDaoTest {
         List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, list, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(),
-                any());
+        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
         verify(institutionConnector).findAndRemoveOnboarding(any(), any());
         verify(tokenConnector).save(any(), any());
         verify(tokenConnector).deleteById(any());
@@ -624,7 +754,7 @@ class OnboardingDaoTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -648,46 +778,21 @@ class OnboardingDaoTest {
     @Test
     void testPersistForUpdate2() {
 
+        TokenConnector tokenConnector = mock(TokenConnector.class);
+        UserConnector userConnector = mock(UserConnector.class);
+        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
 
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setClosedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
+
+        Token token = TestUtils.dummyToken();
         token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
         token.setStatus(RelationshipState.TOBEVALIDATED);
         Institution institution = new Institution();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, "foo"));
+        assertDoesNotThrow(() ->
+                onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, "foo"));
     }
 
     @Test
@@ -719,7 +824,7 @@ class OnboardingDaoTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -766,7 +871,7 @@ class OnboardingDaoTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -816,7 +921,7 @@ class OnboardingDaoTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -971,7 +1076,7 @@ class OnboardingDaoTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -1004,6 +1109,33 @@ class OnboardingDaoTest {
         token.setUpdatedAt(null);
         token.setUsers(new ArrayList<>());
         Assertions.assertThrows(InvalidRequestException.class, () -> onboardingDao.rollbackSecondStepOfUpdate(toUpdate, institution, token));
+    }
+
+    UserToOnboard dummyUserToOnboard() {
+        UserToOnboard user = new UserToOnboard();
+        user.setId("id");
+        return user;
+    }
+
+    @Test
+    void rollbackPersistOnboarding() {
+
+        final String institutionId = "institutionId";
+        final Onboarding onboarding = new Onboarding();
+        onboarding.setProductId("productId");
+        final List<UserToOnboard> users = new ArrayList<>();
+        UserToOnboard user = dummyUserToOnboard();
+        users.add(user);
+
+        onboardingDao.rollbackPersistOnboarding(institutionId, onboarding, users);
+
+        verify(institutionConnector, times(1))
+                .findAndRemoveOnboarding(institutionId, onboarding);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(userConnector, times(1))
+                .findAndRemoveProduct(captor.capture(), any(), any());
+        assertEquals(user.getId(), captor.getValue());
     }
 
     /**
@@ -1531,179 +1663,192 @@ class OnboardingDaoTest {
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator() {
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
         UserToOnboard user = new UserToOnboard();
         user.setId("id");
-        List<UserToOnboard> users = new ArrayList<>();
-        users.add(user);
-        onboardingOperatorsRequest.setUsers(users);
-        assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
+        assertTrue(onboardingDao.onboardOperator(new Institution(), "productId", List.of(user)).isEmpty());
     }
 
-
     @Test
-    void testOnboardOperator1() {
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
+    void testOnboardOperatorAndDeleteDifferentRole() {
+        Institution institution = TestUtils.dummyInstitution();
+        OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
+        UserBinding userBinding = TestUtils.dummyUserBinding();
+        OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
+        onboardedProduct.setProductId("productId");
+        onboardedProduct.setRole(PartyRole.OPERATOR);
+        onboardedProduct.setProductRole("api");
+        OnboardedProduct onboardedProduct1 = TestUtils.dummyOnboardedProduct();
+        userBinding.setProducts(List.of(onboardedProduct, onboardedProduct1));
+        userBinding.setInstitutionId("institutionId");
+        onboardedUser.setBindings(List.of(userBinding));
         UserToOnboard user = new UserToOnboard();
         user.setId("id");
-        List<UserToOnboard> users = new ArrayList<>();
-        users.add(user);
-        onboardingOperatorsRequest.setUsers(users);
-        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
-        assertFalse(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
+        user.setRole(PartyRole.DELEGATE);
+        user.setProductRole("admin");
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        assertFalse(onboardingDao.onboardOperator(institution, "productId", List.of(user)).isEmpty());
+    }
+
+    @Test
+    void testOnboardOperatorAndKeepSameRoleWithDifferentProductRole() {
+        Institution institution = TestUtils.dummyInstitution();
+        OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
+        UserBinding userBinding = TestUtils.dummyUserBinding();
+        OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
+        onboardedProduct.setProductId("productId");
+        onboardedProduct.setRole(PartyRole.OPERATOR);
+        onboardedProduct.setProductRole("api");
+        OnboardedProduct onboardedProduct1 = TestUtils.dummyOnboardedProduct();
+        userBinding.setProducts(List.of(onboardedProduct, onboardedProduct1));
+        userBinding.setInstitutionId("institutionId");
+        onboardedUser.setBindings(List.of(userBinding));
+        UserToOnboard user = new UserToOnboard();
+        user.setId("id");
+        user.setRole(PartyRole.OPERATOR);
+        user.setProductRole("security");
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        assertFalse(onboardingDao.onboardOperator(institution, "productId", List.of(user)).isEmpty());
+    }
+
+    @Test
+    void testOnboardOperatorAndDeleteSameRole() {
+        Institution institution = TestUtils.dummyInstitution();
+        OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
+        UserBinding userBinding = TestUtils.dummyUserBinding();
+        OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
+        onboardedProduct.setProductId("productId");
+        onboardedProduct.setRole(PartyRole.OPERATOR);
+        onboardedProduct.setProductRole("api");
+        OnboardedProduct onboardedProduct1 = TestUtils.dummyOnboardedProduct();
+        userBinding.setProducts(List.of(onboardedProduct, onboardedProduct1));
+        userBinding.setInstitutionId("institutionId");
+        onboardedUser.setBindings(List.of(userBinding));
+        UserToOnboard user = new UserToOnboard();
+        user.setId("id");
+        user.setRole(PartyRole.OPERATOR);
+        user.setProductRole("api");
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+        assertFalse(onboardingDao.onboardOperator(institution, "productId", List.of(user)).isEmpty());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator2() {
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
+        assertTrue(onboardingDao.onboardOperator(new Institution(), "productId", List.of()).isEmpty());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator5() {
-
+        OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
+        UserBinding userBinding = TestUtils.dummyUserBinding();
+        OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
+        onboardedProduct.setProductId("42");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
         UserConnector userConnector = mock(UserConnector.class);
         doNothing().when(userConnector)
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
-        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("prof.einstein@example.org");
-        userToOnboard.setEnv(Env.COLL);
-        userToOnboard.setId("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
-        userToOnboard.setName("42");
-        userToOnboard.setProductRole("42");
-        userToOnboard.setRole(PartyRole.SUB_DELEGATE);
-        userToOnboard.setSurname("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
-        userToOnboard.setTaxCode("42");
+        UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard);
 
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
         Institution institution = new Institution();
-        List<RelationshipInfo> actualOnboardOperatorResult = onboardingDao.onboardOperator(onboardingOperatorsRequest,
-                institution);
+        List<RelationshipInfo> actualOnboardOperatorResult = onboardingDao.onboardOperator(institution, "42", userToOnboardList);
         assertEquals(1, actualOnboardOperatorResult.size());
         RelationshipInfo getResult = actualOnboardOperatorResult.get(0);
         assertSame(institution, getResult.getInstitution());
         assertEquals("it.pagopa.selfcare.mscore.model.user.UserToOnboard", getResult.getUserId());
-        OnboardedProduct onboardedProduct = getResult.getOnboardedProduct();
         assertEquals(RelationshipState.ACTIVE, onboardedProduct.getStatus());
-        assertEquals(PartyRole.SUB_DELEGATE, onboardedProduct.getRole());
-        assertEquals("42", onboardedProduct.getProductRole());
+        assertEquals(PartyRole.DELEGATE, onboardedProduct.getRole());
+        assertEquals("productRole", onboardedProduct.getProductRole());
         assertEquals("42", onboardedProduct.getProductId());
-        assertEquals(Env.COLL, onboardedProduct.getEnv());
+        assertEquals(Env.ROOT, onboardedProduct.getEnv());
         verify(userConnector).findById(any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
                any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator6() {
-
+        OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
+        UserBinding userBinding = TestUtils.dummyUserBinding();
+        OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
+        onboardedProduct.setProductId("42");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
         UserConnector userConnector = mock(UserConnector.class);
         doNothing().when(userConnector).findAndRemoveProduct(any(), any(),any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
-        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
+
         doNothing().when(userConnector).deleteById(any());
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("prof.einstein@example.org");
-        userToOnboard.setEnv(Env.COLL);
-        userToOnboard.setId("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
-        userToOnboard.setName("42");
-        userToOnboard.setProductRole("42");
-        userToOnboard.setRole(PartyRole.SUB_DELEGATE);
-        userToOnboard.setSurname("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
-        userToOnboard.setTaxCode("42");
+        UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard);
 
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
+        assertTrue(onboardingDao.onboardOperator(new Institution(), "42", userToOnboardList).isEmpty());
         verify(userConnector).findById(any());
-        verify(userConnector).deleteById(any());
-        verify(userConnector).findAndRemoveProduct(any(), any(),any());
+        verify(userConnector, times(2)).findAndRemoveProduct(any(), any(),any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
                any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator7() {
-
+        OnboardedUser onboardedUser = TestUtils.dummyOnboardedUser();
+        UserBinding userBinding = TestUtils.dummyUserBinding();
+        OnboardedProduct onboardedProduct = TestUtils.dummyOnboardedProduct();
+        onboardedProduct.setProductId("42");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
         UserConnector userConnector = mock(UserConnector.class);
         doThrow(new InvalidRequestException("An error occurred", "can not onboard operators")).when(userConnector)
                 .findAndRemoveProduct(any(), any(),any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
-        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
+        when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("prof.einstein@example.org");
-        userToOnboard.setEnv(Env.COLL);
-        userToOnboard.setId("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
-        userToOnboard.setName("42");
-        userToOnboard.setProductRole("42");
-        userToOnboard.setRole(PartyRole.SUB_DELEGATE);
-        userToOnboard.setSurname("it.pagopa.selfcare.mscore.model.user.UserToOnboard");
-        userToOnboard.setTaxCode("42");
+        UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard);
 
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        Institution institution = new Institution();
         assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.onboardOperator(onboardingOperatorsRequest, institution));
+                () -> onboardingDao.onboardOperator(new Institution(), "42", userToOnboardList));
         verify(userConnector).findById(any());
         verify(userConnector).findAndRemoveProduct(any(), any(),any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
@@ -1711,7 +1856,7 @@ class OnboardingDaoTest {
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator8() {
@@ -1742,13 +1887,8 @@ class OnboardingDaoTest {
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard);
 
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
         Institution institution = new Institution();
-        List<RelationshipInfo> actualOnboardOperatorResult = onboardingDao.onboardOperator(onboardingOperatorsRequest,
-                institution);
+        List<RelationshipInfo> actualOnboardOperatorResult = onboardingDao.onboardOperator(institution, "42", userToOnboardList);
         assertEquals(1, actualOnboardOperatorResult.size());
         RelationshipInfo getResult = actualOnboardOperatorResult.get(0);
         assertSame(institution, getResult.getInstitution());
@@ -1765,7 +1905,7 @@ class OnboardingDaoTest {
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator9() {
@@ -1796,19 +1936,14 @@ class OnboardingDaoTest {
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard);
 
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
+        assertTrue(onboardingDao.onboardOperator(new Institution(), "42", userToOnboardList).isEmpty());
         verify(userConnector).findAndCreate(any(), any());
         verify(userConnector).findById(any());
-        verify(userConnector).deleteById(any());
         verify(onboardedUser).getId();
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator10() {
@@ -1849,13 +1984,8 @@ class OnboardingDaoTest {
         userToOnboardList.add(userToOnboard1);
         userToOnboardList.add(userToOnboard);
 
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
         Institution institution = new Institution();
-        List<RelationshipInfo> actualOnboardOperatorResult = onboardingDao.onboardOperator(onboardingOperatorsRequest,
-                institution);
+        List<RelationshipInfo> actualOnboardOperatorResult = onboardingDao.onboardOperator(institution, "42", userToOnboardList);
         assertEquals(2, actualOnboardOperatorResult.size());
         assertEquals("42", actualOnboardOperatorResult.get(0).getUserId());
         RelationshipInfo getResult = actualOnboardOperatorResult.get(1);
@@ -1873,7 +2003,7 @@ class OnboardingDaoTest {
     }
 
     /**
-     * Method under test: {@link OnboardingDao#onboardOperator(OnboardingOperatorsRequest, Institution)}
+     * Method under test: {@link OnboardingDao#onboardOperator(Institution, String, List)}
      */
     @Test
     void testOnboardOperator11() {
@@ -1915,11 +2045,7 @@ class OnboardingDaoTest {
         ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
         userToOnboardList.add(userToOnboard);
 
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        assertTrue(onboardingDao.onboardOperator(onboardingOperatorsRequest, new Institution()).isEmpty());
+        assertTrue(onboardingDao.onboardOperator(new Institution(), "42", userToOnboardList).isEmpty());
         verify(userConnector).findById(any());
         verify(userConnector).findAndRemoveProduct(any(), any(),any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
@@ -1969,8 +2095,9 @@ class OnboardingDaoTest {
         when(productConnector.getProductById(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
         CoreConfig config = new CoreConfig();
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, config);
         assertThrows(InvalidRequestException.class,
-                () -> (new OnboardingDao(null, null, null, productConnector, coreConfig)).getProductById("42"));
+                () -> onboardingDao.getProductById("42"));
         verify(productConnector).getProductById(any());
     }
 
@@ -2000,7 +2127,7 @@ class OnboardingDaoTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);

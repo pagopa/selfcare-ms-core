@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.inner;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import lombok.Data;
 
 import java.util.List;
@@ -14,6 +14,9 @@ public class InstitutionUpdateEntity {
     private String address;
     private String taxCode;
     private String zipCode;
+    private String city;
+    private String county;
+    private String country;
     private PaymentServiceProviderEntity paymentServiceProvider;
     private DataProtectionOfficerEntity dataProtectionOfficer;
     private List<GeoTaxonomyEntity> geographicTaxonomies;
@@ -23,4 +26,5 @@ public class InstitutionUpdateEntity {
     private String supportEmail;
     private String supportPhone;
     private boolean imported;
+    private AdditionalInformationsEntity additionalInformations;
 }

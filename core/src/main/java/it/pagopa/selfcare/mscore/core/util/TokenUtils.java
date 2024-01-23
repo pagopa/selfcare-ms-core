@@ -27,14 +27,12 @@ public class TokenUtils {
         }
         token.setCreatedAt(OffsetDateTime.now());
         token.setUpdatedAt(OffsetDateTime.now());
+        token.setActivatedAt(OffsetDateTime.now());
         token.setInstitutionId(institution.getId());
         token.setProductId(request.getProductId());
         token.setChecksum(digest);
-        if (request.getInstitutionUpdate() != null && request.getInstitutionUpdate().getInstitutionType() != null) {
-            token.setStatus(OnboardingInstitutionUtils.getStatus(request.getInstitutionUpdate().getInstitutionType(), request, institution));
-        } else if (institution.getInstitutionType() != null) {
-            token.setStatus(OnboardingInstitutionUtils.getStatus(institution.getInstitutionType(), request, institution));
-        }
+        token.setStatus(OnboardingInstitutionUtils.getStatus(request.getInstitutionUpdate(),
+                institution.getInstitutionType(), institution.getOrigin(), request.getProductId()));
         token.setInstitutionUpdate(request.getInstitutionUpdate());
         token.setUsers(request.getUsers().stream().map(TokenUtils::toTokenUser).collect(Collectors.toList()));
         token.setExpiringDate(expiringDate);
@@ -63,6 +61,20 @@ public class TokenUtils {
         tokenRelationships.setInstitutionId(token.getInstitutionId());
         tokenRelationships.setProductId(token.getProductId());
         tokenRelationships.setUsers(users);
+        tokenRelationships.setType(token.getType());
+        tokenRelationships.setStatus(token.getStatus());
+        tokenRelationships.setClosedAt(token.getDeletedAt());
+        tokenRelationships.setCreatedAt(token.getCreatedAt());
+        tokenRelationships.setActivatedAt(token.getActivatedAt());
+        tokenRelationships.setUpdatedAt(token.getUpdatedAt());
+        tokenRelationships.setContentType(token.getContentType());
+        tokenRelationships.setContractSigned(token.getContractSigned());
+        tokenRelationships.setInstitutionUpdate(token.getInstitutionUpdate());
         return tokenRelationships;
+    }
+
+    public static boolean isTokenExpired(Token token) {
+        OffsetDateTime now = OffsetDateTime.now();
+        return token.getExpiringDate() != null && (now.isEqual(token.getExpiringDate()) || now.isAfter(token.getExpiringDate()));
     }
 }

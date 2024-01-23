@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.rest.config;
 
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 

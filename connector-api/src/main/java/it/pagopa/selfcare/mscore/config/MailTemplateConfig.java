@@ -17,6 +17,14 @@ public class MailTemplateConfig {
     private String completeProductName;
     private String completeSelfcarePlaceholder;
     private String completeSelfcareName;
+    private String completePathFd;
+    private String completePathPt;
+
+    private String autocompletePath;
+
+    private String delegationNotificationPath;
+    private String delegationUserNotificationPath;
+    private String delegationPartnerName;
 
     private String path;
     private String userName;
@@ -40,4 +48,7 @@ public class MailTemplateConfig {
     private String rejectProductName;
     private String rejectOnboardingUrlPlaceholder;
     private String rejectOnboardingUrlValue;
+
+    private String registrationRequestPath;
+    private String registrationNotificationAdminPath;
 }

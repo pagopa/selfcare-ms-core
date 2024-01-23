@@ -22,35 +22,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.DOCUMENT_VALIDATION_FAIL;
-import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_CONTRACT_DIGEST;
-import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_DOCUMENT_SIGNATURE;
-import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_SIGNATURE_FORMS;
-import static it.pagopa.selfcare.mscore.constant.GenericError.INVALID_SIGNATURE_TAX_CODE;
-import static it.pagopa.selfcare.mscore.constant.GenericError.ORIGINAL_DOCUMENT_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.GenericError.SIGNATURE_VALIDATION_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.TAX_CODE_NOT_FOUND_IN_SIGNATURE;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @Service
 public class SignatureService {
 
-    static final String VALID_CHECK = "VALID";
     private static final Integer CF_MATCHER_GROUP = 2;
     private static final Pattern signatureRegex = Pattern.compile("(TINIT-)(.*)");
 
-    public SignedDocumentValidator createDocumentValidator(byte[] bytes) {
+    private final TrustedListsCertificateSource trustedListsCertificateSource;
 
-        var trustedListsCertificateSource = new TrustedListsCertificateSource();
+    public SignatureService(TrustedListsCertificateSource trustedListsCertificateSource) {
+        this.trustedListsCertificateSource = trustedListsCertificateSource;
+    }
+
+
+    public SignedDocumentValidator createDocumentValidator(byte[] bytes) {
 
         CertificateVerifier certificateVerifier = new CommonCertificateVerifier();
         certificateVerifier.setTrustedCertSources(trustedListsCertificateSource);
@@ -95,58 +88,61 @@ public class SignatureService {
         }
     }
 
-    public String verifySignatureForm(SignedDocumentValidator validator) {
-        List<AdvancedSignature> advancedSignatures = validator.getSignatures();
-        List<SignatureForm> signatureForms = advancedSignatures.stream()
+    public void verifySignatureForm(SignedDocumentValidator validator) {
+
+        String signatureFormErrors = validator.getSignatures().stream()
                 .map(AdvancedSignature::getSignatureForm)
                 .filter(signatureForm -> signatureForm != SignatureForm.CAdES)
-                .collect(Collectors.toList());
+                .map(SignatureForm::toString)
+                .collect(Collectors.joining(","));
 
-        if (!signatureForms.isEmpty()) {
-            return String.format(INVALID_SIGNATURE_FORMS.getMessage(), String.join(", ", signatureForms.toString()));
+        if (!StringUtils.isBlank(signatureFormErrors)) {
+            throw new InvalidRequestException(String.format(INVALID_SIGNATURE_FORMS.getMessage(), signatureFormErrors),
+                    INVALID_SIGNATURE_FORMS.getCode());
         }
-        return VALID_CHECK;
     }
 
-    public String verifySignature(Reports reports) {
+    public void verifySignature(Reports reports) {
         List<SignatureValidationReportType> signatureValidationReportTypes = new ArrayList<>();
+
         if (reports.getEtsiValidationReportJaxb() != null) {
             signatureValidationReportTypes = reports.getEtsiValidationReportJaxb().getSignatureValidationReport();
         }
         if (signatureValidationReportTypes.isEmpty()
                 || (!signatureValidationReportTypes.stream().allMatch(s -> s.getSignatureValidationStatus() != null
                 && Indication.TOTAL_PASSED == s.getSignatureValidationStatus().getMainIndication()))) {
-            return INVALID_DOCUMENT_SIGNATURE.getMessage();
+            throw new InvalidRequestException(INVALID_DOCUMENT_SIGNATURE.getMessage(), INVALID_DOCUMENT_SIGNATURE.getCode());
         }
-        return VALID_CHECK;
     }
 
-    public String verifyDigest(SignedDocumentValidator validator, String checksum) {
+    public void verifyDigest(SignedDocumentValidator validator, String checksum) {
         List<AdvancedSignature> advancedSignatures = validator.getSignatures();
+
         if (advancedSignatures != null && !advancedSignatures.isEmpty()) {
             for (AdvancedSignature a : advancedSignatures) {
+
                 List<DSSDocument> dssDocuments = validator.getOriginalDocuments(a.getId());
                 if (!dssDocuments.stream().map(dssDocument -> dssDocument.getDigest(DigestAlgorithm.SHA256))
                         .collect(Collectors.toList()).contains(checksum)) {
-                    return INVALID_CONTRACT_DIGEST.getMessage();
+                    throw new InvalidRequestException(INVALID_CONTRACT_DIGEST.getMessage(), INVALID_CONTRACT_DIGEST.getCode());
                 }
             }
         }
-        return VALID_CHECK;
+
     }
 
-    public String verifyManagerTaxCode(Reports reports, List<User> users) {
+    public void verifyManagerTaxCode(Reports reports, List<User> users) {
         List<String> signatureTaxCodes = extractSubjectSNCFs(reports);
         if (signatureTaxCodes.isEmpty()) {
-            return TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage();
+            throw new InvalidRequestException(TAX_CODE_NOT_FOUND_IN_SIGNATURE.getMessage(), TAX_CODE_NOT_FOUND_IN_SIGNATURE.getCode());
         }
 
         List<String> taxCodes = extractTaxCode(signatureTaxCodes);
 
         if (taxCodes.isEmpty() || !isSignedByLegal(users, taxCodes)) {
-            return INVALID_SIGNATURE_TAX_CODE.getMessage();
+            throw new InvalidRequestException(INVALID_SIGNATURE_TAX_CODE.getMessage(), INVALID_SIGNATURE_TAX_CODE.getCode());
         }
-        return VALID_CHECK;
+
     }
 
     private List<String> extractTaxCode(List<String> signatureTaxCodes) {
@@ -183,4 +179,5 @@ public class SignatureService {
         }
         return false;
     }
+
 }

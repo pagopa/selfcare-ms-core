@@ -5,7 +5,7 @@
     <parent>
         <groupId>it.pagopa.selfcare</groupId>
         <artifactId>selc-starter-parent</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
         <!-- lookup parent from repository -->
     </parent>
     <artifactId>selc-ms-core</artifactId>
@@ -23,7 +23,9 @@
     </modules>
 
     <properties>
-        <selc-commons.version>2.4.6</selc-commons.version>
+        <selc-commons.version>2.5.1</selc-commons.version>
+        <httpclient5.version>5.2.1</httpclient5.version>
+        <httpcore5.version>5.2.1</httpcore5.version>
     </properties>
 
     <dependencyManagement>
@@ -153,7 +155,6 @@
             <artifactId>selc-commons-connector-soap-aruba-sign</artifactId>
             <version>${selc-commons.version}</version>
         </dependency>
-
         <!-- Dependency for verify Signature -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -180,6 +181,18 @@
             <artifactId>bcprov-jdk15on</artifactId>
             <version>1.70</version>
         </dependency>
+
+        <!-- Selfcare commons dependency -->
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-commons-base</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>selc-commons-base</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
@@ -189,4 +202,5 @@
             </url>
         </repository>
     </repositories>
+
 </project>

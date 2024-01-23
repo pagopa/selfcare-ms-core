@@ -39,6 +39,9 @@ public class TokenMapper {
         entity.setProductId(token.getProductId());
         entity.setCreatedAt(token.getCreatedAt());
         entity.setUpdatedAt(token.getUpdatedAt());
+        entity.setActivatedAt(token.getActivatedAt());
+        entity.setDeletedAt(token.getDeletedAt());
+        entity.setContentType(token.getContentType());
         if (token.getInstitutionUpdate() != null) {
             entity.setInstitutionUpdate(toInstitutionUpdateEntity(token.getInstitutionUpdate(), geographicTaxonomies));
         }
@@ -52,7 +55,9 @@ public class TokenMapper {
         entity.setAddress(institutionUpdate.getAddress());
         entity.setTaxCode(institutionUpdate.getTaxCode());
         entity.setZipCode(institutionUpdate.getZipCode());
-
+        entity.setCity(institutionUpdate.getCity());
+        entity.setCounty(institutionUpdate.getCounty());
+        entity.setCountry(institutionUpdate.getCountry());
         if (geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
             entity.setGeographicTaxonomies(toGeoTaxonomyEntity(geographicTaxonomies));
         }else {
@@ -74,6 +79,9 @@ public class TokenMapper {
         entity.setSupportEmail(institutionUpdate.getSupportEmail());
         entity.setSupportPhone(institutionUpdate.getSupportPhone());
         entity.setImported(institutionUpdate.isImported());
+        if (institutionUpdate.getAdditionalInformations() != null) {
+            entity.setAdditionalInformations(toAdditionalInformationsEntity(institutionUpdate.getAdditionalInformations()));
+        }
         return entity;
     }
 
@@ -93,7 +101,10 @@ public class TokenMapper {
         token.setExpiringDate(tokenEntity.getExpiringDate());
         token.setCreatedAt(tokenEntity.getCreatedAt());
         token.setUpdatedAt(tokenEntity.getUpdatedAt());
+        token.setActivatedAt(tokenEntity.getActivatedAt());
+        token.setDeletedAt(token.getDeletedAt());
         token.setProductId(tokenEntity.getProductId());
+        token.setContentType(tokenEntity.getContentType());
         if (tokenEntity.getInstitutionUpdate() != null) {
             token.setInstitutionUpdate(toInstitutionUpdate(tokenEntity.getInstitutionUpdate()));
         }
@@ -107,7 +118,9 @@ public class TokenMapper {
         response.setAddress(entity.getAddress());
         response.setTaxCode(entity.getTaxCode());
         response.setZipCode(entity.getZipCode());
-
+        response.setCity(entity.getCity());
+        response.setCounty(entity.getCounty());
+        response.setCountry(entity.getCountry());
         if (entity.getGeographicTaxonomies() != null && !entity.getGeographicTaxonomies().isEmpty()) {
             response.setGeographicTaxonomies(entity.getGeographicTaxonomies().stream().map(geoTaxonomyEntity -> new InstitutionGeographicTaxonomies(geoTaxonomyEntity.getCode(), geoTaxonomyEntity.getDesc())).collect(Collectors.toList()));
         }
@@ -127,6 +140,9 @@ public class TokenMapper {
         response.setSupportEmail(entity.getSupportEmail());
         response.setSupportPhone(entity.getSupportPhone());
         response.setImported(entity.isImported());
+        if (entity.getAdditionalInformations() != null) {
+            response.setAdditionalInformations(toAdditionalInformations(entity.getAdditionalInformations()));
+        }
         return response;
     }
 

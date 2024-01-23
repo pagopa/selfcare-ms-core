@@ -16,14 +16,19 @@ public class MailParametersMapper {
     @Autowired
     MailTemplateConfig mailTemplateConfig;
 
-    public Map<String, String> getOnboardingMailParameter(User user, OnboardingRequest request, String token) {
+    public Map<String, String> getOnboardingMailParameter(User user, OnboardingRequest request, String token, String description, boolean fromApprove) {
         Map<String, String> map = new HashMap<>();
-        map.put(mailTemplateConfig.getProductName(), request.getProductId());
-        if(user.getName()!=null) {
-            map.put(mailTemplateConfig.getUserName(), user.getName());
-        }
-        if(user.getFamilyName()!=null) {
-            map.put(mailTemplateConfig.getUserSurname(), user.getFamilyName());
+        map.put(mailTemplateConfig.getProductName(), request.getProductName());
+        if (fromApprove) {
+            map.put(mailTemplateConfig.getUserName(), description);
+            map.put(mailTemplateConfig.getUserSurname(), "");
+        } else {
+            if (user.getName() != null) {
+                map.put(mailTemplateConfig.getUserName(), user.getName());
+            }
+            if (user.getFamilyName() != null) {
+                map.put(mailTemplateConfig.getUserSurname(), user.getFamilyName());
+            }
         }
         StringBuilder confirmLink = new StringBuilder(mailTemplateConfig.getConfirmTokenPlaceholder());
         StringBuilder rejectLink = new StringBuilder(mailTemplateConfig.getRejectTokenPlaceholder());
@@ -49,16 +54,54 @@ public class MailParametersMapper {
         return map;
     }
 
-    public String getOnboardingPath() {
-        return mailTemplateConfig.getPath();
+    public Map<String, String> getRegistrationRequestParameter(User user, OnboardingRequest request) {
+        Map<String, String> map = new HashMap<>();
+        if(user.getName()!=null) {
+            map.put(mailTemplateConfig.getNotificationRequesterName(), user.getName());
+        }
+        if(user.getFamilyName()!=null) {
+            map.put(mailTemplateConfig.getNotificationRequesterSurname(), user.getFamilyName());
+        }
+        if(request.getInstitutionUpdate()!=null) {
+            map.put(mailTemplateConfig.getInstitutionDescription(), request.getInstitutionUpdate().getDescription());
+        }
+        return map;
+    }
+
+    public Map<String, String> getDelegationNotificationParameter(String institutionName, String productName, String partnerName) {
+        Map<String, String> map = new HashMap<>();
+        map.put(mailTemplateConfig.getNotificationProductName(), productName);
+        map.put(mailTemplateConfig.getInstitutionDescription(), institutionName);
+        map.put(mailTemplateConfig.getDelegationPartnerName(), partnerName);
+        return map;
     }
 
     public String getOnboardingNotificationPath() {
         return mailTemplateConfig.getNotificationPath();
     }
 
+    public String getRegistrationRequestPath() {
+        return mailTemplateConfig.getRegistrationRequestPath();
+    }
+
+    public String getRegistrationNotificationAdminPath() {
+        return mailTemplateConfig.getRegistrationNotificationAdminPath();
+    }
+
+    public String getDelegationNotificationPath() {
+        return mailTemplateConfig.getDelegationNotificationPath();
+    }
+
+    public String getDelegationUserNotificationPath() {
+        return mailTemplateConfig.getDelegationUserNotificationPath();
+    }
+
     public String getOnboardingCompletePath() {
         return mailTemplateConfig.getCompletePath();
+    }
+
+    public String getFdOnboardingCompletePath(){
+        return mailTemplateConfig.getCompletePathFd();
     }
 
     public List<String> getOnboardingNotificationAdminEmail() {
@@ -82,4 +125,5 @@ public class MailParametersMapper {
     public String getOnboardingRejectNotificationPath(){
         return mailTemplateConfig.getRejectPath();
     }
+
 }

@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.Data;
 
@@ -18,4 +18,8 @@ public class InstitutionBillingResponse {
     private String taxCode;
     private String pricingPlan;
     private BillingResponse billing;
+
+    private String subunitCode;
+    private String subunitType;
+    private String aooParentCode;
 }

@@ -41,7 +41,7 @@ class MailParametersMapperTest {
         user.setFamilyName(certifiedField);
         OnboardingRequest request = new OnboardingRequest();
         request.setProductId("productId");
-        Map<String, String> map = mailParametersMapper.getOnboardingMailParameter(user, request, "");
+        Map<String, String> map = mailParametersMapper.getOnboardingMailParameter(user, request, "token", "description", false);
         Assertions.assertNotNull(map);
     }
 
@@ -70,15 +70,45 @@ class MailParametersMapperTest {
     }
 
     @Test
-    void getOnboardingPath(){
-        when(mailTemplateConfig.getPath()).thenReturn("path");
-        Assertions.assertNotNull(mailParametersMapper.getOnboardingPath());
+    void getRegistrationRequestParameter(){
+        when(mailTemplateConfig.getUserName()).thenReturn("userName");
+        when(mailTemplateConfig.getUserSurname()).thenReturn("userSurname");
+        when(mailTemplateConfig.getInstitutionDescription()).thenReturn("institutionDescription");
+        when(mailTemplateConfig.getAdminLink()).thenReturn("institutionDescription");
+        User user = new User();
+        CertifiedField<String> certifiedField = new CertifiedField<>();
+        certifiedField.setValue("42");
+        user.setName(certifiedField);
+        user.setFamilyName(certifiedField);
+        OnboardingRequest request = new OnboardingRequest();
+        request.setProductId("productId");
+        request.setInstitutionUpdate(new InstitutionUpdate());
+        Map<String, String> map = mailParametersMapper.getRegistrationRequestParameter(user, request);
+        Assertions.assertNotNull(map);
     }
 
     @Test
     void getOnboardingNotificationPath(){
         when(mailTemplateConfig.getNotificationPath()).thenReturn("path");
         Assertions.assertNotNull(mailParametersMapper.getOnboardingNotificationPath());
+    }
+
+    @Test
+    void getNotificationDelegationPath(){
+        when(mailTemplateConfig.getDelegationNotificationPath()).thenReturn("path");
+        Assertions.assertNotNull(mailParametersMapper.getDelegationNotificationPath());
+    }
+
+    @Test
+    void getRegistrationRequestPath(){
+        when(mailTemplateConfig.getRegistrationRequestPath()).thenReturn("path");
+        Assertions.assertNotNull(mailParametersMapper.getRegistrationRequestPath());
+    }
+
+    @Test
+    void getRegistrationNotificationPath(){
+        when(mailTemplateConfig.getRegistrationNotificationAdminPath()).thenReturn("path");
+        Assertions.assertNotNull(mailParametersMapper.getRegistrationNotificationAdminPath());
     }
 
     @Test
@@ -118,5 +148,11 @@ class MailParametersMapperTest {
 
         Assertions.assertNotNull(mailParametersMapper.getOnboardingRejectMailParameters("productName","productId"));
     }
+
+    @Test
+    void getNotificationDelegationParameters(){
+        Assertions.assertNotNull(mailParametersMapper.getDelegationNotificationParameter("productName","productId", "partnerName"));
+    }
+
 }
 

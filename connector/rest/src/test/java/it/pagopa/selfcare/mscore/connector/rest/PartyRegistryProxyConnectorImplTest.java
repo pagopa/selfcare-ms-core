@@ -2,25 +2,31 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import feign.FeignException;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.Institutions;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.InstitutionsByLegalResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyCategoryResponse;
-import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.ProxyInstitutionResponse;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.*;
+import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
+import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
+import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.CategoryProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionByLegal;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
-import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
+import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
+import it.pagopa.selfcare.mscore.model.UnitaOrganizzativa;
+import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.registry_proxy.generated.openapi.v1.dto.InsuranceCompanyResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.checkNotNullFields;
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -31,6 +37,36 @@ class PartyRegistryProxyConnectorImplTest {
 
     @Mock
     private PartyRegistryProxyRestClient partyRegistryProxyRestClient;
+
+    @Spy
+    private AooMapper aooMapper = new AooMapperImpl();
+
+    @Spy
+    private UoMapper uoMapper = new UoMapperImpl();
+
+    @Spy
+    private SaMapper saMapper = new SaMapperImpl();
+    @Spy
+    private AsMapper asMapper = new AsMapperImpl();
+
+    private final static AooResponse aooResponse;
+    private final static UoResponse uoResponse;
+    private final static PdndResponse pdndResponse;
+    private final static InsuranceCompanyResource asResponse;
+
+    static {
+        aooResponse = new AooResponse();
+        aooResponse.setCodAoo("codAoo");
+        aooResponse.setId("id");
+        aooResponse.setOrigin(Origin.IPA);
+
+        uoResponse = new UoResponse();
+        uoResponse.setCodiceUniUo("codiceUniUo");
+        uoResponse.setId("id");
+        uoResponse.setOrigin(Origin.IPA);
+        pdndResponse = mockInstance(new PdndResponse());
+        asResponse = mockInstance(new InsuranceCompanyResource());
+    }
 
     /**
      * Method under test: {@link PartyRegistryProxyConnectorImpl#getInstitutionById(String)}
@@ -400,10 +436,7 @@ class PartyRegistryProxyConnectorImplTest {
     void testGetLegalAddress() {
         NationalRegistriesProfessionalAddress nationalRegistriesProfessionalAddress = new NationalRegistriesProfessionalAddress();
         nationalRegistriesProfessionalAddress.setAddress("42 Main St");
-        nationalRegistriesProfessionalAddress.setDescription("The characteristics of someone or something");
-        nationalRegistriesProfessionalAddress.setMunicipality("Municipality");
-        nationalRegistriesProfessionalAddress.setProvince("Province");
-        nationalRegistriesProfessionalAddress.setZip("21654");
+        nationalRegistriesProfessionalAddress.setZipCode("21654");
         when(partyRegistryProxyRestClient.getLegalAddress(any()))
                 .thenReturn(nationalRegistriesProfessionalAddress);
         assertSame(nationalRegistriesProfessionalAddress, partyRegistryProxyConnectorImpl.getLegalAddress("42"));
@@ -435,5 +468,115 @@ class PartyRegistryProxyConnectorImplTest {
         assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getInstitutionById("id"));
         verify(partyRegistryProxyRestClient).getInstitutionById(any());
     }
+
+
+    @Test
+    void getExtByCode() {
+        GeographicTaxonomiesResponse geographicTaxonomiesResponse = new GeographicTaxonomiesResponse();
+        geographicTaxonomiesResponse.setGeotaxId("Code");
+        geographicTaxonomiesResponse.setCountry("GB");
+        geographicTaxonomiesResponse.setCountryAbbreviation("GB");
+        geographicTaxonomiesResponse.setDescription("The characteristics of someone or something");
+        geographicTaxonomiesResponse.setEnable(true);
+        geographicTaxonomiesResponse.setIstatCode("");
+        geographicTaxonomiesResponse.setProvinceId("Province");
+        geographicTaxonomiesResponse.setProvinceAbbreviation("Province Abbreviation");
+        geographicTaxonomiesResponse.setRegionId("us-east-2");
+        when(partyRegistryProxyRestClient.getExtByCode(any())).thenReturn(geographicTaxonomiesResponse);
+        GeographicTaxonomies actualExtByCode = partyRegistryProxyConnectorImpl.getExtByCode("Code");
+        assertEquals("Code", actualExtByCode.getGeotaxId());
+        assertTrue(actualExtByCode.isEnable());
+        assertEquals("The characteristics of someone or something", actualExtByCode.getDescription());
+        verify(partyRegistryProxyRestClient).getExtByCode(any());
+    }
+
+    @Test
+    void getExtByCode_notFound() {
+        when(partyRegistryProxyRestClient.getExtByCode(any())).thenThrow(new ResourceNotFoundException("", ""));
+        assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getExtByCode("Code"));
+    }
+
+    @Test
+    void shouldGetAoo() {
+        when(partyRegistryProxyRestClient.getAooById(anyString()))
+                .thenReturn(aooResponse);
+
+        AreaOrganizzativaOmogenea aoo = partyRegistryProxyConnectorImpl.getAooById("example");
+        assertEquals(aoo.getCodAoo(), aooResponse.getCodAoo());
+        assertEquals(aoo.getId(), aooResponse.getId());
+        assertEquals(aoo.getOrigin(), aooResponse.getOrigin());
+    }
+
+    @Test
+    void shouldGetUo() {
+        when(partyRegistryProxyRestClient.getUoById(anyString()))
+                .thenReturn(uoResponse);
+
+        UnitaOrganizzativa uo = partyRegistryProxyConnectorImpl.getUoById("example");
+        assertEquals(uo.getCodiceUniUo(), uoResponse.getCodiceUniUo());
+        assertEquals(uo.getId(), uoResponse.getId());
+        assertEquals(uo.getOrigin(), uoResponse.getOrigin());
+    }
+
+    @Test
+    void shouldGetSa() {
+        when(partyRegistryProxyRestClient.getUoById(anyString()))
+                .thenReturn(uoResponse);
+
+        UnitaOrganizzativa uo = partyRegistryProxyConnectorImpl.getUoById("example");
+        assertEquals(uo.getCodiceUniUo(), uoResponse.getCodiceUniUo());
+        assertEquals(uo.getId(), uoResponse.getId());
+        assertEquals(uo.getOrigin(), uoResponse.getOrigin());
+    }
+
+    @Test
+    void getSAFromAnac(){
+        //given
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient.getSaByTaxId(anyString())).thenReturn(pdndResponse);
+        //when
+        SaResource result = partyRegistryProxyConnectorImpl.getSAFromAnac(taxId);
+        //then
+        checkNotNullFields(result);
+        verify(partyRegistryProxyRestClient, times(1)).getSaByTaxId(taxId);
+    }
+
+    @Test
+    void getSAFromAnacNotFound(){
+        //given
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient.getSaByTaxId(anyString())).thenThrow(ResourceNotFoundException.class);
+        //when
+        Executable executable = () -> partyRegistryProxyConnectorImpl.getSAFromAnac(taxId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        verify(partyRegistryProxyRestClient, times(1)).getSaByTaxId(taxId);
+    }
+
+    @Test
+    void getASFromIvass(){
+        //given
+        ResponseEntity<InsuranceCompanyResource> response =  new ResponseEntity<>(asResponse, HttpStatus.FOUND);
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient._searchByTaxCodeUsingGET(anyString())).thenReturn(response);
+        //when
+        AsResource result = partyRegistryProxyConnectorImpl.getASFromIvass(taxId);
+        //then
+        checkNotNullFields(result);
+        verify(partyRegistryProxyRestClient, times(1))._searchByTaxCodeUsingGET(taxId);
+    }
+
+    @Test
+    void getASFromIvassNotFound(){
+        //given
+        String taxId = "taxId";
+        when(partyRegistryProxyRestClient._searchByTaxCodeUsingGET(anyString())).thenThrow(ResourceNotFoundException.class);
+        //when
+        Executable executable = () -> partyRegistryProxyConnectorImpl.getASFromIvass(taxId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        verify(partyRegistryProxyRestClient, times(1))._searchByTaxCodeUsingGET(taxId);
+    }
+
 }
 

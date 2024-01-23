@@ -3,36 +3,52 @@ package it.pagopa.selfcare.mscore.connector.dao;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.UserEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.aggregation.UserInstitutionAggregationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserMapper;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapper;
+import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapper;
+import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
 import it.pagopa.selfcare.mscore.constant.Env;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserConnectorImpl implements UserConnector {
 
     private static final String CURRENT_PRODUCT = "current.";
@@ -41,15 +57,44 @@ public class UserConnectorImpl implements UserConnector {
     private static final String CURRENT_USER_BINDING = "currentUserBinding.";
     private static final String CURRENT_USER_BINDING_REF = "$[currentUserBinding]";
 
+    private static final List<String> VALID_USER_RELATIONSHIPS = List.of(RelationshipState.ACTIVE.name(), RelationshipState.DELETED.name(), RelationshipState.SUSPENDED.name());
     private final UserRepository repository;
 
-    public UserConnectorImpl(UserRepository userRepository) {
-        this.repository = userRepository;
-    }
+    private final UserEntityMapper userMapper;
+
+    private final UserInstitutionAggregationMapper userInstitutionAggregationMapper;
+
+    private final MongoOperations mongoOperations;
+
+    private final ProductsRestClient productRestClient;
+
 
     @Override
     public List<OnboardedUser> findAll() {
-        return repository.findAll().stream().map(UserMapper::toOnboardedUser).collect(Collectors.toList());
+        return repository.findAll().stream().map(userMapper::toOnboardedUser).collect(Collectors.toList());
+    }
+
+    /**
+     * This query retrieves all the users having status in VALID_USER_RELATIONSHIPS for the given productId
+     *
+     * @param page
+     * @param size
+     * @param productId
+     * @return List of onboarded users
+     */
+    @Override
+    public List<OnboardedUser> findAllValidUsers(Integer page, Integer size, String productId) {
+        Pageable pageable = PageRequest.of(page, size);
+        Query queryMatch = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.products.name())
+                        .elemMatch(CriteriaBuilder.builder()
+                                .isIfNotNull(OnboardedProductEntity.Fields.productId.name(), productId)
+                                .build()
+                                .and(OnboardedProductEntity.Fields.status.name()).in(VALID_USER_RELATIONSHIPS))));
+        return repository.find(queryMatch, pageable, UserEntity.class)
+                .stream()
+                .map(userMapper::toOnboardedUser)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -60,33 +105,45 @@ public class UserConnectorImpl implements UserConnector {
     @Override
     public OnboardedUser findById(String userId) {
         Optional<UserEntity> entityOpt = repository.findById(userId);
-        return entityOpt.map(UserMapper::toOnboardedUser)
+        return entityOpt.map(userMapper::toOnboardedUser)
                 .orElseThrow(() -> {
                     log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
-                    throw new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
+                    return new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
                 });
     }
 
     @Override
-    public OnboardedUser save(OnboardedUser example) {
-        final UserEntity entity = UserMapper.toUserEntity(example);
-        return UserMapper.toOnboardedUser(repository.save(entity));
+    public OnboardedUser save(OnboardedUser onboardedUser) {
+        final UserEntity entity = userMapper.toUserEntity(onboardedUser);
+        return userMapper.toOnboardedUser(repository.save(entity));
     }
 
     @Override
     public List<OnboardedUser> findAllByIds(List<String> users) {
+        return findAll(users, false);
+    }
+
+    @Override
+    public List<OnboardedUser> findAllByExistingIds(List<String> users) {
+        return findAll(users, true);
+    }
+
+    private List<OnboardedUser> findAll(List<String> userIds, boolean existingOnly) {
         List<OnboardedUser> userList = new ArrayList<>();
-        Set<String> userIds = new HashSet<>(users);
-        repository.findAllById(users)
-                .forEach(userEntity -> {
-                    userList.add(UserMapper.toOnboardedUser(userEntity));
-                    userIds.remove(userEntity.getId());
-                });
-        if (users.size() != userList.size()) {
-            throw new ResourceNotFoundException(String.format(USERS_NOT_FOUND_ERROR.getMessage(), String.join(",", userIds)), USERS_NOT_FOUND_ERROR.getCode());
+        Set<String> remainingUserIds = new HashSet<>(userIds);
+
+        repository.findAllById(userIds).forEach(userEntity -> {
+            userList.add(userMapper.toOnboardedUser(userEntity));
+            remainingUserIds.remove(userEntity.getId());
+        });
+
+        if (!existingOnly && !remainingUserIds.isEmpty()) {
+            String missingUserIds = String.join(",", remainingUserIds);
+            throw new ResourceNotFoundException(String.format(USERS_NOT_FOUND_ERROR.getMessage(), missingUserIds), USERS_NOT_FOUND_ERROR.getCode());
         }
         return userList;
     }
+
 
     @Override
     public void findAndUpdateState(String userId, @Nullable String relationshipId, @Nullable Token token, RelationshipState state) {
@@ -95,7 +152,7 @@ public class UserConnectorImpl implements UserConnector {
                 .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.status.name()), state)
                 .set(constructQuery(CURRENT_ANY, UserBinding.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
         if (relationshipId != null) {
-            update.filterArray(Criteria.where(CURRENT_PRODUCT  + OnboardedProduct.Fields.relationshipId.name()).is(relationshipId));
+            update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.relationshipId.name()).is(relationshipId));
         }
         if (token != null) {
             update.filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProduct.Fields.tokenId.name()).is(token.getId()));
@@ -105,6 +162,47 @@ public class UserConnectorImpl implements UserConnector {
         }
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+    }
+
+    @Override
+    public void findAndUpdateStateWithOptionalFilter(String userId, String institutionId, String productId, PartyRole role, String productRole, RelationshipState state) {
+
+        checkRoles(productId, role, productRole);
+
+        Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
+        Update update = new Update();
+
+        boolean productFilterIsPresent = role != null || StringUtils.hasText(productId) || StringUtils.hasText(productRole);
+
+        if (StringUtils.hasText(institutionId) && productFilterIsPresent) {
+            filterForInstution(update, institutionId);
+            filterForProduct(update, role, productRole, productId);
+            setUpdate(update, state, CURRENT_USER_BINDING_REF, CURRENT_PRODUCT_REF);
+        } else if (StringUtils.hasText(institutionId)) {
+            filterForInstution(update, institutionId);
+            setUpdate(update, state, CURRENT_USER_BINDING_REF, CURRENT_ANY);
+        } else if (productFilterIsPresent) {
+            filterForProduct(update, role, productRole, productId);
+            setUpdate(update, state, CURRENT_ANY, CURRENT_PRODUCT_REF);
+        } else {
+            setUpdate(update, state, CURRENT_ANY, CURRENT_ANY);
+        }
+
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+    }
+
+    private void filterForProduct(Update update, PartyRole role, String productRole, String productId) {
+        update.filterArray(constructCriteria(role, productRole, productId));
+    }
+
+    private void filterForInstution(Update update, String institutionId) {
+        update.filterArray(Criteria.where(CURRENT_USER_BINDING + UserBinding.Fields.institutionId.name()).is(institutionId));
+    }
+
+    private void setUpdate(Update update, RelationshipState state, String firstCurrent, String secondCurrent) {
+        update.set(constructQuery(firstCurrent, UserBinding.Fields.products.name(), secondCurrent, OnboardedProduct.Fields.status.name()), state)
+                .set(constructQuery(firstCurrent, UserBinding.Fields.products.name(), secondCurrent, OnboardedProduct.Fields.updatedAt.name()), OffsetDateTime.now());
     }
 
     @Override
@@ -134,7 +232,7 @@ public class UserConnectorImpl implements UserConnector {
         update.set(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now());
         update.set(UserEntity.Fields.createdAt.name(), OffsetDateTime.now());
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true).returnNew(true);
-        return UserMapper.toOnboardedUser(repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class));
+        return userMapper.toOnboardedUser(repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class));
     }
 
     @Override
@@ -150,24 +248,34 @@ public class UserConnectorImpl implements UserConnector {
 
         return repository.find(query, UserEntity.class).stream()
                 .findFirst()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
                         GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
 
     @Override
-    public List<OnboardedUser> findActiveInstitutionAdmin(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states) {
+    public List<OnboardedUser> findActiveInstitutionUser(String userId, String institutionId) {
         Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId))
                 .addCriteria(Criteria.where(UserEntity.Fields.bindings.name())
-                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
-                                .and(UserBinding.Fields.products.name())
-                                .elemMatch(Criteria.where(OnboardedProduct.Fields.role.name()).in(roles)
-                                .and(OnboardedProduct.Fields.env.name()).is(Env.ROOT)
-                                .and(OnboardedProduct.Fields.status.name()).in(states))));
+                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)));
 
         return repository.find(query, UserEntity.class).stream()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> findUsersByInstitutionIdAndProductId(String institutionId, String productId) {
+        Query query = Query.query(Criteria.where(UserEntity.Fields.bindings.name())
+                        .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name()).is(institutionId)
+                                .and(UserBinding.Fields.products.name()).elemMatch(
+                                        Criteria.where(OnboardedProductEntity.Fields.productId.name()).is(productId)
+                                .and(OnboardedProductEntity.Fields.status.name()).is(RelationshipState.ACTIVE.name())
+                        )));
+
+        return repository.find(query, UserEntity.class).stream()
+                .map(UserEntity::getId)
+                .toList();
     }
 
     @Override
@@ -179,7 +287,7 @@ public class UserConnectorImpl implements UserConnector {
         }
 
         return repository.find(new Query(criteria), UserEntity.class).stream()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .collect(Collectors.toList());
     }
 
@@ -191,7 +299,7 @@ public class UserConnectorImpl implements UserConnector {
 
         return repository.find(query, UserEntity.class).stream()
                 .findFirst()
-                .map(UserMapper::toOnboardedUser)
+                .map(userMapper::toOnboardedUser)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(RELATIONSHIP_ID_NOT_FOUND.getMessage(), relationshipId),
                         RELATIONSHIP_ID_NOT_FOUND.getCode()));
     }
@@ -208,12 +316,108 @@ public class UserConnectorImpl implements UserConnector {
         repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
     }
 
+    @Override
+    public List<OnboardedUser> updateUserBindingCreatedAt(String institutionId, String productId, List<String> usersId, OffsetDateTime createdAt) {
+        List<OnboardedUser> updatedUsersBindings = new ArrayList<>();
+
+        usersId.forEach(userId -> {
+            Query query = Query.query(Criteria.where(UserEntity.Fields.id.name()).is(userId));
+
+            Update update = new Update();
+            update.set(constructQuery(CURRENT_USER_BINDING_REF, UserBindingEntity.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProductEntity.Fields.createdAt.name()), createdAt)
+                    .set(constructQuery(CURRENT_USER_BINDING_REF, UserBindingEntity.Fields.products.name(), CURRENT_PRODUCT_REF, OnboardedProductEntity.Fields.updatedAt.name()), OffsetDateTime.now())
+                    .filterArray(Criteria.where(CURRENT_USER_BINDING + UserBindingEntity.Fields.institutionId.name()).is(institutionId))
+                    .filterArray(Criteria.where(CURRENT_PRODUCT + OnboardedProductEntity.Fields.productId.name()).is(productId));
+
+            Update updateUserEntityUpdatedAt = new Update();
+            updateUserEntityUpdatedAt.set(UserEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+
+            FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
+            repository.findAndModify(query, update, findAndModifyOptions, UserEntity.class);
+            updatedUsersBindings.add(userMapper.toOnboardedUser(repository.findAndModify(query, updateUserEntityUpdatedAt, findAndModifyOptions, UserEntity.class)));
+        });
+
+        return updatedUsersBindings;
+    }
+
+    @Override
+    public List<UserInfo> findByInstitutionId(String institutionId) {
+        Criteria criteria = Criteria.where(UserEntity.Fields.bindings.name())
+                .elemMatch(Criteria.where(UserBinding.Fields.institutionId.name())
+                        .is(institutionId));
+        return repository.find(new Query(criteria), UserEntity.class).stream()
+                .map(userEntity -> userMapper.toUserInfoByFirstInstitution(userEntity, institutionId))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserInstitutionAggregation> getUserInfo(String userId, String institutionId, String[] states) {
+
+        List<Criteria> criterias = new ArrayList<>();
+        MatchOperation matchUserId = Aggregation.match(Criteria.where("_id").is(userId));
+
+        GraphLookupOperation lookup = Aggregation.graphLookup("Institution")
+                .startWith("$bindings.institutionId")
+                .connectFrom("institutionId")
+                .connectTo("_id").as("institutions");
+
+        UnwindOperation unwindBindings = Aggregation.unwind("$bindings");
+        UnwindOperation unwindProducts = Aggregation.unwind("$bindings.products");
+
+        if (Objects.nonNull(states) && states.length > 0) {
+            criterias.add(Criteria.where("bindings.products.status").in(states));
+        }
+
+        if (Objects.nonNull(institutionId)) {
+            criterias.add(Criteria.where("bindings.institutionId").is(institutionId));
+        }
+
+        MatchOperation matchInstitutionExist = Aggregation.match(Criteria.where("institutions").size(1));
+        MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
+        Aggregation aggregation = Aggregation.newAggregation(matchUserId, unwindBindings, lookup, matchInstitutionExist, unwindProducts, matchOperation);
+
+        return mongoOperations.aggregate(aggregation, "User", UserInstitutionAggregation.class).getMappedResults();
+    }
+
+    private void checkRoles(String productId, PartyRole role, String productRole) {
+        if (StringUtils.hasText(productRole)) {
+            Assert.notNull(role, ROLE_IS_NULL.getMessage());
+            Product product = productRestClient.getProductById(productId, null);
+            ProductRoleInfo productRoleInfo = product.getRoleMappings().get(role);
+            if (productRoleInfo == null) {
+                throw new InvalidRequestException(ROLE_NOT_FOUND.getMessage(), ROLE_NOT_FOUND.getCode());
+            }
+            boolean roleExists = productRoleInfo.getRoles().stream()
+                    .anyMatch(prodRole -> prodRole.getCode().equals(productRole));
+            if (!roleExists) {
+                throw new InvalidRequestException(PRODUCT_ROLE_NOT_FOUND.getMessage(), PRODUCT_ROLE_NOT_FOUND.getCode());
+            }
+        }
+    }
+
+    @Override
+    public List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter) {
+        List<UserInstitutionAggregationEntity> userInstitutionAggregationEntities =
+                repository.findUserInstitutionAggregation(filter, UserInstitutionAggregationEntity.class);
+        return userInstitutionAggregationEntities.stream()
+                .map(userInstitutionAggregationMapper::constructUserInstitutionAggregation)
+                .collect(Collectors.toList());
+    }
+
     private Criteria constructElemMatch(String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> productRoles, List<String> products) {
         return CriteriaBuilder.builder()
                 .isIfNotNull(UserBinding.Fields.institutionId.name(), institutionId)
                 .build()
                 .and(UserBinding.Fields.products.name())
                 .elemMatch(constructCriteria(roles, states, productRoles, products));
+    }
+
+    private Criteria constructCriteria(PartyRole role, String productRole, String product) {
+        return CriteriaBuilder.builder()
+                .isIfNotNull(CURRENT_PRODUCT + OnboardedProductEntity.Fields.role.name(), role != null ? role.name() : null)
+                .isIfNotNull(CURRENT_PRODUCT + OnboardedProductEntity.Fields.productId.name(), product)
+                .isIfNotNull(CURRENT_PRODUCT + OnboardedProductEntity.Fields.productRole.name(), productRole)
+                .build();
     }
 
     private Criteria constructCriteria(List<PartyRole> roles, List<RelationshipState> states, List<String> productRoles, List<String> products) {

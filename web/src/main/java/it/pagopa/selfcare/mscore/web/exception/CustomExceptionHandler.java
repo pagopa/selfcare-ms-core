@@ -1,7 +1,10 @@
 package it.pagopa.selfcare.mscore.web.exception;
 
 import it.pagopa.selfcare.mscore.constant.GenericError;
-import it.pagopa.selfcare.mscore.exception.*;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.error.Problem;
 import it.pagopa.selfcare.mscore.model.error.ProblemError;
 import lombok.NonNull;
@@ -48,7 +51,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("ResourceNotFoundException Occured --> URL:{}, MESSAGE:{}, STATUS: {}",request.getRequestURL(), ex.getMessage(), HttpStatus.NOT_FOUND, ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(),  HttpStatus.NOT_FOUND.value(), ex.getCode());
+        Problem problem = createProblem(ex.getMessage(),  HttpStatus.NOT_FOUND.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.NOT_FOUND);
     }
 
@@ -57,7 +60,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("ResourceConflictException Occured --> URL:{}, MESSAGE:{}, STATUS: {}",request.getRequestURL(), ex.getMessage(), HttpStatus.CONFLICT, ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), HttpStatus.CONFLICT.value(), ex.getCode());
+        Problem problem = createProblem(ex.getMessage(), HttpStatus.CONFLICT.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.CONFLICT);
     }
 
@@ -66,7 +69,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("InvalidRequestException Occured --> URL:{}, MESSAGE:{}, STATUS:{}",request.getRequestURL(), ex.getMessage(), HttpStatus.BAD_REQUEST, ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), HttpStatus.BAD_REQUEST.value(), ex.getCode());
+        Problem problem = createProblem(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, HttpStatus.BAD_REQUEST);
     }
 
@@ -75,16 +78,15 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         log.error("Exception Occured --> URL:{}, MESSAGE:{}, STATUS:{}",request.getRequestURL(), ex.getMessage(), INTERNAL_SERVER_ERROR, ex);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Problem problem = createProblem(request.getRequestURL().toString(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getCode());
+        Problem problem = createProblem(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getCode());
         return new ResponseEntity<>(problem, headers, INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Problem> handleException(HttpServletRequest request, RuntimeException ex) {
-        GenericError genericError = retrieveGenericError(request);
-        log.error("{} Occured --> URL:{}, MESSAGE:{}, STATUS:{}",ex.getCause(), request.getRequestURL(), genericError.getMessage(), HttpStatus.BAD_REQUEST, ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(createProblem(request.getRequestURL().toString(), HttpStatus.BAD_REQUEST.value(), genericError.getCode()));
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Problem> handleException(HttpServletRequest request, Exception ex) {
+        log.error("{} Occured --> URL:{}, MESSAGE:{}, STATUS:{}",ex.getCause(), request.getRequestURL(), ex.getMessage(), HttpStatus.BAD_REQUEST, ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createProblem(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), ""));
     }
 
     private Problem createProblem(String errorMessage, Integer status, String code) {

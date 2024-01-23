@@ -6,6 +6,8 @@ import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.error.Problem;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,7 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class CustomExceptionHandlerTest {
     /**
      * Method under test: {@link CustomExceptionHandler#handleMissingServletRequestParameter(MissingServletRequestParameterException, HttpHeaders, HttpStatus, WebRequest)}
@@ -129,20 +132,20 @@ class CustomExceptionHandlerTest {
     }
 
     /**
-     * Method under test: {@link CustomExceptionHandler#handleException(HttpServletRequest, RuntimeException)}
+     * Method under test: {@link CustomExceptionHandler#handleException(HttpServletRequest, Exception)}
      */
     @Test
     void testHandleException() {
         CustomExceptionHandler customExceptionHandler = new CustomExceptionHandler();
         MockHttpServletRequest request = new MockHttpServletRequest();
         ResponseEntity<Problem> actualHandleExceptionResult = customExceptionHandler.handleException(request,
-                new RuntimeException());
+                new Exception());
         assertTrue(actualHandleExceptionResult.hasBody());
         assertTrue(actualHandleExceptionResult.getHeaders().isEmpty());
-        assertEquals(HttpStatus.BAD_REQUEST, actualHandleExceptionResult.getStatusCode());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, actualHandleExceptionResult.getStatusCode());
         Problem body = actualHandleExceptionResult.getBody();
         assertEquals(1, Objects.requireNonNull(body).getErrors().size());
-        assertEquals(400, body.getStatus().intValue());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), body.getStatus().intValue());
     }
 
     @Test

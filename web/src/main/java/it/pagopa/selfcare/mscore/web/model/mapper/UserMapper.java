@@ -1,33 +1,52 @@
 package it.pagopa.selfcare.mscore.web.model.mapper;
 
+
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.WorkContact;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.mscore.web.model.user.Person;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import java.util.ArrayList;
-import java.util.List;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.UserInfoResponse;
+import it.pagopa.selfcare.mscore.web.model.user.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
-@NoArgsConstructor(access = AccessLevel.NONE)
-public class UserMapper {
+import java.util.Map;
 
-    public static List<UserToOnboard> toUserToOnboard(List<Person> persons) {
-        List<UserToOnboard> users = new ArrayList<>();
-        for (Person p : persons) {
-            users.add(toUserToOnboard(p));
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+
+    @Mapping(source = "user.fiscalCode", target = "taxCode")
+    @Mapping(source = "user.familyName", target = "surname")
+    @Mapping(target = "email", expression = "java(retrieveMailFromWorkContacts(user.getWorkContacts(), institutionId))")
+    UserResponse toUserResponse(User user, String institutionId);
+
+    UserToOnboard toUserToOnboard(Person p);
+
+    UserProductsResponse toEntity(OnboardedUser model);
+
+    @Mapping(source = "userInfo.user.fiscalCode", target = "taxCode")
+    @Mapping(source = "userInfo.user.familyName", target = "surname")
+    @Mapping(source = "userInfo.user.name", target = "name")
+    @Mapping(target = "email", expression = "java(retrieveMailFromWorkContacts(userInfo.getUser().getWorkContacts(), institutionId))")
+    UserInfoResponse toUserInfoResponse(UserInfo userInfo, String institutionId);
+
+    InstitutionProducts toInstitutionProducts(UserBinding model);
+
+    InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request);
+
+    UserNotificationResponse toUserNotification(UserNotificationToSend user);
+
+    @Named("retrieveMailFromWorkContacts")
+    default String retrieveMailFromWorkContacts(Map<String, WorkContact> map, String institutionId){
+        if(map!=null && !map.isEmpty() && map.containsKey(institutionId)){
+            return map.get(institutionId).getEmail();
         }
-        return users;
-    }
-
-    public static UserToOnboard toUserToOnboard(Person p) {
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setId(p.getId());
-        userToOnboard.setName(p.getName());
-        userToOnboard.setSurname(p.getSurname());
-        userToOnboard.setTaxCode(p.getTaxCode());
-        userToOnboard.setEmail(p.getEmail());
-        userToOnboard.setRole(p.getRole());
-        userToOnboard.setProductRole(p.getProductRole());
-        userToOnboard.setEnv(p.getEnv());
-        return userToOnboard;
+        return null;
     }
 }

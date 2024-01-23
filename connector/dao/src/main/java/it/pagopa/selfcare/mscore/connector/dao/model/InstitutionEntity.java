@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -33,6 +33,10 @@ public class InstitutionEntity {
     private String address;
     private String zipCode;
     private String taxCode;
+    private String city;
+    private String county;
+    private String country;
+    private String istatCode;
     private BillingEntity billing;
     private List<OnboardingEntity> onboarding;
     private List<GeoTaxonomyEntity> geographicTaxonomies;
@@ -47,5 +51,10 @@ public class InstitutionEntity {
     private boolean imported;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private String subunitCode;
+    private String subunitType;
+    private String parentDescription;
+    private String rootParentId;
+    private PaAttributesEntity paAttributes;
 
 }

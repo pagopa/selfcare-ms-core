@@ -1,10 +1,12 @@
 package it.pagopa.selfcare.mscore.core.util;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.Origin;
+import it.pagopa.selfcare.mscore.constant.PricingPlan;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.AccessLevel;
@@ -16,6 +18,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.MANAGER_EMAIL_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_IO;
+import static it.pagopa.selfcare.mscore.core.util.Constants.*;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.NONE)
@@ -47,6 +51,11 @@ public class PdfMapper {
             if (geographicTaxonomies != null && !geographicTaxonomies.isEmpty()) {
                 map.put("institutionGeoTaxonomies", geographicTaxonomies.stream().map(InstitutionGeographicTaxonomies::getDesc).collect(Collectors.toList()));
             }
+            if(institution.getSubunitType() != null && (institution.getSubunitType().equals(InstitutionPaSubunitType.AOO.name()) || institution.getSubunitType().equals(InstitutionPaSubunitType.UO.name()))){
+                map.put("parentInfo", " ente centrale " + institution.getParentDescription());
+            } else {
+                map.put("parentInfo", "");
+            }
             return map;
         } else {
             throw new InvalidRequestException(MANAGER_EMAIL_NOT_FOUND.getMessage(), MANAGER_EMAIL_NOT_FOUND.getCode());
@@ -57,6 +66,7 @@ public class PdfMapper {
         log.info("START - setupPSPData");
         if (institution.getPaymentServiceProvider() != null) {
             map.put("legalRegisterNumber", institution.getPaymentServiceProvider().getLegalRegisterNumber());
+            map.put("legalRegisterName", institution.getPaymentServiceProvider().getLegalRegisterName());
             map.put("vatNumberGroup", institution.getPaymentServiceProvider().isVatNumberGroup() ? "partita iva di gruppo" : "");
             map.put("institutionRegister", institution.getPaymentServiceProvider().getBusinessRegisterNumber());
             map.put("institutionAbi", institution.getPaymentServiceProvider().getAbiCode());
@@ -74,7 +84,7 @@ public class PdfMapper {
     public static void setupProdIOData(Map<String, Object> map, User validManager, Institution institution, OnboardingRequest request, InstitutionType institutionType) {
         log.info("START - setupProdIOData");
         map.put("institutionTypeCode", institutionType);
-        map.put("pricingPlan", decodePricingPlan(request.getPricingPlan(), request.getProductId()));
+        decodePricingPlan(request.getPricingPlan(), request.getProductId(), map);
         if (StringUtils.hasText(institution.getOrigin())) {
             map.put("originIdLabelValue", Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin()) ?
                     "<li class=\"c19 c39 li-bullet-0\"><span class=\"c1\">codice di iscrizione all&rsquo;Indice delle Pubbliche Amministrazioni e dei gestori di pubblici servizi (I.P.A.) <span class=\"c3\">${originId}</span> </span><span class=\"c1\"></span></li>"
@@ -91,28 +101,48 @@ public class PdfMapper {
         map.put("GPSmanagerSurname", InstitutionType.GSP == institutionType ? validManager.getFamilyName() : underscore);
         map.put("GPSmanagerTaxCode", InstitutionType.GSP == institutionType ? validManager.getFiscalCode() : underscore);
 
-        map.put("institutionREA", Optional.ofNullable(institution.getRea()).orElse(underscore));
-        map.put("institutionShareCapital", Optional.ofNullable(institution.getShareCapital()).orElse(underscore));
-        map.put("institutionBusinessRegisterPlace", Optional.ofNullable(institution.getBusinessRegisterPlace()).orElse(underscore));
+        map.put(INSTITUTION_REA, Optional.ofNullable(institution.getRea()).orElse(underscore));
+        map.put(INSTITUTION_SHARE_CAPITAL, Optional.ofNullable(institution.getShareCapital()).orElse(underscore));
+        map.put(INSTITUTION_BUSINESS_REGISTER_PLACE, Optional.ofNullable(institution.getBusinessRegisterPlace()).orElse(underscore));
 
         addPricingPlan(request, map);
     }
+  
+    public static void setupSAProdInteropData(Map<String, Object> map, InstitutionUpdate institutionUpdate) {
+        log.info("START - setupSAProdInteropData");
+        String underscore = "_______________";
+        map.put(INSTITUTION_REA, Optional.ofNullable(institutionUpdate.getRea()).orElse(underscore));
+        map.put(INSTITUTION_SHARE_CAPITAL, Optional.ofNullable(institutionUpdate.getShareCapital()).orElse(underscore));
+        map.put(INSTITUTION_BUSINESS_REGISTER_PLACE, Optional.ofNullable(institutionUpdate.getBusinessRegisterPlace()).orElse(underscore));
+        //override originId to not fill ipa code in case of SA
+        if(InstitutionType.SA.equals(institutionUpdate.getInstitutionType()))
+            map.put("originId", underscore);
+    }
+
+    public static void setupProdPNData(Map<String, Object> map, Institution institution, OnboardingRequest request) {
+        log.info("START - setupProdPNData");
+        addInstitutionRegisterLabelValue(institution, map);
+        if (request.getBillingRequest() != null) {
+            map.put("institutionRecipientCode", request.getBillingRequest().getRecipientCode());
+        }
+    }
+
 
     private static void addPricingPlan(OnboardingRequest request, Map<String, Object> map) {
         if (StringUtils.hasText(request.getPricingPlan()) && Arrays.stream(PLAN_LIST).anyMatch(s -> s.equalsIgnoreCase(request.getPricingPlan()))) {
-            map.put("pricingPlanPremium", request.getPricingPlan().replace("C", ""));
-            map.put("pricingPlanPremiumCheckbox", "X");
+            map.put(PRICING_PLAN_PREMIUM, request.getPricingPlan().replace("C", ""));
+            map.put(PRICING_PLAN_PREMIUM_CHECKBOX, "X");
         } else {
-            map.put("pricingPlanPremium", "");
-            map.put("pricingPlanPremiumCheckbox", "");
+            map.put(PRICING_PLAN_PREMIUM, "");
+            map.put(PRICING_PLAN_PREMIUM_CHECKBOX, "");
         }
 
-        map.put("pricingPlanPremiumBase", Optional.ofNullable(request.getPricingPlan()).orElse(""));
+        map.put(PRICING_PLAN_PREMIUM_BASE, Optional.ofNullable(request.getPricingPlan()).orElse(""));
 
         if (StringUtils.hasText(request.getPricingPlan()) && "C0".equalsIgnoreCase(request.getPricingPlan())) {
-            map.put("pricingPlanPremiumBaseCheckbox", "X");
+            map.put(PRICING_PLAN_PREMIUM_BASE_CHECKBOX, "X");
         } else {
-            map.put("pricingPlanPremiumBaseCheckbox", "");
+            map.put(PRICING_PLAN_PREMIUM_BASE_CHECKBOX, "");
         }
     }
 
@@ -126,14 +156,24 @@ public class PdfMapper {
         }
     }
 
-    private static String decodePricingPlan(String pricingPlan, String productId) {
-        if ("FA".equals(pricingPlan)) {
-            return "FAST";
+    private static void decodePricingPlan(String pricingPlan, String productId, Map<String, Object> map) {
+        if (PricingPlan.FA.name().equals(pricingPlan)) {
+            map.put(PRICING_PLAN_FAST_CHECKBOX, "X");
+            map.put(PRICING_PLAN_BASE_CHECKBOX, "");
+            map.put(PRICING_PLAN_PREMIUM_CHECKBOX, "");
+            map.put(PRICING_PLAN, PricingPlan.FA.getValue());
+            return;
         }
-        if ("prod-io".equalsIgnoreCase(productId)) {
-            return "BASE";
+        if (PROD_IO.getValue().equalsIgnoreCase(productId)) {
+            map.put(PRICING_PLAN_FAST_CHECKBOX, "");
+            map.put(PRICING_PLAN_BASE_CHECKBOX, "X");
+            map.put(PRICING_PLAN_PREMIUM_CHECKBOX, "");
+            map.put(PRICING_PLAN, PricingPlan.BASE.getValue());
         } else {
-            return "PREMIUM";
+            map.put(PRICING_PLAN_FAST_CHECKBOX, "");
+            map.put(PRICING_PLAN_BASE_CHECKBOX, "");
+            map.put(PRICING_PLAN_PREMIUM_CHECKBOX, "X");
+            map.put(PRICING_PLAN, PricingPlan.PREMIUM.getValue());
         }
     }
 

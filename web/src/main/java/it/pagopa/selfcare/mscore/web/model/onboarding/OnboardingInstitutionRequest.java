@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.onboarding;
 
+import io.swagger.annotations.ApiModelProperty;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
@@ -31,7 +32,9 @@ public class OnboardingInstitutionRequest {
     private String pricingPlan;
     private BillingRequest billing;
     private ContractRequest contract;
-
-    private boolean signContract;
+    private OnboardingImportContract contractImported;
+    private Boolean signContract;
+    @ApiModelProperty(value = "${swagger.mscore.onboarding.complete.model.sendCompleteOnboardingEmail}")
+    private Boolean sendCompleteOnboardingEmail;
 
 }

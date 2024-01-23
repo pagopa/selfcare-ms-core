@@ -15,13 +15,16 @@ public enum CustomError {
     INSTITUTION_NOT_FOUND("0036", "Cannot find Institution using institutionId %s and externalInstitutionId %s"),
     INSTITUTION_LEGAL_NOT_FOUND("0037", "Institution with externalInstitutionId %s is not related to user"),
     CREATE_INSTITUTION_CONFLICT("0038", "Institution having externalId %s already exists"),
+    CREATE_INSTITUTION_IPA_CONFLICT("0038", "Institution having taxCode %s and subunitCode %s already exists"),
     CREATE_INSTITUTION_NOT_FOUND("0039", "Institution having externalId %s not exists in registry"),
+    INSTITUTION_TAX_CODE_NOT_FOUND("0040", "Cannot find Institution using taxCode %s"),
     ONBOARDING_INVALID_UPDATES("0046", "Cannot perform data overrides on institution having external id %s"),
-    GEO_TAXONOMY_CODE_NOT_FOUND("0049", "Error on retrieve geographic taxonomy code %s: %s"),
+    GEO_TAXONOMY_CODE_NOT_FOUND("0049", "Error on retrieve geographic taxonomy code: %s"),
     PRODUCTS_NOT_FOUND_ERROR("0030", "Products not found for institution having internalId %s"),
     ONBOARDING_INFO_INSTITUTION_NOT_FOUND("0050", "No onboarding information found for %s"),
     ONBOARDING_INFO_ERROR("0051", "Error getting onboarding info"),
     ONBOARDING_BILLING_ERROR("0000", "Billing vatNumber and recipientCode are required"),
+    ONBOARDING_BILLING_VATNUMBER_ERROR("0000", "Billing vatNumber is required"),
     ONBOARDING_PENDING("0000", "There is already an onboarding request for product %s pending"),
     TOKEN_ALREADY_CONSUMED("0040", "Token %s has already consumed"),
     TOKEN_EXPIRED("0040", "Token %s is expired in %s and is status is DELETED"),
@@ -33,7 +36,15 @@ public enum CustomError {
     INVALID_STATUS_CHANGE("0000", "Cannot update state from value %s to value %s"),
     RELATIONSHIP_NOT_SUSPENDABLE("0010", "Relationship %s cannot be suspended"),
     MISSING_QUERY_PARAMETER("0045", "At least one query parameter between [userId, institutionId] must be passed"),
-    RELATIONSHIP_NOT_FOUND("0008", "Relationship not found for Institution %s, User %s and Role %s");
+    RELATIONSHIP_NOT_FOUND("0008", "Relationship not found for Institution %s, User %s and Role %s"),
+    CREATE_DELEGATION_CONFLICT("0041", "Delegation with parameters [from, to, productId, type] already exists"),
+    INSTITUTION_NOT_FOUND_IN_REGISTRY("0042", "NOT_FOUND_IN_REGISTRY"),
+    ROLE_NOT_FOUND("0000", "ROLE_NOT_FOUND"),
+    ROLE_IS_NULL("0000", "ROLE_IS_NULL - Role is required if productRole is present"),
+
+    PRODUCT_ROLE_NOT_FOUND("0000", "PRODUCT_ROLE_NOT_FOUND");
+
+
 
     private final String code;
     private final String detail;

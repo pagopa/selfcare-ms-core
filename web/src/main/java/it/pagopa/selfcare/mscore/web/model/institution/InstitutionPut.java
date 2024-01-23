@@ -10,4 +10,6 @@ import java.util.List;
 public class InstitutionPut {
 
     List<String> geographicTaxonomyCodes;
+    private String digitalAddress;
+    private String description;
 }

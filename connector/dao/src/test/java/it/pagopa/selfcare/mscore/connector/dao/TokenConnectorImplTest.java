@@ -1,11 +1,13 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.DataProtectionOfficerEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.InstitutionUpdateEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.PaymentServiceProviderEntity;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.mscore.connector.dao.utils.DaoMockUtils;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
@@ -13,29 +15,29 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomi
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.utils.MockUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class TokenConnectorImplTest {
@@ -45,6 +47,18 @@ class TokenConnectorImplTest {
 
     @Mock
     TokenRepository tokenRepository;
+
+    @Captor
+    ArgumentCaptor<Query> queryArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Update> updateArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<FindAndModifyOptions> findAndModifyOptionsArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Pageable> pageableArgumentCaptor;
 
     /**
      * Method under test: {@link TokenConnectorImpl#findAll()}
@@ -92,7 +106,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -149,7 +163,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -200,7 +214,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity1 = new TokenEntity();
         tokenEntity1.setChecksum("it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity");
-        tokenEntity1.setClosedAt(null);
+        tokenEntity1.setDeletedAt(null);
         tokenEntity1.setContractSigned("it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity");
         tokenEntity1.setContractTemplate("it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity");
         tokenEntity1.setCreatedAt(null);
@@ -340,7 +354,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -473,7 +487,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -579,7 +593,7 @@ class TokenConnectorImplTest {
 
         TokenEntity tokenEntity = new TokenEntity();
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -620,7 +634,7 @@ class TokenConnectorImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -764,7 +778,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -805,7 +819,7 @@ class TokenConnectorImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -953,7 +967,7 @@ class TokenConnectorImplTest {
         when(tokenEntity.getUpdatedAt()).thenReturn(null);
         when(tokenEntity.getUsers()).thenReturn(new ArrayList<>());
         tokenEntity.setChecksum("Checksum");
-        tokenEntity.setClosedAt(null);
+        tokenEntity.setDeletedAt(null);
         tokenEntity.setContractSigned("Contract Signed");
         tokenEntity.setContractTemplate("Contract Template");
         tokenEntity.setCreatedAt(null);
@@ -994,7 +1008,7 @@ class TokenConnectorImplTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -1050,32 +1064,87 @@ class TokenConnectorImplTest {
 
     @Test
     void testFindAndUpdateTokenUser() {
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setCreatedAt(null);
-        token.setExpiringDate(OffsetDateTime.now());
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setProductId("42");
-        token.setStatus(RelationshipState.DELETED);
-        token.setUpdatedAt(null);
-        token.setContractSigned("contractSigned");
-        token.setUsers(new ArrayList<>());
+        // Given
+        Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.DELETED, InstitutionType.PSP);
+        RelationshipState statusMock = RelationshipState.DELETED;
+        String digestMock = "digestMock";
+        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.DELETED);
 
-        TokenEntity tokenEntity = new TokenEntity();
-        tokenEntity.setChecksum("Checksum");
-        tokenEntity.setCreatedAt(null);
-        tokenEntity.setExpiringDate(OffsetDateTime.now());
-        tokenEntity.setId("42");
-        tokenEntity.setInstitutionId("42");
-        tokenEntity.setProductId("42");
-        tokenEntity.setStatus(RelationshipState.DELETED);
-        tokenEntity.setUpdatedAt(null);
-        tokenEntity.setContractSigned("contractSigned");
-        tokenEntity.setUsers(new ArrayList<>());
-        when(tokenRepository.findAndModify(any(), any(), any(), any())).thenReturn(tokenEntity);
-        tokenConnectorImpl.findAndUpdateToken(token, RelationshipState.DELETED, "");
-        verify(tokenRepository).findAndModify(any(), any(), any(), any());
+        when(tokenRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedTokenMock);
+        // When
+        Token result = tokenConnectorImpl.findAndUpdateToken(tokenMock, statusMock, digestMock);
+        // Then
+        assertNotNull(result);
+        verify(tokenRepository, times(1))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()).toString().contains(tokenMock.getId()));
+        Update capturedUpdate = updateArgumentCaptor.getValue();
+        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()));
+        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.checksum.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.contractSigned.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.contentType.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.deletedAt.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(digestMock) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContractSigned()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContentType()));
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findAndUpdateToken() {
+        // Given
+        Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.TOBEVALIDATED, InstitutionType.GSP);
+        tokenMock.setContractSigned(null);
+        tokenMock.setContentType(null);
+        RelationshipState statusMock = RelationshipState.PENDING;
+        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.PENDING);
+
+        when(tokenRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedTokenMock);
+        // When
+        Token result = tokenConnectorImpl.findAndUpdateToken(tokenMock, statusMock, null);
+        // Then
+        assertNotNull(result);
+        verify(tokenRepository, times(1))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()).toString().contains(tokenMock.getId()));
+        Update capturedUpdate = updateArgumentCaptor.getValue();
+        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()));
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findAndUpdateTokenActivated(){
+        // Given
+        Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.ACTIVE, InstitutionType.GSP);
+        tokenMock.setContractSigned(null);
+        tokenMock.setContentType(null);
+        RelationshipState statusMock = RelationshipState.ACTIVE;
+        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE);
+
+        when(tokenRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedTokenMock);
+        // When
+        Token result = tokenConnectorImpl.findAndUpdateToken(tokenMock, statusMock, null);
+        // Then
+        assertNotNull(result);
+        verify(tokenRepository, times(1))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()).toString().contains(tokenMock.getId()));
+        Update capturedUpdate = updateArgumentCaptor.getValue();
+        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.activatedAt.name()));
+        verifyNoMoreInteractions(tokenRepository);
     }
 
     @Test
@@ -1086,5 +1155,117 @@ class TokenConnectorImplTest {
         when(tokenRepository.find(any(), any())).thenReturn(List.of(token));
         Token tokens = tokenConnectorImpl.findWithFilter("42", "42");
         Assertions.assertEquals("507f1f77bcf86cd799439011", tokens.getId());
+    }
+
+    @Test
+    void updateOnboardedProductCreatedAt() {
+        // Given
+        String tokenIdMock = "tokenIdMock";
+        OffsetDateTime createdAt = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        TokenEntity updatedTokenMock = mockInstance(new TokenEntity());
+        updatedTokenMock.setId(tokenIdMock);
+        when(tokenRepository.findAndModify(any(), any(), any(), any()))
+                .thenReturn(updatedTokenMock);
+        // When
+        Token result = tokenConnectorImpl.updateTokenCreatedAt(tokenIdMock, createdAt);
+        // Then
+        assertNotNull(result);
+        assertEquals(result.getId(), tokenIdMock);
+        verify(tokenRepository, times(1))
+                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertSame(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()), tokenIdMock);
+        assertSame(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()), tokenIdMock);
+        Update capturedUpdate = updateArgumentCaptor.getValue();
+        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains("updatedAt") &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains("updatedAt") &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(createdAt.toString()));
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findByStatusAndProductId() {
+        // Given
+        EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
+        String productId = "prod-io";
+        Integer pageNumber = 0;
+        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE));
+        Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
+
+        doReturn(tokenEntityPage)
+                .when(tokenRepository)
+                .find(any(), any(), any());
+        // When
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber, 100);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(tokenRepository, times(1))
+                .find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertEquals(productId, capturedQuery.getQueryObject().get(TokenEntity.Fields.productId.name()));
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.status.name()).toString().contains(status.toString()));
+        Pageable capturedPage = pageableArgumentCaptor.getValue();
+        assertEquals(pageNumber, capturedPage.getPageNumber());
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findByStatusAndProductId_productIdNull() {
+        // Given
+        EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
+        Integer pageNumber = 0;
+        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE));
+        Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
+
+        doReturn(tokenEntityPage)
+                .when(tokenRepository)
+                .find(any(), any(), any());
+        // When
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, null, pageNumber, 100);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(tokenRepository, times(1))
+                .find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertFalse(capturedQuery.getQueryObject().toString().contains(TokenEntity.Fields.productId.name()));
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.status.name()).toString().contains(status.toString()));
+        Pageable capturedPage = pageableArgumentCaptor.getValue();
+        assertEquals(pageNumber, capturedPage.getPageNumber());
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void findByStatusAndProductId_productIdBlank() {
+        // Given
+        EnumSet<RelationshipState> status = EnumSet.of(RelationshipState.ACTIVE);
+        String productId = "";
+        Integer pageNumber = 0;
+        List<TokenEntity> tokenEntities = List.of(DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE));
+        Page<TokenEntity> tokenEntityPage = new PageImpl<>(tokenEntities);
+
+        doReturn(tokenEntityPage)
+                .when(tokenRepository)
+                .find(any(), any(), any());
+        // When
+        List<Token> result = tokenConnectorImpl.findByStatusAndProductId(status, productId, pageNumber, 100);
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        verify(tokenRepository, times(1))
+                .find(queryArgumentCaptor.capture(), pageableArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
+        Query capturedQuery = queryArgumentCaptor.getValue();
+        assertFalse(capturedQuery.getQueryObject().toString().contains(TokenEntity.Fields.productId.name()));
+        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.status.name()).toString().contains(status.toString()));
+        Pageable capturedPage = pageableArgumentCaptor.getValue();
+        assertEquals(pageNumber, capturedPage.getPageNumber());
+        verifyNoMoreInteractions(tokenRepository);
+    }
+
+    @Test
+    void countAllTokenFilterByStates(){
+        when(tokenRepository.count(any(), any())).thenReturn(1L);
+        Assertions.assertEquals(1L, tokenConnectorImpl.countAllTokenFilterByStates(List.of(RelationshipState.ACTIVE)));
     }
 }

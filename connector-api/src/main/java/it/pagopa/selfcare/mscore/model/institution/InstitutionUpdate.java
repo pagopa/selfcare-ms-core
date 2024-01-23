@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -17,6 +17,9 @@ public class InstitutionUpdate {
     private String address;
     private String taxCode;
     private String zipCode;
+    private String city;
+    private String county;
+    private String country;
     private PaymentServiceProvider paymentServiceProvider;
     private DataProtectionOfficer dataProtectionOfficer;
     private List<InstitutionGeographicTaxonomies> geographicTaxonomies;
@@ -25,5 +28,7 @@ public class InstitutionUpdate {
     private String businessRegisterPlace;
     private String supportEmail;
     private String supportPhone;
+    private String ivassCode;
     private boolean imported;
+    private AdditionalInformations additionalInformations;
 }

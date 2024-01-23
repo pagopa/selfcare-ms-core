@@ -8,11 +8,14 @@ import org.springframework.util.StringUtils;
 import java.util.Arrays;
 
 public enum Origin {
-    MOCK("static"),
+    MOCK("MOCK"),
     IPA("IPA"),
     SELC("SELC"),
+    ANAC("ANAC"),
     UNKNOWN("UNKNOWN"),
-    INFOCAMERE("INFOCAMERE");
+    ADE("ADE"),
+    INFOCAMERE("INFOCAMERE"),
+    IVASS("IVASS");
 
     private final String value;
 

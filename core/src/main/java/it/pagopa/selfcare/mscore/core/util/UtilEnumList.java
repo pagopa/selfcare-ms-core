@@ -16,7 +16,6 @@ public class UtilEnumList {
                     RelationshipState.TOBEVALIDATED);
     public static final List<RelationshipState> VALID_RELATIONSHIP_STATES =
             List.of(RelationshipState.ACTIVE,
-                    RelationshipState.DELETED,
                     RelationshipState.SUSPENDED);
     public static final List<RelationshipState> ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES =
             List.of(RelationshipState.ACTIVE,

@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -15,5 +14,12 @@ import java.util.List;
 @NoArgsConstructor
 public class UserBinding {
     private String institutionId;
+    private String institutionName;
+    private String institutionRootName;
     private List<OnboardedProduct> products;
+
+    public UserBinding(String institutionId, List<OnboardedProduct> products) {
+        this.institutionId = institutionId;
+        this.products = products;
+    }
 }

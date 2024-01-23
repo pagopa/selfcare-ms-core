@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -27,6 +28,9 @@ class UserRelationshipServiceImplTest {
     private InstitutionService institutionService;
 
     @Mock
+    private UserEventService userEventService;
+
+    @Mock
     private OnboardingDao onboardingDao;
 
     @Mock
@@ -34,6 +38,9 @@ class UserRelationshipServiceImplTest {
 
     @InjectMocks
     private UserRelationshipServiceImpl userRelationshipServiceImpl;
+
+    @Mock
+    private UserNotificationService userNotificationService;
 
     /**
      * Method under test: {@link UserRelationshipServiceImpl#findByRelationshipId(String)}
@@ -69,62 +76,126 @@ class UserRelationshipServiceImplTest {
     }
 
     /**
-     * Method under test: {@link UserRelationshipServiceImpl#activateRelationship(String)}
+     * Method under test: {@link UserRelationshipServiceImpl#activateRelationship(String, String, String)}
      */
     @Test
     void testActivateRelationship() {
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
-        userRelationshipServiceImpl.activateRelationship("42");
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("id");
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        userRelationshipServiceImpl.activateRelationship("42", "name","surname");
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }
 
     /**
-     * Method under test: {@link UserRelationshipServiceImpl#activateRelationship(String)}
+     * Method under test: {@link UserRelationshipServiceImpl#activateRelationship(String, String, String)}
      */
     @Test
     void testActivateRelationship2() {
-        when(userConnector.findByRelationshipId(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-        assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.activateRelationship("42"));
-        verify(userConnector).findByRelationshipId(any());
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("id");
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        doThrow(new InvalidRequestException("An error occurred", "Code")).when(onboardingDao)
+                .updateUserProductState(any(), any(), any());
+        assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.activateRelationship("42", "name","surname"));
     }
 
     /**
-     * Method under test: {@link UserRelationshipServiceImpl#suspendRelationship(String)}
+     * Method under test: {@link UserRelationshipServiceImpl#suspendRelationship(String, String, String)}
      */
     @Test
     void testSuspendRelationship() {
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
-        userRelationshipServiceImpl.suspendRelationship("42");
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        onboardedUser.setId("id");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        userRelationshipServiceImpl.suspendRelationship("42", "name","surname");
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }
 
     /**
-     * Method under test: {@link UserRelationshipServiceImpl#suspendRelationship(String)}
+     * Method under test: {@link UserRelationshipServiceImpl#suspendRelationship(String, String, String)}
      */
     @Test
     void testSuspendRelationship2() {
-        when(userConnector.findByRelationshipId(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-        assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.suspendRelationship("42"));
+        OnboardedUser onboardedUser = new OnboardedUser();
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        onboardedUser.setId("id");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        doThrow(new InvalidRequestException("An error occurred", "Code")).when(onboardingDao)
+                .updateUserProductState(any(), any(), any());
+        assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.suspendRelationship("42", "name","surname"));
+        verify(userConnector).findByRelationshipId(any());
+    }
+
+    @Test
+    void testSuspendRelationship3() {
+        OnboardedUser onboardedUser = new OnboardedUser();
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        onboardedUser.setId("id");
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        assertThrows(InvalidRequestException.class, () -> userRelationshipServiceImpl.suspendRelationship("42", "name","surname"));
         verify(userConnector).findByRelationshipId(any());
     }
 
     /**
-     * Method under test: {@link UserRelationshipServiceImpl#deleteRelationship(String)}
+     * Method under test: {@link UserRelationshipServiceImpl#deleteRelationship(String, String, String)}
      */
     @Test
     void testDeleteRelationship() {
         doNothing().when(onboardingDao)
                 .updateUserProductState(any(), any(), any());
-        when(userConnector.findByRelationshipId(any())).thenReturn(new OnboardedUser());
-        userRelationshipServiceImpl.deleteRelationship("42");
+        OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("id");
+        UserBinding userBinding = new UserBinding();
+        userBinding.setInstitutionId("42");
+        OnboardedProduct onboardedProduct = new OnboardedProduct();
+        onboardedProduct.setRelationshipId("42");
+        onboardedProduct.setTokenId("tokenId");
+        onboardedProduct.setProductId("productId");
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userConnector.findByRelationshipId(any())).thenReturn(onboardedUser);
+        userRelationshipServiceImpl.deleteRelationship("42", "name","surname");
         verify(onboardingDao).updateUserProductState(any(), any(), any());
         verify(userConnector).findByRelationshipId(any());
     }

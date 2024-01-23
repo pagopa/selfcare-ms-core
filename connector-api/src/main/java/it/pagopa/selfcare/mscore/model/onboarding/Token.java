@@ -1,15 +1,15 @@
 package it.pagopa.selfcare.mscore.model.onboarding;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.OffsetDateTime;
 import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,9 +25,12 @@ public class Token {
     private String contractVersion;
     private String contractTemplate;
     private String contractSigned;
+    private String contentType;
     private List<TokenUser> users;
     private InstitutionUpdate institutionUpdate;
     private OffsetDateTime createdAt;
+    private OffsetDateTime activatedAt;
     private OffsetDateTime updatedAt;
-    private OffsetDateTime closedAt;
+    private OffsetDateTime deletedAt;
+
 }

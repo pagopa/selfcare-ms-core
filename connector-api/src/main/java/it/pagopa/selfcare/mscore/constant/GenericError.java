@@ -8,7 +8,9 @@ public enum GenericError {
     INSTITUTION_MANAGER_ERROR("0042", "Error while retrieving institution having externalId %s"),
     INSTITUTION_BILLING_ERROR("0044", "Error while retrieving institution having externalId %s"),
     CREATE_INSTITUTION_ERROR("0037", "Error while creating requested institution"),
+    INSTITUTION_INFOCAMERE_NOTFOUND("0039", "Institution %s not found on INFOCAMERE"),
     ONBOARDING_OPERATION_ERROR("0017", "Error while performing onboarding operation"),
+    CREATE_DELEGATION_ERROR("0027", "Error while creating requested delegation"),
     ONBOARDING_VERIFICATION_ERROR("0015", "Error while verifying onboarding"),
     GETTING_ONBOARDING_INFO_ERROR("0016", "Error while getting onboarding info"),
     GET_PRODUCTS_ERROR("0031", "Error while getting products"),
@@ -19,6 +21,8 @@ public enum GenericError {
     SIGNATURE_NOT_FOUND("002-1007", "No signature found"),
     SIGNATURE_VALIDATION_ERROR("002-1004", "The tax code related to signature does not match anyone contained in the relationships"),
     ORIGINAL_DOCUMENT_NOT_FOUND("002-1008", "Original document information not found"),
+
+    INSTITUTION_NOT_ONBOARDED("002-1009", "Institution having externalId %s has already onboarded for product %s"),
     DOCUMENT_VALIDATION_FAIL("002-1000", "Error trying to validate document, due: %s"),
     INVALID_SIGNATURE_FORMS("002-1003", "Only CAdES signature form is admitted. Invalid signatures forms detected: %s"),
     INVALIDATE_ONBOARDING_ERROR("0022", "Error while invalidating onboarding"),
@@ -36,6 +40,7 @@ public enum GenericError {
 
     ERROR_DURING_DELETED_FILE("0000", "Error during deleted file %s"),
     ERROR_DURING_DOWNLOAD_FILE("0000", "Error during download file %s"),
+    ERROR_DURING_COMPRESS_FILE("0000", "Error compressing the file %s"),
     RETRIEVING_USER_RELATIONSHIP_ERROR("0023", "Error while retrieving user relationships"),
     ACTIVATE_RELATIONSHIP_ERROR("0024", "Error while activating relationship"),
     SUSPEND_RELATIONSHIP_ERROR("0025", "Error while suspending relationship"),
@@ -49,6 +54,7 @@ public enum GenericError {
     GET_INSTITUTION_ATTRIBUTES_ERROR("0022", "Error while getting party attributes"),
     GET_INSTITUTION_BY_GEOTAXONOMY_ERROR("0053", "Error while searching institutions related to given geoTaxonomies"),
     GET_INSTITUTION_BY_PRODUCTID_ERROR("0053", "Error while searching institutions related to given productId"),
+    GET_INSTITUTIONS_REQUEST_ERROR("0054", "Invalid request parameters sent. Allowed filters combinations taxCode and subunit or origin and originId"),
     VERIFY_USER_ERROR("0000", "Error while searching institutions related to given productId"),
     GET_USER_ERROR("0000", "Error while searching user given UserID"),
     GENERIC_ERROR("0000", "Generic Error");

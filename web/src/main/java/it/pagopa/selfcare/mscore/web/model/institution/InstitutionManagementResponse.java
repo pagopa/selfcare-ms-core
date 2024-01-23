@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
@@ -33,4 +33,8 @@ public class InstitutionManagementResponse {
     private boolean imported;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+
+    private String subunitCode;
+    private String subunitType;
+    private String aooParentCode;
 }

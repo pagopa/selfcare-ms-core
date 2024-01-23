@@ -1,11 +1,20 @@
 image:
   repository: selcpacr.azurecr.io/selfcaremscore
   pullPolicy: Always # TODO change me in IfNotPresent when each build will have a different tag
-  tag: 0.0.1-SNAPSHOT
+  tag: 1.0-SNAPSHOT
 
 ingress:
   annotations:
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://selfcare.pagopa.it"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://selfcare.pagopa.it,https://api.platform.pagopa.it"
+  tls:
+    - hosts:
+        - selc.internal.selfcare.pagopa.it
+      secretName: selc-internal-selfcare-pagopa-it
+  hosts:
+    - host: "selc.internal.selfcare.pagopa.it"
+      paths:
+        - path: /ms-core/v1/(.*)
+          pathType: ImplementationSpecific
 
 autoscaling:
   enabled: false
@@ -13,6 +22,10 @@ autoscaling:
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
+
+pdb:
+  enabled: false
+  minAvailable: 2
 
 configEnvSpecific:
   JAVA_TOOL_OPTIONS: "-javaagent:/applicationinsights-agent.jar"

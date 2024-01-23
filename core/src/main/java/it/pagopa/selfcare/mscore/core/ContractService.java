@@ -10,22 +10,28 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.dss.validation.reports.Reports;
+import it.pagopa.selfcare.commons.base.logging.LogUtils;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.commons.utils.crypto.model.SignatureInformation;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.InstitutionToNotify;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
-import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.RootParent;
+import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
@@ -37,6 +43,7 @@ import org.jsoup.helper.W3CDom;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,20 +58,18 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
-import static it.pagopa.selfcare.mscore.core.SignatureService.VALID_CHECK;
+import static it.pagopa.selfcare.mscore.constant.GenericError.GENERIC_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD_FILE;
+import static it.pagopa.selfcare.mscore.constant.ProductId.*;
 import static it.pagopa.selfcare.mscore.core.util.PdfMapper.*;
 
 @Slf4j
 @Service
 public class ContractService {
 
+    static final String DESCRIPTION_TO_REPLACE_REGEX = " - COMUNE";
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
     private final PadesSignService padesSignService;
     private final FileStorageConnector fileStorageConnector;
@@ -73,6 +78,8 @@ public class ContractService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaPropertiesConfig kafkaPropertiesConfig;
     private final ObjectMapper mapper;
+    private final PartyRegistryProxyConnector partyRegistryProxyConnector;
+    private final InstitutionConnector institutionConnector;
 
     public ContractService(PagoPaSignatureConfig pagoPaSignatureConfig,
                            FileStorageConnector fileStorageConnector,
@@ -80,7 +87,9 @@ public class ContractService {
                            Pkcs7HashSignService pkcs7HashSignService,
                            SignatureService signatureService,
                            KafkaTemplate<String, String> kafkaTemplate,
-                           KafkaPropertiesConfig kafkaPropertiesConfig) {
+                           KafkaPropertiesConfig kafkaPropertiesConfig,
+                           PartyRegistryProxyConnector partyRegistryProxyConnector,
+                           InstitutionConnector institutionConnector) {
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
         this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
         this.fileStorageConnector = fileStorageConnector;
@@ -93,10 +102,12 @@ public class ContractService {
         simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {
             @Override
             public void serialize(OffsetDateTime offsetDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-                jsonGenerator.writeString(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(offsetDateTime));
+                jsonGenerator.writeString(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(offsetDateTime));
             }
         });
         mapper.registerModule(simpleModule);
+        this.partyRegistryProxyConnector = partyRegistryProxyConnector;
+        this.institutionConnector = institutionConnector;
     }
 
     public File createContractPDF(String contractTemplate, User validManager, List<User> users, Institution institution, OnboardingRequest request, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
@@ -105,12 +116,17 @@ public class ContractService {
         try {
             Path files = Files.createTempFile(builder, ".pdf");
             Map<String, Object> data = setUpCommonData(validManager, users, institution, request, geographicTaxonomies, institutionType);
-            if ("prod-pagopa".equalsIgnoreCase(request.getProductId()) &&
+            if (PROD_PAGOPA.getValue().equalsIgnoreCase(request.getProductId()) &&
                     InstitutionType.PSP == institutionType) {
                 setupPSPData(data, validManager, institution);
-            } else if ("prod-io".equalsIgnoreCase(request.getProductId())
-                    || "prod-io-premium".equalsIgnoreCase(request.getProductId())) {
+            } else if (PROD_IO.getValue().equalsIgnoreCase(request.getProductId())
+                    || PROD_IO_PREMIUM.getValue().equalsIgnoreCase(request.getProductId())
+                    || PROD_IO_SIGN.getValue().equalsIgnoreCase(request.getProductId())) {
                 setupProdIOData(data, validManager, institution, request, institutionType);
+            } else if (PROD_PN.getValue().equalsIgnoreCase(request.getProductId())) {
+                setupProdPNData(data, institution, request);
+            } else if (PROD_INTEROP.getValue().equalsIgnoreCase(request.getProductId())) {
+                setupSAProdInteropData(data, request.getInstitutionUpdate());
             }
             log.debug("data Map for PDF: {}", data);
             getPDFAsFile(files, contractTemplate, data);
@@ -121,12 +137,13 @@ public class ContractService {
         }
     }
 
+
     private File signContract(Institution institution, OnboardingRequest request, File pdf) {
         log.info("START - signContract for pdf: {}", pdf.getName());
-        if (pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.isSignContract()) {
+        if (pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.getSignContract()) {
             return signPdf(pdf, buildSignatureReason(institution, request));
         } else {
-            if (!pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.isSignContract()) {
+            if (!pagoPaSignatureConfig.isApplyOnboardingEnabled() && request.getSignContract()) {
                 log.info("Skipping PagoPA contract pdf sign due to global disabling");
             }
             return pdf;
@@ -159,30 +176,18 @@ public class ContractService {
                 .replace("${productName}", request.getProductId());
     }
 
-    private void validateSignature(String... errorEnums) {
-        StringBuilder stringBuilder = new StringBuilder(INVALID_SIGNATURE.getMessage());
-        List<String> strings = Arrays.stream(errorEnums).filter(s -> !VALID_CHECK.equals(s)).collect(Collectors.toList());
-        if (!strings.isEmpty()) {
-            for (String s : strings) {
-                stringBuilder.append(" - ");
-                stringBuilder.append(s);
-            }
-            throw new InvalidRequestException(stringBuilder.toString(), INVALID_SIGNATURE.getCode());
-        }
-    }
-
     public void verifySignature(MultipartFile contract, Token token, List<User> users) {
         try {
             SignedDocumentValidator validator = signatureService.createDocumentValidator(contract.getInputStream().readAllBytes());
             signatureService.isDocumentSigned(validator);
             signatureService.verifyOriginalDocument(validator);
             Reports reports = signatureService.validateDocument(validator);
-            validateSignature(
-                    signatureService.verifySignatureForm(validator),
-                    signatureService.verifySignature(reports),
-                    signatureService.verifyDigest(validator, token.getChecksum()),
-                    signatureService.verifyManagerTaxCode(reports, users)
-            );
+
+            signatureService.verifySignatureForm(validator);
+            signatureService.verifySignature(reports);
+            signatureService.verifyDigest(validator, token.getChecksum());
+            signatureService.verifyManagerTaxCode(reports, users);
+
         } catch (InvalidRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -226,9 +231,11 @@ public class ContractService {
         }
     }
 
-    public void sendDataLakeNotification(Institution institution, Token token) {
+    public void sendDataLakeNotification(Institution institution, Token token, QueueEvent queueEvent) {
+        log.debug(LogUtils.CONFIDENTIAL_MARKER, "sendDataLakeNotification institution = {}, token = {}, queueEvent = {}", institution, token, queueEvent);
         if (institution != null) {
-            NotificationToSend notification = toNotificationToSend(institution, token);
+            NotificationToSend notification = toNotificationToSend(institution, token, queueEvent);
+            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", notification);
             try {
                 String msg = mapper.writeValueAsString(notification);
                 sendNotification(msg, token.getId());
@@ -238,16 +245,45 @@ public class ContractService {
         }
     }
 
-    private NotificationToSend toNotificationToSend(Institution institution, Token token) {
+    public NotificationToSend toNotificationToSend(Institution institution, Token token, QueueEvent queueEvent) {
         NotificationToSend notification = new NotificationToSend();
-        notification.setId(token.getId());
+        if (queueEvent.equals(QueueEvent.ADD)) {
+            // When Onboarding.complete event id is the onboarding id
+            notification.setId(token.getId());
+            notification.setState(RelationshipState.ACTIVE.toString());
+            // when onboarding complete last update is activated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
+        } else {
+            // New id
+            notification.setId(UUID.randomUUID().toString());
+            notification.setState(token.getStatus() == RelationshipState.DELETED ? "CLOSED" : token.getStatus().toString());
+            // when update last update is updated date
+            notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
+            if (token.getStatus().equals(RelationshipState.DELETED)) {
+                // Queue.ClosedAt: if token.deleted show closedAt
+                notification.setClosedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+                notification.setUpdatedAt(Optional.ofNullable(token.getDeletedAt()).orElse(token.getUpdatedAt()));
+            } else {
+                // when update last update is updated date
+                notification.setUpdatedAt(Optional.ofNullable(token.getUpdatedAt()).orElse(token.getCreatedAt()));
+            }
+        }
+        // ADD or UPDATE msg event
+        notification.setNotificationType(queueEvent);
+        return toNotificationToSend(notification, institution, token);
+    }
+
+    public NotificationToSend toNotificationToSend(NotificationToSend notification, Institution institution, Token token) {
         notification.setInternalIstitutionID(institution.getId());
         notification.setProduct(token.getProductId());
-        notification.setState(RelationshipState.ACTIVE);
         notification.setFilePath(token.getContractSigned());
         notification.setOnboardingTokenId(token.getId());
-        notification.setCreatedAt(token.getCreatedAt());
-        notification.setUpdatedAt(token.getUpdatedAt());
+        // Queue.CreatedAt: onboarding complete date
+        notification.setCreatedAt(Optional.ofNullable(token.getActivatedAt()).orElse(token.getCreatedAt()));
+
+        // ADD or UPDATE msg event
+        notification.setFileName(token.getContractSigned() == null ? "" : Paths.get(token.getContractSigned()).getFileName().toString());
+        notification.setContentType(token.getContentType() == null ? "" : token.getContentType());
 
         if (token.getProductId() != null && institution.getOnboarding() != null) {
             Onboarding onboarding = institution.getOnboarding().stream()
@@ -265,11 +301,41 @@ public class ContractService {
         InstitutionToNotify toNotify = new InstitutionToNotify();
         toNotify.setInstitutionType(institution.getInstitutionType());
         toNotify.setDescription(institution.getDescription());
-        toNotify.setDigitalAddress(institution.getDigitalAddress());
+        toNotify.setDigitalAddress(institution.getDigitalAddress() == null? coreConfig.getInstitutionAlternativeEmail(): institution.getDigitalAddress());
         toNotify.setAddress(institution.getAddress());
         toNotify.setTaxCode(institution.getTaxCode());
         toNotify.setOrigin(institution.getOrigin());
         toNotify.setOriginId(institution.getOriginId());
+        toNotify.setZipCode(institution.getZipCode());
+        toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
+        if (institution.getSubunitType() != null && !institution.getSubunitType().equals("EC")) {
+            try {
+                InstitutionPaSubunitType.valueOf(institution.getSubunitType());
+                toNotify.setSubUnitType(institution.getSubunitType());
+                toNotify.setSubUnitCode(institution.getSubunitCode());
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        RootParent rootParent = new RootParent();
+        rootParent.setDescription(institution.getParentDescription());
+        if (StringUtils.hasText(institution.getRootParentId())) {
+            rootParent.setId(institution.getRootParentId());
+            Institution rootParentInstitution = institutionConnector.findById(institution.getRootParentId());
+            rootParent.setOriginId(Objects.nonNull(rootParentInstitution) ? rootParentInstitution.getOriginId() : null);
+            toNotify.setRootParent(rootParent);
+        }
+
+        if (institution.getAttributes() != null && institution.getAttributes().size() > 0) {
+            toNotify.setCategory(institution.getAttributes().get(0).getCode());
+        }
+        if (institution.getCity() == null) {
+            setInstitutionLocation(toNotify, institution);
+        } else {
+            toNotify.setCounty(institution.getCounty());
+            toNotify.setCountry(institution.getCountry());
+            toNotify.setIstatCode(institution.getIstatCode());
+            toNotify.setCity(institution.getCity().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
+        }
         return toNotify;
     }
 
@@ -290,6 +356,21 @@ public class ContractService {
             }
         });
 
+    }
+
+    private void setInstitutionLocation(InstitutionToNotify toNotify, Institution institution) {
+        try {
+            InstitutionProxyInfo institutionProxyInfo = partyRegistryProxyConnector.getInstitutionById(institution.getExternalId());
+            toNotify.setIstatCode(institutionProxyInfo.getIstatCode());
+            toNotify.setCategory(institutionProxyInfo.getCategory());
+            GeographicTaxonomies geographicTaxonomies = partyRegistryProxyConnector.getExtByCode(toNotify.getIstatCode());
+            toNotify.setCounty(geographicTaxonomies.getProvinceAbbreviation());
+            toNotify.setCountry(geographicTaxonomies.getCountryAbbreviation());
+            toNotify.setCity(geographicTaxonomies.getDescription().replace(DESCRIPTION_TO_REPLACE_REGEX, ""));
+        } catch (MsCoreException | ResourceNotFoundException e) {
+            log.warn("Error while searching institution {} on IPA, {} ", institution.getExternalId(), e.getMessage());
+            toNotify.setIstatCode(null);
+        }
     }
 
     public String uploadContract(String tokenId, MultipartFile contract) {

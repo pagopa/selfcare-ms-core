@@ -20,4 +20,7 @@ public class PagoPaSignatureConfig {
     private String applyOnboardingTemplateReason;
     private boolean verifyEnabled;
 
+    private String euListOfTrustedListsURL;
+    private String euOfficialJournalUrl;
+
 }

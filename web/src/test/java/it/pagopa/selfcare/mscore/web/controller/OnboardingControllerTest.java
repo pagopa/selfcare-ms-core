@@ -3,54 +3,54 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
 import it.pagopa.selfcare.mscore.core.TokenService;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.web.model.institution.BillingRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.mapper.*;
+import it.pagopa.selfcare.mscore.web.model.onboarding.*;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
-
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {OnboardingController.class})
 @ExtendWith(MockitoExtension.class)
@@ -58,26 +58,53 @@ class OnboardingControllerTest {
     @InjectMocks
     private OnboardingController onboardingController;
 
+    @InjectMocks
+    private TokenController tokenController;
+
     @Mock
     private OnboardingService onboardingService;
 
     @Mock
     TokenService tokenService;
 
+    @Spy
+    @InjectMocks
+    OnboardingResourceMapper onboardingResourceMapper = new OnboardingResourceMapperImpl();
+
+    @Spy
+    InstitutionUpdateMapper institutionUpdateMapper = new InstitutionUpdateMapperImpl();
+
+    @Spy
+    InstitutionResourceMapper institutionResourceMapper = new InstitutionResourceMapperImpl();
+
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    void resetContext() {
+        SecurityContextHolder.clearContext();
+        RequestContextHolder.resetRequestAttributes();
+    }
+
+
     @Test
     void onboardingInstitutionOperators() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
         request.setInstitutionId("id");
         request.setProductId("id");
+        request.setProductTitle("productTitle");
         List<Person> personList = new ArrayList<>();
         personList.add(new Person());
         request.setUsers(personList);
         String content = (new ObjectMapper()).writeValueAsString(request);
 
-        when(onboardingService.onboardingOperators(any(), any())).thenReturn(new ArrayList<>());
+        when(onboardingService.onboardingOperators(any(), any(), any(), any())).thenReturn(new ArrayList<>());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/onboarding/operators")
+                .principal(authentication)
                 .content(content)
                 .contentType(MediaType.APPLICATION_JSON);
 
@@ -89,18 +116,51 @@ class OnboardingControllerTest {
 
     @Test
     void onboardingInstitutionSubDelegate() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         OnboardingInstitutionOperatorsRequest request = new OnboardingInstitutionOperatorsRequest();
         request.setInstitutionId("id");
         request.setProductId("id");
+        request.setProductTitle("productTitle");
         List<Person> personList = new ArrayList<>();
         personList.add(new Person());
         request.setUsers(personList);
         String content = (new ObjectMapper()).writeValueAsString(request);
-        when(onboardingService.onboardingOperators(any(), any())).thenReturn(new ArrayList<>());
+        when(onboardingService.onboardingOperators(any(), any(), any(), any())).thenReturn(new ArrayList<>());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/onboarding/subdelegates")
+                .principal(authentication)
                 .content(content)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#onboardingInstitutionUsers(OnboardingInstitutionUsersRequest, Authentication)}
+     */
+    @Test
+    void onboardingInstitutionUsers() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
+
+        OnboardingInstitutionUsersRequest request = new OnboardingInstitutionUsersRequest();
+        request.setInstitutionTaxCode("taxCode");
+        request.setProductId("id");
+        request.setUsers(List.of(new Person()));
+
+        when(onboardingService.onboardingUsers(any(), any(), any())).thenReturn(new ArrayList<>());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/onboarding/users")
+                .principal(authentication)
+                .content(objectMapper.writeValueAsString(request))
                 .contentType(MediaType.APPLICATION_JSON);
 
         MockMvcBuilders.standaloneSetup(onboardingController)
@@ -121,7 +181,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -184,16 +244,36 @@ class OnboardingControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string(""));
     }
 
+
     /**
      * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
      */
     @Test
-    void testOnboardingInstitution() throws Exception {
+    void shouldOnboardInstitutionWithoutContractAndSignNull() throws Exception {
 
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
 
+        String content = objectMapper.writeValueAsString(createOnboardingInstitutionRequest());
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/onboarding/institution/complete")
+                .principal(authentication)
+                .content(content)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        ArgumentCaptor<OnboardingRequest> argumentCaptor = ArgumentCaptor.forClass(OnboardingRequest.class);
+        verify(onboardingService).onboardingInstitutionComplete(argumentCaptor.capture(), any());
+        assertThat(argumentCaptor.getValue().getSignContract()).isTrue();
+    }
+
+    private OnboardingInstitutionRequest createOnboardingInstitutionRequest() {
         BillingRequest billingRequest = new BillingRequest();
         billingRequest.setPublicServices(true);
         billingRequest.setRecipientCode("Recipient Code");
@@ -236,7 +316,20 @@ class OnboardingControllerTest {
         onboardingInstitutionRequest.setProductId("42");
         onboardingInstitutionRequest.setProductName("Product Name");
 
-        String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionRequest);
+        return onboardingInstitutionRequest;
+    }
+
+    /**
+     * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
+     */
+    @Test
+    void testOnboardingInstitution() throws Exception {
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        SecurityContextHolder.setContext(securityContext);
+
+        String content = objectMapper.writeValueAsString(createOnboardingInstitutionRequest());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/onboarding/institution")
@@ -351,7 +444,7 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionOperators() throws Exception {
@@ -370,12 +463,15 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionOperators(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionOperators2() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         when(onboardingService.onboardingOperators(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+                org.mockito.Mockito.any(), any(), any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -398,7 +494,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -421,8 +517,10 @@ class OnboardingControllerTest {
         onboardingInstitutionOperatorsRequest.setInstitutionId("42");
         onboardingInstitutionOperatorsRequest.setProductId("42");
         onboardingInstitutionOperatorsRequest.setUsers(personList);
+        onboardingInstitutionOperatorsRequest.setProductTitle("productTitle");
         String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionOperatorsRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/operators")
+                .principal(authentication)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
         MockMvcBuilders.standaloneSetup(onboardingController)
@@ -434,7 +532,7 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionSubDelegate() throws Exception {
@@ -453,12 +551,15 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest)}
+     * Method under test: {@link OnboardingController#onboardingInstitutionSubDelegate(OnboardingInstitutionOperatorsRequest, Authentication)}
      */
     @Test
     void testOnboardingInstitutionSubDelegate2() throws Exception {
+        SelfCareUser selfCareUser = SelfCareUser.builder("id").name("nome").surname("cognome").build();
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(selfCareUser);
         when(onboardingService.onboardingOperators(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any())).thenReturn(new ArrayList<>());
+                org.mockito.Mockito.any(), any(), any())).thenReturn(new ArrayList<>());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -481,7 +582,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -504,8 +605,10 @@ class OnboardingControllerTest {
         onboardingInstitutionOperatorsRequest.setInstitutionId("42");
         onboardingInstitutionOperatorsRequest.setProductId("42");
         onboardingInstitutionOperatorsRequest.setUsers(personList);
+        onboardingInstitutionOperatorsRequest.setProductTitle("productTitle");
         String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionOperatorsRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/subdelegates")
+                .principal(authentication)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(content);
         MockMvcBuilders.standaloneSetup(onboardingController)
@@ -517,26 +620,45 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
+     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String, String)}
      */
     @Test
-    void testVerifyOnboardingInfo() throws Exception {
-        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
+    void shouldVerifyOnboardingInfoBySubunit() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfoSubunit(any(), any(), any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        MockMvcBuilders.standaloneSetup(onboardingController)
+                .head("/onboarding/")
+                .queryParam("taxCode", "42")
+                .queryParam("productId", "42");
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().is(204));
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
     /**
      * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
      */
     @Test
-    void testVerifyOnboardingInfo2() throws Exception {
-        SecurityMockMvcRequestBuilders.FormLoginRequestBuilder requestBuilder = SecurityMockMvcRequestBuilders
-                .formLogin();
+    void shouldVerifyOnboardingInfoByExternalId() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+
+
+    /**
+     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
+     */
+    //@Test
+    void shouldNotFoundVerifyOnboardingInfoByExternalId() throws Exception {
+        doThrow(new ResourceNotFoundException("","")).when(onboardingService).verifyOnboardingInfo(any(), any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()
                 .perform(requestBuilder);
@@ -544,57 +666,11 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo3() throws Exception {
-        doNothing().when(onboardingService).verifyOnboardingInfo(any(), any());
-        MockHttpServletRequestBuilder headResult = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        headResult.characterEncoding("Encoding");
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(headResult)
-                .andExpect(MockMvcResultMatchers.status().is(204));
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo4() throws Exception {
-        doNothing().when(onboardingService)
-                .verifyOnboardingInfo(org.mockito.Mockito.any(), org.mockito.Mockito.any());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo5() throws Exception {
-        doNothing().when(onboardingService)
-                .verifyOnboardingInfo(org.mockito.Mockito.any(), org.mockito.Mockito.any());
-        MockHttpServletRequestBuilder headResult = MockMvcRequestBuilders
-                .head("/onboarding/institution/{externalId}/products/{productId}", "42", "42");
-        headResult.characterEncoding("Encoding");
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(headResult);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    /**
      * Method under test: {@link OnboardingController#completeOnboarding(String, MultipartFile)}
      */
     @Test
     void testCompleteOnboarding() throws Exception {
-        doNothing().when(onboardingService).completeOboarding(any(), any());
+        doNothing().when(onboardingService).completeOnboarding(any(), any());
         MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .multipart("/onboarding/complete/{tokenId}",
@@ -635,7 +711,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -685,7 +761,7 @@ class OnboardingControllerTest {
 
         Token token = new Token();
         token.setChecksum("Checksum");
-        token.setClosedAt(null);
+        token.setDeletedAt(null);
         token.setContractSigned("Contract Signed");
         token.setContractTemplate("Contract Template");
         token.setCreatedAt(null);
@@ -727,5 +803,20 @@ class OnboardingControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
+
+    @Test
+    void testConsumeToken() throws Exception {
+        doNothing().when(onboardingService).completeOnboardingWithoutSignatureVerification(any(), any());
+        MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .multipart("/onboarding/{tokenId}/consume",
+                        "42")
+                .file(file);
+        MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
 }
 

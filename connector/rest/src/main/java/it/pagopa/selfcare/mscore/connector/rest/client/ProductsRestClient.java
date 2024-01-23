@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -16,5 +16,10 @@ public interface ProductsRestClient{
     @ResponseBody
     Product getProductById(@PathVariable("id") String id,
                            @RequestParam(value = "institutionType", required = false) InstitutionType institutionType);
+
+
+    @GetMapping(value = "${rest-client.products.getProductValid.path}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    Product getProductValid(@PathVariable("id") String id);
 
 }

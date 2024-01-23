@@ -1,7 +1,7 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import lombok.Data;
 
 import java.util.List;
@@ -24,5 +24,11 @@ public class InstitutionUpdateResponse {
     private String supportEmail;
     private String supportPhone;
     private boolean imported;
+    private String city;
+    private String county;
+    private String country;
+    private String subunitCode;
+    private String subunitType;
+    private String aooParentCode;
 }
 

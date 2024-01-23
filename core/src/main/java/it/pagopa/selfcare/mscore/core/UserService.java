@@ -2,11 +2,16 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
+import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -16,13 +21,31 @@ public interface UserService {
 
     List<OnboardedUser> findAllByIds(List<String> users);
 
-    List<OnboardedUser> retrieveUsers(String externalId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+    List<UserNotificationToSend>  findAll(Optional<Integer> size, Optional<Integer> page, String productId);
 
-    boolean checkIfAdmin(String userId, String institutionId);
+    List<OnboardedUser> findAllExistingByIds(List<String> users);
+
+    List<UserBinding> retrieveBindings(String institutionId, String userId, String[] states, List<String> products);
+
+    List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
+
+    boolean checkIfInstitutionUser(String userId, String institutionId);
 
     void verifyUser(String userId);
 
-    User retrieveUserFromUserRegistry(String userId, EnumSet<User.Fields> fields);
+    User retrieveUserFromUserRegistry(String userId);
 
-    OnboardedUser createUser(String userId);
+    User retrieveUserFromUserRegistryByFiscalCode(String fiscalCode);
+
+    User persistUserRegistry(String name, String familyName, String fiscalCode, String email, String institutionId);
+
+    User persistWorksContractToUserRegistry(String fiscalCode, String email, String institutionId);
+
+    List<UserInstitutionAggregation> findUserInstitutionAggregation(UserInstitutionFilter filter);
+
+    User retrievePerson(String userId, String productId, String institutionId);
+
+    List<OnboardingInfo> getUserInfo(String userId, String institutionId, String[] states);
+
+    void updateUserStatus(String userId, String institutionId, String productId, PartyRole role, String productRole, RelationshipState status);
 }

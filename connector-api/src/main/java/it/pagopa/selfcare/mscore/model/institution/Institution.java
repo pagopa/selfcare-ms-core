@@ -1,10 +1,11 @@
 package it.pagopa.selfcare.mscore.model.institution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.pagopa.selfcare.mscore.constant.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -24,6 +25,10 @@ public class Institution {
     private String address;
     private String zipCode;
     private String taxCode;
+    private String city;
+    private String county;
+    private String country;
+    private String istatCode;
     private Billing billing;
     private List<Onboarding> onboarding;
     private List<InstitutionGeographicTaxonomies> geographicTaxonomies;
@@ -38,5 +43,10 @@ public class Institution {
     private boolean imported;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private String subunitCode;
+    private String subunitType;
+    private String rootParentId;
+    private String parentDescription;
+    private PaAttributes paAttributes;
 
 }
