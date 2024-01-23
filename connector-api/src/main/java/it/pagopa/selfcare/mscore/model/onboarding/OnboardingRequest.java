@@ -30,6 +30,7 @@ public class OnboardingRequest {
     private TokenType tokenType;
     private String contractFilePath;
     private OffsetDateTime contractCreatedAt;
+    private OffsetDateTime contractActivatedAt;
     private Boolean sendCompleteOnboardingEmail;
 
     public Contract getContract() {

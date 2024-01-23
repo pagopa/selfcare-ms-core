@@ -27,6 +27,7 @@ public class TokenUtils {
         }
         token.setCreatedAt(OffsetDateTime.now());
         token.setUpdatedAt(OffsetDateTime.now());
+        token.setActivatedAt(OffsetDateTime.now());
         token.setInstitutionId(institution.getId());
         token.setProductId(request.getProductId());
         token.setChecksum(digest);

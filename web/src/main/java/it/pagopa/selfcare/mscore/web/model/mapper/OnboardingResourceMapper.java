@@ -25,6 +25,7 @@ public interface OnboardingResourceMapper {
     @Mapping(target = "contractCreatedAt", source = "contractImported.createdAt")
     @Mapping(target = "billingRequest", source = "billing")
     @Mapping(target = "signContract", source = "signContract", qualifiedByName = "mapSignContract")
+    @Mapping(target = "contractActivatedAt", source = "contractImported.activatedAt")
     OnboardingRequest toOnboardingRequest(OnboardingInstitutionRequest onboardingInstitutionRequest);
 
     OnboardingUsersRequest toOnboardingUsersRequest(OnboardingInstitutionUsersRequest request);
