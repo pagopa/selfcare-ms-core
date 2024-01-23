@@ -7661,6 +7661,10 @@
         "title" : "OnboardingImportContract",
         "type" : "object",
         "properties" : {
+          "activatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "contractType" : {
             "type" : "string"
           },
@@ -7819,6 +7823,10 @@
           },
           "contract" : {
             "$ref" : "#/components/schemas/Contract"
+          },
+          "contractActivatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "contractCreatedAt" : {
             "type" : "string",
