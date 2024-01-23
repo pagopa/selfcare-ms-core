@@ -58,7 +58,7 @@ public class OnboardingInstitutionUtils {
         log.info("START - validateOverridingData for institution having externalId: {} and origin: {}", institution.getExternalId(), institution.getOrigin());
         if (Origin.IPA.getValue().equalsIgnoreCase(institution.getOrigin())) {
             validateIpaOverriding(institutionUpdate, institution);
-        } else {
+        } else if (!Origin.INFOCAMERE.getValue().equalsIgnoreCase(institution.getOrigin())) {
             validateDefaultOverriding(institutionUpdate, institution);
         }
 
