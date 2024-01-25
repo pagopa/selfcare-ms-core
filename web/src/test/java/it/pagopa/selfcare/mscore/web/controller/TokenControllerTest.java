@@ -62,7 +62,7 @@ class TokenControllerTest {
 
     /**
      * Method under test:
-     * {@link TokenController#getAllTokens(List, Integer, Integer)}
+     * {@link TokenController#getAllTokens(List, Integer, Integer, String)}
      */
     @Test
     void testFindAllTokens() throws Exception {
@@ -71,21 +71,19 @@ class TokenControllerTest {
 
         NotificationToSend notification = mockInstance(new NotificationToSend());
         tokenList.setItems(List.of(notification));
-        tokenList.setTotalNumber(10L);
 
         ScContractResponse scContractResponse = mockInstance(new ScContractResponse());
 
         when(tokenService.retrieveContractsFilterByStatus(Mockito.<List<RelationshipState>>any(), Mockito.<Integer>any(),
-                Mockito.<Integer>any())).thenReturn(tokenList);
+                Mockito.<Integer>any(), Mockito.<String>any())).thenReturn(tokenList);
         when(tokenMapper.toScContractResponse(any())).thenReturn(scContractResponse);
         // Act and Assert
         mvc.perform(MockMvcRequestBuilders.get("/tokens")
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalNumber", is(10)));
+                .andExpect(status().isOk());
         verify(tokenService, times(1)).retrieveContractsFilterByStatus(Mockito.<List<RelationshipState>>any(), Mockito.<Integer>any(),
-                Mockito.<Integer>any());
+                Mockito.<Integer>any(), Mockito.<String>any());
     }
 
     @Test

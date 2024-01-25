@@ -11,5 +11,4 @@ import java.util.List;
 @NoArgsConstructor
 public class PaginatedTokenResponse {
     private List<ScContractResponse> items;
-    private Long totalNumber;
 }
