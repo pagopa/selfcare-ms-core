@@ -136,15 +136,16 @@ public class TokenController {
                                                                @ApiParam("${swagger.mscore.page.number}")
                                                                @RequestParam(name = "page", defaultValue = "0") Integer page,
                                                                @ApiParam("${swagger.mscore.page.size}")
-                                                               @RequestParam(name = "size", defaultValue = "100") Integer size) {
+                                                               @RequestParam(name = "size", defaultValue = "100") Integer size,
+                                                               @RequestParam(name = "productId", required = false) String productId) {
         log.trace("getAllToken start");
         log.debug("getAllToken page = {}", page);
-        PaginatedToken tokens = tokenService.retrieveContractsFilterByStatus(states, page, size);
+        PaginatedToken tokens = tokenService.retrieveContractsFilterByStatus(states, page, size, productId);
 
         PaginatedTokenResponse tokenListResponse = new PaginatedTokenResponse(
                 tokens.getItems().stream()
                         .map(tokenMapper::toScContractResponse)
-                        .toList(), tokens.getTotalNumber());
+                        .toList());
 
         log.trace("getAllToken end");
         return ResponseEntity.ok().body(tokenListResponse);

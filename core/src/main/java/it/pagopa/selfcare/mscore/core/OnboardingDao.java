@@ -80,12 +80,14 @@ public class OnboardingDao {
         log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
 
         OffsetDateTime createdAt = Objects.nonNull(request.getContractCreatedAt()) ? request.getContractCreatedAt() : OffsetDateTime.now();
+        OffsetDateTime activatedAt = Objects.nonNull(request.getContractActivatedAt()) ? request.getContractActivatedAt() : OffsetDateTime.now();
 
         Token token = TokenUtils.toToken(request, institution, digest, null);
         token.setStatus(RelationshipState.ACTIVE);
         token.setContractSigned(request.getContractFilePath());
         token.setContentType(MediaType.APPLICATION_JSON_VALUE);
         token.setCreatedAt(createdAt);
+        token.setActivatedAt(activatedAt);
         token = tokenConnector.save(token, geographicTaxonomies);
 
         log.info("created token {} for institution {} and product {}", token.getId(), institution.getId(), request.getProductId());

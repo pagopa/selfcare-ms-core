@@ -248,7 +248,7 @@ class TokenServiceImplTest {
     }
     /**
      * Method under test:
-     * {@link TokenServiceImpl#retrieveContractsFilterByStatus(List, Integer, Integer)}
+     * {@link TokenServiceImpl#retrieveContractsFilterByStatus(List, Integer, Integer, String)}
      */
     @Test
     void testGetAllTokens_founded() {
@@ -265,31 +265,27 @@ class TokenServiceImplTest {
         onboarding.setProductId("productId");
         institution.setOnboarding(List.of(onboarding));
 
-        InstitutionToNotify institutionToNotify = mockInstance(new InstitutionToNotify());
-
         ArrayList<Token> tokenList = new ArrayList<>();
         tokenList.add(tokenResult);
 
-        when(tokenConnector.findByStatusAndProductId(Mockito.<EnumSet<RelationshipState>>any(), Mockito.<String>any(),
+        when(tokenConnector.findByStatusAndProductId(Mockito.any(), Mockito.any(),
                 Mockito.<Integer>any(), Mockito.<Integer>any())).thenReturn(tokenList);
-        when(tokenConnector.countAllTokenFilterByStates(List.of(RelationshipState.ACTIVE))).thenReturn(10L);
-        when(institutionConnector.findById(Mockito.<String>any())).thenReturn(institution);
+        when(institutionConnector.findById(Mockito.any())).thenReturn(institution);
         when(contractService.toNotificationToSend((NotificationToSend) any(),any(), any())).thenReturn(new NotificationToSend());
 
         // Assert
-        PaginatedToken paginatedToken = tokenServiceImpl.retrieveContractsFilterByStatus(List.of(RelationshipState.ACTIVE), 0, 1);
-        Assertions.assertEquals(10, paginatedToken.getTotalNumber());
+        PaginatedToken paginatedToken = tokenServiceImpl.retrieveContractsFilterByStatus(List.of(RelationshipState.ACTIVE), 0, 1, null);
         Assertions.assertEquals(1, paginatedToken.getItems().size());
     }
 
     @Test
     void testGetAllTokens_NotFound() {
 
-        when(tokenConnector.findByStatusAndProductId(Mockito.<EnumSet<RelationshipState>>any(), Mockito.<String>any(),
+        when(tokenConnector.findByStatusAndProductId(Mockito.any(), Mockito.any(),
                 Mockito.<Integer>any(), Mockito.<Integer>any())).thenReturn(Collections.emptyList());
 
         // Assert
-        Assertions.assertDoesNotThrow(() -> tokenServiceImpl.retrieveContractsFilterByStatus(List.of(RelationshipState.DELETED, RelationshipState.ACTIVE), 0, 10));
+        Assertions.assertDoesNotThrow(() -> tokenServiceImpl.retrieveContractsFilterByStatus(List.of(RelationshipState.DELETED, RelationshipState.ACTIVE), 0, 10, null));
     }
 
     private static Institution createInstitution(String institutionId, Onboarding onboarding) {

@@ -19,5 +19,5 @@ public interface TokenService {
 
     List<TokenRelationships> getTokensByProductId(String productId, Integer page, Integer size);
 
-    PaginatedToken retrieveContractsFilterByStatus(List<RelationshipState> states, Integer page, Integer size);
+    PaginatedToken retrieveContractsFilterByStatus(List<RelationshipState> states, Integer page, Integer size, String productId);
 }

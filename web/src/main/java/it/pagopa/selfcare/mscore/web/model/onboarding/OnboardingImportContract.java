@@ -12,4 +12,5 @@ public class OnboardingImportContract {
     private String filePath;
     private String contractType;
     private OffsetDateTime createdAt;
+    private OffsetDateTime activatedAt;
 }

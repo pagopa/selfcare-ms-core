@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -21,12 +22,14 @@ public class TokenUtils {
 
     public static Token toToken(OnboardingRequest request, Institution institution, String digest, OffsetDateTime expiringDate) {
         log.info("START - convertToToken for institution having externalId: {} and digest: {}", institution.getExternalId(), digest);
+        OffsetDateTime activatedAt = Objects.nonNull(request.getContractActivatedAt()) ? request.getContractActivatedAt() : null;
         Token token = new Token();
         if (request.getContract() != null) {
             token.setContractTemplate(request.getContract().getPath());
         }
         token.setCreatedAt(OffsetDateTime.now());
         token.setUpdatedAt(OffsetDateTime.now());
+        token.setActivatedAt(activatedAt);
         token.setInstitutionId(institution.getId());
         token.setProductId(request.getProductId());
         token.setChecksum(digest);

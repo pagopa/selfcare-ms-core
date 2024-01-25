@@ -12,5 +12,4 @@ import java.util.List;
 @NoArgsConstructor
 public class PaginatedToken {
     private List<NotificationToSend> items;
-    private Long totalNumber;
 }
