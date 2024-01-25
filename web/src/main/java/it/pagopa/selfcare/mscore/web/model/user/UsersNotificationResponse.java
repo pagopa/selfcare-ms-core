@@ -6,5 +6,5 @@ import java.util.List;
 @Data
 public class UsersNotificationResponse {
 
-    private List<UserNotificationResponse> users;
+    private List<UserNotificationBindingsResponse> users;
 }
