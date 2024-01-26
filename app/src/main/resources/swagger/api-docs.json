@@ -8581,6 +8581,18 @@
           }
         }
       },
+      "UserNotificationBindingsResponse" : {
+        "title" : "UserNotificationBindingsResponse",
+        "type" : "object",
+        "properties" : {
+          "bindings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserNotificationResponse"
+            }
+          }
+        }
+      },
       "UserNotificationResponse" : {
         "title" : "UserNotificationResponse",
         "type" : "object",
@@ -8721,7 +8733,7 @@
           "users" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/UserNotificationResponse"
+              "$ref" : "#/components/schemas/UserNotificationBindingsResponse"
             }
           }
         }
