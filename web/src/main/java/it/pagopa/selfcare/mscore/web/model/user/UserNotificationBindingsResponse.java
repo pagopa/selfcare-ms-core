@@ -6,7 +6,9 @@ import java.util.List;
 
 @Data
 public class UserNotificationBindingsResponse {
-
-    private String id;
     private List<UserNotificationResponse> bindings;
+
+    public UserNotificationBindingsResponse(List<UserNotificationResponse> bindings) {
+        this.bindings = bindings;
+    }
 }
