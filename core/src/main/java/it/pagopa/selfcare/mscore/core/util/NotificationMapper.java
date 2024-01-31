@@ -16,7 +16,7 @@ public interface NotificationMapper {
     @Mapping(source = "relationshipInfo.institution.id", target = "institutionId")
     @Mapping(source = "relationshipInfo.onboardedProduct.productId", target = "productId")
     @Mapping(source = "relationshipInfo.onboardedProduct.createdAt", target = "createdAt")
-    @Mapping(source = "relationshipInfo.onboardedProduct.updatedAt", target = "updatedAt")
+    @Mapping(target = "updatedAt", expression = "java((null == relationshipInfo.getOnboardedProduct().getUpdatedAt()) ? relationshipInfo.getOnboardedProduct().getCreatedAt() : relationshipInfo.getOnboardedProduct().getUpdatedAt())")
     UserNotificationToSend setNotificationDetailsFromRelationship(RelationshipInfo relationshipInfo, UserToNotify user, QueueEvent eventType);
 
     @Mapping(source = "token.institutionId", target = "institutionId")

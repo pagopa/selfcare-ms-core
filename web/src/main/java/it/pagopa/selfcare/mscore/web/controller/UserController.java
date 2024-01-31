@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.UserEventService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -273,7 +274,7 @@ public class UserController {
                                            @PathVariable("id") String userId,
                                            @ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                            @RequestParam(value = "institutionId") String institutionId) {
-        userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
+        userEventService.sendUserNotificationToQueue(userId, institutionId, QueueEvent.UPDATE);
         return ResponseEntity.noContent().build();
     }
 

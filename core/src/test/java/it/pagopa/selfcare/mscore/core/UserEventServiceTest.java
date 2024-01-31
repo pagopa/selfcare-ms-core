@@ -388,7 +388,7 @@ class UserEventServiceTest {
         when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
         when(userConnector.findById(userId)).thenReturn(onboardedUser);
         //when
-        Executable executable = () -> userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
+        Executable executable = () -> userEventService.sendUserNotificationToQueue(userId, institutionId, QueueEvent.UPDATE);
         //then
         assertDoesNotThrow(executable);
         ArgumentCaptor<UserNotificationToSend> messageArgumentCaptor = ArgumentCaptor.forClass(UserNotificationToSend.class);
