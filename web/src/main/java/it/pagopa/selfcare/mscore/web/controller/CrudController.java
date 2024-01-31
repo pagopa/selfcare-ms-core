@@ -63,14 +63,6 @@ public class CrudController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value ="${swagger.mscore.migration.find.token}", notes = "${swagger.mscore.migration.find.token}")
-    @GetMapping("/tokens")
-    public ResponseEntity<List<Token>> findTokens() {
-        List<Token> tokens = migrationService.findToken();
-        return ResponseEntity.ok().body(tokens);
-    }
-
-    @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.find.institution}", notes = "${swagger.mscore.migration.find.institution}")
     @GetMapping("/institutions")
     public ResponseEntity<List<Institution>> findInstitutions() {

@@ -14,8 +14,6 @@ public interface MigrationService {
 
     Institution createInstitution(Institution institution);
 
-    List<Token> findToken();
-
     List<OnboardedUser> findUser();
 
     List<Institution> findInstitution();
