@@ -9,7 +9,7 @@ public interface UserEventService {
 
     void sendLegalTokenUserNotification(Token token);
     void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType);
-    void sendUpdateUserNotificationToQueue(String userId, String institutionId);
+    void sendUserNotificationToQueue(String userId, String institutionId, QueueEvent eventType);
     void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId);
 
 }
