@@ -156,7 +156,7 @@ public class UserEventServiceImpl implements UserEventService {
         userNotification.setEventType(eventType);
         try {
             String msg = mapper.writeValueAsString(userNotification);
-            //sendUserNotification(msg, userId);
+            sendUserNotification(msg, userId);
         } catch (JsonProcessingException e) {
             log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
         }
@@ -170,25 +170,6 @@ public class UserEventServiceImpl implements UserEventService {
                 user.getProducts().stream().filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
                         .filter(onboardedProduct -> Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()).map(s -> s.equals(onboardedProduct.getRelationshipId())).orElse(true))
                         .forEach(product -> sendUserNotificationFromBindings(relationshipInfo.getUserId(), relationshipInfo.getInstitution().getId(), eventType, user, product));
-            });
-        }
-
-        if (relationshipInfo != null) {
-            List<UserToNotify> usersToNotify = toUserToNotify(relationshipInfo.getUserId(),
-                    relationshipInfo.getInstitution().getId(),
-                    relationshipInfo.getOnboardedProduct().getProductId(), Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()), Optional.empty());
-
-            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
-            usersToNotify.forEach(user -> {
-                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromRelationship(relationshipInfo, user, eventType);
-                String id = idBuilder(user.getUserId(), notification.getInstitutionId(), notification.getProductId(), user.getProductRole());
-                notification.setId(id);
-                try {
-                    String msg = mapper.writeValueAsString(notification);
-                    sendUserNotification(msg, user.getUserId());
-                } catch (JsonProcessingException e) {
-                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getUserId());
-                }
             });
         }
     }
