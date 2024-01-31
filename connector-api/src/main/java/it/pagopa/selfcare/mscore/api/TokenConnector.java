@@ -11,10 +11,6 @@ import java.util.List;
 
 public interface TokenConnector {
 
-    List<Token> findAll();
-
-    Token findActiveContract(String institutionId, String userId, String productId);
-
     void deleteById(String id);
 
     Token save(Token token, List<InstitutionGeographicTaxonomies> geographicTaxonomies);
@@ -28,6 +24,4 @@ public interface TokenConnector {
     Token updateTokenCreatedAt(String tokenId, OffsetDateTime createdAt);
 
     List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer nextPage, Integer size);
-
-    Long countAllTokenFilterByStates(List<RelationshipState> states);
 }
