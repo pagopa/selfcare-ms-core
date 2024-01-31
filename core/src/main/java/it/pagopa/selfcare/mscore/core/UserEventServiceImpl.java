@@ -153,6 +153,7 @@ public class UserEventServiceImpl implements UserEventService {
                             User user = userRegistryConnector.getUserByInternalId(userId);
                             UserToNotify userToNotify = userNotificationMapper.toUserNotify(user, onboardedProduct, userBinding.getInstitutionId());
                             UserNotificationToSend userNotification = notificationMapper.setNotificationDetailsFromOnboardedProduct(userToNotify, onboardedProduct, userBinding.getInstitutionId());
+                            userNotification.setId(idBuilder(userId, institutionId, onboardedProduct.getProductId(), onboardedProduct.getProductRole()));
                             userNotification.setEventType(QueueEvent.UPDATE);
                             try {
                                 String msg = mapper.writeValueAsString(userNotification);
