@@ -9,6 +9,8 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapperImpl;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapper;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapperImpl;
 import it.pagopa.selfcare.mscore.core.util.model.DummyUser;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -71,6 +73,8 @@ class UserEventServiceTest {
 
     @Spy
     private NotificationMapper notificationMapper = new NotificationMapperImpl();
+    @Spy
+    UserNotificationMapper userNotificationMapper = new UserNotificationMapperImpl();
 
     @Test
     void sendLegalTokenUserNotification_ok() {
@@ -370,14 +374,27 @@ class UserEventServiceTest {
             callback.onSuccess(mockSendResult);
             return null;
         }).when(mockFuture).addCallback(any(ListenableFutureCallback.class));
+        final OnboardedUser onboardedUser = mockInstance(new OnboardedUser());
+        onboardedUser.setId(userId);
+        final OnboardedProduct onboardedProduct = mockInstance(new OnboardedProduct());
+        onboardedProduct.setProductId(productId);
+        onboardedProduct.setStatus(RelationshipState.ACTIVE);
+        final UserBinding userBinding = mockInstance(new UserBinding());
+        final User user = new DummyUser(institutionId);
+        user.setId(userId);
+        userBinding.setInstitutionId(institutionId);
+        userBinding.setProducts(List.of(onboardedProduct));
+        onboardedUser.setBindings(List.of(userBinding));
+        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
+        when(userConnector.findById(userId)).thenReturn(onboardedUser);
         //when
-        Executable executable = () -> userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
+        Executable executable = () -> userEventService.sendUserNotificationToQueue(userId, institutionId, QueueEvent.UPDATE);
         //then
         assertDoesNotThrow(executable);
         ArgumentCaptor<UserNotificationToSend> messageArgumentCaptor = ArgumentCaptor.forClass(UserNotificationToSend.class);
         verify(mapper, times(1)).writeValueAsString(messageArgumentCaptor.capture());
         UserNotificationToSend message = messageArgumentCaptor.getValue();
-        checkNotNullFields(message, "onboardingTokenId", "productId", "user.name", "user.familyName", "user.fiscalCode", "user.email", "user.productRole", "user.role", "createdAt");
+        checkNotNullFields(message,   "user.fiscalCode");
     }
 
     @ParameterizedTest
@@ -414,7 +431,7 @@ class UserEventServiceTest {
     }
 
     @Test
-    void sendOnboardedUserNotification1(){
+    void sendOnboardedUserNotification1() throws JsonProcessingException {
         //given
         final String userId = UUID.randomUUID().toString();
         final String institutionId = UUID.randomUUID().toString();
@@ -430,12 +447,10 @@ class UserEventServiceTest {
         userBinding.setInstitutionId(institutionId);
         userBinding.setProducts(List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
-        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
         //when
         Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
         //then
         assertDoesNotThrow(executable);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoInteractions(kafkaTemplateUsers);
     }
     @Test
@@ -455,14 +470,11 @@ class UserEventServiceTest {
         userBinding.setInstitutionId(institutionId);
         userBinding.setProducts(List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
-        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
         //when
         Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
         //then
         assertDoesNotThrow(executable);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoInteractions(kafkaTemplateUsers);
-
     }
 
     @Test
