@@ -93,19 +93,10 @@ public class UserEventServiceImpl implements UserEventService {
     @Override
     public void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId) {
         try {
-            User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId());
             onboardedUser.getBindings().forEach(userBinding -> {
                 for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
                     if (productId.equals(onboardedProduct.getProductId()) && ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus())) {
-                        UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromOnboardedProduct(toUserToNotify(user.getId(), userBinding.getInstitutionId(), user, onboardedProduct), onboardedProduct, userBinding.getInstitutionId());
-                        String id = idBuilder(user.getId(), userBinding.getInstitutionId(), onboardedProduct.getProductId(), onboardedProduct.getProductRole());
-                        notification.setId(id);
-                        try {
-                            String msg = mapper.writeValueAsString(notification);
-                            sendUserNotification(msg, user.getId());
-                        } catch (JsonProcessingException e) {
-                            log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getId());
-                        }
+                        sendUserNotificationFromBindings(onboardedUser.getId(), QueueEvent.ADD, userBinding, onboardedProduct);
                     }
                 }
             });
@@ -144,15 +135,15 @@ public class UserEventServiceImpl implements UserEventService {
                 .filter(userBinding -> userBinding.getInstitutionId().equals(institutionId))
                 .forEach(userBinding -> userBinding.getProducts()
                         .forEach(onboardedProduct -> {
-                            sendUserNotificationFromBindings(userId, institutionId, eventType, userBinding, onboardedProduct);
+                            sendUserNotificationFromBindings(userId, eventType, userBinding, onboardedProduct);
                         }));
     }
 
-    private void sendUserNotificationFromBindings(String userId, String institutionId, QueueEvent eventType, UserBinding userBinding, OnboardedProduct onboardedProduct) {
+    private void sendUserNotificationFromBindings(String userId, QueueEvent eventType, UserBinding userBinding, OnboardedProduct onboardedProduct) {
         User user = userRegistryConnector.getUserByInternalId(userId);
         UserToNotify userToNotify = userNotificationMapper.toUserNotify(user, onboardedProduct, userBinding.getInstitutionId());
         UserNotificationToSend userNotification = notificationMapper.setNotificationDetailsFromOnboardedProduct(userToNotify, onboardedProduct, userBinding.getInstitutionId());
-        userNotification.setId(idBuilder(userId, institutionId, onboardedProduct.getProductId(), onboardedProduct.getProductRole()));
+        userNotification.setId(idBuilder(userId, userBinding.getInstitutionId(), onboardedProduct.getProductId(), onboardedProduct.getProductRole()));
         userNotification.setEventType(eventType);
         try {
             String msg = mapper.writeValueAsString(userNotification);
@@ -166,10 +157,10 @@ public class UserEventServiceImpl implements UserEventService {
         if (relationshipInfo != null) {
             Optional<UserBinding> userBinding = toUserBinding(relationshipInfo.getUserId(),
                     relationshipInfo.getInstitution().getId());
-            userBinding.ifPresent(user -> {
-                user.getProducts().stream().filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
+            userBinding.ifPresent(currentUserBinding -> {
+                currentUserBinding.getProducts().stream().filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
                         .filter(onboardedProduct -> Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()).map(s -> s.equals(onboardedProduct.getRelationshipId())).orElse(true))
-                        .forEach(product -> sendUserNotificationFromBindings(relationshipInfo.getUserId(), relationshipInfo.getInstitution().getId(), eventType, user, product));
+                        .forEach(currentOnboardedProduct -> sendUserNotificationFromBindings(relationshipInfo.getUserId(), eventType, currentUserBinding, currentOnboardedProduct));
             });
         }
     }
