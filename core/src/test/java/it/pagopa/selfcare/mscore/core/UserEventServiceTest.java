@@ -431,7 +431,7 @@ class UserEventServiceTest {
     }
 
     @Test
-    void sendOnboardedUserNotification1(){
+    void sendOnboardedUserNotification1() throws JsonProcessingException {
         //given
         final String userId = UUID.randomUUID().toString();
         final String institutionId = UUID.randomUUID().toString();
@@ -447,12 +447,10 @@ class UserEventServiceTest {
         userBinding.setInstitutionId(institutionId);
         userBinding.setProducts(List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
-        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
         //when
         Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
         //then
         assertDoesNotThrow(executable);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoInteractions(kafkaTemplateUsers);
     }
     @Test
@@ -472,14 +470,11 @@ class UserEventServiceTest {
         userBinding.setInstitutionId(institutionId);
         userBinding.setProducts(List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
-        when(userRegistryConnector.getUserByInternalId(any())).thenReturn(user);
         //when
         Executable executable = () ->userEventService.sendOnboardedUserNotification(onboardedUser, productId);
         //then
         assertDoesNotThrow(executable);
-        verify(userRegistryConnector, times(1)).getUserByInternalId(userId);
         verifyNoInteractions(kafkaTemplateUsers);
-
     }
 
     @Test
