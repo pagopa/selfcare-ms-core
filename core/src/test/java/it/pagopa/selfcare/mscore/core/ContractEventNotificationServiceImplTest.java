@@ -68,7 +68,7 @@ public class ContractEventNotificationServiceImplTest {
      * Method under test: {@link ContractEventNotificationServiceImpl#sendDataLakeNotification(Institution, Token, QueueEvent)}
      */
     @Test
-    void testSendDataLakeNotification2() throws ExecutionException, InterruptedException {
+    void testSendDataLakeNotification2() {
         ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
         when(producerFactory.transactionCapable()).thenReturn(true);
         KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
@@ -79,7 +79,7 @@ public class ContractEventNotificationServiceImplTest {
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         ContractEventNotificationService contractService = new ContractEventNotificationServiceImpl(kafkaTemplate, new KafkaPropertiesConfig(),
-                new ObjectMapper(), partyRegistryProxyConnector, institutionConnector, coreConfig);
+               partyRegistryProxyConnector, institutionConnector, coreConfig);
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
@@ -151,7 +151,7 @@ public class ContractEventNotificationServiceImplTest {
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
         ContractEventNotificationService contractService = new ContractEventNotificationServiceImpl(kafkaTemplate, new KafkaPropertiesConfig(),
-                new ObjectMapper(), partyRegistryProxyConnector, institutionConnector, coreConfig);
+                partyRegistryProxyConnector, institutionConnector, coreConfig);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -201,7 +201,7 @@ public class ContractEventNotificationServiceImplTest {
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
 
         ContractEventNotificationService contractService = new ContractEventNotificationServiceImpl(kafkaTemplate, new KafkaPropertiesConfig(),
-                new ObjectMapper(), partyRegistryProxyConnector, institutionConnector, coreConfig);
+                partyRegistryProxyConnector, institutionConnector, coreConfig);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
@@ -260,16 +260,13 @@ public class ContractEventNotificationServiceImplTest {
         ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
         when(producerFactory.transactionCapable()).thenReturn(true);
         KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
-        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
+
         CoreConfig coreConfig = new CoreConfig();
-        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
-        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
-        UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
 
         ContractEventNotificationService contractService = new ContractEventNotificationServiceImpl(kafkaTemplate, new KafkaPropertiesConfig(),
-                new ObjectMapper(), partyRegistryProxyConnector, institutionConnector, coreConfig);
+                partyRegistryProxyConnector, institutionConnector, coreConfig);
 
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");

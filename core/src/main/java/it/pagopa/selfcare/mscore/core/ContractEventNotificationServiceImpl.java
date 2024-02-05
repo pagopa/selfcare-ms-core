@@ -1,7 +1,11 @@
 package it.pagopa.selfcare.mscore.core;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
@@ -29,7 +33,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,13 +55,23 @@ public class ContractEventNotificationServiceImpl implements ContractEventNotifi
     private final InstitutionConnector institutionConnector;
     private final CoreConfig coreConfig;
 
-    public ContractEventNotificationServiceImpl(KafkaTemplate<String, String> kafkaTemplate, KafkaPropertiesConfig kafkaPropertiesConfig, ObjectMapper mapper, PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, CoreConfig coreConfig) {
+    public ContractEventNotificationServiceImpl(KafkaTemplate<String, String> kafkaTemplate, KafkaPropertiesConfig kafkaPropertiesConfig, PartyRegistryProxyConnector partyRegistryProxyConnector, InstitutionConnector institutionConnector, CoreConfig coreConfig) {
         this.kafkaTemplate = kafkaTemplate;
         this.kafkaPropertiesConfig = kafkaPropertiesConfig;
-        this.mapper = mapper;
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.coreConfig = coreConfig;
+
+
+        this.mapper = new ObjectMapper();
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {
+            @Override
+            public void serialize(OffsetDateTime offsetDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+                jsonGenerator.writeString(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(offsetDateTime));
+            }
+        });
+        mapper.registerModule(simpleModule);
     }
 
     @Override
