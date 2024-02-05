@@ -603,6 +603,7 @@ class UserControllerTest {
         userToNotify.setFamilyName("surname");
         user.setUser(userToNotify);
         user.setProductId("prod-io");
+
         when(userService.findAll(any(), any(), anyString())).thenReturn(List.of(user));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -617,18 +618,17 @@ class UserControllerTest {
 
         UsersNotificationResponse response = new ObjectMapper().readValue(
                 result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                UsersNotificationResponse.class);
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getUsers());
         Assertions.assertFalse(response.getUsers().isEmpty());
         Assertions.assertNotNull(response.getUsers().get(0));
-        Assertions.assertNotNull(response.getUsers().get(0).getUser());
-        Assertions.assertEquals("name", response.getUsers().get(0).getUser().getName());
-        Assertions.assertEquals("surname", response.getUsers().get(0).getUser().getFamilyName());
-        Assertions.assertEquals("prod-io", response.getUsers().get(0).getProductId());
-        Assertions.assertEquals("institutionId", response.getUsers().get(0).getInstitutionId());
+        Assertions.assertNotNull(response.getUsers().get(0).getBindings().get(0).getUser());
+        Assertions.assertEquals("name", response.getUsers().get(0).getBindings().get(0).getUser().getName());
+        Assertions.assertEquals("surname", response.getUsers().get(0).getBindings().get(0).getUser().getFamilyName());
+        Assertions.assertEquals("prod-io", response.getUsers().get(0).getBindings().get(0).getProductId());
+        Assertions.assertEquals("institutionId", response.getUsers().get(0).getBindings().get(0).getInstitutionId());
 
     }
 
