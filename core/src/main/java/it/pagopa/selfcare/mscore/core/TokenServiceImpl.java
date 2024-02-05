@@ -27,13 +27,13 @@ public class TokenServiceImpl implements TokenService {
     private final UserService userService;
     private final OnboardingDao onboardingDao;
     private final InstitutionConnector institutionConnector;
-    private final ContractService contractService;
+    private final ContractEventNotificationService contractService;
 
     public TokenServiceImpl(TokenConnector tokenConnector,
                             UserService userService,
                             OnboardingDao onboardingDao,
                             InstitutionConnector institutionConnector,
-                            ContractService contractService) {
+                            ContractEventNotificationService contractService) {
         this.tokenConnector = tokenConnector;
         this.userService = userService;
         this.onboardingDao = onboardingDao;

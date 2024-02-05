@@ -48,7 +48,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final UserService userService;
     private final CoreConfig coreConfig;
-    private final ContractService contractService;
+    private final ContractEventNotificationService contractService;
     private final InstitutionMapper institutionMapper;
     private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
 
@@ -57,7 +57,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                                   UserService userService, CoreConfig coreConfig,
                                   TokenConnector tokenConnector,
                                   UserConnector userConnector,
-                                  ContractService contractService,
+                                  ContractEventNotificationService contractService,
                                   InstitutionMapper institutionMapper,
                                   CreateInstitutionStrategyFactory createInstitutionStrategyFactory,
                                   UserRegistryConnector userRegistryConnector) {
