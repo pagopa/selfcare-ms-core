@@ -1,4 +1,4 @@
-name: Deploy PNPG core ms
+name: Deploy PNPG ms-core
 
 on:
   push:
@@ -6,15 +6,15 @@ on:
       - main
       - releases/**
     paths:
-      - '!./.devops/**'
-      - '!./.github/**'
-      - '!./.identity/**'
-      - '!./helm/**'
+      - '!.devops/**'
+      - '!.github/**'
+      - '!.identity/**'
+      - '!helm/**'
       - '!**.md'
-      - '!./.**ignore'
-      - '!./infra/**'
-      - '!./.terraform-version'
-      - '!./CODEOWNERS'
+      - '!.**ignore'
+      - '!infra/**'
+      - '!.terraform-version'
+      - '!CODEOWNERS'
 
   workflow_dispatch:
 
