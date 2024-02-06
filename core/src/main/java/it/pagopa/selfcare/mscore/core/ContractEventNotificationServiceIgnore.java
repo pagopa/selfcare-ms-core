@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @ConditionalOnProperty(
-        value="core.user-event-service.type",
+        value="core.contract-event-service.type",
         havingValue = "ignore",
         matchIfMissing = true)
 public class ContractEventNotificationServiceIgnore implements ContractEventNotificationService {

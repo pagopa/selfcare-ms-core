@@ -26,6 +26,7 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionProxyInfo;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,9 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@ConditionalOnProperty(
+        value="core.contract-event-service.type",
+        havingValue = "send")
 public class ContractEventNotificationServiceImpl implements ContractEventNotificationService {
 
 
