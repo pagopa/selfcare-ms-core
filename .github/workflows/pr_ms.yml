@@ -10,15 +10,17 @@ on:
       - reopened
       - ready_for_review
     paths:
-      - '!./.devops/**'
-      - '!./.github/**'
-      - '!./.identity/**'
-      - '!./helm/**'
+      - '.github/workflows/pr_ms.yml'
+      - '.github/workflows/release_ms.yml'
+      - '.github/workflows/release_ms_pnpg.yml'
+      - '!.devops/**'
+      - '!.identity/**'
+      - '!helm/**'
       - '!**.md'
-      - '!./.**ignore'
-      - '!./infra/**'
-      - '!./.terraform-version'
-      - '!./CODEOWNERS'
+      - '!**ignore'
+      - '!infra/**'
+      - '!.terraform-version'
+      - '!CODEOWNERS'
 
 jobs:
 
@@ -26,7 +28,7 @@ jobs:
     uses: ./.github/workflows/call_code_review.yml
     name: Core Code Review
     secrets: inherit
-    if: ${{ github.head_ref == 'main' || startsWith(github.head_ref, 'releases/') }}
+    if: github.base_ref == 'main'
     with:
       pr_number: ${{ github.event.pull_request.number }}
       source_branch: ${{ github.head_ref }}
