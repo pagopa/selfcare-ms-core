@@ -41,15 +41,15 @@ jobs:
       - name: Build
         run: |
           mvn -f ./pom.xml \
-          -B \
-          clean org.jacoco:jacoco-maven-plugin:prepare-agent \
-          verify org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate
+            -B \
+            clean org.jacoco:jacoco-maven-plugin:prepare-agent \
+            verify org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate
 
       - name: Analyze
         run: |
           xmlReportPaths=$(find "$(pwd)" -path '*jacoco.xml' | sed 's/.*/&/' | tr '\n' ',');
 
-          mvn -f pom.xml -B verify \
+          mvn -f pom.xml -B verify sonar:sonar \
             -Dsonar.coverage.jacoco.xmlReportPaths=$xmlReportPaths \
             -Dsonar.organization=pagopa \
             -Dsonar.projectKey=${{ inputs.sonar_key }} \
