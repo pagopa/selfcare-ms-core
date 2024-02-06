@@ -12,6 +12,8 @@ WORKDIR /app
 
 COPY --from=builder ./target/*.jar ./app.jar
 
+ADD https://github.com/microsoft/ApplicationInsights-Java/releases/download/3.1.1/applicationinsights-agent-3.1.1.jar /applicationinsights-agent.jar
+
 EXPOSE 8080
 USER 1001
 
