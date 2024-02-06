@@ -1,0 +1,25 @@
+name: Code Review ms-core
+
+on:
+  workflow_dispatch:
+  
+  pull_request:
+    branches:
+      - main
+      - releases/**
+    types:
+      - opened
+      - synchronize
+      - ready_for_review
+    paths:
+      - './core/**'
+      - './infra/container_apps/ms-core'
+
+jobs:
+  code_review:
+    name: Core Code Review
+    runs-on: ubuntu-20.04
+    steps:
+      
+      - run: |
+          hello world
