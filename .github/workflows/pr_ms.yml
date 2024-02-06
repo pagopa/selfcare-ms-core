@@ -11,7 +11,7 @@ on:
       - ready_for_review
     paths:
       - '!./.devops/**'
-      - '!./.github/**'
+      # - '!./.github/**'
       - '!./.identity/**'
       - '!./helm/**'
       - '!**.md'
