@@ -1,6 +1,5 @@
 **/.dockerignore
 **/.git
-apps/onboarding-ms/.idea/.gitignore
 **/bin
 **/docker-compose*
 **/Dockerfile*
