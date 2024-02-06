@@ -1,14 +1,10 @@
 package it.pagopa.selfcare.mscore.core;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
@@ -35,15 +31,12 @@ import org.springframework.kafka.core.ProducerFactory;
 
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.checkNotNullFields;
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 public class ContractEventNotificationServiceImplTest {
@@ -188,14 +181,12 @@ public class ContractEventNotificationServiceImplTest {
             MsCoreException.class,
             ResourceNotFoundException.class
     })
-    void testSendDataLakeNotification_notOnIpa(Class<?> clazz) throws ExecutionException, InterruptedException {
+    void testSendDataLakeNotification_notOnIpa(Class<?> clazz) {
         ProducerFactory<String, String> producerFactory = (ProducerFactory<String, String>) mock(ProducerFactory.class);
         when(producerFactory.transactionCapable()).thenReturn(true);
         KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
-        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
         CoreConfig coreConfig = new CoreConfig();
-        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
-        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
+
         UserRegistryConnector userRegistryConnector = mock(UserRegistryConnector.class);
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
@@ -332,7 +323,7 @@ public class ContractEventNotificationServiceImplTest {
      * Method under test: {@link ContractEventNotificationServiceImpl#toNotificationToSend(Institution, Token, QueueEvent)}
      */
     @Test
-    void testGenerateMessageActiveWithActivatedAt() throws ExecutionException, InterruptedException {
+    void testGenerateMessageActiveWithActivatedAt() {
 
         String institutionId = "i1";
         String tokenId = "t1";
@@ -521,18 +512,12 @@ public class ContractEventNotificationServiceImplTest {
 
     }
 
-
-
     private static Institution createInstitution(String institutionId, Onboarding onboarding) {
         Institution institution = mockInstance(new Institution());
         institution.setId(institutionId);
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
         return institution;
-    }
-
-    private static Onboarding createOnboarding() {
-        return mockInstance(new Onboarding());
     }
 
     private static Institution createInstitutionWithoutLocation(String institutionId, Onboarding onboarding) {
