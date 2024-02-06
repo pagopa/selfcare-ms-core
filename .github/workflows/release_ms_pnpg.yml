@@ -1,0 +1,48 @@
+name: Deploy PNPG core ms
+
+on:
+  push:
+    branches:
+      - main
+      - releases/**
+    paths:
+      - '!./.devops/**'
+      - '!./.github/**'
+      - '!./.identity/**'
+      - '!./helm/**'
+      - '!**.md'
+      - '!./.**ignore'
+      - '!./infra/**'
+      - '!./.terraform-version'
+      - '!./CODEOWNERS'
+
+  workflow_dispatch:
+
+jobs:
+
+  release_dev:
+    uses: ./.github/workflows/call_release_ms.yml
+    name: '[Dev] Core ms Release'
+    if: github.ref_name == 'main'
+    secrets: inherit
+    with:
+      environment: dev
+      tf_environment: dev-pnpg
+
+  release_uat:
+    uses: ./.github/workflows/call_release_ms.yml
+    name: '[UAT] Core ms Release'
+    if: startsWith(github.ref_name, 'releases/')
+    secrets: inherit
+    with:
+      environment: uat
+      tf_environment: uat-pnpg
+
+  release_prod:
+    uses: ./.github/workflows/call_release_ms.yml
+    name: '[Prod] Core ms Release'
+    if: startsWith(github.ref_name, 'releases/')
+    secrets: inherit
+    with:
+      environment: prod
+      tf_environment: prod-pnpg
