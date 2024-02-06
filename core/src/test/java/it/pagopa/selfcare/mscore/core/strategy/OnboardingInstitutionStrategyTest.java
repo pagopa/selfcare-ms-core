@@ -616,7 +616,7 @@ class OnboardingInstitutionStrategyTest {
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId(PROD_INTEROP_COLL.getValue());
+        onboardingRequest.setProductId(PROD_INTEROP.getValue());
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
