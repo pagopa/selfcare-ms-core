@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   
   pull_request:
-    # branches:
-    #   - 'main'
-    #   - 'releases/**'
     types:
       - opened
       - synchronize
@@ -29,6 +26,7 @@ jobs:
     uses: ./.github/workflows/call_code_review.yml
     name: Core Code Review
     secrets: inherit
+    if: ${{ github.head_ref == 'main' || startsWith(github.head_ref, 'releases/') }}
     with:
       pr_number: ${{ github.event.pull_request.number }}
       source_branch: ${{ github.head_ref }}
