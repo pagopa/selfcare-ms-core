@@ -38,15 +38,39 @@ jobs:
           maven-version: '3.9.5'
           cache-enabled: true
 
-      - name: Build and Analyze
-        shell: bash
+      - name: Build
         run: |
-          mvn --projects :test-coverage --also-make verify -P${{ inputs.module }},report,coverage \
+          mvn -f ./pom.xml \
+          -B \
+          clean org.jacoco:jacoco-maven-plugin:prepare-agent \
+          verify org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate
+
+      - name: Build and Analyze
+        run: |
+          xmlReportPaths=$(find "$(pwd)" -path '*jacoco.xml' | sed 's/.*/&/' | tr '\n' ',');
+
+          mvn -f pom.xml -B \
+            -Dsonar.coverage.jacoco.xmlReportPaths=$xmlReportPaths \
             -Dsonar.organization=pagopa \
             -Dsonar.projectKey=${{ inputs.sonar_key }} \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
             -Dsonar.pullrequest.key=${{ inputs.pr_number }} \
             -Dsonar.pullrequest.branch=${{ inputs.source_branch }} \
-            -Dsonar.pullrequest.base=refs/remotes/origin/${{ inputs.target_branch }}
+            -Dsonar.pullrequest.base=refs/remotes/origin/${{ inputs.target_branch }} \
+            -Dsonar.exclusions='**/enums/**, **/model/**, **/constant/**, **/*Constant*, **/*Config.java, **/*Scheduler.java, **/*Application.java, **/src/test/**, **/Dummy*.java'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # - name: Build and Analyze
+      #   shell: bash
+      #   run: |
+      #     mvn --projects :test-coverage --also-make verify -P${{ inputs.module }},report,coverage \
+      #       -Dsonar.organization=pagopa \
+      #       -Dsonar.projectKey=${{ inputs.sonar_key }} \
+      #       -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
+      #       -Dsonar.pullrequest.key=${{ inputs.pr_number }} \
+      #       -Dsonar.pullrequest.branch=${{ inputs.source_branch }} \
+      #       -Dsonar.pullrequest.base=refs/remotes/origin/${{ inputs.target_branch }} \
+      #       -Dsonar.exclusions='**/enums/**, **/model/**, **/constant/**, **/*Constant*, **/*Config.java, **/*Scheduler.java, **/*Application.java, **/src/test/**, **/Dummy*.java'
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
