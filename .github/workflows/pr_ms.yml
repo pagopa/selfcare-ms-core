@@ -15,10 +15,6 @@ on:
     paths:
       - './core/**'
       - './infra/container_apps/ms-core'
-  
-  push:
-    branches:
-      - EC-150-git-hub-workflows
 
 jobs:
 
