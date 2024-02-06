@@ -9,19 +9,19 @@ on:
     #   - synchronize
     #   - reopened
     #   - ready_for_review
-    paths:
-      - './.github/workflows/pr_ms.yml'
-      - './.github/workflows/release_ms.yml'
-      - './.github/workflows/release_ms_pnpg.yml'
-      - '!./.devops/**'
-      - '!./.github/**'
-      - '!./.identity/**'
-      - '!./helm/**'
-      - '!**.md'
-      - '!./.**ignore'
-      - '!./infra/**'
-      - '!./.terraform-version'
-      - '!./CODEOWNERS'
+    # paths:
+    #   - './.github/workflows/pr_ms.yml'
+    #   - './.github/workflows/release_ms.yml'
+    #   - './.github/workflows/release_ms_pnpg.yml'
+    #   - '!./.devops/**'
+    #   - '!./.github/**'
+    #   - '!./.identity/**'
+    #   - '!./helm/**'
+    #   - '!**.md'
+    #   - '!./.**ignore'
+    #   - '!./infra/**'
+    #   - '!./.terraform-version'
+    #   - '!./CODEOWNERS'
 
 jobs:
 
