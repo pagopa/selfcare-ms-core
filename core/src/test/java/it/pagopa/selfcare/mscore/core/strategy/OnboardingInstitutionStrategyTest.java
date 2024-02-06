@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP_COLL;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -606,6 +607,7 @@ class OnboardingInstitutionStrategyTest {
         institution.setTaxCode(institutionUpdate.getTaxCode());
 
         Billing billing1 = TestUtils.createSimpleBilling();
+        billing1.setRecipientCode(null);
         Contract contract = TestUtils.createSimpleContract();
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
@@ -614,7 +616,7 @@ class OnboardingInstitutionStrategyTest {
         onboardingRequest.setInstitutionExternalId("42");
         onboardingRequest.setInstitutionUpdate(institutionUpdate);
         onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId(PROD_INTEROP.getValue());
+        onboardingRequest.setProductId(PROD_INTEROP_COLL.getValue());
         onboardingRequest.setProductName("Product Name");
         onboardingRequest.setSignContract(true);
         onboardingRequest.setTokenType(TokenType.INSTITUTION);
