@@ -33,7 +33,7 @@ resource "azapi_resource" "container_app_onboarding_ms" {
         containers = [
           {
             env   = concat(var.app_settings, local.secrets_env)
-            image = "ghcr.io/pagopa/selfcare-core-ms:${var.image_tag}"
+            image = "ghcr.io/pagopa/selfcare-ms-core:${var.image_tag}"
             name  = "${local.container_name}"
             resources = {
               cpu    = var.container_app.cpu
