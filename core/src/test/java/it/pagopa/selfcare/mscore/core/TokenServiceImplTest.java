@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class TokenServiceImplTest {
     @Mock
-    private ContractService contractService;
+    private ContractEventNotificationService contractService;
     @Mock
     private UserService userService;
 

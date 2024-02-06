@@ -24,7 +24,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
 
     public static final int TOKEN_PAGE_SIZE = 100;
     public static final int USER_PAGE_SIZE = 100;
-    private final ContractService contractService;
+    private final ContractEventNotificationService contractService;
     private final UserEventService userEventService;
     private Optional<Integer> page_size_api = Optional.empty();
     private Optional<Integer> page = Optional.empty();
@@ -36,7 +36,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
 
 
     @Autowired
-    public QueueNotificationServiceImpl(ContractService contractService,
+    public QueueNotificationServiceImpl(ContractEventNotificationService contractService,
                                         UserEventService userEventService,
                                         TokenConnector tokenConnector,
                                         InstitutionConnector institutionConnector, UserConnector userConnector) {

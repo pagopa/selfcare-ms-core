@@ -62,7 +62,7 @@ class InstitutionServiceImplTest {
     private CoreConfig coreConfig;
 
     @Mock
-    private ContractService contractService;
+    private ContractEventNotificationService contractService;
 
     @Mock
     private TokenConnector tokenConnector;

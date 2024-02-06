@@ -33,7 +33,7 @@ class QueueNotificationServiceTest {
     @InjectMocks
     private QueueNotificationServiceImpl schedulerService;
     @Mock
-    private ContractService contractService;
+    private ContractEventNotificationService contractService;
 
     @Mock
     private UserConnector userConnector;
