@@ -606,6 +606,7 @@ class OnboardingInstitutionStrategyTest {
         institution.setTaxCode(institutionUpdate.getTaxCode());
 
         Billing billing1 = TestUtils.createSimpleBilling();
+        billing1.setRecipientCode(null);
         Contract contract = TestUtils.createSimpleContract();
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();
