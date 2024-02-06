@@ -10,7 +10,7 @@ on:
       - reopened
       - ready_for_review
     paths:
-      - './.github/workflows/pr_ms.yml'
+      - '.github/workflows/pr_ms.yml'
       # - './.github/workflows/release_ms.yml'
       # - './.github/workflows/release_ms_pnpg.yml'
     # paths-ignore:
