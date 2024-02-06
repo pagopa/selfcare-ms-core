@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP;
-import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_INTEROP_COLL;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
