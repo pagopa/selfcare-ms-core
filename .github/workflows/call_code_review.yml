@@ -45,7 +45,7 @@ jobs:
           clean org.jacoco:jacoco-maven-plugin:prepare-agent \
           verify org.jacoco:jacoco-maven-plugin:report org.jacoco:jacoco-maven-plugin:report-aggregate
 
-      - name: Build and Analyze
+      - name: Analyze
         run: |
           xmlReportPaths=$(find "$(pwd)" -path '*jacoco.xml' | sed 's/.*/&/' | tr '\n' ',');
 
