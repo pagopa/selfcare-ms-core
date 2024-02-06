@@ -4,12 +4,13 @@ on:
   workflow_dispatch:
   
   pull_request:
-    branches:
-      - main
-      - releases/**
+    # branches:
+    #   - 'main'
+    #   - 'releases/**'
     types:
+      - opened
       - synchronize
-      - edited
+      - reopened
       - ready_for_review
     paths:
       - '!./.devops/**'
