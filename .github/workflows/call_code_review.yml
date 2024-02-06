@@ -49,7 +49,7 @@ jobs:
         run: |
           xmlReportPaths=$(find "$(pwd)" -path '*jacoco.xml' | sed 's/.*/&/' | tr '\n' ',');
 
-          mvn -f pom.xml -B \
+          mvn -f pom.xml -B verify \
             -Dsonar.coverage.jacoco.xmlReportPaths=$xmlReportPaths \
             -Dsonar.organization=pagopa \
             -Dsonar.projectKey=${{ inputs.sonar_key }} \
