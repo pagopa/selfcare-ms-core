@@ -21,25 +21,28 @@ on:
 jobs:
 
   release_dev:
-    uses: ./.github/workflows/call_release_ms.yml
+    uses: pagopa/selfcare-commons/.github/workflows/call_release_docker.yml@EC-149-template-git-hub-workflows
     name: '[Dev] Core ms Release'
     if: github.ref_name == 'main'
     secrets: inherit
     with:
       environment: dev
+      dir: 'infra'
 
   release_uat:
-    uses: ./.github/workflows/call_release_ms.yml
+    uses: pagopa/selfcare-commons/.github/workflows/call_release_docker.yml@EC-149-template-git-hub-workflows
     name: '[UAT] Core ms Release'
     if: startsWith(github.ref_name, 'releases/')
     secrets: inherit
     with:
       environment: uat
+      dir: 'infra'
 
   release_prod:
-    uses: ./.github/workflows/call_release_ms.yml
+    uses: pagopa/selfcare-commons/.github/workflows/call_release_docker.yml@EC-149-template-git-hub-workflows
     name: '[Prod] Core ms Release'
     if: startsWith(github.ref_name, 'releases/')
     secrets: inherit
     with:
       environment: prod
+      dir: 'infra'
