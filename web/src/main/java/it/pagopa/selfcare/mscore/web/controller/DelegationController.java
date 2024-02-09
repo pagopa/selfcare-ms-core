@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DelegationController {
 
+    public static final int MAX_PAGE_SIZE = 100;
     private final DelegationService delegationService;
     private final DelegationMapper delegationMapper;
 
@@ -121,7 +122,7 @@ public class DelegationController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      */
     @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
-    @GetMapping("/paginated")
+    @GetMapping("/filter")
     public ResponseEntity<List<DelegationResponse>> getPaginatedDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                     @RequestParam(name = "from", required = false) String from,
                                                                     @ApiParam("${swagger.mscore.institutions.model.institutionId}")
@@ -131,7 +132,9 @@ public class DelegationController {
         if(Objects.isNull(from) && Objects.isNull(to))
             throw new InvalidRequestException("from or to must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getPaginatedDelegations(from, to, page, size).stream()
+        int pageSize = size.filter(s -> s <= MAX_PAGE_SIZE).orElse(MAX_PAGE_SIZE);
+
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getPaginatedDelegations(from, to, page, Optional.of(pageSize)).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
