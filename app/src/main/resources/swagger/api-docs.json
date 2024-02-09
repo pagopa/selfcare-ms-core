@@ -4877,15 +4877,15 @@
       }
     },
     "/onboarded-users" : {
-      "put" : {
+      "get" : {
         "tags" : [ "Persons" ],
         "summary" : "Retrieve onboarded users according to identifiers in input",
         "description" : "Retrieve onboarded users according to identifiers in input",
-        "operationId" : "getOnboardedUsersUsingPUT",
+        "operationId" : "getOnboardedUsersUsingGET",
         "parameters" : [ {
           "name" : "ids",
           "in" : "query",
-          "description" : "${swagger.mscore.users.userIds}",
+          "description" : "Users unique identifiers",
           "required" : true,
           "style" : "form",
           "explode" : true,
@@ -4906,16 +4906,6 @@
           },
           "400" : {
             "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "403" : {
-            "description" : "Forbidden",
             "content" : {
               "application/problem+json" : {
                 "schema" : {

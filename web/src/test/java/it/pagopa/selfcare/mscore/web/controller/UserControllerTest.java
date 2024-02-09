@@ -655,8 +655,8 @@ class UserControllerTest {
         when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .put("/onboarded-users", "userId")
-                .queryParam("ids","DELETED")
+                .get("/onboarded-users")
+                .queryParam("ids","userId")
                 .contentType(MediaType.APPLICATION_JSON);
 
         MockMvcBuilders.standaloneSetup(userController)
