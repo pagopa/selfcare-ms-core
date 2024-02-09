@@ -7637,25 +7637,6 @@
           }
         }
       },
-      "OnboardedUserResponse" : {
-        "title" : "OnboardedUserResponse",
-        "type" : "object",
-        "properties" : {
-          "bindings" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/UserBinding"
-            }
-          },
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
-          "id" : {
-            "type" : "string"
-          }
-        }
-      },
       "OnboardedUsersResponse" : {
         "title" : "OnboardedUsersResponse",
         "type" : "object",
@@ -7663,7 +7644,7 @@
           "users" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/OnboardedUserResponse"
+              "$ref" : "#/components/schemas/UserProductsResponse"
             }
           }
         }

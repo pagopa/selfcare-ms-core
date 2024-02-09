@@ -8,5 +8,5 @@ import java.util.List;
 @Data
 @Builder
 public class OnboardedUsersResponse {
-    private List<OnboardedUserResponse> users;
+    private List<UserProductsResponse> users;
 }
