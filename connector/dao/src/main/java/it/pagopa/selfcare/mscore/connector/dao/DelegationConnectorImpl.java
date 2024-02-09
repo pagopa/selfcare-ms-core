@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import com.mongodb.client.model.Facet;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
@@ -11,9 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -62,11 +61,11 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public List<Delegation> find(String from, String to, String productId, GetDelegationsMode mode) {
-
-        Criteria criteria = new Criteria();
-
+    public List<Delegation> find(String from, String to, String productId, GetDelegationsMode mode, Integer page, Integer size) {
         List<Criteria> criterias = new ArrayList<>();
+        Criteria criteria = new Criteria();
+        Pageable pageable = PageRequest.of(page, size);
+
         if(Objects.nonNull(from))
             criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
         if(Objects.nonNull(to))
@@ -82,7 +81,9 @@ public class DelegationConnectorImpl implements DelegationConnector {
                     .connectTo("_id");
 
             MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
-            Aggregation aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"));
+            SkipOperation skip = Aggregation.skip((long) page * size);
+            LimitOperation limit = Aggregation.limit(page);
+            Aggregation aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
 
             List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();
             return result.stream()
@@ -92,7 +93,8 @@ public class DelegationConnectorImpl implements DelegationConnector {
                     .collect(Collectors.toList());
         }
 
-        return repository.find(Query.query(criteria.andOperator(criterias)), DelegationEntity.class).stream()
+        return repository.find(Query.query(criteria.andOperator(criterias)), pageable, DelegationEntity.class)
+                .stream()
                 .map(delegationMapper::convertToDelegation)
                 .collect(Collectors.toList());
     }

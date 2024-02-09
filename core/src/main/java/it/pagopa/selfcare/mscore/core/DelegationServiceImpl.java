@@ -112,8 +112,10 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
     @Override
-    public List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode) {
-        return delegationConnector.find(from, to, productId, mode);
+    public List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode,
+                                           Optional<Integer> page, Optional<Integer> size) {
+        int pageSize = size.filter(s -> s <= MAX_DELEGATIONS_PAGE_SIZE).orElse(DEFAULT_DELEGATIONS_PAGE_SIZE);
+        return delegationConnector.find(from, to, productId, mode, page.orElse(0), pageSize);
     }
 
     @Override

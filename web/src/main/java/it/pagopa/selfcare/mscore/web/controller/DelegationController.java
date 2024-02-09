@@ -100,12 +100,14 @@ public class DelegationController {
                                                                    @ApiParam("${swagger.mscore.product.model.id}")
                                                                    @RequestParam(name = "productId", required = false) String productId,
                                                                    @ApiParam("${swagger.mscore.institutions.delegations.mode}")
-                                                                   @RequestParam(name = "mode", required = false) GetDelegationsMode mode) {
+                                                                   @RequestParam(name = "mode", required = false) GetDelegationsMode mode,
+                                                                   @RequestParam(name = "page", required = false) Optional<Integer> page,
+                                                                   @RequestParam(name = "size", required = false) Optional<Integer> size) {
 
         if(Objects.isNull(institutionId) && Objects.isNull(brokerId))
             throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, mode).stream()
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, mode, page, size).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
