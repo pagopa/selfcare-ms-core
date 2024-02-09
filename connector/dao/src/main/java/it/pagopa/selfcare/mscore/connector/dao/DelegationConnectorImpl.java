@@ -8,6 +8,8 @@ import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.delegation.DelegationInstitution;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
@@ -91,6 +93,23 @@ public class DelegationConnectorImpl implements DelegationConnector {
         }
 
         return repository.find(Query.query(criteria.andOperator(criterias)), DelegationEntity.class).stream()
+                .map(delegationMapper::convertToDelegation)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Delegation> findPaginated(String from, String to, Integer page, Integer size) {
+        List<Criteria> criterias = new ArrayList<>();
+        Criteria criteria = new Criteria();
+        Pageable pageable = PageRequest.of(page, size);
+
+        if(Objects.nonNull(from))
+            criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
+        if(Objects.nonNull(to))
+            criterias.add(Criteria.where(DelegationEntity.Fields.to.name()).is(to));
+
+        return repository.find(Query.query(criteria.andOperator(criterias)), pageable, DelegationEntity.class)
+                .stream()
                 .map(delegationMapper::convertToDelegation)
                 .collect(Collectors.toList());
     }

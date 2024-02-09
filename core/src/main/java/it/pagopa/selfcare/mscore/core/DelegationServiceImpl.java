@@ -11,7 +11,9 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_TAX_CODE_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
@@ -19,6 +21,7 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_
 @Service
 public class DelegationServiceImpl implements DelegationService {
 
+    private static final int DEFAULT_DELEGATIONS_SIZE = 30;
     private final DelegationConnector delegationConnector;
     private final MailNotificationService notificationService;
     private final InstitutionService institutionService;
@@ -100,6 +103,8 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
 
+
+
     @Override
     public boolean checkIfExists(Delegation delegation) {
         return delegationConnector.checkIfExists(delegation);
@@ -108,5 +113,21 @@ public class DelegationServiceImpl implements DelegationService {
     @Override
     public List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode) {
         return delegationConnector.find(from, to, productId, mode);
+    }
+
+    @Override
+    public List<Delegation> getPaginatedDelegations(String from, String to, Optional<Integer> page, Optional<Integer> size) {
+        List<Delegation> delegations = new ArrayList<>();
+        boolean nextPage = true;
+
+        do {
+            List<Delegation> foundDelegations = delegationConnector.findPaginated(from, to, page.orElse(0), size.orElse(DEFAULT_DELEGATIONS_SIZE));
+            delegations.addAll(foundDelegations);
+            if(foundDelegations.size() < DEFAULT_DELEGATIONS_SIZE || page.isPresent()) {
+                nextPage = false;
+            }
+        } while (nextPage);
+
+        return delegations;
     }
 }
