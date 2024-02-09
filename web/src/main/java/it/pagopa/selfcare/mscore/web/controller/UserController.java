@@ -14,6 +14,7 @@ import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -315,8 +316,8 @@ public class UserController {
         }
 
         userNotificationResponse.setUsers(userNotificationMap.values().stream()
-                        .map(UserNotificationBindingsResponse::new)
-                        .toList());
+                .map(UserNotificationBindingsResponse::new)
+                .toList());
 
         return ResponseEntity.ok(userNotificationResponse);
     }
@@ -349,5 +350,30 @@ public class UserController {
         log.debug("updateProductStatus - userId: {}", userId);
         userService.updateUserStatus(userId, institutionId, productId, role, productRole, status);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Get onboarded users from identifiers in input.
+     *
+     * @param userIds Users identifiers.
+     * @return ResponseEntity<OnboardedUsersResponse>
+     * <p>
+     * * Code: 204, Message: Update successful, DataType: No Content
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 404, Message: Not Found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.api.users.getOnboardedUsers}", notes = "${swagger.mscore.api.users.getOnboardedUsers}")
+    @GetMapping(value = "/onboarded-users")
+    public ResponseEntity<OnboardedUsersResponse> getOnboardedUsers(@ApiParam(value = "${swagger.mscore.users.userIds}", required = true)
+                                                                    @RequestParam(value = "ids") List<String> userIds) {
+        log.debug("getOnboardedUsers - userIds: {}", userIds);
+        final List<OnboardedUser> onboardedUsers = userService.findAllByIds(userIds);
+        OnboardedUsersResponse response = OnboardedUsersResponse.builder()
+                .users(onboardedUsers.stream()
+                        .map(userMapper::toOnboardedUserResponse)
+                        .toList())
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

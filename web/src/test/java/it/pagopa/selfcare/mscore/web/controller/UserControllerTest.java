@@ -9,7 +9,6 @@ import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
-import it.pagopa.selfcare.mscore.core.UserServiceImpl;
 import it.pagopa.selfcare.mscore.core.util.UserNotificationMapper;
 import it.pagopa.selfcare.mscore.core.util.UserNotificationMapperImpl;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
@@ -647,6 +646,23 @@ class UserControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    void onboardedUsers() throws Exception {
+        final OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("userId");
+        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .put("/onboarded-users", "userId")
+                .queryParam("ids","DELETED")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
 }
