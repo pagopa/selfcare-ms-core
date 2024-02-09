@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DelegationController {
 
-    public static final int MAX_PAGE_SIZE = 100;
     private final DelegationService delegationService;
     private final DelegationMapper delegationMapper;
 
@@ -132,9 +131,7 @@ public class DelegationController {
         if(Objects.isNull(from) && Objects.isNull(to))
             throw new InvalidRequestException("from or to must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        int pageSize = size.filter(s -> s <= MAX_PAGE_SIZE).orElse(MAX_PAGE_SIZE);
-
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getPaginatedDelegations(from, to, page, Optional.of(pageSize)).stream()
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getPaginatedDelegations(from, to, page, size).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }

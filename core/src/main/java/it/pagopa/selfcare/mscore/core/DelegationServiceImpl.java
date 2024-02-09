@@ -21,7 +21,8 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_
 @Service
 public class DelegationServiceImpl implements DelegationService {
 
-    private static final int DEFAULT_DELEGATIONS_SIZE = 30;
+    private static final int DEFAULT_DELEGATIONS_PAGE_SIZE = 30;
+    private static final int MAX_DELEGATIONS_PAGE_SIZE = 100;
     private final DelegationConnector delegationConnector;
     private final MailNotificationService notificationService;
     private final InstitutionService institutionService;
@@ -117,17 +118,7 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public List<Delegation> getPaginatedDelegations(String from, String to, Optional<Integer> page, Optional<Integer> size) {
-        List<Delegation> delegations = new ArrayList<>();
-        boolean nextPage = true;
-
-        do {
-            List<Delegation> foundDelegations = delegationConnector.findPaginated(from, to, page.orElse(0), size.orElse(DEFAULT_DELEGATIONS_SIZE));
-            delegations.addAll(foundDelegations);
-            if(foundDelegations.size() < DEFAULT_DELEGATIONS_SIZE || page.isPresent()) {
-                nextPage = false;
-            }
-        } while (nextPage);
-
-        return delegations;
+        int pageSize = size.filter(s -> s <= MAX_DELEGATIONS_PAGE_SIZE).orElse(DEFAULT_DELEGATIONS_PAGE_SIZE);
+        return delegationConnector.findPaginated(from, to, page.orElse(0), pageSize);
     }
 }
