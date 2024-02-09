@@ -19,6 +19,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -37,6 +39,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class DelegationConnectorImplTest {
 
+    public static final int PAGE_SIZE = 0;
+    public static final int MAX_PAGE_SIZE = 100;
     static Institution dummyInstitution;
     static DelegationInstitution dummyDelegationEntity;
 
@@ -115,12 +119,16 @@ class DelegationConnectorImplTest {
         delegationEntity.setInstitutionFromName("setInstitutionFromName");
         delegationEntity.setInstitutionFromRootName("setInstitutionFromRootName");
 
+        List<DelegationEntity> delegationEntities = List.of(delegationEntity);
+        Page<DelegationEntity> delegationEntityPage = new PageImpl<>(delegationEntities);
         //When
-        when(delegationRepository.find(any(), any())).
-                thenReturn(List.of(delegationEntity));
+
+        doReturn(delegationEntityPage)
+                .when(delegationRepository)
+                .find(any(), any(), any());
 
         List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(),
-                delegationEntity.getTo(), delegationEntity.getProductId(), GetDelegationsMode.NORMAL);
+                delegationEntity.getTo(), delegationEntity.getProductId(), GetDelegationsMode.NORMAL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -147,7 +155,8 @@ class DelegationConnectorImplTest {
         when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
                 thenReturn(results);
 
-        List<Delegation> response = delegationConnectorImpl.find(dummyDelegationEntity.getFrom(), null, dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL);
+        List<Delegation> response = delegationConnectorImpl.find(dummyDelegationEntity.getFrom(), null,
+                dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -176,7 +185,8 @@ class DelegationConnectorImplTest {
         when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
                 thenReturn(results);
 
-        List<Delegation> response = delegationConnectorImpl.find(null, dummyDelegationEntity.getTo(), dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL);
+        List<Delegation> response = delegationConnectorImpl.find(null, dummyDelegationEntity.getTo(),
+                dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);

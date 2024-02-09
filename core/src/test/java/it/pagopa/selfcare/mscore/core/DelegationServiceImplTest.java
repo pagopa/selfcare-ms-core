@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
@@ -120,11 +121,12 @@ class DelegationServiceImplTest {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
-        List<Delegation> response = delegationServiceImpl.getDelegations("from", "to", "productId", GetDelegationsMode.NORMAL);
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", "to", "productId",
+                GetDelegationsMode.NORMAL, Optional.of(0), Optional.of(100));
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
@@ -139,11 +141,12 @@ class DelegationServiceImplTest {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
-        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", GetDelegationsMode.FULL);
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId",
+                GetDelegationsMode.FULL, Optional.of(0), Optional.of(100));
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
