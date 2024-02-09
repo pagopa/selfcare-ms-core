@@ -32,7 +32,7 @@ jobs:
       pr_number: ${{ github.event.pull_request.number }}
       source_branch: ${{ github.head_ref }}
       target_branch: ${{ github.base_ref }}
-      sonar_key: 'selc-ms-core'
+      sonar_key: 'pagopa_selfcare-ms-core'
 
   docker_build:
     uses: pagopa/selfcare-commons/.github/workflows/call_code_review_docker.yml@EC-149-template-git-hub-workflows
