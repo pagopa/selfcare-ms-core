@@ -1,17 +1,5 @@
 terraform {
-  required_version = ">=1.6.0"
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "<= 3.90.0"
-    }
-
-    azapi = {
-      source  = "azure/azapi"
-      version = "~> 1.9.0"
-    }
-  }
+  required_version = ">= 1.6.0"
 
   backend "azurerm" {}
 }
@@ -20,6 +8,18 @@ provider "azurerm" {
   features {}
 }
 
-provider "azapi" {}
+module "container_app_dashboard_backend" {
+  source = "github.com/pagopa/selfcare-commons//infra/terraform-modules/container_app_microservice?ref=main"
 
-data "azurerm_client_config" "current" {}
+  is_pnpg = var.is_pnpg
+
+  env_short          = var.env_short
+  container_app      = var.container_app
+  container_app_name = "ms-core"
+  image_name         = "selfcare-ms-core"
+  image_tag          = var.image_tag
+  app_settings       = var.app_settings
+  secrets_names      = var.secrets_names
+
+  tags = var.tags
+}
