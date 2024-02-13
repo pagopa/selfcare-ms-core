@@ -75,7 +75,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         try {
             Optional<Institution> opt = institutionConnector.findByExternalId(strategyInput.getTaxCode());
             if (opt.isEmpty()) {
-                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo, null);
+                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo, InstitutionType.PA);
                 return institutionConnector.save(institutionEC);
             } else {
                 return opt.get();
