@@ -129,7 +129,7 @@ public class InstitutionController {
                 .orElse(List.of());
 
         Institution saved = institutionService.createInstitutionFromIpa(institutionFromIpaPost.getTaxCode(),
-                institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode(), geographicTaxonomies);
+                institutionFromIpaPost.getSubunitType(), institutionFromIpaPost.getSubunitCode(), geographicTaxonomies, institutionFromIpaPost.getInstitutionType());
         return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
     }
 

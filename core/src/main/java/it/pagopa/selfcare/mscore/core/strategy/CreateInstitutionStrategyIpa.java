@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
@@ -56,7 +57,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
             institution = mappingToInstitutionIPAUo(strategyInput, institutionEC.getId(), institutionProxyInfo, categoryProxyInfo);
         } else {
             log.info("createInstitution :: unsupported subunitType {}", subunitType);
-            institution = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo);
+            institution = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo, strategyInput.getInstitutionType());
         }
 
         institution.setGeographicTaxonomies(strategyInput.getGeographicTaxonomies());
@@ -74,7 +75,7 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         try {
             Optional<Institution> opt = institutionConnector.findByExternalId(strategyInput.getTaxCode());
             if (opt.isEmpty()) {
-                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo);
+                Institution institutionEC = getInstitutionEC(strategyInput.getTaxCode(), institutionProxyInfo, categoryProxyInfo, null);
                 return institutionConnector.save(institutionEC);
             } else {
                 return opt.get();
@@ -84,13 +85,13 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         }
     }
 
-    private Institution getInstitutionEC(String taxCode, InstitutionProxyInfo institutionProxyInfo, CategoryProxyInfo categoryProxyInfo) {
+    private Institution getInstitutionEC(String taxCode, InstitutionProxyInfo institutionProxyInfo, CategoryProxyInfo categoryProxyInfo, InstitutionType institutionType) {
 
         Institution newInstitution = institutionMapper.fromInstitutionProxyInfo(institutionProxyInfo);
         GeographicTaxonomies geotax = partyRegistryProxyConnector.getExtByCode(institutionProxyInfo.getIstatCode());
 
         newInstitution.setExternalId(taxCode);
-        newInstitution.setInstitutionType(InstitutionType.PA);
+        newInstitution.setInstitutionType(Objects.requireNonNullElse(institutionType, InstitutionType.PA));
         newInstitution.setOrigin(Origin.IPA.getValue());
         newInstitution.setCreatedAt(OffsetDateTime.now());
         newInstitution.setCity(Optional.ofNullable(geotax.getDescription())
