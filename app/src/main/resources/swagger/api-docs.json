@@ -445,52 +445,6 @@
         } ]
       }
     },
-    "/migration/tokens" : {
-      "get" : {
-        "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.find.token}",
-        "description" : "${swagger.mscore.migration.find.token}",
-        "operationId" : "findTokensUsingGET",
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/Token"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
     "/migration/user" : {
       "post" : {
         "tags" : [ "Migration" ],
@@ -4922,6 +4876,60 @@
         } ]
       }
     },
+    "/onboarded-users" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Retrieve onboarded users according to identifiers in input",
+        "description" : "Retrieve onboarded users according to identifiers in input",
+        "operationId" : "getOnboardedUsersUsingGET",
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "Users unique identifiers",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardedUsersResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/relationships/{relationshipId}" : {
       "get" : {
         "tags" : [ "Persons" ],
@@ -6380,6 +6388,10 @@
               "$ref" : "#/components/schemas/GeoTaxonomies"
             }
           },
+          "institutionType" : {
+            "type" : "string",
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
+          },
           "subunitCode" : {
             "type" : "string"
           },
@@ -7626,6 +7638,18 @@
           },
           "id" : {
             "type" : "string"
+          }
+        }
+      },
+      "OnboardedUsersResponse" : {
+        "title" : "OnboardedUsersResponse",
+        "type" : "object",
+        "properties" : {
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserProductsResponse"
+            }
           }
         }
       },

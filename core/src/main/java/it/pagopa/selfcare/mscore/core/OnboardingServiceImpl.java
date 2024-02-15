@@ -60,6 +60,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final UserRelationshipService userRelationshipService;
     private final UserEventService userEventService;
     private final ContractService contractService;
+    private final ContractEventNotificationService contractEventNotification;
     private final MailNotificationService notificationService;
     private final UserNotificationService userNotificationService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
@@ -74,7 +75,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
                                  UserEventService userEventService,
-                                 MailNotificationService notificationService,
+                                 ContractEventNotificationService contractEventNotification, MailNotificationService notificationService,
                                  UserNotificationService userNotificationService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
@@ -87,6 +88,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.userRelationshipService = userRelationshipService;
         this.userEventService = userEventService;
         this.contractService = contractService;
+        this.contractEventNotification = contractEventNotification;
         this.notificationService = notificationService;
         this.userNotificationService = userNotificationService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
@@ -216,7 +218,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             token.setStatus(onboarding.getStatus());
             token.setContractSigned(onboarding.getContract());
             institution.setOnboarding(List.of(onboarding));
-            contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
+            contractEventNotification.sendDataLakeNotification(institution, token, QueueEvent.ADD);
             userEventService.sendLegalTokenUserNotification(token);
 
             return institutionUpdated;
@@ -269,7 +271,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             onboardingDao.rollbackSecondStepOfUpdate(rollback.getUserList(), rollback.getUpdatedInstitution(), rollback.getToken());
             contractService.deleteContract(fileName, token.getId());
         }
-        contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), rollback.getToken(), QueueEvent.ADD);
+        contractEventNotification.sendDataLakeNotification(rollback.getUpdatedInstitution(), rollback.getToken(), QueueEvent.ADD);
         userEventService.sendLegalTokenUserNotification(token);
         log.trace("completeOboarding end");
     }

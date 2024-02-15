@@ -15,7 +15,6 @@ import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -351,7 +350,7 @@ class InstitutionControllerTest {
         institution.setParentDescription("parentDescription");
         institution.setRootParentId("rootParentId");
 
-        when(institutionService.createInstitutionFromIpa(any(), any(), any(), any())).thenReturn(institution);
+        when(institutionService.createInstitutionFromIpa(any(), any(), any(), any(), any())).thenReturn(institution);
 
         //Then
         MockHttpServletRequestBuilder requestBuilder = post("/institutions/from-ipa/")
@@ -366,7 +365,7 @@ class InstitutionControllerTest {
 
         ArgumentCaptor<List<InstitutionGeographicTaxonomies>> captorGeo = ArgumentCaptor.forClass(List.class);
         verify(institutionService, times(1))
-                .createInstitutionFromIpa(any(),any(),any(),captorGeo.capture());
+                .createInstitutionFromIpa(any(),any(),any(),captorGeo.capture(), any());
         assertEquals(institutionFromIpaPost.getGeographicTaxonomies().size(), captorGeo.getValue().size());
         assertEquals(geoTaxonomies.getCode(), captorGeo.getValue().get(0).getCode());
         assertEquals(geoTaxonomies.getDesc(), captorGeo.getValue().get(0).getDesc());

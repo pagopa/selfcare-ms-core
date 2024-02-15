@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import lombok.Data;
 
@@ -14,4 +15,5 @@ public class InstitutionFromIpaPost {
     private String subunitCode;
     private InstitutionPaSubunitType subunitType;
     private List<GeoTaxonomies> geographicTaxonomies;
+    private InstitutionType institutionType;
 }
