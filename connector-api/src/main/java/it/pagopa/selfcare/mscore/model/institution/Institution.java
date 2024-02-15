@@ -48,5 +48,6 @@ public class Institution {
     private String rootParentId;
     private String parentDescription;
     private PaAttributes paAttributes;
+    private boolean delegation;
 
 }
