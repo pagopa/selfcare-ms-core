@@ -319,7 +319,7 @@ class InstitutionServiceImplTest {
     void testCreateInstitutionFromIpa() {
         when(createInstitutionStrategyFactory.createInstitutionStrategyIpa()).thenReturn(createInstitutionStrategy);
         when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
-        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id", List.of());
+        Institution institution = institutionServiceImpl.createInstitutionFromIpa("id", InstitutionPaSubunitType.AOO,"id", List.of(), InstitutionType.PA);
         assertNotNull(institution);
     }
 

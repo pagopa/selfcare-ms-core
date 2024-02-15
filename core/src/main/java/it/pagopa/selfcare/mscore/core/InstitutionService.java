@@ -27,7 +27,7 @@ public interface InstitutionService {
 
     List<Institution> getInstitutions(String taxCode, String subunitCode);
 
-    Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies);
+    Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType);
 
     Institution createInstitutionFromPda(Institution institution, String injectionInstitutionType);
 

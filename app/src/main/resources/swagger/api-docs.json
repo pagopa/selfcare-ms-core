@@ -6388,6 +6388,10 @@
               "$ref" : "#/components/schemas/GeoTaxonomies"
             }
           },
+          "institutionType" : {
+            "type" : "string",
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
+          },
           "subunitCode" : {
             "type" : "string"
           },
