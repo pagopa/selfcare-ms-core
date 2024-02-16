@@ -40,5 +40,6 @@ public class InstitutionRequest {
     private boolean imported;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private boolean delegation;
 
 }
