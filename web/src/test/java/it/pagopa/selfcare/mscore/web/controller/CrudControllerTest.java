@@ -168,7 +168,7 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"imported\":false}"));
+                                "{\"imported\":false,\"delegation\":false}"));
     }
 
     @Test
@@ -256,7 +256,7 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"imported\":false}"));
+                                "{\"imported\":false,\"delegation\":false}"));
     }
 
     /**
