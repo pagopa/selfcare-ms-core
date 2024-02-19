@@ -25,7 +25,10 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,10 +36,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserNotificationServiceImpl implements UserNotificationService {
 
-    private static final String ACTIVATE_SUBJECT = "User has been activated";
-    private static final String DELETE_SUBJECT = "User had been deleted";
-    private static final String SUSPEND_SUBJECT = "User has been suspended";
-    private static final String CREATE_SUBJECT = "A new user has been added";
+    private static final String ACTIVATE_SUBJECT = "Il tuo ruolo è stato riabilitato";
+    private static final String DELETE_SUBJECT = "Il tuo ruolo è stato rimosso";
+    private static final String SUSPEND_SUBJECT = "Il tuo ruolo è sospeso";
+    private static final String CREATE_SUBJECT = "Hai un nuovo ruolo per un prodotto PagoPA";
     private static final String ACTIVATE_TEMPLATE = "user_activated.ftlh";
     private static final String DELETE_TEMPLATE = "user_deleted.ftlh";
     private static final String SUSPEND_TEMPLATE = "user_suspended.ftlh";
