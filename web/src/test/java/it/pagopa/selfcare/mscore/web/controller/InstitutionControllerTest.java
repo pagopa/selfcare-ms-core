@@ -1221,7 +1221,7 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#updateCreatedAt(String, String, java.time.OffsetDateTime)}
+     * Method under test: {@link InstitutionController#updateCreatedAt(String, String, java.time.OffsetDateTime, java.time.OffsetDateTime)}
      */
     @Test
     void updateCreatedAt() throws Exception {
@@ -1239,7 +1239,7 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
         // Then
         verify(institutionService, times(1))
-                .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+                .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock, null);
         verifyNoMoreInteractions(institutionService);
     }
 

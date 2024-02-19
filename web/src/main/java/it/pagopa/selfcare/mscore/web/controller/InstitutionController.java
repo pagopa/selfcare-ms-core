@@ -496,13 +496,14 @@ public class InstitutionController {
                                                 @ApiParam("${swagger.mscore.product.model.id}")
                                                 @PathVariable("productId") String productId,
                                                 @ApiParam("${swagger.mscore.institutions.model.createdAt}")
-                                                @RequestParam(value = "createdAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime createdAt) {
+                                                @RequestParam(value = "createdAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime createdAt,
+                                                @RequestParam(value = "activatedAt", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime activatedAt) {
         log.trace("updateCreatedAt start");
         log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, productId, createdAt);
-        if (createdAt.compareTo(OffsetDateTime.now()) > 0) {
+        if (createdAt.isAfter(OffsetDateTime.now())) {
             throw new ValidationException("Invalid createdAt date: the createdAt date must be prior to the current date.");
         }
-        institutionService.updateCreatedAt(institutionId, productId, createdAt);
+        institutionService.updateCreatedAt(institutionId, productId, createdAt, activatedAt);
         log.trace("updateCreatedAt end");
         return ResponseEntity.status(HttpStatus.OK).build();
     }

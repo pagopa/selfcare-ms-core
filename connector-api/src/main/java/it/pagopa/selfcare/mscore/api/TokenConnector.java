@@ -21,7 +21,7 @@ public interface TokenConnector {
 
     Token findWithFilter(String institutionId, String productId);
 
-    Token updateTokenCreatedAt(String tokenId, OffsetDateTime createdAt);
+    Token updateTokenCreatedAt(String tokenId, OffsetDateTime createdAt, OffsetDateTime activatedAt);
 
     List<Token> findByStatusAndProductId(EnumSet<RelationshipState> statuses, String productId, Integer nextPage, Integer size);
 }
