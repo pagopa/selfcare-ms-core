@@ -17,6 +17,7 @@ import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_TAX_CODE_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.SEND_MAIL_FOR_DELEGATION_ERROR;
 
 @Service
 public class DelegationServiceImpl implements DelegationService {
@@ -49,12 +50,16 @@ public class DelegationServiceImpl implements DelegationService {
             delegation.setTo(partner.getId());
         }
         try {
-            institutionService.updateInstitutionDelegation(delegation.getTo(), true);
             delegation.setCreatedAt(OffsetDateTime.now());
             delegation.setUpdatedAt(OffsetDateTime.now());
             delegation.setStatus(DelegationState.ACTIVE);
             Delegation savedDelegation = delegationConnector.save(delegation);
-            notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
+            institutionService.updateInstitutionDelegation(delegation.getTo(), true);
+            try {
+                notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
+            } catch (Exception e) {
+                throw new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode());
+            }
             return savedDelegation;
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
@@ -98,11 +103,12 @@ public class DelegationServiceImpl implements DelegationService {
         }
 
         try {
-            institutionService.updateInstitutionDelegation(delegation.getTo(), true);
             delegation.setCreatedAt(OffsetDateTime.now());
             delegation.setUpdatedAt(OffsetDateTime.now());
             delegation.setStatus(DelegationState.ACTIVE);
-            return delegationConnector.save(delegation);
+            Delegation savedDelegation = delegationConnector.save(delegation);
+            institutionService.updateInstitutionDelegation(delegation.getTo(), true);
+            return savedDelegation;
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }

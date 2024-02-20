@@ -11,6 +11,7 @@ public enum GenericError {
     INSTITUTION_INFOCAMERE_NOTFOUND("0039", "Institution %s not found on INFOCAMERE"),
     ONBOARDING_OPERATION_ERROR("0017", "Error while performing onboarding operation"),
     CREATE_DELEGATION_ERROR("0027", "Error while creating requested delegation"),
+    SEND_MAIL_FOR_DELEGATION_ERROR("0028", "Error during send mail for delegation"),
     ONBOARDING_VERIFICATION_ERROR("0015", "Error while verifying onboarding"),
     GETTING_ONBOARDING_INFO_ERROR("0016", "Error while getting onboarding info"),
     GET_PRODUCTS_ERROR("0031", "Error while getting products"),

@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.SEND_MAIL_FOR_DELEGATION_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -70,6 +71,18 @@ class DelegationServiceImplTest {
         assertNotNull(response);
         assertNotNull(response.getId());
         assertEquals(delegation.getId(), response.getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationWithSendMailError() {
+        doThrow(new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode()))
+                .when(mailNotificationService)
+                .sendMailForDelegation(any(), any(), any());
+        assertThrows(MsCoreException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
+        verify(mailNotificationService).sendMailForDelegation(any(), any(), any());
     }
 
     /**
