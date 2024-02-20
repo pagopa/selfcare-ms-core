@@ -445,52 +445,6 @@
         } ]
       }
     },
-    "/migration/tokens" : {
-      "get" : {
-        "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.find.token}",
-        "description" : "${swagger.mscore.migration.find.token}",
-        "operationId" : "findTokensUsingGET",
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/Token"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
     "/migration/user" : {
       "post" : {
         "tags" : [ "Migration" ],
@@ -2925,7 +2879,7 @@
           "style" : "simple",
           "schema" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           }
         } ],
         "responses" : {
@@ -4678,6 +4632,15 @@
             "type" : "integer",
             "format" : "int32"
           }
+        }, {
+          "name" : "productId",
+          "in" : "query",
+          "description" : "productId",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
         } ],
         "responses" : {
           "200" : {
@@ -4899,6 +4862,60 @@
           },
           "409" : {
             "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/onboarded-users" : {
+      "get" : {
+        "tags" : [ "Persons" ],
+        "summary" : "Retrieve onboarded users according to identifiers in input",
+        "description" : "Retrieve onboarded users according to identifiers in input",
+        "operationId" : "getOnboardedUsersUsingGET",
+        "parameters" : [ {
+          "name" : "ids",
+          "in" : "query",
+          "description" : "Users unique identifiers",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardedUsersResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -5665,6 +5682,72 @@
   },
   "components" : {
     "schemas" : {
+      "AdditionalInformations" : {
+        "title" : "AdditionalInformations",
+        "type" : "object",
+        "properties" : {
+          "agentOfPublicService" : {
+            "type" : "boolean"
+          },
+          "agentOfPublicServiceNote" : {
+            "type" : "string"
+          },
+          "belongRegulatedMarket" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvision" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvisionNote" : {
+            "type" : "string"
+          },
+          "ipa" : {
+            "type" : "boolean"
+          },
+          "ipaCode" : {
+            "type" : "string"
+          },
+          "otherNote" : {
+            "type" : "string"
+          },
+          "regulatedMarketNote" : {
+            "type" : "string"
+          }
+        }
+      },
+      "AdditionalInformationsRequest" : {
+        "title" : "AdditionalInformationsRequest",
+        "type" : "object",
+        "properties" : {
+          "agentOfPublicService" : {
+            "type" : "boolean"
+          },
+          "agentOfPublicServiceNote" : {
+            "type" : "string"
+          },
+          "belongRegulatedMarket" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvision" : {
+            "type" : "boolean"
+          },
+          "establishedByRegulatoryProvisionNote" : {
+            "type" : "string"
+          },
+          "ipa" : {
+            "type" : "boolean"
+          },
+          "ipaCode" : {
+            "type" : "string"
+          },
+          "otherNote" : {
+            "type" : "string"
+          },
+          "regulatedMarketNote" : {
+            "type" : "string"
+          }
+        }
+      },
       "Attributes" : {
         "title" : "Attributes",
         "type" : "object",
@@ -5798,7 +5881,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -5984,6 +6067,10 @@
         "title" : "DelegationRequest",
         "type" : "object",
         "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "from" : {
             "type" : "string"
           },
@@ -5996,12 +6083,20 @@
           "productId" : {
             "type" : "string"
           },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED" ]
+          },
           "to" : {
             "type" : "string"
           },
           "type" : {
             "type" : "string",
             "enum" : [ "AOO", "PT" ]
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },
@@ -6009,6 +6104,10 @@
         "title" : "DelegationRequestFromTaxcode",
         "type" : "object",
         "properties" : {
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "fromSubunitCode" : {
             "type" : "string"
           },
@@ -6024,6 +6123,10 @@
           "productId" : {
             "type" : "string"
           },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED" ]
+          },
           "toSubunitCode" : {
             "type" : "string"
           },
@@ -6033,6 +6136,10 @@
           "type" : {
             "type" : "string",
             "enum" : [ "AOO", "PT" ]
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },
@@ -6052,6 +6159,10 @@
           "brokerType" : {
             "type" : "string"
           },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "id" : {
             "type" : "string"
           },
@@ -6066,10 +6177,14 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "productId" : {
             "type" : "string"
+          },
+          "status" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED" ]
           },
           "taxCode" : {
             "type" : "string"
@@ -6077,6 +6192,10 @@
           "type" : {
             "type" : "string",
             "enum" : [ "AOO", "PT" ]
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
           }
         }
       },
@@ -6160,6 +6279,9 @@
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficer"
           },
+          "delegation" : {
+            "type" : "boolean"
+          },
           "description" : {
             "type" : "string"
           },
@@ -6183,7 +6305,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "istatCode" : {
             "type" : "string"
@@ -6269,7 +6391,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string",
@@ -6304,6 +6426,10 @@
             "items" : {
               "$ref" : "#/components/schemas/GeoTaxonomies"
             }
+          },
+          "institutionType" : {
+            "type" : "string",
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "subunitCode" : {
             "type" : "string"
@@ -6390,7 +6516,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -6567,7 +6693,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "onboardings" : {
             "type" : "object",
@@ -6710,6 +6836,9 @@
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficerRequest"
           },
+          "delegation" : {
+            "type" : "boolean"
+          },
           "description" : {
             "type" : "string"
           },
@@ -6733,7 +6862,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -6809,6 +6938,9 @@
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficerResponse"
           },
+          "delegation" : {
+            "type" : "boolean"
+          },
           "description" : {
             "type" : "string"
           },
@@ -6832,7 +6964,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -6909,7 +7041,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "istatCode" : {
             "type" : "string"
@@ -6956,6 +7088,9 @@
         "title" : "InstitutionUpdate",
         "type" : "object",
         "properties" : {
+          "additionalInformations" : {
+            "$ref" : "#/components/schemas/AdditionalInformations"
+          },
           "address" : {
             "type" : "string"
           },
@@ -6991,7 +7126,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "ivassCode" : {
             "type" : "string"
@@ -7023,6 +7158,9 @@
         "title" : "InstitutionUpdateRequest",
         "type" : "object",
         "properties" : {
+          "additionalInformations" : {
+            "$ref" : "#/components/schemas/AdditionalInformationsRequest"
+          },
           "address" : {
             "type" : "string"
           },
@@ -7058,7 +7196,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "ivassCode" : {
             "type" : "string"
@@ -7128,7 +7266,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "paymentServiceProvider" : {
             "$ref" : "#/components/schemas/PaymentServiceProviderResponse"
@@ -7240,7 +7378,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "onboarding" : {
             "type" : "array",
@@ -7405,7 +7543,7 @@
           },
           "institutionType" : {
             "type" : "string",
-            "enum" : [ "AS", "GSP", "PA", "PG", "PSP", "PT", "SA", "SCP" ]
+            "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "origin" : {
             "type" : "string"
@@ -7548,6 +7686,18 @@
           }
         }
       },
+      "OnboardedUsersResponse" : {
+        "title" : "OnboardedUsersResponse",
+        "type" : "object",
+        "properties" : {
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserProductsResponse"
+            }
+          }
+        }
+      },
       "Onboarding" : {
         "title" : "Onboarding",
         "type" : "object",
@@ -7589,6 +7739,10 @@
         "title" : "OnboardingImportContract",
         "type" : "object",
         "properties" : {
+          "activatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "contractType" : {
             "type" : "string"
           },
@@ -7748,6 +7902,10 @@
           "contract" : {
             "$ref" : "#/components/schemas/Contract"
           },
+          "contractActivatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "contractCreatedAt" : {
             "type" : "string",
             "format" : "date-time"
@@ -7855,10 +8013,6 @@
             "items" : {
               "$ref" : "#/components/schemas/ScContractResponse"
             }
-          },
-          "totalNumber" : {
-            "type" : "integer",
-            "format" : "int64"
           }
         }
       },
@@ -8496,6 +8650,18 @@
           }
         }
       },
+      "UserNotificationBindingsResponse" : {
+        "title" : "UserNotificationBindingsResponse",
+        "type" : "object",
+        "properties" : {
+          "bindings" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/UserNotificationResponse"
+            }
+          }
+        }
+      },
       "UserNotificationResponse" : {
         "title" : "UserNotificationResponse",
         "type" : "object",
@@ -8636,7 +8802,7 @@
           "users" : {
             "type" : "array",
             "items" : {
-              "$ref" : "#/components/schemas/UserNotificationResponse"
+              "$ref" : "#/components/schemas/UserNotificationBindingsResponse"
             }
           }
         }

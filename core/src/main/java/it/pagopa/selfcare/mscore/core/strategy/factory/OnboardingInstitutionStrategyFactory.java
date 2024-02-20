@@ -40,6 +40,7 @@ public class OnboardingInstitutionStrategyFactory {
 
     private final OnboardingDao onboardingDao;
     private final ContractService contractService;
+    private final ContractEventNotificationService contractEventNotificationService;
     private final UserService userService;
     private final InstitutionService institutionService;
     private final CoreConfig coreConfig;
@@ -49,12 +50,13 @@ public class OnboardingInstitutionStrategyFactory {
 
     public OnboardingInstitutionStrategyFactory(OnboardingDao onboardingDao,
                                                 ContractService contractService,
-                                                UserService userService,
+                                                ContractEventNotificationService contractEventNotificationService, UserService userService,
                                                 InstitutionService institutionService,
                                                 CoreConfig coreConfig,
                                                 MailNotificationService mailNotificationService, FileStorageConnector fileStorageConnector, UserEventService userEventService) {
         this.onboardingDao = onboardingDao;
         this.contractService = contractService;
+        this.contractEventNotificationService = contractEventNotificationService;
         this.userService = userService;
         this.institutionService = institutionService;
         this.coreConfig = coreConfig;
@@ -169,7 +171,8 @@ public class OnboardingInstitutionStrategyFactory {
         boolean checkRecipientCode = !(institutionType.equals(InstitutionType.SA)
                 || institutionType.equals(InstitutionType.PT)
                 || institutionType.equals(InstitutionType.AS))
-                && !productId.equalsIgnoreCase(PROD_INTEROP.getValue());
+                && !(productId.equalsIgnoreCase(PROD_INTEROP.getValue())
+                || productId.equalsIgnoreCase(PROD_INTEROP_COLL.getValue()));
         OnboardingInstitutionUtils.validateOnboarding(billing, checkRecipientCode);
     }
 
@@ -257,7 +260,7 @@ public class OnboardingInstitutionStrategyFactory {
                 }
 
                 //[TODO https://pagopa.atlassian.net/wiki/spaces/SCP/pages/710901785/RFC+Proposta+per+gestione+asincrona+degli+eventi]
-                contractService.sendDataLakeNotification(strategyInput.getOnboardingRollback().getUpdatedInstitution(), strategyInput.getOnboardingRollback().getToken(), QueueEvent.ADD);
+                contractEventNotificationService.sendDataLakeNotification(strategyInput.getOnboardingRollback().getUpdatedInstitution(), strategyInput.getOnboardingRollback().getToken(), QueueEvent.ADD);
                 userEventService.sendLegalTokenUserNotification(strategyInput.getOnboardingRollback().getToken());
             } catch (Exception e) {
                 onboardingDao.rollbackSecondStep(strategyInput.getToUpdate(), strategyInput.getToDelete(), strategyInput.getInstitution().getId(),

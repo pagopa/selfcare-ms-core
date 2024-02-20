@@ -12,7 +12,9 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.UserEventService;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
+import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -22,9 +24,7 @@ import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.user.UserProductsResponse;
-import it.pagopa.selfcare.mscore.web.model.user.UserResponse;
-import it.pagopa.selfcare.mscore.web.model.user.UsersNotificationResponse;
+import it.pagopa.selfcare.mscore.web.model.user.*;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,9 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
@@ -277,7 +275,7 @@ public class UserController {
                                            @PathVariable("id") String userId,
                                            @ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                            @RequestParam(value = "institutionId") String institutionId) {
-        userEventService.sendUpdateUserNotificationToQueue(userId, institutionId);
+        userEventService.sendUserNotificationToQueue(userId, institutionId, QueueEvent.UPDATE);
         return ResponseEntity.noContent().build();
     }
 
@@ -301,9 +299,26 @@ public class UserController {
                                                               @RequestParam(name = "productId", required = false) String productId) {
         List<UserNotificationToSend> users = userService.findAll(size, page, productId);
         UsersNotificationResponse userNotificationResponse = new UsersNotificationResponse();
-        userNotificationResponse.setUsers(users.stream()
+        List<UserNotificationResponse> usersNotification = users.stream()
                 .map(userMapper::toUserNotification)
-                .collect(Collectors.toList()));
+                .toList();
+
+        Map<String, List<UserNotificationResponse>> userNotificationMap = new HashMap<>();
+
+        for (UserNotificationResponse userNotification : usersNotification) {
+            if (userNotificationMap.containsKey(userNotification.getUser().getUserId())) {
+                userNotificationMap.get(userNotification.getUser().getUserId()).add(userNotification);
+            } else {
+                List<UserNotificationResponse> usersNotificationResponse = new ArrayList<>();
+                usersNotificationResponse.add(userNotification);
+                userNotificationMap.put(userNotification.getUser().getUserId(), usersNotificationResponse);
+            }
+        }
+
+        userNotificationResponse.setUsers(userNotificationMap.values().stream()
+                .map(UserNotificationBindingsResponse::new)
+                .toList());
+
         return ResponseEntity.ok(userNotificationResponse);
     }
 
@@ -335,5 +350,30 @@ public class UserController {
         log.debug("updateProductStatus - userId: {}", userId);
         userService.updateUserStatus(userId, institutionId, productId, role, productRole, status);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Get onboarded users from identifiers in input.
+     *
+     * @param userIds Users identifiers.
+     * @return ResponseEntity<OnboardedUsersResponse>
+     * <p>
+     * * Code: 204, Message: Update successful, DataType: No Content
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 404, Message: Not Found, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.api.users.getOnboardedUsers}", notes = "${swagger.mscore.api.users.getOnboardedUsers}")
+    @GetMapping(value = "/onboarded-users")
+    public ResponseEntity<OnboardedUsersResponse> getOnboardedUsers(@ApiParam(value = "${swagger.mscore.users.userIds}", required = true)
+                                                                    @RequestParam(value = "ids") List<String> userIds) {
+        log.debug("getOnboardedUsers - userIds: {}", userIds);
+        final List<OnboardedUser> onboardedUsers = userService.findAllByIds(userIds);
+        OnboardedUsersResponse response = OnboardedUsersResponse.builder()
+                .users(onboardedUsers.stream()
+                        .map(userMapper::toOnboardedUserResponse)
+                        .toList())
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

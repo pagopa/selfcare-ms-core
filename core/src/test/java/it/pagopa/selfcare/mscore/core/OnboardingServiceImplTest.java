@@ -4,6 +4,7 @@ import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
@@ -33,6 +34,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -62,6 +65,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private ContractService contractService;
+
+    @Mock
+    private ContractEventNotificationService contractEventNotificationService;
 
     @Mock
     private UserService userService;
@@ -1493,6 +1499,92 @@ class OnboardingServiceImplTest {
     }
 
     @Test
+    void shouldOnboardingInstitutionGSP() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
+                .thenReturn(mockInstitutionStrategy);
+        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"ipa", "regulatedMarket", "establishedByRegulatoryProvision", "agentOfPublicService"})
+    void shouldOnboardingInstitutionWithAdditionalInfo(String type) {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
+                .thenReturn(mockInstitutionStrategy);
+        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        institutionUpdate.setAdditionalInformations(TestUtils.createSimpleAdditionalInformations(type));
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    @Test
+    void shouldOnboardingInstitutionWithAdditionalInfoOther() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
+                .thenReturn(mockInstitutionStrategy);
+        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        AdditionalInformations additionalInformations = TestUtils.createSimpleAdditionalInformations("other");
+        additionalInformations.setOtherNote("test");
+        institutionUpdate.setAdditionalInformations(additionalInformations);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+    }
+
+    @Test
+    void shouldOnboardingInstitutionWithAdditionalInfoRequiredException() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+
+    }
+
+    @Test
+    void shouldOnboardingInstitutionWithAdditionalInfoOtherRequiredException() {
+        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
+
+        OnboardingRequest onboardingRequest = new OnboardingRequest();
+        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
+        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
+        institutionUpdate.setInstitutionType(InstitutionType.GSP);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+        AdditionalInformations additionalInformations = TestUtils.createSimpleAdditionalInformations("other");
+        additionalInformations.setIpa(false);
+        institutionUpdate.setAdditionalInformations(additionalInformations);
+        onboardingRequest.setInstitutionUpdate(institutionUpdate);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
+
+    }
+
+    @Test
     void shouldOnboardingInstitutionComplete() {
         OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
         when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(any(), any()))
@@ -1594,12 +1686,60 @@ class OnboardingServiceImplTest {
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
 
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
-        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(user);
+        when(userService.persistWorksContractToUserRegistry(userToOnboard.getTaxCode(), userToOnboard.getEmail(), institution.getId())).thenReturn(user);
 
         onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist);
 
         verify(userService, times(1))
                 .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
+
+        verify(userService, times(1))
+                .persistWorksContractToUserRegistry(userToOnboard.getTaxCode(), userToOnboard.getEmail(), institution.getId());
+
+        verify(onboardingDao, times(1))
+                .onboardOperator(any(), any(), any());
+        verifyNoMoreInteractions(userService);
+    }
+
+    /**
+     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     */
+    @Test
+    void persistOnboarding_whenUserExistsOnRegistryButMailIsEmpty() {
+
+        String pricingPlan = "pricingPlan";
+        String productId = "productId";
+        Onboarding onboarding = dummyOnboarding();
+        onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
+
+        Onboarding onboardingToPersist = new Onboarding();
+        onboardingToPersist.setPricingPlan(pricingPlan);
+        onboardingToPersist.setProductId(productId);
+        onboardingToPersist.setBilling(new Billing());
+
+        Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setOnboarding(List.of(onboarding));
+
+        UserToOnboard userToOnboard = createSimpleUserToOnboard();
+        userToOnboard.setEmail(null);
+        User user = new User();
+        user.setFiscalCode("fiscalCode");
+        user.setId("42");
+        final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
+
+        when(institutionConnector.findById(institution.getId())).thenReturn(institution);
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
+
+        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
+
+        onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist);
+
+        verify(userService, times(1))
+                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
+
+        verify(userService, times(0))
+                .persistWorksContractToUserRegistry(any(), any(), any());
 
         verify(onboardingDao, times(1))
                 .onboardOperator(any(), any(), any());

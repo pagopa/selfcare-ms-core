@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
@@ -23,6 +24,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
+import it.pagopa.selfcare.mscore.model.institution.AdditionalInformations;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
@@ -32,6 +34,7 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,13 +52,15 @@ import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 @Slf4j
 @Service
 public class OnboardingServiceImpl implements OnboardingService {
-
+    protected static final String REQUIRED_ADDITIONAL_INFORMATIONS_MESSAGE = "AdditionalInformations is required";
+    protected static final String REQUIRED_OTHER_NOTE_MESSAGE = "Other note is required";
     private final OnboardingDao onboardingDao;
     private final InstitutionService institutionService;
     private final UserService userService;
     private final UserRelationshipService userRelationshipService;
     private final UserEventService userEventService;
     private final ContractService contractService;
+    private final ContractEventNotificationService contractEventNotification;
     private final MailNotificationService notificationService;
     private final UserNotificationService userNotificationService;
     private final PagoPaSignatureConfig pagoPaSignatureConfig;
@@ -70,7 +75,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
                                  UserEventService userEventService,
-                                 MailNotificationService notificationService,
+                                 ContractEventNotificationService contractEventNotification, MailNotificationService notificationService,
                                  UserNotificationService userNotificationService,
                                  PagoPaSignatureConfig pagoPaSignatureConfig,
                                  OnboardingInstitutionStrategyFactory institutionStrategyFactory,
@@ -83,6 +88,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.userRelationshipService = userRelationshipService;
         this.userEventService = userEventService;
         this.contractService = contractService;
+        this.contractEventNotification = contractEventNotification;
         this.notificationService = notificationService;
         this.userNotificationService = userNotificationService;
         this.pagoPaSignatureConfig = pagoPaSignatureConfig;
@@ -127,10 +133,23 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
+        validateAdditionalInformations(request);
         Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
         institutionStrategyFactory
                 .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType(), request.getProductId(), institution)
                 .onboardingInstitution(request, principal);
+    }
+
+    private static void validateAdditionalInformations(OnboardingRequest request) {
+        if (InstitutionType.GSP.equals(request.getInstitutionUpdate().getInstitutionType())  &&
+                ProductId.PROD_PAGOPA.getValue().equals(request.getProductId())) {
+            Assert.notNull(request.getInstitutionUpdate().getAdditionalInformations(), REQUIRED_ADDITIONAL_INFORMATIONS_MESSAGE);
+            AdditionalInformations additionalInfo = request.getInstitutionUpdate().getAdditionalInformations();
+            if (!additionalInfo.isIpa() && !additionalInfo.isAgentOfPublicService()
+                    && !additionalInfo.isBelongRegulatedMarket() && !additionalInfo.isEstablishedByRegulatoryProvision()){
+                Assert.notNull(additionalInfo.getOtherNote(), REQUIRED_OTHER_NOTE_MESSAGE);
+            }
+        }
     }
 
     @Override
@@ -199,7 +218,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             token.setStatus(onboarding.getStatus());
             token.setContractSigned(onboarding.getContract());
             institution.setOnboarding(List.of(onboarding));
-            contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
+            contractEventNotification.sendDataLakeNotification(institution, token, QueueEvent.ADD);
             userEventService.sendLegalTokenUserNotification(token);
 
             return institutionUpdated;
@@ -252,7 +271,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             onboardingDao.rollbackSecondStepOfUpdate(rollback.getUserList(), rollback.getUpdatedInstitution(), rollback.getToken());
             contractService.deleteContract(fileName, token.getId());
         }
-        contractService.sendDataLakeNotification(rollback.getUpdatedInstitution(), rollback.getToken(), QueueEvent.ADD);
+        contractEventNotification.sendDataLakeNotification(rollback.getUpdatedInstitution(), rollback.getToken(), QueueEvent.ADD);
         userEventService.sendLegalTokenUserNotification(token);
         log.trace("completeOboarding end");
     }
@@ -349,8 +368,10 @@ public class OnboardingServiceImpl implements OnboardingService {
         User userRegistry;
         try {
             userRegistry = userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
+
             //We must save mail institution if it is not found on WorkContracts
-            if(Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId)) {
+            if(Objects.nonNull(user.getEmail()) &&
+                    (Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId))) {
                 userRegistry = userService.persistWorksContractToUserRegistry(user.getTaxCode(), user.getEmail(), institutionId);
             }
         } catch (FeignException.NotFound e) {

@@ -168,7 +168,7 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"imported\":false}"));
+                                "{\"imported\":false,\"delegation\":false}"));
     }
 
     @Test
@@ -256,7 +256,7 @@ class CrudControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"imported\":false}"));
+                                "{\"imported\":false,\"delegation\":false}"));
     }
 
     /**
@@ -385,37 +385,6 @@ class CrudControllerTest {
     void testFindInstitutions2() throws Exception {
         when(migrationService.findInstitution()).thenReturn(new ArrayList<>());
         MockHttpServletRequestBuilder getResult = MockMvcRequestBuilders.get("/migration/institutions");
-        getResult.characterEncoding("Encoding");
-        MockMvcBuilders.standaloneSetup(crudController)
-                .build()
-                .perform(getResult)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
-    }
-
-    /**
-     * Method under test: {@link CrudController#findTokens()}
-     */
-    @Test
-    void testFindTokens() throws Exception {
-        when(migrationService.findToken()).thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/migration/tokens");
-        MockMvcBuilders.standaloneSetup(crudController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
-    }
-
-    /**
-     * Method under test: {@link CrudController#findTokens()}
-     */
-    @Test
-    void testFindTokens2() throws Exception {
-        when(migrationService.findToken()).thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder getResult = MockMvcRequestBuilders.get("/migration/tokens");
         getResult.characterEncoding("Encoding");
         MockMvcBuilders.standaloneSetup(crudController)
                 .build()

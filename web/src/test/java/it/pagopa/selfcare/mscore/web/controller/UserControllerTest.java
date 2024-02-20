@@ -9,7 +9,6 @@ import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.UserRelationshipService;
 import it.pagopa.selfcare.mscore.core.UserService;
-import it.pagopa.selfcare.mscore.core.UserServiceImpl;
 import it.pagopa.selfcare.mscore.core.util.UserNotificationMapper;
 import it.pagopa.selfcare.mscore.core.util.UserNotificationMapperImpl;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
@@ -603,6 +602,7 @@ class UserControllerTest {
         userToNotify.setFamilyName("surname");
         user.setUser(userToNotify);
         user.setProductId("prod-io");
+
         when(userService.findAll(any(), any(), anyString())).thenReturn(List.of(user));
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -617,18 +617,17 @@ class UserControllerTest {
 
         UsersNotificationResponse response = new ObjectMapper().readValue(
                 result.getResponse().getContentAsString(),
-                new TypeReference<>() {
-                });
+                UsersNotificationResponse.class);
 
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getUsers());
         Assertions.assertFalse(response.getUsers().isEmpty());
         Assertions.assertNotNull(response.getUsers().get(0));
-        Assertions.assertNotNull(response.getUsers().get(0).getUser());
-        Assertions.assertEquals("name", response.getUsers().get(0).getUser().getName());
-        Assertions.assertEquals("surname", response.getUsers().get(0).getUser().getFamilyName());
-        Assertions.assertEquals("prod-io", response.getUsers().get(0).getProductId());
-        Assertions.assertEquals("institutionId", response.getUsers().get(0).getInstitutionId());
+        Assertions.assertNotNull(response.getUsers().get(0).getBindings().get(0).getUser());
+        Assertions.assertEquals("name", response.getUsers().get(0).getBindings().get(0).getUser().getName());
+        Assertions.assertEquals("surname", response.getUsers().get(0).getBindings().get(0).getUser().getFamilyName());
+        Assertions.assertEquals("prod-io", response.getUsers().get(0).getBindings().get(0).getProductId());
+        Assertions.assertEquals("institutionId", response.getUsers().get(0).getBindings().get(0).getInstitutionId());
 
     }
 
@@ -647,6 +646,23 @@ class UserControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    void onboardedUsers() throws Exception {
+        final OnboardedUser onboardedUser = new OnboardedUser();
+        onboardedUser.setId("userId");
+        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser));
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/onboarded-users")
+                .queryParam("ids","userId")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockMvcBuilders.standaloneSetup(userController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
 }

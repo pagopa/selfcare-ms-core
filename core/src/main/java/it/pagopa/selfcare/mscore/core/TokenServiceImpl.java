@@ -4,16 +4,13 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.NotificationToSend;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,13 +27,13 @@ public class TokenServiceImpl implements TokenService {
     private final UserService userService;
     private final OnboardingDao onboardingDao;
     private final InstitutionConnector institutionConnector;
-    private final ContractService contractService;
+    private final ContractEventNotificationService contractService;
 
     public TokenServiceImpl(TokenConnector tokenConnector,
                             UserService userService,
                             OnboardingDao onboardingDao,
                             InstitutionConnector institutionConnector,
-                            ContractService contractService) {
+                            ContractEventNotificationService contractService) {
         this.tokenConnector = tokenConnector;
         this.userService = userService;
         this.onboardingDao = onboardingDao;
@@ -116,11 +113,11 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public PaginatedToken retrieveContractsFilterByStatus(List<RelationshipState> states, Integer page, Integer size) {
+    public PaginatedToken retrieveContractsFilterByStatus(List<RelationshipState> states, Integer page, Integer size, String productId) {
         log.trace("getTokens start");
-        log.debug("getTokens states = {}, page = {}, size = {}", states, page, size);
-        Long totalNumber = tokenConnector.countAllTokenFilterByStates(states);
-        List<Token> tokensByStatusAndProduct = tokenConnector.findByStatusAndProductId(EnumSet.copyOf(states), null, page, size);
+        log.debug("getTokens productId = {} states = {}, page = {}, size = {}", productId, states, page, size);
+
+        List<Token> tokensByStatusAndProduct = tokenConnector.findByStatusAndProductId(EnumSet.copyOf(states), productId, page, size);
         List<NotificationToSend> notificationToSends = tokensByStatusAndProduct.stream()
                 .map(token -> {
                     Institution institution = retrieveRelatedInstitution(token.getInstitutionId());
@@ -130,7 +127,7 @@ public class TokenServiceImpl implements TokenService {
 
         log.debug("getTokens result = {}", notificationToSends);
         log.trace("getTokens end");
-        return new PaginatedToken(notificationToSends, totalNumber);
+        return new PaginatedToken(notificationToSends);
     }
 
     private Institution retrieveRelatedInstitution(String institutionId) {

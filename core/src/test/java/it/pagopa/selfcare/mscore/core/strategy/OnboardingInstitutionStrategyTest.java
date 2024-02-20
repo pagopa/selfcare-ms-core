@@ -46,6 +46,8 @@ class OnboardingInstitutionStrategyTest {
     @Mock
     private ContractService contractService;
     @Mock
+    private ContractEventNotificationService contractEventNotificationService;
+    @Mock
     private UserEventService userEventService;
     @Mock
     private UserService userService;
@@ -62,7 +64,7 @@ class OnboardingInstitutionStrategyTest {
     @BeforeEach
     void beforeAll() {
         strategyFactory = new OnboardingInstitutionStrategyFactory(onboardingDao,
-                contractService,userService, institutionService, coreConfig, mailNotificationService, fileStorageConnector, userEventService);
+                contractService, contractEventNotificationService, userService, institutionService, coreConfig, mailNotificationService, fileStorageConnector, userEventService);
     }
 
 
@@ -606,6 +608,7 @@ class OnboardingInstitutionStrategyTest {
         institution.setTaxCode(institutionUpdate.getTaxCode());
 
         Billing billing1 = TestUtils.createSimpleBilling();
+        billing1.setRecipientCode(null);
         Contract contract = TestUtils.createSimpleContract();
 
         OnboardingRequest onboardingRequest = new OnboardingRequest();

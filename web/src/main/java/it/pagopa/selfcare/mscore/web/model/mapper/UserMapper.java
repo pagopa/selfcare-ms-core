@@ -16,6 +16,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.util.List;
 import java.util.Map;
 
 @Mapper(componentModel = "spring")
@@ -41,6 +42,7 @@ public interface UserMapper {
     InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request);
 
     UserNotificationResponse toUserNotification(UserNotificationToSend user);
+    UserProductsResponse toOnboardedUserResponse(OnboardedUser onboardedUser);
 
     @Named("retrieveMailFromWorkContacts")
     default String retrieveMailFromWorkContacts(Map<String, WorkContact> map, String institutionId){

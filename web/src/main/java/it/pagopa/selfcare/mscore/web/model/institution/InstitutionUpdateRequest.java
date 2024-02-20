@@ -34,4 +34,5 @@ public class InstitutionUpdateRequest {
     private String supportPhone;
     private String ivassCode;
     private boolean imported;
+    private AdditionalInformationsRequest additionalInformations;
 }

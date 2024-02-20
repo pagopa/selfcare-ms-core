@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
 import it.pagopa.selfcare.mscore.core.util.NotificationMapper;
+import it.pagopa.selfcare.mscore.core.util.UserNotificationMapper;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
@@ -22,6 +23,7 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -55,11 +57,16 @@ public class UserEventServiceImpl implements UserEventService {
 
     private final NotificationMapper notificationMapper;
 
+    private final UserNotificationMapper userNotificationMapper;
+
     public UserEventServiceImpl(CoreConfig coreConfig,
                                 KafkaTemplate<String, String> kafkaTemplateUsers,
                                 KafkaPropertiesConfig kafkaPropertiesConfig,
                                 ObjectMapper mapper,
-                                UserConnector userConnector, UserRegistryConnector userRegistryConnector, NotificationMapper notificationMapper) {
+                                UserConnector userConnector,
+                                UserRegistryConnector userRegistryConnector,
+                                NotificationMapper notificationMapper,
+                                UserNotificationMapper userNotificationMapper) {
         this.coreConfig = coreConfig;
         this.kafkaTemplateUsers = kafkaTemplateUsers;
         this.kafkaPropertiesConfig = kafkaPropertiesConfig;
@@ -67,6 +74,8 @@ public class UserEventServiceImpl implements UserEventService {
         this.userConnector = userConnector;
         this.userRegistryConnector = userRegistryConnector;
         this.notificationMapper = notificationMapper;
+        this.userNotificationMapper = userNotificationMapper;
+
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {
             @Override
@@ -78,38 +87,16 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     public void sendLegalTokenUserNotification(Token token) {
-        token.getUsers().forEach(tokenUser -> {
-            List<UserToNotify> usersToNotify = toUserToNotify(tokenUser.getUserId(), token.getInstitutionId(), token.getProductId(), Optional.empty(), Optional.of(token.getId()));
-            usersToNotify.forEach(user -> {
-                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromToken(token, user, QueueEvent.ADD);
-                String id = idBuilder(user.getUserId(), token.getInstitutionId(), token.getProductId(), user.getProductRole());
-                notification.setId(id);
-                try {
-                    String msg = mapper.writeValueAsString(notification);
-                    sendUserNotification(msg, user.getUserId());
-                } catch (JsonProcessingException e) {
-                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getUserId());
-                }
-            });
-        });
+        token.getUsers().forEach(tokenUser -> sendUserNotificationToQueue(tokenUser.getUserId(), token.getInstitutionId(), QueueEvent.ADD));
     }
 
     @Override
     public void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId) {
         try {
-            User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId());
             onboardedUser.getBindings().forEach(userBinding -> {
                 for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
                     if (productId.equals(onboardedProduct.getProductId()) && ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus())) {
-                        UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromOnboardedProduct(toUserToNotify(user.getId(), userBinding.getInstitutionId(), user, onboardedProduct), onboardedProduct, userBinding.getInstitutionId());
-                        String id = idBuilder(user.getId(), userBinding.getInstitutionId(), onboardedProduct.getProductId(), onboardedProduct.getProductRole());
-                        notification.setId(id);
-                        try {
-                            String msg = mapper.writeValueAsString(notification);
-                            sendUserNotification(msg, user.getId());
-                        } catch (JsonProcessingException e) {
-                            log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getId());
-                        }
+                        sendUserNotificationFromBindings(onboardedUser.getId(), QueueEvent.ADD, userBinding, onboardedProduct);
                     }
                 }
             });
@@ -132,26 +119,52 @@ public class UserEventServiceImpl implements UserEventService {
                 .collect(Collectors.toList());
     }
 
+    protected Optional<UserBinding> toUserBinding(String userId, String institutionId) {
+        OnboardedUser onboardedUser = userConnector.findById(userId);
+        return onboardedUser.getBindings().stream()
+                .filter(userBinding -> institutionId.equals(userBinding.getInstitutionId()))
+                .findFirst();
+    }
+
     @Override
-    public void sendUpdateUserNotificationToQueue(String userId, String institutionId) {
+    public void sendUserNotificationToQueue(String userId, String institutionId, QueueEvent eventType) {
         log.trace("sendUpdateUserNotification start");
         log.debug("sendUpdateUserNotification userId = {}, institutionId = {}", userId, institutionId);
-        UserToNotify userToNotify = new UserToNotify();
-        userToNotify.setUserId(userId);
-        UserNotificationToSend notification = new UserNotificationToSend();
-        String id = userToNotify.getUserId().concat(institutionId);
-        notification.setId(id);
-        notification.setUpdatedAt(OffsetDateTime.now());
-        notification.setInstitutionId(institutionId);
-        notification.setEventType(QueueEvent.UPDATE);
-        notification.setUser(userToNotify);
+        OnboardedUser onboardedUser = userConnector.findById(userId);
+        onboardedUser.getBindings().stream()
+                .filter(userBinding -> userBinding.getInstitutionId().equals(institutionId))
+                .forEach(userBinding -> userBinding.getProducts()
+                        .forEach(onboardedProduct -> {
+                            sendUserNotificationFromBindings(userId, eventType, userBinding, onboardedProduct);
+                        }));
+    }
+
+    private void sendUserNotificationFromBindings(String userId, QueueEvent eventType, UserBinding userBinding, OnboardedProduct onboardedProduct) {
+        User user = userRegistryConnector.getUserByInternalId(userId);
+        UserToNotify userToNotify = userNotificationMapper.toUserNotify(user, onboardedProduct, userBinding.getInstitutionId());
+        UserNotificationToSend userNotification = notificationMapper.setNotificationDetailsFromOnboardedProduct(userToNotify, onboardedProduct, userBinding.getInstitutionId());
+        userNotification.setId(idBuilder(userId, userBinding.getInstitutionId(), onboardedProduct.getProductId(), onboardedProduct.getProductRole()));
+        userNotification.setEventType(eventType);
         try {
-            String msg = mapper.writeValueAsString(notification);
+            String msg = mapper.writeValueAsString(userNotification);
             sendUserNotification(msg, userId);
         } catch (JsonProcessingException e) {
             log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
         }
     }
+
+    public void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType) {
+        if (relationshipInfo != null) {
+            Optional<UserBinding> userBinding = toUserBinding(relationshipInfo.getUserId(),
+                    relationshipInfo.getInstitution().getId());
+            userBinding.ifPresent(currentUserBinding -> {
+                currentUserBinding.getProducts().stream().filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
+                        .filter(onboardedProduct -> Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()).map(s -> s.equals(onboardedProduct.getRelationshipId())).orElse(true))
+                        .forEach(currentOnboardedProduct -> sendUserNotificationFromBindings(relationshipInfo.getUserId(), eventType, currentUserBinding, currentOnboardedProduct));
+            });
+        }
+    }
+
 
 
     private UserToNotify toUserToNotify(String userId, String institutionId, User user, OnboardedProduct onboardedProduct) {
@@ -164,27 +177,6 @@ public class UserEventServiceImpl implements UserEventService {
         userToNotify.setRelationshipStatus(onboardedProduct.getStatus());
         userToNotify.setProductRole(onboardedProduct.getProductRole());
         return userToNotify;
-    }
-
-    public void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType) {
-        if (relationshipInfo != null) {
-            List<UserToNotify> usersToNotify = toUserToNotify(relationshipInfo.getUserId(),
-                    relationshipInfo.getInstitution().getId(),
-                    relationshipInfo.getOnboardedProduct().getProductId(), Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()), Optional.empty());
-
-            log.debug(LogUtils.CONFIDENTIAL_MARKER, "Notification to send to the data lake, notification: {}", relationshipInfo);
-            usersToNotify.forEach(user -> {
-                UserNotificationToSend notification = notificationMapper.setNotificationDetailsFromRelationship(relationshipInfo, user, eventType);
-                String id = idBuilder(user.getUserId(), notification.getInstitutionId(), notification.getProductId(), user.getProductRole());
-                notification.setId(id);
-                try {
-                    String msg = mapper.writeValueAsString(notification);
-                    sendUserNotification(msg, user.getUserId());
-                } catch (JsonProcessingException e) {
-                    log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, user.getUserId());
-                }
-            });
-        }
     }
 
     private String idBuilder(String userId, String institutionId, String productId, String productRole){
