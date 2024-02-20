@@ -340,6 +340,13 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
+    @Override
+    public void updateInstitutionDelegation(String institutionId, boolean delegation) {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDelegation(delegation);
+        institutionConnector.findAndUpdate(institutionId, null, null, institutionUpdate);
+    }
+
     private List<InstitutionGeographicTaxonomies> retrieveGeographicTaxonomies(InstitutionUpdate institutionUpdate) {
         if (institutionUpdate.getGeographicTaxonomies() != null) {
             return institutionUpdate.getGeographicTaxonomies()

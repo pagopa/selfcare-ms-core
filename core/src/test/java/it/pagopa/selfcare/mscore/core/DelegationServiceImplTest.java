@@ -43,6 +43,7 @@ class DelegationServiceImplTest {
         delegation.setId("id");
         when(delegationConnector.save(any())).thenReturn(delegation);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
@@ -63,6 +64,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.save(any())).thenReturn(delegation);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
@@ -162,6 +164,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.save(any())).thenReturn(delegation);
         when(institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode())).thenReturn(List.of(institution));
         when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
@@ -183,6 +186,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.save(any())).thenReturn(delegation);
         when(institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode())).thenReturn(List.of(institution));
         when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);

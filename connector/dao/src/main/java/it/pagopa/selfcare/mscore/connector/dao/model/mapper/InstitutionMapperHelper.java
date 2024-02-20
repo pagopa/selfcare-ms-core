@@ -44,6 +44,7 @@ public class InstitutionMapperHelper {
         response.put(InstitutionUpdate.Fields.supportEmail.name(), institutionUpdate.getSupportEmail());
         response.put(InstitutionUpdate.Fields.supportPhone.name(), institutionUpdate.getSupportPhone());
         response.put(InstitutionUpdate.Fields.imported.name(), institutionUpdate.isImported());
+        response.put(InstitutionUpdate.Fields.delegation.name(), institutionUpdate.isDelegation());
 
         if(institutionUpdate.getPaymentServiceProvider() != null) {
             response.put(constructPaymentInnerField(PaymentServiceProvider.Fields.abiCode.name()),

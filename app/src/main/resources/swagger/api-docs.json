@@ -7109,6 +7109,9 @@
           "dataProtectionOfficer" : {
             "$ref" : "#/components/schemas/DataProtectionOfficer"
           },
+          "delegation" : {
+            "type" : "boolean"
+          },
           "description" : {
             "type" : "string"
           },
