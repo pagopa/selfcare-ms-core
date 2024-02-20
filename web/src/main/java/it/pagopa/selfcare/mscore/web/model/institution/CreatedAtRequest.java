@@ -9,8 +9,6 @@ import java.time.OffsetDateTime;
 
 @Data
 public class CreatedAtRequest {
-    @NotBlank(message = "institutionId is mandatory")
-    private String institutionId;
     @NotBlank(message = "productId is mandatory")
     private String productId;
     @NotNull(message = "createdAt is mandatory")

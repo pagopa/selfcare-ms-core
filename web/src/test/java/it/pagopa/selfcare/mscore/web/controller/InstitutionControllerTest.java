@@ -1221,7 +1221,7 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#updateCreatedAt(CreatedAtRequest)}
+     * Method under test: {@link InstitutionController#updateCreatedAt(String, CreatedAtRequest)}
      */
     @Test
     void updateCreatedAt() throws Exception {
@@ -1232,10 +1232,9 @@ class InstitutionControllerTest {
 
         CreatedAtRequest createdAtRequest = new CreatedAtRequest();
         createdAtRequest.setCreatedAt(createdAtMock);
-        createdAtRequest.setInstitutionId(institutionIdMock);
         createdAtRequest.setProductId(productIdMock);
         // When
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/createdAt")
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/createdAt", institutionIdMock)
                 .content(new ObjectMapper().findAndRegisterModules().writeValueAsString(createdAtRequest))
                 .contentType(APPLICATION_JSON_VALUE)
                 .accept(APPLICATION_JSON_VALUE);
@@ -1387,12 +1386,11 @@ class InstitutionControllerTest {
         String productIdMock = "productId";
         OffsetDateTime createdAtMock = OffsetDateTime.now().minusHours(10);
         CreatedAtRequest createdAtRequest = new CreatedAtRequest();
-        createdAtRequest.setInstitutionId(institutionIdMock);
         createdAtRequest.setProductId(productIdMock);
         createdAtRequest.setCreatedAt(createdAtMock);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                        .put(BASE_URL + "/createdAt")
+                        .put(BASE_URL + "/{institutionId}/createdAt", institutionIdMock)
                         .content(objectMapper.writeValueAsString(createdAtRequest))
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE);

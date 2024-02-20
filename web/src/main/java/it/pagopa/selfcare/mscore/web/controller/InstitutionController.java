@@ -487,14 +487,15 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions.updateCreatedAt}", notes = "${swagger.mscore.institutions.updateCreatedAt}")
-    @PutMapping(value = "/createdAt")
-    public ResponseEntity<Void> updateCreatedAt(@Valid @RequestBody CreatedAtRequest createdAtRequest) {
+    @PutMapping(value = "/{institutionId}/createdAt")
+    public ResponseEntity<Void> updateCreatedAt( @PathVariable(value = "institutionId") String institutionId,
+                                                 @Valid @RequestBody CreatedAtRequest createdAtRequest) {
         log.trace("updateCreatedAt start");
-        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", createdAtRequest.getInstitutionId(), createdAtRequest.getProductId(), createdAtRequest.getCreatedAt());
+        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, createdAtRequest.getProductId(), createdAtRequest.getCreatedAt());
         if (createdAtRequest.getCreatedAt().isAfter(OffsetDateTime.now())) {
             throw new ValidationException("Invalid createdAt date: the createdAt date must be prior to the current date.");
         }
-        institutionService.updateCreatedAt(createdAtRequest.getInstitutionId(), createdAtRequest.getProductId(), createdAtRequest.getCreatedAt(), createdAtRequest.getActivatedAt());
+        institutionService.updateCreatedAt(institutionId, createdAtRequest.getProductId(), createdAtRequest.getCreatedAt(), createdAtRequest.getActivatedAt());
         log.trace("updateCreatedAt end");
         return ResponseEntity.status(HttpStatus.OK).build();
     }
