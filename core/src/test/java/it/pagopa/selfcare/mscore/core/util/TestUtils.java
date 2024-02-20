@@ -46,7 +46,7 @@ public class TestUtils {
                 "The characteristics of someone or something", institutionType, "42 Main St", "42 Main St", "21654",
                 "TaxCode", "city", "county", "country", "istatCode", billing, onboarding, geographicTaxonomies, attributes, paymentServiceProvider,
                 new DataProtectionOfficer(), null, null, "START - setupCommonData", "START - setupCommonData",
-                "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null, null, null, new PaAttributes());
+                "START - setupCommonData", true, OffsetDateTime.now(), OffsetDateTime.now(), null, null, null, null, new PaAttributes(),false);
     }
 
     public static OnboardingRequest dummyOnboardingRequest(Billing billing, Contract contract, InstitutionUpdate institutionUpdate){

@@ -163,19 +163,6 @@ class MigrationServiceImplTest {
     }
 
     /**
-     * Method under test: {@link MigrationServiceImpl#findToken()}
-     */
-    @Test
-    void testFindToken() {
-        ArrayList<Token> tokenList = new ArrayList<>();
-        when(tokenConnector.findAll()).thenReturn(tokenList);
-        List<Token> actualFindTokenResult = migrationServiceImpl.findToken();
-        assertSame(tokenList, actualFindTokenResult);
-        assertTrue(actualFindTokenResult.isEmpty());
-        verify(tokenConnector).findAll();
-    }
-
-    /**
      * Method under test: {@link MigrationServiceImpl#findUser()}
      */
     @Test

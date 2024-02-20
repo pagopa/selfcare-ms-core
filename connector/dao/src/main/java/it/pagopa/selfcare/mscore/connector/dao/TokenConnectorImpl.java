@@ -42,31 +42,8 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public List<Token> findAll(){
-        return tokenRepository.findAll().stream().map(TokenMapper::convertToToken).collect(Collectors.toList());
-    }
-
-    @Override
     public void deleteById(String id) {
         tokenRepository.deleteById(id);
-    }
-
-    @Override
-    public Token findActiveContract(String institutionId, String userId, String productId) {
-        Query query = new Query();
-        query.addCriteria(
-                new Criteria().andOperator(
-                        Criteria.where(TokenEntity.Fields.productId.name()).is(productId),
-                        Criteria.where(TokenEntity.Fields.institutionId.name()).is(institutionId),
-                        Criteria.where(TokenEntity.Fields.status.name()).is(RelationshipState.ACTIVE),
-                        Criteria.where(TokenEntity.Fields.users.name()).is(userId)
-                )
-        );
-        return tokenRepository.find(query, TokenEntity.class).stream()
-                .findFirst()
-                .map(TokenMapper::convertToToken)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(GET_INSTITUTION_MANAGER_NOT_FOUND.getMessage(), institutionId, productId),
-                        GET_INSTITUTION_MANAGER_NOT_FOUND.getCode()));
     }
 
     @Override
@@ -154,13 +131,6 @@ public class TokenConnectorImpl implements TokenConnector {
                 .stream()
                 .map(TokenMapper::convertToToken)
                 .toList();
-    }
-
-    @Override
-    public Long countAllTokenFilterByStates(List<RelationshipState> states) {
-        Query query = Query.query(Criteria.where(TokenEntity.Fields.status.name()).in(states))
-                .with(Sort.by(Sort.Direction.ASC, TokenEntity.Fields.id.name()));
-        return tokenRepository.count(query, TokenEntity.class);
     }
 
 }

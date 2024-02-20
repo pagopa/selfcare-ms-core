@@ -2,10 +2,12 @@ package it.pagopa.selfcare.mscore.web.model.delegation;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import java.time.OffsetDateTime;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -29,5 +31,8 @@ public class DelegationResponse {
     private String brokerTaxCode;
     private String brokerType;
     private String brokerName;
+    private DelegationState status;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 
 }

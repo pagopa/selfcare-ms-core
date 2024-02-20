@@ -42,6 +42,7 @@ public interface UserMapper {
     InstitutionUpdate toInstitutionUpdate(InstitutionUpdateRequest request);
 
     UserNotificationResponse toUserNotification(UserNotificationToSend user);
+    UserProductsResponse toOnboardedUserResponse(OnboardedUser onboardedUser);
 
     @Named("retrieveMailFromWorkContacts")
     default String retrieveMailFromWorkContacts(Map<String, WorkContact> map, String institutionId){

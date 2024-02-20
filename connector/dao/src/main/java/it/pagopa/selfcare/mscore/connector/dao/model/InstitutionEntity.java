@@ -56,5 +56,6 @@ public class InstitutionEntity {
     private String parentDescription;
     private String rootParentId;
     private PaAttributesEntity paAttributes;
+    private boolean delegation;
 
 }

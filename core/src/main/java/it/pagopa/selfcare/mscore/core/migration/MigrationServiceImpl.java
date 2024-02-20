@@ -45,11 +45,6 @@ public class MigrationServiceImpl implements MigrationService {
     }
 
     @Override
-    public List<Token> findToken(){
-        return tokenConnector.findAll();
-    }
-
-    @Override
     public List<OnboardedUser> findUser(){
         return userConnector.findAll();
     }
