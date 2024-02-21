@@ -108,4 +108,24 @@ public class DelegationController {
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
+
+    /**
+     * The function delete delegation
+     *
+     * @param delegationId DelegationId
+     * @return InstitutionResponse
+     * * Code: 204, Message: successful operation, DataType: NoContent
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.delegation.delete}", notes = "${swagger.mscore.delegation.delete}")
+    @DeleteMapping("/{delegationId}")
+    public ResponseEntity<Void> deleteDelegation(@ApiParam("${swagger.mscore.delegation.model.delegationId}")
+                                                                    @PathVariable("delegationId") String delegationId) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
+        delegationService.deleteDelegationFromDelegationId(delegationId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

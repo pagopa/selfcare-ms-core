@@ -115,6 +115,25 @@ public class DelegationServiceImpl implements DelegationService {
         }
     }
 
+    @Override
+    public void deleteDelegationFromDelegationId(String delegationId) {
+        String institutionId;
+        try{
+            Delegation delegation = delegationConnector.findByIdAndModifyStatus(delegationId, DelegationState.DELETED);
+            institutionId = delegation.getTo();
+        } catch (Exception e) {
+            throw new MsCoreException(DELETE_DELEGATION_ERROR.getMessage(), DELETE_DELEGATION_ERROR.getCode());
+        }
+        try{
+            if(!delegationConnector.checkIfDelegationsAreActive(institutionId)) {
+                institutionService.updateInstitutionDelegation(institutionId, false);
+            }
+        } catch (Exception e) {
+            delegationConnector.findByIdAndModifyStatus(delegationId, DelegationState.ACTIVE);
+            throw new MsCoreException(DELETE_DELEGATION_ERROR.getMessage(), DELETE_DELEGATION_ERROR.getCode());
+        }
+    }
+
 
     @Override
     public boolean checkIfExists(Delegation delegation) {
