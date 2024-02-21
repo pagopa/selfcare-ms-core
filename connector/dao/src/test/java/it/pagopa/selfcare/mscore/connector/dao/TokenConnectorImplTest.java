@@ -697,12 +697,13 @@ class TokenConnectorImplTest {
         // Given
         String tokenIdMock = "tokenIdMock";
         OffsetDateTime createdAt = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        OffsetDateTime activatedAt = OffsetDateTime.parse("2020-11-02T02:15:30+01:00");
         TokenEntity updatedTokenMock = mockInstance(new TokenEntity());
         updatedTokenMock.setId(tokenIdMock);
         when(tokenRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(updatedTokenMock);
         // When
-        Token result = tokenConnectorImpl.updateTokenCreatedAt(tokenIdMock, createdAt);
+        Token result = tokenConnectorImpl.updateTokenCreatedAt(tokenIdMock, createdAt, activatedAt);
         // Then
         assertNotNull(result);
         assertEquals(result.getId(), tokenIdMock);
@@ -714,7 +715,8 @@ class TokenConnectorImplTest {
         Update capturedUpdate = updateArgumentCaptor.getValue();
         assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains("updatedAt") &&
                 capturedUpdate.getUpdateObject().get("$set").toString().contains("updatedAt") &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(createdAt.toString()));
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(createdAt.toString()) &&
+                capturedUpdate.getUpdateObject().get("$set").toString().contains(activatedAt.toString()));
         verifyNoMoreInteractions(tokenRepository);
     }
 
