@@ -49,21 +49,22 @@ public class DelegationServiceImpl implements DelegationService {
                             INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
             delegation.setTo(partner.getId());
         }
+        Delegation savedDelegation;
         try {
             delegation.setCreatedAt(OffsetDateTime.now());
             delegation.setUpdatedAt(OffsetDateTime.now());
             delegation.setStatus(DelegationState.ACTIVE);
-            Delegation savedDelegation = delegationConnector.save(delegation);
+            savedDelegation = delegationConnector.save(delegation);
             institutionService.updateInstitutionDelegation(delegation.getTo(), true);
-            try {
-                notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
-            } catch (Exception e) {
-                throw new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode());
-            }
-            return savedDelegation;
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }
+        try {
+            notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
+        } catch (Exception e) {
+            throw new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode());
+        }
+        return savedDelegation;
     }
 
     @Override
