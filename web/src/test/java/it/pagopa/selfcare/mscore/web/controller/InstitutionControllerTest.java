@@ -79,7 +79,8 @@ class InstitutionControllerTest {
     @Spy
     private UserMapper userMapper = new UserMapperImpl();
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+        //.registerModule(new JavaTimeModule());
 
 
     private final static Onboarding onboarding;
@@ -110,7 +111,6 @@ class InstitutionControllerTest {
         institution.setDescription("description");
         institution.setOnboarding(List.of(onboarding));
         institution.setAttributes(List.of(attribute));
-
 
     }
 
@@ -1221,25 +1221,30 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#updateCreatedAt(String, String, java.time.OffsetDateTime)}
+     * Method under test: {@link InstitutionController#updateCreatedAt(String, CreatedAtRequest)}
      */
     @Test
     void updateCreatedAt() throws Exception {
         // Given
         String institutionIdMock = "institutionId";
         String productIdMock = "productId";
-        String createdAtString = "2020-11-01T02:15:30+01:00";
         OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+
+        CreatedAtRequest createdAtRequest = new CreatedAtRequest();
+        createdAtRequest.setCreatedAt(createdAtMock);
+        createdAtRequest.setProductId(productIdMock);
         // When
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
-                .param("createdAt", createdAtString);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put(BASE_URL + "/{institutionId}/createdAt", institutionIdMock)
+                .content(new ObjectMapper().findAndRegisterModules().writeValueAsString(createdAtRequest))
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE);
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk());
         // Then
         verify(institutionService, times(1))
-                .updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+                .updateCreatedAt(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         verifyNoMoreInteractions(institutionService);
     }
 
@@ -1375,14 +1380,18 @@ class InstitutionControllerTest {
     @Test
     void updateCreatedAt_invalidDate() throws Exception {
         // Given
+
+
         String institutionIdMock = "institutionId";
         String productIdMock = "productId";
         OffsetDateTime createdAtMock = OffsetDateTime.now().minusHours(10);
-        String createdAtString = createdAtMock.toString();
+        CreatedAtRequest createdAtRequest = new CreatedAtRequest();
+        createdAtRequest.setProductId(productIdMock);
+        createdAtRequest.setCreatedAt(createdAtMock);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                        .put(BASE_URL + "/{institutionId}/products/{productId}/createdAt", institutionIdMock, productIdMock)
-                        .param("createdAt", createdAtString)
+                        .put(BASE_URL + "/{institutionId}/createdAt", institutionIdMock)
+                        .content(objectMapper.writeValueAsString(createdAtRequest))
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE);
 
