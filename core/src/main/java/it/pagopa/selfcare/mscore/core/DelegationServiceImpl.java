@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -16,9 +17,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_TAX_CODE_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.SEND_MAIL_FOR_DELEGATION_ERROR;
-
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+@Slf4j
 @Service
 public class DelegationServiceImpl implements DelegationService {
 
@@ -62,7 +62,7 @@ public class DelegationServiceImpl implements DelegationService {
         try {
             notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
         } catch (Exception e) {
-            throw new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode());
+            log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
         }
         return savedDelegation;
     }

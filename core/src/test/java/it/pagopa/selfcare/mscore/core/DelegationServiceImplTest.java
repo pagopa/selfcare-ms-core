@@ -81,7 +81,7 @@ class DelegationServiceImplTest {
         doThrow(new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode()))
                 .when(mailNotificationService)
                 .sendMailForDelegation(any(), any(), any());
-        assertThrows(MsCoreException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
+        assertDoesNotThrow(() -> delegationServiceImpl.createDelegation(new Delegation()));
         verify(mailNotificationService).sendMailForDelegation(any(), any(), any());
     }
 
