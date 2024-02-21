@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.SEND_MAIL_FOR_DELEGATION_ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -43,6 +44,7 @@ class DelegationServiceImplTest {
         delegation.setId("id");
         when(delegationConnector.save(any())).thenReturn(delegation);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
@@ -63,11 +65,24 @@ class DelegationServiceImplTest {
         when(delegationConnector.save(any())).thenReturn(delegation);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
         assertNotNull(response.getId());
         assertEquals(delegation.getId(), response.getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationWithSendMailError() {
+        doThrow(new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode()))
+                .when(mailNotificationService)
+                .sendMailForDelegation(any(), any(), any());
+        assertDoesNotThrow(() -> delegationServiceImpl.createDelegation(new Delegation()));
+        verify(mailNotificationService).sendMailForDelegation(any(), any(), any());
     }
 
     /**
@@ -162,6 +177,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.save(any())).thenReturn(delegation);
         when(institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode())).thenReturn(List.of(institution));
         when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);
@@ -183,6 +199,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.save(any())).thenReturn(delegation);
         when(institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode())).thenReturn(List.of(institution));
         when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation);
         verify(delegationConnector).save(any());
         assertNotNull(response);

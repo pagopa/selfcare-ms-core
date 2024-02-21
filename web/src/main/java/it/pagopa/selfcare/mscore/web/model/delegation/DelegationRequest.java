@@ -23,8 +23,5 @@ public class DelegationRequest {
     private String productId;
     @NotNull
     private DelegationType type;
-    private DelegationState status;
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
 
 }
