@@ -50,8 +50,8 @@
     "/migration/institution" : {
       "post" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.save.institution}",
-        "description" : "${swagger.mscore.migration.save.institution}",
+        "summary" : "Create an institution",
+        "description" : "Create an institution",
         "operationId" : "createInstitutionUsingPOST",
         "requestBody" : {
           "content" : {
@@ -112,8 +112,8 @@
     "/migration/institution/{id}" : {
       "get" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.findbyid.institution}",
-        "description" : "${swagger.mscore.migration.findbyid.institution}",
+        "summary" : "Find an institution by institution internal unique identifier",
+        "description" : "Find an institution by institution internal unique identifier",
         "operationId" : "findInstitutionByIdUsingGET",
         "parameters" : [ {
           "name" : "id",
@@ -163,8 +163,8 @@
       },
       "delete" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.delete.institution}",
-        "description" : "${swagger.mscore.migration.delete.institution}",
+        "summary" : "Delete an institution",
+        "description" : "Delete an institution",
         "operationId" : "deleteInstitutionUsingDELETE",
         "parameters" : [ {
           "name" : "id",
@@ -226,8 +226,8 @@
     "/migration/institutions" : {
       "get" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.find.institution}",
-        "description" : "${swagger.mscore.migration.find.institution}",
+        "summary" : "Find an institution",
+        "description" : "Find an institution",
         "operationId" : "findInstitutionsUsingGET",
         "responses" : {
           "200" : {
@@ -272,8 +272,8 @@
     "/migration/token" : {
       "post" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.save.token}",
-        "description" : "${swagger.mscore.migration.save.token}",
+        "summary" : "Create a token",
+        "description" : "Create a token",
         "operationId" : "createTokenUsingPOST",
         "requestBody" : {
           "content" : {
@@ -334,8 +334,8 @@
     "/migration/token/{id}" : {
       "get" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.findbyid.token}",
-        "description" : "${swagger.mscore.migration.findbyid.token}",
+        "summary" : "Find a token by its unique internal identifier",
+        "description" : "Find a token by its unique internal identifier",
         "operationId" : "findTokenByIdUsingGET",
         "parameters" : [ {
           "name" : "id",
@@ -385,8 +385,8 @@
       },
       "delete" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.delete.token}",
-        "description" : "${swagger.mscore.migration.delete.token}",
+        "summary" : "Delete a token",
+        "description" : "Delete a token",
         "operationId" : "deleteTokenUsingDELETE",
         "parameters" : [ {
           "name" : "id",
@@ -448,8 +448,8 @@
     "/migration/user" : {
       "post" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.save.user}",
-        "description" : "${swagger.mscore.migration.save.user}",
+        "summary" : "Create a user",
+        "description" : "Create a user",
         "operationId" : "createUserUsingPOST",
         "requestBody" : {
           "content" : {
@@ -510,8 +510,8 @@
     "/migration/user/{id}" : {
       "get" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.findbyid.user}",
-        "description" : "${swagger.mscore.migration.findbyid.user}",
+        "summary" : "Find a user by its unique internal identifier",
+        "description" : "Find a user by its unique internal identifier",
         "operationId" : "findUserByIdUsingGET",
         "parameters" : [ {
           "name" : "id",
@@ -561,8 +561,8 @@
       },
       "delete" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.delete.user}",
-        "description" : "${swagger.mscore.migration.delete.user}",
+        "summary" : "Delete a user",
+        "description" : "Delete a user",
         "operationId" : "deleteUserUsingDELETE",
         "parameters" : [ {
           "name" : "id",
@@ -624,8 +624,8 @@
     "/migration/users" : {
       "get" : {
         "tags" : [ "Migration" ],
-        "summary" : "${swagger.mscore.migration.find.token}",
-        "description" : "${swagger.mscore.migration.find.token}",
+        "summary" : "Find a token",
+        "description" : "Find a token",
         "operationId" : "findUsersUsingGET",
         "responses" : {
           "200" : {
@@ -836,6 +836,62 @@
                 }
               }
             }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
+    "/delegations/{delegationId}" : {
+      "delete" : {
+        "tags" : [ "Delegation" ],
+        "summary" : "Delete an association between institution id and technical partner",
+        "description" : "Delete an association between institution id and technical partner",
+        "operationId" : "deleteDelegationUsingDELETE",
+        "parameters" : [ {
+          "name" : "delegationId",
+          "in" : "path",
+          "description" : "Delegation's unique internal identifier",
+          "required" : true,
+          "style" : "simple",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
           },
           "400" : {
             "description" : "Bad Request",
@@ -1539,8 +1595,8 @@
     "/institutions/from-anac" : {
       "post" : {
         "tags" : [ "Institution" ],
-        "summary" : "${swagger.mscore.institution.create.from-anac}",
-        "description" : "${swagger.mscore.institution.create.from-anac}",
+        "summary" : "Create an association between institution id and technical partner from anac",
+        "description" : "Create an association between institution id and technical partner from anac",
         "operationId" : "createInstitutionFromAnacUsingPOST",
         "requestBody" : {
           "content" : {
@@ -1787,7 +1843,7 @@
     "/institutions/from-pda" : {
       "post" : {
         "tags" : [ "Institution" ],
-        "summary" : "${swagger.mscore.institution.create.from-pda}",
+        "summary" : "Create an association between institution id and technical partner from pda",
         "description" : "create an institution from ipa registry",
         "operationId" : "createInstitutionFromPdaUsingPOST",
         "requestBody" : {
@@ -2077,7 +2133,7 @@
         }, {
           "name" : "page",
           "in" : "query",
-          "description" : "${swagger.mscore.page.number}",
+          "description" : "Page number",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -2087,7 +2143,7 @@
         }, {
           "name" : "size",
           "in" : "query",
-          "description" : "${swagger.mscore.page.size}",
+          "description" : "Page size",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -2731,8 +2787,8 @@
     "/institutions/{institutionId}/onboardings" : {
       "get" : {
         "tags" : [ "Institution", "external-v2" ],
-        "summary" : "${swagger.mscore.institution.info}",
-        "description" : "${swagger.mscore.institution.info}",
+        "summary" : "Retrieve institution information",
+        "description" : "Retrieve institution information",
         "operationId" : "getOnboardingsInstitutionUsingGET",
         "parameters" : [ {
           "name" : "institutionId",
@@ -2850,7 +2906,7 @@
       "get" : {
         "tags" : [ "Institution" ],
         "summary" : "Retrieve institution brokers",
-        "description" : "${swagger.mscore.institutions.getInstitutionBrokers}",
+        "description" : "Retrieve institution brokers",
         "operationId" : "getInstitutionBrokersUsingGET",
         "parameters" : [ {
           "name" : "productId",
@@ -4588,13 +4644,13 @@
     "/tokens" : {
       "get" : {
         "tags" : [ "Token" ],
-        "summary" : "${swagger.mscore.tokens.getAll}",
-        "description" : "${swagger.mscore.tokens.getAll}",
+        "summary" : "Retrieve all token relationships",
+        "description" : "Retrieve all token relationships",
         "operationId" : "getAllTokensUsingGET",
         "parameters" : [ {
           "name" : "states",
           "in" : "query",
-          "description" : "${swagger.mscore.token.model.states}",
+          "description" : "Token relationship's status",
           "required" : false,
           "style" : "form",
           "explode" : true,
@@ -4605,7 +4661,7 @@
         }, {
           "name" : "page",
           "in" : "query",
-          "description" : "${swagger.mscore.page.number}",
+          "description" : "Page number",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -4615,7 +4671,7 @@
         }, {
           "name" : "size",
           "in" : "query",
-          "description" : "${swagger.mscore.page.size}",
+          "description" : "Page size",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -4672,8 +4728,8 @@
     "/tokens/products/{productId}" : {
       "get" : {
         "tags" : [ "Token", "external-v2" ],
-        "summary" : "${swagger.mscore.tokens.findFromProduct}",
-        "description" : "${swagger.mscore.tokens.findFromProduct}",
+        "summary" : "Retrieve all token from a product",
+        "description" : "Retrieve all token from a product",
         "operationId" : "findFromProductUsingGET_1",
         "parameters" : [ {
           "name" : "productId",
@@ -4687,7 +4743,7 @@
         }, {
           "name" : "page",
           "in" : "query",
-          "description" : "${swagger.mscore.page.number}",
+          "description" : "Page number",
           "required" : false,
           "style" : "form",
           "schema" : {
@@ -4697,7 +4753,7 @@
         }, {
           "name" : "size",
           "in" : "query",
-          "description" : "${swagger.mscore.page.size}",
+          "description" : "Page size",
           "required" : false,
           "style" : "form",
           "schema" : {
