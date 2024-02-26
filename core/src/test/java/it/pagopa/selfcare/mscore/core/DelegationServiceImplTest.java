@@ -291,7 +291,7 @@ class DelegationServiceImplTest {
     }
 
     @Test
-    void testDeleteDelegationByDelegationId_whenUpdateInstitutionDelegationThrowasException() {
+    void testDeleteDelegationByDelegationId_whenUpdateInstitutionDelegationThrowsException() {
         Delegation delegation = new Delegation();
         delegation.setTo("id");
         delegation.setStatus(DelegationState.DELETED);
