@@ -256,7 +256,7 @@ class DelegationServiceImplTest {
     }
 
     @Test
-    void testDeleteDelegationByDelegationId() {
+    void testDeleteDelegationByDelegationId_whenDelegationisNotActive() {
         Delegation delegation = new Delegation();
         delegation.setTo("id");
         delegation.setStatus(DelegationState.DELETED);
@@ -268,7 +268,7 @@ class DelegationServiceImplTest {
     }
 
     @Test
-    void testDeleteDelegationByDelegationId2() {
+    void testDeleteDelegationByDelegationId_whenDelegationisActive() {
         Delegation delegation = new Delegation();
         delegation.setTo("id");
         delegation.setStatus(DelegationState.DELETED);
@@ -280,7 +280,7 @@ class DelegationServiceImplTest {
     }
 
     @Test
-    void testDeleteDelegationByDelegationId_Exception1() {
+    void testDeleteDelegationByDelegationId_whenFindAndModifyStatusThrowsException() {
         Delegation delegation = new Delegation();
         delegation.setTo("id");
         delegation.setStatus(DelegationState.DELETED);
@@ -291,7 +291,7 @@ class DelegationServiceImplTest {
     }
 
     @Test
-    void testDeleteDelegationByDelegationId_Exception2() {
+    void testDeleteDelegationByDelegationId_whenUpdateInstitutionDelegationThrowasException() {
         Delegation delegation = new Delegation();
         delegation.setTo("id");
         delegation.setStatus(DelegationState.DELETED);
