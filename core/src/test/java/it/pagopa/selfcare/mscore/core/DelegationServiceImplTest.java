@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
+import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
@@ -9,6 +10,7 @@ import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,8 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_DELEGATION_ERROR;
-import static it.pagopa.selfcare.mscore.constant.GenericError.SEND_MAIL_FOR_DELEGATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -252,6 +253,54 @@ class DelegationServiceImplTest {
         when(institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode())).thenReturn(List.of(institution));
         when(delegationConnector.checkIfExists(any())).thenReturn(true);
         assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegationFromInstitutionsTaxCode(delegation));
+    }
+
+    @Test
+    void testDeleteDelegationByDelegationId_whenDelegationisNotActive() {
+        Delegation delegation = new Delegation();
+        delegation.setTo("id");
+        delegation.setStatus(DelegationState.DELETED);
+        when(delegationConnector.findByIdAndModifyStatus("id", DelegationState.DELETED)).thenReturn(delegation);
+        when(delegationConnector.checkIfDelegationsAreActive("id")).thenReturn(false);
+        Executable executable = () -> delegationServiceImpl.deleteDelegationByDelegationId("id");
+        assertDoesNotThrow(executable);
+        verify(institutionService).updateInstitutionDelegation("id", false);
+    }
+
+    @Test
+    void testDeleteDelegationByDelegationId_whenDelegationisActive() {
+        Delegation delegation = new Delegation();
+        delegation.setTo("id");
+        delegation.setStatus(DelegationState.DELETED);
+        when(delegationConnector.findByIdAndModifyStatus("id", DelegationState.DELETED)).thenReturn(delegation);
+        when(delegationConnector.checkIfDelegationsAreActive("id")).thenReturn(true);
+        Executable executable = () -> delegationServiceImpl.deleteDelegationByDelegationId("id");
+        assertDoesNotThrow(executable);
+        verify(institutionService, times(0)).updateInstitutionDelegation("id", false);
+    }
+
+    @Test
+    void testDeleteDelegationByDelegationId_whenFindAndModifyStatusThrowsException() {
+        Delegation delegation = new Delegation();
+        delegation.setTo("id");
+        delegation.setStatus(DelegationState.DELETED);
+        when(delegationConnector.findByIdAndModifyStatus("id", DelegationState.DELETED))
+                .thenThrow(new MsCoreException(DELETE_DELEGATION_ERROR.getMessage(), DELETE_DELEGATION_ERROR.getCode()));
+        assertThrows(MsCoreException.class, () -> delegationServiceImpl.deleteDelegationByDelegationId("id"));
+        verify(delegationConnector, times(0)).checkIfDelegationsAreActive(any());
+    }
+
+    @Test
+    void testDeleteDelegationByDelegationId_whenUpdateInstitutionDelegationThrowsException() {
+        Delegation delegation = new Delegation();
+        delegation.setTo("id");
+        delegation.setStatus(DelegationState.DELETED);
+        when(delegationConnector.findByIdAndModifyStatus("id", DelegationState.DELETED)).thenReturn(delegation);
+        when(delegationConnector.checkIfDelegationsAreActive("id")).thenReturn(false);
+        doThrow(new MsCoreException(DELETE_DELEGATION_ERROR.getMessage(), DELETE_DELEGATION_ERROR.getCode()))
+                .when(institutionService).updateInstitutionDelegation("id", false);
+        assertThrows(MsCoreException.class, () -> delegationServiceImpl.deleteDelegationByDelegationId("id"));
+        verify(delegationConnector, times(1)).findByIdAndModifyStatus("id", DelegationState.ACTIVE);
     }
 
 }

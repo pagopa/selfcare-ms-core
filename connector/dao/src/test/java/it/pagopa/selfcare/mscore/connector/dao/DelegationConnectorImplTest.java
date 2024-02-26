@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapp
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapperImpl;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapperImpl;
+import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
@@ -192,6 +193,24 @@ class DelegationConnectorImplTest {
         assertEquals(actual.getInstitutionFromRootName(), dummyDelegationEntity.getInstitutionFromRootName());
         assertEquals(actual.getTaxCode(), dummyDelegationEntity.getInstitutions().get(0).getTaxCode());
         assertEquals(actual.getInstitutionType(), dummyDelegationEntity.getInstitutions().get(0).getInstitutionType());
+    }
+
+    @Test
+    void findByIdAndModifyStatus() {
+        DelegationEntity delegationEntity = new DelegationEntity();
+        delegationEntity.setId("id");
+        delegationEntity.setStatus(DelegationState.ACTIVE);
+        when(delegationRepository.findAndModify(any(), any(), any(), any())).thenReturn(delegationEntity);
+        Delegation delegation = delegationConnectorImpl.findByIdAndModifyStatus(delegationEntity.getId(), DelegationState.DELETED);
+        assertNotNull(delegation);
+        assertEquals(delegation.getId(), delegationEntity.getId());
+    }
+
+    @Test
+    void checkIfDelegationsAreActive() {
+        when(delegationRepository.findByToAndStatus(anyString(), any())).thenReturn(Optional.of(new DelegationEntity()));
+        boolean response = delegationConnectorImpl.checkIfDelegationsAreActive("id");
+        assertTrue(response);
     }
 
 }
