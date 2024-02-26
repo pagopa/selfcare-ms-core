@@ -258,7 +258,7 @@ class DelegationControllerTest {
 
     @Test
     void testDeleteDelegation() throws Exception {
-        doNothing().when(delegationService).deleteDelegationFromDelegationId(any());
+        doNothing().when(delegationService).deleteDelegationByDelegationId(any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/delegations/{delegationId}",
                 "42");
         MockMvcBuilders.standaloneSetup(delegationController)

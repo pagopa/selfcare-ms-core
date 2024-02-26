@@ -110,7 +110,7 @@ public class DelegationController {
     }
 
     /**
-     * The function delete delegation
+     * The function delete a delegation setting its status to DELETED and setting delegation to false on institution if it has no more delegations
      *
      * @param delegationId DelegationId
      * @return InstitutionResponse
@@ -124,7 +124,7 @@ public class DelegationController {
     public ResponseEntity<Void> deleteDelegation(@ApiParam("${swagger.mscore.delegation.model.delegationId}")
                                                                     @PathVariable("delegationId") String delegationId) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
-        delegationService.deleteDelegationFromDelegationId(delegationId);
+        delegationService.deleteDelegationByDelegationId(delegationId);
         return ResponseEntity.noContent().build();
     }
 

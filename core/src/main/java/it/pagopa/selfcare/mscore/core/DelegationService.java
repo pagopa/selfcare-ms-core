@@ -11,5 +11,5 @@ public interface DelegationService {
     boolean checkIfExists(Delegation delegation);
     List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode);
     Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation);
-    void deleteDelegationFromDelegationId(String delegationId);
+    void deleteDelegationByDelegationId(String delegationId);
 }

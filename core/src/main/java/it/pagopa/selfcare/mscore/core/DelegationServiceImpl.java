@@ -116,7 +116,7 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
     @Override
-    public void deleteDelegationFromDelegationId(String delegationId) {
+    public void deleteDelegationByDelegationId(String delegationId) {
         String institutionId;
         try{
             Delegation delegation = delegationConnector.findByIdAndModifyStatus(delegationId, DelegationState.DELETED);
