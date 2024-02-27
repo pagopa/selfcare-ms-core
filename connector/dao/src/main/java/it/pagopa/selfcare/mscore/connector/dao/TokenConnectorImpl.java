@@ -25,7 +25,6 @@ import java.time.OffsetDateTime;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
 import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
@@ -105,12 +104,16 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public Token updateTokenCreatedAt(String tokenId, OffsetDateTime createdAt) {
+    public Token updateTokenCreatedAt(String tokenId, OffsetDateTime createdAt, OffsetDateTime activatedAt) {
         Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(tokenId));
 
         Update update = new Update();
         update.set(TokenEntity.Fields.updatedAt.name(), OffsetDateTime.now())
                 .set(TokenEntity.Fields.createdAt.name(), createdAt);
+
+        if(activatedAt != null) {
+            update.set(TokenEntity.Fields.activatedAt.name(), activatedAt);
+        }
 
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return TokenMapper.convertToToken(tokenRepository.findAndModify(query, update, findAndModifyOptions, TokenEntity.class));
