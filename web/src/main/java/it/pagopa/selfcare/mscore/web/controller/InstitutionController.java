@@ -21,7 +21,6 @@ import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -481,28 +480,22 @@ public class InstitutionController {
     /**
      * The function updates the field createdAt of the OnboardedProduct, the related Token and UserBindings for the given institution-product pair
      *
-     * @param institutionId String
-     * @param productId     String
-     * @param createdAt     OffsetDateTime
+     * @param createdAtRequest     CreatedAtRequest
      * @return no content
      * * Code: 200, Message: successful operation
      * * Code: 404, Message: Institution or Token or UserBinding not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions.updateCreatedAt}", notes = "${swagger.mscore.institutions.updateCreatedAt}")
-    @PutMapping(value = "/{institutionId}/products/{productId}/createdAt")
-    public ResponseEntity<Void> updateCreatedAt(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                @PathVariable("institutionId") String institutionId,
-                                                @ApiParam("${swagger.mscore.product.model.id}")
-                                                @PathVariable("productId") String productId,
-                                                @ApiParam("${swagger.mscore.institutions.model.createdAt}")
-                                                @RequestParam(value = "createdAt") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime createdAt) {
+    @PutMapping(value = "/{institutionId}/createdAt")
+    public ResponseEntity<Void> updateCreatedAt( @PathVariable(value = "institutionId") String institutionId,
+                                                 @Valid @RequestBody CreatedAtRequest createdAtRequest) {
         log.trace("updateCreatedAt start");
-        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, productId, createdAt);
-        if (createdAt.compareTo(OffsetDateTime.now()) > 0) {
+        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, createdAtRequest.getProductId(), createdAtRequest.getCreatedAt());
+        if (createdAtRequest.getCreatedAt().isAfter(OffsetDateTime.now())) {
             throw new ValidationException("Invalid createdAt date: the createdAt date must be prior to the current date.");
         }
-        institutionService.updateCreatedAt(institutionId, productId, createdAt);
+        institutionService.updateCreatedAt(institutionId, createdAtRequest.getProductId(), createdAtRequest.getCreatedAt(), createdAtRequest.getActivatedAt());
         log.trace("updateCreatedAt end");
         return ResponseEntity.status(HttpStatus.OK).build();
     }

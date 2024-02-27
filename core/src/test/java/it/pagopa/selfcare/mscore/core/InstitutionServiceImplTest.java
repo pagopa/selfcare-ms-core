@@ -313,7 +313,7 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String, List)}
+     * Method under test: {@link InstitutionServiceImpl#createInstitutionFromIpa(String, InstitutionPaSubunitType, String, List, InstitutionType)}
      */
     @Test
     void testCreateInstitutionFromIpa() {
@@ -745,6 +745,18 @@ class InstitutionServiceImplTest {
         assertThrows(ResourceForbiddenException.class,
                 () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
         verify(userService).checkIfInstitutionUser(any(), any());
+    }
+
+    /**
+     * Method under test: {@link InstitutionServiceImpl#updateInstitutionDelegation(String, boolean)} (String, InstitutionUpdate, String)}
+     */
+    @Test
+    void testUpdateInstitutionDelegation() {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDelegation(true);
+        assertDoesNotThrow(
+                () -> institutionServiceImpl.updateInstitutionDelegation("42", true));
+        verify(institutionConnector).findAndUpdate(eq("42"), eq(null), eq(null), eq(institutionUpdate));
     }
 
     /**
@@ -1402,6 +1414,8 @@ class InstitutionServiceImplTest {
         String institutionIdMock = "institutionIdMock";
         String productIdMock = "productId";
         OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        OffsetDateTime activatedAtMock = OffsetDateTime.parse("2020-11-02T02:15:30+01:00");
+
 
         Onboarding onboardingMock1 = mockInstance(new Onboarding());
         onboardingMock1.setStatus(RelationshipState.ACTIVE);
@@ -1444,16 +1458,16 @@ class InstitutionServiceImplTest {
 
         when(institutionConnector.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock))
                 .thenReturn(updatedInstitutionMock);
-        when(tokenConnector.updateTokenCreatedAt(updatedTokenMock.getId(), createdAtMock))
+        when(tokenConnector.updateTokenCreatedAt(updatedTokenMock.getId(), createdAtMock, activatedAtMock))
                 .thenReturn(updatedTokenMock);
 
         // When
-        institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, createdAtMock);
+        institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, createdAtMock, activatedAtMock);
         // Then
         verify(institutionConnector, times(1))
                 .updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock);
         verify(tokenConnector, times(1))
-                .updateTokenCreatedAt(updatedTokenMock.getId(), createdAtMock);
+                .updateTokenCreatedAt(updatedTokenMock.getId(), createdAtMock, activatedAtMock);
         verify(userConnector, times(1))
                 .updateUserBindingCreatedAt(institutionIdMock, productIdMock, List.of(tokenUserMock1.getUserId(), tokenUserMock2.getUserId()), createdAtMock);
         verify(contractService, times(1))
@@ -1467,7 +1481,7 @@ class InstitutionServiceImplTest {
         String productIdMock = "productId";
         OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
         // When
-        Executable executable = () -> institutionServiceImpl.updateCreatedAt(null, productIdMock, createdAtMock);
+        Executable executable = () -> institutionServiceImpl.updateCreatedAt(null, productIdMock, createdAtMock, null);
         // Then
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("An institution ID is required.", illegalArgumentException.getMessage());
@@ -1480,7 +1494,7 @@ class InstitutionServiceImplTest {
         String institutionIdMock = "institutionId";
         OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
         // When
-        Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, null, createdAtMock);
+        Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, null, createdAtMock, null);
         // Then
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A product ID is required.", illegalArgumentException.getMessage());
@@ -1493,7 +1507,7 @@ class InstitutionServiceImplTest {
         String institutionIdMock = "institutionId";
         String productIdMock = "producttId";
         // When
-        Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, null);
+        Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, null, null);
         // Then
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A createdAt date is required.", illegalArgumentException.getMessage());

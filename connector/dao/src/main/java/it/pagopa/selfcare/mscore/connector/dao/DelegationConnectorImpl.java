@@ -4,18 +4,22 @@ import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapper;
+import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.delegation.DelegationInstitution;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
 import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -93,5 +97,21 @@ public class DelegationConnectorImpl implements DelegationConnector {
         return repository.find(Query.query(criteria.andOperator(criterias)), DelegationEntity.class).stream()
                 .map(delegationMapper::convertToDelegation)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Delegation findByIdAndModifyStatus(String delegationId, DelegationState status) {
+        Query query = Query.query(Criteria.where(DelegationEntity.Fields.id.name()).is(delegationId));
+        Update update = new Update();
+        update.set(DelegationEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        update.set(DelegationEntity.Fields.status.name(), status);
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false);
+        return delegationMapper.convertToDelegation(repository.findAndModify(query, update, findAndModifyOptions, DelegationEntity.class));
+    }
+
+    @Override
+    public boolean checkIfDelegationsAreActive(String institutionId) {
+        Optional<DelegationEntity> opt = repository.findByToAndStatus(institutionId, DelegationState.ACTIVE);
+        return opt.isPresent();
     }
 }
