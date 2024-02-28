@@ -125,6 +125,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
 
     }
 
+    @Async
     @Override
     public void sendContracts(Optional<Integer> size, List<String> productsFilter) {
         this.page_size_api = size;
@@ -132,6 +133,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
         regenerateContractsNotifications();
     }
 
+    @Async
     @Override
     public void sendUsers(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
         this.page_size_api = size;
