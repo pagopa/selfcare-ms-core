@@ -111,30 +111,4 @@ public class DelegationController {
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
-
-    /**
-     * The function get delegations
-     *
-     * @param from String
-     * @param to String
-     * @return DelegationResponse
-     * * Code: 200, Message: successful operation, DataType: List<DelegationResponse>
-     * * Code: 404, Message: Institution data not found, DataType: Problem
-     * * Code: 400, Message: Bad Request, DataType: Problem
-     */
-    @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
-    @GetMapping("/filter")
-    public ResponseEntity<List<DelegationResponse>> getPaginatedDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                    @RequestParam(name = "from", required = false) String from,
-                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                    @RequestParam(name = "to", required = false) String to,
-                                                                    @RequestParam(name = "page", required = false) Optional<Integer> page,
-                                                                    @RequestParam(name = "size", required = false) Optional<Integer> size) {
-        if(Objects.isNull(from) && Objects.isNull(to))
-            throw new InvalidRequestException("from or to must not be null!!", GenericError.GENERIC_ERROR.getCode());
-
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getPaginatedDelegations(from, to, page, size).stream()
-                .map(delegationMapper::toDelegationResponse)
-                .collect(Collectors.toList()));
-    }
 }

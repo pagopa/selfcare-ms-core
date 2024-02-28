@@ -12,5 +12,4 @@ public interface DelegationService {
     boolean checkIfExists(Delegation delegation);
     List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode, Optional<Integer> page, Optional<Integer> size);
     Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation);
-    List<Delegation> getPaginatedDelegations(String from, String to, Optional<Integer> page, Optional<Integer> size);
 }

@@ -117,10 +117,4 @@ public class DelegationServiceImpl implements DelegationService {
         int pageSize = size.filter(s -> s <= MAX_DELEGATIONS_PAGE_SIZE).orElse(DEFAULT_DELEGATIONS_PAGE_SIZE);
         return delegationConnector.find(from, to, productId, mode, page.orElse(0), pageSize);
     }
-
-    @Override
-    public List<Delegation> getPaginatedDelegations(String from, String to, Optional<Integer> page, Optional<Integer> size) {
-        int pageSize = size.filter(s -> s <= MAX_DELEGATIONS_PAGE_SIZE).orElse(DEFAULT_DELEGATIONS_PAGE_SIZE);
-        return delegationConnector.findPaginated(from, to, page.orElse(0), pageSize);
-    }
 }
