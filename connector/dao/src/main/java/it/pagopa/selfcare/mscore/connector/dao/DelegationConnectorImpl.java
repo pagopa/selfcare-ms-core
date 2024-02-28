@@ -98,21 +98,4 @@ public class DelegationConnectorImpl implements DelegationConnector {
                 .map(delegationMapper::convertToDelegation)
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public List<Delegation> findPaginated(String from, String to, Integer page, Integer size) {
-        List<Criteria> criterias = new ArrayList<>();
-        Criteria criteria = new Criteria();
-        Pageable pageable = PageRequest.of(page, size);
-
-        if(Objects.nonNull(from))
-            criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
-        if(Objects.nonNull(to))
-            criterias.add(Criteria.where(DelegationEntity.Fields.to.name()).is(to));
-
-        return repository.find(Query.query(criteria.andOperator(criterias)), pageable, DelegationEntity.class)
-                .stream()
-                .map(delegationMapper::convertToDelegation)
-                .collect(Collectors.toList());
-    }
 }
