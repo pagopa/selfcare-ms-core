@@ -127,13 +127,14 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
+    public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
         CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyIpa();
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
                 .taxCode(taxCode)
                 .subunitCode(subunitCode)
                 .subunitType(subunitType)
                 .geographicTaxonomies(geographicTaxonomies)
+                .institutionType(institutionType)
                 .build());
     }
 
@@ -411,9 +412,9 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt) {
+    public void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt, OffsetDateTime activatedAt) {
         log.trace("updateCreatedAt start");
-        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, productId, createdAt);
+        log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}, activatedAt = {}", institutionId, productId, createdAt, activatedAt);
         Assert.hasText(institutionId, "An institution ID is required.");
         Assert.hasText(productId, "A product ID is required.");
         Assert.notNull(createdAt, "A createdAt date is required.");
@@ -422,7 +423,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         String tokenId = updatedInstitution.getOnboarding().stream()
                 .filter(onboarding -> onboarding.getProductId().equals(productId))
                 .findFirst().get().getTokenId();
-        Token updatedToken = tokenConnector.updateTokenCreatedAt(tokenId, createdAt);
+        Token updatedToken = tokenConnector.updateTokenCreatedAt(tokenId, createdAt, activatedAt);
         List<String> usersId = updatedToken.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
         userConnector.updateUserBindingCreatedAt(institutionId, productId, usersId, createdAt);
 

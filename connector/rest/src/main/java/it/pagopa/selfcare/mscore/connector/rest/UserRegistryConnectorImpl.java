@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Map;
-
+import java.util.Optional;
 
 
 @Slf4j
@@ -77,24 +77,27 @@ public class UserRegistryConnectorImpl implements UserRegistryConnector {
     public User persistUserUsingPatch(String name, String familyName, String fiscalCode, String email, String institutionId) {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "persistUserByFiscalCode fiscalCode = {}", fiscalCode);
         Assert.hasText(fiscalCode, "A fiscalCode is required");
-        UserId result = restClient._saveUsingPATCH(SaveUserDto.builder()
-                        .name(CertifiableFieldResourceOfstring.builder()
-                                .value(name)
-                                .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
-                                .build())
-                        .familyName(CertifiableFieldResourceOfstring.builder()
-                                .value(familyName)
-                                .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
-                                .build())
-                        .fiscalCode(fiscalCode)
-                        .workContacts(Map.of(institutionId, WorkContactResource.builder()
-                                .email(CertifiableFieldResourceOfstring.builder()
-                                        .value(email)
-                                        .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
-                                        .build())
-                                .build()))
+
+        SaveUserDto.SaveUserDtoBuilder saveUserDtoBuilder = SaveUserDto.builder()
+                .name(CertifiableFieldResourceOfstring.builder()
+                        .value(name)
+                        .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
                         .build())
-                        .getBody();
+                .familyName(CertifiableFieldResourceOfstring.builder()
+                        .value(familyName)
+                        .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                        .build())
+                .fiscalCode(fiscalCode);
+
+        Optional.ofNullable(email).ifPresent(emailValue -> saveUserDtoBuilder
+            .workContacts(Map.of(institutionId, WorkContactResource.builder()
+                    .email(CertifiableFieldResourceOfstring.builder()
+                            .value(emailValue)
+                            .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                            .build())
+                    .build())));
+
+        UserId result = restClient._saveUsingPATCH(saveUserDtoBuilder.build()).getBody();
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "persistUserByFiscalCode result = {}", result);
         return userMapper.fromUserId(result);
     }

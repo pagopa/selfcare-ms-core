@@ -27,7 +27,7 @@ public interface InstitutionService {
 
     List<Institution> getInstitutions(String taxCode, String subunitCode);
 
-    Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies);
+    Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType);
 
     Institution createInstitutionFromPda(Institution institution, String injectionInstitutionType);
 
@@ -77,7 +77,7 @@ public interface InstitutionService {
 
     List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId);
 
-    void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);
+    void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt, OffsetDateTime activatedAt);
 
     List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 

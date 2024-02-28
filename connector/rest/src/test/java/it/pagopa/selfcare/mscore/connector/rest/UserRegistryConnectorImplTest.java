@@ -96,6 +96,29 @@ class UserRegistryConnectorImplTest {
     }
 
     @Test
+    void testPersistUserUsingPatchWithEmailNull() {
+        UUID id = UUID.randomUUID();
+        UserId userId = new UserId();
+        userId.setId(id);
+        ResponseEntity<UserId> userIdResponseEntity = ResponseEntity.ok(userId);
+        when(userRegistryRestClient._saveUsingPATCH(any())).thenReturn(userIdResponseEntity);
+        User user = userRegistryConnector.persistUserUsingPatch("name", "familyName", "fiscalCode", null,"institutionId");
+        assertEquals(user.getId(), id.toString());
+        SaveUserDto saveUserDto = SaveUserDto.builder()
+                .name(CertifiableFieldResourceOfstring.builder()
+                        .value("name")
+                        .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                        .build())
+                .familyName(CertifiableFieldResourceOfstring.builder()
+                        .value("familyName")
+                        .certification(CertifiableFieldResourceOfstring.CertificationEnum.NONE)
+                        .build())
+                .fiscalCode("fiscalCode")
+                .build();
+        verify(userRegistryRestClient)._saveUsingPATCH(saveUserDto);
+    }
+
+    @Test
     void persistUserWorksContractUsingPatch() {
         UUID id = UUID.randomUUID();
         UserId userId = new UserId();
