@@ -30,7 +30,7 @@ public class QueueNotificationController {
         log.trace("Resend contracts events started");
         queueNotificationService.sendContracts(size, productsFilter);
     }
-    @ApiOperation(value = "", notes = "${swagger.ms-core.notification-event.api.start}")
+    @ApiOperation(value = "", notes = "Function to send a specific onboarding using institutionId and tokenId ")
     @PutMapping(value = "/contracts")
     @ResponseStatus(HttpStatus.OK)
     public void resendContractsByInstitutionIdAndTokenId(@RequestParam(name = "tokenId") String tokenId,
