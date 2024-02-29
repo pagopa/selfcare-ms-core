@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -74,6 +76,45 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
                 }
                 page_size_api = Optional.empty();
             }
+        log.trace("regenerateQueueNotifications end");
+    }
+
+
+
+    @Override
+    @Async
+    public void sendContractsNotificationsByInstitutionIdAndTokenId(String tokenId, String institutionId) {
+        log.trace("regenerateQueueNotifications start");
+
+        log.debug("Regenerating notifications on queue with institutionId {} and tokenId {}", institutionId, tokenId);
+
+
+        Institution institution = institutionConnector.findById(institutionId);
+
+        List<Onboarding> onboardings = institution.getOnboarding().stream()
+                .filter(item -> tokenId.equals(item.getTokenId()))
+                .toList();
+
+        if(onboardings.isEmpty()) {
+            log.trace("Onboarding not found with institutionId {} and tokenId {}", institutionId, tokenId);
+            return;
+        }
+
+        for(Onboarding onboarding : onboardings) {
+
+            Token token = new Token();
+            token.setId(onboarding.getTokenId());
+            token.setInstitutionId(institutionId);
+            token.setProductId(onboarding.getProductId());
+            //token.setUsers(users.stream().map(this::toTokenUser).toList());
+            token.setCreatedAt(onboarding.getCreatedAt());
+            token.setUpdatedAt(onboarding.getUpdatedAt());
+            token.setStatus(onboarding.getStatus());
+            token.setContractSigned(onboarding.getContract());
+            institution.setOnboarding(List.of(onboarding));
+            contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
+        }
+
         log.trace("regenerateQueueNotifications end");
     }
 

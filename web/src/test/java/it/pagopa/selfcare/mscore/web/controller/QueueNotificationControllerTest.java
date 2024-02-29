@@ -43,6 +43,20 @@ class QueueNotificationControllerTest {
     }
 
     @Test
+    void sendContractsByInstitutionIdAndTokenId() throws Exception {
+
+        String institutionId = "institutionId";
+        String tokenId = "tokenId";
+        mvc.perform(MockMvcRequestBuilders
+                        .put(BASE_URL+"/contracts")
+                        .param("tokenId", tokenId)
+                        .param("institutionId", institutionId))
+                .andExpect(status().isOk());
+
+        Mockito.verify(queueNotificationService, Mockito.times(1)).sendContractsNotificationsByInstitutionIdAndTokenId(tokenId, institutionId);
+    }
+
+    @Test
     void sendUsers() throws Exception{
         Integer size = 1;
         Integer page = 0;

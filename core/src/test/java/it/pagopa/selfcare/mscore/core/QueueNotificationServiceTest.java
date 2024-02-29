@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,28 @@ class QueueNotificationServiceTest {
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
         verify(institutionConnector, times(1)).findById(token.getInstitutionId());
         verify(contractService, times(1)).sendDataLakeNotification(institution, token, QueueEvent.ADD);
+    }
+
+
+    @Test
+    void sendContractsNotificationsByInstitutionIdAndTokenId() {
+        //given
+        String institutionId = "institutionId";
+        String tokenId = "tokenId";
+        final Institution institution = mockInstance(new Institution());
+        Onboarding onboarding = new Onboarding();
+        onboarding.setTokenId(tokenId);
+        institution.setOnboarding(List.of(onboarding));
+
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector, null);
+
+        when(institutionConnector.findById(institutionId)).thenReturn(institution);
+        //when
+        Executable executable = () -> schedulerService.sendContractsNotificationsByInstitutionIdAndTokenId(tokenId, institutionId);
+        //then
+        assertDoesNotThrow(executable);
+        verify(institutionConnector, times(1)).findById(institutionId);
+        verify(contractService, times(1)).sendDataLakeNotification(any(), any(), any());
     }
 
     @Test
