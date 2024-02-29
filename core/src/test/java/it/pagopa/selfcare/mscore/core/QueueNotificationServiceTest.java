@@ -76,9 +76,16 @@ class QueueNotificationServiceTest {
         String institutionId = "institutionId";
         String tokenId = "tokenId";
         final Institution institution = mockInstance(new Institution());
+        Onboarding onboardingActive = new Onboarding();
+        onboardingActive.setTokenId(tokenId);
+        onboardingActive.setStatus(RelationshipState.ACTIVE);
         Onboarding onboarding = new Onboarding();
         onboarding.setTokenId(tokenId);
-        institution.setOnboarding(List.of(onboarding));
+        onboarding.setStatus(RelationshipState.PENDING);
+        Onboarding onboardingDeleted = new Onboarding();
+        onboardingDeleted.setTokenId(tokenId);
+        onboardingDeleted.setStatus(RelationshipState.DELETED);
+        institution.setOnboarding(List.of(onboardingActive, onboardingDeleted, onboarding));
 
         schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector, null);
 
@@ -88,7 +95,8 @@ class QueueNotificationServiceTest {
         //then
         assertDoesNotThrow(executable);
         verify(institutionConnector, times(1)).findById(institutionId);
-        verify(contractService, times(1)).sendDataLakeNotification(any(), any(), any());
+        verify(contractService, times(2)).sendDataLakeNotification(any(), any(), any());
+        verifyNoMoreInteractions(contractService);
     }
 
     @Test
