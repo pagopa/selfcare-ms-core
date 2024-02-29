@@ -75,6 +75,8 @@ public interface InstitutionService {
 
     Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
 
+    void updateInstitutionDelegation(String institutionId, boolean delegation);
+
     List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId);
 
     void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt, OffsetDateTime activatedAt);

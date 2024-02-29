@@ -79,7 +79,8 @@ class InstitutionControllerTest {
     @Spy
     private UserMapper userMapper = new UserMapperImpl();
 
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();;
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+        //.registerModule(new JavaTimeModule());
 
 
     private final static Onboarding onboarding;
@@ -110,7 +111,6 @@ class InstitutionControllerTest {
         institution.setDescription("description");
         institution.setOnboarding(List.of(onboarding));
         institution.setAttributes(List.of(attribute));
-
 
     }
 
@@ -1380,6 +1380,8 @@ class InstitutionControllerTest {
     @Test
     void updateCreatedAt_invalidDate() throws Exception {
         // Given
+
+
         String institutionIdMock = "institutionId";
         String productIdMock = "productId";
         OffsetDateTime createdAtMock = OffsetDateTime.now().minusHours(10);

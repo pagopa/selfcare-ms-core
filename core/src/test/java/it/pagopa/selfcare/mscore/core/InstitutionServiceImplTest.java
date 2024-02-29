@@ -748,6 +748,18 @@ class InstitutionServiceImplTest {
     }
 
     /**
+     * Method under test: {@link InstitutionServiceImpl#updateInstitutionDelegation(String, boolean)} (String, InstitutionUpdate, String)}
+     */
+    @Test
+    void testUpdateInstitutionDelegation() {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDelegation(true);
+        assertDoesNotThrow(
+                () -> institutionServiceImpl.updateInstitutionDelegation("42", true));
+        verify(institutionConnector).findAndUpdate(eq("42"), eq(null), eq(null), eq(institutionUpdate));
+    }
+
+    /**
      * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionByExternalIds(List, String)}
      */
     @Test
