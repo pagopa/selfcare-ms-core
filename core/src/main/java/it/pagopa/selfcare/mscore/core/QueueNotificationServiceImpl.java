@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,8 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
     private Optional<List<String>> productsFilter = Optional.empty();
 
     private final UserConnector userConnector;
+
+    private final List<RelationshipState> statesToSend = List.of(RelationshipState.ACTIVE, RelationshipState.DELETED);
 
 
     @Autowired
@@ -61,7 +64,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
                     boolean nextPage = true;
                     int page = 0;
                     do {
-                        List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), productId, page, page_size_api.orElse(TOKEN_PAGE_SIZE));
+                        List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.copyOf(statesToSend), productId, page, page_size_api.orElse(TOKEN_PAGE_SIZE));
                         log.debug("[KAFKA] TOKEN NUMBER {} PAGE {}", tokens.size(), page);
 
                         sendScContractNotifications(tokens);
@@ -85,13 +88,12 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
     @Async
     public void sendContractsNotificationsByInstitutionIdAndTokenId(String tokenId, String institutionId) {
         log.trace("regenerateQueueNotifications start");
-
         log.debug("Regenerating notifications on queue with institutionId {} and tokenId {}", institutionId, tokenId);
-
 
         Institution institution = institutionConnector.findById(institutionId);
 
         List<Onboarding> onboardings = institution.getOnboarding().stream()
+                .filter(item -> Objects.nonNull(item.getStatus()) && statesToSend.contains(item.getStatus()))
                 .filter(item -> tokenId.equals(item.getTokenId()))
                 .toList();
 
