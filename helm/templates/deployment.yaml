@@ -52,6 +52,8 @@ spec:
                 name: mail
             - secretRef:
                 name: geotaxonomy-secrets
+            - secretRef:
+                name: product-storage
             - configMapRef:
                 name: jwt
             - configMapRef:

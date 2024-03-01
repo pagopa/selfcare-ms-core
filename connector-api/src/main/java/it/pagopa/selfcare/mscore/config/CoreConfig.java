@@ -22,4 +22,12 @@ public class CoreConfig {
     private boolean sendEmailToInstitution;
     private Integer onboardingExpiringDate;
     private boolean infoCamereEnable;
+    private BlobStorage blobStorage;
+
+    @Data
+    public static class BlobStorage {
+        private String containerProduct;
+        private String filepathProduct;
+        private String connectionStringProduct;
+    }
 }

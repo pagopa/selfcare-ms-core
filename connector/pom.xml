@@ -21,5 +21,18 @@
       <groupId>it.pagopa.selfcare</groupId>
       <artifactId>selc-ms-core-connector-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>it.pagopa.selfcare</groupId>
+      <artifactId>onboarding-sdk-product</artifactId>
+      <version>0.1.6</version>
+    </dependency>
   </dependencies>
+
+  <repositories>
+    <repository>
+      <id>selfcare-github</id>
+      <name>Selfcare Onboarding SDK</name>
+      <url>https://maven.pkg.github.com/pagopa/selfcare-onboarding</url>
+    </repository>
+  </repositories>
 </project>

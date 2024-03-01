@@ -49,6 +49,8 @@ spec:
             - secretRef:
                 name: event-secrets
             - secretRef:
+                name: product-storage
+            - secretRef:
                 name: mail
             - configMapRef:
                 name: jwt
