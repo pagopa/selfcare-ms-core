@@ -54,7 +54,6 @@ public class ContractService {
     private final PadesSignService padesSignService;
     private final FileStorageConnector fileStorageConnector;
     private final CoreConfig coreConfig;
-    private final SignatureService signatureService;
     private final ObjectMapper mapper;
 
     public ContractService(PagoPaSignatureConfig pagoPaSignatureConfig,
@@ -66,7 +65,6 @@ public class ContractService {
         this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
         this.fileStorageConnector = fileStorageConnector;
         this.coreConfig = coreConfig;
-        this.signatureService = signatureService;
         this.mapper = new ObjectMapper();
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(OffsetDateTime.class, new JsonSerializer<>() {

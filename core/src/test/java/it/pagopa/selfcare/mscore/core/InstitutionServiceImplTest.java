@@ -662,7 +662,7 @@ class InstitutionServiceImplTest {
         institutionUpdate.setDelegation(true);
         assertDoesNotThrow(
                 () -> institutionServiceImpl.updateInstitutionDelegation("42", true));
-        verify(institutionConnector).findAndUpdate(eq("42"), eq(null), eq(null), eq(institutionUpdate));
+        verify(institutionConnector).findAndUpdate("42", null, null, institutionUpdate);
     }
 
     /**
