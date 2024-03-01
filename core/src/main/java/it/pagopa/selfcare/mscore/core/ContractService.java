@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.openhtmltopdf.svgsupport.BatikSVGDrawer;
-import eu.europa.esig.dss.validation.SignedDocumentValidator;
-import eu.europa.esig.dss.validation.reports.Reports;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.commons.utils.crypto.model.SignatureInformation;
 import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
@@ -22,7 +20,6 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -145,25 +142,6 @@ public class ContractService {
         return pagoPaSignatureConfig.getApplyOnboardingTemplateReason()
                 .replace("${institutionName}", institution.getDescription())
                 .replace("${productName}", request.getProductId());
-    }
-
-    public void verifySignature(MultipartFile contract, Token token, List<User> users) {
-        try {
-            SignedDocumentValidator validator = signatureService.createDocumentValidator(contract.getInputStream().readAllBytes());
-            signatureService.isDocumentSigned(validator);
-            signatureService.verifyOriginalDocument(validator);
-            Reports reports = signatureService.validateDocument(validator);
-
-            signatureService.verifySignatureForm(validator);
-            signatureService.verifySignature(reports);
-            signatureService.verifyDigest(validator, token.getChecksum());
-            signatureService.verifyManagerTaxCode(reports, users);
-
-        } catch (InvalidRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new InvalidRequestException(GENERIC_ERROR.getMessage(), GENERIC_ERROR.getCode());
-        }
     }
 
     private void getPDFAsFile(Path files, String contractTemplate, Map<String, Object> data) throws IOException {

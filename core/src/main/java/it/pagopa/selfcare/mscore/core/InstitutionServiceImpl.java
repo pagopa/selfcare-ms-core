@@ -269,20 +269,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         return institutionConnector.save(newInstitution);
     }
 
-    @Deprecated
-    @Override
-    public Institution createInstitutionRaw(Institution institution, String externalId) {
-        checkIfAlreadyExists(externalId);
-        institution.setOrigin(Origin.SELC.getValue());
-        institution.setOriginId("SELC_" + institution.getExternalId());
-        institution.setCreatedAt(OffsetDateTime.now());
-        try {
-            return institutionConnector.save(institution);
-        } catch (Exception e) {
-            throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
-        }
-    }
-
     @Override
     public List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states) {
         List<Onboarding> onboardingList;
@@ -496,7 +482,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<UserInfo> getInstitutionUsers(String institutionId) {
         log.trace("getInstitutionUsers start");
-        log.debug("getInstitutionUsers institutionId = {}, productId = {}", institutionId);
+        log.debug("getInstitutionUsers institutionId = {}", institutionId);
         Assert.hasText(institutionId, REQUIRED_INSTITUTION_MESSAGE);
         List<UserInfo> userInfos = userConnector.findByInstitutionId(institutionId);
         userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalIdWithFiscalCode(userInfo.getId())));
