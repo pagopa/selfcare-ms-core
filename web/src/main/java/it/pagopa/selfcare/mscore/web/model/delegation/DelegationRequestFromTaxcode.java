@@ -25,4 +25,7 @@ public class DelegationRequestFromTaxcode {
     private DelegationType type;
     private String fromSubunitCode;
     private String toSubunitCode;
+    private DelegationState status;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

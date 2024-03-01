@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -33,6 +36,8 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
     private Optional<List<String>> productsFilter = Optional.empty();
 
     private final UserConnector userConnector;
+
+    private final List<RelationshipState> statesToSend = List.of(RelationshipState.ACTIVE, RelationshipState.DELETED);
 
 
     @Autowired
@@ -59,7 +64,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
                     boolean nextPage = true;
                     int page = 0;
                     do {
-                        List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), productId, page, page_size_api.orElse(TOKEN_PAGE_SIZE));
+                        List<Token> tokens = tokenConnector.findByStatusAndProductId(EnumSet.copyOf(statesToSend), productId, page, page_size_api.orElse(TOKEN_PAGE_SIZE));
                         log.debug("[KAFKA] TOKEN NUMBER {} PAGE {}", tokens.size(), page);
 
                         sendScContractNotifications(tokens);
@@ -74,6 +79,44 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
                 }
                 page_size_api = Optional.empty();
             }
+        log.trace("regenerateQueueNotifications end");
+    }
+
+
+
+    @Override
+    @Async
+    public void sendContractsNotificationsByInstitutionIdAndTokenId(String tokenId, String institutionId) {
+        log.trace("regenerateQueueNotifications start");
+        log.debug("Regenerating notifications on queue with institutionId {} and tokenId {}", institutionId, tokenId);
+
+        Institution institution = institutionConnector.findById(institutionId);
+
+        List<Onboarding> onboardings = institution.getOnboarding().stream()
+                .filter(item -> Objects.nonNull(item.getStatus()) && statesToSend.contains(item.getStatus()))
+                .filter(item -> tokenId.equals(item.getTokenId()))
+                .toList();
+
+        if(onboardings.isEmpty()) {
+            log.trace("Onboarding not found with institutionId {} and tokenId {}", institutionId, tokenId);
+            return;
+        }
+
+        for(Onboarding onboarding : onboardings) {
+
+            Token token = new Token();
+            token.setId(onboarding.getTokenId());
+            token.setInstitutionId(institutionId);
+            token.setProductId(onboarding.getProductId());
+            //token.setUsers(users.stream().map(this::toTokenUser).toList());
+            token.setCreatedAt(onboarding.getCreatedAt());
+            token.setUpdatedAt(onboarding.getUpdatedAt());
+            token.setStatus(onboarding.getStatus());
+            token.setContractSigned(onboarding.getContract());
+            institution.setOnboarding(List.of(onboarding));
+            contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
+        }
+
         log.trace("regenerateQueueNotifications end");
     }
 
@@ -125,6 +168,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
 
     }
 
+    @Async
     @Override
     public void sendContracts(Optional<Integer> size, List<String> productsFilter) {
         this.page_size_api = size;
@@ -132,6 +176,7 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
         regenerateContractsNotifications();
     }
 
+    @Async
     @Override
     public void sendUsers(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId) {
         this.page_size_api = size;

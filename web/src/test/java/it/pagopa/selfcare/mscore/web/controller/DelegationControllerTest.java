@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.util.NestedServletException;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -123,14 +124,15 @@ class DelegationControllerTest {
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData() throws Exception {
         // Given
         Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL))
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
+                expectedDelegation.getProductId(), GetDelegationsMode.NORMAL, Optional.empty(), Optional.empty()))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -157,19 +159,22 @@ class DelegationControllerTest {
         assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
 
         verify(delegationService, times(1))
-                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL);
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
+                        expectedDelegation.getProductId(), GetDelegationsMode.NORMAL,
+                        Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData_nullMode() throws Exception {
         // Given
         Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), null))
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
+                expectedDelegation.getProductId(), null, Optional.empty(), Optional.empty()))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -196,7 +201,8 @@ class DelegationControllerTest {
         assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
 
         verify(delegationService, times(1))
-                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), null);
+                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
+                        expectedDelegation.getProductId(), null, Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 
