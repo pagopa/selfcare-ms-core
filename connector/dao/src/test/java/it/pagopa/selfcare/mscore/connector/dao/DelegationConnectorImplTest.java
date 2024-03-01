@@ -26,6 +26,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -204,4 +205,51 @@ class DelegationConnectorImplTest {
         assertEquals(actual.getInstitutionType(), dummyDelegationEntity.getInstitutions().get(0).getInstitutionType());
     }
 
+
+    @Test
+    void find_shouldGetDataPaginated() {
+
+        final String FROM1 = "from1";
+        final String TO1 = "to1";
+
+        //Given
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getMappedResults()).thenReturn(List.of(createAggregation("1", FROM1, TO1)));
+
+        //When
+        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
+                thenReturn(results);
+
+        List<Delegation> response = delegationConnectorImpl.find(null,
+                TO1, "productId", GetDelegationsMode.FULL, 0, 1);
+
+        //Then
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(1, response.size());
+
+        Delegation actual = response.get(0);
+
+        assertEquals(actual.getId(), "id_1");
+        assertEquals(actual.getType(), DelegationType.PT);
+        assertEquals(actual.getProductId(), "productId");
+        assertEquals(actual.getTo(), TO1);
+        assertEquals(actual.getFrom(), FROM1);
+
+    }
+
+    private DelegationInstitution createAggregation(String pattern, String from, String to) {
+        Institution institution = new Institution();
+        institution.setTaxCode("taxCode_" + pattern);
+        institution.setInstitutionType(InstitutionType.PT);
+        DelegationInstitution delegationEntity = new DelegationInstitution();
+        delegationEntity.setId("id_" + pattern);
+        delegationEntity.setProductId("productId");
+        delegationEntity.setType(DelegationType.PT);
+        delegationEntity.setTo(to);
+        delegationEntity.setFrom(from);
+        delegationEntity.setInstitutionFromName("name_" + from);
+        delegationEntity.setInstitutions(List.of(institution));
+        return delegationEntity;
+    }
 }
