@@ -1,12 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
-import eu.europa.esig.dss.detailedreport.jaxb.XmlDetailedReport;
-import eu.europa.esig.dss.diagnostic.jaxb.XmlDiagnosticData;
-import eu.europa.esig.dss.simplereport.jaxb.XmlSimpleReport;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
-import eu.europa.esig.dss.validation.SignedDocumentValidator;
-import eu.europa.esig.dss.validation.reports.Reports;
-import eu.europa.esig.validationreport.jaxb.ValidationReportType;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
@@ -20,7 +14,6 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,9 +41,6 @@ class ContractServiceTest {
 
     @Mock
     private FileStorageConnector fileStorageConnector;
-
-    @Mock
-    private SignatureService signatureService;
 
     @Mock
     private PagoPaSignatureConfig pagoPaSignatureConfig;
@@ -228,7 +216,7 @@ class ContractServiceTest {
     void testExtractTemplate2() {
 
         FileStorageConnector fileStorageConnector = mock(FileStorageConnector.class);
-        when(fileStorageConnector.getTemplateFile((String) any())).thenReturn("Template File");
+        when(fileStorageConnector.getTemplateFile(any())).thenReturn("Template File");
 
         PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
         CoreConfig coreConfig = new CoreConfig();
@@ -237,7 +225,7 @@ class ContractServiceTest {
 
         assertEquals("Template File", (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
                 pkcs7HashSignService, signatureService)).extractTemplate("Path"));
-        verify(fileStorageConnector).getTemplateFile((String) any());
+        verify(fileStorageConnector).getTemplateFile(any());
     }
 
     @Test
@@ -257,7 +245,7 @@ class ContractServiceTest {
         resourceResponse.setFileName("foo.txt");
         resourceResponse.setMimetype("Mimetype");
         FileStorageConnector fileStorageConnector = mock(FileStorageConnector.class);
-        when(fileStorageConnector.getFile((String) any())).thenReturn(resourceResponse);
+        when(fileStorageConnector.getFile(any())).thenReturn(resourceResponse);
 
         PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
         CoreConfig coreConfig = new CoreConfig();
@@ -266,27 +254,7 @@ class ContractServiceTest {
 
         assertSame(resourceResponse, (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
                 pkcs7HashSignService, signatureService)).getFile("Path"));
-        verify(fileStorageConnector).getFile((String) any());
-    }
-
-    @Test
-    void shouldThrowErrorWhenVerifySignatureThrowException() throws IOException {
-        SignedDocumentValidator signedDocumentValidator = mock(SignedDocumentValidator.class);
-        when(signatureService.createDocumentValidator(any())).thenReturn(signedDocumentValidator);
-        doNothing().when(signatureService).isDocumentSigned(any());
-        doNothing().when(signatureService).verifyOriginalDocument(any());
-        when(signatureService.validateDocument(any())).thenReturn(new Reports(new XmlDiagnosticData(), new XmlDetailedReport(), new XmlSimpleReport(), new ValidationReportType()));
-        doNothing().when(signatureService).verifySignatureForm(any());
-        doNothing().when(signatureService).verifySignature(any());
-        doNothing().when(signatureService).verifyDigest(any(), any());
-        doThrow(InvalidRequestException.class).when(signatureService).verifyManagerTaxCode(any(), any());
-        MultipartFile file = mock(MultipartFile.class);
-        Token token = new Token();
-        InputStream inputStream = mock(InputStream.class);
-        when(file.getInputStream()).thenReturn(inputStream);
-        when(file.getInputStream().readAllBytes()).thenReturn(new byte[]{1});
-        assertThrows(InvalidRequestException.class, () -> contractService.verifySignature(file, token, new ArrayList<>()));
-
+        verify(fileStorageConnector).getFile(any());
     }
 
     @Test

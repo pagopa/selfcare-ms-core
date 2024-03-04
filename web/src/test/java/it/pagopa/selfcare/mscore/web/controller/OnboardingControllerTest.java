@@ -170,41 +170,6 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#approveOnboarding(String, Authentication)}
-     */
-    @Test
-    void testApproveOnboarding() throws Exception {
-
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        when(tokenService.verifyToken(any())).thenReturn(token);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/onboarding/approve/{tokenId}", "42")
-                .principal(authentication);
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-
-    /**
      * Method under test: {@link OnboardingController#getOnboardingDocument(String)}
      */
     @Test
@@ -242,35 +207,6 @@ class OnboardingControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/octet-stream"))
                 .andExpect(MockMvcResultMatchers.content().string(""));
-    }
-
-
-    /**
-     * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
-     */
-    @Test
-    void shouldOnboardInstitutionWithoutContractAndSignNull() throws Exception {
-
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-
-        String content = objectMapper.writeValueAsString(createOnboardingInstitutionRequest());
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/onboarding/institution/complete")
-                .principal(authentication)
-                .content(content)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-
-        ArgumentCaptor<OnboardingRequest> argumentCaptor = ArgumentCaptor.forClass(OnboardingRequest.class);
-        verify(onboardingService).onboardingInstitutionComplete(argumentCaptor.capture(), any());
-        assertThat(argumentCaptor.getValue().getSignContract()).isTrue();
     }
 
     private OnboardingInstitutionRequest createOnboardingInstitutionRequest() {
@@ -317,93 +253,6 @@ class OnboardingControllerTest {
         onboardingInstitutionRequest.setProductName("Product Name");
 
         return onboardingInstitutionRequest;
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
-     */
-    @Test
-    void testOnboardingInstitution() throws Exception {
-
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-
-        String content = objectMapper.writeValueAsString(createOnboardingInstitutionRequest());
-
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/onboarding/institution")
-                .principal(authentication)
-                .content(content)
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#onboardingInstitution(OnboardingInstitutionRequest, Authentication)}
-     */
-    @Test
-    void testOnboardingInstitution2() throws Exception {
-        BillingRequest billingRequest = new BillingRequest();
-        billingRequest.setPublicServices(true);
-        billingRequest.setRecipientCode("Recipient Code");
-        billingRequest.setVatNumber("42");
-
-        ContractRequest contractRequest = new ContractRequest();
-        contractRequest.setPath("Path");
-        contractRequest.setVersion("1.0.2");
-
-        DataProtectionOfficerRequest dataProtectionOfficerRequest = new DataProtectionOfficerRequest();
-        dataProtectionOfficerRequest.setAddress("42 Main St");
-        dataProtectionOfficerRequest.setEmail("jane.doe@example.org");
-        dataProtectionOfficerRequest.setPec("Pec");
-
-        PaymentServiceProviderRequest paymentServiceProviderRequest = new PaymentServiceProviderRequest();
-        paymentServiceProviderRequest.setAbiCode("Abi Code");
-        paymentServiceProviderRequest.setBusinessRegisterNumber("42");
-        paymentServiceProviderRequest.setLegalRegisterName("Legal Register Name");
-        paymentServiceProviderRequest.setLegalRegisterNumber("42");
-        paymentServiceProviderRequest.setVatNumberGroup(true);
-
-        InstitutionUpdateRequest institutionUpdateRequest = new InstitutionUpdateRequest();
-        institutionUpdateRequest.setAddress("42 Main St");
-        institutionUpdateRequest.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdateRequest.setDataProtectionOfficer(dataProtectionOfficerRequest);
-        institutionUpdateRequest.setDescription("The characteristics of someone or something");
-        institutionUpdateRequest.setDigitalAddress("42 Main St");
-        institutionUpdateRequest.setGeographicTaxonomyCodes(new ArrayList<>());
-        institutionUpdateRequest.setImported(true);
-        institutionUpdateRequest.setInstitutionType(InstitutionType.PA);
-        institutionUpdateRequest.setPaymentServiceProvider(paymentServiceProviderRequest);
-        institutionUpdateRequest.setRea("Rea");
-        institutionUpdateRequest.setShareCapital("Share Capital");
-        institutionUpdateRequest.setSupportEmail("jane.doe@example.org");
-        institutionUpdateRequest.setSupportPhone("6625550144");
-        institutionUpdateRequest.setTaxCode("Tax Code");
-        institutionUpdateRequest.setZipCode("21654");
-
-        OnboardingInstitutionRequest onboardingInstitutionRequest = new OnboardingInstitutionRequest();
-        onboardingInstitutionRequest.setBilling(billingRequest);
-        onboardingInstitutionRequest.setContract(contractRequest);
-        onboardingInstitutionRequest.setInstitutionExternalId("42");
-        onboardingInstitutionRequest.setInstitutionUpdate(institutionUpdateRequest);
-        onboardingInstitutionRequest.setPricingPlan("Pricing Plan");
-        onboardingInstitutionRequest.setProductId("42");
-        onboardingInstitutionRequest.setProductName("Product Name");
-        onboardingInstitutionRequest.setSignContract(true);
-        onboardingInstitutionRequest.setUsers(new ArrayList<>());
-        String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionRequest);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/onboarding/institution")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().is(400));
     }
 
     /**
@@ -630,24 +479,6 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#completeOnboarding(String, MultipartFile)}
-     */
-    @Test
-    void testCompleteOnboarding() throws Exception {
-        doNothing().when(onboardingService).completeOnboarding(any(), any());
-        MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .multipart("/onboarding/complete/{tokenId}",
-                "42")
-                .file(file);
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-
-    /**
      * Method under test: {@link OnboardingController#invalidateOnboarding(String)}
      */
     @Test
@@ -698,57 +529,6 @@ class OnboardingControllerTest {
     }
 
     /**
-     * Method under test: {@link OnboardingController#onboardingReject(String)}
-     */
-    @Test
-    void testOnboardingReject() throws Exception {
-        doNothing().when(onboardingService).onboardingReject(org.mockito.Mockito.any());
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        when(tokenService.verifyToken(org.mockito.Mockito.any())).thenReturn(token);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/onboarding/reject/{tokenId}",
-                "42");
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
-    }
-
-
-    /**
      * Method under test: {@link OnboardingController#onboardingInfo(String, String, String[], Authentication)}
      */
     @Test
@@ -766,20 +546,6 @@ class OnboardingControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-    @Test
-    void testConsumeToken() throws Exception {
-        doNothing().when(onboardingService).completeOnboardingWithoutSignatureVerification(any(), any());
-        MockMultipartFile file = new MockMultipartFile("contract", "".getBytes());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .multipart("/onboarding/{tokenId}/consume",
-                        "42")
-                .file(file);
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 
 }
