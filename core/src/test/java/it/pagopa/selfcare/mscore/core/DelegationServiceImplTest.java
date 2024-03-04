@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
@@ -44,6 +45,9 @@ class DelegationServiceImplTest {
     void testCreateDelegation() {
         Delegation delegation = new Delegation();
         delegation.setId("id");
+        delegation.setProductId("prod-io");
+        Institution institution = new Institution();
+        institution.setId("id");
         when(delegationConnector.save(any())).thenReturn(delegation);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
@@ -58,18 +62,43 @@ class DelegationServiceImplTest {
      * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
      */
     @Test
-    void testCreateDelegationForProductPagopa() {
+    void testCreateDelegationForPTWithProductPagopa() {
         Delegation delegation = new Delegation();
         delegation.setId("id");
         delegation.setProductId("prod-pagopa");
         Institution institution = new Institution();
         institution.setId("id");
+        institution.setInstitutionType(InstitutionType.PT);
+        when(delegationConnector.save(any())).thenReturn(delegation);
+        doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
+        when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
+        Delegation response = delegationServiceImpl.createDelegation(delegation);
+        verify(institutionService).getInstitutions(any(), any());
+        verify(delegationConnector).save(any());
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals(delegation.getId(), response.getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void testCreateDelegationForEcWithProductPagopa() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-pagopa");
+        Institution institution = new Institution();
+        institution.setId("id");
+        institution.setInstitutionType(InstitutionType.PT);
         when(delegationConnector.save(any())).thenReturn(delegation);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegation(delegation);
         verify(delegationConnector).save(any());
+        verify(institutionService).getInstitutions(any(), any());
         assertNotNull(response);
         assertNotNull(response.getId());
         assertEquals(delegation.getId(), response.getId());
@@ -80,10 +109,16 @@ class DelegationServiceImplTest {
      */
     @Test
     void testCreateDelegationWithSendMailError() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-pagopa");
+        Institution institution = new Institution();
+        institution.setId("id");
+        when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
         doThrow(new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode()))
                 .when(mailNotificationService)
                 .sendMailForDelegation(any(), any(), any());
-        assertDoesNotThrow(() -> delegationServiceImpl.createDelegation(new Delegation()));
+        assertDoesNotThrow(() -> delegationServiceImpl.createDelegation(delegation));
         verify(mailNotificationService).sendMailForDelegation(any(), any(), any());
     }
 
@@ -92,8 +127,13 @@ class DelegationServiceImplTest {
      */
     @Test
     void testCreateDelegationWithError() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-io");
+        Institution institution = new Institution();
+        institution.setId("id");
         when(delegationConnector.save(any())).thenThrow(new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode()));
-        assertThrows(MsCoreException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
+        assertThrows(MsCoreException.class, () -> delegationServiceImpl.createDelegation(delegation));
         verify(delegationConnector).save(any());
     }
 
@@ -113,8 +153,13 @@ class DelegationServiceImplTest {
      */
     @Test
     void testCreateDelegationWithConflict() {
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        delegation.setProductId("prod-io");
+        Institution institution = new Institution();
+        institution.setId("id");
         when(delegationServiceImpl.checkIfExists(any())).thenReturn(true);
-        assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegation(new Delegation()));
+        assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegation(delegation));
         verifyNoMoreInteractions(delegationConnector);
     }
 

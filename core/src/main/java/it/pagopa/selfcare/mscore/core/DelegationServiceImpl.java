@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,18 +41,15 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public Delegation createDelegation(Delegation delegation) {
+        if(PROD_PAGOPA.equals(delegation.getProductId())) {
+            setPartnerByInstitutionTaxCode(delegation);
+        }
+
         if (checkIfExists(delegation)) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
         }
-        if (PROD_PAGOPA.equals(delegation.getProductId())) {
-            List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
-            Institution partner = institutions.stream()
-                    .findFirst()
-                    .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
-                            INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
-            delegation.setTo(partner.getId());
-        }
+
         Delegation savedDelegation;
         try {
             delegation.setCreatedAt(OffsetDateTime.now());
@@ -63,12 +60,27 @@ public class DelegationServiceImpl implements DelegationService {
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }
+
         try {
             notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
         } catch (Exception e) {
             log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
         }
+
         return savedDelegation;
+    }
+
+    private void setPartnerByInstitutionTaxCode(Delegation delegation) {
+        List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
+        Institution partner = institutions.stream()
+                .filter(institution -> institution.getInstitutionType() == InstitutionType.PT)
+                .findFirst()
+                .orElse(institutions.stream().findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
+                                INSTITUTION_TAX_CODE_NOT_FOUND.getCode())
+                        ));
+        delegation.setTo(partner.getId());
     }
 
     @Override
@@ -137,11 +149,6 @@ public class DelegationServiceImpl implements DelegationService {
             throw new MsCoreException(DELETE_DELEGATION_ERROR.getMessage(), DELETE_DELEGATION_ERROR.getCode());
         }
     }
-
-
-
-
-
 
     @Override
     public boolean checkIfExists(Delegation delegation) {
