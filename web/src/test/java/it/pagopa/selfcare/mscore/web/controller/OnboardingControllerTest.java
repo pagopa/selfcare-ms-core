@@ -341,24 +341,6 @@ class OnboardingControllerTest {
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
 
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        when(tokenService.verifyOnboarding(org.mockito.Mockito.any(), org.mockito.Mockito.any()))
-                .thenReturn(token);
-
         ArrayList<Person> personList = new ArrayList<>();
         personList.add(new Person());
 
@@ -428,24 +410,6 @@ class OnboardingControllerTest {
         institutionUpdate.setSupportPhone("6625550144");
         institutionUpdate.setTaxCode("Tax Code");
         institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        when(tokenService.verifyOnboarding(org.mockito.Mockito.any(), org.mockito.Mockito.any()))
-                .thenReturn(token);
 
         ArrayList<Person> personList = new ArrayList<>();
         personList.add(new Person());

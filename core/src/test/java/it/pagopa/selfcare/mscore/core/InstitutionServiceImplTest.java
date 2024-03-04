@@ -1322,7 +1322,6 @@ class InstitutionServiceImplTest {
         OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
         OffsetDateTime activatedAtMock = OffsetDateTime.parse("2020-11-02T02:15:30+01:00");
 
-
         Onboarding onboardingMock1 = mockInstance(new Onboarding());
         onboardingMock1.setStatus(RelationshipState.ACTIVE);
         onboardingMock1.setClosedAt(null);

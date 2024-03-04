@@ -4,14 +4,13 @@ on:
     branches:
       - release-dev
     types: [ opened, synchronize, reopened ]
-  workflow_dispatch: #allow to run github action manually
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions: write-all
-    #if: github.event.pull_request.merged == true
     steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
       with:

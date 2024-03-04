@@ -8,6 +8,7 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,36 @@ class QueueNotificationServiceTest {
         verify(tokenConnector, times(1)).findByStatusAndProductId(EnumSet.of(RelationshipState.ACTIVE, RelationshipState.DELETED), "product", 0, 1);
         verify(institutionConnector, times(1)).findById(token.getInstitutionId());
         verify(contractService, times(1)).sendDataLakeNotification(institution, token, QueueEvent.ADD);
+    }
+
+
+    @Test
+    void sendContractsNotificationsByInstitutionIdAndTokenId() {
+        //given
+        String institutionId = "institutionId";
+        String tokenId = "tokenId";
+        final Institution institution = mockInstance(new Institution());
+        Onboarding onboardingActive = new Onboarding();
+        onboardingActive.setTokenId(tokenId);
+        onboardingActive.setStatus(RelationshipState.ACTIVE);
+        Onboarding onboarding = new Onboarding();
+        onboarding.setTokenId(tokenId);
+        onboarding.setStatus(RelationshipState.PENDING);
+        Onboarding onboardingDeleted = new Onboarding();
+        onboardingDeleted.setTokenId(tokenId);
+        onboardingDeleted.setStatus(RelationshipState.DELETED);
+        institution.setOnboarding(List.of(onboardingActive, onboardingDeleted, onboarding));
+
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector, null);
+
+        when(institutionConnector.findById(institutionId)).thenReturn(institution);
+        //when
+        Executable executable = () -> schedulerService.sendContractsNotificationsByInstitutionIdAndTokenId(tokenId, institutionId);
+        //then
+        assertDoesNotThrow(executable);
+        verify(institutionConnector, times(1)).findById(institutionId);
+        verify(contractService, times(2)).sendDataLakeNotification(any(), any(), any());
+        verifyNoMoreInteractions(contractService);
     }
 
     @Test

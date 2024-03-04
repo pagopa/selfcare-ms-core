@@ -34,8 +34,8 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INFO_INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.CONTRACT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
@@ -228,6 +228,14 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
+
+        // Verify if exists an onboarding ACTIVE for productId
+        Optional.ofNullable(institution.getOnboarding())
+                .flatMap(onboardings -> onboardings.stream()
+                        .filter(onboarding -> RelationshipState.ACTIVE.equals(onboarding.getStatus()) && onboardingOperatorRequest.getProductId().equals(onboarding.getProductId()))
+                        .findAny())
+                .orElseThrow(() -> new InvalidRequestException(String.format(CONTRACT_NOT_FOUND.getMessage(), institution.getId(), onboardingOperatorRequest.getProductId()), CONTRACT_NOT_FOUND.getCode()));
+
         Map<String, List<UserToOnboard>> userMap = onboardingOperatorRequest.getUsers().stream()
                 .collect(Collectors.groupingBy(UserToOnboard::getId));
         List<String> roleLabels = onboardingOperatorRequest.getUsers().stream()
@@ -240,7 +248,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser, Token token) {
+    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser) {
         Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(onboardingLegalsRequest);
         InstitutionType institutionType = institution.getInstitutionType();
@@ -251,7 +259,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
         OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-        List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), token);
+        List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), null);
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
 
         List<User> delegate = request.getUsers().stream()

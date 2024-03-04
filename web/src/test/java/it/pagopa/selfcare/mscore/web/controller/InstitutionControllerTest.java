@@ -79,8 +79,7 @@ class InstitutionControllerTest {
     @Spy
     private UserMapper userMapper = new UserMapperImpl();
 
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
-        //.registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();;
 
 
     private final static Onboarding onboarding;
