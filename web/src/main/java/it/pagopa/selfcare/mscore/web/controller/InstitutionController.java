@@ -480,6 +480,7 @@ public class InstitutionController {
     /**
      * The function updates the field createdAt of the OnboardedProduct, the related Token and UserBindings for the given institution-product pair
      *
+     * @param institutionId String
      * @param createdAtRequest     CreatedAtRequest
      * @return no content
      * * Code: 200, Message: successful operation
@@ -488,8 +489,9 @@ public class InstitutionController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions.updateCreatedAt}", notes = "${swagger.mscore.institutions.updateCreatedAt}")
     @PutMapping(value = "/{institutionId}/createdAt")
-    public ResponseEntity<Void> updateCreatedAt( @PathVariable(value = "institutionId") String institutionId,
-                                                 @Valid @RequestBody CreatedAtRequest createdAtRequest) {
+    public ResponseEntity<Void> updateCreatedAt(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
+                                                @PathVariable("institutionId") String institutionId,
+                                                @Valid @RequestBody CreatedAtRequest createdAtRequest) {
         log.trace("updateCreatedAt start");
         log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}", institutionId, createdAtRequest.getProductId(), createdAtRequest.getCreatedAt());
         if (createdAtRequest.getCreatedAt().isAfter(OffsetDateTime.now())) {
