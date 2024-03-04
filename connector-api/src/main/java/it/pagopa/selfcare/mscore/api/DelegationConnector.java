@@ -10,8 +10,7 @@ public interface DelegationConnector {
 
     Delegation save(Delegation delegation);
     boolean checkIfExists(Delegation delegation);
-    List<Delegation> find(String from, String to, String productId, GetDelegationsMode mode);
+    List<Delegation> find(String from, String to, String productId, GetDelegationsMode mode, Integer page, Integer size);
     Delegation findByIdAndModifyStatus(String delegationId, DelegationState status);
     boolean checkIfDelegationsAreActive(String institutionId);
-
 }

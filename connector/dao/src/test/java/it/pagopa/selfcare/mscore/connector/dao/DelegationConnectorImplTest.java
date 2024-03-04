@@ -20,11 +20,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +41,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class DelegationConnectorImplTest {
 
+    public static final int PAGE_SIZE = 0;
+    public static final int MAX_PAGE_SIZE = 100;
     static Institution dummyInstitution;
     static DelegationInstitution dummyDelegationEntity;
 
@@ -116,12 +121,16 @@ class DelegationConnectorImplTest {
         delegationEntity.setInstitutionFromName("setInstitutionFromName");
         delegationEntity.setInstitutionFromRootName("setInstitutionFromRootName");
 
+        List<DelegationEntity> delegationEntities = List.of(delegationEntity);
+        Page<DelegationEntity> delegationEntityPage = new PageImpl<>(delegationEntities);
         //When
-        when(delegationRepository.find(any(), any())).
-                thenReturn(List.of(delegationEntity));
+
+        doReturn(delegationEntityPage)
+                .when(delegationRepository)
+                .find(any(), any(), any());
 
         List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(),
-                delegationEntity.getTo(), delegationEntity.getProductId(), GetDelegationsMode.NORMAL);
+                delegationEntity.getTo(), delegationEntity.getProductId(), GetDelegationsMode.NORMAL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -148,7 +157,8 @@ class DelegationConnectorImplTest {
         when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
                 thenReturn(results);
 
-        List<Delegation> response = delegationConnectorImpl.find(dummyDelegationEntity.getFrom(), null, dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL);
+        List<Delegation> response = delegationConnectorImpl.find(dummyDelegationEntity.getFrom(), null,
+                dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -177,7 +187,8 @@ class DelegationConnectorImplTest {
         when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
                 thenReturn(results);
 
-        List<Delegation> response = delegationConnectorImpl.find(null, dummyDelegationEntity.getTo(), dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL);
+        List<Delegation> response = delegationConnectorImpl.find(null, dummyDelegationEntity.getTo(),
+                dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -213,4 +224,51 @@ class DelegationConnectorImplTest {
         assertTrue(response);
     }
 
+
+    @Test
+    void find_shouldGetDataPaginated() {
+
+        final String FROM1 = "from1";
+        final String TO1 = "to1";
+
+        //Given
+        AggregationResults<Object> results = mock(AggregationResults.class);
+        when(results.getMappedResults()).thenReturn(List.of(createAggregation("1", FROM1, TO1)));
+
+        //When
+        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
+                thenReturn(results);
+
+        List<Delegation> response = delegationConnectorImpl.find(null,
+                TO1, "productId", GetDelegationsMode.FULL, 0, 1);
+
+        //Then
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(1, response.size());
+
+        Delegation actual = response.get(0);
+
+        assertEquals(actual.getId(), "id_1");
+        assertEquals(actual.getType(), DelegationType.PT);
+        assertEquals(actual.getProductId(), "productId");
+        assertEquals(actual.getTo(), TO1);
+        assertEquals(actual.getFrom(), FROM1);
+
+    }
+
+    private DelegationInstitution createAggregation(String pattern, String from, String to) {
+        Institution institution = new Institution();
+        institution.setTaxCode("taxCode_" + pattern);
+        institution.setInstitutionType(InstitutionType.PT);
+        DelegationInstitution delegationEntity = new DelegationInstitution();
+        delegationEntity.setId("id_" + pattern);
+        delegationEntity.setProductId("productId");
+        delegationEntity.setType(DelegationType.PT);
+        delegationEntity.setTo(to);
+        delegationEntity.setFrom(from);
+        delegationEntity.setInstitutionFromName("name_" + from);
+        delegationEntity.setInstitutions(List.of(institution));
+        return delegationEntity;
+    }
 }

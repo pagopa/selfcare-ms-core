@@ -13,8 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INSTITUTION_TAX_CODE_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
@@ -22,6 +24,8 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 @Service
 public class DelegationServiceImpl implements DelegationService {
 
+    private static final int DEFAULT_DELEGATIONS_PAGE_SIZE = 10000;
+    private static final int MAX_DELEGATIONS_PAGE_SIZE = 10000;
     private final DelegationConnector delegationConnector;
     private final MailNotificationService notificationService;
     private final InstitutionService institutionService;
@@ -135,13 +139,19 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
 
+
+
+
+
     @Override
     public boolean checkIfExists(Delegation delegation) {
         return delegationConnector.checkIfExists(delegation);
     }
 
     @Override
-    public List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode) {
-        return delegationConnector.find(from, to, productId, mode);
+    public List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode,
+                                           Optional<Integer> page, Optional<Integer> size) {
+        int pageSize = size.filter(s -> s > 0).filter(s -> s <= DEFAULT_DELEGATIONS_PAGE_SIZE).orElse(DEFAULT_DELEGATIONS_PAGE_SIZE);
+        return delegationConnector.find(from, to, productId, mode, page.orElse(0), pageSize);
     }
 }
