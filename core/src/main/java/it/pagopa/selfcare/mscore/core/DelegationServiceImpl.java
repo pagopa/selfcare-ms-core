@@ -25,7 +25,6 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 public class DelegationServiceImpl implements DelegationService {
 
     private static final int DEFAULT_DELEGATIONS_PAGE_SIZE = 10000;
-    private static final int MAX_DELEGATIONS_PAGE_SIZE = 10000;
     private final DelegationConnector delegationConnector;
     private final MailNotificationService notificationService;
     private final InstitutionService institutionService;
