@@ -40,6 +40,10 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public Delegation createDelegation(Delegation delegation) {
+        /*
+            In case of prod-pagopa product, in the attribute "to" of the delegation object a taxCode is inserted.
+            So we have to retrieve the institutionId from the taxCode and set it in the "to" attribute.
+         */
         if(PROD_PAGOPA.equals(delegation.getProductId())) {
             setPartnerByInstitutionTaxCode(delegation);
         }
@@ -70,6 +74,10 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
     private void setPartnerByInstitutionTaxCode(Delegation delegation) {
+        /*
+            In case the api returns more institutions we always try to take the PT,
+            otherwise it is okay to take the first one
+         */
         List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
         Institution partner = institutions.stream()
                 .filter(institution -> institution.getInstitutionType() == InstitutionType.PT)
