@@ -117,7 +117,10 @@ public class OnboardingServiceImpl implements OnboardingService {
         log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
         onboarding.setStatus(RelationshipState.ACTIVE);
         onboarding.setProductId(productId);
-        onboarding.setCreatedAt(OffsetDateTime.now());
+
+        if(Objects.isNull(onboarding.getCreatedAt())) {
+            onboarding.setCreatedAt(OffsetDateTime.now());
+        }
 
         //Verify if onboarding exists, in case onboarding must fail
         final Institution institution = institutionConnector.findById(institutionId);

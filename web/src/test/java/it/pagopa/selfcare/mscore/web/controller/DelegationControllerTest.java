@@ -215,6 +215,48 @@ class DelegationControllerTest {
         verifyNoMoreInteractions(delegationService);
     }
 
+    @Test
+    void getDelegations_shouldGetDataCustom() throws Exception {
+        // Given
+        List<Delegation> expectedDelegations = new ArrayList<>();
+        Delegation delegation1 = createDelegation("1", FROM1, TO1);
+        Delegation delegation2 = createDelegation("2", FROM2, TO1);
+        expectedDelegations.add(delegation1);
+        expectedDelegations.add(delegation2);
+
+        when(delegationService.getDelegations(null, TO1,
+                null, GetDelegationsMode.FULL, Optional.empty(), Optional.empty()))
+                .thenReturn(expectedDelegations);
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/delegations?brokerId={brokerId}&mode={mode}", TO1, GetDelegationsMode.FULL);
+        MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<DelegationResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), new TypeReference<>() {});
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.size()).isEqualTo(2);
+        DelegationResponse actual = response.get(0);
+        assertThat(actual.getId()).isEqualTo(delegation1.getId());
+        assertThat(actual.getInstitutionName()).isEqualTo(delegation1.getInstitutionFromName());
+        assertThat(actual.getBrokerId()).isEqualTo(delegation1.getTo());
+        assertThat(actual.getProductId()).isEqualTo(delegation1.getProductId());
+        assertThat(actual.getInstitutionId()).isEqualTo(delegation1.getFrom());
+        assertThat(actual.getInstitutionRootName()).isEqualTo(delegation1.getInstitutionFromRootName());
+
+        verify(delegationService, times(1))
+                .getDelegations(null, TO1,
+                        null, GetDelegationsMode.FULL,
+                        Optional.empty(), Optional.empty());
+        verifyNoMoreInteractions(delegationService);
+    }
+
     /**
      * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode, Optional, Optional)}
      */
