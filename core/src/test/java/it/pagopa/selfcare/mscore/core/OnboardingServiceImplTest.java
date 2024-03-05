@@ -781,7 +781,7 @@ class OnboardingServiceImplTest {
     /**
      * Method under test: {@link OnboardingServiceImpl#onboardingLegals(OnboardingLegalsRequest, SelfCareUser)}
      */
-    //@Test
+    @Test
     void testOnboardingLegals() throws IOException {
         Institution institution = new Institution();
         institution.setInstitutionType(InstitutionType.PA);
@@ -801,7 +801,10 @@ class OnboardingServiceImplTest {
         onboardingLegalsRequest.setProductName("Product Name");
         onboardingLegalsRequest.setSignContract(true);
         onboardingLegalsRequest.setTokenType(TokenType.INSTITUTION);
-        onboardingLegalsRequest.setUsers(new ArrayList<>());
+        UserToOnboard user = new UserToOnboard();
+        user.setId("id");
+        user.setRole(PartyRole.MANAGER);
+        onboardingLegalsRequest.setUsers(List.of(user));
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getId()).thenReturn("42");
 
