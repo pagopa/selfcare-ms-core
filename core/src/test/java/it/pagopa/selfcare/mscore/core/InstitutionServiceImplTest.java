@@ -495,100 +495,6 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
-     */
-    @Test
-    void testCreateInstitutionRaw() {
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
-        Institution institution = new Institution();
-        assertThrows(ResourceConflictException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
-        verify(institutionConnector).findByExternalId(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
-     */
-    @Test
-    void testCreateInstitutionRaw2() {
-        Institution institution = new Institution();
-        when(institutionConnector.save(any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
-        Institution institution1 = new Institution();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
-        assertNull(institution1.getInstitutionType());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
-     */
-    @Test
-    void testCreateInstitutionRaw3() {
-        when(institutionConnector.findByExternalId(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "START - check institution {} already exists"));
-        Institution institution = new Institution();
-        assertThrows(InvalidRequestException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
-        verify(institutionConnector).findByExternalId(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
-     */
-    @Test
-    void testCreateInstitutionRaw4() {
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
-        Institution institution = new Institution();
-        assertThrows(ResourceConflictException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
-        verify(institutionConnector).findByExternalId(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
-     */
-    @Test
-    void testCreateInstitutionRaw5() {
-        Institution institution = new Institution();
-        when(institutionConnector.save(any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
-        Institution institution1 = new Institution();
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(institution1, "42"));
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
-        assertNull(institution1.getInstitutionType());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
-     */
-    @Test
-    void testCreateInstitutionRaw6() {
-        Institution institution = new Institution();
-        when(institutionConnector.save(any())).thenReturn(institution);
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
-
-        assertSame(institution, institutionServiceImpl.createInstitutionRaw(dummyInstitutionPa(), "example"));
-        verify(institutionConnector).save(any());
-        verify(institutionConnector).findByExternalId(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#createInstitutionRaw(Institution, String)}
-     */
-    @Test
-    void testCreateInstitutionRaw7() {
-        when(institutionConnector.findByExternalId(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "START - check institution {} already exists"));
-        Institution institution = new Institution();
-        assertThrows(InvalidRequestException.class,
-                () -> institutionServiceImpl.createInstitutionRaw(institution, "42"));
-        verify(institutionConnector).findByExternalId(any());
-    }
-
-    /**
      * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProducts(Institution, List)}
      */
     @Test
@@ -756,7 +662,7 @@ class InstitutionServiceImplTest {
         institutionUpdate.setDelegation(true);
         assertDoesNotThrow(
                 () -> institutionServiceImpl.updateInstitutionDelegation("42", true));
-        verify(institutionConnector).findAndUpdate(eq("42"), eq(null), eq(null), eq(institutionUpdate));
+        verify(institutionConnector).findAndUpdate("42", null, null, institutionUpdate);
     }
 
     /**
@@ -1415,7 +1321,6 @@ class InstitutionServiceImplTest {
         String productIdMock = "productId";
         OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
         OffsetDateTime activatedAtMock = OffsetDateTime.parse("2020-11-02T02:15:30+01:00");
-
 
         Onboarding onboardingMock1 = mockInstance(new Onboarding());
         onboardingMock1.setStatus(RelationshipState.ACTIVE);
