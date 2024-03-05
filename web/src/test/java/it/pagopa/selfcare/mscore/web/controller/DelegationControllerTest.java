@@ -168,6 +168,7 @@ class DelegationControllerTest {
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
                         expectedDelegation.getProductId(), GetDelegationsMode.NORMAL,
                         Optional.empty(), Optional.empty());
+
         verifyNoMoreInteractions(delegationService);
     }
 
@@ -210,6 +211,7 @@ class DelegationControllerTest {
                 .getDelegations(null, TO1,
                         null, GetDelegationsMode.FULL,
                         Optional.empty(), Optional.empty());
+
         verifyNoMoreInteractions(delegationService);
     }
 
