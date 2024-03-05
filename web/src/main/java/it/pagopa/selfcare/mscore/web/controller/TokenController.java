@@ -5,18 +5,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
-import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.PaginatedToken;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
+import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.TokenListResponse;
 import it.pagopa.selfcare.mscore.web.model.token.PaginatedTokenResponse;
-import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
-import it.pagopa.selfcare.mscore.web.model.onboarding.TokenResponse;
 import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
-import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,28 +33,6 @@ public class TokenController {
     public TokenController(TokenService tokenService, TokenMapper tokenMapper) {
         this.tokenService = tokenService;
         this.tokenMapper = tokenMapper;
-    }
-
-    /**
-     * The verifyToken function is used to verify the token that was created by the onboarding service.
-     * It takes in a String tokenId and returns a Token object.
-     *
-     * @param tokenId tokenId
-     * @return The token tokenId
-     * * Code: 200, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Token not found, DataType: Problem
-     * * Code: 409, Message: Token already consumed, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.token.verify}", notes = "${swagger.mscore.token.verify}")
-    @PostMapping("/tokens/{tokenId}/verify")
-    public ResponseEntity<TokenResponse> verifyToken(@ApiParam("${swagger.mscore.token.tokenId}")
-                                                     @PathVariable("tokenId") String tokenId) {
-        log.info("Verify token identified with {}", tokenId);
-        CustomExceptionMessage.setCustomMessage(GenericError.VERIFY_TOKEN_FAILED);
-        tokenService.verifyToken(tokenId);
-        return ResponseEntity.ok().body(new TokenResponse(tokenId));
     }
 
     /**

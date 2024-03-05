@@ -39,8 +39,6 @@ public interface InstitutionService {
 
     Institution createInstitutionFromInfocamere(Institution institution);
 
-    Institution createInstitutionRaw(Institution institution, String externalId);
-
     Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser);
 
     Institution createInstitution(Institution institution);
@@ -74,6 +72,8 @@ public interface InstitutionService {
     Institution createPnPgInstitution(String taxId, String description);
 
     Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
+
+    void updateInstitutionDelegation(String institutionId, boolean delegation);
 
     List<ValidInstitution> retrieveInstitutionByExternalIds(List<ValidInstitution> validInstitutionList, String productId);
 
