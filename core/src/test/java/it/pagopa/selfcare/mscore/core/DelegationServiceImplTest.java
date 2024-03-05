@@ -160,7 +160,27 @@ class DelegationServiceImplTest {
         when(delegationConnector.find(any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId",
-                GetDelegationsMode.FULL, Optional.of(0), Optional.of(100));
+                GetDelegationsMode.FULL, Optional.of(0), Optional.of(0));
+        //Then
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any());
+
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        assertEquals(delegation.getId(), response.get(0).getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
+    void find_shouldGetData_fullMode_defaultPage() {
+        //Given
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
+        //When
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId",
+                GetDelegationsMode.FULL, Optional.empty(), Optional.empty());
         //Then
         verify(delegationConnector).find(any(), any(), any(), any(), any(), any());
 

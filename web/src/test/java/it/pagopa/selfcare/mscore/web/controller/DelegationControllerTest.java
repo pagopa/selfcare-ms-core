@@ -211,7 +211,6 @@ class DelegationControllerTest {
                 .getDelegations(null, TO1,
                         null, GetDelegationsMode.FULL,
                         Optional.empty(), Optional.empty());
-
         verifyNoMoreInteractions(delegationService);
     }
 

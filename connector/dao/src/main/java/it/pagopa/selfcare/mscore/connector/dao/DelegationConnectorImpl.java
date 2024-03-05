@@ -88,7 +88,6 @@ public class DelegationConnectorImpl implements DelegationConnector {
             long skipLimit = (long) page * size;
             SkipOperation skip = Aggregation.skip(skipLimit);
             LimitOperation limit = Aggregation.limit(skipLimit + size);
-
             Aggregation aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
 
             List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();

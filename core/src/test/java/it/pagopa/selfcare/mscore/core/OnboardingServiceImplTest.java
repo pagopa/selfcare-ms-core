@@ -27,6 +27,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -35,6 +38,8 @@ import org.springframework.test.context.ContextConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.time.*;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -1130,6 +1135,13 @@ class OnboardingServiceImplTest {
 
         verify(onboardingDao, times(1))
                 .onboardOperator(any(), any(), any());
+
+        ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
+        verify(institutionConnector, times(1))
+                .findAndUpdate(any(), captor.capture(), any(), any());
+        Onboarding actual = captor.getValue();
+        assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
+
         verifyNoMoreInteractions(userService);
     }
 
@@ -1148,6 +1160,10 @@ class OnboardingServiceImplTest {
         onboardingToPersist.setPricingPlan(pricingPlan);
         onboardingToPersist.setProductId(productId);
         onboardingToPersist.setBilling(new Billing());
+        onboardingToPersist.setCreatedAt(LocalDateTime
+                .of(2022,1,1,0,0,0)
+                .atZone(ZoneOffset.systemDefault())
+                .toOffsetDateTime());
 
         Institution institution = new Institution();
         institution.setId("institutionId");
@@ -1175,6 +1191,13 @@ class OnboardingServiceImplTest {
 
         verify(onboardingDao, times(1))
                 .onboardOperator(any(), any(), any());
+
+        ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
+        verify(institutionConnector, times(1))
+                .findAndUpdate(any(), captor.capture(), any(), any());
+        Onboarding actual = captor.getValue();
+        assertEquals(actual.getCreatedAt(), onboardingToPersist.getCreatedAt());
+
         verifyNoMoreInteractions(userService);
     }
 
