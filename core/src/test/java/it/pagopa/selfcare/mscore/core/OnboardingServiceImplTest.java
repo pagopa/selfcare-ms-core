@@ -5,9 +5,6 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -21,12 +18,10 @@ import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.product.entity.Product;
-import it.pagopa.selfcare.product.entity.ProductStatus;
 import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -295,7 +290,7 @@ class OnboardingServiceImplTest {
         request.setUsers(List.of(userToOnboard));
 
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
-        when(productService.getProductIsValid(request.getProductId())).thenReturn(new Product());
+        when(productService.getProductIsValid(request.getProductId())).thenReturn(new it.pagopa.selfcare.product.entity.Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
         when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
 
@@ -344,7 +339,7 @@ class OnboardingServiceImplTest {
         Institution institution = new Institution();
         institution.setId("example");
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(institution));
-        when(productService.getProductIsValid(request.getProductId())).thenReturn(new Product());
+        when(productService.getProductIsValid(request.getProductId())).thenReturn(new it.pagopa.selfcare.product.entity.Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenThrow(FeignException.NotFound.class);
         when(userService.persistUserRegistry(any(), any(), any(), any(),any())).thenReturn(user);
 
