@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
@@ -15,11 +14,12 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductStatus;
+import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -197,7 +197,7 @@ class OnboardingDaoTest {
     }
 
     @Test
-    void persistComplete_newUser(){
+    void persistComplete_newUser() {
         when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
                 .thenReturn(new Institution());
 
@@ -263,7 +263,7 @@ class OnboardingDaoTest {
     }
 
     @Test
-    void testNewUserStandard(){
+    void testNewUserStandard() {
         when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
                 .thenReturn(new Institution());
 
@@ -730,8 +730,8 @@ class OnboardingDaoTest {
         TokenConnector tokenConnector = mock(TokenConnector.class);
         UserConnector userConnector = mock(UserConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productService, new CoreConfig());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -781,8 +781,8 @@ class OnboardingDaoTest {
         TokenConnector tokenConnector = mock(TokenConnector.class);
         UserConnector userConnector = mock(UserConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productService, new CoreConfig());
 
         InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
 
@@ -800,8 +800,8 @@ class OnboardingDaoTest {
         TokenConnector tokenConnector = mock(TokenConnector.class);
         UserConnector userConnector = mock(UserConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productService, new CoreConfig());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -847,8 +847,8 @@ class OnboardingDaoTest {
         TokenConnector tokenConnector = mock(TokenConnector.class);
         UserConnector userConnector = mock(UserConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productService, new CoreConfig());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -897,8 +897,8 @@ class OnboardingDaoTest {
         TokenConnector tokenConnector = mock(TokenConnector.class);
         UserConnector userConnector = mock(UserConnector.class);
         InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productService, new CoreConfig());
 
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setAddress("42 Main St");
@@ -1154,8 +1154,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState4() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1207,8 +1207,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState9() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1221,8 +1221,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState10() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1266,8 +1266,8 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState12() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1317,8 +1317,8 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState14() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1331,8 +1331,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState15() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         UserBinding userBinding = new UserBinding();
         userBinding.setProducts(new ArrayList<>());
@@ -1351,8 +1351,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState17() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -1386,8 +1386,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState18() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -1435,20 +1435,20 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState19() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getRelationshipId()).thenReturn("42");
         doNothing().when(onboardedProduct).setContract(any());
-        doNothing().when(onboardedProduct).setCreatedAt( any());
+        doNothing().when(onboardedProduct).setCreatedAt(any());
         doNothing().when(onboardedProduct).setEnv(any());
         doNothing().when(onboardedProduct).setProductId(any());
         doNothing().when(onboardedProduct).setProductRole(any());
         doNothing().when(onboardedProduct).setRelationshipId(any());
-        doNothing().when(onboardedProduct).setRole( any());
-        doNothing().when(onboardedProduct).setStatus( any());
+        doNothing().when(onboardedProduct).setRole(any());
+        doNothing().when(onboardedProduct).setStatus(any());
         doNothing().when(onboardedProduct).setTokenId(any());
-        doNothing().when(onboardedProduct).setUpdatedAt( any());
+        doNothing().when(onboardedProduct).setUpdatedAt(any());
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(Env.ROOT);
@@ -1474,15 +1474,15 @@ class OnboardingDaoTest {
         onboardingDao.updateUserProductState(onboardedUser, "foo", RelationshipState.PENDING);
         verify(onboardedProduct).getRelationshipId();
         verify(onboardedProduct).setContract(any());
-        verify(onboardedProduct).setCreatedAt( any());
+        verify(onboardedProduct).setCreatedAt(any());
         verify(onboardedProduct).setEnv(any());
         verify(onboardedProduct).setProductId(any());
         verify(onboardedProduct).setProductRole(any());
         verify(onboardedProduct).setRelationshipId(any());
-        verify(onboardedProduct).setRole( any());
-        verify(onboardedProduct).setStatus( any());
+        verify(onboardedProduct).setRole(any());
+        verify(onboardedProduct).setStatus(any());
         verify(onboardedProduct).setTokenId(any());
-        verify(onboardedProduct).setUpdatedAt( any());
+        verify(onboardedProduct).setUpdatedAt(any());
         assertEquals(1, onboardedUser.getBindings().size());
     }
 
@@ -1491,21 +1491,21 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState20() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
         doNothing().when(onboardedProduct).setContract(any());
-        doNothing().when(onboardedProduct).setCreatedAt( any());
+        doNothing().when(onboardedProduct).setCreatedAt(any());
         doNothing().when(onboardedProduct).setEnv(any());
         doNothing().when(onboardedProduct).setProductId(any());
         doNothing().when(onboardedProduct).setProductRole(any());
         doNothing().when(onboardedProduct).setRelationshipId(any());
-        doNothing().when(onboardedProduct).setRole( any());
-        doNothing().when(onboardedProduct).setStatus( any());
+        doNothing().when(onboardedProduct).setRole(any());
+        doNothing().when(onboardedProduct).setStatus(any());
         doNothing().when(onboardedProduct).setTokenId(any());
-        doNothing().when(onboardedProduct).setUpdatedAt( any());
+        doNothing().when(onboardedProduct).setUpdatedAt(any());
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(Env.ROOT);
@@ -1533,15 +1533,15 @@ class OnboardingDaoTest {
         verify(onboardedProduct).getStatus();
         verify(onboardedProduct, atLeast(1)).getRelationshipId();
         verify(onboardedProduct).setContract(any());
-        verify(onboardedProduct).setCreatedAt( any());
+        verify(onboardedProduct).setCreatedAt(any());
         verify(onboardedProduct).setEnv(any());
         verify(onboardedProduct).setProductId(any());
         verify(onboardedProduct).setProductRole(any());
         verify(onboardedProduct).setRelationshipId(any());
-        verify(onboardedProduct).setRole( any());
-        verify(onboardedProduct).setStatus( any());
+        verify(onboardedProduct).setRole(any());
+        verify(onboardedProduct).setStatus(any());
         verify(onboardedProduct).setTokenId(any());
-        verify(onboardedProduct).setUpdatedAt( any());
+        verify(onboardedProduct).setUpdatedAt(any());
     }
 
     /**
@@ -1550,21 +1550,21 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState21() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
         doNothing().when(onboardedProduct).setContract(any());
-        doNothing().when(onboardedProduct).setCreatedAt( any());
+        doNothing().when(onboardedProduct).setCreatedAt(any());
         doNothing().when(onboardedProduct).setEnv(any());
         doNothing().when(onboardedProduct).setProductId(any());
         doNothing().when(onboardedProduct).setProductRole(any());
         doNothing().when(onboardedProduct).setRelationshipId(any());
-        doNothing().when(onboardedProduct).setRole( any());
-        doNothing().when(onboardedProduct).setStatus( any());
+        doNothing().when(onboardedProduct).setRole(any());
+        doNothing().when(onboardedProduct).setStatus(any());
         doNothing().when(onboardedProduct).setTokenId(any());
-        doNothing().when(onboardedProduct).setUpdatedAt( any());
+        doNothing().when(onboardedProduct).setUpdatedAt(any());
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(Env.ROOT);
@@ -1592,15 +1592,15 @@ class OnboardingDaoTest {
         verify(onboardedProduct).getStatus();
         verify(onboardedProduct, atLeast(1)).getRelationshipId();
         verify(onboardedProduct).setContract(any());
-        verify(onboardedProduct).setCreatedAt( any());
+        verify(onboardedProduct).setCreatedAt(any());
         verify(onboardedProduct).setEnv(any());
         verify(onboardedProduct).setProductId(any());
         verify(onboardedProduct).setProductRole(any());
         verify(onboardedProduct).setRelationshipId(any());
-        verify(onboardedProduct).setRole( any());
-        verify(onboardedProduct).setStatus( any());
+        verify(onboardedProduct).setRole(any());
+        verify(onboardedProduct).setStatus(any());
         verify(onboardedProduct).setTokenId(any());
-        verify(onboardedProduct).setUpdatedAt( any());
+        verify(onboardedProduct).setUpdatedAt(any());
     }
 
     /**
@@ -1609,21 +1609,21 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState22() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
         doNothing().when(onboardedProduct).setContract(any());
-        doNothing().when(onboardedProduct).setCreatedAt( any());
+        doNothing().when(onboardedProduct).setCreatedAt(any());
         doNothing().when(onboardedProduct).setEnv(any());
         doNothing().when(onboardedProduct).setProductId(any());
         doNothing().when(onboardedProduct).setProductRole(any());
         doNothing().when(onboardedProduct).setRelationshipId(any());
-        doNothing().when(onboardedProduct).setRole( any());
-        doNothing().when(onboardedProduct).setStatus( any());
+        doNothing().when(onboardedProduct).setRole(any());
+        doNothing().when(onboardedProduct).setStatus(any());
         doNothing().when(onboardedProduct).setTokenId(any());
-        doNothing().when(onboardedProduct).setUpdatedAt( any());
+        doNothing().when(onboardedProduct).setUpdatedAt(any());
         onboardedProduct.setContract("Contract");
         onboardedProduct.setCreatedAt(null);
         onboardedProduct.setEnv(Env.ROOT);
@@ -1651,15 +1651,15 @@ class OnboardingDaoTest {
         verify(onboardedProduct).getStatus();
         verify(onboardedProduct, atLeast(1)).getRelationshipId();
         verify(onboardedProduct).setContract(any());
-        verify(onboardedProduct).setCreatedAt( any());
+        verify(onboardedProduct).setCreatedAt(any());
         verify(onboardedProduct).setEnv(any());
         verify(onboardedProduct).setProductId(any());
         verify(onboardedProduct).setProductRole(any());
         verify(onboardedProduct).setRelationshipId(any());
-        verify(onboardedProduct).setRole( any());
-        verify(onboardedProduct).setStatus( any());
+        verify(onboardedProduct).setRole(any());
+        verify(onboardedProduct).setStatus(any());
         verify(onboardedProduct).setTokenId(any());
-        verify(onboardedProduct).setUpdatedAt( any());
+        verify(onboardedProduct).setUpdatedAt(any());
     }
 
     /**
@@ -1740,8 +1740,8 @@ class OnboardingDaoTest {
      */
     @Test
     void testOnboardOperator2() {
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, new CoreConfig());
         assertTrue(onboardingDao.onboardOperator(new Institution(), "productId", List.of()).isEmpty());
     }
 
@@ -1758,12 +1758,12 @@ class OnboardingDaoTest {
         onboardedUser.setBindings(List.of(userBinding));
         UserConnector userConnector = mock(UserConnector.class);
         doNothing().when(userConnector)
-                .findAndUpdate(any(), any(), any(),any(),
+                .findAndUpdate(any(), any(), any(), any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productService, new CoreConfig());
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -1783,7 +1783,7 @@ class OnboardingDaoTest {
         assertEquals(Env.ROOT, onboardedProduct.getEnv());
         verify(userConnector).findById(any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
-               any(), any());
+                any(), any());
     }
 
     /**
@@ -1798,15 +1798,15 @@ class OnboardingDaoTest {
         userBinding.setProducts(List.of(onboardedProduct));
         onboardedUser.setBindings(List.of(userBinding));
         UserConnector userConnector = mock(UserConnector.class);
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(),any());
+        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
-                .findAndUpdate(any(), any(), any(),any(),
+                .findAndUpdate(any(), any(), any(), any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
         doNothing().when(userConnector).deleteById(any());
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productService, new CoreConfig());
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -1815,9 +1815,9 @@ class OnboardingDaoTest {
 
         assertTrue(onboardingDao.onboardOperator(new Institution(), "42", userToOnboardList).isEmpty());
         verify(userConnector).findById(any());
-        verify(userConnector, times(2)).findAndRemoveProduct(any(), any(),any());
+        verify(userConnector, times(2)).findAndRemoveProduct(any(), any(), any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
-               any(), any());
+                any(), any());
     }
 
     /**
@@ -1833,14 +1833,14 @@ class OnboardingDaoTest {
         onboardedUser.setBindings(List.of(userBinding));
         UserConnector userConnector = mock(UserConnector.class);
         doThrow(new InvalidRequestException("An error occurred", "can not onboard operators")).when(userConnector)
-                .findAndRemoveProduct(any(), any(),any());
+                .findAndRemoveProduct(any(), any(), any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
-                .findAndUpdate(any(), any(), any(),any(),
+                .findAndUpdate(any(), any(), any(), any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productService, new CoreConfig());
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -1850,9 +1850,9 @@ class OnboardingDaoTest {
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.onboardOperator(new Institution(), "42", userToOnboardList));
         verify(userConnector).findById(any());
-        verify(userConnector).findAndRemoveProduct(any(), any(),any());
+        verify(userConnector).findAndRemoveProduct(any(), any(), any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
-               any(), any());
+                any(), any());
     }
 
     /**
@@ -1865,14 +1865,14 @@ class OnboardingDaoTest {
         when(onboardedUser.getId()).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         UserConnector userConnector = mock(UserConnector.class);
         when(userConnector.findAndCreate(any(), any())).thenReturn(new OnboardedUser());
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(),any());
+        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
-                .findAndUpdate(any(), any(), any(),any(),
+                .findAndUpdate(any(), any(), any(), any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productService, new CoreConfig());
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -1909,19 +1909,19 @@ class OnboardingDaoTest {
      */
     @Test
     void testOnboardOperator9() {
-     OnboardedUser onboardedUser = mock(OnboardedUser.class);
+        OnboardedUser onboardedUser = mock(OnboardedUser.class);
         when(onboardedUser.getId()).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         UserConnector userConnector = mock(UserConnector.class);
         when(userConnector.findAndCreate(any(), any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "users to update: {}"));
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(),any());
+        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
-                .findAndUpdate(any(), any(), any(),any(),
+                .findAndUpdate(any(), any(), any(), any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productService, new CoreConfig());
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -1947,18 +1947,18 @@ class OnboardingDaoTest {
      */
     @Test
     void testOnboardOperator10() {
-       OnboardedUser onboardedUser = mock(OnboardedUser.class);
+        OnboardedUser onboardedUser = mock(OnboardedUser.class);
         when(onboardedUser.getId()).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
         UserConnector userConnector = mock(UserConnector.class);
         when(userConnector.findAndCreate(any(), any())).thenReturn(new OnboardedUser());
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(),any());
+        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
-                .findAndUpdate(any(), any(), any(),any(),
+                .findAndUpdate(any(), any(), any(), any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productService, new CoreConfig());
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -2012,14 +2012,14 @@ class OnboardingDaoTest {
         when(onboardedUser.getId()).thenReturn("42");
         UserConnector userConnector = mock(UserConnector.class);
         when(userConnector.findAndCreate(any(), any())).thenReturn(new OnboardedUser());
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(),any());
+        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
         doThrow(new InvalidRequestException("An error occurred", "users to update: {}")).when(userConnector)
-                .findAndUpdate(any(), any(), any(),any(),
+                .findAndUpdate(any(), any(), any(), any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         doNothing().when(userConnector).deleteById(any());
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        ProductService productService = mock(ProductService.class);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productService, new CoreConfig());
         UserToOnboard userToOnboard = mock(UserToOnboard.class);
         when(userToOnboard.getRole()).thenReturn(PartyRole.MANAGER);
         when(userToOnboard.getEnv()).thenReturn(Env.ROOT);
@@ -2030,7 +2030,7 @@ class OnboardingDaoTest {
         doNothing().when(userToOnboard).setId(any());
         doNothing().when(userToOnboard).setName(any());
         doNothing().when(userToOnboard).setProductRole(any());
-        doNothing().when(userToOnboard).setRole( any());
+        doNothing().when(userToOnboard).setRole(any());
         doNothing().when(userToOnboard).setSurname(any());
         doNothing().when(userToOnboard).setTaxCode(any());
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -2047,9 +2047,9 @@ class OnboardingDaoTest {
 
         assertTrue(onboardingDao.onboardOperator(new Institution(), "42", userToOnboardList).isEmpty());
         verify(userConnector).findById(any());
-        verify(userConnector).findAndRemoveProduct(any(), any(),any());
+        verify(userConnector).findAndRemoveProduct(any(), any(), any());
         verify(userConnector).findAndUpdate(any(), any(), any(),
-               any(), any());
+                any(), any());
         verify(onboardedUser).getId();
         verify(userToOnboard).getRole();
         verify(userToOnboard, atLeast(1)).getEnv();
@@ -2060,7 +2060,7 @@ class OnboardingDaoTest {
         verify(userToOnboard).setId(any());
         verify(userToOnboard).setName(any());
         verify(userToOnboard).setProductRole(any());
-        verify(userToOnboard).setRole( any());
+        verify(userToOnboard).setRole(any());
         verify(userToOnboard).setSurname(any());
         verify(userToOnboard).setTaxCode(any());
     }
@@ -2079,11 +2079,11 @@ class OnboardingDaoTest {
         product.setRoleMappings(null);
         product.setStatus(ProductStatus.ACTIVE);
         product.setTitle("Dr");
-        ProductConnector productConnector = mock(ProductConnector.class);
-        when(productConnector.getProductById(any())).thenReturn(product);
+        ProductService productService = mock(ProductService.class);
+        when(productService.getProduct(any())).thenReturn(product);
         assertSame(product,
-                (new OnboardingDao(null, null, null, productConnector, new CoreConfig())).getProductById("42"));
-        verify(productConnector).getProductById(any());
+                (new OnboardingDao(null, null, null, productService, new CoreConfig())).getProductById("42"));
+        verify(productService).getProduct(any());
     }
 
     /**
@@ -2091,14 +2091,14 @@ class OnboardingDaoTest {
      */
     @Test
     void testGetProductById2() {
-         ProductConnector productConnector = mock(ProductConnector.class);
-        when(productConnector.getProductById(any()))
+        ProductService productService = mock(ProductService.class);
+        when(productService.getProduct(any()))
                 .thenThrow(new InvalidRequestException("An error occurred", "Code"));
         CoreConfig config = new CoreConfig();
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, config);
+        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productService, config);
         assertThrows(InvalidRequestException.class,
                 () -> onboardingDao.getProductById("42"));
-        verify(productConnector).getProductById(any());
+        verify(productService).getProduct(any());
     }
 
     /**
@@ -2142,9 +2142,9 @@ class OnboardingDaoTest {
         token.setUsers(new ArrayList<>());
         TokenConnector tokenConnector = mock(TokenConnector.class);
         when(tokenConnector.findById(any())).thenReturn(token);
-        ProductConnector productConnector = mock(ProductConnector.class);
+        ProductService productService = mock(ProductService.class);
         assertSame(token,
-                (new OnboardingDao(null, tokenConnector, null, productConnector, new CoreConfig())).getTokenById("42"));
+                (new OnboardingDao(null, tokenConnector, null, productService, new CoreConfig())).getTokenById("42"));
         verify(tokenConnector).findById(any());
     }
 }

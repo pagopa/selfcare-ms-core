@@ -5,16 +5,16 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
 import it.pagopa.selfcare.mscore.model.notification.MultipleReceiverMessageRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductRole;
+import it.pagopa.selfcare.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -56,7 +56,7 @@ public class UserNotificationServiceImpl implements UserNotificationService {
 
     private final Configuration freemarkerConfig;
     private final NotificationServiceConnector notificationConnector;
-    private final ProductConnector productsConnector;
+    private final ProductService productService;
     private final UserService userService;
     private final InstitutionService institutionService;
 
@@ -184,12 +184,12 @@ public class UserNotificationServiceImpl implements UserNotificationService {
                         .findFirst().orElseThrow();
         Assert.notNull(onboardedProduct.getProductId(), "A product Id is required");
         Assert.notNull(institution.getDescription(), "An institution description is required");
-        Product product = productsConnector.getProductById(onboardedProduct.getProductId());
+        Product product = productService.getProduct(onboardedProduct.getProductId());
         Assert.notNull(product.getTitle(), A_PRODUCT_TITLE_IS_REQUIRED);
         Optional<String> roleLabel = product.getRoleMappings().values().stream()
                 .flatMap(productRoleInfo -> productRoleInfo.getRoles().stream())
                 .filter(productRole -> productRole.getCode().equals(onboardedProduct.getProductRole()))
-                .map(ProductRoleInfo.ProductRole::getLabel)
+                .map(ProductRole::getLabel)
                 .findAny();
 
         Map<String, String> dataModel = new HashMap<>();

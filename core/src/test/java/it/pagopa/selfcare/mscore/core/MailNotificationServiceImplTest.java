@@ -11,8 +11,9 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 
@@ -49,7 +49,7 @@ class MailNotificationServiceImplTest {
     private InstitutionConnector institutionConnector;
 
     @Mock
-    private ProductConnector productConnector;
+    private ProductService productService;
 
     @Mock
     private ObjectMapper mapper;
@@ -179,7 +179,7 @@ class MailNotificationServiceImplTest {
         user.setId("userID");
         user.setWorkContacts(map);
 
-        when(productConnector.getProductById(anyString())).thenReturn(product);
+        when(productService.getProduct(anyString())).thenReturn(product);
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(userConnector.findUsersByInstitutionIdAndProductId(institution.getId(), product.getId())).thenReturn(List.of(user.getId()));
         when(userRegistryConnector.getUserByInternalIdWithCustomFields(user.getId(), "workContacts")).thenReturn(user);
@@ -191,7 +191,7 @@ class MailNotificationServiceImplTest {
     void sendNotificationDelegationMailWithEmptyProduct() {
         Institution institution = new Institution();
         institution.setDigitalAddress("test@test.com");
-        when(productConnector.getProductById(anyString())).thenReturn(null);
+        when(productService.getProduct(anyString())).thenReturn(null);
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
     }
@@ -202,8 +202,8 @@ class MailNotificationServiceImplTest {
 
         List<User> manager = new ArrayList<>();
         manager.add(user);
-        Product product = mockInstance(new Product());
-
+        Product product = mock(Product.class);
+        when(product.getId()).thenReturn("test");
         Institution institution = new Institution();
         institution.setId("id");
         institution.setDigitalAddress("digital");
@@ -217,7 +217,9 @@ class MailNotificationServiceImplTest {
 
         List<User> manager = new ArrayList<>();
         manager.add(user);
-        Product product = mockInstance(new Product());
+        Product product = mock(Product.class);
+        when(product.getId()).thenReturn("test");
+
         Institution institution = new Institution();
         institution.setId("id");
         institution.setDigitalAddress("digital");

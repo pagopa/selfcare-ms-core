@@ -4,19 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.api.NotificationServiceConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.onboarding.common.PartyRole;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductRole;
+import it.pagopa.selfcare.product.entity.ProductRoleInfo;
+import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,8 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +49,7 @@ class UserNotificationServiceImplTest {
     private NotificationServiceConnector notificationConnector;
 
     @Mock
-    private ProductConnector productsConnector;
+    private ProductService productService;
 
     @Mock
     private UserService userService;
@@ -158,8 +160,8 @@ class UserNotificationServiceImplTest {
         product.setTitle("id");
         EnumMap<PartyRole, ProductRoleInfo> map = new EnumMap<>(PartyRole.class);
         ProductRoleInfo productRoleInfo = new ProductRoleInfo();
-        List<ProductRoleInfo.ProductRole> productRoles = new ArrayList<>();
-        ProductRoleInfo.ProductRole productRole = new ProductRoleInfo.ProductRole();
+        List<ProductRole> productRoles = new ArrayList<>();
+        ProductRole productRole = new ProductRole();
         productRole.setLabel("MANAGER");
         productRole.setCode("MANAGER");
         productRoles.add(productRole);
@@ -168,7 +170,7 @@ class UserNotificationServiceImplTest {
 
         product.setRoleMappings(map);
 
-        when(productsConnector.getProductById(any())).thenReturn(product);
+        when(productService.getProduct(any())).thenReturn(product);
 
         assertThrows(MailPreparationException.class, () -> userNotificationService.sendDeletedUserNotification("id","userid",userBinding, "name","surname"));
     }
@@ -210,8 +212,8 @@ class UserNotificationServiceImplTest {
         product.setTitle("id");
         EnumMap<PartyRole, ProductRoleInfo> map = new EnumMap<>(PartyRole.class);
         ProductRoleInfo productRoleInfo = new ProductRoleInfo();
-        List<ProductRoleInfo.ProductRole> productRoles = new ArrayList<>();
-        ProductRoleInfo.ProductRole productRole = new ProductRoleInfo.ProductRole();
+        List<ProductRole> productRoles = new ArrayList<>();
+        ProductRole productRole = new ProductRole();
         productRole.setLabel("MANAGER");
         productRole.setCode("MANAGER");
         productRoles.add(productRole);
@@ -220,7 +222,7 @@ class UserNotificationServiceImplTest {
 
         product.setRoleMappings(map);
 
-        when(productsConnector.getProductById(any())).thenReturn(product);
+        when(productService.getProduct(any())).thenReturn(product);
 
         assertThrows(MailPreparationException.class, () -> userNotificationService.sendActivatedUserNotification("id","userid",userBinding,"name","surname"));
     }
@@ -263,8 +265,8 @@ class UserNotificationServiceImplTest {
         product.setTitle("id");
         EnumMap<PartyRole, ProductRoleInfo> map = new EnumMap<>(PartyRole.class);
         ProductRoleInfo productRoleInfo = new ProductRoleInfo();
-        List<ProductRoleInfo.ProductRole> productRoles = new ArrayList<>();
-        ProductRoleInfo.ProductRole productRole = new ProductRoleInfo.ProductRole();
+        List<ProductRole> productRoles = new ArrayList<>();
+        ProductRole productRole = new ProductRole();
         productRole.setLabel("MANAGER");
         productRole.setCode("MANAGER");
         productRoles.add(productRole);
@@ -273,7 +275,7 @@ class UserNotificationServiceImplTest {
 
         product.setRoleMappings(map);
 
-        when(productsConnector.getProductById(any())).thenReturn(product);
+        when(productService.getProduct(any())).thenReturn(product);
 
         assertThrows(MailPreparationException.class, () -> userNotificationService.sendSuspendedUserNotification("id","userid",userBinding, "name","surname"));
     }

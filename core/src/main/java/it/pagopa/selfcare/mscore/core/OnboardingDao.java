@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
@@ -16,10 +15,12 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.service.ProductService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -35,25 +36,14 @@ import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class OnboardingDao {
 
     private final InstitutionConnector institutionConnector;
     private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
-    private final ProductConnector productConnector;
+    private final ProductService productService;
     private final CoreConfig coreConfig;
-
-    public OnboardingDao(InstitutionConnector institutionConnector,
-                         TokenConnector tokenConnector,
-                         UserConnector userConnector,
-                         ProductConnector productConnector,
-                         CoreConfig coreConfig) {
-        this.institutionConnector = institutionConnector;
-        this.tokenConnector = tokenConnector;
-        this.userConnector = userConnector;
-        this.productConnector = productConnector;
-        this.coreConfig = coreConfig;
-    }
 
     public OnboardingRollback persist(List<String> toUpdate,
                                       List<String> toDelete,
@@ -377,7 +367,7 @@ public class OnboardingDao {
     }
 
     public Product getProductById(String productId) {
-        return productConnector.getProductById(productId);
+        return productService.getProduct(productId);
     }
 
     public Token getTokenById(String tokenId) {

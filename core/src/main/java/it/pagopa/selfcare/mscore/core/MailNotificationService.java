@@ -2,8 +2,8 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.product.entity.Product;
 
 import java.io.File;
 import java.util.List;

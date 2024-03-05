@@ -1,23 +1,31 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.api.*;
+import it.pagopa.selfcare.mscore.api.EmailConnector;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.User;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import static it.pagopa.selfcare.mscore.constant.ProductId.*;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_FD;
+import static it.pagopa.selfcare.mscore.constant.ProductId.PROD_FD_GARANTITO;
 
 @Slf4j
 @Service
@@ -28,7 +36,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     private static final String DESTINATION_MAIL_LOG = "destinationMails: {}";
     public static final String PAGOPA_LOGO_FILENAME = "pagopa-logo.png";
     private final InstitutionConnector institutionConnector;
-    private final ProductConnector productConnector;
+    private final ProductService productService;
     private final MailTemplateConfig mailTemplateConfig;
     private final UserNotificationService userNotificationService;
     private final EmailConnector emailConnector;
@@ -125,7 +133,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     public void sendMailForDelegation(String institutionName, String productId, String partnerId) {
         try {
             Map<String, String> mailParameters;
-            Product product = productConnector.getProductById(productId);
+            Product product = productService.getProduct(productId);
             Institution partnerInstitution = institutionConnector.findById(partnerId);
             if(Objects.isNull(product) || Objects.isNull(partnerInstitution)) {
                 log.error("create-delegation-email-notification :: Impossible to send email. Error: partner institution or product is null");

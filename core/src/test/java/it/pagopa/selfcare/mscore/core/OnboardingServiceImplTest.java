@@ -6,7 +6,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
@@ -25,11 +24,12 @@ import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductStatus;
+import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -99,7 +99,7 @@ class OnboardingServiceImplTest {
     private InstitutionConnector institutionConnector;
 
     @Mock
-    private ProductConnector productConnector;
+    private ProductService productService;
 
     @Mock
     private UserNotificationService userNotificationService;
@@ -404,9 +404,9 @@ class OnboardingServiceImplTest {
         when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(productConnector.getProductById(any())).thenReturn(product);
+        when(productService.getProduct(any())).thenReturn(product);
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
-        verify(productConnector, times(1)).getProductById(token.getProductId());
+        verify(productService, times(1)).getProduct(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId());
         verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0));
@@ -497,11 +497,11 @@ class OnboardingServiceImplTest {
         when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
         when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(productConnector.getProductById(any())).thenReturn(product);
+        when(productService.getProduct(any())).thenReturn(product);
 
         doThrow(RuntimeException.class).when(emailService).sendMailWithContract(any(), any(), any(), any(), any(), anyBoolean());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
-        verify(productConnector, times(1)).getProductById(token.getProductId());
+        verify(productService, times(1)).getProduct(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId());
         verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0));
@@ -585,11 +585,11 @@ class OnboardingServiceImplTest {
         File file = File.createTempFile("file", ".txt");
         when(contractService.getLogoFile()).thenReturn(file);
         when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(productConnector.getProductById(any())).thenReturn(product);
+        when(productService.getProduct(any())).thenReturn(product);
         when(mailTemplateConfig.getCompletePathPt()).thenReturn("test@email.it");
         doNothing().when(emailService).sendCompletedEmail(any(), any(), any(), any(), any());
         Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
-        verify(productConnector, times(1)).getProductById(token.getProductId());
+        verify(productService, times(1)).getProduct(token.getProductId());
         verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId());
         verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
         verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId());
@@ -741,7 +741,7 @@ class OnboardingServiceImplTest {
         request.setInstitutionTaxCode("taxCode");
         request.setProductId("productId");
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(null);
+        when(productService.getProductIsValid(request.getProductId())).thenReturn(null);
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.onboardingUsers(request, null, null));
     }
 
@@ -758,7 +758,7 @@ class OnboardingServiceImplTest {
         request.setUsers(List.of(userToOnboard));
 
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
+        when(productService.getProductIsValid(request.getProductId())).thenReturn(new Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
         when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
 
@@ -779,7 +779,7 @@ class OnboardingServiceImplTest {
         request.setUsers(List.of(userToOnboard));
 
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
+        when(productService.getProductIsValid(request.getProductId())).thenReturn(new Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
         when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
 
@@ -807,7 +807,7 @@ class OnboardingServiceImplTest {
         Institution institution = new Institution();
         institution.setId("example");
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(institution));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
+        when(productService.getProductIsValid(request.getProductId())).thenReturn(new Product());
         when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenThrow(FeignException.NotFound.class);
         when(userService.persistUserRegistry(any(), any(), any(), any(),any())).thenReturn(user);
 

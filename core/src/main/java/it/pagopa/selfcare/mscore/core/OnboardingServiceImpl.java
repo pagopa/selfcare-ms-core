@@ -7,7 +7,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
@@ -28,10 +27,12 @@ import it.pagopa.selfcare.mscore.model.institution.AdditionalInformations;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.service.ProductService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -51,9 +52,11 @@ import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class OnboardingServiceImpl implements OnboardingService {
     protected static final String REQUIRED_ADDITIONAL_INFORMATIONS_MESSAGE = "AdditionalInformations is required";
     protected static final String REQUIRED_OTHER_NOTE_MESSAGE = "Other note is required";
+
     private final OnboardingDao onboardingDao;
     private final InstitutionService institutionService;
     private final UserService userService;
@@ -67,36 +70,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final MailTemplateConfig mailTemplateConfig;
     private final OnboardingInstitutionStrategyFactory institutionStrategyFactory;
     private final InstitutionConnector institutionConnector;
-    private final ProductConnector productConnector;
-
-    public OnboardingServiceImpl(OnboardingDao onboardingDao,
-                                 InstitutionService institutionService,
-                                 UserService userService,
-                                 UserRelationshipService userRelationshipService,
-                                 ContractService contractService,
-                                 UserEventService userEventService,
-                                 ContractEventNotificationService contractEventNotification, MailNotificationService notificationService,
-                                 UserNotificationService userNotificationService,
-                                 PagoPaSignatureConfig pagoPaSignatureConfig,
-                                 OnboardingInstitutionStrategyFactory institutionStrategyFactory,
-                                 InstitutionConnector institutionConnector,
-                                 ProductConnector productConnector,
-                                 MailTemplateConfig mailTemplateConfig) {
-        this.onboardingDao = onboardingDao;
-        this.institutionService = institutionService;
-        this.userService = userService;
-        this.userRelationshipService = userRelationshipService;
-        this.userEventService = userEventService;
-        this.contractService = contractService;
-        this.contractEventNotification = contractEventNotification;
-        this.notificationService = notificationService;
-        this.userNotificationService = userNotificationService;
-        this.pagoPaSignatureConfig = pagoPaSignatureConfig;
-        this.institutionStrategyFactory = institutionStrategyFactory;
-        this.institutionConnector = institutionConnector;
-        this.productConnector = productConnector;
-        this.mailTemplateConfig = mailTemplateConfig;
-    }
+    private final ProductService productService;
 
     @Override
     public void verifyOnboardingInfo(String externalId, String productId) {
@@ -294,7 +268,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
                 .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId())).collect(Collectors.toList());
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-        Product product = productConnector.getProductById(token.getProductId());
+        Product product = productService.getProduct(token.getProductId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution, product);
         InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
         try {
@@ -340,12 +314,13 @@ public class OnboardingServiceImpl implements OnboardingService {
     @Override
     public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname) {
 
+
+        Product product = Optional.ofNullable(productService.getProductIsValid(request.getProductId()))
+                .orElseThrow(() -> new InvalidRequestException("Product not found or is not valid!", ""));
+
         Institution institution = institutionService.getInstitutions(request.getInstitutionTaxCode(), request.getInstitutionSubunitCode()).stream()
                 .findFirst()
                 .orElseThrow(() -> new InvalidRequestException("Institution not found!", ""));
-
-        Product product = Optional.ofNullable(productConnector.getProductValidById(request.getProductId()))
-                .orElseThrow(() -> new InvalidRequestException("Product not found or is not valid!", ""));
 
         List<String> roleLabels = request.getUsers().stream()
                 .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());

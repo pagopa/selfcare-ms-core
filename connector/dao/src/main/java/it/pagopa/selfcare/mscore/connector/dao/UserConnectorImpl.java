@@ -8,7 +8,6 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntit
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.UserInstitutionAggregationMapper;
-import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -18,10 +17,11 @@ import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductRoleInfo;
+import it.pagopa.selfcare.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -66,7 +66,7 @@ public class UserConnectorImpl implements UserConnector {
 
     private final MongoOperations mongoOperations;
 
-    private final ProductsRestClient productRestClient;
+    private final ProductService productService;
 
 
     @Override
@@ -382,8 +382,8 @@ public class UserConnectorImpl implements UserConnector {
     private void checkRoles(String productId, PartyRole role, String productRole) {
         if (StringUtils.hasText(productRole)) {
             Assert.notNull(role, ROLE_IS_NULL.getMessage());
-            Product product = productRestClient.getProductById(productId, null);
-            ProductRoleInfo productRoleInfo = product.getRoleMappings().get(role);
+            Product product = productService.getProduct(productId);
+            ProductRoleInfo productRoleInfo = product.getRoleMappings().get(it.pagopa.selfcare.onboarding.common.PartyRole.valueOf(role.name()));
             if (productRoleInfo == null) {
                 throw new InvalidRequestException(ROLE_NOT_FOUND.getMessage(), ROLE_NOT_FOUND.getCode());
             }
