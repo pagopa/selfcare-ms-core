@@ -7103,6 +7103,9 @@
             "type" : "string",
             "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
           },
+          "test" : {
+            "type" : "string"
+          },
           "to" : {
             "type" : "string"
           },
