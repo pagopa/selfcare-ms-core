@@ -9,5 +9,4 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SupportContact {
     private String supportEmail;
-    private String supportPhone;
 }

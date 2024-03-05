@@ -24,6 +24,5 @@ public class RelationshipResult {
     private BillingResponse billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
-    private String test;
 
 }
