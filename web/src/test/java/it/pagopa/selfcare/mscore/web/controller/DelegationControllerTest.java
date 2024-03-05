@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.util.NestedServletException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +49,11 @@ class DelegationControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    final String FROM1 = "from1";
+    final String FROM2 = "from2";
+    final String FROM3 = "from3";
+    final String TO1 = "to1";
+    final String TO2 = "to2";
 
     /**
      * Method under test: {@link DelegationController#createDelegation(DelegationRequest)}
@@ -162,6 +168,49 @@ class DelegationControllerTest {
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
                         expectedDelegation.getProductId(), GetDelegationsMode.NORMAL,
                         Optional.empty(), Optional.empty());
+
+        verifyNoMoreInteractions(delegationService);
+    }
+
+    @Test
+    void getDelegations_shouldGetDataCustom() throws Exception {
+        // Given
+        List<Delegation> expectedDelegations = new ArrayList<>();
+        Delegation delegation1 = createDelegation("1", FROM1, TO1);
+        Delegation delegation2 = createDelegation("2", FROM2, TO1);
+        expectedDelegations.add(delegation1);
+        expectedDelegations.add(delegation2);
+
+        when(delegationService.getDelegations(null, TO1,
+                null, GetDelegationsMode.FULL, Optional.empty(), Optional.empty()))
+                .thenReturn(expectedDelegations);
+        // When
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/delegations?brokerId={brokerId}&mode={mode}", TO1, GetDelegationsMode.FULL);
+        MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andReturn();
+
+        List<DelegationResponse> response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), new TypeReference<>() {});
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.size()).isEqualTo(2);
+        DelegationResponse actual = response.get(0);
+        assertThat(actual.getId()).isEqualTo(delegation1.getId());
+        assertThat(actual.getInstitutionName()).isEqualTo(delegation1.getInstitutionFromName());
+        assertThat(actual.getBrokerId()).isEqualTo(delegation1.getTo());
+        assertThat(actual.getProductId()).isEqualTo(delegation1.getProductId());
+        assertThat(actual.getInstitutionId()).isEqualTo(delegation1.getFrom());
+        assertThat(actual.getInstitutionRootName()).isEqualTo(delegation1.getInstitutionFromRootName());
+
+        verify(delegationService, times(1))
+                .getDelegations(null, TO1,
+                        null, GetDelegationsMode.FULL,
+                        Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 
@@ -215,6 +264,18 @@ class DelegationControllerTest {
         delegation.setType(DelegationType.PT);
         delegation.setInstitutionFromName("setInstitutionFromName");
         delegation.setInstitutionFromRootName("setInstitutionFromRootName");
+        return delegation;
+    }
+
+    private Delegation createDelegation(String pattern, String from, String to) {
+        Delegation delegation = new Delegation();
+        delegation.setId("id_" + pattern);
+        delegation.setProductId("productId");
+        delegation.setType(DelegationType.PT);
+        delegation.setTo(to);
+        delegation.setFrom(from);
+        delegation.setInstitutionFromName("name_" + from);
+        delegation.setInstitutionFromRootName("name_" + to);
         return delegation;
     }
 

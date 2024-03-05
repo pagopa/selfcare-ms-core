@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
-import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
@@ -19,7 +18,10 @@ import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
-import it.pagopa.selfcare.mscore.web.model.onboarding.*;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -129,96 +130,6 @@ public class OnboardingController {
         return ResponseEntity.ok().body(onboardingInfoResponse);
     }
 
-
-    /**
-     * The function is responsible for saving the association between an institution and a product. It also creates occurrences in the Users collection as part of this process.
-     *
-     * @param request OnboardingInstitutionRequest
-     * @return no content
-     * <p>
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.institution.persist}", notes = "${swagger.mscore.onboarding.institution.persist}")
-    @PostMapping(value = "/institution")
-    public ResponseEntity<Void> onboardingInstitution(@RequestBody @Valid OnboardingInstitutionRequest request,
-                                                      Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitution(onboardingResourceMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    /**
-     * The function persist onboarding data without contract
-     *
-     * @param request OnboardingInstitutionRequest
-     * @return no content
-     * <p>
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.institution.complete}", notes = "${swagger.mscore.onboarding.institution.complete}")
-    @PostMapping(value = "/institution/complete")
-    public ResponseEntity<Void> onboardingInstitutionComplete(@RequestBody @Valid OnboardingInstitutionRequest request,
-                                                      Authentication authentication) {
-        log.trace("onboardingInstitutionComplete start");
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "onboardingInstitutionComplete request = {}", request);
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        onboardingService.onboardingInstitutionComplete(onboardingResourceMapper.toOnboardingRequest(request), (SelfCareUser) authentication.getPrincipal());
-        log.trace("onboardingInstitutionComplete end");
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    /**
-     * The function complete onboarding request
-     *
-     * @param tokenId String
-     * @param contract MultipartFile
-     * @return no content
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.complete}", notes = "${swagger.mscore.onboarding.complete}")
-    @PostMapping(value = "/complete/{tokenId}")
-    public ResponseEntity<Void> completeOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
-                                                   @PathVariable(value = "tokenId") String tokenId,
-                                                   @RequestPart MultipartFile contract) {
-        log.trace("completeOnboarding start");
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding tokenId = {}, contract = {}", tokenId, contract);
-        CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
-        Token token = tokenService.verifyToken(tokenId);
-        onboardingService.completeOnboarding(token, contract);
-        log.trace("completeOnboarding end");
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    /**
-     * The function approve onboarding request (review of an operator)
-     *
-     * @param tokenId String
-     * @return no content
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.approve}", notes = "${swagger.mscore.onboarding.approve}")
-    @PostMapping(value = "/approve/{tokenId}")
-    public ResponseEntity<Void> approveOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
-                                                  @PathVariable(value = "tokenId") String tokenId,
-                                                  Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        Token token = tokenService.verifyToken(tokenId);
-        onboardingService.approveOnboarding(token, (SelfCareUser) authentication.getPrincipal());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
     /**
      * The function invalidate onboarding request
      *
@@ -240,26 +151,6 @@ public class OnboardingController {
     }
 
     /**
-     * The function invalidate onboarding request (review of an operator)
-     *
-     * @param tokenId String
-     * @return no content
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.reject}", notes = "${swagger.mscore.onboarding.reject}")
-    @DeleteMapping(value = "/reject/{tokenId}")
-    public ResponseEntity<Void> onboardingReject(@ApiParam("${swagger.mscore.token.tokenId}")
-                                                                   @PathVariable("tokenId") String tokenId) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        Token token = tokenService.verifyToken(tokenId);
-        onboardingService.onboardingReject(token);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    /**
      * The function persist operators for given onboarding
      *
      * @param request OnboardingInstitutionOperatorsRequest
@@ -274,7 +165,6 @@ public class OnboardingController {
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
                                                                                    Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATORS_ERROR);
-        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
@@ -295,7 +185,6 @@ public class OnboardingController {
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
                                                                                      Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
-        tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE, selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
@@ -336,8 +225,7 @@ public class OnboardingController {
     @PostMapping(value = "/legals")
     public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest request, Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_LEGALS_ERROR);
-        Token token = tokenService.verifyOnboarding(request.getInstitutionId(), request.getProductId());
-        onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal(), token);
+        onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -364,30 +252,5 @@ public class OnboardingController {
             log.info("byteArray size: {}", file.getData().length);
         }
         return ResponseEntity.ok().headers(headers).body(file.getData());
-    }
-
-    /**
-     * Consume onboarding tokens requested without signature verification
-     *
-     * @param tokenId String
-     * @param contract MultipartFile
-     * @return no content
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.token.consume}", notes = "${swagger.mscore.token.consume}")
-    @PostMapping(value = "/{tokenId}/consume")
-    public ResponseEntity<Void> consumeToken(@ApiParam("${swagger.mscore.token.tokenId}")
-                                             @PathVariable(value = "tokenId") String tokenId,
-                                             @RequestPart MultipartFile contract) {
-        log.trace("consumeToken start");
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "consumeToken tokenId = {}, contract = {}", tokenId, contract);
-        CustomExceptionMessage.setCustomMessage(GenericError.CONFIRM_ONBOARDING_ERROR);
-        Token token = tokenService.verifyToken(tokenId);
-        onboardingService.completeOnboardingWithoutSignatureVerification(token, contract);
-        log.trace("consumeToken end");
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

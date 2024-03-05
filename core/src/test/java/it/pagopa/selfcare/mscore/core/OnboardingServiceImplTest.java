@@ -4,18 +4,12 @@ import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
-import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
-import it.pagopa.selfcare.mscore.core.strategy.OnboardingInstitutionStrategy;
-import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -26,7 +20,6 @@ import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
@@ -36,18 +29,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.time.*;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -90,12 +82,6 @@ class OnboardingServiceImplTest {
     private UserEventService userEventService;
 
     @Mock
-    private PagoPaSignatureConfig pagoPaSignatureConfig;
-
-    @Mock
-    private OnboardingInstitutionStrategyFactory institutionStrategyFactory;
-
-    @Mock
     private InstitutionConnector institutionConnector;
 
     @Mock
@@ -103,9 +89,6 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserNotificationService userNotificationService;
-
-    @Mock
-    private MailTemplateConfig mailTemplateConfig;
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -236,369 +219,6 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
-     */
-    @Test
-    void shouldThrowExceptionCompleteOnboarding() {
-
-        Token token = TestUtils.dummyToken();
-
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of(new Institution()));
-
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.completeOnboarding(token,
-                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
-     */
-    @Test
-    void testCompleteOnboarding() {
-
-        Token token = TestUtils.dummyToken();
-        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
-
-        when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
-
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboarding(token,
-                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#completeOnboarding(Token, MultipartFile)}
-     */
-    @Test
-    void testCompleteOnboarding2() {
-
-        Token token = TestUtils.dummyToken();
-        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
-
-        when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
-        when(pagoPaSignatureConfig.isVerifyEnabled()).thenReturn(true);
-
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboarding(token,
-                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#completeOnboardingWithoutSignatureVerification(Token, MultipartFile)}
-     */
-    @Test
-    void testCompleteOnboardingWithoutSignatureVerification() {
-
-        Token token = TestUtils.dummyToken();
-        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
-
-        when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
-
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboardingWithoutSignatureVerification(token,
-                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#completeOnboardingWithoutSignatureVerification(Token, MultipartFile)}
-     */
-    @Test
-    void testCompleteOnboardingWithoutSignatureVerification2() {
-
-        Token token = TestUtils.dummyToken();
-        token.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
-
-        when(onboardingDao.persistForUpdate(any(), any(), any(), any())).thenReturn(new OnboardingUpdateRollback());
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of());
-        when(pagoPaSignatureConfig.isVerifyEnabled()).thenReturn(true);
-
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.completeOnboardingWithoutSignatureVerification(token,
-                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
-
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#completeOnboardingWithoutSignatureVerification(Token, MultipartFile)}
-     */
-    @Test
-    void shouldThrowExceptionCompleteOnboardingWithoutSignatureVerification() {
-
-        Token token = TestUtils.dummyToken();
-
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(institutionConnector.findWithFilter(any(), any(), any())).thenReturn(List.of(new Institution()));
-
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.completeOnboardingWithoutSignatureVerification(token,
-                new MockMultipartFile("Name", new ByteArrayInputStream("AXAXAXAX".getBytes(StandardCharsets.UTF_8)))));
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#approveOnboarding(Token, SelfCareUser)}
-     */
-    @Test
-    void testApproveOnboarding() throws IOException {
-
-        CertifiedField<String> certifiedField = new CertifiedField<>();
-        certifiedField.setCertification(Certification.NONE);
-        certifiedField.setValue("42");
-
-        CertifiedField<String> certifiedField1 = new CertifiedField<>();
-        certifiedField1.setCertification(Certification.NONE);
-        certifiedField1.setValue("42");
-
-        CertifiedField<String> certifiedField2 = new CertifiedField<>();
-        certifiedField2.setCertification(Certification.NONE);
-        certifiedField2.setValue("42");
-
-        User user = new User();
-        user.setEmail(certifiedField);
-        user.setFamilyName(certifiedField1);
-        user.setFiscalCode("Fiscal Code");
-        user.setId("42");
-        user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
-        User onboardedUser = new User();
-        onboardedUser.setEmail(certifiedField);
-        onboardedUser.setFamilyName(certifiedField1);
-        onboardedUser.setFiscalCode("Fiscal Code3");
-        onboardedUser.setId("42");
-        onboardedUser.setName(certifiedField2);
-        onboardedUser.setWorkContacts(new HashMap<>());
-        User manager = new User();
-        manager.setEmail(certifiedField);
-        manager.setFamilyName(certifiedField1);
-        manager.setFiscalCode("Fiscal Code3");
-        manager.setId("42");
-        manager.setName(certifiedField2);
-        manager.setWorkContacts(new HashMap<>());
-
-        List<User> delegate = new ArrayList<>();
-        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user).thenReturn(manager).thenReturn(onboardedUser);
-        when(userService.findAllByIds(any())).thenReturn(new ArrayList<>());
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-        OnboardingRequest request = getOnboardingRequest();
-
-        Institution institution = new Institution();
-        institution.setBilling(new Billing());
-        List<Onboarding> onboardingList = new ArrayList<>();
-        onboardingList.add(dummyOnboarding());
-        institution.setOnboarding(onboardingList);
-        Token token = getToken(institutionUpdate);
-        TokenUser tokenUser = new TokenUser();
-        tokenUser.setUserId("id");
-        tokenUser.setRole(PartyRole.MANAGER);
-        token.setUsers(List.of(tokenUser));
-        Product product = new Product();
-        product.setTitle("42");
-
-        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getId()).thenReturn("42");
-        File file = File.createTempFile("file", ".txt");
-        when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(productConnector.getProductById(any())).thenReturn(product);
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
-        verify(productConnector, times(1)).getProductById(token.getProductId());
-        verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId());
-        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
-        verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0));
-        verify(userService, times(1)).retrieveUserFromUserRegistry(onboardedUser.getId());
-        verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
-        verify(contractService, times(1)).extractTemplate(token.getContractTemplate());
-        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegate, institution, request, null, null);
-        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
-        verifyNoMoreInteractions(onboardingDao);
-        verify(emailService, times(1)).sendMailWithContract(file, institution, user, request, token.getId(), true);
-    }
-
-    @Test
-    void testApproveOnboarding2() throws IOException {
-
-        CertifiedField<String> certifiedField = new CertifiedField<>();
-        certifiedField.setCertification(Certification.NONE);
-        certifiedField.setValue("42");
-
-        CertifiedField<String> certifiedField1 = new CertifiedField<>();
-        certifiedField1.setCertification(Certification.NONE);
-        certifiedField1.setValue("42");
-
-        CertifiedField<String> certifiedField2 = new CertifiedField<>();
-        certifiedField2.setCertification(Certification.NONE);
-        certifiedField2.setValue("42");
-
-        User user = new User();
-        user.setEmail(certifiedField);
-        user.setFamilyName(certifiedField1);
-        user.setFiscalCode("Fiscal Code");
-        user.setId("42");
-        user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
-        User delegate = new User();
-        delegate.setEmail(certifiedField);
-        delegate.setFamilyName(certifiedField1);
-        delegate.setFiscalCode("Fiscal Code3");
-        delegate.setId("43");
-        delegate.setName(certifiedField2);
-        delegate.setWorkContacts(new HashMap<>());
-        User manager = new User();
-        manager.setEmail(certifiedField);
-        manager.setFamilyName(certifiedField1);
-        manager.setFiscalCode("Fiscal Code3");
-        manager.setId("44");
-        manager.setName(certifiedField2);
-        manager.setWorkContacts(new HashMap<>());
-        List<User> delegateList = new ArrayList<>();
-        delegateList.add(delegate);
-        delegateList.add(delegate);
-
-        OnboardedUser onboardedUser1 = new OnboardedUser();
-        OnboardedUser onboardedUser2 = new OnboardedUser();
-        onboardedUser1.setId(manager.getId());
-        onboardedUser2.setId(delegate.getId());
-
-        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user).thenReturn(manager).thenReturn(delegate);
-        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser1, onboardedUser2));
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        OnboardingRequest expectedRequest = getOnboardingRequest();
-
-        Institution institution = new Institution();
-        institution.setBilling(new Billing());
-        List<Onboarding> onboardingList = new ArrayList<>();
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(new Billing());
-        onboarding.setTokenId("42");
-        onboarding.setPricingPlan("C3");
-        onboarding.setProductId("42");
-        onboardingList.add(onboarding);
-        institution.setOnboarding(onboardingList);
-        Token token = getToken(institutionUpdate);
-        TokenUser tokenUser = new TokenUser();
-        tokenUser.setUserId("id");
-        tokenUser.setRole(PartyRole.MANAGER);
-        token.setUsers(List.of(tokenUser));
-        Product product = new Product();
-        product.setTitle("42");
-
-        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getId()).thenReturn("42");
-        File file = File.createTempFile("file", ".txt");
-        when(contractService.extractTemplate(any())).thenReturn(token.getContractTemplate());
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(productConnector.getProductById(any())).thenReturn(product);
-
-        doThrow(RuntimeException.class).when(emailService).sendMailWithContract(any(), any(), any(), any(), any(), anyBoolean());
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
-        verify(productConnector, times(1)).getProductById(token.getProductId());
-        verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId());
-        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
-        verify(userService, times(1)).retrieveUserFromUserRegistry(validManagerList.get(0));
-        verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId());
-        verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
-        verify(contractService, times(1)).extractTemplate(token.getContractTemplate());
-        verify(contractService, times(1)).createContractPDF(token.getContractTemplate(), manager, delegateList, institution, expectedRequest, null, null);
-        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.PENDING, "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=");
-        verify(onboardingDao, times(1)).rollbackSecondStepOfUpdate((List.of(tokenUser.getUserId())), institution, token);
-    }
-
-    @Test
-    void testApproveOnboardingPT() throws IOException {
-
-        CertifiedField<String> certifiedField = new CertifiedField<>();
-        certifiedField.setCertification(Certification.NONE);
-        certifiedField.setValue("42");
-
-        CertifiedField<String> certifiedField1 = new CertifiedField<>();
-        certifiedField1.setCertification(Certification.NONE);
-        certifiedField1.setValue("42");
-
-        CertifiedField<String> certifiedField2 = new CertifiedField<>();
-        certifiedField2.setCertification(Certification.NONE);
-        certifiedField2.setValue("42");
-
-        User user = new User();
-        user.setEmail(certifiedField);
-        user.setFamilyName(certifiedField1);
-        user.setFiscalCode("Fiscal Code");
-        user.setId("42");
-        user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
-        User delegate = new User();
-        delegate.setEmail(certifiedField);
-        delegate.setFamilyName(certifiedField1);
-        delegate.setFiscalCode("Fiscal Code3");
-        delegate.setId("43");
-        delegate.setName(certifiedField2);
-        delegate.setWorkContacts(new HashMap<>());
-        User manager = new User();
-        manager.setEmail(certifiedField);
-        manager.setFamilyName(certifiedField1);
-        manager.setFiscalCode("Fiscal Code3");
-        manager.setId("44");
-        manager.setName(certifiedField2);
-        manager.setWorkContacts(new HashMap<>());
-
-        OnboardedUser onboardedUser1 = new OnboardedUser();
-        OnboardedUser onboardedUser2 = new OnboardedUser();
-        onboardedUser1.setId(manager.getId());
-        onboardedUser2.setId(delegate.getId());
-
-        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(user).thenReturn(manager).thenReturn(delegate);
-        when(userService.findAllByIds(any())).thenReturn(List.of(onboardedUser1, onboardedUser2));
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
-
-        Institution institution = new Institution();
-        institution.setBilling(new Billing());
-        institution.setInstitutionType(InstitutionType.PT);
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(new Billing());
-        onboarding.setTokenId("42");
-        onboarding.setPricingPlan("C3");
-        onboarding.setProductId("42");
-        List<Onboarding> onboardingList = List.of(onboarding);
-        institution.setOnboarding(onboardingList);
-        Token token = getToken(institutionUpdate);
-        TokenUser tokenUser = new TokenUser();
-        tokenUser.setUserId("id");
-        tokenUser.setRole(PartyRole.MANAGER);
-        token.setUsers(List.of(tokenUser));
-        Product product = new Product();
-        product.setTitle("42");
-
-        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getId()).thenReturn("42");
-        File file = File.createTempFile("file", ".txt");
-        when(contractService.getLogoFile()).thenReturn(file);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(productConnector.getProductById(any())).thenReturn(product);
-        when(mailTemplateConfig.getCompletePathPt()).thenReturn("test@email.it");
-        doNothing().when(emailService).sendCompletedEmail(any(), any(), any(), any(), any());
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.approveOnboarding(token, selfCareUser));
-        verify(productConnector, times(1)).getProductById(token.getProductId());
-        verify(userService, times(1)).retrieveUserFromUserRegistry(selfCareUser.getId());
-        verify(userService, times(1)).findAllByIds(List.of(tokenUser.getUserId()));
-        verify(userService, times(1)).retrieveUserFromUserRegistry(delegate.getId());
-        verify(institutionService, times(1)).retrieveInstitutionById(token.getInstitutionId());
-        verify(contractService, times(1)).getLogoFile();
-        verify(onboardingDao, times(1)).persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
-    }
-
-    /**
      * Method under test: {@link OnboardingServiceImpl#invalidateOnboarding}
      */
     @Test
@@ -636,89 +256,6 @@ class OnboardingServiceImplTest {
         Token token = getToken(institutionUpdate);
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.invalidateOnboarding(token));
         verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingReject}
-     */
-    @Test
-    void testOnboardingReject() {
-        Product product = new Product();
-        product.setContractTemplatePath("Contract Template Path");
-        product.setContractTemplateVersion("1.0.2");
-        product.setId("42");
-        product.setParentId("42");
-        product.setRoleMappings(null);
-        product.setStatus(ProductStatus.ACTIVE);
-        product.setTitle("Dr");
-        when(onboardingDao.getProductById(any())).thenReturn(product);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(contractService.getLogoFile())
-                .thenReturn(Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile());
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = getToken(institutionUpdate);
-        onboardingServiceImpl.onboardingReject(token);
-        verify(onboardingDao).getProductById(any());
-        verify(onboardingDao).persistForUpdate(any(), any(), any(),
-                any());
-        verify(institutionService).retrieveInstitutionById(any());
-        verify(contractService).getLogoFile();
-        verify(emailService).sendRejectMail(any(), any(), any());
-        assertEquals("Checksum", token.getChecksum());
-        assertEquals(TokenType.INSTITUTION, token.getType());
-        assertEquals(RelationshipState.PENDING, token.getStatus());
-        assertEquals("42", token.getProductId());
-        assertSame(institutionUpdate, token.getInstitutionUpdate());
-        assertEquals("42", token.getInstitutionId());
-        assertEquals("Contract Template", token.getContractTemplate());
-        assertEquals("Contract Signed", token.getContractSigned());
-        assertEquals("42", token.getId());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingReject}
-     */
-    @Test
-    void testOnboardingReject2() {
-        Product product = new Product();
-        product.setContractTemplatePath("Contract Template Path");
-        product.setContractTemplateVersion("1.0.2");
-        product.setId("42");
-        product.setParentId("42");
-        product.setRoleMappings(null);
-        product.setStatus(ProductStatus.ACTIVE);
-        product.setTitle("Dr");
-        doNothing().when(onboardingDao)
-                .rollbackSecondStepOfUpdate(any(), any(), any());
-        when(onboardingDao.getProductById(any())).thenReturn(product);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-        when(contractService.getLogoFile())
-                .thenReturn(Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile());
-        doThrow(new InvalidRequestException("An error occurred", "START - invalidate token {}")).when(emailService)
-                .sendRejectMail(any(), any(), any());
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = getToken(institutionUpdate);
-        onboardingServiceImpl.onboardingReject(token);
-        verify(onboardingDao).getProductById(any());
-        verify(onboardingDao).persistForUpdate(any(), any(), any(),
-                any());
-        verify(onboardingDao).rollbackSecondStepOfUpdate(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-        verify(contractService).getLogoFile();
-        verify(emailService).sendRejectMail(any(), any(), any());
-        assertEquals("Checksum", token.getChecksum());
-        assertEquals(TokenType.INSTITUTION, token.getType());
-        assertEquals(RelationshipState.PENDING, token.getStatus());
-        assertEquals("42", token.getProductId());
-        assertSame(institutionUpdate, token.getInstitutionUpdate());
-        assertEquals("42", token.getInstitutionId());
-        assertEquals("Contract Template", token.getContractTemplate());
-        assertEquals("Contract Signed", token.getContractSigned());
-        assertEquals("42", token.getId());
     }
 
     /**
@@ -818,6 +355,17 @@ class OnboardingServiceImplTest {
         verifyNoMoreInteractions(userService);
     }
 
+    private Institution dummyInstitution() {
+        Institution institution = new Institution();
+        institution.setId("42");
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setStatus(RelationshipState.ACTIVE);
+        onboarding.setProductId("42");
+        institution.setOnboarding(List.of(onboarding));
+        return institution;
+    }
+
     /**
      * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
      */
@@ -826,7 +374,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(),any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -863,7 +411,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         UserToOnboard userToOnboard = createSimpleUserToOnboard();
         UserToOnboard userToOnboard1 = createSimpleUserToOnboard();
@@ -893,7 +441,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -915,7 +463,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -954,7 +502,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
@@ -990,7 +538,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
@@ -1036,7 +584,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -1058,7 +606,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -1080,7 +628,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -1102,7 +650,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -1141,7 +689,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("jane.doe@example.org");
@@ -1177,7 +725,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -1199,7 +747,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -1221,7 +769,7 @@ class OnboardingServiceImplTest {
         ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
         when(onboardingDao.onboardOperator(any(), any(), any()))
                 .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
 
         OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
         onboardingOperatorsRequest.setInstitutionId("42");
@@ -1236,7 +784,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingLegals(OnboardingLegalsRequest, SelfCareUser, Token)}
+     * Method under test: {@link OnboardingServiceImpl#onboardingLegals(OnboardingLegalsRequest, SelfCareUser)}
      */
     @Test
     void testOnboardingLegals() throws IOException {
@@ -1258,7 +806,10 @@ class OnboardingServiceImplTest {
         onboardingLegalsRequest.setProductName("Product Name");
         onboardingLegalsRequest.setSignContract(true);
         onboardingLegalsRequest.setTokenType(TokenType.INSTITUTION);
-        onboardingLegalsRequest.setUsers(new ArrayList<>());
+        UserToOnboard user = new UserToOnboard();
+        user.setId("id");
+        user.setRole(PartyRole.MANAGER);
+        onboardingLegalsRequest.setUsers(List.of(user));
         SelfCareUser selfCareUser = mock(SelfCareUser.class);
         when(selfCareUser.getId()).thenReturn("42");
 
@@ -1289,7 +840,7 @@ class OnboardingServiceImplTest {
         OnboardingRollback onboardingRollback = new OnboardingRollback();
         onboardingRollback.setToken(new Token());
         when(onboardingDao.persistLegals(any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.onboardingLegals(onboardingLegalsRequest, selfCareUser, token));
+        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.onboardingLegals(onboardingLegalsRequest, selfCareUser));
     }
 
     /**
@@ -1486,120 +1037,6 @@ class OnboardingServiceImplTest {
     }
 
     @Test
-    void shouldOnboardingInstitution() {
-        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
-                .thenReturn(mockInstitutionStrategy);
-        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
-
-        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-    }
-
-    @Test
-    void shouldOnboardingInstitutionGSP() {
-        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
-                .thenReturn(mockInstitutionStrategy);
-        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-        institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-
-        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"ipa", "regulatedMarket", "establishedByRegulatoryProvision", "agentOfPublicService"})
-    void shouldOnboardingInstitutionWithAdditionalInfo(String type) {
-        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
-                .thenReturn(mockInstitutionStrategy);
-        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-        institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        institutionUpdate.setAdditionalInformations(TestUtils.createSimpleAdditionalInformations(type));
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-
-        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-    }
-
-    @Test
-    void shouldOnboardingInstitutionWithAdditionalInfoOther() {
-        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategy(any(), any(), any()))
-                .thenReturn(mockInstitutionStrategy);
-        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-        institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        AdditionalInformations additionalInformations = TestUtils.createSimpleAdditionalInformations("other");
-        additionalInformations.setOtherNote("test");
-        institutionUpdate.setAdditionalInformations(additionalInformations);
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-
-        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-    }
-
-    @Test
-    void shouldOnboardingInstitutionWithAdditionalInfoRequiredException() {
-        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-        institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-
-    }
-
-    @Test
-    void shouldOnboardingInstitutionWithAdditionalInfoOtherRequiredException() {
-        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(ProductId.PROD_PAGOPA.getValue());
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-        institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        AdditionalInformations additionalInformations = TestUtils.createSimpleAdditionalInformations("other");
-        additionalInformations.setIpa(false);
-        institutionUpdate.setAdditionalInformations(additionalInformations);
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-
-        assertThrows(IllegalArgumentException.class,
-                () -> onboardingServiceImpl.onboardingInstitution(onboardingRequest, mock(SelfCareUser.class)));
-
-    }
-
-    @Test
-    void shouldOnboardingInstitutionComplete() {
-        OnboardingInstitutionStrategy mockInstitutionStrategy = mock(OnboardingInstitutionStrategy.class);
-        when(institutionStrategyFactory.retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(any(), any()))
-                .thenReturn(mockInstitutionStrategy);
-        doNothing().when(mockInstitutionStrategy).onboardingInstitution(any(),any());
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setInstitutionUpdate(TestUtils.createSimpleInstitutionUpdate());
-
-        assertDoesNotThrow(() -> onboardingServiceImpl.onboardingInstitutionComplete(onboardingRequest, mock(SelfCareUser.class)));
-    }
-
-
-
-    @Test
     void persistOnboarding_shouldThrowIfOnboardingExists() {
 
         Onboarding onboarding = dummyOnboarding();
@@ -1698,6 +1135,13 @@ class OnboardingServiceImplTest {
 
         verify(onboardingDao, times(1))
                 .onboardOperator(any(), any(), any());
+
+        ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
+        verify(institutionConnector, times(1))
+                .findAndUpdate(any(), captor.capture(), any(), any());
+        Onboarding actual = captor.getValue();
+        assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
+
         verifyNoMoreInteractions(userService);
     }
 
@@ -1716,6 +1160,10 @@ class OnboardingServiceImplTest {
         onboardingToPersist.setPricingPlan(pricingPlan);
         onboardingToPersist.setProductId(productId);
         onboardingToPersist.setBilling(new Billing());
+        onboardingToPersist.setCreatedAt(LocalDateTime
+                .of(2022,1,1,0,0,0)
+                .atZone(ZoneOffset.systemDefault())
+                .toOffsetDateTime());
 
         Institution institution = new Institution();
         institution.setId("institutionId");
@@ -1743,6 +1191,13 @@ class OnboardingServiceImplTest {
 
         verify(onboardingDao, times(1))
                 .onboardOperator(any(), any(), any());
+
+        ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
+        verify(institutionConnector, times(1))
+                .findAndUpdate(any(), captor.capture(), any(), any());
+        Onboarding actual = captor.getValue();
+        assertEquals(actual.getCreatedAt(), onboardingToPersist.getCreatedAt());
+
         verifyNoMoreInteractions(userService);
     }
 

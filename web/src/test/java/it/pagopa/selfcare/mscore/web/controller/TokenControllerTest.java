@@ -8,8 +8,6 @@ import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.web.config.WebTestConfig;
 import it.pagopa.selfcare.mscore.web.model.mapper.TokenMapper;
-
-
 import it.pagopa.selfcare.mscore.web.model.token.ScContractResponse;
 import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
 import org.junit.jupiter.api.Test;
@@ -25,14 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.List;
-import java.util.UUID;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -52,10 +47,6 @@ class TokenControllerTest {
 
     @Autowired
     protected MockMvc mvc;
-
-    /*
-     * @Spy private TokenMapper tokenMapper = new TokenMapperImpl();
-     */
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -84,22 +75,6 @@ class TokenControllerTest {
                 .andExpect(status().isOk());
         verify(tokenService, times(1)).retrieveContractsFilterByStatus(Mockito.<List<RelationshipState>>any(), Mockito.<Integer>any(),
                 Mockito.<Integer>any(), Mockito.<String>any());
-    }
-
-    @Test
-    void verifyToken() throws Exception {
-        //given
-        String id = UUID.randomUUID().toString();
-        Token token = new Token();
-        when(tokenService.verifyToken(any())).thenReturn(token);
-
-        //when
-        mvc.perform(MockMvcRequestBuilders.post("/tokens/{tokenId}/verify", id)
-                .contentType(APPLICATION_JSON_VALUE)
-                .accept(APPLICATION_JSON_VALUE)).andExpect(status().isOk()).andExpect(jsonPath("$.id", is(id)));
-
-        //then
-        verify(tokenService, times(1)).verifyToken(id);
     }
 
     @Test

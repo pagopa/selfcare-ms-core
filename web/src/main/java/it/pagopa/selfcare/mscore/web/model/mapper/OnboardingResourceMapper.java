@@ -14,6 +14,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 @Mapper(componentModel = "spring", uses = {InstitutionUpdateMapper.class})
@@ -36,5 +39,13 @@ public interface OnboardingResourceMapper {
     }
 
     @Mapping(target = "contract", source = "contractPath")
+    @Mapping(target = "createdAt", source = "activatedAt", qualifiedByName = "toOffsetDateTime")
     Onboarding toOnboarding(InstitutionOnboardingRequest onboardingRequest);
+
+    @Named("toOffsetDateTime")
+    default OffsetDateTime toOffsetDateTime(LocalDateTime date) {
+        return Optional.ofNullable(date)
+                .map(ld -> ld.atZone(ZoneOffset.systemDefault()).toOffsetDateTime())
+                .orElse(null);
+    }
 }

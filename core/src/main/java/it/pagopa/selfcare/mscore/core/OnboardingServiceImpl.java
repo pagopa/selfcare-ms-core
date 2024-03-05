@@ -1,20 +1,14 @@
 package it.pagopa.selfcare.mscore.core;
 
 import feign.FeignException;
-import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
-import it.pagopa.selfcare.commons.base.utils.ProductId;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
-import it.pagopa.selfcare.mscore.core.strategy.factory.OnboardingInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.TokenUtils;
@@ -24,7 +18,6 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
-import it.pagopa.selfcare.mscore.model.institution.AdditionalInformations;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
@@ -34,26 +27,21 @@ import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INFO_INSTITUTION_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.CONTRACT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
 @Service
 public class OnboardingServiceImpl implements OnboardingService {
-    protected static final String REQUIRED_ADDITIONAL_INFORMATIONS_MESSAGE = "AdditionalInformations is required";
-    protected static final String REQUIRED_OTHER_NOTE_MESSAGE = "Other note is required";
     private final OnboardingDao onboardingDao;
     private final InstitutionService institutionService;
     private final UserService userService;
@@ -63,9 +51,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final ContractEventNotificationService contractEventNotification;
     private final MailNotificationService notificationService;
     private final UserNotificationService userNotificationService;
-    private final PagoPaSignatureConfig pagoPaSignatureConfig;
-    private final MailTemplateConfig mailTemplateConfig;
-    private final OnboardingInstitutionStrategyFactory institutionStrategyFactory;
     private final InstitutionConnector institutionConnector;
     private final ProductConnector productConnector;
 
@@ -77,11 +62,8 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  UserEventService userEventService,
                                  ContractEventNotificationService contractEventNotification, MailNotificationService notificationService,
                                  UserNotificationService userNotificationService,
-                                 PagoPaSignatureConfig pagoPaSignatureConfig,
-                                 OnboardingInstitutionStrategyFactory institutionStrategyFactory,
                                  InstitutionConnector institutionConnector,
-                                 ProductConnector productConnector,
-                                 MailTemplateConfig mailTemplateConfig) {
+                                 ProductConnector productConnector) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
@@ -91,11 +73,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.contractEventNotification = contractEventNotification;
         this.notificationService = notificationService;
         this.userNotificationService = userNotificationService;
-        this.pagoPaSignatureConfig = pagoPaSignatureConfig;
-        this.institutionStrategyFactory = institutionStrategyFactory;
         this.institutionConnector = institutionConnector;
         this.productConnector = productConnector;
-        this.mailTemplateConfig = mailTemplateConfig;
     }
 
     @Override
@@ -132,55 +111,16 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void onboardingInstitution(OnboardingRequest request, SelfCareUser principal) {
-        validateAdditionalInformations(request);
-        Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
-        institutionStrategyFactory
-                .retrieveOnboardingInstitutionStrategy(request.getInstitutionUpdate().getInstitutionType(), request.getProductId(), institution)
-                .onboardingInstitution(request, principal);
-    }
-
-    private static void validateAdditionalInformations(OnboardingRequest request) {
-        if (InstitutionType.GSP.equals(request.getInstitutionUpdate().getInstitutionType())  &&
-                ProductId.PROD_PAGOPA.getValue().equals(request.getProductId())) {
-            Assert.notNull(request.getInstitutionUpdate().getAdditionalInformations(), REQUIRED_ADDITIONAL_INFORMATIONS_MESSAGE);
-            AdditionalInformations additionalInfo = request.getInstitutionUpdate().getAdditionalInformations();
-            if (!additionalInfo.isIpa() && !additionalInfo.isAgentOfPublicService()
-                    && !additionalInfo.isBelongRegulatedMarket() && !additionalInfo.isEstablishedByRegulatoryProvision()){
-                Assert.notNull(additionalInfo.getOtherNote(), REQUIRED_OTHER_NOTE_MESSAGE);
-            }
-        }
-    }
-
-    @Override
-    public void onboardingInstitutionComplete(OnboardingRequest request, SelfCareUser principal) {
-        Institution institution = institutionService.retrieveInstitutionByExternalId(request.getInstitutionExternalId());
-        institutionStrategyFactory
-                .retrieveOnboardingInstitutionStrategyWithoutContractAndComplete(request.getInstitutionUpdate().getInstitutionType(), institution)
-                .onboardingInstitution(request, principal);
-    }
-
-    @Override
-    public void completeOnboarding(Token token, MultipartFile contract) {
-        Consumer<List<User>> verification = users -> contractService.verifySignature(contract, token, users);
-        this.completeOnboarding(token, contract, verification);
-    }
-
-    @Override
-    public void completeOnboardingWithoutSignatureVerification(Token token, MultipartFile contract) {
-        Consumer<List<User>> verification = ignored -> {
-        };
-        this.completeOnboarding(token, contract, verification);
-    }
-
-    @Override
     public Institution persistOnboarding(String institutionId, String productId,List<UserToOnboard> users, Onboarding onboarding) {
 
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
         onboarding.setStatus(RelationshipState.ACTIVE);
         onboarding.setProductId(productId);
-        onboarding.setCreatedAt(OffsetDateTime.now());
+
+        if(Objects.isNull(onboarding.getCreatedAt())) {
+            onboarding.setCreatedAt(OffsetDateTime.now());
+        }
 
         //Verify if onboarding exists, in case onboarding must fail
         final Institution institution = institutionConnector.findById(institutionId);
@@ -237,104 +177,11 @@ public class OnboardingServiceImpl implements OnboardingService {
         return tokenUser;
     }
 
-    public void completeOnboarding(Token token, MultipartFile contract, Consumer<List<User>> verification) {
-        log.trace("completeOnboarding start");
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOboarding token = {} contract = {}", token, contract);
-        checkAndHandleExpiring(token);
-        List<String> managerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-        List<User> managersData = managerList.stream()
-                .map(userService::retrieveUserFromUserRegistry)
-                .collect(Collectors.toList());
-
-        Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-
-        /* check if onboarding ACTIVE already exists for product */
-        List<Institution> list = institutionConnector.findWithFilter(institution.getExternalId(), token.getProductId(), UtilEnumList.VALID_RELATIONSHIP_STATES);
-        if (list != null && !list.isEmpty()) {
-            throw new InvalidRequestException(String.format(GenericError.INSTITUTION_NOT_ONBOARDED.getMessage(), institution.getExternalId(), token.getProductId()),
-                    GenericError.INSTITUTION_NOT_ONBOARDED.getCode());
-        }
-
-        Product product = onboardingDao.getProductById(token.getProductId());
-        if (pagoPaSignatureConfig.isVerifyEnabled()) {
-            verification.accept(managersData);
-        }
-        File logoFile = contractService.getLogoFile();
-        String fileName = contractService.uploadContract(token.getId(), contract);
-        token.setContractSigned(fileName);
-        token.setContentType(contract.getContentType());
-        OnboardingUpdateRollback rollback = onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "completeOnboarding persistedOnboardingRollBack = {}", rollback);
-        try {
-            notificationService.sendCompletedEmail(managersData, institution, product, logoFile);
-        } catch (Exception e) {
-            onboardingDao.rollbackSecondStepOfUpdate(rollback.getUserList(), rollback.getUpdatedInstitution(), rollback.getToken());
-            contractService.deleteContract(fileName, token.getId());
-        }
-        contractEventNotification.sendDataLakeNotification(rollback.getUpdatedInstitution(), rollback.getToken(), QueueEvent.ADD);
-        userEventService.sendLegalTokenUserNotification(token);
-        log.trace("completeOboarding end");
-    }
-
-    @Override
-    public void approveOnboarding(Token token, SelfCareUser selfCareUser) {
-
-        checkAndHandleExpiring(token);
-        User currentUser = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
-
-        List<OnboardedUser> onboardedUsers = userService.findAllByIds(token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList()));
-
-        List<String> validManagerList = OnboardingInstitutionUtils.getOnboardedValidManager(token);
-        User manager = null;
-        if (!validManagerList.isEmpty()) {
-            manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
-        }
-        List<User> delegate = onboardedUsers
-                .stream()
-                .filter(onboardedUser -> !validManagerList.contains(onboardedUser.getId()))
-                .map(onboardedUser -> userService.retrieveUserFromUserRegistry(onboardedUser.getId())).collect(Collectors.toList());
-        Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-        Product product = productConnector.getProductById(token.getProductId());
-        OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(token, institution, product);
-        InstitutionType institutionType = request.getInstitutionUpdate().getInstitutionType();
-        try {
-            if (InstitutionType.PT.equals(institutionType)) {
-                onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, null);
-                File logoFile = contractService.getLogoFile();
-                String templatePath = mailTemplateConfig.getCompletePathPt();
-                notificationService.sendCompletedEmail(delegate, institution, product, logoFile, templatePath);
-            } else {
-                String contractTemplate = contractService.extractTemplate(token.getContractTemplate());
-                File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
-                String digest = TokenUtils.createDigest(pdf);
-                log.info("Digest {}", digest);
-                onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, digest);
-                notificationService.sendMailWithContract(pdf, institution, currentUser, request, token.getId(), true);
-            }
-        } catch (Exception e) {
-            onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
-        }
-    }
-
     @Override
     public void invalidateOnboarding(Token token) {
         checkAndHandleExpiring(token);
         Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
         invalidateToken(token, institution);
-    }
-
-    @Override
-    public void onboardingReject(Token token) {
-        checkAndHandleExpiring(token);
-        Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-        invalidateToken(token, institution);
-        File logo = contractService.getLogoFile();
-        Product product = onboardingDao.getProductById(token.getProductId());
-        try {
-            notificationService.sendRejectMail(logo, institution, product);
-        } catch (Exception e) {
-            onboardingDao.rollbackSecondStepOfUpdate((token.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList())), institution, token);
-        }
     }
 
     @Override
@@ -384,6 +231,14 @@ public class OnboardingServiceImpl implements OnboardingService {
     public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
+
+        // Verify if exists an onboarding ACTIVE for productId
+        Optional.ofNullable(institution.getOnboarding())
+                .flatMap(onboardings -> onboardings.stream()
+                        .filter(onboarding -> RelationshipState.ACTIVE.equals(onboarding.getStatus()) && onboardingOperatorRequest.getProductId().equals(onboarding.getProductId()))
+                        .findAny())
+                .orElseThrow(() -> new InvalidRequestException(String.format(CONTRACT_NOT_FOUND.getMessage(), institution.getId(), onboardingOperatorRequest.getProductId()), CONTRACT_NOT_FOUND.getCode()));
+
         Map<String, List<UserToOnboard>> userMap = onboardingOperatorRequest.getUsers().stream()
                 .collect(Collectors.groupingBy(UserToOnboard::getId));
         List<String> roleLabels = onboardingOperatorRequest.getUsers().stream()
@@ -396,7 +251,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser, Token token) {
+    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser) {
         Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
         OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(onboardingLegalsRequest);
         InstitutionType institutionType = institution.getInstitutionType();
@@ -407,7 +262,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
         OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-        List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), token);
+        List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), null);
         User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
 
         List<User> delegate = request.getUsers().stream()
