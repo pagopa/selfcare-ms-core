@@ -139,10 +139,6 @@ public class DelegationServiceImpl implements DelegationService {
     }
 
 
-
-
-
-
     @Override
     public boolean checkIfExists(Delegation delegation) {
         return delegationConnector.checkIfExists(delegation);
