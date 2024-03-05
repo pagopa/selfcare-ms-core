@@ -102,7 +102,7 @@ public class OnboardingMapper {
         institutionResponse.setRole(product.getRole());
         institutionResponse.setProductInfo(productInfo);
         institutionResponse.setBusinessData(new BusinessData(institution.getRea(), institution.getShareCapital(), institution.getBusinessRegisterPlace()));
-        institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail()));
+        institutionResponse.setSupportContact(new SupportContact(institution.getSupportEmail(), institution.getSupportPhone()));
         institutionResponse.setPaymentServiceProvider(InstitutionMapperCustom.toPaymentServiceProviderResponse(institution.getPaymentServiceProvider()));
         institutionResponse.setDataProtectionOfficer(InstitutionMapperCustom.toDataProtectionOfficerResponse(institution.getDataProtectionOfficer()));
         institutionResponse.setParentDescription(institution.getParentDescription());

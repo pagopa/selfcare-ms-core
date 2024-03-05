@@ -39,7 +39,6 @@ public class InstitutionResponse {
     private String rea;
     private String shareCapital;
     private String businessRegisterPlace;
-    private String supportEmail;
     private String supportPhone;
     private boolean imported;
     private String subunitCode;
