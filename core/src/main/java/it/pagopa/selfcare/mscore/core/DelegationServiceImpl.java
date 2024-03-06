@@ -63,13 +63,11 @@ public class DelegationServiceImpl implements DelegationService {
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }
-
         try {
             notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
         } catch (Exception e) {
             log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
         }
-
         return savedDelegation;
     }
 
@@ -156,6 +154,7 @@ public class DelegationServiceImpl implements DelegationService {
             throw new MsCoreException(DELETE_DELEGATION_ERROR.getMessage(), DELETE_DELEGATION_ERROR.getCode());
         }
     }
+
 
     @Override
     public boolean checkIfExists(Delegation delegation) {

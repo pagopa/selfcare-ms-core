@@ -5611,6 +5611,10 @@
         "title" : "InstitutionOnboardingRequest",
         "type" : "object",
         "properties" : {
+          "activatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "billing" : {
             "$ref" : "#/components/schemas/BillingRequest"
           },
