@@ -52,6 +52,22 @@ variable "app_settings" {
 }
 
 variable "secrets_names" {
-  type        = list(string)
+  type        = map(string)
   description = "KeyVault secrets to get values from"
+}
+
+variable "env" {
+  description = "Environment name"
+  type        = string
+  validation {
+    condition = (
+      length(var.env) <= 3
+    )
+    error_message = "Max length is 3 chars."
+  }
+}
+
+variable "env_suffix" {
+  description = "Environment suffix"
+  type        = string
 }
