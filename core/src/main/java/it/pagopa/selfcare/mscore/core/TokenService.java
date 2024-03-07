@@ -13,8 +13,6 @@ public interface TokenService {
 
     Token verifyOnboarding(String institutionId, String productId);
 
-    TokenRelationships retrieveToken(String tokenId);
-
     Token getToken(String institutionId, String productId);
 
     List<TokenRelationships> getTokensByProductId(String productId, Integer page, Integer size);

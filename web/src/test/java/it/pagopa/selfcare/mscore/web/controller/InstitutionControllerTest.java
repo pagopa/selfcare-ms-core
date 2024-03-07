@@ -111,7 +111,6 @@ class InstitutionControllerTest {
         institution.setOnboarding(List.of(onboarding));
         institution.setAttributes(List.of(attribute));
 
-
     }
 
     @Test
@@ -1380,6 +1379,8 @@ class InstitutionControllerTest {
     @Test
     void updateCreatedAt_invalidDate() throws Exception {
         // Given
+
+
         String institutionIdMock = "institutionId";
         String productIdMock = "productId";
         OffsetDateTime createdAtMock = OffsetDateTime.now().minusHours(10);

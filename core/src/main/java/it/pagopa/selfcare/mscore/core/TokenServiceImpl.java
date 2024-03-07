@@ -12,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_ALREADY_CONSUMED;
@@ -71,16 +74,6 @@ public class TokenServiceImpl implements TokenService {
         log.debug("getToken result = {}", token);
         log.trace("getToken end");
         return token;
-    }
-
-    @Override
-    public TokenRelationships retrieveToken(String tokenId) {
-        log.trace("retrieveToken start");
-        log.debug("retrieveToken tokenId = {}", tokenId);
-        TokenRelationships tokenRelationships = retrieveToken(tokenId, false);
-        log.debug("retrieveToken tokenRelationships = {}", tokenRelationships);
-        log.trace("retrieveToken end");
-        return tokenRelationships;
     }
 
     private TokenRelationships retrieveToken(String tokenId, boolean existingOnly){
