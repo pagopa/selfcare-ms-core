@@ -1,6 +1,5 @@
 env_short  = "d"
 env        = "dev"
-env_suffix = ".dev"
 
 tags = {
   CreatedBy   = "Terraform"
@@ -20,12 +19,8 @@ container_app = {
 
 app_settings = [
   {
-    name  = "PAGOPA_LOGO_URL"
-    value = "resources/logo.png"
-  },
-  {
     name  = "DESTINATION_MAILS"
-    value = "pectest@pec.pagopa.it”
+    value = "pectest@pec.pagopa.it"
     # //prod non presente
   },
 #  {
@@ -70,17 +65,17 @@ app_settings = [
   },
   {
     name  = "MAIL_ONBOARDING_CONFIRMATION_LINK"
-    value = "https://{var.env_suffix}selfcare.pagopa.it/onboarding/confirm?jwt="
+    value = "https://dev.selfcare.pagopa.it/onboarding/confirm?jwt="
   },
   
   {
     name  = "MAIL_ONBOARDING_REJECTION_LINK"
-    value = "https://{var.env_suffix}selfcare.pagopa.it/onboarding/cancel?jwt="
+    value = "https://dev.selfcare.pagopa.it/onboarding/cancel?jwt="
   },
   
   {
     name  = "SELFCARE_ADMIN_NOTIFICATION_URL"
-    value = "https://{var.env_suffix}selfcare.pagopa.it/dashboard/admin/onboarding/"
+    value = "https://dev.selfcare.pagopa.it/dashboard/admin/onboarding/"
   },
   {
     name  = "MAIL_TEMPLATE_NOTIFICATION_PATH"
@@ -102,32 +97,16 @@ app_settings = [
   },  
   {
     name  = "MAIL_ONBOARDING_URL"    
-    value = "https://{var.env_suffix}selfcare.pagopa.it/onboarding/"
-  },
-  {
-    name  = "PAGOPA_SIGNATURE_SIGNER"
-    value = "PagoPA S.p.A."
-  },
-
-  {
-    name  = "PAGOPA_SIGNATURE_LOCATION"
-    value = "Roma"
-  },
-
-  {
-    name  = "PAGOPA_SIGNATURE_ONBOARDING_REASON_TEMPLATE"
-    value = "Firma contratto adesione prodotto"
+    value = "https://dev.selfcare.pagopa.it/onboarding/"
   },
   {
     name  = "SIGNATURE_VALIDATION_ENABLED"
-    value = "true"
+    value = "false"
   },
-  
   {
     name  = "PAGOPA_SIGNATURE_ONBOARDING_ENABLED"
     value = "true",
   },
-  
   {
     name  = "ARUBA_SIGN_SERVICE_IDENTITY_TYPE_OTP_AUTH"
     value = "faPagoPa",
@@ -145,18 +124,11 @@ app_settings = [
   {
     name  = "ARUBA_SIGN_SERVICE_BASE_URL"          
     value = "https://asbr-pagopa.arubapec.it/ArubaSignService/ArubaSignService"
-  },
-    
-  {
-    name  = "STORAGE_TYPE" 
-    value = "BlobStorage"
-  },
-    
+  }, 
   {
     name  = "STORAGE_CONTAINER"
     value = "$web"
-  },
-    
+  }, 
   {
     name  = "STORAGE_ENDPOINT"
     value = "core.windows.net"
@@ -164,32 +136,20 @@ app_settings = [
     
   {
     name  = "STORAGE_APPLICATION_ID"
-    value = "${local.contracts_storage_account_name}"
+    value = "selcdcontractsstorage"
   },
     
   {
     name  = "STORAGE_CREDENTIAL_ID"
-    value = "selc${var.env_short}weupnpgcheckoutsa"
-  },
-    
+    value = "selcdcheckoutsa"
+  },  
   {
     name  = "STORAGE_TEMPLATE_URL"
-    value = format("https://selc%sweupnpgcheckoutsa.z6.web.core.windows.net", var.env_short)
+    value = "https://selcdcheckoutsa.z6.web.core.windows.net"
   },
-
   {
     name  = "KAFKA_BROKER"
-    value = "${local.project}-eventhub-ns.servicebus.windows.net:9093"
-  },
-    
-  {
-    name  = "KAFKA_SECURITY_PROTOCOL"
-    value = "SASL_SSL"
-  },
-    
-  {
-    name  = "KAFKA_SASL_MECHANISM"
-    value = "PLAIN"
+    value = "selc-d-eventhub-ns.servicebus.windows.net:9093"
   },  
   {
     name  = "KAFKA_CONTRACTS_TOPIC"          
@@ -205,7 +165,7 @@ app_settings = [
   },
   {
     name  = "JAVA_TOOL_OPTIONS"
-    value = "-javaagent:/applicationinsights-agent.jar"
+    value = "-javaagent:applicationinsights-agent.jar"
   },
   {
     name  = "APPLICATIONINSIGHTS_INSTRUMENTATION_LOGGING_LEVEL"
@@ -213,16 +173,18 @@ app_settings = [
   },
   {
     name  = "EXTERNAL_API_LOG_LEVEL"
-    value = "DEBUG” // prod è “INFO”
+    value = "DEBUG" 
+    # // prod è “INFO"
   },
   {
     name  = "CORE_USER_EVENT_SERVICE_TYPE"
-    value = "send" //solo selfcare
+    value = "send" 
+    # //solo selfcare
   },
-
   {
     name  = "CORE_CONTRACT_EVENT_SERVICE_TYPE"
-    value = "send" //solo selfcare
+    value = "send" 
+    # //solo selfcare
   },
   {
     name  = "SMTP_HOST"
@@ -239,33 +201,34 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "http://ms-notification-manager:8080"
+    value = "https://selc-d-notification-mngr-ca.gentleflower-c63e62fe.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "http://ms-party-registry-proxy:8080"
+    value = "https://selc-d-party-reg-proxy-ca.gentleflower-c63e62fe.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"      
-    value = "http://ms-product:8080"
+    value = "https://selc.internal.dev.selfcare.pagopa.it/ms-product/v1"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"
-    value = "https://api.uat.pdv.pagopa.it/user-registry/v1”
+    value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   }
 ]
 
 secrets_names = {
     "STORAGE_APPLICATION_SECRET"                      = "contracts-storage-access-key"
     "ADDRESS_EMAIL_NOTIFICATION_ADMIN"                = "portal-admin-operator-email"
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"           = "appinsights-connection-string"
     "ARUBA_SIGN_SERVICE_IDENTITY_USER"                = "aruba-sign-service-user"
-    "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_USER"      = "aruba-sign-service-delegated-user",
-    "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_PASSWORD"  = "aruba-sign-service-delegated-psw",
+    "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_USER"      = "aruba-sign-service-delegated-user"
+    "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_PASSWORD"  = "aruba-sign-service-delegated-psw"
     "MAIL_SENDER_ADDRESS"                             = "smtp-usr"
     "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
     "BLOB_STORAGE_CONN_STRING"                        = "web-storage-connection-string"
     "STORAGE_CREDENTIAL_SECRET"                       = "contracts-storage-access-key"
-    "KAFKA_CONTRACTS_WO_CONN_STRING"                  = "eventhub-SC-Contracts-selfcare-wo-connection-string"
+    "KAFKA_CONTRACTS_WO_CONN_STRING"                  = "eventhub-sc-users-selfcare-wo-connection-string-lc"
     "SMTP_USR"                                        = "smtp-usr"
     "SMTP_PSW"                                        = "smtp-psw"
     "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL"        = "party-test-institution-email"

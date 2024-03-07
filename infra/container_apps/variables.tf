@@ -66,8 +66,3 @@ variable "env" {
     error_message = "Max length is 3 chars."
   }
 }
-
-variable "env_suffix" {
-  description = "Environment suffix"
-  type        = string
-}
