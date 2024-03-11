@@ -305,7 +305,8 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         Update update = new Update();
         update.set(constructQuery(CURRENT_ONBOARDING_REFER, OnboardingEntity.Fields.createdAt.name()), createdAt)
                 .set(constructQuery(CURRENT_ONBOARDING_REFER, OnboardingEntity.Fields.updatedAt.name()), OffsetDateTime.now())
-                .filterArray(Criteria.where(CURRENT_ONBOARDING + OnboardingEntity.Fields.productId.name()).is(productId));
+                .filterArray(Criteria.where(CURRENT_ONBOARDING + OnboardingEntity.Fields.productId.name()).is(productId)
+                        .and(CURRENT_ONBOARDING + OnboardingEntity.Fields.status.name()).is(RelationshipState.ACTIVE.name()));
 
         Update updateInstitutionEntityUpdatedAt = new Update();
         updateInstitutionEntityUpdatedAt.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
