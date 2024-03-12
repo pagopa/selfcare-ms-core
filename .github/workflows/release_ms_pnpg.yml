@@ -1,4 +1,4 @@
-name: Deploy PNPG ms-core
+name: Release - PNPG ms-core
 
 on:
   push:

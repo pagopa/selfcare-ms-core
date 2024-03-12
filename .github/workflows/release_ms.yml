@@ -1,4 +1,4 @@
-name: Deploy ms-core
+name: Release - ms-core
 
 on:
   push:
