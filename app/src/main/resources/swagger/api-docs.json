@@ -3005,6 +3005,111 @@
         } ]
       }
     },
+    "/relationships" : {
+      "get" : {
+        "tags" : [ "Management" ],
+        "summary" : "Return a list of relationships",
+        "description" : "Return a list of relationships",
+        "operationId" : "getInstitutionRelationshipsUsingGET",
+        "parameters" : [ {
+          "name" : "from",
+          "in" : "query",
+          "description" : "from",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "to",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "roles",
+          "in" : "query",
+          "description" : "roles",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "DELEGATE", "MANAGER", "OPERATOR", "SUB_DELEGATE" ]
+          }
+        }, {
+          "name" : "states",
+          "in" : "query",
+          "description" : "states",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "PENDING", "REJECTED", "SUSPENDED", "TOBEVALIDATED" ]
+          }
+        }, {
+          "name" : "products",
+          "in" : "query",
+          "description" : "products",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "productRoles",
+          "in" : "query",
+          "description" : "productRoles",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RelationshipsManagement"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "deprecated" : true,
+        "security" : [ {
+          "bearerAuth" : [ "global" ]
+        } ]
+      }
+    },
     "/onboarding" : {
       "head" : {
         "tags" : [ "Onboarding" ],
@@ -5611,6 +5716,10 @@
         "title" : "InstitutionOnboardingRequest",
         "type" : "object",
         "properties" : {
+          "activatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
           "billing" : {
             "$ref" : "#/components/schemas/BillingRequest"
           },
@@ -7108,6 +7217,18 @@
           "updatedAt" : {
             "type" : "string",
             "format" : "date-time"
+          }
+        }
+      },
+      "RelationshipsManagement" : {
+        "title" : "RelationshipsManagement",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/RelationshipResult"
+            }
           }
         }
       },
