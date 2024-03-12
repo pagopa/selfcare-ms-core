@@ -2,7 +2,21 @@ FROM maven:3-eclipse-temurin-17 AS builder
 
 COPY . .
 
-RUN mvn clean package -DskipTests=true
+RUN echo "<settings>\n" \
+         "<servers>\n" \
+         "<server>\n" \
+         "<id>\${repositoryOnboarding}</id>\n" \
+         "<username>\${repoLogin}</username>\n" \
+         "<password>\${repoPwd}</password>\n" \
+         "</server>\n" \
+         "</servers>\n" \
+         "</settings>\n" > settings.xml
+
+ARG REPO_ONBOARDING
+ARG REPO_USERNAME
+ARG REPO_PASSWORD
+
+RUN mvn --global-settings settings.xml -repositoryOnboarding=${REPO_ONBOARDING} -DrepoLogin=${REPO_USERNAME} -DrepoPwd=${REPO_PASSWORD} clean package -DskipTests=true
 
 FROM openjdk:17-jdk AS runtime
 
