@@ -16,7 +16,7 @@ ARG REPO_ONBOARDING
 ARG REPO_USERNAME
 ARG REPO_PASSWORD
 
-RUN mvn --global-settings settings.xml -repositoryOnboarding=${REPO_ONBOARDING} -DrepoLogin=${REPO_USERNAME} -DrepoPwd=${REPO_PASSWORD} clean package -DskipTests=true
+RUN mvn --global-settings settings.xml -DrepositoryOnboarding=${REPO_ONBOARDING} -DrepoLogin=${REPO_USERNAME} -DrepoPwd=${REPO_PASSWORD} clean package -DskipTests=true
 
 FROM openjdk:17-jdk AS runtime
 
