@@ -204,6 +204,10 @@ app_settings = [
   {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
+  },
+  {
+    name  = "PRODUCT_STORAGE_CONTAINER"
+    value = "selc-u-product"
   }
 ]
 
