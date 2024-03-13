@@ -704,7 +704,7 @@ class UserConnectorImplTest {
         ProductRole productRole = mock(ProductRole.class);
         when(productRole.getCode()).thenReturn("productRole");
         when(productRoleInfo.getRoles()).thenReturn(List.of(productRole));
-        when(map.get(PartyRole.DELEGATE)).thenReturn(productRoleInfo);
+        when(map.get(it.pagopa.selfcare.onboarding.common.PartyRole.DELEGATE)).thenReturn(productRoleInfo);
         when(product.getRoleMappings()).thenReturn(map);
 
         when(productService.getProduct(anyString())).thenReturn(product);

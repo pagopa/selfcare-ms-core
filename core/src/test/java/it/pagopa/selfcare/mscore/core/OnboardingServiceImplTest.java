@@ -265,6 +265,7 @@ class OnboardingServiceImplTest {
     void onboardingUsers_shouldThrowExceptionIfInstitutionNotFound() {
         OnboardingUsersRequest request = new OnboardingUsersRequest();
         request.setInstitutionTaxCode("taxCode");
+        when(productService.getProductIsValid(request.getProductId())).thenReturn(new Product());
         when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of());
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.onboardingUsers(request, null, null));
     }
@@ -277,7 +278,7 @@ class OnboardingServiceImplTest {
         OnboardingUsersRequest request = new OnboardingUsersRequest();
         request.setInstitutionTaxCode("taxCode");
         request.setProductId("productId");
-        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
+
         when(productService.getProductIsValid(request.getProductId())).thenReturn(null);
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.onboardingUsers(request, null, null));
     }
