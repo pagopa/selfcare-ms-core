@@ -53,7 +53,7 @@ public class DelegationController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.delegation.create}", notes = "${swagger.mscore.delegation.create}")
-    @PostMapping
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DelegationResponse> createDelegation(@RequestBody @Valid DelegationRequest delegation) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
         Delegation saved = delegationService.createDelegation(delegationMapper.toDelegation(delegation));
@@ -72,7 +72,7 @@ public class DelegationController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.delegation.createFromTaxCode}", notes = "${swagger.mscore.delegation.createFromTaxCode}")
-    @PostMapping("/from-taxcode")
+    @PostMapping(value = "/from-taxcode", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<DelegationResponse> createDelegationFromInstitutionsTaxCode(@RequestBody @Valid DelegationRequestFromTaxcode delegation) {
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_DELEGATION_ERROR);
         Delegation saved = delegationService.createDelegationFromInstitutionsTaxCode(delegationMapper.toDelegation(delegation));
@@ -92,7 +92,7 @@ public class DelegationController {
      */
     @Tags({@Tag(name = "external-v2"), @Tag(name = "support"), @Tag(name = "Delegation")})
     @ApiOperation(value = "${swagger.mscore.institutions.delegations}", notes = "${swagger.mscore.institutions.delegations}")
-    @GetMapping()
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<DelegationResponse>> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                    @RequestParam(name = "institutionId", required = false) String institutionId,
                                                                    @ApiParam("${swagger.mscore.institutions.model.institutionId}")

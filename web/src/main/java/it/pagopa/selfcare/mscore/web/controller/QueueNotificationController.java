@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import it.pagopa.selfcare.mscore.core.QueueNotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class QueueNotificationController {
         this.queueNotificationService = queueNotificationService;
     }
     @ApiOperation(value = "", notes = "${swagger.ms-core.notification-event.api.start}")
-    @PostMapping(value = "/contracts")
+    @PostMapping(value = "/contracts", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public void resendContracts(@RequestParam(name = "size", required = false) Optional<Integer> size,
                                 @RequestParam(name = "productsFilter") List<String> productsFilter){
@@ -31,7 +32,7 @@ public class QueueNotificationController {
         queueNotificationService.sendContracts(size, productsFilter);
     }
     @ApiOperation(value = "", notes = "Function to send a specific onboarding using institutionId and tokenId ")
-    @PutMapping(value = "/contracts")
+    @PutMapping(value = "/contracts", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public void resendContractsByInstitutionIdAndTokenId(@RequestParam(name = "tokenId") String tokenId,
                                 @RequestParam(name = "institutionId") String institutionId){
@@ -41,7 +42,7 @@ public class QueueNotificationController {
     }
 
     @ApiOperation(value = "", notes = "${swagger.ms-core.notification-event.api.start.users}")
-    @PostMapping(value = "/users")
+    @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public void resendUsers(@RequestParam(name = "size", required = false)Optional<Integer> size,
                             @RequestParam(name = "page", required = false)Optional<Integer> page,

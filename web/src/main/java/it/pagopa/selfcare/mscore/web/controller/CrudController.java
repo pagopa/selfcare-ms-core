@@ -40,7 +40,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.save.token}", notes = "${swagger.mscore.migration.save.token}")
-    @PostMapping("/token")
+    @PostMapping(value = "/token", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Token> createToken(@RequestBody @Valid MigrationToken migrationTokenRequest) {
         Token token = migrationService.createToken(MigrationMapper.toToken(migrationTokenRequest));
         return ResponseEntity.ok().body(token);
@@ -48,7 +48,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.save.institution}", notes = "${swagger.mscore.migration.save.institution}")
-    @PostMapping("/institution")
+    @PostMapping(value = "/institution", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Institution> createInstitution(@RequestBody @Valid MigrationInstitution institutionRequest) {
         Institution institution =  migrationService.createInstitution(MigrationMapper.toInstitution(institutionRequest));
         return ResponseEntity.ok().body(institution);
@@ -56,7 +56,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.save.user}", notes = "${swagger.mscore.migration.save.user}")
-    @PostMapping("/user")
+    @PostMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardedUser> createUser(@RequestBody @Valid MigrationOnboardedUser userRequest) {
         OnboardedUser user = migrationService.createUser(MigrationMapper.toOnboardedUser(userRequest));
         return ResponseEntity.ok().body(user);
@@ -64,7 +64,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.find.institution}", notes = "${swagger.mscore.migration.find.institution}")
-    @GetMapping("/institutions")
+    @GetMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Institution>> findInstitutions() {
         List<Institution> institutions = migrationService.findInstitution();
         return ResponseEntity.ok().body(institutions);
@@ -72,7 +72,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.find.token}", notes = "${swagger.mscore.migration.find.token}")
-    @GetMapping("/users")
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<OnboardedUser>> findUsers() {
         List<OnboardedUser> onboardedUsers = migrationService.findUser();
         return ResponseEntity.ok().body(onboardedUsers);
@@ -80,7 +80,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.findbyid.token}", notes = "${swagger.mscore.migration.findbyid.token}")
-    @GetMapping("/token/{id}")
+    @GetMapping(value = "/token/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Token> findTokenById(@PathVariable("id") String id) {
         Token token = migrationService.findTokenById(id);
         return ResponseEntity.ok().body(token);
@@ -88,7 +88,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.findbyid.institution}", notes = "${swagger.mscore.migration.findbyid.institution}")
-    @GetMapping("/institution/{id}")
+    @GetMapping(value = "/institution/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Institution> findInstitutionById(@PathVariable("id") String id) {
         Institution institution = migrationService.findInstitutionById(id);
         return ResponseEntity.ok().body(institution);
@@ -96,7 +96,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value ="${swagger.mscore.migration.findbyid.user}", notes = "${swagger.mscore.migration.findbyid.user}")
-    @GetMapping("/user/{id}")
+    @GetMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardedUser> findUserById(@PathVariable("id") String id) {
         OnboardedUser onboardedUser = migrationService.findUserById(id);
         return ResponseEntity.ok().body(onboardedUser);
@@ -104,7 +104,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value ="${swagger.mscore.migration.delete.token}", notes = "${swagger.mscore.migration.delete.token}")
-    @DeleteMapping("/token/{id}")
+    @DeleteMapping(value = "/token/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Token> deleteToken(@PathVariable("id") String id) {
         migrationService.deleteToken(id);
         return ResponseEntity.noContent().build();
@@ -112,7 +112,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value ="${swagger.mscore.migration.delete.institution}", notes = "${swagger.mscore.migration.delete.institution}")
-    @DeleteMapping("/institution/{id}")
+    @DeleteMapping(value = "/institution/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Institution> deleteInstitution(@PathVariable("id") String id) {
         migrationService.deleteInstitution(id);
         return ResponseEntity.noContent().build();
@@ -120,7 +120,7 @@ public class CrudController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value ="${swagger.mscore.migration.delete.user}", notes = "${swagger.mscore.migration.delete.user}")
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping(value = "/user/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardedUser> deleteUser(@PathVariable("id") String id) {
         migrationService.deleteUser(id);
         return ResponseEntity.noContent().build();

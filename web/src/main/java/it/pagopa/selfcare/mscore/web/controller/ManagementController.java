@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
-import it.pagopa.selfcare.mscore.core.UserService;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.BulkInstitutions;
@@ -17,6 +16,7 @@ import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,7 +40,7 @@ public class ManagementController {
 
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
-    @PostMapping(value = "/bulk/institutions")
+    @PostMapping(value = "/bulk/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<BulkInstitutions> retrieveInstitutionByIds(@ApiParam("${swagger.mscore.institutions.model.internalIds}")
                                                                      @RequestBody @Valid BulkPartiesSeed bulkPartiesSeed) {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_ID_ERROR);
@@ -55,7 +55,7 @@ public class ManagementController {
     @Deprecated(since = "1.0-SNAPSHOT")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.relationships.get}", notes = "${swagger.mscore.relationships.get}")
-    @GetMapping(value = "/relationships")
+    @GetMapping(value = "/relationships", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RelationshipsManagement> getInstitutionRelationships(@RequestParam(value = "from", required = false) String userId,
                                                                                @RequestParam(value = "to", required = false) String institutionId,
                                                                                @RequestParam(value = "roles", required = false) List<PartyRole> roles,

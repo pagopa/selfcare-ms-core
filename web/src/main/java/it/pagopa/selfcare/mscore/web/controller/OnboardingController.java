@@ -26,6 +26,7 @@ import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -114,7 +115,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.info}", notes = "${swagger.mscore.onboarding.info}")
-    @GetMapping(value = "/info")
+    @GetMapping(value = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @RequestParam(value = "institutionId", required = false) String institutionId,
                                                                  @ApiParam("${swagger.mscore.institutions.model.externalId}")
@@ -161,7 +162,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.operator}", notes = "${swagger.mscore.onboarding.operator}")
-    @PostMapping(value = "/operators")
+    @PostMapping(value = "/operators", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
                                                                                    Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATORS_ERROR);
@@ -181,7 +182,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.subdelegates}", notes = "${swagger.mscore.onboarding.subdelegates}")
-    @PostMapping(value = "/subdelegates")
+    @PostMapping(value = "/subdelegates", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
                                                                                      Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
@@ -202,7 +203,7 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.OK)
     @Tags({@Tag(name = "support"), @Tag(name = "Onboarding")})
     @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
-    @PostMapping(value = "/users")
+    @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionUsers(@RequestBody @Valid OnboardingInstitutionUsersRequest request,
                                                                                      Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
@@ -222,7 +223,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.legals}", notes = "${swagger.mscore.onboarding.legals}")
-    @PostMapping(value = "/legals")
+    @PostMapping(value = "/legals", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest request, Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_LEGALS_ERROR);
         onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal());
@@ -239,7 +240,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.relationship.document}", notes = "${swagger.mscore.onboarding.relationship.document}")
-    @GetMapping(value = "/relationship/{relationshipId}/document")
+    @GetMapping(value = "/relationship/{relationshipId}/document", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<byte[]> getOnboardingDocument(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                         @PathVariable("relationshipId") String relationshipId) {
         CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);

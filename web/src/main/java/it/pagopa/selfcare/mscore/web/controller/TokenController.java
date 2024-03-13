@@ -16,6 +16,7 @@ import it.pagopa.selfcare.mscore.web.model.token.PaginatedTokenResponse;
 import it.pagopa.selfcare.mscore.web.model.token.TokenResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +48,7 @@ public class TokenController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.token.api.getToken}")
-    @GetMapping(value = "/tokens/token")
+    @GetMapping(value = "/tokens/token", produces = MediaType.APPLICATION_JSON_VALUE)
     public TokenResource getToken(@ApiParam("${swagger.mscore.institution.model.id}")@RequestParam(value = "institutionId")String institutionId,
                                   @ApiParam("${swagger.mscore.product.model.id}")@RequestParam(value = "productId")String productId){
         log.trace("getToken start");
@@ -72,7 +73,7 @@ public class TokenController {
     @Tags({@Tag(name = "external-v2"), @Tag(name = "Token")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.tokens.findFromProduct}", notes = "${swagger.mscore.tokens.findFromProduct}")
-    @GetMapping(value = "/tokens/products/{productId}")
+    @GetMapping(value = "/tokens/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenListResponse> findFromProduct(@ApiParam("${swagger.mscore.institutions.model.productId}")
                                                                              @PathVariable(value = "productId") String productId,
                                                              @ApiParam("${swagger.mscore.page.number}")
@@ -105,7 +106,7 @@ public class TokenController {
     @Tag(name = "Token")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.tokens.getAll}", notes = "${swagger.mscore.tokens.getAll}")
-    @GetMapping(value = "/tokens")
+    @GetMapping(value = "/tokens", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PaginatedTokenResponse> getAllTokens(@ApiParam("${swagger.mscore.token.model.states}")
                                                                @RequestParam(value = "states", defaultValue = "ACTIVE,DELETED") List<RelationshipState> states,
                                                                @ApiParam("${swagger.mscore.page.number}")
