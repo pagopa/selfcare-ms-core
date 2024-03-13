@@ -55,14 +55,3 @@ variable "secrets_names" {
   type        = map(string)
   description = "KeyVault secrets to get values from"
 }
-
-variable "env" {
-  description = "Environment name"
-  type        = string
-  validation {
-    condition = (
-      length(var.env) <= 3
-    )
-    error_message = "Max length is 3 chars."
-  }
-}
