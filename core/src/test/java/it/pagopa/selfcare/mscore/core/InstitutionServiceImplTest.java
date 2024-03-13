@@ -1420,6 +1420,26 @@ class InstitutionServiceImplTest {
 
     }
 
+    @Test
+    void updateCreatedAt_onboardingNotFound() {
+        // Given
+        String institutionIdMock = "institutionId";
+        String productIdMock = "producttId";
+        OffsetDateTime createdAtMock = OffsetDateTime.parse("2020-11-01T02:15:30+01:00");
+        OffsetDateTime activatedAtMock = OffsetDateTime.parse("2020-11-02T02:15:30+01:00");
+
+        Institution institutionMock = mockInstance(new Institution());
+        institutionMock.setOnboarding(Collections.emptyList());
+        when(institutionConnector.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock))
+                .thenReturn(institutionMock);
+        // When
+        Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, createdAtMock, activatedAtMock);
+        // Then
+        assertThrows(ResourceNotFoundException.class, executable);
+        verifyNoInteractions(tokenConnector, userConnector);
+
+    }
+
     /**
      * Method under test: {@link InstitutionServiceImpl#getInstitutionBrokers(String, InstitutionType)}
      */
