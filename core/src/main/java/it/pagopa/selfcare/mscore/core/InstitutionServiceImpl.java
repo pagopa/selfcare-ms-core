@@ -414,8 +414,10 @@ public class InstitutionServiceImpl implements InstitutionService {
 
         Institution updatedInstitution = institutionConnector.updateOnboardedProductCreatedAt(institutionId, productId, createdAt);
         String tokenId = updatedInstitution.getOnboarding().stream()
-                .filter(onboarding -> onboarding.getProductId().equals(productId))
-                .findFirst().get().getTokenId();
+                .filter(onboarding -> onboarding.getProductId().equals(productId) && onboarding.getStatus() == RelationshipState.ACTIVE)
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(CustomError.CONTRACT_NOT_FOUND.getMessage(), institutionId, productId), CustomError.CONTRACT_NOT_FOUND.getCode()))
+                .getTokenId();
         Token updatedToken = tokenConnector.updateTokenCreatedAt(tokenId, createdAt, activatedAt);
         List<String> usersId = updatedToken.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
         userConnector.updateUserBindingCreatedAt(institutionId, productId, usersId, createdAt);
