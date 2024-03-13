@@ -230,4 +230,5 @@ secrets_names = {
     "SMTP_PSW"                                        = "smtp-psw"
     "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL"        = "party-test-institution-email"
     "USER_REGISTRY_API_KEY"                           = "user-registry-api-key"
+    "JWT_TOKEN_PUBLIC_KEY"                            = "jwt-public-key"
 }
