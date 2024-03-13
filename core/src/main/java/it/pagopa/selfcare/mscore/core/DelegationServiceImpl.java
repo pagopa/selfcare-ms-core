@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +25,6 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 public class DelegationServiceImpl implements DelegationService {
 
     private static final int DEFAULT_DELEGATIONS_PAGE_SIZE = 10000;
-    private static final int MAX_DELEGATIONS_PAGE_SIZE = 10000;
     private final DelegationConnector delegationConnector;
     private final MailNotificationService notificationService;
     private final InstitutionService institutionService;
@@ -41,18 +40,19 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public Delegation createDelegation(Delegation delegation) {
+        /*
+            In case of prod-pagopa product, in the attribute "to" of the delegation object a taxCode is inserted.
+            So we have to retrieve the institutionId from the taxCode and set it in the "to" attribute.
+         */
+        if(PROD_PAGOPA.equals(delegation.getProductId())) {
+            setPartnerByInstitutionTaxCode(delegation);
+        }
+
         if (checkIfExists(delegation)) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
         }
-        if (PROD_PAGOPA.equals(delegation.getProductId())) {
-            List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
-            Institution partner = institutions.stream()
-                    .findFirst()
-                    .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
-                            INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
-            delegation.setTo(partner.getId());
-        }
+
         Delegation savedDelegation;
         try {
             delegation.setCreatedAt(OffsetDateTime.now());
@@ -69,6 +69,23 @@ public class DelegationServiceImpl implements DelegationService {
             log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
         }
         return savedDelegation;
+    }
+
+    private void setPartnerByInstitutionTaxCode(Delegation delegation) {
+        /*
+            In case the api returns more institutions we always try to take the PT,
+            otherwise it is okay to take the first one
+         */
+        List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
+        Institution partner = institutions.stream()
+                .filter(institution -> institution.getInstitutionType() == InstitutionType.PT)
+                .findFirst()
+                .orElse(institutions.stream().findFirst()
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
+                                INSTITUTION_TAX_CODE_NOT_FOUND.getCode())
+                        ));
+        delegation.setTo(partner.getId());
     }
 
     @Override
