@@ -24,7 +24,7 @@ on:
 jobs:
 
   code_review:
-    uses: pagopa/selfcare-commons/.github/workflows/call_code_review_spring.yml@main
+    uses: pagopa/selfcare-commons/.github/workflows/call_code_review_spring.yml@auth-repo-onboarding
     name: 'Code Review'
     secrets: inherit
     if: github.base_ref == 'main' && github.event_name == 'pull_request'
@@ -35,5 +35,5 @@ jobs:
       sonar_key: 'pagopa_selfcare-ms-core'
 
   docker_build:
-    uses: pagopa/selfcare-commons/.github/workflows/call_code_review_docker.yml@main
+    uses: pagopa/selfcare-commons/.github/workflows/call_code_review_docker.yml@auth-repo-onboarding
     name: 'Docker'

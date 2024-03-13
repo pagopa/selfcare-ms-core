@@ -203,7 +203,7 @@
             </url>
         </repository>
         <repository>
-            <id>selfcare-github</id>
+            <id>selfcare-onboarding</id>
             <name>Selfcare Onboarding SDK</name>
             <url>https://maven.pkg.github.com/pagopa/selfcare-onboarding</url>
         </repository>
