@@ -130,14 +130,14 @@ class DelegationControllerTest {
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode, Optional, Optional)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, GetDelegationsMode, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData() throws Exception {
         // Given
         Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), null,
                 expectedDelegation.getProductId(), GetDelegationsMode.NORMAL, Optional.empty(), Optional.empty()))
                 .thenReturn(List.of(expectedDelegation));
         // When
@@ -166,7 +166,7 @@ class DelegationControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), GetDelegationsMode.NORMAL,
+                        expectedDelegation.getProductId(), null, GetDelegationsMode.NORMAL,
                         Optional.empty(), Optional.empty());
 
         verifyNoMoreInteractions(delegationService);
@@ -182,7 +182,7 @@ class DelegationControllerTest {
         expectedDelegations.add(delegation2);
 
         when(delegationService.getDelegations(null, TO1,
-                null, GetDelegationsMode.FULL, Optional.empty(), Optional.empty()))
+                null, null, GetDelegationsMode.FULL, Optional.empty(), Optional.empty()))
                 .thenReturn(expectedDelegations);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -209,13 +209,13 @@ class DelegationControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegations(null, TO1,
-                        null, GetDelegationsMode.FULL,
+                        null, null, GetDelegationsMode.FULL,
                         Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, GetDelegationsMode, Optional, Optional)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, GetDelegationsMode, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData_nullMode() throws Exception {
@@ -223,7 +223,7 @@ class DelegationControllerTest {
         Delegation expectedDelegation = dummyDelegation();
 
         when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, Optional.empty(), Optional.empty()))
+                expectedDelegation.getProductId(), null, null, Optional.empty(), Optional.empty()))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -251,7 +251,7 @@ class DelegationControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, Optional.empty(), Optional.empty());
+                        expectedDelegation.getProductId(), null, null, Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 
