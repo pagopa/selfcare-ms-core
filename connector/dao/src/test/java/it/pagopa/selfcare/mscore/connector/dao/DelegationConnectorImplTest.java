@@ -130,7 +130,7 @@ class DelegationConnectorImplTest {
                 .find(any(), any(), any());
 
         List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(),
-                delegationEntity.getTo(), delegationEntity.getProductId(), GetDelegationsMode.NORMAL, PAGE_SIZE, MAX_PAGE_SIZE);
+                delegationEntity.getTo(), delegationEntity.getProductId(), null, GetDelegationsMode.NORMAL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -158,7 +158,7 @@ class DelegationConnectorImplTest {
                 thenReturn(results);
 
         List<Delegation> response = delegationConnectorImpl.find(dummyDelegationEntity.getFrom(), null,
-                dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
+                dummyDelegationEntity.getProductId(), null, GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -188,7 +188,7 @@ class DelegationConnectorImplTest {
                 thenReturn(results);
 
         List<Delegation> response = delegationConnectorImpl.find(null, dummyDelegationEntity.getTo(),
-                dummyDelegationEntity.getProductId(), GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
+                dummyDelegationEntity.getProductId(), null, GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -240,7 +240,7 @@ class DelegationConnectorImplTest {
                 thenReturn(results);
 
         List<Delegation> response = delegationConnectorImpl.find(null,
-                TO1, "productId", GetDelegationsMode.FULL, 0, 1);
+                TO1, "productId", null, GetDelegationsMode.FULL, 0, 1);
 
         //Then
         assertNotNull(response);

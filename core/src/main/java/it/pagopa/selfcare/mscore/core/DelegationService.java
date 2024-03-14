@@ -10,7 +10,7 @@ public interface DelegationService {
 
     Delegation createDelegation(Delegation delegation);
     boolean checkIfExists(Delegation delegation);
-    List<Delegation> getDelegations(String from, String to, String productId, GetDelegationsMode mode, Optional<Integer> page, Optional<Integer> size);
+    List<Delegation> getDelegations(String from, String to, String productId, String search, GetDelegationsMode mode, Optional<Integer> page, Optional<Integer> size);
     Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation);
     void deleteDelegationByDelegationId(String delegationId);
 }
