@@ -137,8 +137,8 @@ class DelegationControllerTest {
         // Given
         Delegation expectedDelegation = dummyDelegation();
 
-        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(), null,
-                expectedDelegation.getProductId(), GetDelegationsMode.NORMAL, Optional.empty(), Optional.empty()))
+        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
+                expectedDelegation.getProductId(), null, GetDelegationsMode.NORMAL, Optional.empty(), Optional.empty()))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
