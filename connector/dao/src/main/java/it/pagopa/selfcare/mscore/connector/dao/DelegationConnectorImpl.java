@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -65,19 +66,24 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public List<Delegation> find(String from, String to, String productId, GetDelegationsMode mode, Integer page, Integer size) {
+    public List<Delegation> find(String from, String to, String productId, String search, GetDelegationsMode mode, Integer page, Integer size) {
         List<Criteria> criterias = new ArrayList<>();
         Criteria criteria = new Criteria();
         Pageable pageable = PageRequest.of(page, size);
 
-        if(Objects.nonNull(from))
+        if (Objects.nonNull(from)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
-        if(Objects.nonNull(to))
+        }
+        if (Objects.nonNull(to)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.to.name()).is(to));
-        if(Objects.nonNull(productId))
+        }
+        if (Objects.nonNull(productId)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.productId.name()).is(productId));
-
-        if(GetDelegationsMode.FULL.equals(mode)) {
+        }
+        if (Objects.nonNull(search)) {
+            criterias.add(Criteria.where(DelegationEntity.Fields.institutionFromName.name()).regex("(?i)" + Pattern.quote(search)));
+        }
+        if (GetDelegationsMode.FULL.equals(mode)) {
 
             GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
                     .startWith(Objects.nonNull(from) ? "to" : "from")
