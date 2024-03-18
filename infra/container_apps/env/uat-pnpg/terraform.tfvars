@@ -208,7 +208,6 @@ secrets_names = {
     "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
     "BLOB_STORAGE_CONN_STRING"                        = "web-storage-connection-string"
     "STORAGE_CREDENTIAL_SECRET"                       = "contracts-storage-access-key"
-    "KAFKA_CONTRACTS_SELFCARE_WO_SASL_JAAS_CONFIG"    = "eventhub-sc-contracts-selfcare-wo-connection-string-lc"
     "SMTP_USR"                                        = "smtp-usr"
     "SMTP_PSW"                                        = "smtp-psw"
     "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL"        = "party-test-institution-email"
