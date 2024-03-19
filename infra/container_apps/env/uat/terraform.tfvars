@@ -224,4 +224,5 @@ secrets_names = {
     "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL"        = "party-test-institution-email"
     "USER_REGISTRY_API_KEY"                           = "user-registry-api-key"
     "JWT_TOKEN_PUBLIC_KEY"                            = "jwt-public-key"
+    "KAFKA_USERS_SELFCARE_WO_SASL_JAAS_CONFIG"        = "eventhub-sc-users-selfcare-wo-connection-string-lc"
 }
