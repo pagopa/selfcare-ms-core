@@ -182,11 +182,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-d-notification-mngr-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
+    value = "https://selc-d-pnpg-notification-mngr-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-d-party-reg-proxy-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
+    value = "https://selc-d-pnpg-party-reg-proxy-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"      
