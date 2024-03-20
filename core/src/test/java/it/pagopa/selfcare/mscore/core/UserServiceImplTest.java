@@ -562,6 +562,7 @@ class UserServiceImplTest {
         UserBinding binding = new UserBinding();
         OnboardedProduct product = new OnboardedProduct();
         product.setProductId("prod-pn");
+        product.setStatus(RelationshipState.ACTIVE);
         binding.setProducts(List.of(product));
         binding.setInstitutionId("institutionId");
         user.setBindings(List.of(binding));
@@ -579,6 +580,30 @@ class UserServiceImplTest {
         assertEquals("userId", response.get(0).getUser().getUserId());
         assertEquals("institutionId", response.get(0).getInstitutionId());
         assertEquals("prod-pn", response.get(0).getProductId());
+    }
+
+    /**
+     * Method under test: {@link UserServiceImpl#findAll(Optional, Optional, String)}
+     */
+    @Test
+    void findNoUsers() {
+        OnboardedUser user = new OnboardedUser();
+        user.setId("userId");
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        product.setStatus(RelationshipState.PENDING);
+        binding.setProducts(List.of(product));
+        binding.setInstitutionId("institutionId");
+        user.setBindings(List.of(binding));
+        when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(user));
+        User pdvUser = new User();
+        pdvUser.setId("userId");
+        pdvUser.setWorkContacts(Map.of("institutionId", new WorkContact()));
+        when(userRegistryConnector.getUserByInternalId("userId")).thenReturn(pdvUser);
+        List<UserNotificationToSend> response = userServiceImpl.findAll(Optional.empty(),Optional.empty(), "prod-pn");
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
     }
 }
 
