@@ -226,7 +226,7 @@ secrets_names = {
     "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_PASSWORD"  = "aruba-sign-service-delegated-psw"
     "MAIL_SENDER_ADDRESS"                             = "smtp-usr"
     "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
-    "BLOB_STORAGE_CONN_STRING"                        = "web-storage-connection-string"
+    "BLOB_STORAGE_CONN_STRING"                        = "blob-storage-contract-connection-string"
     "STORAGE_CREDENTIAL_SECRET"                       = "contracts-storage-access-key"
     "KAFKA_CONTRACTS_SELFCARE_WO_SASL_JAAS_CONFIG"    = "eventhub-sc-contracts-selfcare-wo-connection-string-lc"
     "SMTP_USR"                                        = "smtp-usr"
@@ -234,4 +234,5 @@ secrets_names = {
     "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL"        = "party-test-institution-email"
     "USER_REGISTRY_API_KEY"                           = "user-registry-api-key"
     "JWT_TOKEN_PUBLIC_KEY"                            = "jwt-public-key"
+    "KAFKA_USERS_SELFCARE_WO_SASL_JAAS_CONFIG"        = "eventhub-sc-users-selfcare-wo-connection-string-lc"
 }

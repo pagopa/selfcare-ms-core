@@ -182,11 +182,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-d-notification-mngr-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
+    value = "https://selc-d-pnpg-notification-mngr-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-d-party-reg-proxy-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
+    value = "https://selc-d-pnpg-party-reg-proxy-ca.whiteglacier-211c4885.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"      
@@ -207,7 +207,7 @@ secrets_names = {
     "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_PASSWORD"  = "aruba-sign-service-delegated-psw"
     "MAIL_SENDER_ADDRESS"                             = "smtp-usr"
     "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
-    "BLOB_STORAGE_CONN_STRING"                        = "web-storage-connection-string"
+    "BLOB_STORAGE_CONN_STRING"                        = "blob-storage-contract-connection-string"
     "STORAGE_CREDENTIAL_SECRET"                       = "contracts-storage-access-key"
     "SMTP_USR"                                        = "smtp-usr"
     "SMTP_PSW"                                        = "smtp-psw"

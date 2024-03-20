@@ -36,7 +36,6 @@ class AzureBlobClient implements FileStorageConnector {
 
     AzureBlobClient(AzureStorageConfig azureStorageConfig) throws URISyntaxException {
         log.trace("AzureBlobClient.AzureBlobClient");
-        log.debug("storageConnectionString = {}", azureStorageConfig.getConnectionString());
         this.azureStorageConfig = azureStorageConfig;
         final CloudStorageAccount storageAccount = buildStorageAccount();
         this.blobClient = storageAccount.createCloudBlobClient();

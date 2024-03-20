@@ -133,7 +133,8 @@ public class UserEventServiceImpl implements UserEventService {
         OnboardedUser onboardedUser = userConnector.findById(userId);
         onboardedUser.getBindings().stream()
                 .filter(userBinding -> userBinding.getInstitutionId().equals(institutionId))
-                .forEach(userBinding -> userBinding.getProducts()
+                .forEach(userBinding -> userBinding.getProducts().stream()
+                        .filter(onboardedProduct -> ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus()))
                         .forEach(onboardedProduct -> {
                             sendUserNotificationFromBindings(userId, eventType, userBinding, onboardedProduct);
                         }));
@@ -158,7 +159,9 @@ public class UserEventServiceImpl implements UserEventService {
             Optional<UserBinding> userBinding = toUserBinding(relationshipInfo.getUserId(),
                     relationshipInfo.getInstitution().getId());
             userBinding.ifPresent(currentUserBinding -> {
-                currentUserBinding.getProducts().stream().filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
+                currentUserBinding.getProducts().stream()
+                        .filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
+                        .filter(onboardedProduct -> ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus()))
                         .filter(onboardedProduct -> Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()).map(s -> s.equals(onboardedProduct.getRelationshipId())).orElse(true))
                         .forEach(currentOnboardedProduct -> sendUserNotificationFromBindings(relationshipInfo.getUserId(), eventType, currentUserBinding, currentOnboardedProduct));
             });
