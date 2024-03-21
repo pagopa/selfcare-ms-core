@@ -27,6 +27,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -217,10 +218,17 @@ class DelegationConnectorImplTest {
     }
 
     @Test
-    void checkIfDelegationsAreActive() {
+    void checkIfDelegationsAreActive_true() {
         when(delegationRepository.findByToAndStatus(anyString(), any())).thenReturn(Optional.of(List.of(new DelegationEntity())));
         boolean response = delegationConnectorImpl.checkIfDelegationsAreActive("id");
         assertTrue(response);
+    }
+
+    @Test
+    void checkIfDelegationsAreActive_false() {
+        when(delegationRepository.findByToAndStatus(anyString(), any())).thenReturn(Optional.of(Collections.emptyList()));
+        boolean response = delegationConnectorImpl.checkIfDelegationsAreActive("id");
+        assertFalse(response);
     }
 
 
