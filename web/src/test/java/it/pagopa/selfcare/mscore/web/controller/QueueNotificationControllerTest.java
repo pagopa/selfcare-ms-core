@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.QueueNotificationService;
+import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,10 @@ class QueueNotificationControllerTest {
     private static final String BASE_URL = "/notification-event";
     @Autowired
     protected MockMvc mvc;
+
+    @MockBean
+    private UserMapper userMapper;
+
     @MockBean
     private QueueNotificationService queueNotificationService;
 

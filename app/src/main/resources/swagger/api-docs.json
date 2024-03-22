@@ -3894,7 +3894,14 @@
         "operationId" : "countUsersUsingGET",
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "OK",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProductCountResponse"
+                }
+              }
+            }
           },
           "400" : {
             "description" : "Bad Request",
@@ -7197,6 +7204,31 @@
           "updatedAt" : {
             "type" : "string",
             "format" : "date-time"
+          }
+        }
+      },
+      "ProductCount" : {
+        "title" : "ProductCount",
+        "type" : "object",
+        "properties" : {
+          "count" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "productId" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ProductCountResponse" : {
+        "title" : "ProductCountResponse",
+        "type" : "object",
+        "properties" : {
+          "products" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProductCount"
+            }
           }
         }
       },
