@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
-import com.mongodb.client.model.Facet;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
@@ -21,10 +20,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -122,7 +118,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
     @Override
     public boolean checkIfDelegationsAreActive(String institutionId) {
-        Optional<DelegationEntity> opt = repository.findByToAndStatus(institutionId, DelegationState.ACTIVE);
-        return opt.isPresent();
+        List<DelegationEntity> opt = repository.findByToAndStatus(institutionId, DelegationState.ACTIVE).orElse(Collections.emptyList());
+        return !opt.isEmpty();
     }
 }

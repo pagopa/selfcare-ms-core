@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.constant.DelegationType;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,5 +14,5 @@ public interface DelegationRepository extends MongoRepository<DelegationEntity, 
 
     Optional<DelegationEntity> findByFromAndToAndProductIdAndType(String from, String to, String productId, DelegationType type);
 
-    Optional<DelegationEntity> findByToAndStatus(String to, DelegationState status);
+    Optional<List<DelegationEntity>> findByToAndStatus(String to, DelegationState status);
 }
