@@ -34,7 +34,7 @@ class QueueNotificationControllerTest {
         Integer size = 1;
         String productId = "product";
         mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL+"/contracts")
+                        .post(BASE_URL + "/contracts")
                         .param("size", String.valueOf(size))
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
@@ -48,7 +48,7 @@ class QueueNotificationControllerTest {
         String institutionId = "institutionId";
         String tokenId = "tokenId";
         mvc.perform(MockMvcRequestBuilders
-                        .put(BASE_URL+"/contracts")
+                        .put(BASE_URL + "/contracts")
                         .param("tokenId", tokenId)
                         .param("institutionId", institutionId))
                 .andExpect(status().isOk());
@@ -57,17 +57,23 @@ class QueueNotificationControllerTest {
     }
 
     @Test
-    void sendUsers() throws Exception{
+    void sendUsers() throws Exception {
         Integer size = 1;
         Integer page = 0;
         String productId = "product";
         mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL+"/users")
+                        .post(BASE_URL + "/users")
                         .param("size", String.valueOf(size))
                         .param("page",String.valueOf(page))
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
 
         Mockito.verify(queueNotificationService, Mockito.times(1)).sendUsers(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
+    }
+
+    @Test
+    void countUsers() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/users/count")).andExpect(status().isOk());
+        Mockito.verify(queueNotificationService, Mockito.times(1)).countUsers();
     }
 }

@@ -52,7 +52,7 @@ public class QueueNotificationController {
     }
 
     @ApiOperation(value = "", notes = "${swagger.ms-core.notification-event.api.start.users.count}")
-    @PostMapping(value = "/users/count")
+    @GetMapping(value = "/users/count")
     @ResponseStatus(HttpStatus.OK)
     public void countUsers(){
         log.trace("Resend users events started");
