@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
+import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import org.springframework.scheduling.annotation.Async;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface QueueNotificationService {
     void sendContracts(Optional<Integer> size, List<String> productsFilter);
 
     void sendUsers(Optional<Integer> size, Optional<Integer> page, List<String> productsFilter, Optional<String> userId);
+
+    List<QueryCount> countUsers();
 }

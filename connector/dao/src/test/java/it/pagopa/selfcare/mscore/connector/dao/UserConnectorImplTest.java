@@ -14,6 +14,7 @@ import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
@@ -1159,4 +1160,30 @@ class UserConnectorImplTest {
         List<String> userIds = userConnectorImpl.findUsersByInstitutionIdAndProductId("institutionId", "productId");
         assertEquals(1, userIds.size());
     }
+
+
+    @Test
+    void countUser() {
+        //Given
+        AggregationResults<Object> results = mock(AggregationResults.class);
+
+        when(results.getMappedResults()).thenReturn(List.of(
+                new QueryCount("prod1", 1),
+                new QueryCount("prod2", 2),
+                new QueryCount("prod3", 3)));
+
+        //When
+        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
+                thenReturn(results);
+
+        List<QueryCount> response = userConnectorImpl.countUsers();
+
+        //Then
+        assertNotNull(response);
+        assertFalse(response.isEmpty());
+        QueryCount actual = response.get(0);
+
+        assertEquals(actual.getCount(), 1);
+    }
+
 }
