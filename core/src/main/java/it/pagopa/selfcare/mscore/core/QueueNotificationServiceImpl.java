@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
+import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -19,7 +20,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -183,5 +183,10 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
         this.productsFilter = Optional.ofNullable(productsFilter);
         this.page=page;
         regenerateUserNotifications(userId);
+    }
+
+    @Override
+    public List<QueryCount> countUsers() {
+        return userConnector.countUsers();
     }
 }

@@ -119,7 +119,7 @@ app_settings = [
   }, 
   {
     name  = "STORAGE_CONTAINER"
-    value = "$web"
+    value = "selc-u-contracts-blob"
   }, 
   {
     name  = "STORAGE_ENDPOINT"
@@ -133,7 +133,7 @@ app_settings = [
     
   {
     name  = "STORAGE_CREDENTIAL_ID"
-    value = "selcucheckoutsa"
+    value = "selcucontractsstorage"
   },  
   {
     name  = "STORAGE_TEMPLATE_URL"
