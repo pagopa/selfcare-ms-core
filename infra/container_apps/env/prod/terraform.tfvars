@@ -31,6 +31,10 @@ container_app = {
 
 
 app_settings = [
+   {
+     name  = "ONBOARDING_SEND_EMAIL_TO_INSTITUTION"
+     value = "true" 
+   },
   {
     name  = "MAIL_TEMPLATE_COMPLETE_PATH"
     value = "contracts/template/mail/onboarding-complete/1.0.0.json"
@@ -127,7 +131,7 @@ app_settings = [
   }, 
   {
     name  = "STORAGE_CONTAINER"
-    value = "$web"
+    value = "selc-p-contracts-blob"
   }, 
   {
     name  = "STORAGE_ENDPOINT"
@@ -141,7 +145,7 @@ app_settings = [
     
   {
     name  = "STORAGE_CREDENTIAL_ID"
-    value = "selcpcheckoutsa"
+    value = "selcpcontractsstorage"
   },  
   {
     name  = "STORAGE_TEMPLATE_URL"

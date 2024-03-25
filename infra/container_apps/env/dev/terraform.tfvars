@@ -127,7 +127,7 @@ app_settings = [
   }, 
   {
     name  = "STORAGE_CONTAINER"
-    value = "$web"
+    value = "selc-d-contracts-blob"
   }, 
   {
     name  = "STORAGE_ENDPOINT"
@@ -141,7 +141,7 @@ app_settings = [
     
   {
     name  = "STORAGE_CREDENTIAL_ID"
-    value = "selcdcheckoutsa"
+    value = "selcdcontractsstorage"
   },  
   {
     name  = "STORAGE_TEMPLATE_URL"
