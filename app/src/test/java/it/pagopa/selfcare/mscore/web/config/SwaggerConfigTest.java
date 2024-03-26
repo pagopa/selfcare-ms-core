@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.web.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.*;
-import it.pagopa.selfcare.mscore.core.migration.MigrationService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +61,6 @@ class SwaggerConfigTest {
 
     @MockBean
     UserRelationshipService userRelationshipService;
-
-    @MockBean
-    MigrationService migrationService;
 
     @MockBean
     DelegationService delegationService;

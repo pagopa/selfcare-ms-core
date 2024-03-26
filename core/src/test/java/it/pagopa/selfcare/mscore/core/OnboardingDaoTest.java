@@ -1761,7 +1761,7 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
@@ -1804,7 +1804,7 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
@@ -1838,7 +1838,7 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
@@ -1870,7 +1870,7 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
@@ -1919,7 +1919,7 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
@@ -1956,7 +1956,7 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
 
@@ -2017,7 +2017,7 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
         UserToOnboard userToOnboard = mock(UserToOnboard.class);
