@@ -190,11 +190,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-p-pnpg-notification-mngr-ca.salmonpond-602699235.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-pnpg-notification-mngr-ca.salmonpond-60269923.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-p-pnpg-party-reg-proxy-ca.salmonpond-602699235.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-pnpg-party-reg-proxy-ca.salmonpond-60269923.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"      
