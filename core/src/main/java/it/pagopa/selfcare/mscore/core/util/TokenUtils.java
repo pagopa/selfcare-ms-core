@@ -1,8 +1,5 @@
 package it.pagopa.selfcare.mscore.core.util;
 
-import eu.europa.esig.dss.enumerations.DigestAlgorithm;
-import eu.europa.esig.dss.model.DSSDocument;
-import eu.europa.esig.dss.model.FileDocument;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
@@ -10,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -50,12 +46,6 @@ public class TokenUtils {
         return tokenUser;
     }
 
-    public static String createDigest(File pdf) {
-        log.info("START- createDigest for pdf {}", pdf.getName());
-        DSSDocument document = new FileDocument(pdf);
-        return document.getDigest(DigestAlgorithm.SHA256);
-    }
-
     public static TokenRelationships toTokenRelationships(Token token, List<OnboardedUser> users) {
         TokenRelationships tokenRelationships = new TokenRelationships();
         tokenRelationships.setChecksum(token.getChecksum());
@@ -73,10 +63,5 @@ public class TokenUtils {
         tokenRelationships.setContractSigned(token.getContractSigned());
         tokenRelationships.setInstitutionUpdate(token.getInstitutionUpdate());
         return tokenRelationships;
-    }
-
-    public static boolean isTokenExpired(Token token) {
-        OffsetDateTime now = OffsetDateTime.now();
-        return token.getExpiringDate() != null && (now.isEqual(token.getExpiringDate()) || now.isAfter(token.getExpiringDate()));
     }
 }

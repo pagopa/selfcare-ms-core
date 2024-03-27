@@ -4,7 +4,6 @@ import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -39,10 +38,6 @@ public interface InstitutionConnector {
     List<Institution> findInstitutionsByProductId(String productId, Integer page, Integer size);
 
     void findAndRemoveOnboarding(String institutionId, Onboarding onboarding);
-
-    Institution findAndUpdateInstitutionData(String id, Token token, Onboarding onboarding, RelationshipState state);
-
-    Institution findAndUpdateInstitutionDataWithNewOnboarding(String institutionId, InstitutionUpdate institutionUpdate, Onboarding onboarding);
 
     List<Institution> findByGeotaxonomies(List<String> geo, SearchMode searchMode);
 

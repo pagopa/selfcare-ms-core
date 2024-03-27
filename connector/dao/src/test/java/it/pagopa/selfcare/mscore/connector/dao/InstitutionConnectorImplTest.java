@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,26 +59,6 @@ class InstitutionConnectorImplTest {
 
     @Captor
     ArgumentCaptor<Pageable> pageableArgumentCaptor;
-
-    @Test
-    void testFindAndUpdateInstitutionDataWithNewOnboarding(){
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePA();
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(new Billing());
-        onboarding.setContract("contract");
-        onboarding.setStatus(RelationshipState.ACTIVE);
-        onboarding.setCreatedAt(OffsetDateTime.now());
-        onboarding.setProductId("productId");
-        onboarding.setUpdatedAt(OffsetDateTime.now());
-        onboarding.setPricingPlan("pricingPal");
-
-        InstitutionEntity institutionEntity = TestUtils.createSimpleInstitutionEntity();
-
-        when(institutionRepository.findAndModify(any(),any(),any(),any())).thenReturn(institutionEntity);
-
-        assertNotNull(institutionConnectorImpl.findAndUpdateInstitutionDataWithNewOnboarding("institutionId",institutionUpdate,onboarding));
-    }
 
     /**
      * Method under test: {@link InstitutionConnectorImpl#findAll()}
@@ -227,50 +206,6 @@ class InstitutionConnectorImplTest {
         geographicTaxonomies.add(geographicTaxonomies1);
         Institution response = institutionConnectorImpl.findAndUpdate("institutionId", new Onboarding(), geographicTaxonomies, new InstitutionUpdate());
         assertNotNull(response);
-    }
-
-    /**
-     * Method under test: {@link InstitutionConnectorImpl#findAndUpdateInstitutionData(String, Token, Onboarding, RelationshipState)}
-     */
-    @Test
-    void testFindAndUpdateInstitutionData() {
-        InstitutionEntity institutionEntity = TestUtils.createSimpleInstitutionEntity();
-
-        when(institutionRepository.findAndModify(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
-                org.mockito.Mockito.any())).thenReturn(institutionEntity);
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePA();
-
-        Token token = TestUtils.createSimpleToken(institutionUpdate);
-
-        Onboarding onboarding = TestUtils.createSimpleOnboarding();
-        institutionConnectorImpl.findAndUpdateInstitutionData("42", token, onboarding, RelationshipState.PENDING);
-        verify(institutionRepository).findAndModify(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
-                org.mockito.Mockito.any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionConnectorImpl#findAndUpdateInstitutionData(String, Token, Onboarding, RelationshipState)}
-     */
-    @Test
-    void testFindAndUpdateInstitutionData2() {
-        InstitutionEntity institutionEntity = TestUtils.createSimpleInstitutionEntity();
-        when(institutionRepository.findAndModify(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
-                org.mockito.Mockito.any())).thenReturn(institutionEntity);
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePA();
-
-        Token token = TestUtils.createSimpleToken(institutionUpdate);
-
-        Onboarding onboarding = TestUtils.createSimpleOnboarding();
-
-        institutionConnectorImpl.findAndUpdateInstitutionData("42", token, onboarding, RelationshipState.DELETED);
-        verify(institutionRepository).findAndModify(org.mockito.Mockito.any(),
-                org.mockito.Mockito.any(), org.mockito.Mockito.any(),
-                org.mockito.Mockito.any());
     }
 
     /**

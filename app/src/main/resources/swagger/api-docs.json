@@ -2560,62 +2560,6 @@
         } ]
       }
     },
-    "/onboarding/complete/{tokenId}" : {
-      "delete" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "invalidate an onboarding request",
-        "description" : "invalidate an onboarding request",
-        "operationId" : "invalidateOnboardingUsingDELETE",
-        "parameters" : [ {
-          "name" : "tokenId",
-          "in" : "path",
-          "description" : "contract's unique identifier",
-          "required" : true,
-          "style" : "simple",
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "204" : {
-            "description" : "No Content"
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
     "/onboarding/info" : {
       "get" : {
         "tags" : [ "Onboarding" ],
@@ -2729,61 +2673,6 @@
           },
           "404" : {
             "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/onboarding/legals" : {
-      "post" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "performs legals onboarding on an already existing institution",
-        "description" : "performs legals onboarding on an already existing institution",
-        "operationId" : "onboardingInstitutionLegalsUsingPOST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/OnboardingInstitutionLegalsRequest"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "204" : {
-            "description" : "No Content"
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -4579,18 +4468,6 @@
           }
         }
       },
-      "ContractRequest" : {
-        "title" : "ContractRequest",
-        "type" : "object",
-        "properties" : {
-          "path" : {
-            "type" : "string"
-          },
-          "version" : {
-            "type" : "string"
-          }
-        }
-      },
       "CreatePgInstitutionRequest" : {
         "title" : "CreatePgInstitutionRequest",
         "type" : "object",
@@ -5848,36 +5725,6 @@
           },
           "userId" : {
             "type" : "string"
-          }
-        }
-      },
-      "OnboardingInstitutionLegalsRequest" : {
-        "title" : "OnboardingInstitutionLegalsRequest",
-        "type" : "object",
-        "properties" : {
-          "contract" : {
-            "$ref" : "#/components/schemas/ContractRequest"
-          },
-          "institutionExternalId" : {
-            "type" : "string"
-          },
-          "institutionId" : {
-            "type" : "string"
-          },
-          "productId" : {
-            "type" : "string"
-          },
-          "productName" : {
-            "type" : "string"
-          },
-          "signContract" : {
-            "type" : "boolean"
-          },
-          "users" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Person"
-            }
           }
         }
       },
