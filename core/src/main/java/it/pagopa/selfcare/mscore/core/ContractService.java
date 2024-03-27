@@ -5,12 +5,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignService;
-import it.pagopa.selfcare.commons.utils.crypto.service.PadesSignServiceImpl;
-import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -32,19 +28,12 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.UNABLE_TO_DOWNLOAD
 @Slf4j
 @Service
 public class ContractService {
-    private final PagoPaSignatureConfig pagoPaSignatureConfig;
-    private final PadesSignService padesSignService;
     private final FileStorageConnector fileStorageConnector;
     private final CoreConfig coreConfig;
     private final ObjectMapper mapper;
 
-    public ContractService(PagoPaSignatureConfig pagoPaSignatureConfig,
-                           FileStorageConnector fileStorageConnector,
-                           CoreConfig coreConfig,
-                           Pkcs7HashSignService pkcs7HashSignService,
-                           SignatureService signatureService) {
-        this.pagoPaSignatureConfig = pagoPaSignatureConfig;
-        this.padesSignService = new PadesSignServiceImpl(pkcs7HashSignService);
+    public ContractService(FileStorageConnector fileStorageConnector,
+                           CoreConfig coreConfig) {
         this.fileStorageConnector = fileStorageConnector;
         this.coreConfig = coreConfig;
         this.mapper = new ObjectMapper();

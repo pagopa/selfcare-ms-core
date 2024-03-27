@@ -8,11 +8,8 @@ import it.pagopa.selfcare.mscore.model.onboarding.Contract;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenRelationships;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -205,15 +202,6 @@ class TokenUtilsTest {
         assertEquals("42", actualConvertToTokenResult.getProductId());
         assertNull(actualConvertToTokenResult.getInstitutionId());
         assertEquals("Path", actualConvertToTokenResult.getContractTemplate());
-    }
-
-    /**
-     * Method under test: {@link TokenUtils#createDigest(File)}
-     */
-    @Test
-    void testCreateDigest() throws IOException {
-        File tmp = File.createTempFile("file",".txt");
-        Assertions.assertEquals("47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=", TokenUtils.createDigest(tmp));
     }
 
     /**

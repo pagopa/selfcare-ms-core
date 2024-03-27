@@ -1,10 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
-import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
-import it.pagopa.selfcare.commons.utils.crypto.service.Pkcs7HashSignService;
 import it.pagopa.selfcare.mscore.api.FileStorageConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
-import it.pagopa.selfcare.mscore.config.PagoPaSignatureConfig;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import org.junit.jupiter.api.Test;
@@ -13,8 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -27,9 +22,6 @@ class ContractServiceTest {
 
     @Mock
     private FileStorageConnector fileStorageConnector;
-
-    @Mock
-    private PagoPaSignatureConfig pagoPaSignatureConfig;
 
     @Mock
     private CoreConfig coreConfig;
@@ -53,29 +45,6 @@ class ContractServiceTest {
     void getFile() {
         when(fileStorageConnector.getFile(any())).thenReturn(new ResourceResponse());
         assertNotNull(contractService.getFile("path"));
-    }
-
-    /**
-     * Method under test: {@link ContractService#getFile(String)}
-     */
-    @Test
-    void testGetFile2() {
-
-        ResourceResponse resourceResponse = new ResourceResponse();
-        resourceResponse.setData("AXAXAXAX".getBytes(StandardCharsets.UTF_8));
-        resourceResponse.setFileName("foo.txt");
-        resourceResponse.setMimetype("Mimetype");
-        FileStorageConnector fileStorageConnector = mock(FileStorageConnector.class);
-        when(fileStorageConnector.getFile(any())).thenReturn(resourceResponse);
-
-        PagoPaSignatureConfig pagoPaSignatureConfig = new PagoPaSignatureConfig();
-        CoreConfig coreConfig = new CoreConfig();
-        Pkcs7HashSignService pkcs7HashSignService = mock(Pkcs7HashSignService.class);
-        SignatureService signatureService = new SignatureService(new TrustedListsCertificateSource());
-
-        assertSame(resourceResponse, (new ContractService(pagoPaSignatureConfig, fileStorageConnector, coreConfig,
-                pkcs7HashSignService, signatureService)).getFile("Path"));
-        verify(fileStorageConnector).getFile(any());
     }
 
     @Test
