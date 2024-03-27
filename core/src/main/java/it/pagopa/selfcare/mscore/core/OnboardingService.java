@@ -1,10 +1,12 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingUsersRequest;
+import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 
@@ -23,8 +25,6 @@ public interface OnboardingService {
     List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname);
 
     List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest toOnboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname);
-
-    void onboardingLegals(OnboardingLegalsRequest toOnboardingLegalsRequest, SelfCareUser selfCareUser);
 
     ResourceResponse retrieveDocument(String relationshipId);
 

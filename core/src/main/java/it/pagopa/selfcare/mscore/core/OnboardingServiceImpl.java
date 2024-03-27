@@ -2,13 +2,10 @@ package it.pagopa.selfcare.mscore.core;
 
 import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
@@ -28,14 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
-import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
 @Service
@@ -239,38 +234,6 @@ public class OnboardingServiceImpl implements OnboardingService {
                 onboardingOperatorRequest.getProductTitle(), roleLabels, loggedUserName, loggedUserSurname));
         relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
         return relationshipInfoList;
-    }
-
-    @Override
-    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser) {
-        Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
-        OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(onboardingLegalsRequest);
-        InstitutionType institutionType = institution.getInstitutionType();
-        request.setTokenType(TokenType.LEGALS);
-
-        List<String> toUpdate = new ArrayList<>();
-        List<String> toDelete = new ArrayList<>();
-
-        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
-        OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-        List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), null);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
-
-        List<User> delegate = request.getUsers().stream()
-                .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
-                .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId()))
-                .collect(Collectors.toList());
-
-        String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
-        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
-        String digest = createDigest(pdf);
-        OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
-        log.info("{} - Digest {}", rollback.getToken().getId(), digest);
-        try {
-            notificationService.sendMailWithContract(pdf, institution, user, request, rollback.getToken().getId(), false);
-        } catch (Exception e) {
-            onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
-        }
     }
 
     @Override

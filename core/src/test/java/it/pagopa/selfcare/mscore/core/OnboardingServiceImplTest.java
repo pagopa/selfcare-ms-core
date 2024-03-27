@@ -2,8 +2,6 @@ package it.pagopa.selfcare.mscore.core;
 
 import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.constant.Env;
@@ -34,8 +32,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -738,66 +734,6 @@ class OnboardingServiceImplTest {
         assertTrue(actualOnboardingOperatorsResult.isEmpty());
         verify(onboardingDao).onboardOperator(any(), any(), any());
         verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingLegals(OnboardingLegalsRequest, SelfCareUser)}
-     */
-    //@Test
-    void testOnboardingLegals() throws IOException {
-        Institution institution = new Institution();
-        institution.setInstitutionType(InstitutionType.PA);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-
-        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(dummyUser());
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        OnboardingLegalsRequest onboardingLegalsRequest = new OnboardingLegalsRequest();
-        onboardingLegalsRequest.setContract(contract);
-        onboardingLegalsRequest.setInstitutionExternalId("42");
-        onboardingLegalsRequest.setInstitutionId("42");
-        onboardingLegalsRequest.setProductId("42");
-        onboardingLegalsRequest.setProductName("Product Name");
-        onboardingLegalsRequest.setSignContract(true);
-        onboardingLegalsRequest.setTokenType(TokenType.INSTITUTION);
-        UserToOnboard user = new UserToOnboard();
-        user.setId("id");
-        user.setRole(PartyRole.MANAGER);
-        onboardingLegalsRequest.setUsers(List.of(user));
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getId()).thenReturn("42");
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        TokenUser tokenUser = new TokenUser();
-        tokenUser.setUserId("id");
-        tokenUser.setRole(PartyRole.MANAGER);
-        token.setUsers(List.of(tokenUser));
-
-        File file = File.createTempFile("test",".txt");
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
-
-        OnboardingRollback onboardingRollback = new OnboardingRollback();
-        onboardingRollback.setToken(new Token());
-        when(onboardingDao.persistLegals(any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.onboardingLegals(onboardingLegalsRequest, selfCareUser));
     }
 
     /**

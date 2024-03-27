@@ -16,7 +16,10 @@ import it.pagopa.selfcare.mscore.web.model.institution.DataProtectionOfficerRequ
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionUpdateRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.PaymentServiceProviderRequest;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
-import it.pagopa.selfcare.mscore.web.model.onboarding.*;
+import it.pagopa.selfcare.mscore.web.model.onboarding.ContractRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
 import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +30,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.ResultActions;
@@ -245,43 +247,6 @@ class OnboardingControllerTest {
         onboardingInstitutionRequest.setProductName("Product Name");
 
         return onboardingInstitutionRequest;
-    }
-
-    /**
-     * Method under test: {@link OnboardingController#onboardingInstitutionLegals(OnboardingInstitutionLegalsRequest, Authentication)}
-     */
-    @Test
-    void testOnboardingInstitutionLegals() throws Exception {
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-
-        ContractRequest contractRequest = new ContractRequest();
-        contractRequest.setPath("Path");
-        contractRequest.setVersion("1.0.2");
-
-        OnboardingInstitutionLegalsRequest onboardingInstitutionLegalsRequest = new OnboardingInstitutionLegalsRequest();
-        onboardingInstitutionLegalsRequest.setContract(contractRequest);
-        onboardingInstitutionLegalsRequest.setInstitutionExternalId("42");
-        onboardingInstitutionLegalsRequest.setInstitutionId("42");
-        onboardingInstitutionLegalsRequest.setProductId("42");
-        onboardingInstitutionLegalsRequest.setProductName("Product Name");
-        onboardingInstitutionLegalsRequest.setSignContract(true);
-        Person person = new Person();
-        person.setId("id");
-        onboardingInstitutionLegalsRequest.setUsers(List.of(person));
-
-        String content = (new ObjectMapper()).writeValueAsString(onboardingInstitutionLegalsRequest);
-        MockHttpServletRequestBuilder requestBuilder =
-                MockMvcRequestBuilders.post("/onboarding/legals")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(content)
-                        .principal(authentication);
-
-        MockMvcBuilders.standaloneSetup(onboardingController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().is(204));
     }
 
     /**

@@ -2,32 +2,26 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
-import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INVALID_STATUS_CHANGE;
-import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.constructOperatorProduct;
 import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.constructProduct;
 
@@ -36,27 +30,12 @@ import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.con
 public class OnboardingDao {
 
     private final InstitutionConnector institutionConnector;
-    private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
-    private final ProductConnector productConnector;
-    private final CoreConfig coreConfig;
 
     public OnboardingDao(InstitutionConnector institutionConnector,
-                         TokenConnector tokenConnector,
-                         UserConnector userConnector,
-                         ProductConnector productConnector,
-                         CoreConfig coreConfig) {
+                         UserConnector userConnector) {
         this.institutionConnector = institutionConnector;
-        this.tokenConnector = tokenConnector;
         this.userConnector = userConnector;
-        this.productConnector = productConnector;
-        this.coreConfig = coreConfig;
-    }
-
-    public OnboardingRollback persistLegals(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, String digest) {
-        Token token = createToken(request, institution, digest, coreConfig.getOnboardingExpiringDate(), null);
-        Map<String, OnboardedProduct> productMap = createUsers(toUpdate, toDelete, request, institution, token, null);
-        return new OnboardingRollback(token, null, productMap, null);
     }
 
     private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingRequest request, String tokenId) {
@@ -106,37 +85,6 @@ public class OnboardingDao {
             } else {
                 products.forEach(productToDelete -> updateUserProductState(onboardedUser, productToDelete.getRelationshipId(), RelationshipState.DELETED));
             }
-        }
-    }
-
-    private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
-        log.info("createToken for institution {} and product {}", institution.getExternalId(), request.getProductId());
-        OffsetDateTime expiringDate = OffsetDateTime.now().plus(expire, ChronoUnit.DAYS);
-        return tokenConnector.save(TokenUtils.toToken(request, institution, digest, expiringDate), geographicTaxonomies);
-    }
-
-    private Map<String, OnboardedProduct> createUsers(List<String> toUpdate, List<String> toDelete, OnboardingRequest request, Institution institution, Token token, Onboarding onboarding) {
-        List<String> usersId = request.getUsers().stream().map(UserToOnboard::getId).collect(Collectors.toList());
-        Map<String, OnboardedProduct> productMap = new HashMap<>();
-        try {
-            for (UserToOnboard userToOnboard : request.getUsers()) {
-                updateOrCreateUserToOnboard(toUpdate, userToOnboard, institution, request, token.getId(), productMap);
-            }
-            log.debug("users to update: {}", toUpdate);
-        } catch (Exception e) {
-            toDelete.addAll(usersId.stream().filter(id -> !toUpdate.contains(id)).collect(Collectors.toList()));
-            rollbackSecondStep(toUpdate, toDelete, institution.getId(), token, onboarding, productMap);
-        }
-        return productMap;
-    }
-
-    private void updateOrCreateUserToOnboard(List<String> toUpdate, UserToOnboard userToOnboard, Institution institution, OnboardingRequest request, String tokenId, Map<String, OnboardedProduct> productMap) {
-        try {
-            OnboardedUser onboardedUser = isNewUser(toUpdate, userToOnboard.getId());
-            OnboardedProduct currentProduct = updateUser(onboardedUser, userToOnboard, institution, request, tokenId);
-            productMap.put(userToOnboard.getId(), currentProduct);
-        } catch (ResourceNotFoundException e) {
-            createNewUser(userToOnboard, institution, request, tokenId, Optional.empty());
         }
     }
 
@@ -199,17 +147,6 @@ public class OnboardingDao {
         } else {
             throw new InvalidRequestException((String.format(INVALID_STATUS_CHANGE.getMessage(), fromState, toState)), INVALID_STATUS_CHANGE.getCode());
         }
-    }
-
-    public void rollbackSecondStep(List<String> toUpdate, List<String> toDelete, String institutionId, Token token, Onboarding onboarding, Map<String, OnboardedProduct> productMap) {
-        if (token != null && token.getId()!=null) {
-            tokenConnector.deleteById(token.getId());
-        }
-        if (institutionId != null && onboarding != null) {
-            institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
-        }
-        rollbackUser(toUpdate, toDelete, institutionId, productMap);
-        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
 
     public void rollbackPersistOnboarding(String institutionId, Onboarding onboarding, List<UserToOnboard> users) {

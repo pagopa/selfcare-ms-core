@@ -17,7 +17,6 @@ import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -185,24 +184,6 @@ public class OnboardingController {
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = onboardingService.onboardingUsers(onboardingResourceMapper.toOnboardingUsersRequest(request), selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
-    }
-
-    /**
-     * The function persist legals for given onboarding
-     *
-     * @param request OnboardingInstitutionLegalsRequest
-     * @return no content
-     * * Code: 204, Message: successful operation
-     * * Code: 404, Message: Not found, DataType: Problem
-     * * Code: 400, Message: Invalid request, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.legals}", notes = "${swagger.mscore.onboarding.legals}")
-    @PostMapping(value = "/legals")
-    public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest request, Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_LEGALS_ERROR);
-        onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**

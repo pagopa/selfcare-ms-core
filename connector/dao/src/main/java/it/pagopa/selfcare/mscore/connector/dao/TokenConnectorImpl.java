@@ -7,7 +7,6 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -24,8 +23,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
 import static it.pagopa.selfcare.mscore.constant.CustomError.CONTRACT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_NOT_FOUND;
 
@@ -37,17 +34,6 @@ public class TokenConnectorImpl implements TokenConnector {
 
     public TokenConnectorImpl(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
-    }
-
-    @Override
-    public void deleteById(String id) {
-        tokenRepository.deleteById(id);
-    }
-
-    @Override
-    public Token save(Token token, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
-        final TokenEntity entity = convertToTokenEntity(token, geographicTaxonomies);
-        return convertToToken(tokenRepository.save(entity));
     }
 
     @Override

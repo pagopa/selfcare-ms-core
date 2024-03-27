@@ -1,23 +1,21 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,9 +24,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -42,188 +38,9 @@ class OnboardingDaoTest {
     private TokenConnector tokenConnector;
     @Mock
     private UserConnector userConnector;
-    @Mock
-    private CoreConfig coreConfig;
 
     @InjectMocks
     private OnboardingDao onboardingDao;
-
-    @Test
-    void testPersistLegals() {
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-        onboardingRequest.setBillingRequest(billing);
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setTokenType(TokenType.INSTITUTION);
-        onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingRollback onboardingRollback = onboardingDao.persistLegals(toUpdate, toDelete, onboardingRequest, new Institution(), "Digest");
-        Assertions.assertNotNull(onboardingRollback);
-    }
-
-    @Test
-    void testRollbackSecondStep() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doNothing().when(tokenConnector).deleteById(any());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        token.setId("id");
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", token, onboarding, map));
-    }
-
-    @Test
-    void testRollbackSecondStep2() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doThrow(new InvalidRequestException("An error occurred", "rollback second step completed")).when(tokenConnector)
-                .deleteById(any());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", token, onboarding, map));
-    }
-
-    @Test
-    void testRollbackSecondStep3() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doNothing().when(tokenConnector).deleteById(any());
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("rollback second step completed");
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", token, onboarding, map));
-    }
-
-    @Test
-    void testRollbackSecondStep4() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doNothing().when(tokenConnector).deleteById(any());
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("rollback second step completed");
-        stringList.add("rollback second step completed");
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", token, onboarding, map));
-    }
 
     UserToOnboard dummyUserToOnboard() {
         UserToOnboard user = new UserToOnboard();
@@ -269,7 +86,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState4() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -322,7 +139,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState9() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -336,7 +153,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState10() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -381,7 +198,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState12() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -432,7 +249,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState14() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -446,7 +263,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState15() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         UserBinding userBinding = new UserBinding();
         userBinding.setProducts(new ArrayList<>());
@@ -466,7 +283,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState17() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -501,7 +318,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState18() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -550,7 +367,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState19() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getRelationshipId()).thenReturn("42");
         doNothing().when(onboardedProduct).setContract(any());
@@ -606,7 +423,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState20() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
@@ -665,7 +482,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState21() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
@@ -724,7 +541,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState22() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
@@ -855,7 +672,7 @@ class OnboardingDaoTest {
     @Test
     void testOnboardOperator2() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         assertTrue(onboardingDao.onboardOperator(new Institution(), "productId", List.of()).isEmpty());
     }
 
@@ -877,7 +694,7 @@ class OnboardingDaoTest {
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -920,7 +737,7 @@ class OnboardingDaoTest {
 
         
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -954,7 +771,7 @@ class OnboardingDaoTest {
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -986,7 +803,7 @@ class OnboardingDaoTest {
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -1035,7 +852,7 @@ class OnboardingDaoTest {
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -1072,7 +889,7 @@ class OnboardingDaoTest {
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -1133,7 +950,7 @@ class OnboardingDaoTest {
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
         UserToOnboard userToOnboard = mock(UserToOnboard.class);
         when(userToOnboard.getRole()).thenReturn(PartyRole.MANAGER);
         when(userToOnboard.getEnv()).thenReturn(Env.ROOT);
