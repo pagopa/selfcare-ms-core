@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
         havingValue = "send")
 public class UserEventServiceImpl implements UserEventService {
     public static final String ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER = "error during send dataLake notification for user {}";
+    public static final String DONE_SEND_DATA_LAKE_NOTIFICATION_FOR_USER = "done send dataLake notification for user {}";
     private final CoreConfig coreConfig;
     private final KafkaTemplate<String, String> kafkaTemplateUsers;
     private final EnumSet<RelationshipState> ALLOWED_RELATIONSHIP_STATUSES = EnumSet.of(RelationshipState.ACTIVE, RelationshipState.SUSPENDED, RelationshipState.DELETED);
@@ -149,6 +150,7 @@ public class UserEventServiceImpl implements UserEventService {
         try {
             String msg = mapper.writeValueAsString(userNotification);
             sendUserNotification(msg, userId);
+            log.info(DONE_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
         } catch (JsonProcessingException e) {
             log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
         }
