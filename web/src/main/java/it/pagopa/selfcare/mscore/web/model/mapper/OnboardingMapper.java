@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.NONE)
 public class OnboardingMapper {
 
-    public static final String DEFAULT_PRODUCT_ROLE = "admin";
     private static UserMapper userMapper = new UserMapperImpl();
 
     private static Contract toContract(ContractRequest request) {
@@ -93,7 +92,7 @@ public class OnboardingMapper {
             institutionResponse.setAttributes(InstitutionMapperCustom.toAttributeResponse(institution.getAttributes()));
         }
         ProductInfo productInfo = new ProductInfo();
-        productInfo.setRole(Objects.nonNull(product.getProductRole()) ? product.getProductRole() : DEFAULT_PRODUCT_ROLE);
+        productInfo.setRole(product.getProductRole());
         productInfo.setId(product.getProductId());
         productInfo.setCreatedAt(product.getCreatedAt());
         if(Objects.nonNull(product.getStatus())){
