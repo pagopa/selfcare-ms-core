@@ -222,25 +222,6 @@ public class OnboardingInstitutionUtils {
         return institution.getBilling();
     }
 
-
-    public static Onboarding constructOnboarding(OnboardingRequest request, Institution institution) {
-        Onboarding onboarding = new Onboarding();
-
-        onboarding.setProductId(request.getProductId());
-        onboarding.setBilling(request.getBillingRequest());
-        onboarding.setPricingPlan(request.getPricingPlan());
-        onboarding.setCreatedAt(OffsetDateTime.now());
-        onboarding.setUpdatedAt(OffsetDateTime.now());
-        if (request.getContract() != null) {
-            onboarding.setContract(request.getContract().getPath());
-        }
-
-        onboarding.setStatus(getStatus(request.getInstitutionUpdate(),
-                institution.getInstitutionType(), institution.getOrigin(), request.getProductId()));
-
-        return onboarding;
-    }
-
     public static OnboardedProduct constructOperatorProduct(UserToOnboard user, String productId) {
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setRelationshipId(UUID.randomUUID().toString());
