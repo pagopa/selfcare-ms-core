@@ -14,8 +14,6 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
@@ -1179,88 +1177,5 @@ class OnboardingDaoTest {
         verify(userToOnboard).setRole( any());
         verify(userToOnboard).setSurname(any());
         verify(userToOnboard).setTaxCode(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#getProductById(String)}
-     */
-    @Test
-    void testGetProductById() {
-
-        Product product = new Product();
-        product.setContractTemplatePath("Contract Template Path");
-        product.setContractTemplateVersion("1.0.2");
-        product.setId("42");
-        product.setParentId("42");
-        product.setRoleMappings(null);
-        product.setStatus(ProductStatus.ACTIVE);
-        product.setTitle("Dr");
-        ProductConnector productConnector = mock(ProductConnector.class);
-        when(productConnector.getProductById(any())).thenReturn(product);
-        assertSame(product,
-                (new OnboardingDao(null, null, null, productConnector, new CoreConfig())).getProductById("42"));
-        verify(productConnector).getProductById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#getProductById(String)}
-     */
-    @Test
-    void testGetProductById2() {
-         ProductConnector productConnector = mock(ProductConnector.class);
-        when(productConnector.getProductById(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-        CoreConfig config = new CoreConfig();
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, config);
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.getProductById("42"));
-        verify(productConnector).getProductById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#getTokenById(String)}
-     */
-    @Test
-    void testGetTokenById2() {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        TokenConnector tokenConnector = mock(TokenConnector.class);
-        when(tokenConnector.findById(any())).thenReturn(token);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        assertSame(token,
-                (new OnboardingDao(null, tokenConnector, null, productConnector, new CoreConfig())).getTokenById("42"));
-        verify(tokenConnector).findById(any());
     }
 }

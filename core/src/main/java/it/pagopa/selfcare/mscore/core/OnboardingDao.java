@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
@@ -16,7 +15,6 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
@@ -30,7 +28,8 @@ import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.INVALID_STATUS_CHANGE;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
-import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.*;
+import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.constructOperatorProduct;
+import static it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils.constructProduct;
 
 @Service
 @Slf4j
@@ -108,13 +107,6 @@ public class OnboardingDao {
                 products.forEach(productToDelete -> updateUserProductState(onboardedUser, productToDelete.getRelationshipId(), RelationshipState.DELETED));
             }
         }
-    }
-
-    private Token updateToken(Token token, RelationshipState state, String digest) {
-        log.info("update token {} from state {} to {}", token.getId(), token.getStatus(), state);
-        Token updatedToken = tokenConnector.findAndUpdateToken(token, state, digest);
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "updatedToken updatedToken = {}", updatedToken);
-        return updatedToken;
     }
 
     private Token createToken(OnboardingRequest request, Institution institution, String digest, Integer expire, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
@@ -209,14 +201,6 @@ public class OnboardingDao {
         }
     }
 
-    public Product getProductById(String productId) {
-        return productConnector.getProductById(productId);
-    }
-
-    public Token getTokenById(String tokenId) {
-        return tokenConnector.findById(tokenId);
-    }
-
     public void rollbackSecondStep(List<String> toUpdate, List<String> toDelete, String institutionId, Token token, Onboarding onboarding, Map<String, OnboardedProduct> productMap) {
         if (token != null && token.getId()!=null) {
             tokenConnector.deleteById(token.getId());
@@ -225,12 +209,6 @@ public class OnboardingDao {
             institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
         }
         rollbackUser(toUpdate, toDelete, institutionId, productMap);
-        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
-    }
-
-    private void rollbackFirstStepOfUpdate(Token token) {
-        tokenConnector.findAndUpdateToken(token, token.getStatus(), token.getChecksum());
-        log.debug("rollback first step completed");
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
 

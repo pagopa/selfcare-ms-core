@@ -15,7 +15,6 @@ import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomi
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.utils.MockUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -595,91 +594,6 @@ class TokenConnectorImplTest {
         when(tokenRepository.findById(any())).thenReturn(Optional.of(tokenEntity));
         Token response = tokenConnectorImpl.findById("tokenId");
         assertNotNull(response);
-    }
-
-    @Test
-    void testFindAndUpdateTokenUser() {
-        // Given
-        Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.DELETED, InstitutionType.PSP);
-        RelationshipState statusMock = RelationshipState.DELETED;
-        String digestMock = "digestMock";
-        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.DELETED);
-
-        when(tokenRepository.findAndModify(any(), any(), any(), any()))
-                .thenReturn(updatedTokenMock);
-        // When
-        Token result = tokenConnectorImpl.findAndUpdateToken(tokenMock, statusMock, digestMock);
-        // Then
-        assertNotNull(result);
-        verify(tokenRepository, times(1))
-                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
-        Query capturedQuery = queryArgumentCaptor.getValue();
-        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()).toString().contains(tokenMock.getId()));
-        Update capturedUpdate = updateArgumentCaptor.getValue();
-        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()));
-        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.checksum.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.contractSigned.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.contentType.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.deletedAt.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(digestMock) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContractSigned()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(tokenMock.getContentType()));
-        verifyNoMoreInteractions(tokenRepository);
-    }
-
-    @Test
-    void findAndUpdateToken() {
-        // Given
-        Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.TOBEVALIDATED, InstitutionType.GSP);
-        tokenMock.setContractSigned(null);
-        tokenMock.setContentType(null);
-        RelationshipState statusMock = RelationshipState.PENDING;
-        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.PENDING);
-
-        when(tokenRepository.findAndModify(any(), any(), any(), any()))
-                .thenReturn(updatedTokenMock);
-        // When
-        Token result = tokenConnectorImpl.findAndUpdateToken(tokenMock, statusMock, null);
-        // Then
-        assertNotNull(result);
-        verify(tokenRepository, times(1))
-                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
-        Query capturedQuery = queryArgumentCaptor.getValue();
-        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()).toString().contains(tokenMock.getId()));
-        Update capturedUpdate = updateArgumentCaptor.getValue();
-        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()));
-        verifyNoMoreInteractions(tokenRepository);
-    }
-
-    @Test
-    void findAndUpdateTokenActivated(){
-        // Given
-        Token tokenMock = MockUtils.createTokenMock(null, RelationshipState.ACTIVE, InstitutionType.GSP);
-        tokenMock.setContractSigned(null);
-        tokenMock.setContentType(null);
-        RelationshipState statusMock = RelationshipState.ACTIVE;
-        TokenEntity updatedTokenMock = DaoMockUtils.createTokenEntityMock(null, RelationshipState.ACTIVE);
-
-        when(tokenRepository.findAndModify(any(), any(), any(), any()))
-                .thenReturn(updatedTokenMock);
-        // When
-        Token result = tokenConnectorImpl.findAndUpdateToken(tokenMock, statusMock, null);
-        // Then
-        assertNotNull(result);
-        verify(tokenRepository, times(1))
-                .findAndModify(queryArgumentCaptor.capture(), updateArgumentCaptor.capture(), findAndModifyOptionsArgumentCaptor.capture(), Mockito.eq(TokenEntity.class));
-        Query capturedQuery = queryArgumentCaptor.getValue();
-        assertTrue(capturedQuery.getQueryObject().get(TokenEntity.Fields.id.name()).toString().contains(tokenMock.getId()));
-        Update capturedUpdate = updateArgumentCaptor.getValue();
-        assertTrue(capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.status.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.updatedAt.name()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(statusMock.toString()) &&
-                capturedUpdate.getUpdateObject().get("$set").toString().contains(TokenEntity.Fields.activatedAt.name()));
-        verifyNoMoreInteractions(tokenRepository);
     }
 
     @Test
