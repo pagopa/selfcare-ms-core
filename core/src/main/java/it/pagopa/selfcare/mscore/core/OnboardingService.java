@@ -18,8 +18,6 @@ public interface OnboardingService {
 
     List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId);
 
-    void invalidateOnboarding(Token token);
-
     Institution persistOnboarding(String institutionId, String productId, List<UserToOnboard> users, Onboarding onboarding);
 
     List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname);

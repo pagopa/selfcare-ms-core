@@ -131,25 +131,6 @@ public class OnboardingDao {
         return new OnboardingRollback(token, null, productMap, null);
     }
 
-    public OnboardingUpdateRollback persistForUpdate(Token token, Institution institution, RelationshipState toState, String digest) {
-        log.trace("persistForUpdate start");
-        log.debug("persistForUpdate token = {}, institution = {}, toState = {}, digest = {}", token, institution, toState, digest);
-        OnboardingUpdateRollback rollback = new OnboardingUpdateRollback();
-        if (isValidStateChangeForToken(token.getStatus(), toState)) {
-            rollback.setToken(updateToken(token, toState, digest));
-            if (RelationshipState.ACTIVE == toState) {
-                rollback.setUpdatedInstitution(updateInstitutionData(institution, token, toState));
-            } else {
-                rollback.setUpdatedInstitution(updateInstitutionState(institution, token, toState));
-            }
-            rollback.setUserList(updateUsersState(institution, token, toState));
-            log.trace("persistForUpdate end");
-            return rollback;
-        } else {
-            throw new InvalidRequestException(String.format(INVALID_STATUS_CHANGE.getMessage(), token.getStatus(), toState), INVALID_STATUS_CHANGE.getCode());
-        }
-    }
-
     private Onboarding updateInstitution(OnboardingRequest request, Institution institution, List<InstitutionGeographicTaxonomies> geographicTaxonomies, Token token) {
         Onboarding onboarding = constructOnboarding(request, institution);
         onboarding.setTokenId(token.getId());
@@ -167,27 +148,6 @@ public class OnboardingDao {
         return onboarding;
     }
 
-    private Institution updateInstitutionData(Institution institution, Token token, RelationshipState toState) {
-        try {
-            return institutionConnector.findAndUpdateInstitutionData(institution.getId(), token, null, toState);
-        } catch (Exception e) {
-            log.warn("can not update data of institution {}", institution.getId(), e);
-            rollbackFirstStepOfUpdate(token);
-        }
-        return institution;
-    }
-
-    private Institution updateInstitutionState(Institution institution, Token token, RelationshipState state) {
-        log.info("update institution status from {} to {} for product {}", token.getStatus(), state, token.getProductId());
-        try {
-            return institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), state);
-        } catch (Exception e) {
-            log.warn("can not update state of institution {}", institution.getId(), e);
-            rollbackFirstStepOfUpdate(token);
-        }
-        return institution;
-    }
-
     private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingRequest request, String tokenId) {
         OnboardedProduct product = constructProduct(user, request, institution);
         product.setTokenId(tokenId);
@@ -197,23 +157,6 @@ public class OnboardingDao {
                 List.of(product));
         userConnector.findAndUpdate(onboardedUser, user.getId(), institution.getId(), product, binding);
         return product;
-    }
-
-    public List<String> updateUsersState(Institution institution, Token token, RelationshipState state) {
-        log.info("update {} users state from {} to {} for product {}", token.getUsers().size(), token.getStatus(), state, token.getProductId());
-        List<String> toUpdate = new ArrayList<>();
-        token.getUsers().forEach(tokenUser -> {
-            try {
-                log.debug("updating user {} with tokenId {} to state {}", tokenUser.getUserId(), token.getId(), state);
-                userConnector.findAndUpdateState(tokenUser.getUserId(), null, token, state);
-                toUpdate.add(tokenUser.getUserId());
-                log.debug("updated user {}", tokenUser.getUserId());
-            } catch (Exception e) {
-                log.warn("can not update state of user {}", tokenUser.getUserId(), e);
-                rollbackSecondStepOfUpdate(toUpdate, institution, token);
-            }
-        });
-        return toUpdate;
     }
 
     public void updateUserProductState(OnboardedUser user, String relationshipId, RelationshipState toState) {
@@ -408,14 +351,6 @@ public class OnboardingDao {
         throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
     }
 
-    public void rollbackSecondStepOfUpdate(List<String> toUpdate, Institution institution, Token token) {
-        tokenConnector.findAndUpdateToken(token, token.getStatus(), token.getChecksum());
-        institutionConnector.findAndUpdateStatus(institution.getId(), token.getId(), token.getStatus());
-        toUpdate.forEach(userId -> userConnector.findAndUpdateState(userId, null, token, token.getStatus()));
-        log.debug("rollback second step completed");
-        throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage(), ONBOARDING_OPERATION_ERROR.getCode());
-    }
-
     public void rollbackPersistOnboarding(String institutionId, Onboarding onboarding, List<UserToOnboard> users) {
         institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
         users.forEach(user -> userConnector.findAndRemoveProduct(user.getId(), institutionId, OnboardingInstitutionUtils.constructOperatorProduct(user, onboarding.getProductId())));
@@ -436,18 +371,6 @@ public class OnboardingDao {
                 return fromState == RelationshipState.ACTIVE;
             case DELETED:
                 return fromState != RelationshipState.DELETED;
-            default:
-                return false;
-        }
-    }
-
-    private boolean isValidStateChangeForToken(RelationshipState fromState, RelationshipState toState) {
-        switch (fromState) {
-            case TOBEVALIDATED:
-                return RelationshipState.PENDING == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState
-                        || RelationshipState.ACTIVE == toState;
-            case PENDING:
-                return RelationshipState.ACTIVE == toState || RelationshipState.REJECTED == toState || RelationshipState.DELETED == toState;
             default:
                 return false;
         }

@@ -11,7 +11,6 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
-import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -35,7 +34,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
-import static it.pagopa.selfcare.mscore.constant.CustomError.CONTRACT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
@@ -178,13 +176,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void invalidateOnboarding(Token token) {
-        checkAndHandleExpiring(token);
-        Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-        invalidateToken(token, institution);
-    }
-
-    @Override
     public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname) {
 
         Institution institution = institutionService.getInstitutions(request.getInstitutionTaxCode(), request.getInstitutionSubunitCode()).stream()
@@ -293,11 +284,6 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
-    private void invalidateToken(Token token, Institution institution) {
-        log.info("START - invalidate token {}", token.getId());
-        onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
-    }
-
     private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String institutionId, String externalId, List<RelationshipState> relationshipStates) {
         List<String> states = relationshipStates.stream().map(Enum::name).collect(Collectors.toList());
         UserInstitutionFilter filter = new UserInstitutionFilter(userId, institutionId, externalId, states);
@@ -306,16 +292,6 @@ public class OnboardingServiceImpl implements OnboardingService {
             throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), userId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
         }
         return userInstitutionAggregation;
-    }
-
-    public void checkAndHandleExpiring(Token token) {
-
-        if (TokenUtils.isTokenExpired(token)) {
-            log.info("token {} is expired at {}", token.getId(), token.getExpiringDate());
-            var institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-            onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
-            throw new InvalidRequestException(String.format(CustomError.TOKEN_EXPIRED.getMessage(), token.getId(), token.getExpiringDate()), CustomError.TOKEN_EXPIRED.getCode());
-        }
     }
 
 }

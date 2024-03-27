@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
@@ -128,26 +127,6 @@ public class OnboardingController {
         OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
         log.debug("onboardingInfo result = {}", onboardingInfoResponse);
         return ResponseEntity.ok().body(onboardingInfoResponse);
-    }
-
-    /**
-     * The function invalidate onboarding request
-     *
-     * @param tokenId String
-     * @return no content
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.invalidate}", notes = "${swagger.mscore.onboarding.invalidate}")
-    @DeleteMapping(value = "/complete/{tokenId}")
-    public ResponseEntity<Void> invalidateOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
-                                                     @PathVariable(value = "tokenId") String tokenId) {
-        CustomExceptionMessage.setCustomMessage(GenericError.INVALIDATE_ONBOARDING_ERROR);
-        Token token = tokenService.verifyToken(tokenId);
-        onboardingService.invalidateOnboarding(token);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**

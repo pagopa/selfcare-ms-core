@@ -74,9 +74,4 @@ public class TokenUtils {
         tokenRelationships.setInstitutionUpdate(token.getInstitutionUpdate());
         return tokenRelationships;
     }
-
-    public static boolean isTokenExpired(Token token) {
-        OffsetDateTime now = OffsetDateTime.now();
-        return token.getExpiringDate() != null && (now.isEqual(token.getExpiringDate()) || now.isAfter(token.getExpiringDate()));
-    }
 }
