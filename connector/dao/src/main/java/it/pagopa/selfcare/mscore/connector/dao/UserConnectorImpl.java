@@ -68,11 +68,6 @@ public class UserConnectorImpl implements UserConnector {
     private final ProductsRestClient productRestClient;
 
 
-    @Override
-    public List<OnboardedUser> findAll() {
-        return repository.findAll().stream().map(userMapper::toOnboardedUser).collect(Collectors.toList());
-    }
-
     /**
      * This query retrieves all the users having status in VALID_USER_RELATIONSHIPS for the given productId
      *
@@ -97,11 +92,6 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public void deleteById(String id) {
-        repository.deleteById(id);
-    }
-
-    @Override
     public OnboardedUser findById(String userId) {
         Optional<UserEntity> entityOpt = repository.findById(userId);
         return entityOpt.map(userMapper::toOnboardedUser)
@@ -109,12 +99,6 @@ public class UserConnectorImpl implements UserConnector {
                     log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
                     return new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
                 });
-    }
-
-    @Override
-    public OnboardedUser save(OnboardedUser onboardedUser) {
-        final UserEntity entity = userMapper.toUserEntity(onboardedUser);
-        return userMapper.toOnboardedUser(repository.save(entity));
     }
 
     @Override
