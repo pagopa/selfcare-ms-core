@@ -9,7 +9,6 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
@@ -41,13 +40,11 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 public class OnboardingController {
 
     private final OnboardingService onboardingService;
-    private final TokenService tokenService;
 
     private final OnboardingResourceMapper onboardingResourceMapper;
 
-    public OnboardingController(OnboardingService onboardingService, TokenService tokenService, OnboardingResourceMapper onboardingResourceMapper) {
+    public OnboardingController(OnboardingService onboardingService, OnboardingResourceMapper onboardingResourceMapper) {
         this.onboardingService = onboardingService;
-        this.tokenService = tokenService;
         this.onboardingResourceMapper = onboardingResourceMapper;
     }
 
