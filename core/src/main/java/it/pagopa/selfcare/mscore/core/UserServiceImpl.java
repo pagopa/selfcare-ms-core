@@ -52,11 +52,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public OnboardedUser findByUserId(String userId) {
-        return userConnector.findById(userId);
-    }
-
-    @Override
     public List<OnboardedUser> findAllByIds(List<String> users) {
         if (users == null || users.isEmpty()) {
             return Collections.emptyList();
@@ -124,11 +119,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean checkIfInstitutionUser(String userId, String institutionId) {
         return !userConnector.findActiveInstitutionUser(userId, institutionId).isEmpty();
-    }
-
-    @Override
-    public void verifyUser(String userId) {
-        findByUserId(userId);
     }
 
     @Override

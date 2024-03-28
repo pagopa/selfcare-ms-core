@@ -100,32 +100,6 @@ app_settings = [
     value = "https://dev.selfcare.pagopa.it/onboarding/"
   },
   {
-    name  = "SIGNATURE_VALIDATION_ENABLED"
-    value = "false"
-  },
-  {
-    name  = "PAGOPA_SIGNATURE_ONBOARDING_ENABLED"
-    value = "true",
-  },
-  {
-    name  = "ARUBA_SIGN_SERVICE_IDENTITY_TYPE_OTP_AUTH"
-    value = "faPagoPa",
-  },
-  
-  {
-    name  = "ARUBA_SIGN_SERVICE_IDENTITY_OTP_PWD"
-    value = "dsign",
-  },
-  
-  {
-    name  = "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_DOMAIN"
-    value = "faPagoPa",
-  },
-  {
-    name  = "ARUBA_SIGN_SERVICE_BASE_URL"          
-    value = "https://asbr-pagopa.arubapec.it/ArubaSignService/ArubaSignService"
-  }, 
-  {
     name  = "STORAGE_CONTAINER"
     value = "selc-d-contracts-blob"
   }, 
@@ -221,9 +195,6 @@ secrets_names = {
     "STORAGE_APPLICATION_SECRET"                      = "contracts-storage-access-key"
     "ADDRESS_EMAIL_NOTIFICATION_ADMIN"                = "portal-admin-operator-email"
     "APPLICATIONINSIGHTS_CONNECTION_STRING"           = "appinsights-connection-string"
-    "ARUBA_SIGN_SERVICE_IDENTITY_USER"                = "aruba-sign-service-user"
-    "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_USER"      = "aruba-sign-service-delegated-user"
-    "ARUBA_SIGN_SERVICE_IDENTITY_DELEGATED_PASSWORD"  = "aruba-sign-service-delegated-psw"
     "MAIL_SENDER_ADDRESS"                             = "smtp-usr"
     "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
     "BLOB_STORAGE_CONN_STRING"                        = "blob-storage-contract-connection-string"

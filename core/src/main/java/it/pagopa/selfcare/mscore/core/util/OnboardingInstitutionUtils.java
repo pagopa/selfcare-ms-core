@@ -6,15 +6,14 @@ import it.pagopa.selfcare.commons.base.utils.Origin;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -140,105 +139,6 @@ public class OnboardingInstitutionUtils {
                 .findAny()
                 .orElseThrow(() -> new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(),
                         CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getCode()));
-    }
-
-    public static List<String> getValidManagerToOnboard(List<UserToOnboard> users, Token token) {
-        log.info("START - getOnboardingValidManager for users list size: {}", users.size());
-        List<String> response;
-        if (token != null) {
-            response = token.getUsers().stream()
-                    .filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
-                    .map(TokenUser::getUserId)
-                    .collect(Collectors.toList());
-        } else {
-            response = users.stream()
-                    .filter(userToOnboard -> PartyRole.MANAGER == userToOnboard.getRole())
-                    .map(UserToOnboard::getId)
-                    .collect(Collectors.toList());
-        }
-        if (response.isEmpty()) {
-            throw new InvalidRequestException(CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getMessage(), CustomError.MANAGER_NOT_FOUND_GENERIC_ERROR.getCode());
-        }
-        return response;
-    }
-
-    public static List<String> getOnboardedValidManager(Token token) {
-        List<String> managerList = new ArrayList<>();
-        if (token.getUsers() != null) {
-            managerList = token.getUsers().stream().filter(tokenUser -> PartyRole.MANAGER == tokenUser.getRole())
-                    .map(TokenUser::getUserId).collect(Collectors.toList());
-        }
-        if (managerList.isEmpty() && !InstitutionType.PT.equals(token.getInstitutionUpdate().getInstitutionType())) {
-            throw new InvalidRequestException(String.format(CustomError.MANAGER_NOT_FOUND_ERROR.getMessage(), token.getInstitutionId(), token.getProductId()), CustomError.MANAGER_NOT_FOUND_ERROR.getCode());
-        }
-        return managerList;
-    }
-
-    public static OnboardingRequest constructOnboardingRequest(OnboardingLegalsRequest onboardingLegalsRequest) {
-        OnboardingRequest request = new OnboardingRequest();
-        request.setProductId(onboardingLegalsRequest.getProductId());
-        request.setProductName(onboardingLegalsRequest.getProductName());
-        request.setUsers(onboardingLegalsRequest.getUsers());
-        request.setInstitutionExternalId(onboardingLegalsRequest.getInstitutionExternalId());
-        request.setContract(onboardingLegalsRequest.getContract());
-        request.setSignContract(true);
-        request.setTokenType(TokenType.LEGALS);
-        return request;
-    }
-
-    public static OnboardingRequest constructOnboardingRequest(Token token, Institution institution, Product product) {
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setProductId(token.getProductId());
-        onboardingRequest.setProductName(product.getTitle());
-        onboardingRequest.setPricingPlan(retrivePricingPlan(token, institution, onboardingRequest));
-        Contract contract = new Contract();
-        contract.setPath(token.getContractTemplate());
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setDescription(institution.getDescription());
-        institutionUpdate.setInstitutionType((institution.getInstitutionType()));
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setBillingRequest(retriveBilling(token, institution));
-        return onboardingRequest;
-    }
-
-    private static String retrivePricingPlan(Token token, Institution institution, OnboardingRequest onboardingRequest) {
-        institution.getOnboarding().stream()
-                .filter(onboarding -> onboarding.getTokenId().equals(token.getId())
-                        && onboarding.getProductId().equals(token.getProductId()))
-                .map(Onboarding::getPricingPlan)
-                .forEach(onboardingRequest::setPricingPlan);
-        return onboardingRequest.getPricingPlan();
-    }
-
-    private static Billing retriveBilling(Token token, Institution institution) {
-        for (Onboarding onboarding : institution.getOnboarding()) {
-            if (onboarding.getTokenId().equals(token.getId())) {
-                return onboarding.getBilling();
-            }
-        }
-
-        return institution.getBilling();
-    }
-
-
-    public static Onboarding constructOnboarding(OnboardingRequest request, Institution institution) {
-        Onboarding onboarding = new Onboarding();
-
-        onboarding.setProductId(request.getProductId());
-        onboarding.setBilling(request.getBillingRequest());
-        onboarding.setPricingPlan(request.getPricingPlan());
-        onboarding.setCreatedAt(OffsetDateTime.now());
-        onboarding.setUpdatedAt(OffsetDateTime.now());
-        if (request.getContract() != null) {
-            onboarding.setContract(request.getContract().getPath());
-        }
-
-        onboarding.setStatus(getStatus(request.getInstitutionUpdate(),
-                institution.getInstitutionType(), institution.getOrigin(), request.getProductId()));
-
-        return onboarding;
     }
 
     public static OnboardedProduct constructOperatorProduct(UserToOnboard user, String productId) {

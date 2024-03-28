@@ -7,7 +7,6 @@ import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.User;
 import org.junit.jupiter.api.Assertions;
@@ -17,12 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MailNotificationServiceImplTest {
@@ -75,14 +74,6 @@ class MailNotificationServiceImplTest {
         workContacts1.put("id",workContact);
 
         user.setWorkContacts(workContacts1);
-    }
-
-    @Test
-    void sendMailWithContract(){
-        File file = mock(File.class);
-        Institution institution = new Institution();
-        institution.setDigitalAddress("digital");
-        Assertions.assertDoesNotThrow(() -> notificationService.sendMailWithContract(file, institution, new User(), new OnboardingRequest(), "", false));
     }
 
     @Test

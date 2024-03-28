@@ -1,26 +1,21 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
+import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -29,11 +24,8 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -46,1070 +38,9 @@ class OnboardingDaoTest {
     private TokenConnector tokenConnector;
     @Mock
     private UserConnector userConnector;
-    @Mock
-    private CoreConfig coreConfig;
 
     @InjectMocks
     private OnboardingDao onboardingDao;
-
-    @Test
-    void testPersist0() {
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
-                .thenReturn(new Institution());
-        when(coreConfig.getOnboardingExpiringDate()).thenReturn(60);
-        Token token = new Token();
-        token.setStatus(RelationshipState.ACTIVE);
-        when(tokenConnector.save(any(), any())).thenReturn(token);
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        UserToOnboard user = new UserToOnboard();
-        List<UserToOnboard> users = new ArrayList<>();
-        users.add(user);
-        onboardingRequest.setUsers(users);
-        when(userConnector.findById(any())).thenReturn(null);
-        Institution institution = new Institution();
-        List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution,
-                list, "Digest"));
-    }
-
-
-    /**
-     * Method under test: {@link OnboardingDao#persistComplete(List, List, OnboardingRequest, Institution, List, String)}
-     */
-    @Test
-    void testPersistComplete() {
-        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
-                .thenReturn(new Institution());
-
-        Token token = new Token();
-        token.setId("tokenId");
-        when(tokenConnector.save(any(), any())).thenReturn(token);
-
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = TestUtils.createSimpleBilling();
-        Contract contract = TestUtils.createSimpleContract();
-        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
-        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setContractFilePath("/example");
-
-        UserToOnboard user = new UserToOnboard();
-        List<UserToOnboard> users = new ArrayList<>();
-        users.add(user);
-        onboardingRequest.setUsers(users);
-
-        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
-
-        OnboardingRollback actualPersistResult = onboardingDao.persistComplete(toUpdate, toDelete, onboardingRequest, new Institution(),
-                new ArrayList<>(), null);
-
-        Onboarding onboarding = actualPersistResult.getOnboarding();
-        assertEquals(RelationshipState.ACTIVE, onboarding.getStatus());
-        assertEquals("42", onboarding.getProductId());
-        assertEquals("Pricing Plan", onboarding.getPricingPlan());
-        assertEquals(onboardingRequest.getContractFilePath(), onboarding.getContract());
-        assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdateInstitutionDataWithNewOnboarding(any(), any(),
-                any());
-        verify(tokenConnector).save(any(), any());
-    }
-
-    @Test
-    void persistComplete_newUser(){
-        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
-                .thenReturn(new Institution());
-
-        Token token = new Token();
-        token.setId("tokenId");
-        when(tokenConnector.save(any(), any())).thenReturn(token);
-
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = TestUtils.createSimpleBilling();
-        Contract contract = TestUtils.createSimpleContract();
-        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
-        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setContractFilePath("/example");
-
-        UserToOnboard user = new UserToOnboard();
-        List<UserToOnboard> users = new ArrayList<>();
-        users.add(user);
-        onboardingRequest.setUsers(users);
-
-        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
-
-        OnboardingRollback actualPersistResult = onboardingDao.persistComplete(toUpdate, toDelete, onboardingRequest, new Institution(),
-                new ArrayList<>(), null);
-
-        Onboarding onboarding = actualPersistResult.getOnboarding();
-        assertEquals(RelationshipState.ACTIVE, onboarding.getStatus());
-        assertEquals("42", onboarding.getProductId());
-        assertEquals("Pricing Plan", onboarding.getPricingPlan());
-        assertEquals(onboardingRequest.getContractFilePath(), onboarding.getContract());
-        assertSame(billing, onboarding.getBilling());
-        verify(institutionConnector).findAndUpdateInstitutionDataWithNewOnboarding(any(), any(),
-                any());
-        verify(tokenConnector).save(any(), any());
-    }
-
-    @Test
-    void testNewUserStandard(){
-        when(institutionConnector.findAndUpdateInstitutionDataWithNewOnboarding(any(), any(), any()))
-                .thenReturn(new Institution());
-
-        Token token = new Token();
-        token.setId("tokenId");
-        when(tokenConnector.save(any(), any())).thenReturn(token);
-
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        OnboardingRequest onboardingRequest = TestUtils.createDummyOnboardingRequest();
-
-        UserToOnboard user = new UserToOnboard();
-        List<UserToOnboard> users = new ArrayList<>();
-        users.add(user);
-        onboardingRequest.setUsers(users);
-
-        when(userConnector.findById(any())).thenThrow(ResourceNotFoundException.class);
-
-        OnboardingRollback actualPersistResult = onboardingDao.persist(toUpdate, toDelete, onboardingRequest, new Institution(),
-                new ArrayList<>(), null);
-
-        Onboarding onboarding = actualPersistResult.getOnboarding();
-        assertEquals(RelationshipState.PENDING, onboarding.getStatus());
-        assertEquals("42", onboarding.getProductId());
-        assertEquals("Pricing Plan", onboarding.getPricingPlan());
-        assertSame(onboardingRequest.getBillingRequest(), onboarding.getBilling());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
-     */
-    @Test
-    void persist_shouldPersist() {
-        String expectedProductId = "productId";
-        String expectedDigest = "Digest";
-
-        Billing billing = TestUtils.createSimpleBilling();
-        Contract contract = TestUtils.createSimpleContract();
-        DataProtectionOfficer dataProtectionOfficer = TestUtils.createSimpleDataProtectionOfficer();
-        PaymentServiceProvider paymentServiceProvider = TestUtils.createSimplePaymentServiceProvider();
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId(expectedProductId);
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setTokenType(TokenType.INSTITUTION);
-
-        UserToOnboard user = new UserToOnboard();
-        onboardingRequest.setUsers(List.of(user));
-
-        Institution expectedInstitution = TestUtils.dummyInstitution();
-
-        RelationshipState expectedTokenRelationshipState = OnboardingInstitutionUtils.getStatus(institutionUpdate,
-                expectedInstitution.getInstitutionType(), expectedInstitution.getOrigin(), expectedProductId);
-
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
-                .thenReturn(new Institution());
-        when(tokenConnector.save(any(), any())).thenAnswer(obj -> obj.getArguments()[0]);
-        when(userConnector.findById(any())).thenReturn(new OnboardedUser());
-
-        //When
-        OnboardingRollback actualPersistResult = onboardingDao.persist(new ArrayList<>(), new ArrayList<>(), onboardingRequest, expectedInstitution,
-                List.of(), expectedDigest);
-
-        //Then
-        Onboarding onboarding = actualPersistResult.getOnboarding();
-        assertEquals(RelationshipState.PENDING, onboarding.getStatus());
-        assertEquals(expectedProductId, onboarding.getProductId());
-        assertEquals("Pricing Plan", onboarding.getPricingPlan());
-        assertEquals("Path", onboarding.getContract());
-        assertSame(billing, onboarding.getBilling());
-
-        ArgumentCaptor<UserBinding> argumentBindings = ArgumentCaptor.forClass(UserBinding.class);
-        ArgumentCaptor<Token> argumentToken = ArgumentCaptor.forClass(Token.class);
-
-        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
-
-        verify(tokenConnector).save(argumentToken.capture(), any());
-        assertThat(argumentToken.getValue().getInstitutionId()).isEqualTo(expectedInstitution.getId());
-        assertThat(argumentToken.getValue().getProductId()).isEqualTo(expectedProductId);
-        assertThat(argumentToken.getValue().getChecksum()).isEqualTo(expectedDigest);
-        assertThat(argumentToken.getValue().getType()).isEqualTo(onboardingRequest.getTokenType());
-        assertThat(argumentToken.getValue().getChecksum()).isEqualTo(expectedDigest);
-        assertThat(argumentToken.getValue().getStatus()).isEqualTo(expectedTokenRelationshipState);
-
-        verify(userConnector).findAndUpdate(any(), any(), any(), any(), argumentBindings.capture());
-        assertThat(argumentBindings.getValue().getInstitutionId()).isEqualTo(expectedInstitution.getId());
-        assertThat(argumentBindings.getValue().getInstitutionName()).isEqualTo(expectedInstitution.getDescription());
-        assertThat(argumentBindings.getValue().getInstitutionRootName()).isEqualTo(expectedInstitution.getParentDescription());
-        List<OnboardedProduct> expectedOnboardedProducts = argumentBindings.getValue().getProducts();
-        assertThat(expectedOnboardedProducts.size()).isEqualTo(1);
-        assertThat(expectedOnboardedProducts.get(0).getProductId()).isEqualTo(expectedProductId);
-
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
-     */
-    @Test
-    void persist_shouldThrowInvalidRequestException() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
-        doNothing().when(tokenConnector).deleteById(any());
-        when(tokenConnector.save(any(), any())).thenReturn(new Token());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-        List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
-        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).save(any(), any());
-        verify(tokenConnector).deleteById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
-     */
-    @Test
-    void testPersist3() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
-        doThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"))
-                .when(tokenConnector)
-                .deleteById(any());
-        when(tokenConnector.save(any(), any())).thenReturn(new Token());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-        List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
-        verify(tokenConnector).save(any(), any());
-        verify(tokenConnector).deleteById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
-     */
-    @Test
-    void testPersist6() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
-        doNothing().when(tokenConnector).deleteById(any());
-        when(tokenConnector.save(any(), any())).thenReturn(new Token());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PG);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-        List<InstitutionGeographicTaxonomies> geo = new ArrayList<>();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, geo, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
-        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).save(any(), any());
-        verify(tokenConnector).deleteById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persist(List, List, OnboardingRequest, Institution, List, String)}
-     */
-    @Test
-    void testPersist7() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "createToken for institution {} and product {}"));
-        doNothing().when(tokenConnector).deleteById(any());
-        when(tokenConnector.save(any(), any())).thenReturn(new Token());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        ContractImported contractImported = new ContractImported();
-        contractImported.setContractType("Contract Type");
-        contractImported.setFileName("foo.txt");
-        contractImported.setFilePath("/directory/foo.txt");
-
-        DataProtectionOfficer dataProtectionOfficer = new DataProtectionOfficer();
-        dataProtectionOfficer.setAddress("42 Main St");
-        dataProtectionOfficer.setEmail("jane.doe@example.org");
-        dataProtectionOfficer.setPec("Pec");
-
-        PaymentServiceProvider paymentServiceProvider = new PaymentServiceProvider();
-        paymentServiceProvider.setAbiCode("Abi Code");
-        paymentServiceProvider.setBusinessRegisterNumber("42");
-        paymentServiceProvider.setLegalRegisterName("Legal Register Name");
-        paymentServiceProvider.setLegalRegisterNumber("42");
-        paymentServiceProvider.setVatNumberGroup(true);
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setDataProtectionOfficer(dataProtectionOfficer);
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.GSP);
-        institutionUpdate.setPaymentServiceProvider(paymentServiceProvider);
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("4105551212");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-        onboardingRequest.setBillingRequest(billing);
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-        List<InstitutionGeographicTaxonomies> list = new ArrayList<>();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.persist(toUpdate, toDelete, onboardingRequest, institution, list, "Digest"));
-        verify(institutionConnector).findAndUpdate(any(), any(), any(), any());
-        verify(institutionConnector).findAndRemoveOnboarding(any(), any());
-        verify(tokenConnector).save(any(), any());
-        verify(tokenConnector).deleteById(any());
-    }
-
-    @Test
-    void testPersistLegals() {
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        OnboardingRequest onboardingRequest = new OnboardingRequest();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-        onboardingRequest.setBillingRequest(billing);
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-        onboardingRequest.setContract(contract);
-        onboardingRequest.setInstitutionExternalId("42");
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        onboardingRequest.setInstitutionUpdate(institutionUpdate);
-        onboardingRequest.setPricingPlan("Pricing Plan");
-        onboardingRequest.setProductId("42");
-        onboardingRequest.setProductName("Product Name");
-        onboardingRequest.setSignContract(true);
-        onboardingRequest.setTokenType(TokenType.INSTITUTION);
-        onboardingRequest.setUsers(new ArrayList<>());
-        OnboardingRollback onboardingRollback = onboardingDao.persistLegals(toUpdate, toDelete, onboardingRequest, new Institution(), "Digest");
-        Assertions.assertNotNull(onboardingRollback);
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persistForUpdate(Token, Institution, RelationshipState, String)}
-     */
-    @Test
-    void testPersistForUpdate() {
-        TokenConnector tokenConnector = mock(TokenConnector.class);
-        UserConnector userConnector = mock(UserConnector.class);
-        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-
-        assertDoesNotThrow(() -> onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, "Digest"));
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persistForUpdate(Token, Institution, RelationshipState, String)}
-     */
-    @Test
-    void testPersistForUpdate2() {
-
-        TokenConnector tokenConnector = mock(TokenConnector.class);
-        UserConnector userConnector = mock(UserConnector.class);
-        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdatePT();
-
-
-        Token token = TestUtils.dummyToken();
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setStatus(RelationshipState.TOBEVALIDATED);
-        Institution institution = new Institution();
-        assertDoesNotThrow(() ->
-                onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, "foo"));
-    }
-
-    @Test
-    void testPersistForUpdate7() {
-        TokenConnector tokenConnector = mock(TokenConnector.class);
-        UserConnector userConnector = mock(UserConnector.class);
-        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-        when(institutionConnector.findAndUpdateStatus(any(), any(), any())).thenThrow(new RuntimeException());
-        assertThrows(InvalidRequestException.class, () -> onboardingDao.persistForUpdate(token, institution, RelationshipState.DELETED, "Digest"));
-    }
-
-    @Test
-    void testPersistForUpdate8() {
-        TokenConnector tokenConnector = mock(TokenConnector.class);
-        UserConnector userConnector = mock(UserConnector.class);
-        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-        when(institutionConnector.findAndUpdateInstitutionData(any(), any(), any(), any())).thenThrow(new RuntimeException());
-        assertThrows(InvalidRequestException.class, () -> onboardingDao.persistForUpdate(token, institution, RelationshipState.ACTIVE, "Digest"));
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#persistForUpdate(Token, Institution, RelationshipState, String)}
-     */
-    @Test
-    void testPersistForUpdate9() {
-        TokenConnector tokenConnector = mock(TokenConnector.class);
-        UserConnector userConnector = mock(UserConnector.class);
-        InstitutionConnector institutionConnector = mock(InstitutionConnector.class);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(institutionConnector, tokenConnector, userConnector, productConnector, new CoreConfig());
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.TOBEVALIDATED);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        Institution institution = new Institution();
-
-        assertDoesNotThrow(() -> onboardingDao.persistForUpdate(token, institution, RelationshipState.PENDING, "Digest"));
-    }
-
-    @Test
-    void testRollbackSecondStep() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doNothing().when(tokenConnector).deleteById(any());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        token.setId("id");
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", token, onboarding, map));
-    }
-
-    @Test
-    void testRollbackSecondStep2() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doThrow(new InvalidRequestException("An error occurred", "rollback second step completed")).when(tokenConnector)
-                .deleteById(any());
-        ArrayList<String> toUpdate = new ArrayList<>();
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(toUpdate, toDelete, "42", token, onboarding, map));
-    }
-
-    @Test
-    void testRollbackSecondStep3() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doNothing().when(tokenConnector).deleteById(any());
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("rollback second step completed");
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", token, onboarding, map));
-    }
-
-    @Test
-    void testRollbackSecondStep4() {
-        doNothing().when(institutionConnector).findAndRemoveOnboarding(any(), any());
-        doNothing().when(tokenConnector).deleteById(any());
-        doNothing().when(userConnector).findAndRemoveProduct(any(), any(), any());
-
-        ArrayList<String> stringList = new ArrayList<>();
-        stringList.add("rollback second step completed");
-        stringList.add("rollback second step completed");
-        ArrayList<String> toDelete = new ArrayList<>();
-
-        Billing billing = new Billing();
-        billing.setPublicServices(true);
-        billing.setRecipientCode("Recipient Code");
-        billing.setVatNumber("42");
-
-        Premium premium = new Premium();
-        premium.setContract("Contract");
-        premium.setStatus(RelationshipState.PENDING);
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setBilling(billing);
-        onboarding.setContract("Contract");
-        onboarding.setCreatedAt(null);
-        onboarding.setPricingPlan("Pricing Plan");
-        onboarding.setProductId("42");
-        onboarding.setStatus(RelationshipState.PENDING);
-        onboarding.setUpdatedAt(null);
-        Map<String, OnboardedProduct> map = new HashMap<>();
-        Token token = new Token();
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.rollbackSecondStep(stringList, toDelete, "42", token, onboarding, map));
-    }
-
-    @Test
-    void testRollbackSecondStepOfUpdate() {
-
-        ArrayList<String> toUpdate = new ArrayList<>();
-        Institution institution = new Institution();
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingDao.rollbackSecondStepOfUpdate(toUpdate, institution, token));
-    }
 
     UserToOnboard dummyUserToOnboard() {
         UserToOnboard user = new UserToOnboard();
@@ -1155,7 +86,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState4() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1208,7 +139,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState9() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1222,7 +153,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState10() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1267,7 +198,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState12() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1318,7 +249,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState14() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
         onboardedUser.setBindings(new ArrayList<>());
@@ -1332,7 +263,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState15() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         UserBinding userBinding = new UserBinding();
         userBinding.setProducts(new ArrayList<>());
@@ -1352,7 +283,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState17() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -1387,7 +318,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState18() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
         onboardedProduct.setContract("Contract");
@@ -1436,7 +367,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState19() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getRelationshipId()).thenReturn("42");
         doNothing().when(onboardedProduct).setContract(any());
@@ -1492,7 +423,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState20() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
@@ -1551,7 +482,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState21() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
@@ -1610,7 +541,7 @@ class OnboardingDaoTest {
     void testUpdateUserProductState22() {
 
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
         when(onboardedProduct.getRelationshipId()).thenReturn("foo");
@@ -1741,7 +672,7 @@ class OnboardingDaoTest {
     @Test
     void testOnboardOperator2() {
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, null);
         assertTrue(onboardingDao.onboardOperator(new Institution(), "productId", List.of()).isEmpty());
     }
 
@@ -1761,9 +692,9 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -1804,9 +735,9 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -1838,9 +769,9 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
 
@@ -1870,9 +801,9 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -1919,9 +850,9 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -1956,9 +887,9 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
         userToOnboard.setEmail("prof.einstein@example.org");
@@ -2017,9 +948,9 @@ class OnboardingDaoTest {
                 .findAndUpdate(any(), any(), any(),any(),
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
-        doNothing().when(userConnector).deleteById(any());
+        
         ProductConnector productConnector = mock(ProductConnector.class);
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, userConnector, productConnector, new CoreConfig());
+        OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
         UserToOnboard userToOnboard = mock(UserToOnboard.class);
         when(userToOnboard.getRole()).thenReturn(PartyRole.MANAGER);
         when(userToOnboard.getEnv()).thenReturn(Env.ROOT);
@@ -2063,88 +994,5 @@ class OnboardingDaoTest {
         verify(userToOnboard).setRole( any());
         verify(userToOnboard).setSurname(any());
         verify(userToOnboard).setTaxCode(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#getProductById(String)}
-     */
-    @Test
-    void testGetProductById() {
-
-        Product product = new Product();
-        product.setContractTemplatePath("Contract Template Path");
-        product.setContractTemplateVersion("1.0.2");
-        product.setId("42");
-        product.setParentId("42");
-        product.setRoleMappings(null);
-        product.setStatus(ProductStatus.ACTIVE);
-        product.setTitle("Dr");
-        ProductConnector productConnector = mock(ProductConnector.class);
-        when(productConnector.getProductById(any())).thenReturn(product);
-        assertSame(product,
-                (new OnboardingDao(null, null, null, productConnector, new CoreConfig())).getProductById("42"));
-        verify(productConnector).getProductById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#getProductById(String)}
-     */
-    @Test
-    void testGetProductById2() {
-         ProductConnector productConnector = mock(ProductConnector.class);
-        when(productConnector.getProductById(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-        CoreConfig config = new CoreConfig();
-        OnboardingDao onboardingDao = new OnboardingDao(null, null, null, productConnector, config);
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingDao.getProductById("42"));
-        verify(productConnector).getProductById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingDao#getTokenById(String)}
-     */
-    @Test
-    void testGetTokenById2() {
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(new ArrayList<>());
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        TokenConnector tokenConnector = mock(TokenConnector.class);
-        when(tokenConnector.findById(any())).thenReturn(token);
-        ProductConnector productConnector = mock(ProductConnector.class);
-        assertSame(token,
-                (new OnboardingDao(null, tokenConnector, null, productConnector, new CoreConfig())).getTokenById("42"));
-        verify(tokenConnector).findById(any());
     }
 }

@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
-import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.TokenEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper;
@@ -8,7 +7,6 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +16,6 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -26,9 +23,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToToken;
-import static it.pagopa.selfcare.mscore.connector.dao.model.mapper.TokenMapper.convertToTokenEntity;
-import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.CONTRACT_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.TOKEN_NOT_FOUND;
 
 @Slf4j
 @Component
@@ -41,53 +37,12 @@ public class TokenConnectorImpl implements TokenConnector {
     }
 
     @Override
-    public void deleteById(String id) {
-        tokenRepository.deleteById(id);
-    }
-
-    @Override
-    public Token save(Token token, List<InstitutionGeographicTaxonomies> geographicTaxonomies) {
-        final TokenEntity entity = convertToTokenEntity(token, geographicTaxonomies);
-        return convertToToken(tokenRepository.save(entity));
-    }
-
-    @Override
     public Token findById(String tokenId) {
         Optional<Token> opt = tokenRepository.findById(tokenId).map(TokenMapper::convertToToken);
         if (opt.isEmpty()) {
             throw new ResourceNotFoundException(String.format(TOKEN_NOT_FOUND.getMessage(), tokenId), TOKEN_NOT_FOUND.getCode());
         }
         return opt.get();
-    }
-
-    @Override
-    public Token findAndUpdateToken(Token token, RelationshipState status, @Nullable String digest) {
-        OffsetDateTime now = OffsetDateTime.now();
-
-        Query query = Query.query(Criteria.where(TokenEntity.Fields.id.name()).is(token.getId()));
-        Update updateDefinition = new Update()
-                .set(TokenEntity.Fields.status.name(), status)
-                .set(TokenEntity.Fields.updatedAt.name(), now);
-
-        if (digest != null) {
-            updateDefinition.set(TokenEntity.Fields.checksum.name(), digest);
-        }
-        if (token.getContractSigned() != null) {
-            updateDefinition.set(TokenEntity.Fields.contractSigned.name(), token.getContractSigned());
-        }
-        if (token.getContentType() != null) {
-            updateDefinition.set(TokenEntity.Fields.contentType.name(), token.getContentType());
-        }
-        if (status == RelationshipState.ACTIVE){
-            updateDefinition.set(TokenEntity.Fields.activatedAt.name(), now);
-        }
-        if (status == RelationshipState.DELETED) {
-            updateDefinition.set(TokenEntity.Fields.deletedAt.name(), now);
-        }
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        Token modifiedToken = convertToToken(tokenRepository.findAndModify(query, updateDefinition, findAndModifyOptions, TokenEntity.class));
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "findAndUpdateToken modifiedToken = {}", modifiedToken);
-        return modifiedToken;
     }
 
     @Override

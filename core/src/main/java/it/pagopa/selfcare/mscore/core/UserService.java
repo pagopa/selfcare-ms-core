@@ -17,8 +17,6 @@ public interface UserService {
 
     OnboardedUser findOnboardedManager(String id, String productId, List<RelationshipState> active);
 
-    OnboardedUser findByUserId(String id);
-
     List<OnboardedUser> findAllByIds(List<String> users);
 
     List<UserNotificationToSend>  findAll(Optional<Integer> size, Optional<Integer> page, String productId);
@@ -30,8 +28,6 @@ public interface UserService {
     List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
 
     boolean checkIfInstitutionUser(String userId, String institutionId);
-
-    void verifyUser(String userId);
 
     User retrieveUserFromUserRegistry(String userId);
 

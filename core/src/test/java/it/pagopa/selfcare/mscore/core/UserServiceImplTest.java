@@ -108,26 +108,6 @@ class UserServiceImplTest {
                 () -> userServiceImpl.findOnboardedManager("42", "42", states));
         verify(userConnector).findOnboardedManager(any(), any(), any());
     }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.findById(any())).thenReturn(onboardedUser);
-        assertSame(onboardedUser, userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
-    }
-
-    @Test
-    void verifyUser() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.findById(any())).thenReturn(onboardedUser);
-        Assertions.assertDoesNotThrow(() -> userServiceImpl.verifyUser("42"));
-        verify(userConnector).findById(any());
-    }
-
     /**
      * Method under test: {@link UserServiceImpl#retrieveUserFromUserRegistry(String)}
      */
@@ -155,37 +135,6 @@ class UserServiceImplTest {
         when(userRegistryConnector.getUserByInternalIdWithFiscalCode( any())).thenReturn(user);
         assertSame(user, userServiceImpl.retrieveUserFromUserRegistry("42"));
         verify(userRegistryConnector).getUserByInternalIdWithFiscalCode( user.getId());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId2() {
-        when(userConnector.findById(any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId3() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.findById(any())).thenReturn(onboardedUser);
-        assertSame(onboardedUser, userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId4() {
-        when(userConnector.findById(any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
     }
 
     /**
