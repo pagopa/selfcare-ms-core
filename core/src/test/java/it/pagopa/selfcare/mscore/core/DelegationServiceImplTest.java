@@ -201,7 +201,7 @@ class DelegationServiceImplTest {
         List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null, null,
                 GetDelegationsMode.FULL, Optional.of(0), Optional.of(0));
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(),m any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
