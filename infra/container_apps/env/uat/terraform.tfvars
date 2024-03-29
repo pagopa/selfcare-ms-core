@@ -9,22 +9,9 @@ tags = {
 }
 
 container_app = {
-  min_replicas = 0
+  min_replicas = 1
   max_replicas = 2
-  scale_rules = [
-    {
-      custom = {
-        metadata = {
-          "desiredReplicas" = "1"
-          "start"           = "0 8 * * MON-FRI"
-          "end"             = "0 19 * * MON-FRI"
-          "timezone"        = "Europe/Rome"
-        }
-        type = "cron"
-      }
-      name = "cron-scale-rule"
-    }
-  ]
+  scale_rules = []
   cpu    = 0.5
   memory = "1Gi"
 }
