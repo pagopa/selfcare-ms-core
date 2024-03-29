@@ -82,10 +82,6 @@ public class DelegationConnectorImpl implements DelegationConnector {
         }
         if (GetDelegationsMode.FULL.equals(mode)) {
 
-            if (Objects.nonNull(taxCode)) {
-                criterias.add(Criteria.where(InstitutionEntity.Fields.taxCode.name()).regex("(?i)" + Pattern.quote(taxCode)));
-            }
-
             GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
                     .startWith(Objects.nonNull(from) ? "to" : "from")
                     .connectFrom(Objects.nonNull(from) ? "to" : "from")
@@ -95,7 +91,14 @@ public class DelegationConnectorImpl implements DelegationConnector {
             long skipLimit = (long) page * size;
             SkipOperation skip = Aggregation.skip(skipLimit);
             LimitOperation limit = Aggregation.limit(skipLimit + size);
-            Aggregation aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+            Aggregation aggregation;
+            if (Objects.nonNull(taxCode)) {
+                Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
+                MatchOperation matchTaxCodeOperation = new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), matchTaxCodeOperation, skip, limit);
+            } else {
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+            }
 
             List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();
             return result.stream()
