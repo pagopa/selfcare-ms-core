@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
@@ -62,7 +63,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public List<Delegation> find(String from, String to, String productId, String search, GetDelegationsMode mode, Integer page, Integer size) {
+    public List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Integer page, Integer size) {
         List<Criteria> criterias = new ArrayList<>();
         Criteria criteria = new Criteria();
         Pageable pageable = PageRequest.of(page, size);
@@ -80,6 +81,10 @@ public class DelegationConnectorImpl implements DelegationConnector {
             criterias.add(Criteria.where(DelegationEntity.Fields.institutionFromName.name()).regex("(?i)" + Pattern.quote(search)));
         }
         if (GetDelegationsMode.FULL.equals(mode)) {
+
+            if (Objects.nonNull(taxCode)) {
+                criterias.add(Criteria.where(InstitutionEntity.Fields.taxCode.name()).regex("(?i)" + Pattern.quote(taxCode)));
+            }
 
             GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
                     .startWith(Objects.nonNull(from) ? "to" : "from")
