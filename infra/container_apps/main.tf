@@ -20,7 +20,6 @@ module "container_app_core" {
   image_tag          = "sha-61a02a8"
   app_settings       = var.app_settings
   secrets_names      = var.secrets_names
-  workload_profile_name = var.workload_profile_name
 
   tags = var.tags
 }
