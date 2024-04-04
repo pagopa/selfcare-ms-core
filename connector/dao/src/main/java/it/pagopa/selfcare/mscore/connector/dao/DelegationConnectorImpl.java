@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
@@ -62,7 +63,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public List<Delegation> find(String from, String to, String productId, String search, GetDelegationsMode mode, Integer page, Integer size) {
+    public List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Integer page, Integer size) {
         List<Criteria> criterias = new ArrayList<>();
         Criteria criteria = new Criteria();
         Pageable pageable = PageRequest.of(page, size);
@@ -90,7 +91,14 @@ public class DelegationConnectorImpl implements DelegationConnector {
             long skipLimit = (long) page * size;
             SkipOperation skip = Aggregation.skip(skipLimit);
             LimitOperation limit = Aggregation.limit(skipLimit + size);
-            Aggregation aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+            Aggregation aggregation;
+            if (Objects.nonNull(taxCode)) {
+                Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
+                MatchOperation matchTaxCodeOperation = new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), matchTaxCodeOperation, skip, limit);
+            } else {
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+            }
 
             List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();
             return result.stream()
