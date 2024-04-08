@@ -8,7 +8,6 @@ import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.product.entity.Product;
 import it.pagopa.selfcare.product.service.ProductService;
@@ -30,7 +29,6 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     private static final String DESTINATION_MAIL_LOG = "destinationMails: {}";
     private final InstitutionConnector institutionConnector;
     private final ProductService productService;
-    private final MailTemplateConfig mailTemplateConfig;
     private final UserNotificationService userNotificationService;
     private final EmailConnector emailConnector;
     private final MailParametersMapper mailParametersMapper;

@@ -84,7 +84,6 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState4() {
-        ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
@@ -137,7 +136,6 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState9() {
-        ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
@@ -151,7 +149,6 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState10() {
-        ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
@@ -196,7 +193,6 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState12() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
@@ -247,7 +243,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState14() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedUser onboardedUser = new OnboardedUser();
@@ -261,7 +257,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState15() {
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         UserBinding userBinding = new UserBinding();
@@ -281,7 +277,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState17() {
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
@@ -316,7 +312,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState18() {
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
 
         OnboardedProduct onboardedProduct = new OnboardedProduct();
@@ -365,7 +361,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState19() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getRelationshipId()).thenReturn("42");
@@ -421,7 +417,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testUpdateUserProductState20() {
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
@@ -480,7 +476,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState21() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
@@ -539,7 +535,7 @@ class OnboardingDaoTest {
     @Test
     void testUpdateUserProductState22() {
 
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
         OnboardedProduct onboardedProduct = mock(OnboardedProduct.class);
         when(onboardedProduct.getStatus()).thenReturn(RelationshipState.PENDING);
@@ -670,7 +666,7 @@ class OnboardingDaoTest {
      */
     @Test
     void testOnboardOperator2() {
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, null);
         assertTrue(onboardingDao.onboardOperator(new Institution(), "productId", List.of()).isEmpty());
     }
@@ -692,7 +688,7 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
@@ -735,7 +731,7 @@ class OnboardingDaoTest {
         when(userConnector.findById(any())).thenReturn(onboardedUser);
 
         
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
@@ -769,7 +765,7 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = TestUtils.dummyUserToOnboard();
@@ -801,7 +797,7 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
@@ -850,7 +846,7 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
@@ -887,7 +883,7 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
 
         UserToOnboard userToOnboard = new UserToOnboard();
@@ -948,7 +944,7 @@ class OnboardingDaoTest {
                         any());
         when(userConnector.findById(any())).thenReturn(onboardedUser);
         
-        ProductConnector productConnector = mock(ProductConnector.class);
+        
         OnboardingDao onboardingDao = new OnboardingDao(null, userConnector);
         UserToOnboard userToOnboard = mock(UserToOnboard.class);
         when(userToOnboard.getRole()).thenReturn(PartyRole.MANAGER);

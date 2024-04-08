@@ -15,8 +15,6 @@ import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
-import it.pagopa.selfcare.product.entity.Product;
-import it.pagopa.selfcare.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,12 +33,6 @@ public class OnboardingDao {
 
     private final InstitutionConnector institutionConnector;
     private final UserConnector userConnector;
-
-    public OnboardingDao(InstitutionConnector institutionConnector,
-                         UserConnector userConnector) {
-        this.institutionConnector = institutionConnector;
-        this.userConnector = userConnector;
-    }
 
     private OnboardedProduct updateUser(OnboardedUser onboardedUser, UserToOnboard user, Institution institution, OnboardingRequest request, String tokenId) {
         OnboardedProduct product = constructProduct(user, request, institution);
