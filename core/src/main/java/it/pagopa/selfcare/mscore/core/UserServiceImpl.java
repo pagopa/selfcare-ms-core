@@ -29,7 +29,7 @@ import static it.pagopa.selfcare.mscore.constant.CustomError.USER_NOT_FOUND_ERRO
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
-
+    private static final List<String> VALID_USER_RELATIONSHIPS = List.of(RelationshipState.ACTIVE.name(), RelationshipState.DELETED.name(), RelationshipState.SUSPENDED.name());
     private final UserConnector userConnector;
     private final UserRegistryConnector userRegistryConnector;
     private final NotificationMapper notificationMapper;
@@ -52,11 +52,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public OnboardedUser findByUserId(String userId) {
-        return userConnector.findById(userId);
-    }
-
-    @Override
     public List<OnboardedUser> findAllByIds(List<String> users) {
         if (users == null || users.isEmpty()) {
             return Collections.emptyList();
@@ -74,7 +69,9 @@ public class UserServiceImpl implements UserService {
             User user = userRegistryConnector.getUserByInternalId(onboardedUser.getId());
             onboardedUser.getBindings().forEach(userBinding -> {
                 for (OnboardedProduct onboardedProduct : userBinding.getProducts()) {
-                    if(!StringUtils.hasText(productId) || (StringUtils.hasText(productId) && productId.equals(onboardedProduct.getProductId()))) {
+                    if(!StringUtils.hasText(productId)
+                            || (StringUtils.hasText(productId) && productId.equals(onboardedProduct.getProductId())
+                                && VALID_USER_RELATIONSHIPS.contains(onboardedProduct.getStatus().name()))) {
                         UserToNotify userToNotify = userNotificationMapper.toUserNotify(user, onboardedProduct, userBinding.getInstitutionId());
                         UserNotificationToSend userNotification = notificationMapper.setNotificationDetailsFromOnboardedProduct(userToNotify, onboardedProduct, userBinding.getInstitutionId());
                         users.add(userNotification);
@@ -122,11 +119,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean checkIfInstitutionUser(String userId, String institutionId) {
         return !userConnector.findActiveInstitutionUser(userId, institutionId).isEmpty();
-    }
-
-    @Override
-    public void verifyUser(String userId) {
-        findByUserId(userId);
     }
 
     @Override

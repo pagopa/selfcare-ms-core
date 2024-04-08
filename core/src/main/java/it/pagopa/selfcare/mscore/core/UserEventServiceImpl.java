@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
         havingValue = "send")
 public class UserEventServiceImpl implements UserEventService {
     public static final String ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER = "error during send dataLake notification for user {}";
+    public static final String DONE_SEND_DATA_LAKE_NOTIFICATION_FOR_USER = "done send dataLake notification for user {}";
     private final CoreConfig coreConfig;
     private final KafkaTemplate<String, String> kafkaTemplateUsers;
     private final EnumSet<RelationshipState> ALLOWED_RELATIONSHIP_STATUSES = EnumSet.of(RelationshipState.ACTIVE, RelationshipState.SUSPENDED, RelationshipState.DELETED);
@@ -133,7 +134,8 @@ public class UserEventServiceImpl implements UserEventService {
         OnboardedUser onboardedUser = userConnector.findById(userId);
         onboardedUser.getBindings().stream()
                 .filter(userBinding -> userBinding.getInstitutionId().equals(institutionId))
-                .forEach(userBinding -> userBinding.getProducts()
+                .forEach(userBinding -> userBinding.getProducts().stream()
+                        .filter(onboardedProduct -> ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus()))
                         .forEach(onboardedProduct -> {
                             sendUserNotificationFromBindings(userId, eventType, userBinding, onboardedProduct);
                         }));
@@ -148,6 +150,7 @@ public class UserEventServiceImpl implements UserEventService {
         try {
             String msg = mapper.writeValueAsString(userNotification);
             sendUserNotification(msg, userId);
+            log.info(DONE_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
         } catch (JsonProcessingException e) {
             log.warn(ERROR_DURING_SEND_DATA_LAKE_NOTIFICATION_FOR_USER, userId);
         }
@@ -158,7 +161,9 @@ public class UserEventServiceImpl implements UserEventService {
             Optional<UserBinding> userBinding = toUserBinding(relationshipInfo.getUserId(),
                     relationshipInfo.getInstitution().getId());
             userBinding.ifPresent(currentUserBinding -> {
-                currentUserBinding.getProducts().stream().filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
+                currentUserBinding.getProducts().stream()
+                        .filter(onboardedProduct -> relationshipInfo.getOnboardedProduct().getProductId().equals(onboardedProduct.getProductId()))
+                        .filter(onboardedProduct -> ALLOWED_RELATIONSHIP_STATUSES.contains(onboardedProduct.getStatus()))
                         .filter(onboardedProduct -> Optional.of(relationshipInfo.getOnboardedProduct().getRelationshipId()).map(s -> s.equals(onboardedProduct.getRelationshipId())).orElse(true))
                         .forEach(currentOnboardedProduct -> sendUserNotificationFromBindings(relationshipInfo.getUserId(), eventType, currentUserBinding, currentOnboardedProduct));
             });

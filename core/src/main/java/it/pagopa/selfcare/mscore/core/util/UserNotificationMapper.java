@@ -15,7 +15,7 @@ public interface UserNotificationMapper {
     @Mapping(source = "onboardedProduct.status", target = "relationshipStatus")
     @Mapping(source = "onboardedProduct.productRole", target = "productRole")
     @Mapping(source = "user.id", target = "userId")
-    @Mapping(target = "email", expression = "java(user.getWorkContacts().containsKey(institutionId) ? user.getWorkContacts().get(institutionId).getEmail() : user.getEmail())")
+    @Mapping(target = "email", expression = "java(null == user.getWorkContacts() ? \"\" : user.getWorkContacts().containsKey(institutionId) ? user.getWorkContacts().get(institutionId).getEmail() : \"\")")
     UserToNotify toUserNotify(User user, OnboardedProduct onboardedProduct, String institutionId);
 
 }

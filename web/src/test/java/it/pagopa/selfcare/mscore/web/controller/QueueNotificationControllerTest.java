@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.QueueNotificationService;
+import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,10 @@ class QueueNotificationControllerTest {
     private static final String BASE_URL = "/notification-event";
     @Autowired
     protected MockMvc mvc;
+
+    @MockBean
+    private UserMapper userMapper;
+
     @MockBean
     private QueueNotificationService queueNotificationService;
 
@@ -34,7 +39,7 @@ class QueueNotificationControllerTest {
         Integer size = 1;
         String productId = "product";
         mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL+"/contracts")
+                        .post(BASE_URL + "/contracts")
                         .param("size", String.valueOf(size))
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
@@ -48,7 +53,7 @@ class QueueNotificationControllerTest {
         String institutionId = "institutionId";
         String tokenId = "tokenId";
         mvc.perform(MockMvcRequestBuilders
-                        .put(BASE_URL+"/contracts")
+                        .put(BASE_URL + "/contracts")
                         .param("tokenId", tokenId)
                         .param("institutionId", institutionId))
                 .andExpect(status().isOk());
@@ -57,17 +62,23 @@ class QueueNotificationControllerTest {
     }
 
     @Test
-    void sendUsers() throws Exception{
+    void sendUsers() throws Exception {
         Integer size = 1;
         Integer page = 0;
         String productId = "product";
         mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL+"/users")
+                        .post(BASE_URL + "/users")
                         .param("size", String.valueOf(size))
                         .param("page",String.valueOf(page))
                         .param("productsFilter", productId))
                 .andExpect(status().isOk());
 
         Mockito.verify(queueNotificationService, Mockito.times(1)).sendUsers(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
+    }
+
+    @Test
+    void countUsers() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/users/count")).andExpect(status().isOk());
+        Mockito.verify(queueNotificationService, Mockito.times(1)).countUsers();
     }
 }

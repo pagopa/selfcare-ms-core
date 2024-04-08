@@ -2,15 +2,11 @@ package it.pagopa.selfcare.mscore.core;
 
 import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
-import it.pagopa.selfcare.mscore.core.util.TokenUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -30,15 +26,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
-import static it.pagopa.selfcare.mscore.constant.CustomError.CONTRACT_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
-import static it.pagopa.selfcare.mscore.core.util.TokenUtils.createDigest;
 
 @Slf4j
 @Service
@@ -160,13 +153,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void invalidateOnboarding(Token token) {
-        checkAndHandleExpiring(token);
-        Institution institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-        invalidateToken(token, institution);
-    }
-
-    @Override
     public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname) {
 
 
@@ -234,38 +220,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void onboardingLegals(OnboardingLegalsRequest onboardingLegalsRequest, SelfCareUser selfCareUser) {
-        Institution institution = institutionService.retrieveInstitutionById(onboardingLegalsRequest.getInstitutionId());
-        OnboardingRequest request = OnboardingInstitutionUtils.constructOnboardingRequest(onboardingLegalsRequest);
-        InstitutionType institutionType = institution.getInstitutionType();
-        request.setTokenType(TokenType.LEGALS);
-
-        List<String> toUpdate = new ArrayList<>();
-        List<String> toDelete = new ArrayList<>();
-
-        User user = userService.retrieveUserFromUserRegistry(selfCareUser.getId());
-        OnboardingInstitutionUtils.verifyUsers(request.getUsers(), List.of(PartyRole.MANAGER, PartyRole.DELEGATE));
-        List<String> validManagerList = OnboardingInstitutionUtils.getValidManagerToOnboard(request.getUsers(), null);
-        User manager = userService.retrieveUserFromUserRegistry(validManagerList.get(0));
-
-        List<User> delegate = request.getUsers().stream()
-                .filter(userToOnboard -> !validManagerList.contains(userToOnboard.getId()))
-                .map(userToOnboard -> userService.retrieveUserFromUserRegistry(userToOnboard.getId()))
-                .collect(Collectors.toList());
-
-        String contractTemplate = contractService.extractTemplate(request.getContract().getPath());
-        File pdf = contractService.createContractPDF(contractTemplate, manager, delegate, institution, request, null, institutionType);
-        String digest = createDigest(pdf);
-        OnboardingRollback rollback = onboardingDao.persistLegals(toUpdate, toDelete, request, institution, digest);
-        log.info("{} - Digest {}", rollback.getToken().getId(), digest);
-        try {
-            notificationService.sendMailWithContract(pdf, institution, user, request, rollback.getToken().getId(), false);
-        } catch (Exception e) {
-            onboardingDao.rollbackSecondStep(toUpdate, toDelete, institution.getId(), rollback.getToken(), rollback.getOnboarding(), rollback.getProductMap());
-        }
-    }
-
-    @Override
     public ResourceResponse retrieveDocument(String relationshipId) {
         RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
         if (relationship.getOnboardedProduct() != null &&
@@ -276,11 +230,6 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
-    private void invalidateToken(Token token, Institution institution) {
-        log.info("START - invalidate token {}", token.getId());
-        onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
-    }
-
     private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String institutionId, String externalId, List<RelationshipState> relationshipStates) {
         List<String> states = relationshipStates.stream().map(Enum::name).collect(Collectors.toList());
         UserInstitutionFilter filter = new UserInstitutionFilter(userId, institutionId, externalId, states);
@@ -289,16 +238,6 @@ public class OnboardingServiceImpl implements OnboardingService {
             throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), userId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
         }
         return userInstitutionAggregation;
-    }
-
-    public void checkAndHandleExpiring(Token token) {
-
-        if (TokenUtils.isTokenExpired(token)) {
-            log.info("token {} is expired at {}", token.getId(), token.getExpiringDate());
-            var institution = institutionService.retrieveInstitutionById(token.getInstitutionId());
-            onboardingDao.persistForUpdate(token, institution, RelationshipState.REJECTED, null);
-            throw new InvalidRequestException(String.format(CustomError.TOKEN_EXPIRED.getMessage(), token.getId(), token.getExpiringDate()), CustomError.TOKEN_EXPIRED.getCode());
-        }
     }
 
 }

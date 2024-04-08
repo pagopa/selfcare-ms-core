@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -16,12 +17,7 @@ import java.util.List;
 
 public interface UserConnector {
 
-    OnboardedUser save(OnboardedUser example);
-
-    List<OnboardedUser> findAll();
     List<OnboardedUser> findAllValidUsers(Integer page, Integer size, String productId);
-
-    void deleteById(String id);
 
     OnboardedUser findById(String userId);
 
@@ -63,6 +59,7 @@ public interface UserConnector {
 
     List<UserInfo> findByInstitutionId(String institutionId);
 
-    List<UserInstitutionAggregation>  getUserInfo(String userId, String institutionId, String[] states);
+    List<UserInstitutionAggregation> getUserInfo(String userId, String institutionId, String[] states);
 
+    List<QueryCount> countUsers();
 }

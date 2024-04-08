@@ -9,10 +9,6 @@ import java.util.List;
 
 public interface TokenService {
 
-    Token verifyToken(String id);
-
-    Token verifyOnboarding(String institutionId, String productId);
-
     Token getToken(String institutionId, String productId);
 
     List<TokenRelationships> getTokensByProductId(String productId, Integer page, Integer size);

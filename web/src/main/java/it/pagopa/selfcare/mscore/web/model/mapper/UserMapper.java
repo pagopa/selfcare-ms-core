@@ -2,6 +2,7 @@ package it.pagopa.selfcare.mscore.web.model.mapper;
 
 
 import it.pagopa.selfcare.mscore.model.UserNotificationToSend;
+import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.WorkContact;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
@@ -43,6 +44,8 @@ public interface UserMapper {
 
     UserNotificationResponse toUserNotification(UserNotificationToSend user);
     UserProductsResponse toOnboardedUserResponse(OnboardedUser onboardedUser);
+    @Mapping(source = "_id", target = "productId")
+    ProductCount toProductCount(QueryCount queryCount);
 
     @Named("retrieveMailFromWorkContacts")
     default String retrieveMailFromWorkContacts(Map<String, WorkContact> map, String institutionId){

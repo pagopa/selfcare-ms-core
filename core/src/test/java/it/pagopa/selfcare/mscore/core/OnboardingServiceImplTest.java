@@ -2,8 +2,6 @@ package it.pagopa.selfcare.mscore.core;
 
 import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.Env;
@@ -16,7 +14,10 @@ import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.Billing;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
@@ -26,22 +27,15 @@ import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.time.*;
-import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -216,46 +210,6 @@ class OnboardingServiceImplTest {
         assertSame(institution, institution1);
         List<Onboarding> onboarding1 = institution1.getOnboarding();
         assertTrue(onboarding1.isEmpty());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#invalidateOnboarding}
-     */
-    @Test
-    void testInvalidateOnboarding() {
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(new Institution());
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = getToken(institutionUpdate);
-        onboardingServiceImpl.invalidateOnboarding(token);
-        verify(onboardingDao).persistForUpdate(any(), any(), any(),
-                any());
-        verify(institutionService).retrieveInstitutionById(any());
-        assertEquals("Checksum", token.getChecksum());
-        assertEquals(TokenType.INSTITUTION, token.getType());
-        assertEquals(RelationshipState.PENDING, token.getStatus());
-        assertEquals("42", token.getProductId());
-        assertSame(institutionUpdate, token.getInstitutionUpdate());
-        assertEquals("42", token.getInstitutionId());
-        assertEquals("Contract Template", token.getContractTemplate());
-        assertEquals("Contract Signed", token.getContractSigned());
-        assertEquals("42", token.getId());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#invalidateOnboarding}
-     */
-    @Test
-    void testInvalidateOnboarding2() {
-        when(institutionService.retrieveInstitutionById(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "START - invalidate token {}"));
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = getToken(institutionUpdate);
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.invalidateOnboarding(token));
-        verify(institutionService).retrieveInstitutionById(any());
     }
 
     /**
@@ -785,66 +739,6 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingLegals(OnboardingLegalsRequest, SelfCareUser)}
-     */
-    //@Test
-    void testOnboardingLegals() throws IOException {
-        Institution institution = new Institution();
-        institution.setInstitutionType(InstitutionType.PA);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-
-        when(userService.retrieveUserFromUserRegistry(any())).thenReturn(dummyUser());
-
-        Contract contract = new Contract();
-        contract.setPath("Path");
-        contract.setVersion("1.0.2");
-
-        OnboardingLegalsRequest onboardingLegalsRequest = new OnboardingLegalsRequest();
-        onboardingLegalsRequest.setContract(contract);
-        onboardingLegalsRequest.setInstitutionExternalId("42");
-        onboardingLegalsRequest.setInstitutionId("42");
-        onboardingLegalsRequest.setProductId("42");
-        onboardingLegalsRequest.setProductName("Product Name");
-        onboardingLegalsRequest.setSignContract(true);
-        onboardingLegalsRequest.setTokenType(TokenType.INSTITUTION);
-        UserToOnboard user = new UserToOnboard();
-        user.setId("id");
-        user.setRole(PartyRole.MANAGER);
-        onboardingLegalsRequest.setUsers(List.of(user));
-        SelfCareUser selfCareUser = mock(SelfCareUser.class);
-        when(selfCareUser.getId()).thenReturn("42");
-
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        TokenUser tokenUser = new TokenUser();
-        tokenUser.setUserId("id");
-        tokenUser.setRole(PartyRole.MANAGER);
-        token.setUsers(List.of(tokenUser));
-
-        File file = File.createTempFile("test",".txt");
-        when(contractService.createContractPDF(any(), any(), any(), any(), any(), any(), any())).thenReturn(file);
-
-        OnboardingRollback onboardingRollback = new OnboardingRollback();
-        onboardingRollback.setToken(new Token());
-        when(onboardingDao.persistLegals(any(), any(), any(), any(), any())).thenReturn(onboardingRollback);
-        Assertions.assertDoesNotThrow(() -> onboardingServiceImpl.onboardingLegals(onboardingLegalsRequest, selfCareUser));
-    }
-
-    /**
      * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
      */
     @Test
@@ -885,156 +779,6 @@ class OnboardingServiceImplTest {
         verify(userRelationshipService).retrieveRelationship(any());
         verify(relationshipInfo, atLeast(1)).getOnboardedProduct();
         verify(contractService).getFile(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#checkAndHandleExpiring}
-     */
-    @Test
-    void testCheckAndHandleExpiring() {
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = getToken(institutionUpdate);
-        onboardingServiceImpl.checkAndHandleExpiring(token);
-        assertEquals("Checksum", token.getChecksum());
-        assertEquals(TokenType.INSTITUTION, token.getType());
-        assertEquals(RelationshipState.PENDING, token.getStatus());
-        assertEquals("42", token.getProductId());
-        assertSame(institutionUpdate, token.getInstitutionUpdate());
-        assertEquals("42", token.getInstitutionId());
-        assertEquals("Contract Template", token.getContractTemplate());
-        assertEquals("Contract Signed", token.getContractSigned());
-        assertEquals("42", token.getId());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#checkAndHandleExpiring}
-     */
-    @Test
-    void testCheckAndHandleExpiring2() {
-        InstitutionUpdate institutionUpdate = TestUtils.createSimpleInstitutionUpdate();
-
-        Token token = mock(Token.class);
-        when(token.getExpiringDate()).thenReturn(null);
-        doNothing().when(token).setChecksum(any());
-        doNothing().when(token).setDeletedAt(any());
-        doNothing().when(token).setContractSigned(any());
-        doNothing().when(token).setContractTemplate(any());
-        doNothing().when(token).setCreatedAt(any());
-        doNothing().when(token).setExpiringDate(any());
-        doNothing().when(token).setId(any());
-        doNothing().when(token).setInstitutionId(any());
-        doNothing().when(token).setInstitutionUpdate(any());
-        doNothing().when(token).setProductId(any());
-        doNothing().when(token).setStatus(any());
-        doNothing().when(token).setType(any());
-        doNothing().when(token).setUpdatedAt(any());
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        onboardingServiceImpl.checkAndHandleExpiring(token);
-        verify(token).getExpiringDate();
-        verify(token).setChecksum(any());
-        verify(token).setDeletedAt(any());
-        verify(token).setContractSigned(any());
-        verify(token).setContractTemplate(any());
-        verify(token).setCreatedAt(any());
-        verify(token).setExpiringDate(any());
-        verify(token).setId(any());
-        verify(token).setInstitutionId(any());
-        verify(token).setInstitutionUpdate(any());
-        verify(token).setProductId(any());
-        verify(token).setStatus(any());
-        verify(token).setType(any());
-        verify(token).setUpdatedAt(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#checkAndHandleExpiring}
-     */
-    @Test
-    void testCheckAndHandleExpiring_expired() {
-        // Given
-        List<TokenUser> users = new ArrayList<>();
-        users.add(new TokenUser("UserId1", PartyRole.MANAGER));
-        users.add(new TokenUser("UserId2", PartyRole.DELEGATE));
-        users.add(new TokenUser("UserId3", PartyRole.DELEGATE));
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate.setDescription("InstitutionUpdateDescription");
-        institutionUpdate.setDigitalAddress("email@example.com");
-        institutionUpdate.setAddress("InstitutionUpdateAddress");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        institutionUpdate.setGeographicTaxonomies(List.of(new InstitutionGeographicTaxonomies("100", "Italia")));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setImported(false);
-
-        Token token = new Token();
-        token.setId("TokenId");
-        token.setType(TokenType.INSTITUTION);
-        token.setStatus(RelationshipState.PENDING);
-        token.setInstitutionId("InstitutionId");
-        token.setProductId("ProductId");
-        token.setExpiringDate(OffsetDateTime.ofInstant(Instant.now(), ZoneOffset.UTC));
-        token.setChecksum("Checksum");
-        token.setContractVersion("1.0.1");
-        token.setContractSigned("ContractSigned");
-        token.setContractTemplate("ContractTemplate");
-        token.setUsers(users);
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setCreatedAt(token.getExpiringDate().minusDays(150));
-        token.setUpdatedAt(null);
-        token.setDeletedAt(null);
-
-        Institution institution = new Institution();
-        institution.setId("InstitutionId");
-        institution.setDescription("InstitutionUpdateDescription");
-        institution.setDigitalAddress("email@example.com");
-        institution.setAddress("InstitutionUpdateAddress");
-        institution.setTaxCode("Tax Code");
-        institution.setZipCode("21654");
-        institution.setGeographicTaxonomies(List.of(new InstitutionGeographicTaxonomies("100", "Italia")));
-        institution.setRea("Rea");
-        institution.setShareCapital("Share Capital");
-        institution.setBusinessRegisterPlace("Business Register Place");
-        institution.setSupportEmail("jane.doe@example.org");
-        institution.setSupportPhone("6625550144");
-        institution.setImported(false);
-
-        when(institutionService.retrieveInstitutionById(any()))
-                .thenReturn(institution);
-        when(onboardingDao.persistForUpdate(any(), any(), any(), any()))
-                .thenReturn(null);
-
-        // When
-        Executable executable = () -> onboardingServiceImpl.checkAndHandleExpiring(token);
-
-        // Then
-        InvalidRequestException e = assertThrows(InvalidRequestException.class, executable);
-        assertEquals(String.format(CustomError.TOKEN_EXPIRED.getMessage(), token.getId(), token.getExpiringDate()), e.getMessage());
-        verify(institutionService, times(1))
-                .retrieveInstitutionById(token.getInstitutionId());
-        verify(onboardingDao, times(1))
-                .persistForUpdate(token, institution, RelationshipState.REJECTED, null);
-        verifyNoMoreInteractions(institutionService, onboardingDao);
-        verifyNoInteractions(contractService, emailService, userRelationshipService, userService);
     }
 
     @Test

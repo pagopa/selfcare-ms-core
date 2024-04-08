@@ -9,17 +9,14 @@ import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionLegalsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
@@ -43,13 +40,11 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 public class OnboardingController {
 
     private final OnboardingService onboardingService;
-    private final TokenService tokenService;
 
     private final OnboardingResourceMapper onboardingResourceMapper;
 
-    public OnboardingController(OnboardingService onboardingService, TokenService tokenService, OnboardingResourceMapper onboardingResourceMapper) {
+    public OnboardingController(OnboardingService onboardingService, OnboardingResourceMapper onboardingResourceMapper) {
         this.onboardingService = onboardingService;
-        this.tokenService = tokenService;
         this.onboardingResourceMapper = onboardingResourceMapper;
     }
 
@@ -132,26 +127,6 @@ public class OnboardingController {
     }
 
     /**
-     * The function invalidate onboarding request
-     *
-     * @param tokenId String
-     * @return no content
-     * * Code: 204, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.invalidate}", notes = "${swagger.mscore.onboarding.invalidate}")
-    @DeleteMapping(value = "/complete/{tokenId}")
-    public ResponseEntity<Void> invalidateOnboarding(@ApiParam("${swagger.mscore.token.tokenId}")
-                                                     @PathVariable(value = "tokenId") String tokenId) {
-        CustomExceptionMessage.setCustomMessage(GenericError.INVALIDATE_ONBOARDING_ERROR);
-        Token token = tokenService.verifyToken(tokenId);
-        onboardingService.invalidateOnboarding(token);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    /**
      * The function persist operators for given onboarding
      *
      * @param request OnboardingInstitutionOperatorsRequest
@@ -210,24 +185,6 @@ public class OnboardingController {
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = onboardingService.onboardingUsers(onboardingResourceMapper.toOnboardingUsersRequest(request), selfCareUser.getUserName(), selfCareUser.getSurname());
         return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
-    }
-
-    /**
-     * The function persist legals for given onboarding
-     *
-     * @param request OnboardingInstitutionLegalsRequest
-     * @return no content
-     * * Code: 204, Message: successful operation
-     * * Code: 404, Message: Not found, DataType: Problem
-     * * Code: 400, Message: Invalid request, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "${swagger.mscore.onboarding.legals}", notes = "${swagger.mscore.onboarding.legals}")
-    @PostMapping(value = "/legals", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> onboardingInstitutionLegals(@RequestBody @Valid OnboardingInstitutionLegalsRequest request, Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_LEGALS_ERROR);
-        onboardingService.onboardingLegals(OnboardingMapper.toOnboardingLegalsRequest(request), (SelfCareUser) authentication.getPrincipal());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**

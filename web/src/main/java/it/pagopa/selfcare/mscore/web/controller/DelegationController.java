@@ -99,6 +99,10 @@ public class DelegationController {
                                                                    @RequestParam(name = "brokerId", required = false) String brokerId,
                                                                    @ApiParam("${swagger.mscore.product.model.id}")
                                                                    @RequestParam(name = "productId", required = false) String productId,
+                                                                   @ApiParam("${swagger.mscore.institutions.model.description}")
+                                                                   @RequestParam(name = "search", required = false) String search,
+                                                                   @ApiParam("${swagger.mscore.institutions.model.taxCode}")
+                                                                   @RequestParam(name = "taxCode", required = false) String taxCode,
                                                                    @ApiParam("${swagger.mscore.institutions.delegations.mode}")
                                                                    @RequestParam(name = "mode", required = false) GetDelegationsMode mode,
                                                                    @RequestParam(name = "page", required = false) Optional<Integer> page,
@@ -107,7 +111,7 @@ public class DelegationController {
         if(Objects.isNull(institutionId) && Objects.isNull(brokerId))
             throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, mode, page, size).stream()
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, search, taxCode, mode, page, size).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
@@ -130,5 +134,4 @@ public class DelegationController {
         delegationService.deleteDelegationByDelegationId(delegationId);
         return ResponseEntity.noContent().build();
     }
-
 }

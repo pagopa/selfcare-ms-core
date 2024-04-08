@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -119,56 +118,6 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
             map.forEach(update::set);
         }
         addGeographicTaxonomies(geographicTaxonomiesList, update);
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        return institutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
-    }
-
-    //TODO[SELC-2286]: refactor new onboarding (onboarding != null) and updates on onboarding (state and token != null) cause conflicts
-    @Override
-    public Institution findAndUpdateInstitutionData(String institutionId, Token token, Onboarding onboarding, RelationshipState state) {
-        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
-        Update update = new Update();
-        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
-        if (onboarding != null) {
-            update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
-        }
-        if (state != null) {
-            update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.status.name()), state)
-                    .set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.updatedAt.name()), OffsetDateTime.now())
-                    .filterArray(Criteria.where(CURRENT_ONBOARDING + Onboarding.Fields.tokenId.name()).is(token.getId()));
-            if (state == RelationshipState.DELETED) {
-                update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.closedAt.name()), OffsetDateTime.now());
-            }
-        }
-        if (token.getContractSigned() != null) {
-            update.set(constructQuery(CURRENT_ONBOARDING_REFER, Onboarding.Fields.contract.name()), token.getContractSigned());
-        }
-        InstitutionUpdate institutionUpdate = token.getInstitutionUpdate();
-        if (institutionUpdate != null) {
-            Map<String, Object> map = InstitutionMapperHelper.getNotNullField(institutionUpdate);
-            map.forEach(update::set);
-            addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
-        }
-
-        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
-        return institutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
-    }
-
-
-
-    @Override
-    public Institution findAndUpdateInstitutionDataWithNewOnboarding(String institutionId, InstitutionUpdate institutionUpdate, Onboarding onboarding) {
-        Query query = Query.query(Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
-        Update update = new Update();
-        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
-        update.addToSet(InstitutionEntity.Fields.onboarding.name(), onboarding);
-
-        if (institutionUpdate != null) {
-            Map<String, Object> map = InstitutionMapperHelper.getNotNullField(institutionUpdate);
-            map.forEach(update::set);
-            addGeographicTaxonomies(institutionUpdate.getGeographicTaxonomies(), update);
-        }
-
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return institutionMapper.convertToInstitution(repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class));
     }

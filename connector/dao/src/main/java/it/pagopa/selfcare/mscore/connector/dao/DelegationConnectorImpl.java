@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
-import com.mongodb.client.model.Facet;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
+import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
@@ -21,10 +21,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -65,19 +63,24 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public List<Delegation> find(String from, String to, String productId, GetDelegationsMode mode, Integer page, Integer size) {
+    public List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Integer page, Integer size) {
         List<Criteria> criterias = new ArrayList<>();
         Criteria criteria = new Criteria();
         Pageable pageable = PageRequest.of(page, size);
 
-        if(Objects.nonNull(from))
+        if (Objects.nonNull(from)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
-        if(Objects.nonNull(to))
+        }
+        if (Objects.nonNull(to)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.to.name()).is(to));
-        if(Objects.nonNull(productId))
+        }
+        if (Objects.nonNull(productId)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.productId.name()).is(productId));
-
-        if(GetDelegationsMode.FULL.equals(mode)) {
+        }
+        if (Objects.nonNull(search)) {
+            criterias.add(Criteria.where(DelegationEntity.Fields.institutionFromName.name()).regex("(?i)" + Pattern.quote(search)));
+        }
+        if (GetDelegationsMode.FULL.equals(mode)) {
 
             GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
                     .startWith(Objects.nonNull(from) ? "to" : "from")
@@ -88,7 +91,14 @@ public class DelegationConnectorImpl implements DelegationConnector {
             long skipLimit = (long) page * size;
             SkipOperation skip = Aggregation.skip(skipLimit);
             LimitOperation limit = Aggregation.limit(skipLimit + size);
-            Aggregation aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+            Aggregation aggregation;
+            if (Objects.nonNull(taxCode)) {
+                Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
+                MatchOperation matchTaxCodeOperation = new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), matchTaxCodeOperation, skip, limit);
+            } else {
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+            }
 
             List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();
             return result.stream()
@@ -116,7 +126,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
     @Override
     public boolean checkIfDelegationsAreActive(String institutionId) {
-        Optional<DelegationEntity> opt = repository.findByToAndStatus(institutionId, DelegationState.ACTIVE);
-        return opt.isPresent();
+        List<DelegationEntity> opt = repository.findByToAndStatus(institutionId, DelegationState.ACTIVE).orElse(Collections.emptyList());
+        return !opt.isEmpty();
     }
 }

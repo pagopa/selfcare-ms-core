@@ -108,26 +108,6 @@ class UserServiceImplTest {
                 () -> userServiceImpl.findOnboardedManager("42", "42", states));
         verify(userConnector).findOnboardedManager(any(), any(), any());
     }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.findById(any())).thenReturn(onboardedUser);
-        assertSame(onboardedUser, userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
-    }
-
-    @Test
-    void verifyUser() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.findById(any())).thenReturn(onboardedUser);
-        Assertions.assertDoesNotThrow(() -> userServiceImpl.verifyUser("42"));
-        verify(userConnector).findById(any());
-    }
-
     /**
      * Method under test: {@link UserServiceImpl#retrieveUserFromUserRegistry(String)}
      */
@@ -155,37 +135,6 @@ class UserServiceImplTest {
         when(userRegistryConnector.getUserByInternalIdWithFiscalCode( any())).thenReturn(user);
         assertSame(user, userServiceImpl.retrieveUserFromUserRegistry("42"));
         verify(userRegistryConnector).getUserByInternalIdWithFiscalCode( user.getId());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId2() {
-        when(userConnector.findById(any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId3() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        when(userConnector.findById(any())).thenReturn(onboardedUser);
-        assertSame(onboardedUser, userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
-    }
-
-    /**
-     * Method under test: {@link UserServiceImpl#findByUserId}
-     */
-    @Test
-    void testFindByUserId4() {
-        when(userConnector.findById(any())).thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
-        assertThrows(ResourceNotFoundException.class, () -> userServiceImpl.findByUserId("42"));
-        verify(userConnector).findById(any());
     }
 
     /**
@@ -562,6 +511,7 @@ class UserServiceImplTest {
         UserBinding binding = new UserBinding();
         OnboardedProduct product = new OnboardedProduct();
         product.setProductId("prod-pn");
+        product.setStatus(RelationshipState.ACTIVE);
         binding.setProducts(List.of(product));
         binding.setInstitutionId("institutionId");
         user.setBindings(List.of(binding));
@@ -579,6 +529,30 @@ class UserServiceImplTest {
         assertEquals("userId", response.get(0).getUser().getUserId());
         assertEquals("institutionId", response.get(0).getInstitutionId());
         assertEquals("prod-pn", response.get(0).getProductId());
+    }
+
+    /**
+     * Method under test: {@link UserServiceImpl#findAll(Optional, Optional, String)}
+     */
+    @Test
+    void findNoUsers() {
+        OnboardedUser user = new OnboardedUser();
+        user.setId("userId");
+        UserBinding binding = new UserBinding();
+        OnboardedProduct product = new OnboardedProduct();
+        product.setProductId("prod-pn");
+        product.setStatus(RelationshipState.PENDING);
+        binding.setProducts(List.of(product));
+        binding.setInstitutionId("institutionId");
+        user.setBindings(List.of(binding));
+        when(userConnector.findAllValidUsers(any(), any(), any())).thenReturn(List.of(user));
+        User pdvUser = new User();
+        pdvUser.setId("userId");
+        pdvUser.setWorkContacts(Map.of("institutionId", new WorkContact()));
+        when(userRegistryConnector.getUserByInternalId("userId")).thenReturn(pdvUser);
+        List<UserNotificationToSend> response = userServiceImpl.findAll(Optional.empty(),Optional.empty(), "prod-pn");
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
     }
 }
 

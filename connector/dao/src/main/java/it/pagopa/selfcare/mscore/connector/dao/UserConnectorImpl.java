@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -28,10 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -45,6 +43,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
 
 @Slf4j
 @Component
@@ -68,11 +67,6 @@ public class UserConnectorImpl implements UserConnector {
 
     private final ProductService productService;
 
-
-    @Override
-    public List<OnboardedUser> findAll() {
-        return repository.findAll().stream().map(userMapper::toOnboardedUser).collect(Collectors.toList());
-    }
 
     /**
      * This query retrieves all the users having status in VALID_USER_RELATIONSHIPS for the given productId
@@ -98,11 +92,6 @@ public class UserConnectorImpl implements UserConnector {
     }
 
     @Override
-    public void deleteById(String id) {
-        repository.deleteById(id);
-    }
-
-    @Override
     public OnboardedUser findById(String userId) {
         Optional<UserEntity> entityOpt = repository.findById(userId);
         return entityOpt.map(userMapper::toOnboardedUser)
@@ -110,12 +99,6 @@ public class UserConnectorImpl implements UserConnector {
                     log.error(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId));
                     return new ResourceNotFoundException(String.format(USER_NOT_FOUND_ERROR.getMessage(), userId), USER_NOT_FOUND_ERROR.getCode());
                 });
-    }
-
-    @Override
-    public OnboardedUser save(OnboardedUser onboardedUser) {
-        final UserEntity entity = userMapper.toUserEntity(onboardedUser);
-        return userMapper.toOnboardedUser(repository.save(entity));
     }
 
     @Override
@@ -435,5 +418,15 @@ public class UserConnectorImpl implements UserConnector {
         builder.append(UserEntity.Fields.bindings.name());
         Arrays.stream(variables).forEach(s -> builder.append(".").append(s));
         return builder.toString();
+    }
+
+    @Override
+    public List<QueryCount> countUsers() {
+        UnwindOperation unwindBindings = Aggregation.unwind("$bindings", "binding", true);
+        UnwindOperation unwindProducts = Aggregation.unwind("$bindings.products", "products", true);
+        MatchOperation matchStatusId = Aggregation.match(Criteria.where("bindings.products.status").in(VALID_USER_RELATIONSHIPS));
+        GroupOperation productCount = group("bindings.products.productId").count().as("count");
+        Aggregation aggregation = Aggregation.newAggregation(unwindBindings, unwindProducts, matchStatusId, productCount);
+        return mongoOperations.aggregate(aggregation, "User", QueryCount.class).getMappedResults();
     }
 }
