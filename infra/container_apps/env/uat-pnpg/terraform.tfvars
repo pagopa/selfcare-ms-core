@@ -12,9 +12,9 @@ tags = {
 container_app = {
   min_replicas = 1
   max_replicas = 2
-  scale_rules = []
-  cpu    = 0.5
-  memory = "1Gi"
+  scale_rules  = []
+  cpu          = 0.5
+  memory       = "1Gi"
 }
 
 app_settings = [
