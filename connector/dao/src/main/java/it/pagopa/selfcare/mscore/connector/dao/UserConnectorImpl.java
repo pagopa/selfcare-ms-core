@@ -356,7 +356,12 @@ public class UserConnectorImpl implements UserConnector {
         }
 
         MatchOperation matchInstitutionExist = Aggregation.match(Criteria.where("institutions").size(1));
-        MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
+        MatchOperation matchOperation;
+        if(!criterias.isEmpty()) {
+            matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
+        } else {
+            matchOperation = new MatchOperation(new Criteria());
+        }
         Aggregation aggregation = Aggregation.newAggregation(matchUserId, unwindBindings, lookup, matchInstitutionExist, unwindProducts, matchOperation);
 
         return mongoOperations.aggregate(aggregation, "User", UserInstitutionAggregation.class).getMappedResults();
