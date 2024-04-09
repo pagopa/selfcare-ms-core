@@ -4,17 +4,15 @@ on:
   push:
     branches:
       - main
-      - releases/**
+      - releases/*
     paths:
-      - '!.devops/**'
-      - '!.github/**'
-      - '!.identity/**'
-      - '!helm/**'
-      - '!**.md'
-      - '!.**ignore'
-      - '!infra/repository/**'
-      - '!.terraform-version'
-      - '!CODEOWNERS'
+      - 'app/**'
+      - 'connector/**'
+      - 'connector-api/**'
+      - 'core/**'
+      - 'infra/**'
+      - 'web/**'
+      - 'pom.xml'
 
   workflow_dispatch:
     inputs:
