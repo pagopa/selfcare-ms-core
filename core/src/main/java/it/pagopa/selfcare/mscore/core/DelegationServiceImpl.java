@@ -48,17 +48,21 @@ public class DelegationServiceImpl implements DelegationService {
             setPartnerByInstitutionTaxCode(delegation);
         }
 
-        if (checkIfExists(delegation)) {
+        if(checkIfExistsWithStatus(delegation, DelegationState.ACTIVE)) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
         }
 
         Delegation savedDelegation;
         try {
-            delegation.setCreatedAt(OffsetDateTime.now());
-            delegation.setUpdatedAt(OffsetDateTime.now());
-            delegation.setStatus(DelegationState.ACTIVE);
-            savedDelegation = delegationConnector.save(delegation);
+            if(checkIfExistsWithStatus(delegation, DelegationState.DELETED)){
+                savedDelegation = delegationConnector.findAndActivate(delegation.getFrom(), delegation.getTo(), delegation.getProductId());
+            } else{
+                delegation.setCreatedAt(OffsetDateTime.now());
+                delegation.setUpdatedAt(OffsetDateTime.now());
+                delegation.setStatus(DelegationState.ACTIVE);
+                savedDelegation = delegationConnector.save(delegation);
+            }
             institutionService.updateInstitutionDelegation(delegation.getTo(), true);
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
@@ -119,13 +123,15 @@ public class DelegationServiceImpl implements DelegationService {
                         INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
         delegation.setFrom(from);
 
-        if(checkIfExists(delegation)) {
+        if(checkIfExistsWithStatus(delegation, DelegationState.ACTIVE)) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
         }
 
         try {
-            delegation.setCreatedAt(OffsetDateTime.now());
+            if(!checkIfExistsWithStatus(delegation, DelegationState.DELETED)){
+                delegation.setCreatedAt(OffsetDateTime.now());
+            }
             delegation.setUpdatedAt(OffsetDateTime.now());
             delegation.setStatus(DelegationState.ACTIVE);
             Delegation savedDelegation = delegationConnector.save(delegation);
@@ -157,8 +163,8 @@ public class DelegationServiceImpl implements DelegationService {
 
 
     @Override
-    public boolean checkIfExists(Delegation delegation) {
-        return delegationConnector.checkIfExists(delegation);
+    public boolean checkIfExistsWithStatus(Delegation delegation, DelegationState status) {
+        return delegationConnector.checkIfExistsWithStatus(delegation, status);
     }
 
     @Override

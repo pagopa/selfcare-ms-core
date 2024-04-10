@@ -41,8 +41,8 @@ public enum CustomError {
     INSTITUTION_NOT_FOUND_IN_REGISTRY("0042", "NOT_FOUND_IN_REGISTRY"),
     ROLE_NOT_FOUND("0000", "ROLE_NOT_FOUND"),
     ROLE_IS_NULL("0000", "ROLE_IS_NULL - Role is required if productRole is present"),
-
-    PRODUCT_ROLE_NOT_FOUND("0000", "PRODUCT_ROLE_NOT_FOUND");
+    PRODUCT_ROLE_NOT_FOUND("0000", "PRODUCT_ROLE_NOT_FOUND"),
+    DELEGATION_NOT_FOUND("0047", "Cannot find Delegation with parameters: to %s, from %s, productId: %s");
 
 
 

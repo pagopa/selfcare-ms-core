@@ -51,13 +51,13 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public boolean checkIfExists(Delegation delegation) {
-        Optional<DelegationEntity> opt = repository.findByFromAndToAndProductIdAndType(
+    public boolean checkIfExistsWithStatus(Delegation delegation, DelegationState status) {
+        Optional<DelegationEntity> opt = repository.findByFromAndToAndProductIdAndTypeAndStatus(
                 delegation.getFrom(),
                 delegation.getTo(),
                 delegation.getProductId(),
-                delegation.getType()
-
+                delegation.getType(),
+                status
         );
         return opt.isPresent();
     }
@@ -128,5 +128,15 @@ public class DelegationConnectorImpl implements DelegationConnector {
     public boolean checkIfDelegationsAreActive(String institutionId) {
         List<DelegationEntity> opt = repository.findByToAndStatus(institutionId, DelegationState.ACTIVE).orElse(Collections.emptyList());
         return !opt.isEmpty();
+    }
+
+    @Override
+    public Delegation findAndActivate(String from, String to, String productId) {
+        Query query = Query.query(Criteria.where(DelegationEntity.Fields.from.name()).is(from).and(DelegationEntity.Fields.to.name()).is(to).and(DelegationEntity.Fields.productId.name()).is(productId));
+        Update update = new Update();
+        update.set(DelegationEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        update.set(DelegationEntity.Fields.status.name(), DelegationState.ACTIVE);
+        FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(true);
+        return delegationMapper.convertToDelegation(repository.findAndModify(query, update, findAndModifyOptions, DelegationEntity.class));
     }
 }
