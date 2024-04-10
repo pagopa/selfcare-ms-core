@@ -1,5 +1,7 @@
 env_short = "u"
 is_pnpg   = true
+cae_name  = "cae"
+workload_profile_name = "Consumption"
 
 tags = {
   CreatedBy   = "Terraform"
