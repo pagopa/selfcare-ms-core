@@ -163,15 +163,15 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-p-pnpg-notification-mngr-ca.redbeach-5da5166f.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-pnpg-notification-mngr-ca.calmmoss-0be48755.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-p-pnpg-party-reg-proxy-ca.redbeach-5da5166f.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-pnpg-party-reg-proxy-ca.calmmoss-0be48755.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"
-    value = "https://selc-p-pnpg-product-ca.redbeach-5da5166f.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-pnpg-product-ca.calmmoss-0be48755.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"
