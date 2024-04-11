@@ -1,7 +1,7 @@
-env_short = "u"
-is_pnpg   = true
-cae_name  = "cae"
-workload_profile_name = "Consumption"
+env_short        = "u"
+is_pnpg          = true
+suffix_increment = "-001"
+cae_name         = "cae-001"
 
 tags = {
   CreatedBy   = "Terraform"
@@ -156,11 +156,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-u-pnpg-notification-mngr-ca.calmforest-ffe47bf1.westeurope.azurecontainerapps.io"
+    value = "https://selc-u-pnpg-notification-mngr-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-u-pnpg-party-reg-proxy-ca.calmforest-ffe47bf1.westeurope.azurecontainerapps.io"
+    value = "https://selc-u-pnpg-party-reg-proxy-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"

@@ -15,6 +15,7 @@ module "container_app_core" {
 
   env_short                      = var.env_short
   container_app                  = var.container_app
+  resource_group_name            = local.ca_resource_group_name
   container_app_name             = "ms-core"
   container_app_environment_name = local.container_app_environment_name
   image_name                     = "selfcare-ms-core"
