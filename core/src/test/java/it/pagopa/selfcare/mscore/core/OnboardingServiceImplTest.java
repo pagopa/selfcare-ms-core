@@ -170,10 +170,6 @@ class OnboardingServiceImplTest {
 
     @Test
     void testVerifyOnboardingInfoByFiltersInvalidRequestException() {
-        // Arrange
-        doNothing().when(institutionService).retrieveInstitutionsWithFilter(Mockito.any(), Mockito.any(), Mockito.any());
-
-        // Assert that nothing has changed
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.verifyOnboardingInfoByFilters("", "", "", "", "", ""));
     }
 
