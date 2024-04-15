@@ -163,6 +163,16 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
+    void testExistsByOrigin() {
+        when(institutionRepository.exists(Mockito.any(), Mockito.<Class<InstitutionEntity>>any())).thenReturn(true);
+        Boolean actualExistsByOriginResult = institutionConnectorImpl.existsByOrigin("Product", "Origin", "42",
+                new ArrayList<>());
+
+        verify(institutionRepository).exists(Mockito.any(), Mockito.<Class<InstitutionEntity>>any());
+        assertTrue(actualExistsByOriginResult);
+    }
+
+    @Test
     void deleteById() {
         doNothing().when(institutionRepository).deleteById(any());
         Assertions.assertDoesNotThrow(() -> institutionConnectorImpl.deleteById("507f1f77bcf86cd799439011"));

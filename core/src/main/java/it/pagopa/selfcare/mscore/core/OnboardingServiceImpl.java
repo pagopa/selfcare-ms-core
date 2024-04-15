@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.util.OnboardingInfoTypeVerifier;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
@@ -86,7 +87,44 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId) {
+    public void verifyOnboardingInfoOrigin(String productId, String origin, String originId) {
+        Boolean existsOnboardingValid = institutionConnector.existsByOrigin(productId, origin, originId, UtilEnumList.VALID_RELATIONSHIP_STATES);
+        if (Boolean.FALSE.equals(existsOnboardingValid)) {
+            throw new ResourceNotFoundException(String.format(CustomError.INSTITUTION_NOT_ONBOARDED_FOR_ORIGIN.getMessage(), origin, originId, productId),
+                    CustomError.INSTITUTION_NOT_ONBOARDED_FOR_ORIGIN.getCode());
+        }
+    }
+
+    @Override
+    public void verifyOnboardingInfoByFilters(String productId, String externalId, String taxCode, String origin, String originId, String subunitCode) {
+        OnboardingInfoTypeVerifier onboardingInfoTypeVerifier = this.inferTypeVerifierFromGivenFilters(externalId, taxCode, origin, originId, subunitCode);
+        switch (onboardingInfoTypeVerifier) {
+            case EXTERNAL_ID_VERIFIER:
+                verifyOnboardingInfo(externalId, productId);
+                break;
+            case TAX_CODE_AND_SUBUNIT_VERIFIER:
+                verifyOnboardingInfoSubunit(taxCode, subunitCode, productId);
+                break;
+            case ORIGIN_VERIFIER:
+                verifyOnboardingInfoOrigin(productId, origin, originId);
+                break;
+        }
+    }
+
+    private OnboardingInfoTypeVerifier inferTypeVerifierFromGivenFilters(String externalId, String taxCode, String origin, String originId, String subunitCode) {
+        if (StringUtils.hasText(externalId) && !StringUtils.hasText(taxCode) && !StringUtils.hasText(origin) && !StringUtils.hasText(originId) && !StringUtils.hasText(subunitCode)) {
+            return OnboardingInfoTypeVerifier.EXTERNAL_ID_VERIFIER;
+        } else if (StringUtils.hasText(taxCode) && !StringUtils.hasText(origin) && !StringUtils.hasText(originId) && !StringUtils.hasText(externalId)) {
+            return OnboardingInfoTypeVerifier.TAX_CODE_AND_SUBUNIT_VERIFIER;
+        } else if (StringUtils.hasText(origin) && StringUtils.hasText(originId) && !StringUtils.hasText(taxCode) && !StringUtils.hasText(subunitCode) && !StringUtils.hasText(externalId)) {
+            return OnboardingInfoTypeVerifier.ORIGIN_VERIFIER;
+        }
+        throw new InvalidRequestException(CustomError.ONBOARDING_INFO_FILTERS_ERROR.getMessage(), CustomError.ONBOARDING_INFO_FILTERS_ERROR.getCode());
+    }
+
+    @Override
+    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[]
+            states, String userId) {
 
         List<RelationshipState> relationshipStateList = OnboardingInfoUtils.getRelationShipStateList(states);
         List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
@@ -104,25 +142,26 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public Institution persistOnboarding(String institutionId, String productId,List<UserToOnboard> users, Onboarding onboarding) {
+    public Institution persistOnboarding(String institutionId, String
+            productId, List<UserToOnboard> users, Onboarding onboarding) {
 
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
         onboarding.setStatus(RelationshipState.ACTIVE);
         onboarding.setProductId(productId);
 
-        if(Objects.isNull(onboarding.getCreatedAt())) {
+        if (Objects.isNull(onboarding.getCreatedAt())) {
             onboarding.setCreatedAt(OffsetDateTime.now());
         }
 
         //Verify if onboarding exists, in case onboarding must fail
         final Institution institution = institutionConnector.findById(institutionId);
 
-        if(Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
+        if (Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
                 .filter(item -> item.getProductId().equals(productId) && UtilEnumList.VALID_RELATIONSHIP_STATES.contains(item.getStatus()))
-                .findAny()).isPresent()){
+                .findAny()).isPresent()) {
             throw new InvalidRequestException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), institution.getTaxCode(), productId),
-                        CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
+                    CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
         }
 
         try {
@@ -171,7 +210,8 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname) {
+    public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String
+            loggedUserSurname) {
 
         Institution institution = institutionService.getInstitutions(request.getInstitutionTaxCode(), request.getInstitutionSubunitCode()).stream()
                 .findFirst()
@@ -203,7 +243,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             userRegistry = userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
 
             //We must save mail institution if it is not found on WorkContracts
-            if(Objects.nonNull(user.getEmail()) &&
+            if (Objects.nonNull(user.getEmail()) &&
                     (Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId))) {
                 userRegistry = userService.persistWorksContractToUserRegistry(user.getTaxCode(), user.getEmail(), institutionId);
             }
@@ -214,7 +254,8 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
+    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest
+                                                              onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
 
@@ -247,7 +288,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
-    private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String institutionId, String externalId, List<RelationshipState> relationshipStates) {
+    private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String
+            institutionId, String externalId, List<RelationshipState> relationshipStates) {
         List<String> states = relationshipStates.stream().map(Enum::name).collect(Collectors.toList());
         UserInstitutionFilter filter = new UserInstitutionFilter(userId, institutionId, externalId, states);
         List<UserInstitutionAggregation> userInstitutionAggregation = userService.findUserInstitutionAggregation(filter);

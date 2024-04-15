@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -105,6 +106,77 @@ class OnboardingServiceImplTest {
         onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example");
         verify(institutionConnector).existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any());
     }
+    @Test
+    void VerifyOnboardingInfoOrigin() {
+        when(institutionConnector.existsByOrigin(any(), any(), any(), any()))
+                .thenReturn(true);
+        onboardingServiceImpl.verifyOnboardingInfoOrigin("42", "42", "example");
+        verify(institutionConnector).existsByOrigin(any(), any(), any(), any());
+    }
+
+    @Test
+    void VerifyOnboardingInfoSubunitResourceNotFound() {
+        when(institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any()))
+                .thenReturn(false);
+        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example"));
+
+    }
+    @Test
+    void VerifyOnboardingInfoOriginResourceNotFound() {
+        when(institutionConnector.existsByOrigin(any(), any(), any(), any()))
+                .thenReturn(false);
+        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfoOrigin("42", "42", "example"));
+
+    }
+
+    @Test
+    void testVerifyOnboardingInfoByOrigin() {
+        // Arrange
+        when(institutionConnector.existsByOrigin(Mockito.<String>any(), Mockito.<String>any(), Mockito.<String>any(),
+                Mockito.<List<RelationshipState>>any())).thenReturn(true);
+
+        // Act
+        onboardingServiceImpl.verifyOnboardingInfoByFilters("Product", "", "", "Origin", "42", "");
+
+        // Assert that nothing has changed
+        verify(institutionConnector).existsByOrigin(Mockito.<String>any(), Mockito.<String>any(), Mockito.<String>any(),
+                Mockito.<List<RelationshipState>>any());
+    }
+
+    @Test
+    void testVerifyOnboardingInfoByTaxCode() {
+        // Arrange
+        when(institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
+
+        // Act
+        onboardingServiceImpl.verifyOnboardingInfoByFilters("Product", "", "taxCode", "", "", "subunitCode");
+
+        // Assert that nothing has changed
+        verify(institutionConnector).existsByTaxCodeAndSubunitCodeAndProductAndStatusList(Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any());
+    }
+
+    @Test
+    void testVerifyOnboardingInfoByExternalId() {
+        // Arrange
+        doNothing().when(institutionService).retrieveInstitutionsWithFilter(Mockito.any(), Mockito.any(), Mockito.any());
+
+        // Act
+        onboardingServiceImpl.verifyOnboardingInfoByFilters("Product", "42", "", "", "", "");
+
+        // Assert that nothing has changed
+        verify(institutionService).retrieveInstitutionsWithFilter(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    void testVerifyOnboardingInfoByFiltersInvalidRequestException() {
+        // Arrange
+        doNothing().when(institutionService).retrieveInstitutionsWithFilter(Mockito.any(), Mockito.any(), Mockito.any());
+
+        // Assert that nothing has changed
+        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.verifyOnboardingInfoByFilters("", "", "", "", "", ""));
+    }
+
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}

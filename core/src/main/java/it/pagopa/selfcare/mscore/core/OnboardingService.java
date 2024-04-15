@@ -18,6 +18,10 @@ public interface OnboardingService {
 
     void verifyOnboardingInfoSubunit(String taxCode, String subunitCode, String productId);
 
+    void verifyOnboardingInfoOrigin(String productId, String origin, String originId);
+
+    void verifyOnboardingInfoByFilters(String productId, String externalId, String taxCode, String origin, String originId, String subunitCode);
+
     List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId);
 
     Institution persistOnboarding(String institutionId, String productId, List<UserToOnboard> users, Onboarding onboarding);
@@ -27,5 +31,6 @@ public interface OnboardingService {
     List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest toOnboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname);
 
     ResourceResponse retrieveDocument(String relationshipId);
+
 
 }

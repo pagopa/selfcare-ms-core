@@ -47,7 +47,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findAll(){
+    public List<Institution> findAll() {
         return repository.findAll().stream().map(institutionMapper::convertToInstitution).collect(Collectors.toList());
     }
 
@@ -160,7 +160,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     @Override
     public List<Onboarding> findOnboardingByIdAndProductId(String institutionId, String productId) {
 
-        Optional<InstitutionEntity> optionalInstitution =  Objects.nonNull(productId)
+        Optional<InstitutionEntity> optionalInstitution = Objects.nonNull(productId)
                 ? Optional
                 .ofNullable(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId))
                 : repository.findById(institutionId);
@@ -180,7 +180,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 Objects.nonNull(size) ? size : 100);
 
         Page<InstitutionEntity> institutionEntities = repository.find(query, pageable, InstitutionEntity.class);
-        return  institutionEntities.getContent().stream()
+        return institutionEntities.getContent().stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }
@@ -225,6 +225,19 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                         .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
                                 .elemMatch(criteriaOnboarding))
                 , InstitutionEntity.class);
+    }
+
+    @Override
+    public Boolean existsByOrigin(String productId, String origin, String originId, List<RelationshipState> validRelationshipStates) {
+
+        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.origin.name()).is(origin).and(InstitutionEntity.Fields.originId.name()).is(originId);
+
+        Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.productId.name()).is(productId)
+                .and(Onboarding.Fields.status.name()).in(validRelationshipStates);
+
+        return repository.exists(Query.query(criteriaInstitution)
+                .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                        .elemMatch(criteriaOnboarding)), InstitutionEntity.class);
     }
 
     @Override
@@ -273,7 +286,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                         .and(Onboarding.Fields.status.name()).is(ProductStatus.ACTIVE)));
 
         List<InstitutionEntity> institutionEntities = repository.find(query, InstitutionEntity.class);
-        return  institutionEntities.stream()
+        return institutionEntities.stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }

@@ -73,9 +73,9 @@ public class OnboardingController {
     /**
      * The function verify onboarding status of given product and subunit of institution
      *
-     * @param taxCode String
+     * @param taxCode     String
      * @param subunitCode String
-     * @param productId  String
+     * @param productId   String
      * @return no content
      * * Code: 204, Message: successful operation, DataType: TokenId
      * * Code: 400, Message: Invalid ID supplied, DataType: Problem
@@ -92,6 +92,26 @@ public class OnboardingController {
                                                      @RequestParam(value = "productId") String productId) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
         onboardingService.verifyOnboardingInfoSubunit(taxCode, subunitCode, productId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
+    @RequestMapping(method = {RequestMethod.HEAD}, value = "/verify")
+    public ResponseEntity<Void> verifyOnboardingInfoByFilters(@ApiParam("${swagger.mscore.institutions.model.product}")
+                                                       @RequestParam(value = "productId") String productId,
+                                                       @ApiParam("${swagger.mscore.institutions.model.externalId}")
+                                                       @PathVariable(value = "externalId", required = false) String externalId,
+                                                       @ApiParam("${swagger.mscore.institutions.model.taxCode}")
+                                                       @RequestParam(value = "taxCode", required = false) String taxCode,
+                                                       @ApiParam("${swagger.mscore.institutions.model.origin}")
+                                                       @RequestParam(value = "origin", required = false) String origin,
+                                                       @ApiParam("${swagger.mscore.institutions.model.originId}")
+                                                       @RequestParam(value = "originId", required = false) String originId,
+                                                       @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
+                                                       @RequestParam(value = "subunitCode", required = false) String subunitCode) {
+        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
+        onboardingService.verifyOnboardingInfoByFilters(productId, externalId, taxCode, origin, originId, subunitCode);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -179,7 +199,7 @@ public class OnboardingController {
     @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
     @PostMapping(value = "/users")
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionUsers(@RequestBody @Valid OnboardingInstitutionUsersRequest request,
-                                                                                     Authentication authentication) {
+                                                                               Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = onboardingService.onboardingUsers(onboardingResourceMapper.toOnboardingUsersRequest(request), selfCareUser.getUserName(), selfCareUser.getSurname());

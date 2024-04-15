@@ -21,6 +21,8 @@ public interface InstitutionConnector {
 
     Boolean existsByTaxCodeAndSubunitCodeAndProductAndStatusList(String taxtCode, String subunitCode, Optional<String> productId, List<RelationshipState> validRelationshipStates);
 
+    Boolean existsByOrigin(String productId, String origin, String originId, List<RelationshipState> validRelationshipStates);
+
     Optional<Institution> findByExternalId(String externalId);
 
     List<Institution> findWithFilter(String externalId, String productId, List<RelationshipState> validRelationshipStates);
