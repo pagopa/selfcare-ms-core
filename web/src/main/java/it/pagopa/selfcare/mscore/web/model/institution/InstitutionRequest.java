@@ -23,9 +23,7 @@ public class InstitutionRequest {
     private String city;
     private String county;
     private String country;
-    @NotEmpty(message = "TaxCode is required")
     private String taxCode;
-
     private BillingRequest billing;
     private List<OnboardingRequest> onboarding;
     private List<GeoTaxonomies> geographicTaxonomies;

@@ -179,7 +179,7 @@ public class OnboardingController {
     @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
     @PostMapping(value = "/users")
     public ResponseEntity<List<RelationshipResult>> onboardingInstitutionUsers(@RequestBody @Valid OnboardingInstitutionUsersRequest request,
-                                                                                     Authentication authentication) {
+                                                                               Authentication authentication) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
         SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
         List<RelationshipInfo> response = onboardingService.onboardingUsers(onboardingResourceMapper.toOnboardingUsersRequest(request), selfCareUser.getUserName(), selfCareUser.getSurname());
