@@ -98,7 +98,7 @@ public class OnboardingController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.verify}", notes = "${swagger.mscore.onboarding.verify}")
     @RequestMapping(method = {RequestMethod.HEAD}, value = "/verify")
-    public ResponseEntity<Void> verifyOnboardingInfoByFilters(@ApiParam("${swagger.mscore.institutions.model.product}")
+    public ResponseEntity<Void> verifyOnboardingInfoByFilters(@ApiParam("${swagger.mscore.institutions.model.productId}")
                                                        @RequestParam(value = "productId") String productId,
                                                        @ApiParam("${swagger.mscore.institutions.model.externalId}")
                                                        @PathVariable(value = "externalId", required = false) String externalId,
