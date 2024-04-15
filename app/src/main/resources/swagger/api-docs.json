@@ -4595,10 +4595,6 @@
         "title" : "DelegationRequestFromTaxcode",
         "type" : "object",
         "properties" : {
-          "createdAt" : {
-            "type" : "string",
-            "format" : "date-time"
-          },
           "fromSubunitCode" : {
             "type" : "string"
           },
@@ -4614,10 +4610,6 @@
           "productId" : {
             "type" : "string"
           },
-          "status" : {
-            "type" : "string",
-            "enum" : [ "ACTIVE", "DELETED" ]
-          },
           "toSubunitCode" : {
             "type" : "string"
           },
@@ -4627,10 +4619,6 @@
           "type" : {
             "type" : "string",
             "enum" : [ "AOO", "PT" ]
-          },
-          "updatedAt" : {
-            "type" : "string",
-            "format" : "date-time"
           }
         }
       },
