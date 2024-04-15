@@ -248,12 +248,14 @@ class DelegationServiceImplTest {
     void testCreateDelegationFromTaxCodeWithSubunitCode() {
         Institution institution = new Institution();
         institution.setId("id");
-        when(delegationConnector.save(any())).thenReturn(dummyDelegationProdPagopa);
+        when(delegationConnector.findAndActivate(anyString(), anyString(), anyString())).thenReturn(dummyDelegationProdPagopa);
         when(institutionService.getInstitutions(dummyDelegationProdPagopa.getTo(), dummyDelegationProdPagopa.getToSubunitCode())).thenReturn(List.of(institution));
         when(institutionService.getInstitutions(dummyDelegationProdPagopa.getFrom(), dummyDelegationProdPagopa.getFromSubunitCode())).thenReturn(List.of(institution));
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
+        when(delegationConnector.checkIfExistsWithStatus(dummyDelegationProdPagopa, DelegationState.ACTIVE)).thenReturn(false);
+        when(delegationConnector.checkIfExistsWithStatus(dummyDelegationProdPagopa, DelegationState.DELETED)).thenReturn(true);
         Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(dummyDelegationProdPagopa);
-        verify(delegationConnector).save(any());
+        verify(delegationConnector).findAndActivate(anyString(), anyString(), anyString());
         assertNotNull(response);
         assertNotNull(response.getId());
         assertEquals(dummyDelegationProdPagopa.getId(), response.getId());

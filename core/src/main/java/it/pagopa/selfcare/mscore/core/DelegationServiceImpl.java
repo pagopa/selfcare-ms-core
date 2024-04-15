@@ -57,7 +57,7 @@ public class DelegationServiceImpl implements DelegationService {
         try {
             if(checkIfExistsWithStatus(delegation, DelegationState.DELETED)){
                 savedDelegation = delegationConnector.findAndActivate(delegation.getFrom(), delegation.getTo(), delegation.getProductId());
-            } else{
+            } else {
                 delegation.setCreatedAt(OffsetDateTime.now());
                 delegation.setUpdatedAt(OffsetDateTime.now());
                 delegation.setStatus(DelegationState.ACTIVE);
@@ -128,13 +128,16 @@ public class DelegationServiceImpl implements DelegationService {
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
         }
 
+        Delegation savedDelegation;
         try {
-            if(!checkIfExistsWithStatus(delegation, DelegationState.DELETED)){
+            if(checkIfExistsWithStatus(delegation, DelegationState.DELETED)){
+                savedDelegation = delegationConnector.findAndActivate(delegation.getFrom(),delegation.getTo(),delegation.getProductId());
+            } else {
                 delegation.setCreatedAt(OffsetDateTime.now());
+                delegation.setUpdatedAt(OffsetDateTime.now());
+                delegation.setStatus(DelegationState.ACTIVE);
+                savedDelegation = delegationConnector.save(delegation);
             }
-            delegation.setUpdatedAt(OffsetDateTime.now());
-            delegation.setStatus(DelegationState.ACTIVE);
-            Delegation savedDelegation = delegationConnector.save(delegation);
             institutionService.updateInstitutionDelegation(delegation.getTo(), true);
             return savedDelegation;
         } catch (Exception e) {
