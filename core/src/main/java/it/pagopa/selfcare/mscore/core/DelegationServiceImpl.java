@@ -48,6 +48,16 @@ public class DelegationServiceImpl implements DelegationService {
             setPartnerByInstitutionTaxCode(delegation);
         }
 
+        Delegation savedDelegation = checkIfExistsAndSaveDelegation(delegation);
+        try {
+            notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
+        } catch (Exception e) {
+            log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
+        }
+        return savedDelegation;
+    }
+
+    private Delegation checkIfExistsAndSaveDelegation(Delegation delegation) {
         if(checkIfExistsWithStatus(delegation, DelegationState.ACTIVE)) {
             throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
                     CustomError.CREATE_DELEGATION_CONFLICT.getCode());
@@ -66,11 +76,6 @@ public class DelegationServiceImpl implements DelegationService {
             institutionService.updateInstitutionDelegation(delegation.getTo(), true);
         } catch (Exception e) {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
-        }
-        try {
-            notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
-        } catch (Exception e) {
-            log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
         }
         return savedDelegation;
     }
@@ -123,26 +128,7 @@ public class DelegationServiceImpl implements DelegationService {
                         INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
         delegation.setFrom(from);
 
-        if(checkIfExistsWithStatus(delegation, DelegationState.ACTIVE)) {
-            throw new ResourceConflictException(String.format(CustomError.CREATE_DELEGATION_CONFLICT.getMessage()),
-                    CustomError.CREATE_DELEGATION_CONFLICT.getCode());
-        }
-
-        Delegation savedDelegation;
-        try {
-            if(checkIfExistsWithStatus(delegation, DelegationState.DELETED)){
-                savedDelegation = delegationConnector.findAndActivate(delegation.getFrom(),delegation.getTo(),delegation.getProductId());
-            } else {
-                delegation.setCreatedAt(OffsetDateTime.now());
-                delegation.setUpdatedAt(OffsetDateTime.now());
-                delegation.setStatus(DelegationState.ACTIVE);
-                savedDelegation = delegationConnector.save(delegation);
-            }
-            institutionService.updateInstitutionDelegation(delegation.getTo(), true);
-            return savedDelegation;
-        } catch (Exception e) {
-            throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
-        }
+        return checkIfExistsAndSaveDelegation(delegation);
     }
 
     @Override
