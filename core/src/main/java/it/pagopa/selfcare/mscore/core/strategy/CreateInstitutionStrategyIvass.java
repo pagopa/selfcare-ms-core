@@ -31,10 +31,9 @@ public class CreateInstitutionStrategyIvass extends CreateInstitutionStrategyCom
 
     @Override
     public Institution createInstitution(CreateInstitutionStrategyInput strategyInput) {
+        checkIfAlreadyExistByOriginAndOriginId(Origin.IVASS.name(), strategyInput.getIvassCode());
 
-        checkIfAlreadyExistsByTaxCodeAndSubunitCode(strategyInput.getTaxCode(), strategyInput.getSubunitCode());
-
-        AsResource asResource = partyRegistryProxyConnector.getASFromIvass(strategyInput.getTaxCode());
+        AsResource asResource = partyRegistryProxyConnector.getASFromIvass(strategyInput.getIvassCode());
 
         institution = addFieldsToInstitution(asResource);
         try {

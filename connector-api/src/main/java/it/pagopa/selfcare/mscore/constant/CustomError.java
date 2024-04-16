@@ -16,6 +16,7 @@ public enum CustomError {
     INSTITUTION_LEGAL_NOT_FOUND("0037", "Institution with externalInstitutionId %s is not related to user"),
     CREATE_INSTITUTION_CONFLICT("0038", "Institution having externalId %s already exists"),
     CREATE_INSTITUTION_IPA_CONFLICT("0038", "Institution having taxCode %s and subunitCode %s already exists"),
+    CREATE_INSTITUTION_ORIGIN_CONFLICT("0038", "Institution having origin %s and originId %s already exists"),
     CREATE_INSTITUTION_NOT_FOUND("0039", "Institution having externalId %s not exists in registry"),
     INSTITUTION_TAX_CODE_NOT_FOUND("0040", "Cannot find Institution using taxCode %s"),
     ONBOARDING_INVALID_UPDATES("0046", "Cannot perform data overrides on institution having external id %s"),
