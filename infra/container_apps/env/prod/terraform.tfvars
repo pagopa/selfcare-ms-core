@@ -189,6 +189,10 @@ app_settings = [
   {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.pdv.pagopa.it/user-registry/v1"
+  },
+  {
+    name  = "SELFCARE_USER_URL"
+    value = "https://selc-p-user-ms-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
   }
 ]
 

@@ -201,6 +201,10 @@ app_settings = [
   {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
+  },
+  {
+    name  = "SELFCARE_USER_URL"
+    value = "https://selc-d-user-ms-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
   }
 ]
 
