@@ -570,7 +570,6 @@ class PartyRegistryProxyConnectorImplTest {
     void getASFromIvassNotFound() {
         //given
         String ivassCode = "ivassCode";
-        when(partyRegistryProxyRestClient._searchByOriginIdUsingGET(anyString())).thenThrow(ResourceNotFoundException.class);
         when(partyRegistryProxyRestClient._searchByOriginIdUsingGET(anyString())).thenReturn(null);
 
         //when
