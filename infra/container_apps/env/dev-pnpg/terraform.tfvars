@@ -181,6 +181,10 @@ app_settings = [
   {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
+  },
+  {
+    name  = "SELFCARE_USER_URL"
+    value = "https://selc-d-pnpg-user-ms-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
   }
 ]
 
