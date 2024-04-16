@@ -2,8 +2,6 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import it.pagopa.selfcare.mscore.api.UserApiConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.UserApiRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.client.UserInstitutionApiRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.client.UserPermissionRestClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,13 +13,9 @@ import java.util.List;
 public class UserApiConnectorImpl implements UserApiConnector {
 
     private final UserApiRestClient userApiRestClient;
-    private final UserInstitutionApiRestClient userInstitutionApiRestClient;
-    private final UserPermissionRestClient userPermissionRestClient;
 
-    public UserApiConnectorImpl(UserApiRestClient userApiRestClient, UserInstitutionApiRestClient userInstitutionApiRestClient, UserPermissionRestClient userPermissionRestClient) {
+    public UserApiConnectorImpl(UserApiRestClient userApiRestClient) {
         this.userApiRestClient = userApiRestClient;
-        this.userInstitutionApiRestClient = userInstitutionApiRestClient;
-        this.userPermissionRestClient = userPermissionRestClient;
     }
 
     @Override
