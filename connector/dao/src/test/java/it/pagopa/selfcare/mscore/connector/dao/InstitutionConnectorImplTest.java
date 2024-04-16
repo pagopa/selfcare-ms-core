@@ -12,7 +12,9 @@ import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -770,5 +772,36 @@ class InstitutionConnectorImplTest {
                 .findByOriginAndOriginId("example", "example");
 
         assertFalse(onboardings.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return true when onboarding exists by filters")
+    void shouldReturnTrueWhenOnboardingExistsByFilters() {
+        // Given
+        VerifyOnboardingFilters filters = new VerifyOnboardingFilters("productId", "externalId", "taxCode", "origin", "originId", "subunitCode");
+        filters.setValidRelationshipStates(List.of(RelationshipState.ACTIVE));
+        when(institutionRepository.exists(any(Query.class), any())).thenReturn(true);
+
+        // When
+        Boolean exists = institutionConnectorImpl.existsOnboardingByFilters(filters);
+
+        // Then
+        assertTrue(exists);
+    }
+
+    @Test
+    @DisplayName("Should return false when onboarding does not exist by filters")
+    void shouldReturnFalseWhenOnboardingDoesNotExistByFilters() {
+        // Given
+        VerifyOnboardingFilters filters = new VerifyOnboardingFilters("productId", "externalId", "taxCode", "origin", "originId", "subunitCode");
+        filters.setValidRelationshipStates(List.of(RelationshipState.ACTIVE));
+
+        when(institutionRepository.exists(any(Query.class), any())).thenReturn(false);
+
+        // When
+        Boolean exists = institutionConnectorImpl.existsOnboardingByFilters(filters);
+
+        // Then
+        assertFalse(exists);
     }
 }
