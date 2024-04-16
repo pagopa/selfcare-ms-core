@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
+import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
@@ -130,7 +131,7 @@ class DelegationControllerTest {
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData() throws Exception {
@@ -138,7 +139,7 @@ class DelegationControllerTest {
         Delegation expectedDelegation = dummyDelegation();
 
         when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Optional.empty(), Optional.empty()))
+                expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.NONE, Optional.empty(), Optional.empty()))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -166,7 +167,7 @@ class DelegationControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL,
+                        expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, null,
                         Optional.empty(), Optional.empty());
 
         verifyNoMoreInteractions(delegationService);
@@ -182,7 +183,7 @@ class DelegationControllerTest {
         expectedDelegations.add(delegation2);
 
         when(delegationService.getDelegations(null, TO1,
-                null, null, null, GetDelegationsMode.FULL, Optional.empty(), Optional.empty()))
+                null, null, null, GetDelegationsMode.FULL, null, Optional.empty(), Optional.empty()))
                 .thenReturn(expectedDelegations);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -209,13 +210,13 @@ class DelegationControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegations(null, TO1, null,
-                        null, null, GetDelegationsMode.FULL,
+                        null, null, GetDelegationsMode.FULL, null,
                         Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData_nullMode() throws Exception {
@@ -223,7 +224,7 @@ class DelegationControllerTest {
         Delegation expectedDelegation = dummyDelegation();
 
         when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, null, null, Optional.empty(), Optional.empty()))
+                expectedDelegation.getProductId(), null, null, null, null, Optional.empty(), Optional.empty()))
                 .thenReturn(List.of(expectedDelegation));
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -251,7 +252,7 @@ class DelegationControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, null, null, Optional.empty(), Optional.empty());
+                        expectedDelegation.getProductId(), null, null, null, null, Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 

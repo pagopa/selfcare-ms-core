@@ -5,6 +5,7 @@ import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
+import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -163,8 +164,8 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public List<Delegation> getDelegations(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode,
-                                           Optional<Integer> page, Optional<Integer> size) {
+                                           Order order, Optional<Integer> page, Optional<Integer> size) {
         int pageSize = size.filter(s -> s > 0).filter(s -> s <= DEFAULT_DELEGATIONS_PAGE_SIZE).orElse(DEFAULT_DELEGATIONS_PAGE_SIZE);
-        return delegationConnector.find(from, to, productId, search, taxCode, mode, page.orElse(0), pageSize);
+        return delegationConnector.find(from, to, productId, search, taxCode, mode, order, page.orElse(0), pageSize);
     }
 }

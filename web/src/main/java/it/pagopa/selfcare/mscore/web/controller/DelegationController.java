@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
+import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
@@ -105,13 +106,15 @@ public class DelegationController {
                                                                    @RequestParam(name = "taxCode", required = false) String taxCode,
                                                                    @ApiParam("${swagger.mscore.institutions.delegations.mode}")
                                                                    @RequestParam(name = "mode", required = false) GetDelegationsMode mode,
+                                                                   @ApiParam("${swagger.mscore.institutions.delegations.order}")
+                                                                   @RequestParam(name = "order", required = false) Optional<Order> order,
                                                                    @RequestParam(name = "page", required = false) Optional<Integer> page,
                                                                    @RequestParam(name = "size", required = false) Optional<Integer> size) {
 
         if(Objects.isNull(institutionId) && Objects.isNull(brokerId))
             throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, search, taxCode, mode, page, size).stream()
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, search, taxCode, mode, order.orElse(Order.NONE), page, size).stream()
                 .map(delegationMapper::toDelegationResponse)
                 .collect(Collectors.toList()));
     }
