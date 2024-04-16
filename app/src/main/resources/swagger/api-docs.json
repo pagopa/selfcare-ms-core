@@ -2962,10 +2962,10 @@
           }
         }, {
           "name" : "externalId",
-          "in" : "path",
+          "in" : "query",
           "description" : "Institution's unique external identifier",
-          "required" : true,
-          "style" : "simple",
+          "required" : false,
+          "style" : "form",
           "schema" : {
             "type" : "string"
           }
