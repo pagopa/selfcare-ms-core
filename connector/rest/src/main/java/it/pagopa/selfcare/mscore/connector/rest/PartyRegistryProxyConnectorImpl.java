@@ -182,6 +182,7 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     @Override
     public AsResource getASFromIvass(String ivassCode) {
         try {
+            if (ivassCode.matches("\\w*")) { log.debug("getASFromIvass = {}", ivassCode); }
             Assert.hasText(ivassCode, "IvassCode is required");
             ResponseEntity<InsuranceCompanyResource> result = restClient._searchByOriginIdUsingGET(ivassCode);
             log.debug("getASFromIvass = {}", ivassCode);
