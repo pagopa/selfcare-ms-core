@@ -409,12 +409,12 @@ class OnboardingControllerTest {
      * Method under test: {@link OnboardingController#verifyOnboardingInfoByFilters(String, String, String, String, String, String)}
      */
     @Test
-    void shouldVerifyOnboardingInfoByFilters() throws Exception {
-        doNothing().when(onboardingService).verifyOnboardingInfoByFilters(any(), any(), any(),any(), any(), any());
+    void shouldVerifyOnboardingInfoByFiltersSuccess() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfoByFilters(any());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .head("/onboarding/verify")
                 .queryParam("origin", "42")
-                .queryParam("originid", "42")
+                .queryParam("originId", "42")
                 .queryParam("productId", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
                 .build()

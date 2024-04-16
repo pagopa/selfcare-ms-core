@@ -106,13 +106,6 @@ class OnboardingServiceImplTest {
         onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example");
         verify(institutionConnector).existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any());
     }
-    @Test
-    void VerifyOnboardingInfoOrigin() {
-        when(institutionConnector.existsByOrigin(any(), any(), any(), any()))
-                .thenReturn(true);
-        onboardingServiceImpl.verifyOnboardingInfoOrigin("42", "42", "example");
-        verify(institutionConnector).existsByOrigin(any(), any(), any(), any());
-    }
 
     @Test
     void VerifyOnboardingInfoSubunitResourceNotFound() {
@@ -121,58 +114,32 @@ class OnboardingServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example"));
 
     }
-    @Test
-    void VerifyOnboardingInfoOriginResourceNotFound() {
-        when(institutionConnector.existsByOrigin(any(), any(), any(), any()))
-                .thenReturn(false);
-        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfoOrigin("42", "42", "example"));
-
-    }
 
     @Test
-    void testVerifyOnboardingInfoByOrigin() {
+    void testVerifyOnboardingInfoByFilter() {
         // Arrange
-        when(institutionConnector.existsByOrigin(Mockito.<String>any(), Mockito.<String>any(), Mockito.<String>any(),
-                Mockito.<List<RelationshipState>>any())).thenReturn(true);
+        when(institutionConnector.existsOnboardingByFilters(Mockito.any())).thenReturn(true);
 
+        VerifyOnboardingFilters verifyOnboardingFilters = new VerifyOnboardingFilters("Product", "", "", "Origin", "OriginId", "");
         // Act
-        onboardingServiceImpl.verifyOnboardingInfoByFilters("Product", "", "", "Origin", "42", "");
+        onboardingServiceImpl.verifyOnboardingInfoByFilters(verifyOnboardingFilters);
 
         // Assert that nothing has changed
-        verify(institutionConnector).existsByOrigin(Mockito.<String>any(), Mockito.<String>any(), Mockito.<String>any(),
-                Mockito.<List<RelationshipState>>any());
+        verify(institutionConnector).existsOnboardingByFilters(Mockito.any());
     }
 
     @Test
-    void testVerifyOnboardingInfoByTaxCode() {
+    void testVerifyOnboardingInfoByFilterNotFound() {
         // Arrange
-        when(institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
+        when(institutionConnector.existsOnboardingByFilters(Mockito.any())).thenReturn(false);
 
+        VerifyOnboardingFilters verifyOnboardingFilters = new VerifyOnboardingFilters("Product", "", "", "Origin", "OriginId", "");
         // Act
-        onboardingServiceImpl.verifyOnboardingInfoByFilters("Product", "", "taxCode", "", "", "subunitCode");
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfoByFilters(verifyOnboardingFilters));
 
         // Assert that nothing has changed
-        verify(institutionConnector).existsByTaxCodeAndSubunitCodeAndProductAndStatusList(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any());
+        verify(institutionConnector).existsOnboardingByFilters(Mockito.any());
     }
-
-    @Test
-    void testVerifyOnboardingInfoByExternalId() {
-        // Arrange
-        doNothing().when(institutionService).retrieveInstitutionsWithFilter(Mockito.any(), Mockito.any(), Mockito.any());
-
-        // Act
-        onboardingServiceImpl.verifyOnboardingInfoByFilters("Product", "42", "", "", "", "");
-
-        // Assert that nothing has changed
-        verify(institutionService).retrieveInstitutionsWithFilter(Mockito.any(), Mockito.any(), Mockito.any());
-    }
-
-    @Test
-    void testVerifyOnboardingInfoByFiltersInvalidRequestException() {
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.verifyOnboardingInfoByFilters("", "", "", "", "", ""));
-    }
-
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -1060,15 +1027,15 @@ class OnboardingServiceImplTest {
 
 
     private User dummyUser() {
-        CertifiedField<String> certifiedField = new CertifiedField<>();
+        CertifiedField certifiedField = new CertifiedField<>();
         certifiedField.setCertification(Certification.NONE);
         certifiedField.setValue("42");
 
-        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        CertifiedField certifiedField1 = new CertifiedField<>();
         certifiedField1.setCertification(Certification.NONE);
         certifiedField1.setValue("42");
 
-        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        CertifiedField certifiedField2 = new CertifiedField<>();
         certifiedField2.setCertification(Certification.NONE);
         certifiedField2.setValue("42");
 

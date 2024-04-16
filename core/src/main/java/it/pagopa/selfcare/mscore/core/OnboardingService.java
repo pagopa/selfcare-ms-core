@@ -3,10 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingOperatorsRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingUsersRequest;
-import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.*;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 
@@ -18,9 +15,7 @@ public interface OnboardingService {
 
     void verifyOnboardingInfoSubunit(String taxCode, String subunitCode, String productId);
 
-    void verifyOnboardingInfoOrigin(String productId, String origin, String originId);
-
-    void verifyOnboardingInfoByFilters(String productId, String externalId, String taxCode, String origin, String originId, String subunitCode);
+    void verifyOnboardingInfoByFilters(VerifyOnboardingFilters filters);
 
     List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId);
 

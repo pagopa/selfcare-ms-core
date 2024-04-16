@@ -11,6 +11,7 @@ import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
+import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
@@ -101,7 +102,7 @@ public class OnboardingController {
     public ResponseEntity<Void> verifyOnboardingInfoByFilters(@ApiParam("${swagger.mscore.institutions.model.productId}")
                                                        @RequestParam(value = "productId") String productId,
                                                        @ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                       @PathVariable(value = "externalId", required = false) String externalId,
+                                                       @RequestParam(value = "externalId", required = false) String externalId,
                                                        @ApiParam("${swagger.mscore.institutions.model.taxCode}")
                                                        @RequestParam(value = "taxCode", required = false) String taxCode,
                                                        @ApiParam("${swagger.mscore.institutions.model.origin}")
@@ -111,7 +112,7 @@ public class OnboardingController {
                                                        @ApiParam("${swagger.mscore.institutions.model.subunitCode}")
                                                        @RequestParam(value = "subunitCode", required = false) String subunitCode) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_VERIFICATION_ERROR);
-        onboardingService.verifyOnboardingInfoByFilters(productId, externalId, taxCode, origin, originId, subunitCode);
+        onboardingService.verifyOnboardingInfoByFilters(new VerifyOnboardingFilters(productId, externalId, taxCode, origin, originId, subunitCode));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 

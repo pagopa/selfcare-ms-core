@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -228,19 +229,6 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Boolean existsByOrigin(String productId, String origin, String originId, List<RelationshipState> validRelationshipStates) {
-
-        Criteria criteriaInstitution = Criteria.where(InstitutionEntity.Fields.origin.name()).is(origin).and(InstitutionEntity.Fields.originId.name()).is(originId);
-
-        Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.productId.name()).is(productId)
-                .and(Onboarding.Fields.status.name()).in(validRelationshipStates);
-
-        return repository.exists(Query.query(criteriaInstitution)
-                .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
-                        .elemMatch(criteriaOnboarding)), InstitutionEntity.class);
-    }
-
-    @Override
     public Optional<Institution> findByExternalId(String externalId) {
         return repository.find(Query.query(Criteria.where(InstitutionEntity.Fields.externalId.name()).is(externalId)),
                         InstitutionEntity.class).stream()
@@ -311,6 +299,25 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                         InstitutionEntity.class).stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean existsOnboardingByFilters(VerifyOnboardingFilters filters) {
+        Criteria criteriaInstitution = CriteriaBuilder.builder()
+                .isIfNotNull(InstitutionEntity.Fields.externalId.name(), filters.getExternalId())
+                .isIfNotNull(InstitutionEntity.Fields.taxCode.name(), filters.getTaxCode())
+                .isIfNotNull(InstitutionEntity.Fields.origin.name(), filters.getOrigin())
+                .isIfNotNull(InstitutionEntity.Fields.originId.name(), filters.getOriginId())
+                .isIfNotNull(InstitutionEntity.Fields.subunitCode.name(), filters.getSubunitCode())
+                .build();
+
+        Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(filters.getValidRelationshipStates())
+                .and(Onboarding.Fields.productId.name()).is(filters.getProductId());
+
+        return repository.exists(Query.query(criteriaInstitution)
+                        .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                                .elemMatch(criteriaOnboarding))
+                , InstitutionEntity.class);
     }
 
     private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {

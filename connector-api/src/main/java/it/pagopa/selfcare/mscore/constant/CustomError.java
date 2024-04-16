@@ -12,7 +12,7 @@ public enum CustomError {
     MANAGER_NOT_FOUND_ERROR("0033", "No onboarded managers for at least one of the institutions %s and product %s"),
     ROLES_NOT_ADMITTED_ERROR("0034","Roles %s are not admitted for this operation"),
     INSTITUTION_NOT_ONBOARDED("0004", "Institution having externalId %s is not onboarded for product %s"),
-    INSTITUTION_NOT_ONBOARDED_FOR_ORIGIN("0004", "Institution having origin %s and originId %s is not onboarded for product %s"),
+    INSTITUTION_NOT_ONBOARDED_BY_FILTERS("0004", "Has not been found an onboarded Institution with the provided filters"),
     INSTITUTION_NOT_FOUND("0036", "Cannot find Institution using institutionId %s and externalInstitutionId %s"),
     INSTITUTION_LEGAL_NOT_FOUND("0037", "Institution with externalInstitutionId %s is not related to user"),
     CREATE_INSTITUTION_CONFLICT("0038", "Institution having externalId %s already exists"),

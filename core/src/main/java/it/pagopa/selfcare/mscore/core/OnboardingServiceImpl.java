@@ -6,7 +6,6 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInfoTypeVerifier;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
@@ -87,39 +86,14 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public void verifyOnboardingInfoOrigin(String productId, String origin, String originId) {
-        Boolean existsOnboardingValid = institutionConnector.existsByOrigin(productId, origin, originId, UtilEnumList.VALID_RELATIONSHIP_STATES);
+    public void verifyOnboardingInfoByFilters(VerifyOnboardingFilters filters) {
+        filters.setValidRelationshipStates(UtilEnumList.VALID_RELATIONSHIP_STATES);
+
+        Boolean existsOnboardingValid = institutionConnector.existsOnboardingByFilters(filters);
         if (Boolean.FALSE.equals(existsOnboardingValid)) {
-            throw new ResourceNotFoundException(String.format(CustomError.INSTITUTION_NOT_ONBOARDED_FOR_ORIGIN.getMessage(), origin, originId, productId),
-                    CustomError.INSTITUTION_NOT_ONBOARDED_FOR_ORIGIN.getCode());
+            throw new ResourceNotFoundException(CustomError.INSTITUTION_NOT_ONBOARDED_BY_FILTERS.getMessage(),
+                    CustomError.INSTITUTION_NOT_ONBOARDED_BY_FILTERS.getCode());
         }
-    }
-
-    @Override
-    public void verifyOnboardingInfoByFilters(String productId, String externalId, String taxCode, String origin, String originId, String subunitCode) {
-        OnboardingInfoTypeVerifier onboardingInfoTypeVerifier = this.inferTypeVerifierFromGivenFilters(externalId, taxCode, origin, originId, subunitCode);
-        switch (onboardingInfoTypeVerifier) {
-            case EXTERNAL_ID_VERIFIER:
-                verifyOnboardingInfo(externalId, productId);
-                break;
-            case TAX_CODE_AND_SUBUNIT_VERIFIER:
-                verifyOnboardingInfoSubunit(taxCode, subunitCode, productId);
-                break;
-            case ORIGIN_VERIFIER:
-                verifyOnboardingInfoOrigin(productId, origin, originId);
-                break;
-        }
-    }
-
-    private OnboardingInfoTypeVerifier inferTypeVerifierFromGivenFilters(String externalId, String taxCode, String origin, String originId, String subunitCode) {
-        if (StringUtils.hasText(externalId) && !StringUtils.hasText(taxCode) && !StringUtils.hasText(origin) && !StringUtils.hasText(originId) && !StringUtils.hasText(subunitCode)) {
-            return OnboardingInfoTypeVerifier.EXTERNAL_ID_VERIFIER;
-        } else if (StringUtils.hasText(taxCode) && !StringUtils.hasText(origin) && !StringUtils.hasText(originId) && !StringUtils.hasText(externalId)) {
-            return OnboardingInfoTypeVerifier.TAX_CODE_AND_SUBUNIT_VERIFIER;
-        } else if (StringUtils.hasText(origin) && StringUtils.hasText(originId) && !StringUtils.hasText(taxCode) && !StringUtils.hasText(subunitCode) && !StringUtils.hasText(externalId)) {
-            return OnboardingInfoTypeVerifier.ORIGIN_VERIFIER;
-        }
-        throw new InvalidRequestException(CustomError.ONBOARDING_INFO_FILTERS_ERROR.getMessage(), CustomError.ONBOARDING_INFO_FILTERS_ERROR.getCode());
     }
 
     @Override
