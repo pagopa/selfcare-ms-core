@@ -406,6 +406,23 @@ class OnboardingControllerTest {
     }
 
     /**
+     * Method under test: {@link OnboardingController#verifyOnboardingInfoByFilters(String, String, String, String, String, String)}
+     */
+    @Test
+    void shouldVerifyOnboardingInfoByFiltersSuccess() throws Exception {
+        doNothing().when(onboardingService).verifyOnboardingInfoByFilters(any());
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .head("/onboarding/verify")
+                .queryParam("origin", "42")
+                .queryParam("originId", "42")
+                .queryParam("productId", "42");
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(onboardingController)
+                .build()
+                .perform(requestBuilder);
+        actualPerformResult.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    /**
      * Method under test: {@link OnboardingController#verifyOnboardingInfo(String, String)}
      */
     @Test
@@ -455,5 +472,5 @@ class OnboardingControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
-}
+    }
 
