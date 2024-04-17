@@ -180,7 +180,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", "to", "productId", null, null,
-                GetDelegationsMode.NORMAL, null, Optional.of(0), Optional.of(100));
+                GetDelegationsMode.NORMAL, Optional.empty(), Optional.of(0), Optional.of(100));
         //Then
         verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
@@ -200,7 +200,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null, null,
-                GetDelegationsMode.FULL, null, Optional.of(0), Optional.of(0));
+                GetDelegationsMode.FULL, Optional.of(Order.DESC), Optional.of(0), Optional.of(0));
         //Then
         verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
@@ -220,7 +220,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null, null,
-                GetDelegationsMode.FULL, Order.DESC, Optional.empty(), Optional.empty());
+                GetDelegationsMode.FULL, Optional.of(Order.DESC), Optional.empty(), Optional.empty());
         //Then
         verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
