@@ -25,7 +25,6 @@ public class InstitutionResponse {
     private String digitalAddress;
     private String address;
     private String zipCode;
-    @NotBlank
     private String taxCode;
     private String city;
     private String county;

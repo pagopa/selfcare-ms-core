@@ -13,6 +13,7 @@ import java.util.List;
 public class CreateInstitutionStrategyInput {
 
     private String taxCode;
+    private String ivassCode;
     private String description;
     private InstitutionPaSubunitType subunitType;
     private List<InstitutionGeographicTaxonomies> geographicTaxonomies;

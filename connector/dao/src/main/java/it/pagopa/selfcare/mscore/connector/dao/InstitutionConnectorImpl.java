@@ -12,6 +12,7 @@ import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
 import it.pagopa.selfcare.mscore.model.product.ProductStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -47,7 +48,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public List<Institution> findAll(){
+    public List<Institution> findAll() {
         return repository.findAll().stream().map(institutionMapper::convertToInstitution).collect(Collectors.toList());
     }
 
@@ -160,7 +161,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     @Override
     public List<Onboarding> findOnboardingByIdAndProductId(String institutionId, String productId) {
 
-        Optional<InstitutionEntity> optionalInstitution =  Objects.nonNull(productId)
+        Optional<InstitutionEntity> optionalInstitution = Objects.nonNull(productId)
                 ? Optional
                 .ofNullable(repository.findByInstitutionIdAndOnboardingProductId(institutionId, productId))
                 : repository.findById(institutionId);
@@ -180,7 +181,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 Objects.nonNull(size) ? size : 100);
 
         Page<InstitutionEntity> institutionEntities = repository.find(query, pageable, InstitutionEntity.class);
-        return  institutionEntities.getContent().stream()
+        return institutionEntities.getContent().stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }
@@ -273,7 +274,7 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                         .and(Onboarding.Fields.status.name()).is(ProductStatus.ACTIVE)));
 
         List<InstitutionEntity> institutionEntities = repository.find(query, InstitutionEntity.class);
-        return  institutionEntities.stream()
+        return institutionEntities.stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
     }
@@ -298,6 +299,25 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                         InstitutionEntity.class).stream()
                 .map(institutionMapper::convertToInstitution)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean existsOnboardingByFilters(VerifyOnboardingFilters filters) {
+        Criteria criteriaInstitution = CriteriaBuilder.builder()
+                .isIfNotNull(InstitutionEntity.Fields.externalId.name(), filters.getExternalId())
+                .isIfNotNull(InstitutionEntity.Fields.taxCode.name(), filters.getTaxCode())
+                .isIfNotNull(InstitutionEntity.Fields.origin.name(), filters.getOrigin())
+                .isIfNotNull(InstitutionEntity.Fields.originId.name(), filters.getOriginId())
+                .isIfNotNull(InstitutionEntity.Fields.subunitCode.name(), filters.getSubunitCode())
+                .build();
+
+        Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(filters.getValidRelationshipStates())
+                .and(Onboarding.Fields.productId.name()).is(filters.getProductId());
+
+        return repository.exists(Query.query(criteriaInstitution)
+                        .addCriteria(Criteria.where(InstitutionEntity.Fields.onboarding.name())
+                                .elemMatch(criteriaOnboarding))
+                , InstitutionEntity.class);
     }
 
     private Query constructQueryWithSearchMode(List<String> geo, SearchMode searchMode) {

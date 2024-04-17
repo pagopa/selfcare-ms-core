@@ -25,6 +25,7 @@ public class Institution {
     private String address;
     private String zipCode;
     private String taxCode;
+    private String ivassCode;
     private String city;
     private String county;
     private String country;
