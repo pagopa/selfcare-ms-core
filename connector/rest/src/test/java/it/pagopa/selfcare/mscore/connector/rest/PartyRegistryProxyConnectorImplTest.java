@@ -236,7 +236,7 @@ class PartyRegistryProxyConnectorImplTest {
         FeignException feignException = mock(FeignException.class);
         when(partyRegistryProxyRestClient.getCategory(any(), any()))
                 .thenThrow(feignException);
-        assertThrows(MsCoreException.class, () -> partyRegistryProxyConnectorImpl.getCategory("origin","code"));
+        assertThrows(MsCoreException.class, () -> partyRegistryProxyConnectorImpl.getCategory("origin", "code"));
         verify(partyRegistryProxyRestClient).getCategory(any(), any());
     }
 
@@ -530,7 +530,7 @@ class PartyRegistryProxyConnectorImplTest {
     }
 
     @Test
-    void getSAFromAnac(){
+    void getSAFromAnac() {
         //given
         String taxId = "taxId";
         when(partyRegistryProxyRestClient.getSaByTaxId(anyString())).thenReturn(pdndResponse);
@@ -542,7 +542,7 @@ class PartyRegistryProxyConnectorImplTest {
     }
 
     @Test
-    void getSAFromAnacNotFound(){
+    void getSAFromAnacNotFound() {
         //given
         String taxId = "taxId";
         when(partyRegistryProxyRestClient.getSaByTaxId(anyString())).thenThrow(ResourceNotFoundException.class);
@@ -554,29 +554,38 @@ class PartyRegistryProxyConnectorImplTest {
     }
 
     @Test
-    void getASFromIvass(){
+    void getASFromIvass() {
         //given
-        ResponseEntity<InsuranceCompanyResource> response =  new ResponseEntity<>(asResponse, HttpStatus.FOUND);
-        String taxId = "taxId";
-        when(partyRegistryProxyRestClient._searchByTaxCodeUsingGET(anyString())).thenReturn(response);
+        ResponseEntity<InsuranceCompanyResource> response = new ResponseEntity<>(asResponse, HttpStatus.FOUND);
+        String ivassCode = "ivassCode";
+        when(partyRegistryProxyRestClient._searchByOriginIdUsingGET(anyString())).thenReturn(response);
         //when
-        AsResource result = partyRegistryProxyConnectorImpl.getASFromIvass(taxId);
+        AsResource result = partyRegistryProxyConnectorImpl.getASFromIvass(ivassCode);
         //then
         checkNotNullFields(result);
-        verify(partyRegistryProxyRestClient, times(1))._searchByTaxCodeUsingGET(taxId);
+        verify(partyRegistryProxyRestClient, times(1))._searchByOriginIdUsingGET(ivassCode);
     }
 
     @Test
-    void getASFromIvassNotFound(){
+    void getASFromIvassNotFound() {
         //given
-        String taxId = "taxId";
-        when(partyRegistryProxyRestClient._searchByTaxCodeUsingGET(anyString())).thenThrow(ResourceNotFoundException.class);
+        String ivassCode = "ivassCode";
+        when(partyRegistryProxyRestClient._searchByOriginIdUsingGET(anyString())).thenReturn(null);
+
         //when
-        Executable executable = () -> partyRegistryProxyConnectorImpl.getASFromIvass(taxId);
+        Executable executable = () -> partyRegistryProxyConnectorImpl.getASFromIvass(ivassCode);
         //then
         assertThrows(ResourceNotFoundException.class, executable);
-        verify(partyRegistryProxyRestClient, times(1))._searchByTaxCodeUsingGET(taxId);
+        verify(partyRegistryProxyRestClient, times(1))._searchByOriginIdUsingGET(ivassCode);
     }
 
+    @Test
+    void shouldThrowResourceNotFoundExceptionWhenIvassCodeNotFound() {
+        String ivassCode = "12345";
+
+        when(partyRegistryProxyRestClient._searchByOriginIdUsingGET(ivassCode)).thenReturn(null);
+
+        assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getASFromIvass(ivassCode));
+    }
 }
 

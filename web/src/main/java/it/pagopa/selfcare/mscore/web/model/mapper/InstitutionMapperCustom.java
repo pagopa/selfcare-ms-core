@@ -171,6 +171,7 @@ public class InstitutionMapperCustom {
         institution.setBusinessRegisterPlace(request.getBusinessRegisterPlace());
         institution.setSupportEmail(request.getSupportEmail());
         institution.setSupportPhone(request.getSupportPhone());
+        institution.setIvassCode(request.getIvassCode());
         if (request.getPaymentServiceProvider() != null)
             institution.setPaymentServiceProvider(toPaymentServiceProvider(request.getPaymentServiceProvider()));
         if (request.getDataProtectionOfficer() != null)
