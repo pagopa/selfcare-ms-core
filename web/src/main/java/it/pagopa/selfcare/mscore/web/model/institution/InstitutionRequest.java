@@ -4,7 +4,6 @@ import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingRequest;
 import lombok.Data;
 
-import javax.validation.constraints.NotEmpty;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -24,6 +23,7 @@ public class InstitutionRequest {
     private String county;
     private String country;
     private String taxCode;
+    private String ivassCode;
     private BillingRequest billing;
     private List<OnboardingRequest> onboarding;
     private List<GeoTaxonomies> geographicTaxonomies;

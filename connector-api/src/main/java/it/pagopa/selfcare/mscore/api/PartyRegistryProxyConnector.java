@@ -24,5 +24,5 @@ public interface PartyRegistryProxyConnector {
 
     SaResource getSAFromAnac(String taxId);
 
-    AsResource getASFromIvass(String taxId);
+    AsResource getASFromIvass(String ivassCode);
 }
