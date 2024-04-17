@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 @Component
 public class DelegationConnectorImpl implements DelegationConnector {
 
+    public static final String INSTITUTIONS = "institutions";
+    public static final String DELEGATIONS = "Delegations";
     private final DelegationRepository repository;
     private final DelegationEntityMapper delegationMapper;
     private final DelegationInstitutionMapper delegationInstitutionMapper;
@@ -100,19 +102,19 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
             if (Objects.nonNull(taxCode)) {
                 MatchOperation matchTaxCodeOperation = getMatchTaxCodeOperation(taxCode);
-                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), matchTaxCodeOperation, skip, limit);
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as(INSTITUTIONS), matchTaxCodeOperation, skip, limit);
             }
             else {
                 if (!order.equals(Order.NONE)) {
                     SortOperation sortOperation = new SortOperation(Sort.by(sortDirection, DelegationEntity.Fields.institutionFromName.name()));
-                    aggregation = Aggregation.newAggregation(matchOperation, sortOperation, lookup.as("institutions"), skip, limit);
+                    aggregation = Aggregation.newAggregation(matchOperation, sortOperation, lookup.as(INSTITUTIONS), skip, limit);
                 }
                 else {
-                    aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+                    aggregation = Aggregation.newAggregation(matchOperation, lookup.as(INSTITUTIONS), skip, limit);
                 }
             }
 
-            List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();
+            List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, DELEGATIONS, DelegationInstitution.class).getMappedResults();
             return result.stream()
                     .map(Objects.nonNull(from) ?
                             delegationInstitutionMapper::convertToDelegationBroker :
@@ -132,7 +134,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     private static GraphLookupOperation.GraphLookupOperationBuilder createInstitutionGraphLookupOperationBuilder(String from) {
-        return Aggregation.graphLookup("Institution")
+        return Aggregation.graphLookup(INSTITUTIONS)
                 .startWith(Objects.nonNull(from) ? "to" : "from")
                 .connectFrom(Objects.nonNull(from) ? "to" : "from")
                 .connectTo("_id");
