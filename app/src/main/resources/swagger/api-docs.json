@@ -106,6 +106,16 @@
             "enum" : [ "FULL", "NORMAL" ]
           }
         }, {
+          "name" : "order",
+          "in" : "query",
+          "description" : "Order to show response NONE, ASC, DESC",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "ASC", "DESC", "NONE" ]
+          }
+        }, {
           "name" : "page",
           "in" : "query",
           "description" : "page",

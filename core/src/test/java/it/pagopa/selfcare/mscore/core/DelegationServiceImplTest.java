@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
+import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -176,12 +177,12 @@ class DelegationServiceImplTest {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", "to", "productId", null, null,
-                GetDelegationsMode.NORMAL, Optional.of(0), Optional.of(100));
+                GetDelegationsMode.NORMAL, Optional.empty(), Optional.of(0), Optional.of(100));
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
@@ -196,12 +197,12 @@ class DelegationServiceImplTest {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null, null,
-                GetDelegationsMode.FULL, Optional.of(0), Optional.of(0));
+                GetDelegationsMode.FULL, Optional.of(Order.DESC), Optional.of(0), Optional.of(0));
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
@@ -216,12 +217,12 @@ class DelegationServiceImplTest {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
         List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null, null,
-                GetDelegationsMode.FULL, Optional.empty(), Optional.empty());
+                GetDelegationsMode.FULL, Optional.of(Order.DESC), Optional.empty(), Optional.empty());
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
