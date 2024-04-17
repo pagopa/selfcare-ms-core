@@ -23,7 +23,6 @@ public class InstitutionRequest {
     private String county;
     private String country;
     private String taxCode;
-    private String ivassCode;
     private BillingRequest billing;
     private List<OnboardingRequest> onboarding;
     private List<GeoTaxonomies> geographicTaxonomies;
