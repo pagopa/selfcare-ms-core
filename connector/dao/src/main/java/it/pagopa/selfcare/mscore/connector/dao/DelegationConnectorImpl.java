@@ -70,6 +70,8 @@ public class DelegationConnectorImpl implements DelegationConnector {
         Criteria criteria = new Criteria();
         Pageable pageable = PageRequest.of(page, size);
 
+        criterias.add(Criteria.where(DelegationEntity.Fields.status.name()).is(DelegationState.ACTIVE.name()));
+
         if (Objects.nonNull(from)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
         }
@@ -87,10 +89,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
         if (GetDelegationsMode.FULL.equals(mode)) {
 
-            GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
-                    .startWith(Objects.nonNull(from) ? "to" : "from")
-                    .connectFrom(Objects.nonNull(from) ? "to" : "from")
-                    .connectTo("_id");
+            GraphLookupOperation.GraphLookupOperationBuilder lookup = createInstitutionGraphLookupOperationBuilder(from);
 
             MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
 
@@ -100,8 +99,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
             Aggregation aggregation;
 
             if (Objects.nonNull(taxCode)) {
-                Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
-                MatchOperation matchTaxCodeOperation = new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
+                MatchOperation matchTaxCodeOperation = getMatchTaxCodeOperation(taxCode);
                 aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), matchTaxCodeOperation, skip, limit);
             }
             else {
@@ -131,6 +129,18 @@ public class DelegationConnectorImpl implements DelegationConnector {
                 .stream()
                 .map(delegationMapper::convertToDelegation)
                 .collect(Collectors.toList());
+    }
+
+    private static GraphLookupOperation.GraphLookupOperationBuilder createInstitutionGraphLookupOperationBuilder(String from) {
+        return Aggregation.graphLookup("Institution")
+                .startWith(Objects.nonNull(from) ? "to" : "from")
+                .connectFrom(Objects.nonNull(from) ? "to" : "from")
+                .connectTo("_id");
+    }
+
+    private static MatchOperation getMatchTaxCodeOperation(String taxCode) {
+        Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
+        return new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
     }
 
     @Override
