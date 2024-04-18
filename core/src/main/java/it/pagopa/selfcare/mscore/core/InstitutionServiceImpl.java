@@ -175,7 +175,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Institution createInstitutionFromIvass(Institution institution) {
         return createInstitutionStrategyFactory.createInstitutionStrategyIvass(institution)
                 .createInstitution(CreateInstitutionStrategyInput.builder()
-                        .ivassCode(institution.getIvassCode())
+                        .ivassCode(institution.getOriginId())
                         .build());
     }
 
