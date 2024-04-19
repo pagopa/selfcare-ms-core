@@ -4,7 +4,7 @@ import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.Data;
 
 @Data
-public class AsResource {
+public class ASResource {
     private String id;
     private String originId;
     private String taxCode;

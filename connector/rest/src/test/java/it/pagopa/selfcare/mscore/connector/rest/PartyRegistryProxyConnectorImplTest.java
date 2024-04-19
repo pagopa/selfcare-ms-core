@@ -560,7 +560,7 @@ class PartyRegistryProxyConnectorImplTest {
         String ivassCode = "ivassCode";
         when(partyRegistryProxyRestClient._searchByOriginIdUsingGET(anyString())).thenReturn(response);
         //when
-        AsResource result = partyRegistryProxyConnectorImpl.getASFromIvass(ivassCode);
+        ASResource result = partyRegistryProxyConnectorImpl.getASFromIvass(ivassCode);
         //then
         checkNotNullFields(result);
         verify(partyRegistryProxyRestClient, times(1))._searchByOriginIdUsingGET(ivassCode);
