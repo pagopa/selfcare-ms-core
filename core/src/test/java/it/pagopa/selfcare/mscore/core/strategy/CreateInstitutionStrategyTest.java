@@ -186,7 +186,7 @@ class CreateInstitutionStrategyTest {
     void shouldCreateInstitutionFromIvass() {
 
         Institution institution = TestUtils.dummyInstitutionAs();
-        AsResource asResource = new AsResource();
+        ASResource asResource = new ASResource();
         asResource.setOriginId("originId");
         asResource.setTaxCode("taxCode");
         asResource.setDescription("desc");
