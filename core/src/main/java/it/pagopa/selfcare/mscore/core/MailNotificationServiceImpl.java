@@ -47,10 +47,12 @@ public class MailNotificationServiceImpl implements MailNotificationService {
             userNotificationService.sendDelegationUserNotification(userDestinationMail, mailParametersMapper.getDelegationUserNotificationPath(), product.getTitle(), mailParameters);
             log.info("create-delegation-user-email-notification :: Email successful sent");
 
-            List<String> institutionDestinationMail = getDestinationMails(partnerInstitution);
-            log.info(DESTINATION_MAIL_LOG, institutionDestinationMail);
-            emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), institutionDestinationMail, null, product.getTitle(), mailParameters, null);
-            log.info("create-delegation-institution-email-notification :: Email successful sent");
+            if (coreConfig.isEnableSendDelegationMail()) {
+                List<String> institutionDestinationMail = getDestinationMails(partnerInstitution);
+                log.info(DESTINATION_MAIL_LOG, institutionDestinationMail);
+                emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), institutionDestinationMail, null, product.getTitle(), mailParameters, null);
+                log.info("create-delegation-institution-email-notification :: Email successful sent");
+            }
         } catch (Exception e) {
             log.error("create-delegation-email-notification :: Impossible to send email. Error: {}", e.getMessage(), e);
         }
