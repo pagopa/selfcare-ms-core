@@ -90,6 +90,7 @@ class MailNotificationServiceImplTest {
         when(institutionConnector.findById(anyString())).thenReturn(institution);
         when(userApiConnector.getUserEmails(institution.getId(), product.getId())).thenReturn(userEmails);
         when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
+        when(coreConfig.isEnableSendDelegationMail()).thenReturn(true);
         Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
     }
 
