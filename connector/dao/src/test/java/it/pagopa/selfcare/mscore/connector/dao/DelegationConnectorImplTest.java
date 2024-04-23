@@ -104,8 +104,9 @@ class DelegationConnectorImplTest {
         delegation.setFrom("from");
         delegation.setType(DelegationType.PT);
         delegation.setProductId("prod");
-        when(delegationRepository.findByFromAndToAndProductIdAndType(any(), any(), any(), any())).thenReturn(Optional.of(new DelegationEntity()));
-        boolean response = delegationConnectorImpl.checkIfExists(delegation);
+        delegation.setStatus(DelegationState.DELETED);
+        when(delegationRepository.findByFromAndToAndProductIdAndTypeAndStatus(any(), any(), any(), any(), any())).thenReturn(Optional.of(new DelegationEntity()));
+        boolean response = delegationConnectorImpl.checkIfExistsWithStatus(delegation, DelegationState.DELETED);
         assertTrue(response);
 
     }
@@ -263,6 +264,20 @@ class DelegationConnectorImplTest {
         assertEquals(actual.getTo(), TO1);
         assertEquals(actual.getFrom(), FROM1);
 
+    }
+
+    @Test
+    void findAndActivate() {
+        DelegationEntity delegationEntity = new DelegationEntity();
+        delegationEntity.setId("id");
+        delegationEntity.setFrom("from");
+        delegationEntity.setTo("to");
+        delegationEntity.setProductId("prod-io");
+        delegationEntity.setStatus(DelegationState.ACTIVE);
+        when(delegationRepository.findAndModify(any(), any(), any(), any())).thenReturn(delegationEntity);
+        Delegation delegation = delegationConnectorImpl.findAndActivate(delegationEntity.getFrom(), delegationEntity.getTo(), delegationEntity.getProductId());
+        assertNotNull(delegation);
+        assertEquals(delegation.getId(), delegationEntity.getId());
     }
 
     private DelegationInstitution createAggregation(String pattern, String from, String to) {
