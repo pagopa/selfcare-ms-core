@@ -10,8 +10,9 @@ import java.util.List;
 public interface DelegationConnector {
 
     Delegation save(Delegation delegation);
-    boolean checkIfExists(Delegation delegation);
+    boolean checkIfExistsWithStatus(Delegation delegation, DelegationState status);
     List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Order order, Integer page, Integer size);
     Delegation findByIdAndModifyStatus(String delegationId, DelegationState status);
     boolean checkIfDelegationsAreActive(String institutionId);
+    Delegation findAndActivate(String from, String to, String productId);
 }

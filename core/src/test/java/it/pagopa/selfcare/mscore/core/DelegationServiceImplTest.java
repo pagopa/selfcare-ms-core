@@ -98,12 +98,13 @@ class DelegationServiceImplTest {
         Institution institution = new Institution();
         institution.setId("id");
         institution.setInstitutionType(InstitutionType.PT);
-        when(delegationConnector.save(any())).thenReturn(dummyDelegationProdPagopa);
+        when(delegationConnector.findAndActivate(anyString(), anyString(), anyString())).thenReturn(dummyDelegationProdPagopa);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institution));
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
+        when(delegationServiceImpl.checkIfExistsWithStatus(dummyDelegationProdPagopa, DelegationState.DELETED)).thenReturn(true);
         Delegation response = delegationServiceImpl.createDelegation(dummyDelegationProdPagopa);
-        verify(delegationConnector).save(any());
+        verify(delegationConnector).findAndActivate(anyString(), anyString(), anyString());
         verify(institutionService).getInstitutions(any(), any());
         assertNotNull(response);
         assertNotNull(response.getId());
@@ -153,19 +154,19 @@ class DelegationServiceImplTest {
     void testCreateDelegationWithConflict() {
         Institution institution = new Institution();
         institution.setId("id");
-        when(delegationServiceImpl.checkIfExists(any())).thenReturn(true);
+        when(delegationServiceImpl.checkIfExistsWithStatus(dummyDelegationProdIo, DelegationState.ACTIVE)).thenReturn(true);
         assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegation(dummyDelegationProdIo));
         verifyNoMoreInteractions(delegationConnector);
     }
 
     /**
-     * Method under test: {@link DelegationServiceImpl#checkIfExists(Delegation)}
+     * Method under test: {@link DelegationService#checkIfExistsWithStatus(Delegation, DelegationState)}
      */
     @Test
     void testCheckIfExists() {
         Delegation delegation = new Delegation();
-        when(delegationConnector.checkIfExists(any())).thenReturn(true);
-        boolean check = delegationServiceImpl.checkIfExists(delegation);
+        when(delegationConnector.checkIfExistsWithStatus(any(), any())).thenReturn(true);
+        boolean check = delegationServiceImpl.checkIfExistsWithStatus(delegation, DelegationState.ACTIVE);
         assertTrue(check);
     }
 
@@ -248,12 +249,14 @@ class DelegationServiceImplTest {
     void testCreateDelegationFromTaxCodeWithSubunitCode() {
         Institution institution = new Institution();
         institution.setId("id");
-        when(delegationConnector.save(any())).thenReturn(dummyDelegationProdPagopa);
+        when(delegationConnector.findAndActivate(anyString(), anyString(), anyString())).thenReturn(dummyDelegationProdPagopa);
         when(institutionService.getInstitutions(dummyDelegationProdPagopa.getTo(), dummyDelegationProdPagopa.getToSubunitCode())).thenReturn(List.of(institution));
         when(institutionService.getInstitutions(dummyDelegationProdPagopa.getFrom(), dummyDelegationProdPagopa.getFromSubunitCode())).thenReturn(List.of(institution));
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
+        when(delegationConnector.checkIfExistsWithStatus(dummyDelegationProdPagopa, DelegationState.ACTIVE)).thenReturn(false);
+        when(delegationConnector.checkIfExistsWithStatus(dummyDelegationProdPagopa, DelegationState.DELETED)).thenReturn(true);
         Delegation response = delegationServiceImpl.createDelegationFromInstitutionsTaxCode(dummyDelegationProdPagopa);
-        verify(delegationConnector).save(any());
+        verify(delegationConnector).findAndActivate(anyString(), anyString(), anyString());
         assertNotNull(response);
         assertNotNull(response.getId());
         assertEquals(dummyDelegationProdPagopa.getId(), response.getId());
@@ -291,7 +294,7 @@ class DelegationServiceImplTest {
         institution.setId("id");
         when(institutionService.getInstitutions(dummyDelegationProdPagopa.getTo(), dummyDelegationProdPagopa.getToSubunitCode())).thenReturn(List.of(institution));
         when(institutionService.getInstitutions(dummyDelegationProdPagopa.getFrom(), dummyDelegationProdPagopa.getFromSubunitCode())).thenReturn(List.of(institution));
-        when(delegationConnector.checkIfExists(any())).thenReturn(true);
+        when(delegationConnector.checkIfExistsWithStatus(dummyDelegationProdPagopa, DelegationState.ACTIVE)).thenReturn(true);
         assertThrows(ResourceConflictException.class, () -> delegationServiceImpl.createDelegationFromInstitutionsTaxCode(dummyDelegationProdPagopa));
     }
 
