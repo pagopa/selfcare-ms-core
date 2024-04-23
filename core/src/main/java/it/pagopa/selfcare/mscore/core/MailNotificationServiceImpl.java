@@ -2,13 +2,10 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.EmailConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
+import it.pagopa.selfcare.mscore.api.UserApiConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.WorkContact;
-import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.product.entity.Product;
 import it.pagopa.selfcare.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +29,7 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     private final EmailConnector emailConnector;
     private final MailParametersMapper mailParametersMapper;
     private final CoreConfig coreConfig;
+    private final UserApiConnector userApiConnector;
 
     public void sendMailForDelegation(String institutionName, String productId, String partnerId) {
         try {
