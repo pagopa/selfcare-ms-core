@@ -1,6 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.api.*;
+import it.pagopa.selfcare.mscore.api.EmailConnector;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.ProductConnector;
+import it.pagopa.selfcare.mscore.api.UserApiConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.config.MailTemplateConfig;
 import it.pagopa.selfcare.mscore.core.util.MailParametersMapper;
@@ -51,12 +54,9 @@ class MailNotificationServiceImplTest {
     @Mock
     private CoreConfig coreConfig;
 
-    @Mock
-    private UserConnector userConnector;
 
     @Mock
-    private UserRegistryConnector userRegistryConnector;
-
+    private UserApiConnector userApiConnector;
     @Mock
     private UserNotificationService userNotificationService;
 
@@ -88,22 +88,13 @@ class MailNotificationServiceImplTest {
         Institution institution = new Institution();
         institution.setId("institutionID");
         institution.setDigitalAddress("test@test.com");
-
-        var mail = new CertifiedField<String>();
-        mail.setValue("test@test2.com");
-        var work = new WorkContact();
-        work.setEmail(mail);
-        var map = new HashMap<String, WorkContact>();
-        map.put("institutionID", work);
-        var user = new User();
-        user.setId("userID");
-        user.setWorkContacts(map);
+        List<String> userEmails = List.of("userEmail");
 
         when(productService.getProduct(anyString())).thenReturn(product);
         when(institutionConnector.findById(anyString())).thenReturn(institution);
-        when(userConnector.findUsersByInstitutionIdAndProductId(institution.getId(), product.getId())).thenReturn(List.of(user.getId()));
-        when(userRegistryConnector.getUserByInternalIdWithCustomFields(user.getId(), "workContacts")).thenReturn(user);
+        when(userApiConnector.getUserEmails(institution.getId(), product.getId())).thenReturn(userEmails);
         when(coreConfig.isSendEmailToInstitution()).thenReturn(true);
+        when(coreConfig.isEnableSendDelegationMail()).thenReturn(true);
         Assertions.assertDoesNotThrow(() -> notificationService.sendMailForDelegation("institutionName", "productId", "partnerId"));
     }
 

@@ -353,7 +353,7 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
     @PostMapping(value = "/{id}/onboarding", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<InstitutionResponse> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
-                                                      @PathVariable("id") String id) {
+                                                                     @PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
                 .map(users -> users.stream().map(userMapper::toUserToOnboard).toList())

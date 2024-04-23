@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutio
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
+import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.delegation.DelegationInstitution;
@@ -130,7 +131,7 @@ class DelegationConnectorImplTest {
                 .find(any(), any(), any());
 
         List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(),
-                delegationEntity.getTo(), delegationEntity.getProductId(), null, null, GetDelegationsMode.NORMAL, PAGE_SIZE, MAX_PAGE_SIZE);
+                delegationEntity.getTo(), delegationEntity.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -158,7 +159,7 @@ class DelegationConnectorImplTest {
                 thenReturn(results);
 
         List<Delegation> response = delegationConnectorImpl.find(dummyDelegationEntity.getFrom(), null,
-                dummyDelegationEntity.getProductId(), null, null, GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
+                dummyDelegationEntity.getProductId(), null, null, GetDelegationsMode.FULL, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -188,7 +189,7 @@ class DelegationConnectorImplTest {
                 thenReturn(results);
 
         List<Delegation> response = delegationConnectorImpl.find(null, dummyDelegationEntity.getTo(),
-                dummyDelegationEntity.getProductId(), null, null, GetDelegationsMode.FULL, PAGE_SIZE, MAX_PAGE_SIZE);
+                dummyDelegationEntity.getProductId(), null, null, GetDelegationsMode.FULL, Order.ASC, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -247,7 +248,7 @@ class DelegationConnectorImplTest {
                 thenReturn(results);
 
         List<Delegation> response = delegationConnectorImpl.find(null,
-                TO1, "productId", null, null, GetDelegationsMode.FULL, 0, 1);
+                TO1, "productId", null, null, GetDelegationsMode.FULL, Order.NONE, 0, 1);
 
         //Then
         assertNotNull(response);

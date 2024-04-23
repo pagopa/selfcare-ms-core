@@ -22,6 +22,7 @@ public class CoreConfig {
     private boolean sendEmailToInstitution;
     private Integer onboardingExpiringDate;
     private boolean infoCamereEnable;
+    private boolean enableSendDelegationMail;
     private BlobStorage blobStorage;
 
     @Data

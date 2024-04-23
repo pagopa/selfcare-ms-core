@@ -180,16 +180,15 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     }
 
     @Override
-    public AsResource getASFromIvass(String taxId) {
+    public ASResource getASFromIvass(String ivassCode) {
         try {
-            log.debug("getASFromIvass = {}", taxId);
-            Assert.hasText(taxId, "TaxId is required");
-            ResponseEntity<InsuranceCompanyResource> result = restClient._searchByTaxCodeUsingGET(taxId);
-            log.debug("getASFromIvass = {}", taxId);
+            if (ivassCode.matches("\\w*")) { log.debug("getASFromIvass = {}", ivassCode); }
+            Assert.hasText(ivassCode, "IvassCode is required");
+            ResponseEntity<InsuranceCompanyResource> result = restClient._searchByOriginIdUsingGET(ivassCode);
             if (result != null) {
                 return asMapper.toResource(result.getBody());
             }
-            throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), taxId), CREATE_INSTITUTION_NOT_FOUND.getCode());
+            throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), ivassCode), CREATE_INSTITUTION_NOT_FOUND.getCode());
         } catch (FeignException e) {
             throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
         }

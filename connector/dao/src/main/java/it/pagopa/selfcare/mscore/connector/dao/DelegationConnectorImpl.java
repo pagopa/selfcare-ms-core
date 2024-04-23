@@ -7,11 +7,13 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapp
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
+import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.delegation.DelegationInstitution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 @Component
 public class DelegationConnectorImpl implements DelegationConnector {
 
+    public static final String INSTITUTIONS = "institutions";
+    public static final String DELEGATIONS = "Delegations";
     private final DelegationRepository repository;
     private final DelegationEntityMapper delegationMapper;
     private final DelegationInstitutionMapper delegationInstitutionMapper;
@@ -63,10 +67,12 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     @Override
-    public List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Integer page, Integer size) {
+    public List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Order order, Integer page, Integer size) {
         List<Criteria> criterias = new ArrayList<>();
         Criteria criteria = new Criteria();
         Pageable pageable = PageRequest.of(page, size);
+
+        criterias.add(Criteria.where(DelegationEntity.Fields.status.name()).is(DelegationState.ACTIVE.name()));
 
         if (Objects.nonNull(from)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
@@ -80,27 +86,35 @@ public class DelegationConnectorImpl implements DelegationConnector {
         if (Objects.nonNull(search)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.institutionFromName.name()).regex("(?i)" + Pattern.quote(search)));
         }
+
+        Sort.Direction sortDirection = order.equals(Order.ASC) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
         if (GetDelegationsMode.FULL.equals(mode)) {
 
-            GraphLookupOperation.GraphLookupOperationBuilder lookup = Aggregation.graphLookup("Institution")
-                    .startWith(Objects.nonNull(from) ? "to" : "from")
-                    .connectFrom(Objects.nonNull(from) ? "to" : "from")
-                    .connectTo("_id");
+            GraphLookupOperation.GraphLookupOperationBuilder lookup = createInstitutionGraphLookupOperationBuilder(from);
 
             MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
+
             long skipLimit = (long) page * size;
             SkipOperation skip = Aggregation.skip(skipLimit);
-            LimitOperation limit = Aggregation.limit(skipLimit + size);
+            LimitOperation limit = Aggregation.limit(size);
             Aggregation aggregation;
+
             if (Objects.nonNull(taxCode)) {
-                Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
-                MatchOperation matchTaxCodeOperation = new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
-                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), matchTaxCodeOperation, skip, limit);
-            } else {
-                aggregation = Aggregation.newAggregation(matchOperation, lookup.as("institutions"), skip, limit);
+                MatchOperation matchTaxCodeOperation = getMatchTaxCodeOperation(taxCode);
+                aggregation = Aggregation.newAggregation(matchOperation, lookup.as(INSTITUTIONS), matchTaxCodeOperation, skip, limit);
+            }
+            else {
+                if (!order.equals(Order.NONE)) {
+                    SortOperation sortOperation = new SortOperation(Sort.by(sortDirection, DelegationEntity.Fields.institutionFromName.name()));
+                    aggregation = Aggregation.newAggregation(matchOperation, sortOperation, lookup.as(INSTITUTIONS), skip, limit);
+                }
+                else {
+                    aggregation = Aggregation.newAggregation(matchOperation, lookup.as(INSTITUTIONS), skip, limit);
+                }
             }
 
-            List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, "Delegations", DelegationInstitution.class).getMappedResults();
+            List<DelegationInstitution> result = mongoTemplate.aggregate(aggregation, DELEGATIONS, DelegationInstitution.class).getMappedResults();
             return result.stream()
                     .map(Objects.nonNull(from) ?
                             delegationInstitutionMapper::convertToDelegationBroker :
@@ -108,10 +122,27 @@ public class DelegationConnectorImpl implements DelegationConnector {
                     .collect(Collectors.toList());
         }
 
-        return repository.find(Query.query(criteria.andOperator(criterias)), pageable, DelegationEntity.class)
+        Query query = Query.query(criteria.andOperator(criterias));
+        if (!order.equals(Order.NONE)) {
+            query = query.with(Sort.by(sortDirection, DelegationEntity.Fields.institutionFromName.name()));
+        }
+
+        return repository.find(query, pageable, DelegationEntity.class)
                 .stream()
                 .map(delegationMapper::convertToDelegation)
                 .collect(Collectors.toList());
+    }
+
+    private static GraphLookupOperation.GraphLookupOperationBuilder createInstitutionGraphLookupOperationBuilder(String from) {
+        return Aggregation.graphLookup(INSTITUTIONS)
+                .startWith(Objects.nonNull(from) ? "to" : "from")
+                .connectFrom(Objects.nonNull(from) ? "to" : "from")
+                .connectTo("_id");
+    }
+
+    private static MatchOperation getMatchTaxCodeOperation(String taxCode) {
+        Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
+        return new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
     }
 
     @Override

@@ -14,7 +14,6 @@ import it.pagopa.selfcare.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -33,8 +32,6 @@ public class MailNotificationServiceImpl implements MailNotificationService {
     private final EmailConnector emailConnector;
     private final MailParametersMapper mailParametersMapper;
     private final CoreConfig coreConfig;
-    private final UserConnector userConnector;
-    private final UserRegistryConnector userRegistryConnector;
 
     public void sendMailForDelegation(String institutionName, String productId, String partnerId) {
         try {
@@ -47,15 +44,17 @@ public class MailNotificationServiceImpl implements MailNotificationService {
             }
             mailParameters = mailParametersMapper.getDelegationNotificationParameter(institutionName, product.getTitle(), partnerInstitution.getDescription());
             log.debug(MAIL_PARAMETER_LOG, mailParameters);
-            List<String> userDestinationMail = getUsersEmailByInstitutionAndProduct(partnerInstitution.getId(), productId);
+            List<String> userDestinationMail = getUsersEmailByInstitutionAndProductV2(partnerInstitution.getId(), productId);
             log.info(DESTINATION_MAIL_LOG, userDestinationMail);
             userNotificationService.sendDelegationUserNotification(userDestinationMail, mailParametersMapper.getDelegationUserNotificationPath(), product.getTitle(), mailParameters);
             log.info("create-delegation-user-email-notification :: Email successful sent");
 
-            List<String> institutionDestinationMail = getDestinationMails(partnerInstitution);
-            log.info(DESTINATION_MAIL_LOG, institutionDestinationMail);
-            emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), institutionDestinationMail, null, product.getTitle(), mailParameters, null);
-            log.info("create-delegation-institution-email-notification :: Email successful sent");
+            if (coreConfig.isEnableSendDelegationMail()) {
+                List<String> institutionDestinationMail = getDestinationMails(partnerInstitution);
+                log.info(DESTINATION_MAIL_LOG, institutionDestinationMail);
+                emailConnector.sendMail(mailParametersMapper.getDelegationNotificationPath(), institutionDestinationMail, null, product.getTitle(), mailParameters, null);
+                log.info("create-delegation-institution-email-notification :: Email successful sent");
+            }
         } catch (Exception e) {
             log.error("create-delegation-email-notification :: Impossible to send email. Error: {}", e.getMessage(), e);
         }
@@ -69,15 +68,8 @@ public class MailNotificationServiceImpl implements MailNotificationService {
         }
     }
 
-    private List<String> getUsersEmailByInstitutionAndProduct(String institutionId, String productId) {
-        return userConnector.findUsersByInstitutionIdAndProductId(institutionId, productId).stream()
-                .map(userId -> userRegistryConnector.getUserByInternalIdWithCustomFields(userId, "workContacts"))
-                .map(User::getWorkContacts)
-                .filter(Objects::nonNull)
-                .map(workContactMap -> workContactMap.get(institutionId))
-                .filter(Objects::nonNull)
-                .map(WorkContact::getEmail)
-                .filter(StringUtils::hasText)
-                .toList();
+
+    private List<String> getUsersEmailByInstitutionAndProductV2(String institutionId, String productId){
+     return userApiConnector.getUserEmails(institutionId, productId);
     }
 }

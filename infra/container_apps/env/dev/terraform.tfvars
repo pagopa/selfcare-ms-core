@@ -188,15 +188,15 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-d-notification-mngr-ca.livelydesert-633675bb.westeurope.azurecontainerapps.io"
+    value = "https://selc-d-notification-mngr-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-d-party-reg-proxy-ca.livelydesert-633675bb.westeurope.azurecontainerapps.io"
+    value = "https://selc-d-party-reg-proxy-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"
-    value = "https://selc-d-product-ca.livelydesert-633675bb.westeurope.azurecontainerapps.io"
+    value = "https://selc-d-product-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"

@@ -5,7 +5,7 @@ import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.model.institution.AsResource;
+import it.pagopa.selfcare.mscore.model.institution.ASResource;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,10 +31,9 @@ public class CreateInstitutionStrategyIvass extends CreateInstitutionStrategyCom
 
     @Override
     public Institution createInstitution(CreateInstitutionStrategyInput strategyInput) {
+        checkIfAlreadyExistByOriginAndOriginId(Origin.IVASS.name(), strategyInput.getIvassCode());
 
-        checkIfAlreadyExistsByTaxCodeAndSubunitCode(strategyInput.getTaxCode(), strategyInput.getSubunitCode());
-
-        AsResource asResource = partyRegistryProxyConnector.getASFromIvass(strategyInput.getTaxCode());
+        ASResource asResource = partyRegistryProxyConnector.getASFromIvass(strategyInput.getIvassCode());
 
         institution = addFieldsToInstitution(asResource);
         try {
@@ -44,9 +43,9 @@ public class CreateInstitutionStrategyIvass extends CreateInstitutionStrategyCom
         }
     }
 
-    private Institution addFieldsToInstitution(AsResource asResource) {
-
-        institution.setExternalId(institution.getTaxCode());
+    private Institution addFieldsToInstitution(ASResource asResource) {
+        institution.setTaxCode(asResource.getTaxCode());
+        institution.setExternalId(asResource.getOriginId());
         institution.setOrigin(Origin.IVASS.getValue());
         institution.setOriginId(asResource.getOriginId());
         institution.setCreatedAt(OffsetDateTime.now());

@@ -109,11 +109,11 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public List<Institution> getInstitutions(String taxCode, String subunitCode, String origin, String originId) {
-        if(StringUtils.hasText(taxCode) && (StringUtils.hasText(origin) || StringUtils.hasText(originId))) {
+        if (StringUtils.hasText(taxCode) && (StringUtils.hasText(origin) || StringUtils.hasText(originId))) {
             throw new InvalidRequestException(GenericError.GET_INSTITUTIONS_REQUEST_ERROR.getMessage(), GenericError.GET_INSTITUTIONS_REQUEST_ERROR.getCode());
         }
 
-        if(StringUtils.hasText(taxCode)) {
+        if (StringUtils.hasText(taxCode)) {
             return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
         } else {
             return institutionConnector.findByOriginAndOriginId(origin, originId);
@@ -175,11 +175,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Institution createInstitutionFromIvass(Institution institution) {
         return createInstitutionStrategyFactory.createInstitutionStrategyIvass(institution)
                 .createInstitution(CreateInstitutionStrategyInput.builder()
-                        .taxCode(institution.getTaxCode())
-                        .subunitCode(institution.getSubunitCode())
-                        .subunitType(Optional.ofNullable(institution.getSubunitType())
-                                .map(InstitutionPaSubunitType::valueOf)
-                                .orElse(null))
+                        .ivassCode(institution.getOriginId())
                         .build());
     }
 
@@ -191,6 +187,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .description(institution.getDescription())
                 .build());
     }
+
     @Override
     public Institution createInstitutionByExternalId(String externalId) {
         checkIfAlreadyExists(externalId);
@@ -311,7 +308,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Optional<GeographicTaxonomies> retrieveGeoTaxonomies(String code) {
         try {
             return Optional.of(partyRegistryProxyConnector.getExtByCode(code));
-        } catch (ResourceNotFoundException e){
+        } catch (ResourceNotFoundException e) {
             return Optional.empty();
         }
     }

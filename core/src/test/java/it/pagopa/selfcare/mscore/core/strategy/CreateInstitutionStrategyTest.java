@@ -45,6 +45,9 @@ class CreateInstitutionStrategyTest {
     @Spy
     InstitutionMapper institutionMapper = new InstitutionMapperImpl();
 
+    @InjectMocks
+    CreateInstitutionStrategyIvass createInstitutionStrategyIvass;
+
 
     private static final InstitutionProxyInfo dummyInstitutionProxyInfo;
     private static final CategoryProxyInfo dummyCategoryProxyInfo;
@@ -120,6 +123,19 @@ class CreateInstitutionStrategyTest {
     }
 
     @Test
+    void shouldThrowMsCoreExceptionWhenInstitutionAlreadyExists() {
+        String origin = "IVASS";
+        String originId = "12345";
+
+        when(institutionConnector.findByOriginAndOriginId(origin, originId)).thenReturn(List.of(new Institution()));
+
+        assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategyIvass(new Institution())
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .ivassCode(originId)
+                        .build()));
+    }
+
+    @Test
     void shouldThrowExceptionOnCreateInstitutionIfAlreadyExists() {
 
         when(institutionConnector.findByTaxCodeAndSubunitCode(any(), any()))
@@ -170,7 +186,7 @@ class CreateInstitutionStrategyTest {
     void shouldCreateInstitutionFromIvass() {
 
         Institution institution = TestUtils.dummyInstitutionAs();
-        AsResource asResource = new AsResource();
+        ASResource asResource = new ASResource();
         asResource.setOriginId("originId");
         asResource.setTaxCode("taxCode");
         asResource.setDescription("desc");

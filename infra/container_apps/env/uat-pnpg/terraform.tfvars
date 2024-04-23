@@ -1,5 +1,7 @@
-env_short = "u"
-is_pnpg   = true
+env_short        = "u"
+is_pnpg          = true
+suffix_increment = "-001"
+cae_name         = "cae-001"
 
 tags = {
   CreatedBy   = "Terraform"
@@ -12,9 +14,9 @@ tags = {
 container_app = {
   min_replicas = 1
   max_replicas = 2
-  scale_rules = []
-  cpu    = 0.5
-  memory = "1Gi"
+  scale_rules  = []
+  cpu          = 0.5
+  memory       = "1Gi"
 }
 
 app_settings = [
@@ -154,11 +156,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-u-pnpg-notification-mngr-ca.calmforest-ffe47bf1.westeurope.azurecontainerapps.io"
+    value = "https://selc-u-pnpg-notification-mngr-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-u-pnpg-party-reg-proxy-ca.calmforest-ffe47bf1.westeurope.azurecontainerapps.io"
+    value = "https://selc-u-pnpg-party-reg-proxy-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"
@@ -169,8 +171,8 @@ app_settings = [
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },
   {
-    name  = "PRODUCT_STORAGE_CONTAINER"
-    value = "selc-u-product"
+    name  = "SELFCARE_USER_URL"
+    value = "https://selc-u-pnpg-user-ms-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
   }
 ]
 

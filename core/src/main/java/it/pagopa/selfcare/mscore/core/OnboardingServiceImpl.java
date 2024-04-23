@@ -68,7 +68,19 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[] states, String userId) {
+    public void verifyOnboardingInfoByFilters(VerifyOnboardingFilters filters) {
+        filters.setValidRelationshipStates(UtilEnumList.VALID_RELATIONSHIP_STATES);
+
+        Boolean existsOnboardingValid = institutionConnector.existsOnboardingByFilters(filters);
+        if (Boolean.FALSE.equals(existsOnboardingValid)) {
+            throw new ResourceNotFoundException(CustomError.INSTITUTION_NOT_ONBOARDED_BY_FILTERS.getMessage(),
+                    CustomError.INSTITUTION_NOT_ONBOARDED_BY_FILTERS.getCode());
+        }
+    }
+
+    @Override
+    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[]
+            states, String userId) {
 
         List<RelationshipState> relationshipStateList = OnboardingInfoUtils.getRelationShipStateList(states);
         List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
@@ -86,25 +98,26 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public Institution persistOnboarding(String institutionId, String productId,List<UserToOnboard> users, Onboarding onboarding) {
+    public Institution persistOnboarding(String institutionId, String
+            productId, List<UserToOnboard> users, Onboarding onboarding) {
 
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}, users = {}", institutionId, productId, users);
         onboarding.setStatus(RelationshipState.ACTIVE);
         onboarding.setProductId(productId);
 
-        if(Objects.isNull(onboarding.getCreatedAt())) {
+        if (Objects.isNull(onboarding.getCreatedAt())) {
             onboarding.setCreatedAt(OffsetDateTime.now());
         }
 
         //Verify if onboarding exists, in case onboarding must fail
         final Institution institution = institutionConnector.findById(institutionId);
 
-        if(Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
+        if (Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
                 .filter(item -> item.getProductId().equals(productId) && UtilEnumList.VALID_RELATIONSHIP_STATES.contains(item.getStatus()))
-                .findAny()).isPresent()){
+                .findAny()).isPresent()) {
             throw new InvalidRequestException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), institution.getTaxCode(), productId),
-                        CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
+                    CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
         }
 
         try {
@@ -153,7 +166,8 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String loggedUserSurname) {
+    public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String
+            loggedUserSurname) {
 
 
         Product product = Optional.ofNullable(productService.getProductIsValid(request.getProductId()))
@@ -186,7 +200,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             userRegistry = userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
 
             //We must save mail institution if it is not found on WorkContracts
-            if(Objects.nonNull(user.getEmail()) &&
+            if (Objects.nonNull(user.getEmail()) &&
                     (Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId))) {
                 userRegistry = userService.persistWorksContractToUserRegistry(user.getTaxCode(), user.getEmail(), institutionId);
             }
@@ -197,7 +211,8 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
+    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest
+                                                              onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
         OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
         Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
 
@@ -230,7 +245,8 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
-    private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String institutionId, String externalId, List<RelationshipState> relationshipStates) {
+    private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String
+            institutionId, String externalId, List<RelationshipState> relationshipStates) {
         List<String> states = relationshipStates.stream().map(Enum::name).collect(Collectors.toList());
         UserInstitutionFilter filter = new UserInstitutionFilter(userId, institutionId, externalId, states);
         List<UserInstitutionAggregation> userInstitutionAggregation = userService.findUserInstitutionAggregation(filter);

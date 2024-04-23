@@ -176,23 +176,23 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-p-notification-mngr-ca.salmonstone-7f910b8f.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-notification-mngr-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-p-party-reg-proxy-ca.salmonstone-7f910b8f.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-party-reg-proxy-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
   },
   {
     name  = "MS_PRODUCT_URL"
-    value = "https://selc-p-product-ca.salmonstone-7f910b8f.westeurope.azurecontainerapps.io"
+    value = "https://selc-p-product-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.pdv.pagopa.it/user-registry/v1"
   },
   {
-    name  = "PRODUCT_STORAGE_CONTAINER"
-    value = "selc-p-product"
+    name  = "SELFCARE_USER_URL"
+    value = "https://selc-p-user-ms-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
   }
 ]
 

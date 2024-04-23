@@ -4,6 +4,7 @@ import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -56,4 +57,6 @@ public interface InstitutionConnector {
     List<Institution> findByTaxCodeAndSubunitCode(String taxCode, String subunitCode);
 
     List<Institution> findByOriginAndOriginId(String origin, String originId);
+
+    Boolean existsOnboardingByFilters(VerifyOnboardingFilters filters);
 }

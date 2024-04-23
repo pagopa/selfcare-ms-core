@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -105,6 +106,40 @@ class OnboardingServiceImplTest {
                 .thenReturn(true);
         onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example");
         verify(institutionConnector).existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any());
+    }
+
+    @Test
+    void VerifyOnboardingInfoSubunitResourceNotFound() {
+        when(institutionConnector.existsByTaxCodeAndSubunitCodeAndProductAndStatusList(any(), any(), any(), any()))
+                .thenReturn(false);
+        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfoSubunit("42", "42", "example"));
+
+    }
+
+    @Test
+    void testVerifyOnboardingInfoByFilter() {
+        // Arrange
+        when(institutionConnector.existsOnboardingByFilters(Mockito.any())).thenReturn(true);
+
+        VerifyOnboardingFilters verifyOnboardingFilters = new VerifyOnboardingFilters("Product", "", "", "Origin", "OriginId", "");
+        // Act
+        onboardingServiceImpl.verifyOnboardingInfoByFilters(verifyOnboardingFilters);
+
+        // Assert that nothing has changed
+        verify(institutionConnector).existsOnboardingByFilters(Mockito.any());
+    }
+
+    @Test
+    void testVerifyOnboardingInfoByFilterNotFound() {
+        // Arrange
+        when(institutionConnector.existsOnboardingByFilters(Mockito.any())).thenReturn(false);
+
+        VerifyOnboardingFilters verifyOnboardingFilters = new VerifyOnboardingFilters("Product", "", "", "Origin", "OriginId", "");
+        // Act
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.verifyOnboardingInfoByFilters(verifyOnboardingFilters));
+
+        // Assert that nothing has changed
+        verify(institutionConnector).existsOnboardingByFilters(Mockito.any());
     }
 
     /**
@@ -994,15 +1029,15 @@ class OnboardingServiceImplTest {
 
 
     private User dummyUser() {
-        CertifiedField<String> certifiedField = new CertifiedField<>();
+        CertifiedField certifiedField = new CertifiedField<>();
         certifiedField.setCertification(Certification.NONE);
         certifiedField.setValue("42");
 
-        CertifiedField<String> certifiedField1 = new CertifiedField<>();
+        CertifiedField certifiedField1 = new CertifiedField<>();
         certifiedField1.setCertification(Certification.NONE);
         certifiedField1.setValue("42");
 
-        CertifiedField<String> certifiedField2 = new CertifiedField<>();
+        CertifiedField certifiedField2 = new CertifiedField<>();
         certifiedField2.setCertification(Certification.NONE);
         certifiedField2.setValue("42");
 
