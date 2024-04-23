@@ -174,10 +174,6 @@ app_settings = [
     value = "https://selc-u-party-reg-proxy-ca.proudglacier-20652b81.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://selc-u-product-ca.proudglacier-20652b81.westeurope.azurecontainerapps.io"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },

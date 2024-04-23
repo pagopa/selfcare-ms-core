@@ -195,10 +195,6 @@ app_settings = [
     value = "https://selc-d-party-reg-proxy-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://selc-d-product-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },

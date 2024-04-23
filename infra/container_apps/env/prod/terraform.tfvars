@@ -183,10 +183,6 @@ app_settings = [
     value = "https://selc-p-party-reg-proxy-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://selc-p-product-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.pdv.pagopa.it/user-registry/v1"
   },

@@ -163,10 +163,6 @@ app_settings = [
     value = "https://selc-u-pnpg-party-reg-proxy-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://uat01.pnpg.internal.uat.selfcare.pagopa.it/ms-product/v1"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },
