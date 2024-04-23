@@ -180,6 +180,10 @@ app_settings = [
   {
     name  = "SELFCARE_USER_URL"
     value = "https://selc-p-pnpg-user-ms-ca.calmmoss-0be48755.westeurope.azurecontainerapps.io"
+  },
+  {
+    name  = "PRODUCT_STORAGE_CONTAINER"
+    value = "selc-p-product"
   }
 ]
 

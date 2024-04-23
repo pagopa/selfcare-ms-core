@@ -173,6 +173,10 @@ app_settings = [
   {
     name  = "SELFCARE_USER_URL"
     value = "https://selc-u-pnpg-user-ms-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
+  },
+  {
+    name  = "PRODUCT_STORAGE_CONTAINER"
+    value = "selc-u-product"
   }
 ]
 
