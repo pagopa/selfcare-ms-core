@@ -315,12 +315,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
-        if (userService.checkIfInstitutionUser(userId, institutionId)) {
-            List<InstitutionGeographicTaxonomies> geographicTaxonomies = retrieveGeographicTaxonomies(institutionUpdate);
-            return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
-        } else {
-            throw new ResourceForbiddenException(String.format(CustomError.RELATIONSHIP_NOT_FOUND.getMessage(), institutionId, userId, "admin roles"), CustomError.RELATIONSHIP_NOT_FOUND.getCode());
-        }
+        List<InstitutionGeographicTaxonomies> geographicTaxonomies = retrieveGeographicTaxonomies(institutionUpdate);
+        return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
     }
 
     @Override
