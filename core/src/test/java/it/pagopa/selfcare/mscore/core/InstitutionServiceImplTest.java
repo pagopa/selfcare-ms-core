@@ -589,8 +589,6 @@ class InstitutionServiceImplTest {
         when(partyRegistryProxyConnector.getExtByCode(any()))
                 .thenThrow(new ResourceNotFoundException("An error occurred", "Code"));
 
-        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(true);
-
         ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
         institutionGeographicTaxonomiesList
                 .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
@@ -616,41 +614,6 @@ class InstitutionServiceImplTest {
         assertThrows(MsCoreException.class,
                 () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
         verify(partyRegistryProxyConnector).getExtByCode(any());
-        verify(userService).checkIfInstitutionUser(any(), any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#updateInstitution(String, InstitutionUpdate, String)}
-     */
-    @Test
-    void testUpdateInstitution7() {
-        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(false);
-
-        ArrayList<InstitutionGeographicTaxonomies> institutionGeographicTaxonomiesList = new ArrayList<>();
-        institutionGeographicTaxonomiesList
-                .add(new InstitutionGeographicTaxonomies("Code", "The characteristics of someone or something"));
-
-        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
-        institutionUpdate.setAddress("42 Main St");
-        institutionUpdate.setBusinessRegisterPlace("Business Register Place");
-        institutionUpdate
-                .setDataProtectionOfficer(new DataProtectionOfficer("42 Main St", "jane.doe@example.org", "Pec"));
-        institutionUpdate.setDescription("The characteristics of someone or something");
-        institutionUpdate.setDigitalAddress("42 Main St");
-        institutionUpdate.setGeographicTaxonomies(institutionGeographicTaxonomiesList);
-        institutionUpdate.setImported(true);
-        institutionUpdate.setInstitutionType(InstitutionType.PA);
-        institutionUpdate
-                .setPaymentServiceProvider(new PaymentServiceProvider("Abi Code", "42", "Legal Register Name", "42", true));
-        institutionUpdate.setRea("Rea");
-        institutionUpdate.setShareCapital("Share Capital");
-        institutionUpdate.setSupportEmail("jane.doe@example.org");
-        institutionUpdate.setSupportPhone("6625550144");
-        institutionUpdate.setTaxCode("Tax Code");
-        institutionUpdate.setZipCode("21654");
-        assertThrows(ResourceForbiddenException.class,
-                () -> institutionServiceImpl.updateInstitution("42", institutionUpdate, "42"));
-        verify(userService).checkIfInstitutionUser(any(), any());
     }
 
     /**
@@ -1303,15 +1266,8 @@ class InstitutionServiceImplTest {
 
     @Test
     void testUpdateInstitutionDescription() {
-        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(true);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(new Institution());
         assertDoesNotThrow(() -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
-    }
-
-    @Test
-    void testUpdateInstitutionDescriptionException() {
-        when(userService.checkIfInstitutionUser(any(), any())).thenReturn(false);
-        assertThrows(ResourceForbiddenException.class, () -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
     }
 
     @Test
