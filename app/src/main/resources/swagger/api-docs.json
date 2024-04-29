@@ -2706,71 +2706,6 @@
         } ]
       }
     },
-    "/onboarding/operators" : {
-      "post" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "performs operators onboarding on an already existing institution",
-        "description" : "performs operators onboarding on an already existing institution",
-        "operationId" : "onboardingInstitutionOperatorsUsingPOST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/OnboardingInstitutionOperatorsRequest"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/RelationshipResult"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
     "/onboarding/relationship/{relationshipId}/document" : {
       "get" : {
         "tags" : [ "Onboarding" ],
@@ -2811,136 +2746,6 @@
           },
           "404" : {
             "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/onboarding/subdelegates" : {
-      "post" : {
-        "tags" : [ "Onboarding" ],
-        "summary" : "performs subdelegates onboarding on an already existing institution",
-        "description" : "performs subdelegates onboarding on an already existing institution",
-        "operationId" : "onboardingInstitutionSubDelegateUsingPOST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/OnboardingInstitutionOperatorsRequest"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/RelationshipResult"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
-    "/onboarding/users" : {
-      "post" : {
-        "tags" : [ "Onboarding", "support" ],
-        "summary" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
-        "description" : "The service adds users to the registry if they are not present and associates them with the institution and product contained in the body",
-        "operationId" : "onboardingInstitutionUsersUsingPOST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/OnboardingInstitutionUsersRequest"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "*/*" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/RelationshipResult"
-                  }
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
             "content" : {
               "application/problem+json" : {
                 "schema" : {
@@ -5220,9 +5025,6 @@
             "type" : "string",
             "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
-          "ivassCode" : {
-            "type" : "string"
-          },
           "onboarding" : {
             "type" : "array",
             "items" : {
@@ -5814,51 +5616,6 @@
           },
           "userId" : {
             "type" : "string"
-          }
-        }
-      },
-      "OnboardingInstitutionOperatorsRequest" : {
-        "title" : "OnboardingInstitutionOperatorsRequest",
-        "type" : "object",
-        "properties" : {
-          "institutionId" : {
-            "type" : "string"
-          },
-          "productId" : {
-            "type" : "string"
-          },
-          "productTitle" : {
-            "type" : "string"
-          },
-          "users" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Person"
-            }
-          }
-        }
-      },
-      "OnboardingInstitutionUsersRequest" : {
-        "title" : "OnboardingInstitutionUsersRequest",
-        "type" : "object",
-        "properties" : {
-          "institutionSubunitCode" : {
-            "type" : "string"
-          },
-          "institutionTaxCode" : {
-            "type" : "string"
-          },
-          "productId" : {
-            "type" : "string"
-          },
-          "sendCreateUserNotificationEmail" : {
-            "type" : "boolean"
-          },
-          "users" : {
-            "type" : "array",
-            "items" : {
-              "$ref" : "#/components/schemas/Person"
-            }
           }
         }
       },

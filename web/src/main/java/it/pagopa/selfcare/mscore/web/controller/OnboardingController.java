@@ -3,23 +3,14 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.tags.Tags;
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.web.model.institution.RelationshipResult;
 import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingResourceMapper;
-import it.pagopa.selfcare.mscore.web.model.mapper.RelationshipMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionOperatorsRequest;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInstitutionUsersRequest;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -41,11 +31,8 @@ public class OnboardingController {
 
     private final OnboardingService onboardingService;
 
-    private final OnboardingResourceMapper onboardingResourceMapper;
-
-    public OnboardingController(OnboardingService onboardingService, OnboardingResourceMapper onboardingResourceMapper) {
+    public OnboardingController(OnboardingService onboardingService) {
         this.onboardingService = onboardingService;
-        this.onboardingResourceMapper = onboardingResourceMapper;
     }
 
     /**
@@ -144,67 +131,6 @@ public class OnboardingController {
         OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
         log.debug("onboardingInfo result = {}", onboardingInfoResponse);
         return ResponseEntity.ok().body(onboardingInfoResponse);
-    }
-
-    /**
-     * The function persist operators for given onboarding
-     *
-     * @param request OnboardingInstitutionOperatorsRequest
-     * @return no content
-     * * Code: 204, Message: successful operation
-     * * Code: 404, Message: Not found, DataType: Problem
-     * * Code: 400, Message: Invalid request, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.onboarding.operator}", notes = "${swagger.mscore.onboarding.operator}")
-    @PostMapping(value = "/operators")
-    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionOperators(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
-                                                                                   Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATORS_ERROR);
-        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.OPERATOR, selfCareUser.getUserName(), selfCareUser.getSurname());
-        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
-    }
-
-    /**
-     * The function persist subDelegates for given onboarding
-     *
-     * @param request OnboardingInstitutionOperatorRequest
-     * @return no content
-     * * Code: 204, Message: successful operation
-     * * Code: 404, Message: Not found, DataType: Problem
-     * * Code: 400, Message: Invalid request, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.onboarding.subdelegates}", notes = "${swagger.mscore.onboarding.subdelegates}")
-    @PostMapping(value = "/subdelegates")
-    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionSubDelegate(@RequestBody @Valid OnboardingInstitutionOperatorsRequest request,
-                                                                                     Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
-        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        List<RelationshipInfo> response = onboardingService.onboardingOperators(OnboardingMapper.toOnboardingOperatorRequest(request), PartyRole.SUB_DELEGATE, selfCareUser.getUserName(), selfCareUser.getSurname());
-        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
-    }
-
-    /**
-     * The function persist user on registry if not exists and add relation with institution-product
-     *
-     * @param request OnboardingInstitutionUsersRequest
-     * @return no content
-     * * Code: 204, Message: successful operation
-     * * Code: 404, Message: Not found, DataType: Problem
-     * * Code: 400, Message: Invalid request, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @Tags({@Tag(name = "support"), @Tag(name = "Onboarding")})
-    @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
-    @PostMapping(value = "/users")
-    public ResponseEntity<List<RelationshipResult>> onboardingInstitutionUsers(@RequestBody @Valid OnboardingInstitutionUsersRequest request,
-                                                                               Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_SUBDELEGATES_ERROR);
-        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        List<RelationshipInfo> response = onboardingService.onboardingUsers(onboardingResourceMapper.toOnboardingUsersRequest(request), selfCareUser.getUserName(), selfCareUser.getSurname());
-        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(response));
     }
 
     /**

@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.core;
 
-import feign.FeignException;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
@@ -19,7 +18,6 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
@@ -35,8 +33,6 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -246,103 +242,6 @@ class OnboardingServiceImplTest {
         assertTrue(onboarding1.isEmpty());
     }
 
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
-     */
-    @Test
-    void onboardingUsers_shouldThrowExceptionIfInstitutionNotFound() {
-        OnboardingUsersRequest request = new OnboardingUsersRequest();
-        request.setInstitutionTaxCode("taxCode");
-        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of());
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.onboardingUsers(request, null, null));
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
-     */
-    @Test
-    void onboardingUsers_shouldThrowExceptionIfProductIsNotValid() {
-        OnboardingUsersRequest request = new OnboardingUsersRequest();
-        request.setInstitutionTaxCode("taxCode");
-        request.setProductId("productId");
-        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(null);
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.onboardingUsers(request, null, null));
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
-     */
-    @Test
-    void onboardingUsers_whenUserExistsOnRegistry() {
-        OnboardingUsersRequest request = new OnboardingUsersRequest();
-        request.setInstitutionTaxCode("taxCode");
-        request.setProductId("productId");
-        request.setSendCreateUserNotificationEmail(Boolean.TRUE);
-        UserToOnboard userToOnboard = createSimpleUserToOnboard();
-        request.setUsers(List.of(userToOnboard));
-
-        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
-        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
-        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
-
-        onboardingServiceImpl.onboardingUsers(request, null, null);
-
-        verify(userService, times(1))
-                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
-        verifyNoMoreInteractions(userService);
-    }
-
-    @Test
-    void onboardingUsers_whenUserExistsOnRegistryAndSendMailIsFalse() {
-        OnboardingUsersRequest request = new OnboardingUsersRequest();
-        request.setInstitutionTaxCode("taxCode");
-        request.setProductId("productId");
-        request.setSendCreateUserNotificationEmail(Boolean.FALSE);
-        UserToOnboard userToOnboard = createSimpleUserToOnboard();
-        request.setUsers(List.of(userToOnboard));
-
-        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(new Institution()));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
-        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(new User());
-        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenReturn(new User());
-
-        onboardingServiceImpl.onboardingUsers(request, null, null);
-
-        verify(userService, times(1))
-                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
-        verifyNoMoreInteractions(userService);
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
-     */
-    @Test
-    void onboardingUsers_whenUserNotExistsOnRegistry() {
-        OnboardingUsersRequest request = new OnboardingUsersRequest();
-        request.setInstitutionTaxCode("taxCode");
-        request.setProductId("productId");
-        request.setSendCreateUserNotificationEmail(Boolean.TRUE);
-        UserToOnboard userToOnboard = createSimpleUserToOnboard();
-        User user = new User();
-        user.setId("42");
-        request.setUsers(List.of(userToOnboard));
-
-        Institution institution = new Institution();
-        institution.setId("example");
-        when(institutionService.getInstitutions(request.getInstitutionTaxCode(), null)).thenReturn(List.of(institution));
-        when(productConnector.getProductValidById(request.getProductId())).thenReturn(new Product());
-        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenThrow(FeignException.NotFound.class);
-        when(userService.persistUserRegistry(any(), any(), any(), any(),any())).thenReturn(user);
-
-        onboardingServiceImpl.onboardingUsers(request, null, null);
-
-        verify(userService, times(1))
-                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
-        verifyNoMoreInteractions(userService);
-    }
-
     private Institution dummyInstitution() {
         Institution institution = new Institution();
         institution.setId("42");
@@ -352,28 +251,6 @@ class OnboardingServiceImplTest {
         onboarding.setProductId("42");
         institution.setOnboarding(List.of(onboarding));
         return institution;
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(),any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
     }
 
     private UserToOnboard createSimpleUserToOnboard() {
@@ -387,388 +264,6 @@ class OnboardingServiceImplTest {
         userToOnboard.setSurname("Doe");
         userToOnboard.setTaxCode("Tax Code");
         return userToOnboard;
-    }
-
-
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators4() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        UserToOnboard userToOnboard = createSimpleUserToOnboard();
-        UserToOnboard userToOnboard1 = createSimpleUserToOnboard();
-
-        ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
-        userToOnboardList.add(userToOnboard1);
-        userToOnboardList.add(userToOnboard);
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setProductTitle("productTitle");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators5() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "name", "surname");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators8() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators9() {
-        when(institutionService.retrieveInstitutionById(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingServiceImpl.onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome"));
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators10() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(Env.ROOT);
-        userToOnboard.setId("42");
-        userToOnboard.setName("Name");
-        userToOnboard.setProductRole("");
-        userToOnboard.setRole(PartyRole.MANAGER);
-        userToOnboard.setSurname("Doe");
-        userToOnboard.setTaxCode("Tax Code");
-
-        ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
-        userToOnboardList.add(userToOnboard);
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setProductTitle("productTitle");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators11() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(Env.ROOT);
-        userToOnboard.setId("42");
-        userToOnboard.setName("Name");
-        userToOnboard.setProductRole("");
-        userToOnboard.setRole(PartyRole.MANAGER);
-        userToOnboard.setSurname("Doe");
-        userToOnboard.setTaxCode("Tax Code");
-
-        UserToOnboard userToOnboard1 = new UserToOnboard();
-        userToOnboard1.setEmail("jane.doe@example.org");
-        userToOnboard1.setEnv(Env.ROOT);
-        userToOnboard1.setId("42");
-        userToOnboard1.setName("Name");
-        userToOnboard1.setRole(PartyRole.MANAGER);
-        userToOnboard1.setSurname("Doe");
-        userToOnboard1.setTaxCode("Tax Code");
-
-        ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
-        userToOnboardList.add(userToOnboard1);
-        userToOnboardList.add(userToOnboard);
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setProductTitle("productTitle");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators12() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators13() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators14() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators15() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators16() {
-        when(institutionService.retrieveInstitutionById(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        assertThrows(InvalidRequestException.class,
-                () -> onboardingServiceImpl.onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome"));
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators17() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(Env.ROOT);
-        userToOnboard.setId("42");
-        userToOnboard.setName("Name");
-        userToOnboard.setProductRole("Product Role");
-        userToOnboard.setRole(PartyRole.MANAGER);
-        userToOnboard.setSurname("Doe");
-        userToOnboard.setTaxCode("Tax Code");
-
-        ArrayList<UserToOnboard> userToOnboardList = new ArrayList<>();
-        userToOnboardList.add(userToOnboard);
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setProductTitle("productTitle");
-        onboardingOperatorsRequest.setUsers(userToOnboardList);
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.MANAGER, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators19() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.DELEGATE, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators20() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.SUB_DELEGATE, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingOperators(OnboardingOperatorsRequest, PartyRole, String, String)}
-     */
-    @Test
-    void testOnboardingOperators21() {
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(onboardingDao.onboardOperator(any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(dummyInstitution());
-
-        OnboardingOperatorsRequest onboardingOperatorsRequest = new OnboardingOperatorsRequest();
-        onboardingOperatorsRequest.setInstitutionId("42");
-        onboardingOperatorsRequest.setProductId("42");
-        onboardingOperatorsRequest.setUsers(new ArrayList<>());
-        List<RelationshipInfo> actualOnboardingOperatorsResult = onboardingServiceImpl
-                .onboardingOperators(onboardingOperatorsRequest, PartyRole.OPERATOR, "nome", "cognome");
-        assertSame(relationshipInfoList, actualOnboardingOperatorsResult);
-        assertTrue(actualOnboardingOperatorsResult.isEmpty());
-        verify(onboardingDao).onboardOperator(any(), any(), any());
-        verify(institutionService).retrieveInstitutionById(any());
     }
 
     /**
@@ -832,7 +327,7 @@ class OnboardingServiceImplTest {
 
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     * Method under test: {@link OnboardingServiceImpl#persistOnboarding(String, String, List, Onboarding)}
      */
     @Test
     void persistOnboarding_shouldRollback() {
@@ -859,10 +354,7 @@ class OnboardingServiceImplTest {
 
 
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
-
-        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
-        when(userService.persistWorksContractToUserRegistry(any(), any(), any())).thenThrow(new RuntimeException());
+        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenThrow(new RuntimeException());
 
         Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist));
 
@@ -871,7 +363,7 @@ class OnboardingServiceImplTest {
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
+     * Method under test: {@link OnboardingServiceImpl#persistOnboarding(String, String, List, Onboarding)}
      */
     @Test
     void persistOnboarding_whenUserNotExistsOnRegistry() {
@@ -900,81 +392,14 @@ class OnboardingServiceImplTest {
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
 
-        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
-        when(userService.persistWorksContractToUserRegistry(userToOnboard.getTaxCode(), userToOnboard.getEmail(), institution.getId())).thenReturn(user);
-
         onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist);
 
-        verify(userService, times(1))
-                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
-
-        verify(userService, times(1))
-                .persistWorksContractToUserRegistry(userToOnboard.getTaxCode(), userToOnboard.getEmail(), institution.getId());
-
-        verify(onboardingDao, times(1))
-                .onboardOperator(any(), any(), any());
 
         ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
         verify(institutionConnector, times(1))
                 .findAndUpdate(any(), captor.capture(), any(), any());
         Onboarding actual = captor.getValue();
         assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
-
-        verifyNoMoreInteractions(userService);
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#onboardingUsers(OnboardingUsersRequest, String, String)}
-     */
-    @Test
-    void persistOnboarding_whenUserExistsOnRegistryButMailIsEmpty() {
-
-        String pricingPlan = "pricingPlan";
-        String productId = "productId";
-        Onboarding onboarding = dummyOnboarding();
-        onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
-
-        Onboarding onboardingToPersist = new Onboarding();
-        onboardingToPersist.setPricingPlan(pricingPlan);
-        onboardingToPersist.setProductId(productId);
-        onboardingToPersist.setBilling(new Billing());
-        onboardingToPersist.setCreatedAt(LocalDateTime
-                .of(2022,1,1,0,0,0)
-                .atZone(ZoneOffset.systemDefault())
-                .toOffsetDateTime());
-
-        Institution institution = new Institution();
-        institution.setId("institutionId");
-        institution.setOnboarding(List.of(onboarding));
-
-        UserToOnboard userToOnboard = createSimpleUserToOnboard();
-        userToOnboard.setEmail(null);
-        User user = new User();
-        user.setFiscalCode("fiscalCode");
-        user.setId("42");
-        final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
-
-        when(institutionConnector.findById(institution.getId())).thenReturn(institution);
-        when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
-
-        when(userService.retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode())).thenReturn(dummyUser());
-
-        onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist);
-
-        verify(userService, times(1))
-                .retrieveUserFromUserRegistryByFiscalCode(userToOnboard.getTaxCode());
-
-        verify(userService, times(0))
-                .persistWorksContractToUserRegistry(any(), any(), any());
-
-        verify(onboardingDao, times(1))
-                .onboardOperator(any(), any(), any());
-
-        ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
-        verify(institutionConnector, times(1))
-                .findAndUpdate(any(), captor.capture(), any(), any());
-        Onboarding actual = captor.getValue();
-        assertEquals(actual.getCreatedAt(), onboardingToPersist.getCreatedAt());
 
         verifyNoMoreInteractions(userService);
     }
