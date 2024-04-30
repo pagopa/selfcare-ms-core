@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 @Component
 public class DelegationConnectorImpl implements DelegationConnector {
 
+    public static final String INSTITUTION = "Institution";
     public static final String INSTITUTIONS = "institutions";
     public static final String DELEGATIONS = "Delegations";
     private final DelegationRepository repository;
@@ -91,7 +92,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
         if (GetDelegationsMode.FULL.equals(mode)) {
 
-            GraphLookupOperation.GraphLookupOperationBuilder lookup = createInstitutionGraphLookupOperationBuilder(from);
+            GraphLookupOperation lookup = createInstitutionGraphLookupOperationBuilder(from).as(INSTITUTIONS);
 
             MatchOperation matchOperation = new MatchOperation(new Criteria().andOperator(criterias.toArray(new Criteria[criterias.size()])));
 
@@ -102,15 +103,15 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
             if (Objects.nonNull(taxCode)) {
                 MatchOperation matchTaxCodeOperation = getMatchTaxCodeOperation(taxCode);
-                aggregation = Aggregation.newAggregation(matchOperation, lookup.as(INSTITUTIONS), matchTaxCodeOperation, skip, limit);
+                aggregation = Aggregation.newAggregation(matchOperation, lookup, matchTaxCodeOperation, skip, limit);
             }
             else {
                 if (!order.equals(Order.NONE)) {
                     SortOperation sortOperation = new SortOperation(Sort.by(sortDirection, DelegationEntity.Fields.institutionFromName.name()));
-                    aggregation = Aggregation.newAggregation(matchOperation, sortOperation, lookup.as(INSTITUTIONS), skip, limit);
+                    aggregation = Aggregation.newAggregation(matchOperation, sortOperation, lookup, skip, limit);
                 }
                 else {
-                    aggregation = Aggregation.newAggregation(matchOperation, lookup.as(INSTITUTIONS), skip, limit);
+                    aggregation = Aggregation.newAggregation(matchOperation, lookup, skip, limit);
                 }
             }
 
@@ -134,7 +135,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
     }
 
     private static GraphLookupOperation.GraphLookupOperationBuilder createInstitutionGraphLookupOperationBuilder(String from) {
-        return Aggregation.graphLookup(INSTITUTIONS)
+        return Aggregation.graphLookup(INSTITUTION)
                 .startWith(Objects.nonNull(from) ? "to" : "from")
                 .connectFrom(Objects.nonNull(from) ? "to" : "from")
                 .connectTo("_id");
