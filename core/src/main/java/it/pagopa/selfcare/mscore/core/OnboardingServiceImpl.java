@@ -1,13 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
-import feign.FeignException;
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInstitutionUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -17,9 +13,7 @@ import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.product.Product;
 import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +23,8 @@ import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static it.pagopa.selfcare.mscore.constant.CustomError.*;
+import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
+import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INFO_INSTITUTION_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 
 @Slf4j
@@ -39,35 +34,24 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final InstitutionService institutionService;
     private final UserService userService;
     private final UserRelationshipService userRelationshipService;
-    private final UserEventService userEventService;
     private final ContractService contractService;
     private final ContractEventNotificationService contractEventNotification;
-    private final MailNotificationService notificationService;
-    private final UserNotificationService userNotificationService;
     private final InstitutionConnector institutionConnector;
-    private final ProductConnector productConnector;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  UserService userService,
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
-                                 UserEventService userEventService,
-                                 ContractEventNotificationService contractEventNotification, MailNotificationService notificationService,
-                                 UserNotificationService userNotificationService,
-                                 InstitutionConnector institutionConnector,
-                                 ProductConnector productConnector) {
+                                 ContractEventNotificationService contractEventNotification,
+                                 InstitutionConnector institutionConnector) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
         this.userRelationshipService = userRelationshipService;
-        this.userEventService = userEventService;
         this.contractService = contractService;
         this.contractEventNotification = contractEventNotification;
-        this.notificationService = notificationService;
-        this.userNotificationService = userNotificationService;
         this.institutionConnector = institutionConnector;
-        this.productConnector = productConnector;
     }
 
     @Override
@@ -142,13 +126,6 @@ public class OnboardingServiceImpl implements OnboardingService {
             //If not exists, persist a new onboarding for product
             final Institution institutionUpdated = institutionConnector.findAndUpdate(institutionId, onboarding, List.of(), null);
 
-
-            //fillUserIdAndCreateIfNotExist is for adding mail institution to pdv because user already exists there
-            users.forEach(userToOnboard -> fillUserIdAndCreateIfNotExist(userToOnboard, institutionId));
-
-            //Add users to onboarding adding to collection users
-            onboardingDao.onboardOperator(institution, productId, users);
-
             log.trace("persistForUpdate end");
 
             //Prepare data for sending to queue ScContract and ScUsers using method exists
@@ -165,7 +142,6 @@ public class OnboardingServiceImpl implements OnboardingService {
             token.setContractSigned(onboarding.getContract());
             institution.setOnboarding(List.of(onboarding));
             contractEventNotification.sendDataLakeNotification(institution, token, QueueEvent.ADD);
-            userEventService.sendLegalTokenUserNotification(token);
 
             return institutionUpdated;
         } catch (Exception e) {
@@ -181,74 +157,6 @@ public class OnboardingServiceImpl implements OnboardingService {
         tokenUser.setUserId(user.getId());
         tokenUser.setRole(user.getRole());
         return tokenUser;
-    }
-
-    @Override
-    public List<RelationshipInfo> onboardingUsers(OnboardingUsersRequest request, String loggedUserName, String
-            loggedUserSurname) {
-
-        Institution institution = institutionService.getInstitutions(request.getInstitutionTaxCode(), request.getInstitutionSubunitCode()).stream()
-                .findFirst()
-                .orElseThrow(() -> new InvalidRequestException("Institution not found!", ""));
-
-        Product product = Optional.ofNullable(productConnector.getProductValidById(request.getProductId()))
-                .orElseThrow(() -> new InvalidRequestException("Product not found or is not valid!", ""));
-
-        List<String> roleLabels = request.getUsers().stream()
-                .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
-
-        request.getUsers().forEach(userToOnboard -> fillUserIdAndCreateIfNotExist(userToOnboard, institution.getId()));
-
-        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, request.getProductId(), request.getUsers());
-
-        if (request.getSendCreateUserNotificationEmail()) {
-            request.getUsers().forEach(userToOnboard -> userNotificationService.sendCreateUserNotification(institution.getDescription(),
-                    product.getTitle(), userToOnboard.getEmail(), roleLabels, loggedUserName, loggedUserSurname));
-        }
-
-        relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
-
-        return relationshipInfoList;
-    }
-
-    private void fillUserIdAndCreateIfNotExist(UserToOnboard user, String institutionId) {
-        User userRegistry;
-        try {
-            userRegistry = userService.retrieveUserFromUserRegistryByFiscalCode(user.getTaxCode());
-
-            //We must save mail institution if it is not found on WorkContracts
-            if (Objects.nonNull(user.getEmail()) &&
-                    (Objects.isNull(userRegistry.getWorkContacts()) || !userRegistry.getWorkContacts().containsKey(institutionId))) {
-                userRegistry = userService.persistWorksContractToUserRegistry(user.getTaxCode(), user.getEmail(), institutionId);
-            }
-        } catch (FeignException.NotFound e) {
-            userRegistry = userService.persistUserRegistry(user.getName(), user.getSurname(), user.getTaxCode(), user.getEmail(), institutionId);
-        }
-        user.setId(userRegistry.getId());
-    }
-
-    @Override
-    public List<RelationshipInfo> onboardingOperators(OnboardingOperatorsRequest
-                                                              onboardingOperatorRequest, PartyRole role, String loggedUserName, String loggedUserSurname) {
-        OnboardingInstitutionUtils.verifyUsers(onboardingOperatorRequest.getUsers(), List.of(role));
-        Institution institution = institutionService.retrieveInstitutionById(onboardingOperatorRequest.getInstitutionId());
-
-        // Verify if exists an onboarding ACTIVE for productId
-        Optional.ofNullable(institution.getOnboarding())
-                .flatMap(onboardings -> onboardings.stream()
-                        .filter(onboarding -> RelationshipState.ACTIVE.equals(onboarding.getStatus()) && onboardingOperatorRequest.getProductId().equals(onboarding.getProductId()))
-                        .findAny())
-                .orElseThrow(() -> new InvalidRequestException(String.format(CONTRACT_NOT_FOUND.getMessage(), institution.getId(), onboardingOperatorRequest.getProductId()), CONTRACT_NOT_FOUND.getCode()));
-
-        Map<String, List<UserToOnboard>> userMap = onboardingOperatorRequest.getUsers().stream()
-                .collect(Collectors.groupingBy(UserToOnboard::getId));
-        List<String> roleLabels = onboardingOperatorRequest.getUsers().stream()
-                .map(UserToOnboard::getRoleLabel).collect(Collectors.toList());
-        List<RelationshipInfo> relationshipInfoList = onboardingDao.onboardOperator(institution, onboardingOperatorRequest.getProductId(), onboardingOperatorRequest.getUsers());
-        userMap.forEach((key, value) -> userNotificationService.sendAddedProductRoleNotification(key, institution,
-                onboardingOperatorRequest.getProductTitle(), roleLabels, loggedUserName, loggedUserSurname));
-        relationshipInfoList.forEach(relationshipInfo -> userEventService.sendOperatorUserNotification(relationshipInfo, QueueEvent.ADD));
-        return relationshipInfoList;
     }
 
     @Override
