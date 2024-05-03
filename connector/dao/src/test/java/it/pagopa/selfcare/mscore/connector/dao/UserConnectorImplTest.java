@@ -10,7 +10,6 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardedProductEntit
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.*;
-import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -22,9 +21,11 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductRole;
+import it.pagopa.selfcare.product.entity.ProductRoleInfo;
+import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +63,7 @@ class UserConnectorImplTest {
     private UserEntityMapper userMapper = new UserEntityMapperImpl();
 
     @Mock
-    private ProductsRestClient productsRestClient;
+    private ProductService productService;
 
     @Spy
     private OnboardedProductMapper productMapper = new OnboardedProductMapperImpl();
@@ -220,15 +221,15 @@ class UserConnectorImplTest {
         when(userRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(new UserEntity());
         Product product = mock(Product.class);
-        EnumMap<PartyRole, ProductRoleInfo> map = mock(EnumMap.class);
+        EnumMap<it.pagopa.selfcare.onboarding.common.PartyRole, ProductRoleInfo> map = mock(EnumMap.class);
         ProductRoleInfo productRoleInfo = mock(ProductRoleInfo.class);
-        ProductRoleInfo.ProductRole productRole = mock(ProductRoleInfo.ProductRole.class);
+        ProductRole productRole = mock(ProductRole.class);
         when(productRole.getCode()).thenReturn("productRole");
         when(productRoleInfo.getRoles()).thenReturn(List.of(productRole));
-        when(map.get(PartyRole.DELEGATE)).thenReturn(productRoleInfo);
+        when(map.get(it.pagopa.selfcare.onboarding.common.PartyRole.DELEGATE)).thenReturn(productRoleInfo);
         when(product.getRoleMappings()).thenReturn(map);
 
-        when(productsRestClient.getProductById(anyString(), any())).thenReturn(product);
+        when(productService.getProduct(anyString())).thenReturn(product);
         Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateWithOptionalFilter("42", "42", "productId", PartyRole.DELEGATE, "productRole", RelationshipState.PENDING));
     }
 
@@ -250,10 +251,6 @@ class UserConnectorImplTest {
     void findAndUpdateStateWithoutFilter() {
         when(userRepository.findAndModify(any(), any(), any(), any()))
                 .thenReturn(new UserEntity());
-        Product product = mock(Product.class);
-        EnumMap<PartyRole, ProductRoleInfo> map = mock(EnumMap.class);
-        ProductRoleInfo productRoleInfo = mock(ProductRoleInfo.class);
-        ProductRoleInfo.ProductRole productRole = mock(ProductRoleInfo.ProductRole.class);
         Assertions.assertDoesNotThrow(() -> userConnectorImpl.findAndUpdateStateWithOptionalFilter("42", null, null, null, null, RelationshipState.PENDING));
     }
 

@@ -163,16 +163,16 @@ app_settings = [
     value = "https://selc-u-pnpg-party-reg-proxy-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://uat01.pnpg.internal.uat.selfcare.pagopa.it/ms-product/v1"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },
   {
     name  = "SELFCARE_USER_URL"
     value = "https://selc-u-pnpg-user-ms-ca.orangeground-0bd2d4dc.westeurope.azurecontainerapps.io"
+  },
+  {
+    name  = "PRODUCT_STORAGE_CONTAINER"
+    value = "selc-u-product"
   }
 ]
 
@@ -189,4 +189,5 @@ secrets_names = {
   "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL" = "party-test-institution-email"
   "USER_REGISTRY_API_KEY"                    = "user-registry-api-key"
   "JWT_TOKEN_PUBLIC_KEY"                     = "jwt-public-key"
+  "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"       = "blob-storage-product-connection-string"
 }

@@ -195,10 +195,6 @@ app_settings = [
     value = "https://selc-d-party-reg-proxy-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://selc-d-product-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },
@@ -223,4 +219,5 @@ secrets_names = {
   "USER_REGISTRY_API_KEY"                        = "user-registry-api-key"
   "JWT_TOKEN_PUBLIC_KEY"                         = "jwt-public-key"
   "KAFKA_USERS_SELFCARE_WO_SASL_JAAS_CONFIG"     = "eventhub-sc-users-selfcare-wo-connection-string-lc"
+  "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"       = "blob-storage-product-connection-string"
 }

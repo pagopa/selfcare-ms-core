@@ -11,10 +11,10 @@ import it.pagopa.selfcare.mscore.model.notification.MessageRequest;
 import it.pagopa.selfcare.mscore.model.notification.MultipleReceiverMessageRequest;
 import it.pagopa.selfcare.mscore.model.onboarding.MailTemplate;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductRoleInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -189,7 +189,7 @@ public class UserNotificationServiceImpl implements UserNotificationService {
         Optional<String> roleLabel = product.getRoleMappings().values().stream()
                 .flatMap(productRoleInfo -> productRoleInfo.getRoles().stream())
                 .filter(productRole -> productRole.getCode().equals(onboardedProduct.getProductRole()))
-                .map(ProductRoleInfo.ProductRole::getLabel)
+                .map(ProductRole::getLabel)
                 .findAny();
 
         Map<String, String> dataModel = new HashMap<>();

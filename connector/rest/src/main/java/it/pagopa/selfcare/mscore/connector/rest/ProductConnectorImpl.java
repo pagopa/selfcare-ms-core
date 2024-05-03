@@ -2,8 +2,8 @@ package it.pagopa.selfcare.mscore.connector.rest;
 
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
-import it.pagopa.selfcare.mscore.model.product.Product;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -12,17 +12,17 @@ import org.springframework.util.Assert;
 @Service
 public class ProductConnectorImpl implements ProductConnector {
 
-    private final ProductsRestClient restClient;
+    private final ProductService productService;
 
-    public ProductConnectorImpl(ProductsRestClient productsRestClient) {
-        this.restClient = productsRestClient;
+    public ProductConnectorImpl(ProductService productService) {
+        this.productService = productService;
     }
 
     @Override
     public Product getProductById(String productId) {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById productId = {}", productId);
         Assert.hasText(productId, "A productId is required");
-        Product result = restClient.getProductById(productId, null);
+        Product result = productService.getProduct(productId);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductById result = {}", result);
         return result;
     }
@@ -31,7 +31,7 @@ public class ProductConnectorImpl implements ProductConnector {
     public Product getProductValidById(String productId) {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductValidById productId = {}", productId);
         Assert.hasText(productId, "A productId is required");
-        Product result = restClient.getProductValid(productId);
+        Product result = productService.getProductIsValid(productId);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getProductValidById result = {}", result);
         return result;
     }

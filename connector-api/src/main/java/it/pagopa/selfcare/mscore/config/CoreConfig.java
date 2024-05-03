@@ -23,4 +23,12 @@ public class CoreConfig {
     private Integer onboardingExpiringDate;
     private boolean infoCamereEnable;
     private boolean enableSendDelegationMail;
+    private BlobStorage blobStorage;
+
+    @Data
+    public static class BlobStorage {
+        private String containerProduct;
+        private String filepathProduct;
+        private String connectionStringProduct;
+    }
 }

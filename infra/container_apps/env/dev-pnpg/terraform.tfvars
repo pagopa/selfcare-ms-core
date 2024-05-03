@@ -175,10 +175,6 @@ app_settings = [
     value = "https://selc-d-pnpg-party-reg-proxy-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://selc-d-pnpg-product-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },
@@ -201,4 +197,5 @@ secrets_names = {
   "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL" = "party-test-institution-email"
   "USER_REGISTRY_API_KEY"                    = "user-registry-api-key"
   "JWT_TOKEN_PUBLIC_KEY"                     = "jwt-public-key"
+  "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"   = "blob-storage-product-connection-string"
 }
