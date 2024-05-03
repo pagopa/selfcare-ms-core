@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.ExternalService;
@@ -15,14 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -190,27 +184,6 @@ class ExternalControllerTest {
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content().string("{}"));
-    }
-
-    @Test
-    void getUserInstitutionRelationshipsByExternalId() throws Exception {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
-
-        when(externalService.getUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/external/institutions/{externalId}/relationships", "42")
-                .principal(authentication);
-        MockMvcBuilders.standaloneSetup(externalController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("[]"));
     }
 
     /**

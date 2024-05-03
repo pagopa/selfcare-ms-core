@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.GenericError;
@@ -13,7 +12,6 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
@@ -401,37 +399,6 @@ public class InstitutionController {
         CustomExceptionMessage.setCustomMessage(GenericError.GET_INSTITUTION_BY_ID_ERROR);
         Institution institution = institutionService.retrieveInstitutionById(id);
         return ResponseEntity.ok().body(institutionResourceMapper.toInstitutionResponse(institution));
-    }
-
-    /**
-     * The function return user institution relationships
-     *
-     * @param institutionId String
-     * @param personId      String
-     * @param roles         String[]
-     * @param states        String[]
-     * @param products      String[]
-     * @param productRoles  String[]
-     * @return List
-     * * Code: 200, Message: successful operation, DataType: List<RelationshipResult>
-     * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.institution.relationships}", notes = "${swagger.mscore.institution.relationships}")
-    @GetMapping(value = "/{id}/relationships")
-    public ResponseEntity<List<RelationshipResult>> getUserInstitutionRelationships(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                                    @PathVariable("id") String institutionId,
-                                                                                    @RequestParam(value = "personId", required = false) String personId,
-                                                                                    @RequestParam(value = "roles", required = false) List<PartyRole> roles,
-                                                                                    @RequestParam(value = "states", required = false) List<RelationshipState> states,
-                                                                                    @RequestParam(value = "products", required = false) List<String> products,
-                                                                                    @RequestParam(value = "productRoles", required = false) List<String> productRoles,
-                                                                                    Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.GET_USER_INSTITUTION_RELATIONSHIP_ERROR);
-        SelfCareUser selfCareUser = (SelfCareUser) authentication.getPrincipal();
-        Institution institution = institutionService.retrieveInstitutionById(institutionId);
-        List<RelationshipInfo> relationshipInfoList = institutionService.retrieveUserInstitutionRelationships(institution, selfCareUser.getId(), personId, roles, states, products, productRoles);
-        return ResponseEntity.ok().body(RelationshipMapper.toRelationshipResultList(relationshipInfoList));
     }
 
 

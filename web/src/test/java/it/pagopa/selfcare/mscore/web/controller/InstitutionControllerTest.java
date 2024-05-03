@@ -262,27 +262,6 @@ class InstitutionControllerTest {
     }
 
     @Test
-    void getUserInstitutionRelationships() throws Exception {
-        Authentication authentication = Mockito.mock(Authentication.class);
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        SecurityContextHolder.setContext(securityContext);
-        when(authentication.getPrincipal()).thenReturn(SelfCareUser.builder("id").build());
-        Institution institution = new Institution();
-        institution.setId("id");
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
-        when(institutionService.retrieveUserInstitutionRelationships(any(), any(), any(), any(), any(), any(), any()))
-                .thenReturn(new ArrayList<>());
-        MockHttpServletRequestBuilder requestBuilder = get("/institutions/{id}/relationships", "42")
-                .principal(authentication);
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
-    }
-
-    @Test
     void retrieveInstitutionById() throws Exception {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);

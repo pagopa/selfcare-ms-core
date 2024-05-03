@@ -25,8 +25,6 @@ public interface UserService {
 
     List<UserBinding> retrieveBindings(String institutionId, String userId, String[] states, List<String> products);
 
-    List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles);
-
     boolean checkIfInstitutionUser(String userId, String institutionId);
 
     User retrieveUserFromUserRegistry(String userId);

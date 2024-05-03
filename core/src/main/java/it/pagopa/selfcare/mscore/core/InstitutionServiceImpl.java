@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.*;
@@ -12,15 +11,14 @@ import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
-import it.pagopa.selfcare.mscore.exception.*;
+import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
+import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
+import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
-import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,12 +26,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ADMIN_PARTY_ROLE;
-import static it.pagopa.selfcare.mscore.core.util.UtilEnumList.ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES;
 
 @Slf4j
 @Service
@@ -374,30 +373,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public List<RelationshipInfo> retrieveUserInstitutionRelationships(Institution institution, String userId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<OnboardedUser> adminRelationships = userService.retrieveUsers(institution.getId(), userId, ADMIN_PARTY_ROLE, ONBOARDING_INFO_DEFAULT_RELATIONSHIP_STATES, null, null);
-        String personToFilter = personId;
-        if (adminRelationships.isEmpty()) {
-            personToFilter = userId;
-        }
-        List<OnboardedUser> institutionRelationships = userService.retrieveUsers(institution.getId(), personToFilter, roles, states, products, productRoles);
-        return toRelationshipInfo(institutionRelationships, institution, roles, states, products, productRoles);
-    }
-
-    @Override
-    public List<RelationshipInfo> retrieveUserRelationships(String userId, String institutionId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        Institution institution = null;
-        if (!StringUtils.hasText(userId) && !StringUtils.hasText(institutionId)
-                && (products == null || products.isEmpty())) {
-            throw new InvalidRequestException(CustomError.MISSING_QUERY_PARAMETER.getMessage(), CustomError.MISSING_QUERY_PARAMETER.getCode());
-        }
-        if (StringUtils.hasText(institutionId)) {
-            institution = retrieveInstitutionById(institutionId);
-        }
-        return toRelationshipInfo(userService.retrieveUsers(institutionId, userId, roles, states, products, productRoles), institution, roles, states, products, productRoles);
-    }
-
-    @Override
     public void updateCreatedAt(String institutionId, String productId, OffsetDateTime createdAt, OffsetDateTime activatedAt) {
         log.trace("updateCreatedAt start");
         log.debug("updateCreatedAt institutionId = {}, productId = {}, createdAt = {}, activatedAt = {}", institutionId, productId, createdAt, activatedAt);
@@ -428,47 +403,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
-    private List<RelationshipInfo> toRelationshipInfo(List<OnboardedUser> institutionRelationships, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<RelationshipInfo> list = new ArrayList<>();
-        for (OnboardedUser onboardedUser : institutionRelationships) {
-            for (UserBinding binding : onboardedUser.getBindings()) {
-                list.addAll(retrieveAllProduct(onboardedUser.getId(), binding, institution, roles, states, products, productRoles));
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public List<RelationshipInfo> retrieveAllProduct(String userId, UserBinding binding, Institution institution, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        List<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        if (institution != null) {
-            if (institution.getId().equalsIgnoreCase(binding.getInstitutionId())) {
-                relationshipInfoList = binding.getProducts().stream()
-                        .filter(product -> filterProduct(product, roles, states, products, productRoles))
-                        .map(product -> {
-                            RelationshipInfo relationshipInfo = new RelationshipInfo();
-                            relationshipInfo.setInstitution(institution);
-                            relationshipInfo.setUserId(userId);
-                            relationshipInfo.setOnboardedProduct(product);
-                            return relationshipInfo;
-                        })
-                        .collect(Collectors.toList());
-            }
-        } else {
-            for (OnboardedProduct product : binding.getProducts()) {
-                if (Boolean.TRUE.equals(filterProduct(product, roles, states, products, productRoles))) {
-                    Institution retrievedInstitution = retrieveInstitutionById(binding.getInstitutionId());
-                    RelationshipInfo relationshipInfo = new RelationshipInfo();
-                    relationshipInfo.setInstitution(retrievedInstitution);
-                    relationshipInfo.setUserId(userId);
-                    relationshipInfo.setOnboardedProduct(product);
-                    relationshipInfoList.add(relationshipInfo);
-                }
-            }
-        }
-        return relationshipInfoList;
-    }
-
     @Override
     public List<Institution> getInstitutionBrokers(String productId, InstitutionType type) {
         return institutionConnector.findBrokers(productId, type);
@@ -484,23 +418,5 @@ public class InstitutionServiceImpl implements InstitutionService {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getInstitutionUsers result = {}", userInfos);
         log.trace("getInstitutionUsers end");
         return userInfos;
-    }
-
-    protected Boolean filterProduct(OnboardedProduct product, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-
-        if (roles != null && !roles.isEmpty() && !roles.contains(product.getRole())) {
-            return false;
-        }
-
-        if (states != null && !states.isEmpty() && !states.contains(product.getStatus())) {
-            return false;
-        }
-
-        if (products != null && !products.isEmpty() && !products.contains(product.getProductId())) {
-            return false;
-        }
-
-        return !(productRoles != null && !productRoles.isEmpty() && !productRoles.contains(product.getProductRole()));
-
     }
 }
