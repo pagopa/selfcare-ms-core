@@ -175,10 +175,6 @@ app_settings = [
     value = "https://selc-d-pnpg-party-reg-proxy-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://selc-d-pnpg-product-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.uat.pdv.pagopa.it/user-registry/v1"
   },

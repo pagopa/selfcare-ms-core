@@ -1,8 +1,8 @@
 package it.pagopa.selfcare.mscore.connector.rest;
 
-import it.pagopa.selfcare.mscore.connector.rest.client.ProductsRestClient;
-import it.pagopa.selfcare.mscore.model.product.Product;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
+import it.pagopa.selfcare.product.entity.Product;
+import it.pagopa.selfcare.product.entity.ProductStatus;
+import it.pagopa.selfcare.product.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ class ProductConnectorImplTest {
     private ProductConnectorImpl productConnectorImpl;
 
     @MockBean
-    private ProductsRestClient productsRestClient;
+    private ProductService productService;
 
     /**
      * Method under test: {@link ProductConnectorImpl#getProductById(String)}
@@ -28,17 +28,17 @@ class ProductConnectorImplTest {
     @Test
     void testGetProductById() {
         Product product = dummyProduct();
-        when(productsRestClient.getProductById(any(), any())).thenReturn(product);
+        when(productService.getProduct(any())).thenReturn(product);
         assertSame(product, productConnectorImpl.getProductById("42"));
-        verify(productsRestClient).getProductById(any(), any());
+        verify(productService).getProduct(any());
     }
 
     @Test
     void testGetProductValid() {
         Product product = dummyProduct();
-        when(productsRestClient.getProductValid(any())).thenReturn(product);
+        when(productService.getProductIsValid(any())).thenReturn(product);
         assertSame(product, productConnectorImpl.getProductValidById("42"));
-        verify(productsRestClient).getProductValid(any());
+        verify(productService).getProductIsValid(any());
     }
 
     private Product dummyProduct(){

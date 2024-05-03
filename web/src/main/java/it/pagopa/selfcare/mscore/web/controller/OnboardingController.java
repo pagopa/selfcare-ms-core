@@ -15,6 +15,7 @@ import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -117,7 +118,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.info}", notes = "${swagger.mscore.onboarding.info}")
-    @GetMapping(value = "/info")
+    @GetMapping(value = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
                                                                  @RequestParam(value = "institutionId", required = false) String institutionId,
                                                                  @ApiParam("${swagger.mscore.institutions.model.externalId}")
@@ -143,7 +144,7 @@ public class OnboardingController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.relationship.document}", notes = "${swagger.mscore.onboarding.relationship.document}")
-    @GetMapping(value = "/relationship/{relationshipId}/document")
+    @GetMapping(value = "/relationship/{relationshipId}/document", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<byte[]> getOnboardingDocument(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                         @PathVariable("relationshipId") String relationshipId) {
         CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);

@@ -34,6 +34,20 @@
             <groupId>it.pagopa.selfcare</groupId>
             <artifactId>selc-commons-base</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>it.pagopa.selfcare</groupId>
+            <artifactId>onboarding-sdk-product</artifactId>
+            <version>0.1.10</version>
+        </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>selfcare-onboarding</id>
+            <name>Selfcare Onboarding SDK</name>
+            <url>https://maven.pkg.github.com/pagopa/selfcare-onboarding</url>
+        </repository>
+    </repositories>
 
 </project>

@@ -28,6 +28,7 @@ import it.pagopa.selfcare.mscore.web.model.user.*;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -68,7 +69,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.relationship.activate}", notes = "${swagger.mscore.relationship.activate}")
-    @PostMapping("/relationships/{relationshipId}/activate")
+    @PostMapping(value = "/relationships/{relationshipId}/activate", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> activateRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                      @PathVariable("relationshipId") String relationshipId,
                                                      Authentication authentication) {
@@ -90,7 +91,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.relationship.suspend}", notes = "${swagger.mscore.relationship.suspend}")
-    @PostMapping("/relationships/{relationshipId}/suspend")
+    @PostMapping(value = "/relationships/{relationshipId}/suspend", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> suspendRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                     @PathVariable("relationshipId") String relationshipId,
                                                     Authentication authentication) {
@@ -112,7 +113,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.relationship.delete}", notes = "${swagger.mscore.relationship.delete}")
-    @DeleteMapping("/relationships/{relationshipId}")
+    @DeleteMapping(value = "/relationships/{relationshipId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> deleteRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                    @PathVariable("relationshipId") String relationshipId,
                                                    Authentication authentication) {
@@ -134,7 +135,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.relationships}", notes = "${swagger.mscore.relationships}")
-    @GetMapping("/relationships/{relationshipId}")
+    @GetMapping(value = "/relationships/{relationshipId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RelationshipResult> getRelationship(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                               @PathVariable("relationshipId") String relationshipId) {
         log.info("Getting relationship {}", relationshipId);
@@ -156,7 +157,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.onboarding.info}", notes = "${swagger.mscore.onboarding.info}")
-    @GetMapping(value = "/users/{userId}/institution-products")
+    @GetMapping(value = "/users/{userId}/institution-products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardingInfoResponse> getInstitutionProductsInfo(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                                              @PathVariable("userId") String userId,
                                                                              @ApiParam("${swagger.mscore.institutions.model.institutionId}")
@@ -183,7 +184,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.users.products}", notes = "${swagger.mscore.users.products}")
-    @GetMapping(value = "/users/{userId}/products")
+    @GetMapping(value = "/users/{userId}/products", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserProductsResponse> getUserProductsInfo(@ApiParam("${swagger.mscore.relationship.relationshipId}")
                                                                     @PathVariable("userId") String userId,
                                                                     @ApiParam("${swagger.mscore.institutions.model.institutionId}")
@@ -245,7 +246,7 @@ public class UserController {
     @Tags({@Tag(name = "support"), @Tag(name = "external-v2"), @Tag(name = "Persons")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.users}", notes = "${swagger.mscore.users}")
-    @GetMapping(value = "/users/{id}")
+    @GetMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserResponse> getUserInfo(@ApiParam("${swagger.mscore.users.userId}")
                                                     @PathVariable("id") String userId,
                                                     @ApiParam("${swagger.mscore.institutions.model.productId}")
@@ -270,7 +271,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.api.users.updateUser}", notes = "${swagger.mscore.api.users.updateUser}")
-    @PostMapping(value = "/users/{id}/update")
+    @PostMapping(value = "/users/{id}/update", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateUser(@ApiParam("${swagger.mscore.users.userId}")
                                            @PathVariable("id") String userId,
                                            @ApiParam("${swagger.mscore.institutions.model.institutionId}")
@@ -292,7 +293,7 @@ public class UserController {
      * * Code: 404, Message: Not found, DataType: Problem
      */
     @ApiOperation(value = "", notes = "${swagger.mscore.api.users.findAll}")
-    @GetMapping(value = "/users")
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<UsersNotificationResponse> getUsers(@RequestParam(name = "size", required = false, defaultValue = "100") Optional<Integer> size,
                                                               @RequestParam(name = "page", required = false, defaultValue = "0") Optional<Integer> page,
@@ -340,7 +341,7 @@ public class UserController {
     @Tag(name = "support")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.api.users.updateUserStatus}", notes = "${swagger.mscore.api.users.updateUserStatus}")
-    @PutMapping(value = "/users/{id}/status")
+    @PutMapping(value = "/users/{id}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateUserStatus(@ApiParam(value = "${swagger.mscore.users.userId}", required = true) @PathVariable(value = "id") String userId,
                                                  @ApiParam(value = "${swagger.mscore.institutions.model.institutionId}") @RequestParam(value = "institutionId", required = false) String institutionId,
                                                  @ApiParam(value = "${swagger.mscore.institutions.model.productId}") @RequestParam(value = "productId", required = false) String productId,
@@ -364,7 +365,7 @@ public class UserController {
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.api.users.getOnboardedUsers}", notes = "${swagger.mscore.api.users.getOnboardedUsers}")
-    @GetMapping(value = "/onboarded-users")
+    @GetMapping(value = "/onboarded-users", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OnboardedUsersResponse> getOnboardedUsers(@ApiParam(value = "${swagger.mscore.users.userIds}", required = true)
                                                                     @RequestParam(value = "ids") List<String> userIds) {
         log.debug("getOnboardedUsers - userIds: {}", userIds);

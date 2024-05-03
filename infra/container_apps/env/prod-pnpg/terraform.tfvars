@@ -170,16 +170,16 @@ app_settings = [
     value = "https://selc-p-pnpg-party-reg-proxy-ca.calmmoss-0be48755.westeurope.azurecontainerapps.io"
   },
   {
-    name  = "MS_PRODUCT_URL"
-    value = "https://selc-p-pnpg-product-ca.calmmoss-0be48755.westeurope.azurecontainerapps.io"
-  },
-  {
     name  = "USERVICE_USER_REGISTRY_URL"
     value = "https://api.pdv.pagopa.it/user-registry/v1"
   },
   {
     name  = "SELFCARE_USER_URL"
     value = "https://selc-p-pnpg-user-ms-ca.calmmoss-0be48755.westeurope.azurecontainerapps.io"
+  },
+  {
+    name  = "PRODUCT_STORAGE_CONTAINER"
+    value = "selc-p-product"
   }
 ]
 

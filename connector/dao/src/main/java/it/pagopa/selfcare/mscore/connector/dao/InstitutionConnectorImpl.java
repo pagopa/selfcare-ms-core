@@ -13,7 +13,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
-import it.pagopa.selfcare.mscore.model.product.ProductStatus;
+import it.pagopa.selfcare.product.entity.ProductStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
