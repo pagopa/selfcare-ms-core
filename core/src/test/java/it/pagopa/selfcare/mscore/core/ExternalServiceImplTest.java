@@ -1,13 +1,11 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.UserBinding;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -272,43 +270,5 @@ class ExternalServiceImplTest {
         assertTrue(actualRetrieveInstitutionGeoTaxonomiesByExternalIdResult.isEmpty());
         verify(institutionService).retrieveInstitutionByExternalId(any());
         verify(institutionService).retrieveInstitutionGeoTaxonomies(any());
-    }
-
-    /**
-     * Method under test: {@link ExternalServiceImpl#getUserInstitutionRelationships(String, String, String, List, List, List, List)}
-     */
-    @Test
-    void testGetUserInstitutionRelationships() {
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(new Institution());
-        ArrayList<RelationshipInfo> relationshipInfoList = new ArrayList<>();
-        when(institutionService.retrieveUserInstitutionRelationships(any(), any(), any(),
-                any(), any(), any(), any()))
-                .thenReturn(relationshipInfoList);
-        ArrayList<PartyRole> roles = new ArrayList<>();
-        ArrayList<RelationshipState> states = new ArrayList<>();
-        ArrayList<String> products = new ArrayList<>();
-        List<RelationshipInfo> actualUserInstitutionRelationships = externalServiceImpl
-                .getUserInstitutionRelationships("42", "42", "42", roles, states, products, new ArrayList<>());
-        assertSame(relationshipInfoList, actualUserInstitutionRelationships);
-        assertTrue(actualUserInstitutionRelationships.isEmpty());
-        verify(institutionService).retrieveInstitutionByExternalId(any());
-        verify(institutionService).retrieveUserInstitutionRelationships(any(), any(),
-                any(), any(), any(), any(),
-                any());
-    }
-
-    /**
-     * Method under test: {@link ExternalServiceImpl#getUserInstitutionRelationships(String, String, String, List, List, List, List)}
-     */
-    @Test
-    void testGetUserInstitutionRelationships2() {
-        when(institutionService.retrieveInstitutionByExternalId(any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-        ArrayList<PartyRole> roles = new ArrayList<>();
-        ArrayList<RelationshipState> states = new ArrayList<>();
-        ArrayList<String> products = new ArrayList<>();
-        ArrayList<String> productRoles = new ArrayList<>();
-        assertThrows(InvalidRequestException.class, () -> externalServiceImpl.getUserInstitutionRelationships("42", "42",
-                "42", roles, states, products, productRoles));
     }
 }

@@ -112,11 +112,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<OnboardedUser> retrieveUsers(String institutionId, String personId, List<PartyRole> roles, List<RelationshipState> states, List<String> products, List<String> productRoles) {
-        return userConnector.findWithFilter(institutionId, personId, roles, states, products, productRoles);
-    }
-
-    @Override
     public boolean checkIfInstitutionUser(String userId, String institutionId) {
         return !userConnector.findActiveInstitutionUser(userId, institutionId).isEmpty();
     }

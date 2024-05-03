@@ -181,18 +181,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void retrieveUsers() {
-        ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
-        when(userConnector.findWithFilter(any(), any(), any(),
-                any(), any(), any())).thenReturn(onboardedUserList);
-        List<OnboardedUser> actualRetrieveAdminUsersResult = userServiceImpl.retrieveUsers("42", "42", new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
-        assertSame(onboardedUserList, actualRetrieveAdminUsersResult);
-        assertTrue(actualRetrieveAdminUsersResult.isEmpty());
-        verify(userConnector).findWithFilter(any(), any(), any(),
-                any(), any(), any());
-    }
-
-    @Test
     void retrieveBindings_shouldReturnEmpty() {
         ArrayList<OnboardedUser> onboardedUserList = new ArrayList<>();
         when(userConnector.findWithFilter(any(), any(), any(),
