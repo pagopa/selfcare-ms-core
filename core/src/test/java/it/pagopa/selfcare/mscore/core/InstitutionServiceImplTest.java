@@ -78,9 +78,6 @@ class InstitutionServiceImplTest {
     @Mock
     private CreateInstitutionStrategy createInstitutionStrategy;
 
-    @Mock
-    private TokenMapper tokenMapper;
-
     @Spy
     private InstitutionMapper institutionMapper = new InstitutionMapperImpl();
 
@@ -903,13 +900,10 @@ class InstitutionServiceImplTest {
         tokenUserMock2.setUserId("321e9876-e89b-12d3-a456-426614174000");
         tokenUserMock2.setRole(PartyRole.DELEGATE);
 
-        Token updatedTokenMock = mockInstance(new Token());
-        updatedTokenMock.setId(updatedInstitutionMock.getOnboarding().get(1).getTokenId());
-        updatedTokenMock.setUsers(List.of(tokenUserMock1, tokenUserMock2));
+        Token updatedTokenMock = TokenMapper.toToken(onboardingMock2, institutionIdMock, productIdMock);
 
         when(institutionConnector.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock))
                 .thenReturn(updatedInstitutionMock);
-        when(tokenMapper.toToken(any(), anyString(), anyString())).thenReturn(updatedTokenMock);
 
         // When
         institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, createdAtMock, activatedAtMock);
