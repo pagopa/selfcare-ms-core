@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -37,6 +38,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final ContractService contractService;
     private final ContractEventNotificationService contractEventNotification;
     private final InstitutionConnector institutionConnector;
+    private final TokenMapper tokenMapper;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
@@ -44,7 +46,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                                  UserRelationshipService userRelationshipService,
                                  ContractService contractService,
                                  ContractEventNotificationService contractEventNotification,
-                                 InstitutionConnector institutionConnector) {
+                                 InstitutionConnector institutionConnector, TokenMapper tokenMapper) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.userService = userService;
@@ -52,6 +54,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.contractService = contractService;
         this.contractEventNotification = contractEventNotification;
         this.institutionConnector = institutionConnector;
+        this.tokenMapper = tokenMapper;
     }
 
     @Override
@@ -131,15 +134,8 @@ public class OnboardingServiceImpl implements OnboardingService {
             //Prepare data for sending to queue ScContract and ScUsers using method exists
             //using Token pojo as temporary solution, these methods will be refactored or moved as CDC of institution
             //https://pagopa.atlassian.net/browse/SELC-3571
-            Token token = new Token();
-            token.setId(onboarding.getTokenId());
-            token.setInstitutionId(institutionId);
-            token.setProductId(productId);
+            Token token = tokenMapper.toToken(onboarding, institutionId, productId);
             token.setUsers(users.stream().map(this::toTokenUser).toList());
-            token.setCreatedAt(onboarding.getCreatedAt());
-            token.setUpdatedAt(onboarding.getUpdatedAt());
-            token.setStatus(onboarding.getStatus());
-            token.setContractSigned(onboarding.getContract());
             institution.setOnboarding(List.of(onboarding));
             contractEventNotification.sendDataLakeNotification(institution, token, QueueEvent.ADD);
 

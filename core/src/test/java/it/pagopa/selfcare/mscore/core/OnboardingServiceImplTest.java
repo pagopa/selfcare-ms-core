@@ -6,6 +6,7 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -79,6 +80,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserNotificationService userNotificationService;
+
+    @Mock
+    private TokenMapper tokenMapper;
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -389,8 +393,18 @@ class OnboardingServiceImplTest {
         final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
 
 
+        Token token = new Token();
+        token.setId(onboarding.getTokenId());
+        token.setInstitutionId("institutionId");
+        token.setProductId(productId);
+        token.setCreatedAt(onboarding.getCreatedAt());
+        token.setUpdatedAt(onboarding.getUpdatedAt());
+        token.setStatus(onboarding.getStatus());
+        token.setContractSigned(onboarding.getContract());
+
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
+        when(tokenMapper.toToken(any(),anyString(),anyString())).thenReturn(token);
 
         onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist);
 

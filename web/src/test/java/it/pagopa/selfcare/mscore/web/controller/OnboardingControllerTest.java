@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.core.TokenService;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
@@ -36,14 +35,8 @@ class OnboardingControllerTest {
     @InjectMocks
     private OnboardingController onboardingController;
 
-    @InjectMocks
-    private TokenController tokenController;
-
     @Mock
     private OnboardingService onboardingService;
-
-    @Mock
-    TokenService tokenService;
 
     @Spy
     @InjectMocks

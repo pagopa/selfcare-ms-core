@@ -48,9 +48,6 @@ class SwaggerConfigTest {
     OnboardingService onboardingService;
 
     @MockBean
-    TokenService tokenService;
-
-    @MockBean
     UserService userService;
 
     @MockBean
