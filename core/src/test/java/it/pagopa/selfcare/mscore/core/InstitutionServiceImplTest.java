@@ -13,6 +13,7 @@ import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapperImpl;
 import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapperImpl;
 import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
@@ -80,6 +81,9 @@ class InstitutionServiceImplTest {
 
     @Spy
     private InstitutionMapper institutionMapper = new InstitutionMapperImpl();
+
+    @Spy
+    private TokenMapper tokenMapper = new TokenMapperImpl();
 
 
     private static final InstitutionProxyInfo dummyInstitutionProxyInfo;
@@ -900,7 +904,7 @@ class InstitutionServiceImplTest {
         tokenUserMock2.setUserId("321e9876-e89b-12d3-a456-426614174000");
         tokenUserMock2.setRole(PartyRole.DELEGATE);
 
-        Token updatedTokenMock = TokenMapper.toToken(onboardingMock2, institutionIdMock, productIdMock);
+        Token updatedTokenMock = tokenMapper.toToken(onboardingMock2, institutionIdMock, productIdMock);
 
         when(institutionConnector.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock))
                 .thenReturn(updatedInstitutionMock);

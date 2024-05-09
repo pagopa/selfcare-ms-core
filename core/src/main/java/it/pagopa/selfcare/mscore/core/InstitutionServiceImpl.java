@@ -51,6 +51,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final CoreConfig coreConfig;
     private final ContractEventNotificationService contractService;
     private final InstitutionMapper institutionMapper;
+    private final TokenMapper tokenMapper;
     private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
@@ -60,7 +61,8 @@ public class InstitutionServiceImpl implements InstitutionService {
                                   ContractEventNotificationService contractService,
                                   InstitutionMapper institutionMapper,
                                   CreateInstitutionStrategyFactory createInstitutionStrategyFactory,
-                                  UserRegistryConnector userRegistryConnector) {
+                                  UserRegistryConnector userRegistryConnector,
+                                  TokenMapper tokenMapper) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.userService = userService;
@@ -70,6 +72,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         this.institutionMapper = institutionMapper;
         this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
         this.userRegistryConnector = userRegistryConnector;
+        this.tokenMapper = tokenMapper;
     }
 
     @Override
@@ -385,7 +388,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .filter(onboarding1 -> onboarding1.getProductId().equals(productId) && onboarding1.getStatus() == RelationshipState.ACTIVE)
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(CustomError.CONTRACT_NOT_FOUND.getMessage(), institutionId, productId), CustomError.CONTRACT_NOT_FOUND.getCode()));
-        Token updatedToken = TokenMapper.toToken(onboarding, institutionId, productId);
+        Token updatedToken = tokenMapper.toToken(onboarding, institutionId, productId);
 
         contractService.sendDataLakeNotification(updatedInstitution, updatedToken, QueueEvent.UPDATE);
 

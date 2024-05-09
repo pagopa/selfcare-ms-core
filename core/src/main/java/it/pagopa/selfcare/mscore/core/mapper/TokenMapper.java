@@ -2,20 +2,19 @@ package it.pagopa.selfcare.mscore.core.mapper;
 
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@NoArgsConstructor(access = AccessLevel.NONE)
-public class TokenMapper {
-    public static Token toToken(Onboarding onboarding, String institutionId, String productId) {
-        Token token = new Token();
-        token.setId(onboarding.getTokenId());
-        token.setInstitutionId(institutionId);
-        token.setProductId(productId);
-        token.setCreatedAt(onboarding.getCreatedAt());
-        token.setUpdatedAt(onboarding.getUpdatedAt());
-        token.setStatus(onboarding.getStatus());
-        token.setContractSigned(onboarding.getContract());
-        return token;
-    }
+@Mapper(componentModel = "spring")
+public interface TokenMapper {
+
+    @Mapping(target = "id" , source = "onboarding.tokenId")
+    @Mapping(target = "institutionId" , source = "institutionId")
+    @Mapping(target = "productId" , source = "productId")
+    @Mapping(target = "createdAt" , source = "onboarding.createdAt")
+    @Mapping(target = "updatedAt" , source = "onboarding.createdAt")
+    @Mapping(target = "status" , source = "onboarding.status")
+    @Mapping(target = "contractSigned" , source = "onboarding.contract")
+    Token toToken(Onboarding onboarding, String institutionId, String productId);
+
 }
