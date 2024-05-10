@@ -69,11 +69,6 @@ class QueueNotificationServiceTest {
     }
 
     @Test
-    void startContractScheduler_productNotPresent(){
-
-    }
-
-    @Test
     void startUserScheduler(){
         //given
         final List<String> productIds = List.of("productId");
