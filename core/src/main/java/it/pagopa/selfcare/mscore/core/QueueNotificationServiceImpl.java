@@ -1,22 +1,16 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.TokenConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
-import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,28 +72,6 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
         }
 
         log.trace("regenerateQueueNotifications end");
-    }
-
-    private void sendScContractNotifications(List<Token> tokens) {
-        tokens.forEach(token -> {
-            try {
-                Institution institution = institutionConnector.findById(token.getInstitutionId());
-                contractService.sendDataLakeNotification(institution, token, QueueEvent.ADD);
-                if (!token.getStatus().equals(RelationshipState.ACTIVE)) {
-                    contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
-                }
-            } catch (ResourceNotFoundException exception) {
-                log.error("Error while fetching institution for token {}, {}", token.getId(), exception.getMessage());
-            }
-        });
-    }
-
-    @Async
-    @Override
-    public void sendContracts(Optional<Integer> size, List<String> productsFilter) {
-        this.page_size_api = size;
-        this.productsFilter = Optional.ofNullable(productsFilter);
-        regenerateContractsNotifications();
     }
 
 }
