@@ -1328,7 +1328,8 @@ class InstitutionControllerTest {
         // Then
         assertNotNull(response);
         assertNotNull(response.get(0));
-        assertEquals(response.get(0).getId(), institution.getTaxCode());
+        assertEquals(response.get(0).getId(), institution.getId());
+        assertEquals(response.get(0).getTaxCode(), institution.getTaxCode());
         verify(institutionService, times(1))
                 .getInstitutionBrokers(productId, type);
         verifyNoMoreInteractions(institutionService);
