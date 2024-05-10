@@ -47,7 +47,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final UserConnector userConnector;
     private final UserRegistryConnector userRegistryConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-    private final UserService userService;
     private final CoreConfig coreConfig;
     private final ContractEventNotificationService contractService;
     private final InstitutionMapper institutionMapper;
@@ -56,7 +55,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
-                                  UserService userService, CoreConfig coreConfig,
+                                  CoreConfig coreConfig,
                                   UserConnector userConnector,
                                   ContractEventNotificationService contractService,
                                   InstitutionMapper institutionMapper,
@@ -65,7 +64,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                                   TokenMapper tokenMapper) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
-        this.userService = userService;
         this.coreConfig = coreConfig;
         this.userConnector = userConnector;
         this.contractService = contractService;

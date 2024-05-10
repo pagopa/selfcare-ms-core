@@ -57,9 +57,6 @@ class InstitutionServiceImplTest {
 
     @Mock
     private PartyRegistryProxyConnector partyRegistryProxyConnector;
-
-    @Mock
-    private UserService userService;
     
     @Mock
     private CoreConfig coreConfig;
