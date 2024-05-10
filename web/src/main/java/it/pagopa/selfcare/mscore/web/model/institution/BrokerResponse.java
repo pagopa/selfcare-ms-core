@@ -6,6 +6,7 @@ import lombok.Data;
 public class BrokerResponse {
 
     private String id;
+    private String taxCode;
     private String description;
     private int numberOfDelegations;
 

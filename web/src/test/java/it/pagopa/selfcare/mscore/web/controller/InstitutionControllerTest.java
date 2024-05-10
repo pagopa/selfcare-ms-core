@@ -1306,6 +1306,7 @@ class InstitutionControllerTest {
         final InstitutionType type = InstitutionType.PT;
         Institution institution = new Institution();
         institution.setId("id");
+        institution.setTaxCode("taxCode");
 
         // When
         when(institutionService.getInstitutionBrokers(any(), any())).thenReturn(List.of(institution));
@@ -1328,6 +1329,7 @@ class InstitutionControllerTest {
         assertNotNull(response);
         assertNotNull(response.get(0));
         assertEquals(response.get(0).getId(), institution.getId());
+        assertEquals(response.get(0).getTaxCode(), institution.getTaxCode());
         verify(institutionService, times(1))
                 .getInstitutionBrokers(productId, type);
         verifyNoMoreInteractions(institutionService);
