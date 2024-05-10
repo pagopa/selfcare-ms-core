@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.core.QueueNotificationService;
-import it.pagopa.selfcare.mscore.web.model.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +23,6 @@ class QueueNotificationControllerTest {
     private static final String BASE_URL = "/notification-event";
     @Autowired
     protected MockMvc mvc;
-
-    @MockBean
-    private UserMapper userMapper;
 
     @MockBean
     private QueueNotificationService queueNotificationService;
@@ -61,24 +57,4 @@ class QueueNotificationControllerTest {
         Mockito.verify(queueNotificationService, Mockito.times(1)).sendContractsNotificationsByInstitutionIdAndTokenId(tokenId, institutionId);
     }
 
-    @Test
-    void sendUsers() throws Exception {
-        Integer size = 1;
-        Integer page = 0;
-        String productId = "product";
-        mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL + "/users")
-                        .param("size", String.valueOf(size))
-                        .param("page",String.valueOf(page))
-                        .param("productsFilter", productId))
-                .andExpect(status().isOk());
-
-        Mockito.verify(queueNotificationService, Mockito.times(1)).sendUsers(Optional.of(size),Optional.of(page), List.of(productId), Optional.empty());
-    }
-
-    @Test
-    void countUsers() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/users/count")).andExpect(status().isOk());
-        Mockito.verify(queueNotificationService, Mockito.times(1)).countUsers();
-    }
 }
