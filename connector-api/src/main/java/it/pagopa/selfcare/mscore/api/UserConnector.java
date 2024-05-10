@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.api;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.aggregation.QueryCount;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedProduct;
@@ -61,5 +60,4 @@ public interface UserConnector {
 
     List<UserInstitutionAggregation> getUserInfo(String userId, String institutionId, String[] states);
 
-    List<QueryCount> countUsers();
 }
