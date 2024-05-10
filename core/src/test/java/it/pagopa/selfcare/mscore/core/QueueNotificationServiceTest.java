@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -34,8 +33,6 @@ class QueueNotificationServiceTest {
     @Mock
     private ContractEventNotificationService contractService;
 
-    @Mock
-    private UserConnector userConnector;
     @Mock
     private InstitutionConnector institutionConnector;
     @Mock
@@ -118,10 +115,6 @@ class QueueNotificationServiceTest {
         verify(contractService, times(1)).sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
     }
 
-    @Test
-    void startContractScheduler_productNotPresent(){
-
-    }
 
     @Test
     void institutionNotFound(){

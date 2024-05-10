@@ -1,9 +1,6 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -15,20 +12,6 @@ import org.springframework.stereotype.Service;
         havingValue = "ignore",
         matchIfMissing = true)
 public class UserEventServiceIgnore implements UserEventService{
-    @Override
-    public void sendLegalTokenUserNotification(Token token) {
-
-    }
-
-    @Override
-    public void sendOperatorUserNotification(RelationshipInfo relationshipInfo, QueueEvent eventType) {
-
-    }
-
-    @Override
-    public void sendUserNotificationToQueue(String userId, String institutionId, QueueEvent eventType) {
-
-    }
 
     @Override
     public void sendOnboardedUserNotification(OnboardedUser onboardedUser, String productId) {
