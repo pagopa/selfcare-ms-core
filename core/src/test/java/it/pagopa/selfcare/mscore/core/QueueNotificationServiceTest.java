@@ -53,7 +53,7 @@ class QueueNotificationServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
@@ -85,7 +85,7 @@ class QueueNotificationServiceTest {
         onboardingDeleted.setStatus(RelationshipState.DELETED);
         institution.setOnboarding(List.of(onboardingActive, onboardingDeleted, onboarding));
 
-        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService,tokenConnector, institutionConnector);
 
         when(institutionConnector.findById(institutionId)).thenReturn(institution);
         //when
@@ -106,7 +106,7 @@ class QueueNotificationServiceTest {
         token.setInstitutionUpdate(institutionUpdate);
         final Institution institution = mockInstance(new Institution());
 
-        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector);
 
 
         when(institutionConnector.findById(anyString())).thenReturn(institution);
@@ -131,7 +131,7 @@ class QueueNotificationServiceTest {
         final Token token = mockInstance(new Token());
         token.setStatus(RelationshipState.DELETED);
 
-        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector, null);
+        schedulerService = new QueueNotificationServiceImpl(contractService, userEventService, tokenConnector, institutionConnector);
 
 
         when(institutionConnector.findById(anyString())).thenThrow(ResourceNotFoundException.class);

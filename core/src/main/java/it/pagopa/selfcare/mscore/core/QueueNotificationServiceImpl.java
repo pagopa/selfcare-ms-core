@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.TokenConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
@@ -33,8 +32,6 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
     private final InstitutionConnector institutionConnector;
     private Optional<List<String>> productsFilter = Optional.empty();
 
-    private final UserConnector userConnector;
-
     private final List<RelationshipState> statesToSend = List.of(RelationshipState.ACTIVE, RelationshipState.DELETED);
 
 
@@ -42,9 +39,8 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
     public QueueNotificationServiceImpl(ContractEventNotificationService contractService,
                                         UserEventService userEventService,
                                         TokenConnector tokenConnector,
-                                        InstitutionConnector institutionConnector, UserConnector userConnector) {
+                                        InstitutionConnector institutionConnector) {
         this.userEventService = userEventService;
-        this.userConnector = userConnector;
         log.info("Initializing {}...", QueueNotificationServiceImpl.class.getSimpleName());
         this.contractService = contractService;
         this.tokenConnector = tokenConnector;
