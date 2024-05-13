@@ -168,11 +168,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-d-pnpg-notification-mngr-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
+    value = "http://selc-d-pnpg-notification-mngr-ca"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-d-pnpg-party-reg-proxy-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
+    value = "http://selc-d-pnpg-party-reg-proxy-ca"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"
@@ -180,7 +180,7 @@ app_settings = [
   },
   {
     name  = "SELFCARE_USER_URL"
-    value = "https://selc-d-pnpg-user-ms-ca.victoriousfield-e39534b8.westeurope.azurecontainerapps.io"
+    value = "http://selc-d-pnpg-user-ms-ca"
   }
 ]
 

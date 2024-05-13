@@ -167,11 +167,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-u-notification-mngr-ca.proudglacier-20652b81.westeurope.azurecontainerapps.io"
+    value = "http://selc-u-notification-mngr-ca"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-u-party-reg-proxy-ca.proudglacier-20652b81.westeurope.azurecontainerapps.io"
+    value = "http://selc-u-party-reg-proxy-ca"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"
@@ -179,7 +179,7 @@ app_settings = [
   },
   {
     name  = "SELFCARE_USER_URL"
-    value = "https://selc-u-user-ms-ca.proudglacier-20652b81.westeurope.azurecontainerapps.io"
+    value = "http://selc-u-user-ms-ca"
   },
   {
     name  = "PRODUCT_STORAGE_CONTAINER"

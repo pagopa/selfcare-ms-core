@@ -188,11 +188,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-d-notification-mngr-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
+    value = "http://selc-d-notification-mngr-ca"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-d-party-reg-proxy-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
+    value = "http://selc-d-party-reg-proxy-ca"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"
@@ -200,7 +200,7 @@ app_settings = [
   },
   {
     name  = "SELFCARE_USER_URL"
-    value = "https://selc-d-user-ms-ca.politewater-9af33050.westeurope.azurecontainerapps.io"
+    value = "http://selc-d-user-ms-ca"
   }
 ]
 
