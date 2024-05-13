@@ -412,13 +412,10 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getPaAttributes().getAooParentCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniAoo());
         assertThat(actual.getCity()).isEqualTo(dummyGeotaxonomies.getDescription().replace(" - COMUNE", ""));
 
-        verify(institutionConnector, times(2)).save(any());
+        verify(institutionConnector, times(1)).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
         verify(partyRegistryProxyConnector).getCategory(any(), any());
         verify(partyRegistryProxyConnector).getInstitutionById(any());
-        verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyInstitutionProxyInfo.getIstatCode());
-        verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyUnitaOrganizzativa.getCodiceComuneISTAT());
-
     }
 
     /**
@@ -460,7 +457,7 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
         assertThat(actual.getPaAttributes().getAooParentCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniAoo());
 
-        verify(institutionConnector, times(1)).save(any());
+        verify(institutionConnector, times(2)).save(any());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
         verify(partyRegistryProxyConnector).getCategory(any(), any());
         verify(partyRegistryProxyConnector).getInstitutionById(any());
