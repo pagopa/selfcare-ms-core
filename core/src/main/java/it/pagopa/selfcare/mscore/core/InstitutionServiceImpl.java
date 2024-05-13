@@ -4,11 +4,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
-import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
@@ -24,7 +19,6 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -46,15 +40,12 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
     private final InstitutionConnector institutionConnector;
-    private final TokenConnector tokenConnector;
-    private final UserConnector userConnector;
-    private final UserRegistryConnector userRegistryConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-    private final UserService userService;
     private final CoreConfig coreConfig;
     private final ContractEventNotificationService contractService;
     private final InstitutionMapper institutionMapper;
     private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
+    private final TokenMapper tokenMapper;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
@@ -69,6 +60,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         this.contractService = contractService;
         this.institutionMapper = institutionMapper;
         this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
+        this.tokenMapper = tokenMapper;
     }
 
     @Override
