@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -299,6 +300,7 @@ class CreateInstitutionStrategyTest {
     void shouldCreateInstitutionFromIpaUo() {
 
         UnitaOrganizzativa dummyUnitaOrganizzativa = dummyUnitaOrganizzativa();
+        dummyUnitaOrganizzativa.setCodiceFiscaleSfe("codiceFiscaleSfe");
 
         when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
         when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), anyString()))
@@ -403,6 +405,56 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getAddress()).isEqualTo(dummyUnitaOrganizzativa.getIndirizzo());
         assertThat(actual.getZipCode()).isEqualTo(dummyUnitaOrganizzativa.getCAP());
         assertThat(actual.getTaxCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceFiscaleEnte());
+        assertThat(actual.getTaxCodeSfe()).isEqualTo(dummyUnitaOrganizzativa.getCodiceFiscaleSfe());
+        assertThat(actual.getSubunitCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniUo());
+        assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.UO.name());
+        assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
+        assertThat(actual.getPaAttributes().getAooParentCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniAoo());
+        assertThat(actual.getCity()).isEqualTo(dummyGeotaxonomies.getDescription().replace(" - COMUNE", ""));
+
+        verify(institutionConnector, times(2)).save(any());
+        verify(institutionConnector).findByTaxCodeAndSubunitCode(anyString(), anyString());
+        verify(partyRegistryProxyConnector).getCategory(any(), any());
+        verify(partyRegistryProxyConnector).getInstitutionById(any());
+        verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyInstitutionProxyInfo.getIstatCode());
+        verify(partyRegistryProxyConnector, times(1)).getExtByCode(dummyUnitaOrganizzativa.getCodiceComuneISTAT());
+
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionFromIpaUoWithoutTaxCodeSfe() {
+
+        UnitaOrganizzativa dummyUnitaOrganizzativa = dummyUnitaOrganizzativa();
+
+        when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
+        when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), anyString()))
+                .thenReturn(List.of());
+
+        when(partyRegistryProxyConnector.getCategory(any(), any())).thenReturn(dummyCategoryProxyInfo);
+        when(partyRegistryProxyConnector.getInstitutionById(any())).thenReturn(dummyInstitutionProxyInfo);
+        when(partyRegistryProxyConnector.getUoById(any())).thenReturn(dummyUnitaOrganizzativa);
+        when(partyRegistryProxyConnector.getExtByCode(anyString())).thenReturn(dummyGeotaxonomies).thenReturn(dummyGeotaxonomies);
+
+        Institution actual = strategyFactory.createInstitutionStrategyIpa()
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(dummyUnitaOrganizzativa.getCodiceFiscaleEnte())
+                        .subunitType(InstitutionPaSubunitType.UO)
+                        .subunitCode(dummyUnitaOrganizzativa.getCodiceUniUo())
+                        .build());
+
+        //Then
+        assertThat(actual.getOriginId()).isEqualTo(dummyUnitaOrganizzativa.getId());
+        assertThat(actual.getDescription()).isEqualTo(dummyUnitaOrganizzativa.getDescrizioneUo());
+
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PA);
+        assertThat(actual.getDigitalAddress()).isEqualTo(dummyInstitutionProxyInfo.getDigitalAddress());
+        assertThat(actual.getAddress()).isEqualTo(dummyUnitaOrganizzativa.getIndirizzo());
+        assertThat(actual.getZipCode()).isEqualTo(dummyUnitaOrganizzativa.getCAP());
+        assertThat(actual.getTaxCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceFiscaleEnte());
+        assertNull(actual.getTaxCodeSfe());
         assertThat(actual.getSubunitCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniUo());
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.UO.name());
         assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
