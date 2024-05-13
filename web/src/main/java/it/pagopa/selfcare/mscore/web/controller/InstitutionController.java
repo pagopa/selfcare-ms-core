@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
@@ -519,23 +518,4 @@ public class InstitutionController {
         return result;
     }
 
-    @Tags({@Tag(name = "support"), @Tag(name = "Institution")})
-    @GetMapping(value = "/{institutionId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "", notes = "${swagger.mscore.institutions.api.getInstitutionUsers}")
-    public List<UserInfoResponse> getInstitutionUsers(@ApiParam("${swagger.mscore.institutions.model.id}")
-                                                      @PathVariable("institutionId")
-                                                      String institutionId) {
-
-        log.trace("getInstitutionUsers start");
-        log.debug("getInstitutionUsers institutionId = {}, role = {}", institutionId);
-        List<UserInfo> userInfos = institutionService.getInstitutionUsers(institutionId);
-        List<UserInfoResponse> result = userInfos.stream()
-                .map(userInfo -> userMapper.toUserInfoResponse(userInfo, institutionId))
-                .collect(Collectors.toList());
-        log.debug("getInstitutionUsers result = {}", result);
-        log.trace("getInstitutionUsers end");
-
-        return result;
-    }
 }

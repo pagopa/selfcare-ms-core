@@ -5,9 +5,6 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardedUser;
-import it.pagopa.selfcare.mscore.model.user.UserBinding;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -30,8 +26,6 @@ class ExternalServiceImplTest {
     @Mock
     private InstitutionService institutionService;
 
-    @Mock
-    private UserService userService;
 
     /**
      * Method under test: {@link ExternalServiceImpl#getInstitutionByExternalId(String)}
@@ -66,80 +60,6 @@ class ExternalServiceImplTest {
         verify(institutionService).retrieveInstitutionByExternalId(any());
     }
 
-    /**
-     * Method under test: {@link ExternalServiceImpl#retrieveInstitutionManager(String, String)}
-     */
-    @Test
-    void testRetrieveInstitutionManager() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new ArrayList<>());
-        when(userService.findOnboardedManager(any(), any(), any()))
-                .thenReturn(onboardedUser);
-        Institution institution = new Institution();
-        institution.setOnboarding(new ArrayList<>());
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(institution);
-        Assertions.assertThrows(InvalidRequestException.class, () -> externalServiceImpl.retrieveInstitutionManager("42", "42"));
-    }
-
-    @Test
-    void testRetrieveInstitutionManager2() {
-        OnboardedUser onboardedUser = new OnboardedUser();
-        List<UserBinding> userBindings = new ArrayList<>();
-        UserBinding userBinding = new UserBinding();
-        userBinding.setInstitutionId("id");
-        userBinding.setProducts(new ArrayList<>());
-        userBindings.add(userBinding);
-        onboardedUser.setBindings(userBindings);
-        onboardedUser.setId("id");
-        when(userService.findOnboardedManager(any(), any(), any()))
-                .thenReturn(onboardedUser);
-        Institution institution = new Institution();
-        institution.setId("id");
-        institution.setOnboarding(new ArrayList<>());
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(institution);
-        assertNotNull(externalServiceImpl.retrieveInstitutionManager("42", "42"));
-    }
-
-    /**
-     * Method under test: {@link ExternalServiceImpl#retrieveInstitutionManager(String, String)}
-     */
-    @Test
-    void testRetrieveInstitutionManager3() {
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(new Institution());
-        assertThrows(InvalidRequestException.class, () -> externalServiceImpl.retrieveInstitutionManager("42", "42"));
-        verify(institutionService).retrieveInstitutionByExternalId(any());
-    }
-
-    /**
-     * Method under test: {@link ExternalServiceImpl#retrieveInstitutionManager(String, String)}
-     */
-    @Test
-    void testRetrieveInstitutionManager6() {
-
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(dummyInstitutionPa());
-
-        OnboardedUser onboardedUser = new OnboardedUser();
-        onboardedUser.setBindings(new ArrayList<>());
-        when(userService.findOnboardedManager(any(), any(), any()))
-                .thenReturn(onboardedUser);
-        assertThrows(InvalidRequestException.class, () -> externalServiceImpl.retrieveInstitutionManager("42", "42"));
-        verify(institutionService).retrieveInstitutionByExternalId(any());
-        verify(userService).findOnboardedManager(any(), any(), any());
-    }
-
-    /**
-     * Method under test: {@link ExternalServiceImpl#retrieveInstitutionManager(String, String)}
-     */
-    @Test
-    void testRetrieveInstitutionManager8() {
-
-        when(institutionService.retrieveInstitutionByExternalId(any())).thenReturn(dummyInstitutionPa());
-        when(userService.findOnboardedManager(any(), any(), any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-        assertThrows(InvalidRequestException.class, () -> externalServiceImpl.retrieveInstitutionManager("42", "42"));
-        verify(institutionService).retrieveInstitutionByExternalId(any());
-        verify(userService).findOnboardedManager(any(), any(), any());
-    }
 
     /**
      * Method under test: {@link ExternalServiceImpl#retrieveInstitutionProduct(String, String)}

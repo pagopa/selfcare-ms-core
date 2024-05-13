@@ -1,12 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
@@ -22,7 +19,6 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -44,32 +40,26 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
     private final InstitutionConnector institutionConnector;
-    private final UserConnector userConnector;
-    private final UserRegistryConnector userRegistryConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final CoreConfig coreConfig;
     private final ContractEventNotificationService contractService;
     private final InstitutionMapper institutionMapper;
-    private final TokenMapper tokenMapper;
     private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
+    private final TokenMapper tokenMapper;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
                                   CoreConfig coreConfig,
-                                  UserConnector userConnector,
                                   ContractEventNotificationService contractService,
                                   InstitutionMapper institutionMapper,
                                   CreateInstitutionStrategyFactory createInstitutionStrategyFactory,
-                                  UserRegistryConnector userRegistryConnector,
                                   TokenMapper tokenMapper) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.coreConfig = coreConfig;
-        this.userConnector = userConnector;
         this.contractService = contractService;
         this.institutionMapper = institutionMapper;
         this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
-        this.userRegistryConnector = userRegistryConnector;
         this.tokenMapper = tokenMapper;
     }
 
@@ -404,17 +394,5 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public List<Institution> getInstitutionBrokers(String productId, InstitutionType type) {
         return institutionConnector.findBrokers(productId, type);
-    }
-
-    @Override
-    public List<UserInfo> getInstitutionUsers(String institutionId) {
-        log.trace("getInstitutionUsers start");
-        log.debug("getInstitutionUsers institutionId = {}", institutionId);
-        Assert.hasText(institutionId, REQUIRED_INSTITUTION_MESSAGE);
-        List<UserInfo> userInfos = userConnector.findByInstitutionId(institutionId);
-        userInfos.forEach(userInfo -> userInfo.setUser(userRegistryConnector.getUserByInternalIdWithFiscalCode(userInfo.getId())));
-        log.debug(LogUtils.CONFIDENTIAL_MARKER, "getInstitutionUsers result = {}", userInfos);
-        log.trace("getInstitutionUsers end");
-        return userInfos;
     }
 }

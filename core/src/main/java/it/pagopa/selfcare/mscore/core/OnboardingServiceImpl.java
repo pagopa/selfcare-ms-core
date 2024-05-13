@@ -4,28 +4,24 @@ import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
-import it.pagopa.selfcare.mscore.core.util.OnboardingInfoUtils;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
+import it.pagopa.selfcare.mscore.model.onboarding.Token;
+import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
+import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
-import static it.pagopa.selfcare.mscore.constant.CustomError.DOCUMENT_NOT_FOUND;
-import static it.pagopa.selfcare.mscore.constant.CustomError.ONBOARDING_INFO_INSTITUTION_NOT_FOUND;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 
 @Slf4j
@@ -33,26 +29,17 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATI
 public class OnboardingServiceImpl implements OnboardingService {
     private final OnboardingDao onboardingDao;
     private final InstitutionService institutionService;
-    private final UserService userService;
-    private final UserRelationshipService userRelationshipService;
-    private final ContractService contractService;
     private final ContractEventNotificationService contractEventNotification;
     private final InstitutionConnector institutionConnector;
     private final TokenMapper tokenMapper;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
-                                 UserService userService,
-                                 UserRelationshipService userRelationshipService,
-                                 ContractService contractService,
                                  ContractEventNotificationService contractEventNotification,
                                  InstitutionConnector institutionConnector,
                                  TokenMapper tokenMapper) {
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
-        this.userService = userService;
-        this.userRelationshipService = userRelationshipService;
-        this.contractService = contractService;
         this.contractEventNotification = contractEventNotification;
         this.institutionConnector = institutionConnector;
         this.tokenMapper = tokenMapper;
@@ -81,25 +68,6 @@ public class OnboardingServiceImpl implements OnboardingService {
         if (Boolean.FALSE.equals(existsOnboardingValid)) {
             throw new ResourceNotFoundException(CustomError.INSTITUTION_NOT_ONBOARDED_BY_FILTERS.getMessage(),
                     CustomError.INSTITUTION_NOT_ONBOARDED_BY_FILTERS.getCode());
-        }
-    }
-
-    @Override
-    public List<OnboardingInfo> getOnboardingInfo(String institutionId, String institutionExternalId, String[]
-            states, String userId) {
-
-        List<RelationshipState> relationshipStateList = OnboardingInfoUtils.getRelationShipStateList(states);
-        List<OnboardingInfo> onboardingInfoList = new ArrayList<>();
-        try {
-            List<UserInstitutionAggregation> userInstitutionAggregation = getUserInstitutionAggregation(userId, institutionId, institutionExternalId, relationshipStateList);
-            userInstitutionAggregation.forEach(userBinding -> onboardingInfoList.add(new OnboardingInfo(userId, userBinding.getInstitutions().get(0), userBinding.getBindings())));
-
-            if (onboardingInfoList.isEmpty()) {
-                throw new InvalidRequestException(CustomError.ONBOARDING_INFO_ERROR.getMessage(), CustomError.ONBOARDING_INFO_ERROR.getCode());
-            }
-            return onboardingInfoList;
-        } catch (ResourceNotFoundException e) {
-            return Collections.emptyList();
         }
     }
 
@@ -154,28 +122,6 @@ public class OnboardingServiceImpl implements OnboardingService {
         tokenUser.setUserId(user.getId());
         tokenUser.setRole(user.getRole());
         return tokenUser;
-    }
-
-    @Override
-    public ResourceResponse retrieveDocument(String relationshipId) {
-        RelationshipInfo relationship = userRelationshipService.retrieveRelationship(relationshipId);
-        if (relationship.getOnboardedProduct() != null &&
-                StringUtils.hasText(relationship.getOnboardedProduct().getContract())) {
-            return contractService.getFile(relationship.getOnboardedProduct().getContract());
-        } else {
-            throw new ResourceNotFoundException(String.format(DOCUMENT_NOT_FOUND.getMessage(), relationshipId), DOCUMENT_NOT_FOUND.getCode());
-        }
-    }
-
-    private List<UserInstitutionAggregation> getUserInstitutionAggregation(String userId, String
-            institutionId, String externalId, List<RelationshipState> relationshipStates) {
-        List<String> states = relationshipStates.stream().map(Enum::name).collect(Collectors.toList());
-        UserInstitutionFilter filter = new UserInstitutionFilter(userId, institutionId, externalId, states);
-        List<UserInstitutionAggregation> userInstitutionAggregation = userService.findUserInstitutionAggregation(filter);
-        if (userInstitutionAggregation == null || userInstitutionAggregation.isEmpty()) {
-            throw new ResourceNotFoundException(String.format(ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getMessage(), userId), ONBOARDING_INFO_INSTITUTION_NOT_FOUND.getCode());
-        }
-        return userInstitutionAggregation;
     }
 
 }

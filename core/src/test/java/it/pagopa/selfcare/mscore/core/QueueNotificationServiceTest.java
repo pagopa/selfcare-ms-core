@@ -1,8 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapperImpl;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -26,11 +28,10 @@ class QueueNotificationServiceTest {
     private QueueNotificationServiceImpl schedulerService;
     @Mock
     private ContractEventNotificationService contractService;
-
-    @Mock
-    private UserConnector userConnector;
     @Mock
     private InstitutionConnector institutionConnector;
+    @Spy
+    private TokenMapper tokenMapper = new TokenMapperImpl();
 
 
     @Test
@@ -50,7 +51,7 @@ class QueueNotificationServiceTest {
         onboardingDeleted.setStatus(RelationshipState.DELETED);
         institution.setOnboarding(List.of(onboardingActive, onboardingDeleted, onboarding));
 
-        schedulerService = new QueueNotificationServiceImpl(contractService, institutionConnector);
+        schedulerService = new QueueNotificationServiceImpl(contractService, institutionConnector, tokenMapper);
 
         when(institutionConnector.findById(institutionId)).thenReturn(institution);
         //when

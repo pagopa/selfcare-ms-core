@@ -48,16 +48,10 @@ class SwaggerConfigTest {
     OnboardingService onboardingService;
 
     @MockBean
-    UserService userService;
-
-    @MockBean
     QueueNotificationService queueNotificationService;
 
     @Autowired
     WebApplicationContext context;
-
-    @MockBean
-    UserRelationshipService userRelationshipService;
 
     @MockBean
     DelegationService delegationService;

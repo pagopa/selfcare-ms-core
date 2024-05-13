@@ -2,12 +2,12 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +26,13 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
     private Optional<Integer> page = Optional.empty();
     private final InstitutionConnector institutionConnector;
     private Optional<List<String>> productsFilter = Optional.empty();
-
+    private final TokenMapper tokenMapper;
     private final List<RelationshipState> statesToSend = List.of(RelationshipState.ACTIVE, RelationshipState.DELETED);
 
 
-    @Autowired
     public QueueNotificationServiceImpl(ContractEventNotificationService contractService,
-                                        InstitutionConnector institutionConnector) {
+                                        InstitutionConnector institutionConnector, TokenMapper tokenMapper) {
+        this.tokenMapper = tokenMapper;
         log.info("Initializing {}...", QueueNotificationServiceImpl.class.getSimpleName());
         this.contractService = contractService;
         this.institutionConnector = institutionConnector;
@@ -58,15 +58,8 @@ public class QueueNotificationServiceImpl implements QueueNotificationService {
 
         for(Onboarding onboarding : onboardings) {
 
-            Token token = new Token();
-            token.setId(onboarding.getTokenId());
-            token.setInstitutionId(institutionId);
-            token.setProductId(onboarding.getProductId());
+            Token token = tokenMapper.toToken(onboarding, institutionId, onboarding.getProductId());
             //token.setUsers(users.stream().map(this::toTokenUser).toList());
-            token.setCreatedAt(onboarding.getCreatedAt());
-            token.setUpdatedAt(onboarding.getUpdatedAt());
-            token.setStatus(onboarding.getStatus());
-            token.setContractSigned(onboarding.getContract());
             institution.setOnboarding(List.of(onboarding));
             contractService.sendDataLakeNotification(institution, token, QueueEvent.UPDATE);
         }
