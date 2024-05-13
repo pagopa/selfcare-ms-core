@@ -41,15 +41,7 @@ import static org.mockito.Mockito.*;
 class OnboardingServiceImplTest {
 
     @Mock
-    private ContractService contractService;
-
-    @Mock
     private ContractEventNotificationService contractEventNotificationService;
-
-    @Mock
-    private UserService userService;
-    @Mock
-    private MailNotificationService emailService;
 
     @Mock
     private OnboardingDao onboardingDao;
@@ -305,8 +297,6 @@ class OnboardingServiceImplTest {
                 .findAndUpdate(any(), captor.capture(), any(), any());
         Onboarding actual = captor.getValue();
         assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
-
-        verifyNoMoreInteractions(userService);
     }
 
     private OnboardedProduct getOnboardedProduct() {

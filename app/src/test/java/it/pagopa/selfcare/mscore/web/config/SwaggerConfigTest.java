@@ -48,9 +48,6 @@ class SwaggerConfigTest {
     OnboardingService onboardingService;
 
     @MockBean
-    UserService userService;
-
-    @MockBean
     QueueNotificationService queueNotificationService;
 
     @Autowired
