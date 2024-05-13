@@ -181,13 +181,10 @@ public class ContractEventNotificationServiceImpl implements ContractEventNotifi
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
         toNotify.setTaxCodeSfe(institution.getTaxCodeSfe());
-        if (institution.getSubunitType() != null && !institution.getSubunitType().equals("EC")) {
-            try {
-                InstitutionPaSubunitType.valueOf(institution.getSubunitType());
-                toNotify.setSubUnitType(institution.getSubunitType());
-                toNotify.setSubUnitCode(institution.getSubunitCode());
-            } catch (IllegalArgumentException ignored) {
-            }
+        if (institution.getSubunitType() != null && !"EC".equals(institution.getSubunitType())) {
+            InstitutionPaSubunitType.valueOf(institution.getSubunitType());
+            toNotify.setSubUnitType(institution.getSubunitType());
+            toNotify.setSubUnitCode(institution.getSubunitCode());
         }
         RootParent rootParent = new RootParent();
         rootParent.setDescription(institution.getParentDescription());
@@ -198,7 +195,7 @@ public class ContractEventNotificationServiceImpl implements ContractEventNotifi
             toNotify.setRootParent(rootParent);
         }
 
-        if (institution.getAttributes() != null && institution.getAttributes().size() > 0) {
+        if (institution.getAttributes() != null && !institution.getAttributes().isEmpty()) {
             toNotify.setCategory(institution.getAttributes().get(0).getCode());
         }
         if (institution.getCity() == null) {

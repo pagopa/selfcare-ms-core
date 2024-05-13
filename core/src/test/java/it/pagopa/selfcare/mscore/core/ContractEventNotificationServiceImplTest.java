@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ContractEventNotificationServiceImplTest {
+class ContractEventNotificationServiceImplTest {
 
 
 
@@ -77,7 +77,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry", "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -150,7 +150,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(), "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -198,7 +198,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution(), "setCity");
+        Institution institution = mockInstance(new Institution(), "setCity", "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -263,7 +263,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry", "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -516,7 +516,7 @@ public class ContractEventNotificationServiceImplTest {
     }
 
     private static Institution createInstitution(String institutionId, Onboarding onboarding) {
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(), "setSubunitType");
         institution.setId(institutionId);
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
@@ -524,7 +524,7 @@ public class ContractEventNotificationServiceImplTest {
     }
 
     private static Institution createInstitutionWithoutLocation(String institutionId, Onboarding onboarding) {
-        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry", "setSubunitType");
         institution.setId(institutionId);
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
