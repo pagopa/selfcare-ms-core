@@ -2,7 +2,6 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
-import it.pagopa.selfcare.mscore.api.TokenConnector;
 import it.pagopa.selfcare.mscore.api.UserConnector;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
@@ -30,10 +29,7 @@ class OnboardingDaoTest {
     @Mock
     private InstitutionConnector institutionConnector;
     @Mock
-    private TokenConnector tokenConnector;
-    @Mock
     private UserConnector userConnector;
-
     @InjectMocks
     private OnboardingDao onboardingDao;
 

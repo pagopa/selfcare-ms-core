@@ -6,6 +6,8 @@ import it.pagopa.selfcare.mscore.api.ProductConnector;
 import it.pagopa.selfcare.mscore.constant.Env;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.TokenType;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapperImpl;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
@@ -24,10 +26,7 @@ import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -79,6 +78,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserNotificationService userNotificationService;
+
+    @Spy
+    private TokenMapper tokenMapper = new TokenMapperImpl();
 
     /**
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
@@ -388,6 +390,15 @@ class OnboardingServiceImplTest {
         user.setId("42");
         final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
 
+
+        Token token = new Token();
+        token.setId(onboarding.getTokenId());
+        token.setInstitutionId("institutionId");
+        token.setProductId(productId);
+        token.setCreatedAt(onboarding.getCreatedAt());
+        token.setUpdatedAt(onboarding.getUpdatedAt());
+        token.setStatus(onboarding.getStatus());
+        token.setContractSigned(onboarding.getContract());
 
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);

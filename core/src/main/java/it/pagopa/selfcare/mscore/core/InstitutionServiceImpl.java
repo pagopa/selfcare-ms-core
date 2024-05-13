@@ -3,10 +3,14 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
-import it.pagopa.selfcare.mscore.api.*;
+import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserConnector;
+import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
+import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
@@ -18,7 +22,6 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
-import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,35 +44,33 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
     private final InstitutionConnector institutionConnector;
-    private final TokenConnector tokenConnector;
     private final UserConnector userConnector;
     private final UserRegistryConnector userRegistryConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
-    private final UserService userService;
     private final CoreConfig coreConfig;
     private final ContractEventNotificationService contractService;
     private final InstitutionMapper institutionMapper;
+    private final TokenMapper tokenMapper;
     private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
-                                  UserService userService, CoreConfig coreConfig,
-                                  TokenConnector tokenConnector,
+                                  CoreConfig coreConfig,
                                   UserConnector userConnector,
                                   ContractEventNotificationService contractService,
                                   InstitutionMapper institutionMapper,
                                   CreateInstitutionStrategyFactory createInstitutionStrategyFactory,
-                                  UserRegistryConnector userRegistryConnector) {
+                                  UserRegistryConnector userRegistryConnector,
+                                  TokenMapper tokenMapper) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
-        this.userService = userService;
         this.coreConfig = coreConfig;
-        this.tokenConnector = tokenConnector;
         this.userConnector = userConnector;
         this.contractService = contractService;
         this.institutionMapper = institutionMapper;
         this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
         this.userRegistryConnector = userRegistryConnector;
+        this.tokenMapper = tokenMapper;
     }
 
     @Override
@@ -381,14 +382,11 @@ public class InstitutionServiceImpl implements InstitutionService {
         Assert.notNull(createdAt, "A createdAt date is required.");
 
         Institution updatedInstitution = institutionConnector.updateOnboardedProductCreatedAt(institutionId, productId, createdAt);
-        String tokenId = updatedInstitution.getOnboarding().stream()
-                .filter(onboarding -> onboarding.getProductId().equals(productId) && onboarding.getStatus() == RelationshipState.ACTIVE)
+        Onboarding onboarding = updatedInstitution.getOnboarding().stream()
+                .filter(onboarding1 -> onboarding1.getProductId().equals(productId) && onboarding1.getStatus() == RelationshipState.ACTIVE)
                 .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(CustomError.CONTRACT_NOT_FOUND.getMessage(), institutionId, productId), CustomError.CONTRACT_NOT_FOUND.getCode()))
-                .getTokenId();
-        Token updatedToken = tokenConnector.updateTokenCreatedAt(tokenId, createdAt, activatedAt);
-        List<String> usersId = updatedToken.getUsers().stream().map(TokenUser::getUserId).collect(Collectors.toList());
-        userConnector.updateUserBindingCreatedAt(institutionId, productId, usersId, createdAt);
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(CustomError.CONTRACT_NOT_FOUND.getMessage(), institutionId, productId), CustomError.CONTRACT_NOT_FOUND.getCode()));
+        Token updatedToken = tokenMapper.toToken(onboarding, institutionId, productId);
 
         contractService.sendDataLakeNotification(updatedInstitution, updatedToken, QueueEvent.UPDATE);
 

@@ -31,19 +31,6 @@ class QueueNotificationControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void sendContracts() throws Exception {
-        Integer size = 1;
-        String productId = "product";
-        mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL + "/contracts")
-                        .param("size", String.valueOf(size))
-                        .param("productsFilter", productId))
-                .andExpect(status().isOk());
-
-        Mockito.verify(queueNotificationService, Mockito.times(1)).sendContracts(Optional.of(size), List.of(productId));
-    }
-
-    @Test
     void sendContractsByInstitutionIdAndTokenId() throws Exception {
 
         String institutionId = "institutionId";
