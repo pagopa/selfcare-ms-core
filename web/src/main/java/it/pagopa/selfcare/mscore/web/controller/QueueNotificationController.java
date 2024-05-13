@@ -21,15 +21,6 @@ public class QueueNotificationController {
     public QueueNotificationController(QueueNotificationService queueNotificationService) {
         this.queueNotificationService = queueNotificationService;
     }
-    @ApiOperation(value = "", notes = "${swagger.ms-core.notification-event.api.start}")
-    @PostMapping(value = "/contracts")
-    @ResponseStatus(HttpStatus.OK)
-    public void resendContracts(@RequestParam(name = "size", required = false) Optional<Integer> size,
-                                @RequestParam(name = "productsFilter") List<String> productsFilter){
-
-        log.trace("Resend contracts events started");
-        queueNotificationService.sendContracts(size, productsFilter);
-    }
     @ApiOperation(value = "", notes = "Function to send a specific onboarding using institutionId and tokenId ")
     @PutMapping(value = "/contracts")
     @ResponseStatus(HttpStatus.OK)
