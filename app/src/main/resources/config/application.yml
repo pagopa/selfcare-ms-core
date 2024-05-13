@@ -48,4 +48,4 @@ core:
   user-event-service:
     type: ${CORE_USER_EVENT_SERVICE_TYPE:ignore}
   contract-event-service:
-    type: ${CORE_CONTRACT_EVENT_SERVICE_TYPE:send}
+    type: ${CORE_CONTRACT_EVENT_SERVICE_TYPE:ignore}
