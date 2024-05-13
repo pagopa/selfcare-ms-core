@@ -1,11 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.rest.model.registryproxy;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import it.pagopa.selfcare.mscore.constant.Origin;
 import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Data
 public class UoResponse {
@@ -14,6 +10,7 @@ public class UoResponse {
     private String codiceIpa;
     private String denominazioneEnte;
     private String codiceFiscaleEnte;
+    private String codiceFiscaleSfe;
     private String codiceUniUo;
     private String codiceUniUoPadre;
     private String codiceUniAoo;
