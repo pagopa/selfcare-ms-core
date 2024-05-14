@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InstitutionToNotify {
 
     private InstitutionType institutionType;
@@ -16,6 +18,7 @@ public class InstitutionToNotify {
     private String digitalAddress;
     private String address;
     private String taxCode;
+    private String taxCodeSfe;
     private String origin;
     private String originId;
     private String zipCode;

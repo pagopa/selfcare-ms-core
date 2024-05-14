@@ -3307,6 +3307,9 @@
           "taxCode" : {
             "type" : "string"
           },
+          "taxCodeSfe" : {
+            "type" : "string"
+          },
           "updatedAt" : {
             "type" : "string",
             "format" : "date-time"
