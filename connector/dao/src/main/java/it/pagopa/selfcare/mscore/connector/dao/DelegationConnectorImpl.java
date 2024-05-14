@@ -8,9 +8,9 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutio
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.constant.Order;
-import it.pagopa.selfcare.mscore.model.delegation.Delegation;
-import it.pagopa.selfcare.mscore.model.delegation.DelegationInstitution;
+import it.pagopa.selfcare.mscore.model.delegation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,12 +20,12 @@ import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -67,11 +67,8 @@ public class DelegationConnectorImpl implements DelegationConnector {
         return opt.isPresent();
     }
 
-    @Override
-    public List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Order order, Integer page, Integer size) {
+    private List<Criteria> getCriterias(String from, String to, String productId, String search) {
         List<Criteria> criterias = new ArrayList<>();
-        Criteria criteria = new Criteria();
-        Pageable pageable = PageRequest.of(page, size);
 
         criterias.add(Criteria.where(DelegationEntity.Fields.status.name()).is(DelegationState.ACTIVE.name()));
 
@@ -87,6 +84,14 @@ public class DelegationConnectorImpl implements DelegationConnector {
         if (Objects.nonNull(search)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.institutionFromName.name()).regex("(?i)" + Pattern.quote(search)));
         }
+        return criterias;
+    }
+
+    @Override
+    public List<Delegation> find(String from, String to, String productId, String search, String taxCode, GetDelegationsMode mode, Order order, Integer page, Integer size) {
+        Criteria criteria = new Criteria();
+        Pageable pageable = PageRequest.of(page, size);
+        List<Criteria> criterias = getCriterias(from, to, productId, search);
 
         Sort.Direction sortDirection = order.equals(Order.ASC) ? Sort.Direction.ASC : Sort.Direction.DESC;
 
@@ -120,7 +125,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
                     .map(Objects.nonNull(from) ?
                             delegationInstitutionMapper::convertToDelegationBroker :
                             delegationInstitutionMapper::convertToDelegationInstitution)
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         Query query = Query.query(criteria.andOperator(criterias));
@@ -131,7 +136,26 @@ public class DelegationConnectorImpl implements DelegationConnector {
         return repository.find(query, pageable, DelegationEntity.class)
                 .stream()
                 .map(delegationMapper::convertToDelegation)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Override
+    public DelegationWithPagination findAndCount(GetDelegationParameters delegationParameters) {
+
+        List<Delegation> delegations = find(delegationParameters.getFrom(), delegationParameters.getTo(), delegationParameters.getProductId(),
+                delegationParameters.getSearch(), delegationParameters.getTaxCode(), delegationParameters.getMode(),
+                delegationParameters.getOrder(), delegationParameters.getPage(), delegationParameters.getSize());
+
+        Query query = Query.query(new Criteria().andOperator(getCriterias(delegationParameters.getFrom(),
+                delegationParameters.getTo(), delegationParameters.getProductId(), delegationParameters.getSearch())));
+
+        long count = mongoTemplate.count(query, DelegationEntity.class);
+
+        Pageable pageable = PageRequest.of(delegationParameters.getPage(), delegationParameters.getSize());
+        Page<Delegation> result = PageableExecutionUtils.getPage(delegations, pageable, () -> count);
+
+        PageInfo pageInfo = new PageInfo(result.getSize(), result.getNumber(), result.getTotalElements(), result.getTotalPages());
+        return new DelegationWithPagination(delegations, pageInfo);
     }
 
     private static GraphLookupOperation.GraphLookupOperationBuilder createInstitutionGraphLookupOperationBuilder(String from) {

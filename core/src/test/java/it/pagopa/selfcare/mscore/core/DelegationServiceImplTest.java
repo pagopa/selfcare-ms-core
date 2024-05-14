@@ -9,6 +9,9 @@ import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
+import it.pagopa.selfcare.mscore.model.delegation.DelegationWithPagination;
+import it.pagopa.selfcare.mscore.model.delegation.GetDelegationParameters;
+import it.pagopa.selfcare.mscore.model.delegation.PageInfo;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -171,7 +174,7 @@ class DelegationServiceImplTest {
     }
 
     /**
-     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
      */
     @Test
     void find_shouldGetData() {
@@ -191,7 +194,7 @@ class DelegationServiceImplTest {
     }
 
     /**
-     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
      */
     @Test
     void find_shouldGetData_fullMode() {
@@ -211,7 +214,7 @@ class DelegationServiceImplTest {
     }
 
     /**
-     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
      */
     @Test
     void find_shouldGetData_fullMode_defaultPage() {
@@ -228,6 +231,29 @@ class DelegationServiceImplTest {
         assertNotNull(response);
         assertFalse(response.isEmpty());
         assertEquals(delegation.getId(), response.get(0).getId());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#getDelegationsV2(GetDelegationParameters)}
+     */
+    @Test
+    void getDelegationsV2_shouldGetData() {
+        //Given
+        Delegation delegation = new Delegation();
+        delegation.setId("id");
+        DelegationWithPagination delegationWithPagination = new DelegationWithPagination(List.of(delegation), new PageInfo(10, 0, 10, 1));
+        when(delegationConnector.findAndCount(any())).thenReturn(delegationWithPagination);
+        //When
+        DelegationWithPagination response = delegationServiceImpl.getDelegationsV2(createDelegationParameters("from", "to", "productId", null, null,
+                GetDelegationsMode.NORMAL, Optional.empty(), Optional.of(0), Optional.of(100)));
+        //Then
+        verify(delegationConnector).findAndCount(any());
+
+        assertNotNull(response);
+        assertNotNull(response.getDelegations());
+        assertNotNull(response.getPageInfo());
+        assertFalse(response.getDelegations().isEmpty());
+        assertEquals(delegation.getId(), response.getDelegations().get(0).getId());
     }
 
     @Test
@@ -344,6 +370,23 @@ class DelegationServiceImplTest {
                 .when(institutionService).updateInstitutionDelegation("id", false);
         assertThrows(MsCoreException.class, () -> delegationServiceImpl.deleteDelegationByDelegationId("id"));
         verify(delegationConnector, times(1)).findByIdAndModifyStatus("id", DelegationState.ACTIVE);
+    }
+
+
+    private GetDelegationParameters createDelegationParameters(String from, String to, String productId,
+                                                               String search, String taxCode, GetDelegationsMode mode,
+                                                               Optional<Order> order, Optional<Integer> page, Optional<Integer> size) {
+        return GetDelegationParameters.builder()
+                .from(from)
+                .to(to)
+                .productId(productId)
+                .search(search)
+                .taxCode(taxCode)
+                .mode(mode)
+                .order(order)
+                .page(page)
+                .size(size)
+                .build();
     }
 
 }
