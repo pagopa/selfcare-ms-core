@@ -180,7 +180,7 @@ public class ContractEventNotificationServiceImpl implements ContractEventNotifi
         toNotify.setOriginId(institution.getOriginId());
         toNotify.setZipCode(institution.getZipCode());
         toNotify.setPaymentServiceProvider(institution.getPaymentServiceProvider());
-        toNotify.setTaxCodeSfe(institution.getTaxCodeSfe());
+        toNotify.setTaxCodeInvoicing(institution.getTaxCodeInvoicing());
         if (institution.getSubunitType() != null && !"EC".equals(institution.getSubunitType())) {
             InstitutionPaSubunitType.valueOf(institution.getSubunitType());
             toNotify.setSubUnitType(institution.getSubunitType());
