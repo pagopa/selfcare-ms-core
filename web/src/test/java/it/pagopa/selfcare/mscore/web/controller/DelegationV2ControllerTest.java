@@ -103,7 +103,7 @@ class DelegationV2ControllerTest {
         assertThat(response).isNotNull();
         assertThat(response.getDelegations()).isNotNull();
         assertThat(response.getPageInfo()).isNotNull();
-        assertThat(response.getDelegations().size()).isEqualTo(1);
+        assertThat((long) response.getDelegations().size()).isEqualTo(1);
         DelegationResponse actualDelegation = response.getDelegations().get(0);
         PageInfo actualPageInfo = response.getPageInfo();
         assertThat(actualDelegation.getId()).isEqualTo(expectedDelegation.getId());
@@ -154,7 +154,7 @@ class DelegationV2ControllerTest {
         assertThat(response).isNotNull();
         assertThat(response.getDelegations()).isNotNull();
         assertThat(response.getPageInfo()).isNotNull();
-        assertThat(response.getDelegations().size()).isEqualTo(2);
+        assertThat((long) response.getDelegations().size()).isEqualTo(2);
         DelegationResponse actualDelegation = response.getDelegations().get(0);
         PageInfo actualPageInfo = response.getPageInfo();
         assertThat(actualDelegation.getId()).isEqualTo(delegation1.getId());
@@ -203,7 +203,7 @@ class DelegationV2ControllerTest {
         assertThat(response).isNotNull();
         assertThat(response.getDelegations()).isNotNull();
         assertThat(response.getPageInfo()).isNotNull();
-        assertThat(response.getDelegations().size()).isEqualTo(1);
+        assertThat((long) response.getDelegations().size()).isEqualTo(1);
         DelegationResponse actualDelegation = response.getDelegations().get(0);
         PageInfo actualPageInfo = response.getPageInfo();
         assertThat(actualDelegation.getId()).isEqualTo(expectedDelegation.getId());
