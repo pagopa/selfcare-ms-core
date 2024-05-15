@@ -245,7 +245,7 @@ class DelegationServiceImplTest {
         when(delegationConnector.findAndCount(any())).thenReturn(delegationWithPagination);
         //When
         DelegationWithPagination response = delegationServiceImpl.getDelegationsV2(createDelegationParameters("from", "to", "productId", null, null,
-                GetDelegationsMode.NORMAL, Optional.empty(), Optional.of(0), Optional.of(100)));
+                GetDelegationsMode.NORMAL, null, 0, 100));
         //Then
         verify(delegationConnector).findAndCount(any());
 
@@ -375,7 +375,7 @@ class DelegationServiceImplTest {
 
     private GetDelegationParameters createDelegationParameters(String from, String to, String productId,
                                                                String search, String taxCode, GetDelegationsMode mode,
-                                                               Optional<Order> order, Optional<Integer> page, Optional<Integer> size) {
+                                                               Order order, Integer page, Integer size) {
         return GetDelegationParameters.builder()
                 .from(from)
                 .to(to)

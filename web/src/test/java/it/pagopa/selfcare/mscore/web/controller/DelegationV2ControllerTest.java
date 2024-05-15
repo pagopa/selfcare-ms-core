@@ -78,17 +78,18 @@ class DelegationV2ControllerTest {
     void getDelegations_shouldGetData() throws Exception {
         // Given
         Delegation expectedDelegation = dummyDelegation();
-        PageInfo exptectedPageInfo = new PageInfo(10000, 0, 1, 1);
+        PageInfo exptectedPageInfo = new PageInfo(10, 0, 1, 1);
 
         DelegationWithPagination expectedDelegationWithPagination = new DelegationWithPagination(List.of(expectedDelegation), exptectedPageInfo);
 
         when(delegationService.getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Optional.empty(), Optional.empty(), Optional.empty())))
+                expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.ASC, 0, 10)))
                 .thenReturn(expectedDelegationWithPagination);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/v2/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}&mode={mode}", expectedDelegation.getFrom(),
-                        expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL);
+                .get("/v2/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}&mode={mode}&order={order}&page={page}&size={size}",
+                        expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL,
+                        Order.ASC ,exptectedPageInfo.getPageNo(), exptectedPageInfo.getPageSize());
         MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
                 .build()
                 .perform(requestBuilder)
@@ -115,8 +116,8 @@ class DelegationV2ControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Optional.empty(),
-                        Optional.empty(), Optional.empty()));
+                        expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.ASC,
+                        0, 10));
 
         verifyNoMoreInteractions(delegationService);
     }
@@ -135,11 +136,11 @@ class DelegationV2ControllerTest {
         DelegationWithPagination expectedDelegationWithPagination = new DelegationWithPagination(expectedDelegations, exptectedPageInfo);
 
         when(delegationService.getDelegationsV2(createDelegationParameters(null, TO1,
-                null, null, null, GetDelegationsMode.FULL, Optional.empty(), Optional.empty(), Optional.empty())))
+                null, null, null, GetDelegationsMode.FULL, Order.DESC, 0, 10000)))
                 .thenReturn(expectedDelegationWithPagination);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/v2/delegations?brokerId={brokerId}&mode={mode}", TO1, GetDelegationsMode.FULL);
+                .get("/v2/delegations?brokerId={brokerId}&mode={mode}&order={order}", TO1, GetDelegationsMode.FULL, Order.DESC);
         MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
                 .build()
                 .perform(requestBuilder)
@@ -166,8 +167,8 @@ class DelegationV2ControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegationsV2(createDelegationParameters(null, TO1, null,
-                        null, null, GetDelegationsMode.FULL, Optional.empty(),
-                        Optional.empty(), Optional.empty()));
+                        null, null, GetDelegationsMode.FULL, Order.DESC,
+                        0, 10000));
         verifyNoMoreInteractions(delegationService);
     }
 
@@ -183,7 +184,7 @@ class DelegationV2ControllerTest {
         DelegationWithPagination expectedDelegationWithPagination = new DelegationWithPagination(List.of(expectedDelegation), exptectedPageInfo);
 
         when(delegationService.getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, null, null, Optional.empty(), Optional.empty(), Optional.empty())))
+                expectedDelegation.getProductId(), null, null, null, Order.NONE, 0, 10000)))
                 .thenReturn(expectedDelegationWithPagination);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -215,9 +216,44 @@ class DelegationV2ControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, null, null, Optional.empty(), Optional.empty(), Optional.empty()));
+                        expectedDelegation.getProductId(), null, null, null, Order.NONE, 0, 10000));
         verifyNoMoreInteractions(delegationService);
     }
+
+    @Test
+    void getDelegations_shouldInvalidRequest_wrongPageSize() {
+
+        Delegation expectedDelegation = dummyDelegation();
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/v2/delegations?brokerId={brokerId}&size={size}",
+                        expectedDelegation.getTo(), 0);
+
+        assertThrows(NestedServletException.class, () ->
+                MockMvcBuilders.standaloneSetup(delegationController)
+                        .build()
+                        .perform(requestBuilder));
+
+    }
+
+    @Test
+    void getDelegations_shouldInvalidRequest_wrongPageNumber() {
+
+        Delegation expectedDelegation = dummyDelegation();
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .get("/v2/delegations?brokerId={brokerId}&page={size}",
+                        expectedDelegation.getTo(), -1);
+
+        assertThrows(NestedServletException.class, () ->
+                MockMvcBuilders.standaloneSetup(delegationController)
+                        .build()
+                        .perform(requestBuilder));
+
+    }
+
+
+
 
     private Delegation dummyDelegation() {
         Delegation delegation = new Delegation();
@@ -245,7 +281,7 @@ class DelegationV2ControllerTest {
 
     private GetDelegationParameters createDelegationParameters(String from, String to, String productId,
                                                                String search, String taxCode, GetDelegationsMode mode,
-                                                               Optional<Order> order, Optional<Integer> page, Optional<Integer> size) {
+                                                               Order order, Integer page, Integer size) {
         return GetDelegationParameters.builder()
                 .from(from)
                 .to(to)

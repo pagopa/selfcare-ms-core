@@ -22,6 +22,7 @@
     import org.springframework.web.bind.annotation.RequestParam;
     import org.springframework.web.bind.annotation.RestController;
 
+    import javax.validation.constraints.Min;
     import java.util.Objects;
 
     @RestController
@@ -67,8 +68,8 @@
                                                                        @RequestParam(name = "mode", required = false) GetDelegationsMode mode,
                                                                        @ApiParam("${swagger.mscore.institutions.delegations.order}")
                                                                        @RequestParam(name = "order", required = false, defaultValue = "NONE") Order order,
-                                                                       @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
-                                                                       @RequestParam(name = "size", required = false, defaultValue = "10000") Integer size) {
+                                                                       @RequestParam (name = "page", required = false, defaultValue = "0") @Min(0) Integer page,
+                                                                       @RequestParam(name = "size", required = false, defaultValue = "10000") @Min(1) Integer size) {
 
             if(Objects.isNull(institutionId) && Objects.isNull(brokerId))
                 throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
