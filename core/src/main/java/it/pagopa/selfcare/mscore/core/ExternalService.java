@@ -4,15 +4,12 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
 
 import java.util.List;
 
 public interface ExternalService {
 
     Institution getInstitutionByExternalId(String externalId);
-
-    ProductManagerInfo retrieveInstitutionManager(String externalId, String productId);
 
     Institution retrieveInstitutionProduct(String externalId, String productId);
 

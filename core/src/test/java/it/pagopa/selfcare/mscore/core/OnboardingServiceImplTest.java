@@ -13,14 +13,11 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
 import it.pagopa.selfcare.mscore.model.CertifiedField;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
-import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionBinding;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.user.RelationshipInfo;
 import it.pagopa.selfcare.mscore.model.user.User;
 import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Assertions;
@@ -30,14 +27,13 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.core.util.TestUtils.dummyInstitutionPa;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {OnboardingServiceImpl.class})
@@ -45,18 +41,7 @@ import static org.mockito.Mockito.*;
 class OnboardingServiceImplTest {
 
     @Mock
-    private ContractService contractService;
-
-    @Mock
     private ContractEventNotificationService contractEventNotificationService;
-
-    @Mock
-    private UserService userService;
-    @Mock
-    private MailNotificationService emailService;
-
-    @Mock
-    private UserRelationshipService userRelationshipService;
 
     @Mock
     private OnboardingDao onboardingDao;
@@ -187,63 +172,6 @@ class OnboardingServiceImplTest {
                 any());
     }
 
-    /**
-     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
-     */
-    @Test
-    void testGetOnboardingInfo10() {
-
-        Institution institution = dummyInstitutionPa();
-
-        OnboardedProduct onboardedProduct = getOnboardedProduct();
-
-        UserInstitutionBinding userBinding = new UserInstitutionBinding();
-        userBinding.setInstitutionId("42");
-        userBinding.setProducts(onboardedProduct);
-
-        UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
-        userInstitutionAggregation.setId("42");
-        userInstitutionAggregation.setBindings(userBinding);
-        userInstitutionAggregation.setInstitutions(List.of(institution));
-        when(userService.findUserInstitutionAggregation(any())).thenReturn(List.of(userInstitutionAggregation));
-        List<OnboardingInfo> actualOnboardingInfo = onboardingServiceImpl.getOnboardingInfo("42", "42", new String[]{},
-                "42");
-        assertEquals(1, actualOnboardingInfo.size());
-        OnboardingInfo getResult = actualOnboardingInfo.get(0);
-        Institution institution1 = getResult.getInstitution();
-        assertSame(institution, institution1);
-        List<Onboarding> onboarding1 = institution1.getOnboarding();
-        assertTrue(onboarding1.isEmpty());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#getOnboardingInfo(String, String, String[], String)}
-     */
-    @Test
-    void testGetOnboardingInfoWithTwoParameters() {
-
-        Institution institution = dummyInstitutionPa();
-
-        OnboardedProduct onboardedProduct = getOnboardedProduct();
-
-        UserInstitutionBinding userBinding = new UserInstitutionBinding();
-        userBinding.setInstitutionId("42");
-        userBinding.setProducts(onboardedProduct);
-
-        UserInstitutionAggregation userInstitutionAggregation = new UserInstitutionAggregation();
-        userInstitutionAggregation.setId("42");
-        userInstitutionAggregation.setBindings(userBinding);
-        userInstitutionAggregation.setInstitutions(List.of(institution));
-        when(userService.findUserInstitutionAggregation(any())).thenReturn(List.of(userInstitutionAggregation));
-        var actualOnboardingInfo = onboardingServiceImpl.getOnboardingInfo("42", null, null, "42");
-        assertEquals(1, actualOnboardingInfo.size());
-        OnboardingInfo getResult = actualOnboardingInfo.get(0);
-        Institution institution1 = getResult.getInstitution();
-        assertSame(institution, institution1);
-        List<Onboarding> onboarding1 = institution1.getOnboarding();
-        assertTrue(onboarding1.isEmpty());
-    }
-
     private Institution dummyInstitution() {
         Institution institution = new Institution();
         institution.setId("42");
@@ -268,48 +196,6 @@ class OnboardingServiceImplTest {
         return userToOnboard;
     }
 
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument() {
-        when(userRelationshipService.retrieveRelationship(any())).thenReturn(new RelationshipInfo());
-        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
-        verify(userRelationshipService).retrieveRelationship(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument3() {
-        Institution institution = new Institution();
-        when(userRelationshipService.retrieveRelationship(any()))
-                .thenReturn(new RelationshipInfo(institution, "42", new OnboardedProduct()));
-        assertThrows(ResourceNotFoundException.class, () -> onboardingServiceImpl.retrieveDocument("42"));
-        verify(userRelationshipService).retrieveRelationship(any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#retrieveDocument(String)}
-     */
-    @Test
-    void testRetrieveDocument4(){
-        OnboardedProduct onboardedProduct = getOnboardedProduct();
-        RelationshipInfo relationshipInfo = mock(RelationshipInfo.class);
-        when(relationshipInfo.getOnboardedProduct()).thenReturn(onboardedProduct);
-        when(userRelationshipService.retrieveRelationship(any())).thenReturn(relationshipInfo);
-
-        ResourceResponse resourceResponse = new ResourceResponse();
-        resourceResponse.setData("AXAXAXAX".getBytes(StandardCharsets.UTF_8));
-        resourceResponse.setFileName("foo.txt");
-        resourceResponse.setMimetype("Mimetype");
-        when(contractService.getFile(any())).thenReturn(resourceResponse);
-        assertSame(resourceResponse, onboardingServiceImpl.retrieveDocument("42"));
-        verify(userRelationshipService).retrieveRelationship(any());
-        verify(relationshipInfo, atLeast(1)).getOnboardedProduct();
-        verify(contractService).getFile(any());
-    }
 
     @Test
     void persistOnboarding_shouldThrowIfOnboardingExists() {
@@ -411,8 +297,6 @@ class OnboardingServiceImplTest {
                 .findAndUpdate(any(), captor.capture(), any(), any());
         Onboarding actual = captor.getValue();
         assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
-
-        verifyNoMoreInteractions(userService);
     }
 
     private OnboardedProduct getOnboardedProduct() {

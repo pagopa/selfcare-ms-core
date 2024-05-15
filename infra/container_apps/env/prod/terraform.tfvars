@@ -176,11 +176,11 @@ app_settings = [
   },
   {
     name  = "MS_NOTIFICATION_MANAGER_URL"
-    value = "https://selc-p-notification-mngr-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
+    value = "http://selc-p-notification-mngr-ca"
   },
   {
     name  = "USERVICE_PARTY_REGISTRY_PROXY_URL"
-    value = "https://selc-p-party-reg-proxy-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
+    value = "http://selc-p-party-reg-proxy-ca"
   },
   {
     name  = "USERVICE_USER_REGISTRY_URL"
@@ -188,7 +188,7 @@ app_settings = [
   },
   {
     name  = "SELFCARE_USER_URL"
-    value = "https://selc-p-user-ms-ca.greensand-62fc96da.westeurope.azurecontainerapps.io"
+    value = "http://selc-p-user-ms-ca"
   },
   {
     name  = "PRODUCT_STORAGE_CONTAINER"

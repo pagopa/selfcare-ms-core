@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.config.KafkaPropertiesConfig;
+import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.Certification;
@@ -39,7 +40,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ContractEventNotificationServiceImplTest {
+class ContractEventNotificationServiceImplTest {
 
 
 
@@ -76,7 +77,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry", "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -149,7 +150,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(), "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -197,7 +198,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution(), "setCity");
+        Institution institution = mockInstance(new Institution(), "setCity", "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -262,7 +263,7 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = mockInstance(new Onboarding());
         onboarding.setProductId("prod");
 
-        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry", "setSubunitType");
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
 
@@ -468,6 +469,8 @@ public class ContractEventNotificationServiceImplTest {
         Onboarding onboarding = createOnboarding(tokenId, "prod");
         Institution institutionMock = createInstitutionWithoutLocation(institutionId, onboarding);
         institutionMock.setRootParentId(null);
+        institutionMock.setSubunitType(InstitutionPaSubunitType.UO.name());
+        institutionMock.setTaxCodeSfe("taxCodeSfe");
         Token tokenMock = createToken(institutionId, tokenId, null,
                 RelationshipState.DELETED,
                 OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
@@ -481,6 +484,7 @@ public class ContractEventNotificationServiceImplTest {
         //then
         assertNotNull(notification.getInstitution().getCategory());
         assertNotNull(notification.getInstitution().getCity());
+        assertEquals(institutionMock.getTaxCodeSfe(), notification.getInstitution().getTaxCodeSfe());
         verify(partyRegistryProxyConnectorMock, times(1)).getInstitutionById(institutionMock.getExternalId());
         verify(partyRegistryProxyConnectorMock, times(1)).getExtByCode(any());
     }
@@ -494,7 +498,6 @@ public class ContractEventNotificationServiceImplTest {
         Attributes attribute = new Attributes();
         attribute.setCode("code");
         institutionMock.setAttributes(List.of(attribute));
-        institutionMock.setOrigin("IPA");
         institutionMock.setCity(null);
         institutionMock.setRootParentId(null);
         Token tokenMock = createToken(institutionId, tokenId, null,
@@ -513,7 +516,7 @@ public class ContractEventNotificationServiceImplTest {
     }
 
     private static Institution createInstitution(String institutionId, Onboarding onboarding) {
-        Institution institution = mockInstance(new Institution());
+        Institution institution = mockInstance(new Institution(), "setSubunitType");
         institution.setId(institutionId);
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));
@@ -521,7 +524,7 @@ public class ContractEventNotificationServiceImplTest {
     }
 
     private static Institution createInstitutionWithoutLocation(String institutionId, Onboarding onboarding) {
-        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry");
+        Institution institution = mockInstance(new Institution(), "setCity", "setCounty", "setCountry", "setSubunitType");
         institution.setId(institutionId);
         institution.setOrigin("IPA");
         institution.setOnboarding(List.of(onboarding));

@@ -8,8 +8,10 @@ import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.model.user.ProductManagerInfo;
-import it.pagopa.selfcare.mscore.web.model.institution.*;
+import it.pagopa.selfcare.mscore.web.model.institution.CreatePnPgInstitutionRequest;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPnPgResponse;
+import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperCustom;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -58,30 +60,6 @@ public class ExternalController {
         CustomExceptionMessage.setCustomMessage(GET_INSTITUTION_BY_EXTERNAL_ID_ERROR);
         Institution institution = externalService.getInstitutionByExternalId(externalId);
         return ResponseEntity.ok().body(institutionResourceMapper.toInstitutionResponse(institution));
-    }
-
-
-    /**
-     * The function returns Manager institution Data from its externalId
-     *
-     * @param externalId String
-     * @param productId  String
-     *
-     * @return InstitutionManagerResponse
-     * * Code: 200, Message: successful operation, DataType: InstitutionManagerResponse
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Institution Manager not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.external.institution.manager}", notes = "${swagger.mscore.external.institution.manager}")
-    @GetMapping(value = "/{externalId}/products/{productId}/manager", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<InstitutionManagerResponse> getManagerInstitutionByExternalId(@ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                                                        @PathVariable("externalId") String externalId,
-                                                                                        @ApiParam("${swagger.mscore.institutions.model.productId}")
-                                                                                        @PathVariable("productId") String productId) {
-        CustomExceptionMessage.setCustomMessage(INSTITUTION_MANAGER_ERROR);
-        ProductManagerInfo manager = externalService.retrieveInstitutionManager(externalId, productId);
-        return ResponseEntity.ok(InstitutionMapperCustom.toInstitutionManagerResponse(manager, productId));
     }
 
 

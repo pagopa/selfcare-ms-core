@@ -5,8 +5,6 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
-import it.pagopa.selfcare.mscore.api.UserConnector;
-import it.pagopa.selfcare.mscore.api.UserRegistryConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
@@ -25,8 +23,6 @@ import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
-import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.user.UserInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,12 +59,6 @@ class InstitutionServiceImplTest {
 
     @Mock
     private ContractEventNotificationService contractService;
-
-    @Mock
-    private UserConnector userConnector;
-
-    @Mock
-    private UserRegistryConnector userRegistryConnector;
 
     @Mock
     private CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
@@ -492,7 +482,6 @@ class InstitutionServiceImplTest {
     @Test
     void testRetrieveInstitutionProducts() {
         PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
-        UserServiceImpl userService = new UserServiceImpl(null, null, null, null);
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.PENDING);
@@ -913,7 +902,7 @@ class InstitutionServiceImplTest {
                 .updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock);
         verify(contractService, times(1))
                 .sendDataLakeNotification(updatedInstitutionMock, updatedTokenMock, QueueEvent.UPDATE);
-        verifyNoMoreInteractions(institutionConnector, userConnector, contractService);
+        verifyNoMoreInteractions(institutionConnector, contractService);
     }
 
     @Test
@@ -926,7 +915,7 @@ class InstitutionServiceImplTest {
         // Then
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("An institution ID is required.", illegalArgumentException.getMessage());
-        verifyNoInteractions(institutionConnector, userConnector);
+        verifyNoInteractions(institutionConnector);
     }
 
     @Test
@@ -939,7 +928,7 @@ class InstitutionServiceImplTest {
         // Then
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A product ID is required.", illegalArgumentException.getMessage());
-        verifyNoInteractions(institutionConnector, userConnector);
+        verifyNoInteractions(institutionConnector);
     }
 
     @Test
@@ -952,7 +941,7 @@ class InstitutionServiceImplTest {
         // Then
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A createdAt date is required.", illegalArgumentException.getMessage());
-        verifyNoInteractions(institutionConnector, userConnector);
+        verifyNoInteractions(institutionConnector);
 
     }
 
@@ -972,8 +961,6 @@ class InstitutionServiceImplTest {
         Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, createdAtMock, activatedAtMock);
         // Then
         assertThrows(ResourceNotFoundException.class, executable);
-        verifyNoInteractions(userConnector);
-
     }
 
     /**
@@ -1010,25 +997,6 @@ class InstitutionServiceImplTest {
         assertEquals(institutions.get(0).getId(), institution.getId());
         verify(institutionConnector).findByTaxCodeAndSubunitCode(any(), any());
 
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#getInstitutionUsers(String)}
-     */
-    @Test
-    void getInstitutionUsers() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.setId("id");
-        User user = new User();
-        user.setId("id");
-        when(userConnector.findByInstitutionId(any())).thenReturn(List.of(userInfo));
-        when(userRegistryConnector.getUserByInternalIdWithFiscalCode(any())).thenReturn(user);
-        List<UserInfo> userInfos = institutionServiceImpl.getInstitutionUsers("test");
-        assertNotNull(userInfos);
-        assertFalse(userInfos.isEmpty());
-        assertNotNull(userInfos.get(0));
-        assertEquals(userInfos.get(0).getId(), userInfo.getId());
-        verify(userConnector).findByInstitutionId("test");
     }
 
 }

@@ -3,26 +3,14 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
-import it.pagopa.selfcare.mscore.model.onboarding.OnboardingInfo;
-import it.pagopa.selfcare.mscore.model.onboarding.ResourceResponse;
 import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
-import it.pagopa.selfcare.mscore.web.model.mapper.OnboardingMapper;
-import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardingInfoResponse;
 import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @Slf4j
 @RestController
@@ -104,58 +92,4 @@ public class OnboardingController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    /**
-     * The function return onboardingInfo
-     *
-     * @param institutionId         String
-     * @param institutionExternalId String
-     * @param states                String[]
-     * @return onboardingInfoResponse
-     * <p>
-     * * Code: 200, Message: successful operation, DataType: TokenId
-     * * Code: 400, Message: Invalid ID supplied, DataType: Problem
-     * * Code: 404, Message: Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.onboarding.info}", notes = "${swagger.mscore.onboarding.info}")
-    @GetMapping(value = "/info", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OnboardingInfoResponse> onboardingInfo(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
-                                                                 @RequestParam(value = "institutionId", required = false) String institutionId,
-                                                                 @ApiParam("${swagger.mscore.institutions.model.externalId}")
-                                                                 @RequestParam(value = "institutionExternalId", required = false) String institutionExternalId,
-                                                                 @ApiParam("${swagger.mscore.institutions.model.relationshipState}")
-                                                                 @RequestParam(value = "states", required = false) String[] states,
-                                                                 Authentication authentication) {
-        CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
-        String userId = ((SelfCareUser) authentication.getPrincipal()).getId();
-        List<OnboardingInfo> onboardingInfoList = onboardingService.getOnboardingInfo(institutionId, institutionExternalId, states, userId);
-        OnboardingInfoResponse onboardingInfoResponse = OnboardingMapper.toOnboardingInfoResponse(userId, onboardingInfoList);
-        log.debug("onboardingInfo result = {}", onboardingInfoResponse);
-        return ResponseEntity.ok().body(onboardingInfoResponse);
-    }
-
-    /**
-     * The function retrieve the document of specific onboarding
-     *
-     * @param relationshipId String
-     * @return no content
-     * * Code: 200, Message: successful operation, DataType: Resource (signed onboarding document)
-     * * Code: 404, Message: Document Not found, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @ApiOperation(value = "${swagger.mscore.onboarding.relationship.document}", notes = "${swagger.mscore.onboarding.relationship.document}")
-    @GetMapping(value = "/relationship/{relationshipId}/document", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<byte[]> getOnboardingDocument(@ApiParam("${swagger.mscore.relationship.relationshipId}")
-                                                        @PathVariable("relationshipId") String relationshipId) {
-        CustomExceptionMessage.setCustomMessage(GenericError.GETTING_ONBOARDING_INFO_ERROR);
-        ResourceResponse file = onboardingService.retrieveDocument(relationshipId);
-        var headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE);
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + file.getFileName());
-        log.info("contentType: {}", headers.getContentType());
-        if (file.getData() != null) {
-            log.info("byteArray size: {}", file.getData().length);
-        }
-        return ResponseEntity.ok().headers(headers).body(file.getData());
-    }
 }
