@@ -16,6 +16,7 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -247,7 +248,8 @@ class DelegationServiceImplTest {
         DelegationWithPagination response = delegationServiceImpl.getDelegationsV2(createDelegationParameters("from", "to", "productId", null, null,
                 GetDelegationsMode.NORMAL, null, 0, 100));
         //Then
-        verify(delegationConnector).findAndCount(any());
+        ArgumentCaptor<GetDelegationParameters> argumentCaptor = ArgumentCaptor.forClass(GetDelegationParameters.class);
+        verify(delegationConnector).findAndCount(argumentCaptor.capture());
 
         assertNotNull(response);
         assertNotNull(response.getDelegations());
