@@ -244,12 +244,16 @@ class DelegationServiceImplTest {
         delegation.setId("id");
         DelegationWithPagination delegationWithPagination = new DelegationWithPagination(List.of(delegation), new PageInfo(10, 0, 10, 1));
         when(delegationConnector.findAndCount(any())).thenReturn(delegationWithPagination);
+        GetDelegationParameters delegationParameters = createDelegationParameters("from", "to", "productId", null, null,
+                GetDelegationsMode.NORMAL, null, 0, 100);
+
         //When
-        DelegationWithPagination response = delegationServiceImpl.getDelegationsV2(createDelegationParameters("from", "to", "productId", null, null,
-                GetDelegationsMode.NORMAL, null, 0, 100));
+        DelegationWithPagination response = delegationServiceImpl.getDelegationsV2(delegationParameters);
         //Then
         ArgumentCaptor<GetDelegationParameters> argumentCaptor = ArgumentCaptor.forClass(GetDelegationParameters.class);
         verify(delegationConnector).findAndCount(argumentCaptor.capture());
+        assertNotNull(argumentCaptor);
+        assertEquals(argumentCaptor.getValue(), delegationParameters);
 
         assertNotNull(response);
         assertNotNull(response.getDelegations());
