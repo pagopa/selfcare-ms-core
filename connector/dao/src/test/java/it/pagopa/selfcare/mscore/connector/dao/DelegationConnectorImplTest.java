@@ -11,8 +11,7 @@ import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
-import it.pagopa.selfcare.mscore.model.delegation.Delegation;
-import it.pagopa.selfcare.mscore.model.delegation.DelegationInstitution;
+import it.pagopa.selfcare.mscore.model.delegation.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +22,12 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Collections;
@@ -293,5 +295,71 @@ class DelegationConnectorImplTest {
         delegationEntity.setInstitutionFromName("name_" + from);
         delegationEntity.setInstitutions(List.of(institution));
         return delegationEntity;
+    }
+
+    @Test
+    void findAndCount_shouldGetData() {
+
+        DelegationEntity delegationEntity = new DelegationEntity();
+        delegationEntity.setId("id");
+        delegationEntity.setProductId("productId");
+        delegationEntity.setType(DelegationType.PT);
+        delegationEntity.setTo("To");
+        delegationEntity.setFrom("From");
+        delegationEntity.setInstitutionFromName("setInstitutionFromName");
+        delegationEntity.setInstitutionFromRootName("setInstitutionFromRootName");
+
+
+        List<DelegationEntity> delegationEntities = List.of(delegationEntity);
+        Page<DelegationEntity> delegationEntityPage = new PageImpl<>(delegationEntities);
+
+        Pageable pageable = PageRequest.of(PAGE_SIZE, MAX_PAGE_SIZE);
+        Page<Delegation> result = PageableExecutionUtils.getPage(List.of(new Delegation()), pageable, () -> 1L);
+        PageInfo expectedPageInfo = new PageInfo(result.getSize(), result.getNumber(), result.getTotalElements(), result.getTotalPages());
+
+        //When
+
+        doReturn(delegationEntityPage)
+                .when(delegationRepository)
+                .find(any(), any(), any());
+
+        doReturn(1L)
+                .when(mongoTemplate)
+                .count(any(), eq(DelegationEntity.class));
+
+        DelegationWithPagination response = delegationConnectorImpl.findAndCount(createDelegationParameters(delegationEntity.getFrom(),
+                delegationEntity.getTo(), delegationEntity.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE));
+
+        //Then
+        assertNotNull(response);
+        assertNotNull(response.getDelegations());
+        assertNotNull(response.getPageInfo());
+        assertFalse(response.getDelegations().isEmpty());
+        Delegation actualDelegation = response.getDelegations().get(0);
+        PageInfo actualPageInfo = response.getPageInfo();
+
+        assertEquals(actualDelegation.getId(), delegationEntity.getId());
+        assertEquals(actualDelegation.getType(), delegationEntity.getType());
+        assertEquals(actualDelegation.getProductId(), delegationEntity.getProductId());
+        assertEquals(actualDelegation.getTo(), delegationEntity.getTo());
+        assertEquals(actualDelegation.getFrom(), delegationEntity.getFrom());
+        assertEquals(actualDelegation.getInstitutionFromName(), delegationEntity.getInstitutionFromName());
+        assertEquals(actualDelegation.getInstitutionFromRootName(), delegationEntity.getInstitutionFromRootName());
+        assertEquals(actualPageInfo, expectedPageInfo);
+    }
+    private GetDelegationParameters createDelegationParameters(String from, String to, String productId,
+                                                               String search, String taxCode, GetDelegationsMode mode,
+                                                               Order order, Integer page, Integer size) {
+        return GetDelegationParameters.builder()
+                .from(from)
+                .to(to)
+                .productId(productId)
+                .search(search)
+                .taxCode(taxCode)
+                .mode(mode)
+                .order(order)
+                .page(page)
+                .size(size)
+                .build();
     }
 }

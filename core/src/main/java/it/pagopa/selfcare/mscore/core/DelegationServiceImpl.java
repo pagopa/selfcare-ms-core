@@ -10,6 +10,8 @@ import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
+import it.pagopa.selfcare.mscore.model.delegation.DelegationWithPagination;
+import it.pagopa.selfcare.mscore.model.delegation.GetDelegationParameters;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -151,7 +153,6 @@ public class DelegationServiceImpl implements DelegationService {
         }
     }
 
-
     @Override
     public boolean checkIfExistsWithStatus(Delegation delegation, DelegationState status) {
         return delegationConnector.checkIfExistsWithStatus(delegation, status);
@@ -162,5 +163,10 @@ public class DelegationServiceImpl implements DelegationService {
                                            Optional<Order> order, Optional<Integer> page, Optional<Integer> size) {
         int pageSize = size.filter(s -> s > 0).filter(s -> s <= DEFAULT_DELEGATIONS_PAGE_SIZE).orElse(DEFAULT_DELEGATIONS_PAGE_SIZE);
         return delegationConnector.find(from, to, productId, search, taxCode, mode, order.orElse(Order.NONE), page.orElse(0), pageSize);
+    }
+
+    @Override
+    public DelegationWithPagination getDelegationsV2(GetDelegationParameters delegationParameters) {
+        return delegationConnector.findAndCount(delegationParameters);
     }
 }
