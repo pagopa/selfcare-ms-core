@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
@@ -33,38 +34,48 @@ public class CreateInstitutionStrategyInfocamere extends CreateInstitutionStrate
 
     @Override
     public Institution createInstitution(CreateInstitutionStrategyInput strategyInput) {
-        checkIfAlreadyExistsByTaxCodeAndSubunitCode(strategyInput.getTaxCode(), strategyInput.getSubunitCode());
-
-        try {
-            NationalRegistriesProfessionalAddress professionalAddress = partyRegistryProxyConnector.getLegalAddress(strategyInput.getTaxCode());
-            getInstitutionFromInfocamere(strategyInput.getTaxCode(), strategyInput.getDescription(), professionalAddress);
-        } catch(MsCoreException ex) {
-            if(ex.getCode().equalsIgnoreCase(String.valueOf(HttpStatus.NOT_FOUND.value()))) {
+        Institution toSavedOrUpdate;
+        List<Institution> institutions = institutionConnector.findByTaxCodeAndSubunitCode(strategyInput.getTaxCode(), null);
+        if (institutions.isEmpty()) {
+            //Institution does not exists, it will be created
+            try {
+                NationalRegistriesProfessionalAddress professionalAddress = partyRegistryProxyConnector.getLegalAddress(strategyInput.getTaxCode());
+                fillInstitutionFromInfocamereData(strategyInput.getTaxCode(), strategyInput.getDescription(), professionalAddress);
+            } catch (MsCoreException ex) {
+                if (ex.getCode().equalsIgnoreCase(String.valueOf(HttpStatus.NOT_FOUND.value()))) {
+                    log.warn(String.format(INSTITUTION_INFOCAMERE_NOTFOUND.getMessage(), MaskDataUtils.maskString(strategyInput.getTaxCode())));
+                    fillInstitutionRawData(strategyInput);
+                } else {
+                    throw ex;
+                }
+            } catch (ResourceNotFoundException ex) {
                 log.warn(String.format(INSTITUTION_INFOCAMERE_NOTFOUND.getMessage(), MaskDataUtils.maskString(strategyInput.getTaxCode())));
-                getInstitutionRaw(strategyInput);
-            } else {
-                throw ex;
+                fillInstitutionRawData(strategyInput);
             }
-        } catch (ResourceNotFoundException ex) {
-            log.warn(String.format(INSTITUTION_INFOCAMERE_NOTFOUND.getMessage(), MaskDataUtils.maskString(strategyInput.getTaxCode())));
-            getInstitutionRaw(strategyInput);
+
+            toSavedOrUpdate = institution;
+        } else {
+            //Institution exists but description could be updated
+            toSavedOrUpdate = institutions.get(0);
+            toSavedOrUpdate.setDescription(strategyInput.getDescription());
+            toSavedOrUpdate.setUpdatedAt(OffsetDateTime.now());
         }
 
         try {
-            return institutionConnector.save(institution);
+            return institutionConnector.save(toSavedOrUpdate);
         } catch (Exception e) {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
     }
 
-    private void getInstitutionRaw(CreateInstitutionStrategyInput strategyInput) {
+    private void fillInstitutionRawData(CreateInstitutionStrategyInput strategyInput) {
         institution.setExternalId(getExternalId(strategyInput));
         institution.setOrigin(Origin.ADE.getValue());
         institution.setOriginId(strategyInput.getTaxCode());
         institution.setCreatedAt(OffsetDateTime.now());
     }
 
-    private void getInstitutionFromInfocamere(String taxCode, String description, NationalRegistriesProfessionalAddress professionalAddress) {
+    private void fillInstitutionFromInfocamereData(String taxCode, String description, NationalRegistriesProfessionalAddress professionalAddress) {
         institution.setAddress(professionalAddress.getAddress());
         institution.setZipCode(professionalAddress.getZipCode());
         institution.setTaxCode(taxCode);
