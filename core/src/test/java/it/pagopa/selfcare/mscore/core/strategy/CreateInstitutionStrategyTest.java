@@ -556,7 +556,7 @@ class CreateInstitutionStrategyTest {
         nationalRegistriesProfessionalAddress.setZipCode("00000");
         when(partyRegistryProxyConnector.getLegalAddress(any())).thenReturn(nationalRegistriesProfessionalAddress);
 
-        when(institutionConnector.save(any())).thenReturn(institution);
+        when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
         //When
         Institution actual = strategyFactory.createInstitutionStrategyInfocamere(institution)
                 .createInstitution(CreateInstitutionStrategyInput.builder()
@@ -575,6 +575,42 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.PG);
         assertThat(actual.getSubunitType()).isNull();
         assertThat(actual.getOrigin()).isEqualTo(Origin.INFOCAMERE.getValue());
+
+        verify(institutionConnector).save(any());
+    }
+
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void createInstitutionWithOriginInfocamere_WhenInstitutionExists() {
+
+        Institution institution = TestUtils.dummyInstitutionPg();
+        final String description = "UPDATE DESCRIPTION";
+
+        when(institutionConnector.findByTaxCodeAndSubunitCode(institution.getTaxCode(), null))
+                .thenReturn(List.of(institution));
+
+        when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyInfocamere(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .description(description)
+                        .build());
+
+        //Then
+        assertThat(actual.getDescription()).isEqualTo(description);
+        assertThat(actual.getDigitalAddress()).isEqualTo(institution.getDigitalAddress());
+        assertThat(actual.getAddress()).isEqualTo(institution.getAddress());
+        assertThat(actual.getZipCode()).isEqualTo(institution.getZipCode());
+        assertThat(actual.getTaxCode()).isEqualTo(institution.getTaxCode());
+        assertThat(actual.getSubunitCode()).isNull();
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getInstitutionType()).isEqualTo(institution.getInstitutionType());
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getOrigin()).isEqualTo(institution.getOrigin());
 
         verify(institutionConnector).save(any());
     }
