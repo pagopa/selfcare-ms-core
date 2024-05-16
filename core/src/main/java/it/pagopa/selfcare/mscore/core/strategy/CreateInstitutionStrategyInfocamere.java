@@ -6,16 +6,19 @@ import it.pagopa.selfcare.mscore.constant.Origin;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
+import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
 import it.pagopa.selfcare.mscore.utils.MaskDataUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.owasp.encoder.Encode;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.*;
+import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.INSTITUTION_INFOCAMERE_NOTFOUND;
 
 @Slf4j
 @Component
@@ -43,13 +46,13 @@ public class CreateInstitutionStrategyInfocamere extends CreateInstitutionStrate
                 fillInstitutionFromInfocamereData(strategyInput.getTaxCode(), strategyInput.getDescription(), professionalAddress);
             } catch (MsCoreException ex) {
                 if (ex.getCode().equalsIgnoreCase(String.valueOf(HttpStatus.NOT_FOUND.value()))) {
-                    log.warn(String.format(INSTITUTION_INFOCAMERE_NOTFOUND.getMessage(), MaskDataUtils.maskString(strategyInput.getTaxCode())));
+                    log.warn(String.format(INSTITUTION_INFOCAMERE_NOTFOUND.getMessage(), Encode.forJava(MaskDataUtils.maskString(strategyInput.getTaxCode()))));
                     fillInstitutionRawData(strategyInput);
                 } else {
                     throw ex;
                 }
             } catch (ResourceNotFoundException ex) {
-                log.warn(String.format(INSTITUTION_INFOCAMERE_NOTFOUND.getMessage(), MaskDataUtils.maskString(strategyInput.getTaxCode())));
+                log.warn(String.format(INSTITUTION_INFOCAMERE_NOTFOUND.getMessage(), Encode.forJava(MaskDataUtils.maskString(strategyInput.getTaxCode()))));
                 fillInstitutionRawData(strategyInput);
             }
 
