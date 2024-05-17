@@ -470,7 +470,6 @@ class ContractEventNotificationServiceImplTest {
         Institution institutionMock = createInstitutionWithoutLocation(institutionId, onboarding);
         institutionMock.setRootParentId(null);
         institutionMock.setSubunitType(InstitutionPaSubunitType.UO.name());
-        institutionMock.setTaxCodeInvoicing("taxCodeSfe");
         Token tokenMock = createToken(institutionId, tokenId, null,
                 RelationshipState.DELETED,
                 OffsetDateTime.parse("2020-11-01T10:00:00Z"), // createdAt
@@ -484,7 +483,6 @@ class ContractEventNotificationServiceImplTest {
         //then
         assertNotNull(notification.getInstitution().getCategory());
         assertNotNull(notification.getInstitution().getCity());
-        assertEquals(institutionMock.getTaxCodeInvoicing(), notification.getInstitution().getTaxCodeInvoicing());
         verify(partyRegistryProxyConnectorMock, times(1)).getInstitutionById(institutionMock.getExternalId());
         verify(partyRegistryProxyConnectorMock, times(1)).getExtByCode(any());
     }

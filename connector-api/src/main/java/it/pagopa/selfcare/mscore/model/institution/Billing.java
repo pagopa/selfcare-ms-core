@@ -9,6 +9,9 @@ public class Billing {
     @JsonProperty("vatNumber")
     private String vatNumber;
 
+    @JsonProperty("taxCodeInvoicing")
+    private boolean taxCodeInvoicing;
+
     @JsonProperty("recipientCode")
     private String recipientCode;
 

@@ -166,7 +166,6 @@ public class CreateInstitutionStrategyIpa extends CreateInstitutionStrategyCommo
         newInstitution.setAddress(unitaOrganizzativa.getIndirizzo());
         newInstitution.setZipCode(unitaOrganizzativa.getCAP());
         newInstitution.setTaxCode(unitaOrganizzativa.getCodiceFiscaleEnte());
-        newInstitution.setTaxCodeInvoicing(unitaOrganizzativa.getCodiceFiscaleSfe());
         newInstitution.setSubunitCode(strategyInput.getSubunitCode());
         newInstitution.setSubunitType(InstitutionPaSubunitType.UO.name());
         newInstitution.setParentDescription(institutionProxyInfo.getDescription());

@@ -2552,6 +2552,9 @@
           "recipientCode" : {
             "type" : "string"
           },
+          "taxCodeInvoicing" : {
+            "type" : "boolean"
+          },
           "vatNumber" : {
             "type" : "string"
           }
@@ -3451,7 +3454,7 @@
           "taxCode" : {
             "type" : "string"
           },
-          "taxCodeSfe" : {
+          "taxCodeInvoicing" : {
             "type" : "string"
           },
           "updatedAt" : {
