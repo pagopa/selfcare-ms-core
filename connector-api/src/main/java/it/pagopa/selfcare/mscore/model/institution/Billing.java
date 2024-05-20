@@ -10,7 +10,7 @@ public class Billing {
     private String vatNumber;
 
     @JsonProperty("taxCodeInvoicing")
-    private boolean taxCodeInvoicing;
+    private String taxCodeInvoicing;
 
     @JsonProperty("recipientCode")
     private String recipientCode;

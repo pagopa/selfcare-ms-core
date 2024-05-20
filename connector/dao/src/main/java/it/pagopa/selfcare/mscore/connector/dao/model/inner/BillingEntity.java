@@ -8,6 +8,7 @@ import lombok.experimental.FieldNameConstants;
 public class BillingEntity {
 
     private String vatNumber;
+    private String taxCodeInvoicing;
     private String recipientCode;
     private boolean publicServices;
 

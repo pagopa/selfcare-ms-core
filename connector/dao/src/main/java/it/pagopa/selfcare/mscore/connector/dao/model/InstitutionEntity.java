@@ -33,7 +33,6 @@ public class InstitutionEntity {
     private String address;
     private String zipCode;
     private String taxCode;
-    private String taxCodeInvoicing;
     private String city;
     private String county;
     private String country;

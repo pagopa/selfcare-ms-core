@@ -258,13 +258,18 @@ class OnboardingServiceImplTest {
 
         String pricingPlan = "pricingPlan";
         String productId = "productId";
+        Billing billing = new Billing();
+        billing.setVatNumber("vatNumber");
+        billing.setPublicServices(false);
+        billing.setRecipientCode("recipientCode");
+        billing.setTaxCodeInvoicing("taxCodeInvoicing");
         Onboarding onboarding = dummyOnboarding();
         onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
 
         Onboarding onboardingToPersist = new Onboarding();
         onboardingToPersist.setPricingPlan(pricingPlan);
         onboardingToPersist.setProductId(productId);
-        onboardingToPersist.setBilling(new Billing());
+        onboardingToPersist.setBilling(billing);
 
         Institution institution = new Institution();
         institution.setId("institutionId");
@@ -296,6 +301,7 @@ class OnboardingServiceImplTest {
         verify(institutionConnector, times(1))
                 .findAndUpdate(any(), captor.capture(), any(), any());
         Onboarding actual = captor.getValue();
+        assertEquals(billing, actual.getBilling());
         assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
     }
 
