@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -300,7 +299,6 @@ class CreateInstitutionStrategyTest {
     void shouldCreateInstitutionFromIpaUo() {
 
         UnitaOrganizzativa dummyUnitaOrganizzativa = dummyUnitaOrganizzativa();
-        dummyUnitaOrganizzativa.setCodiceFiscaleSfe("codiceFiscaleSfe");
 
         when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
         when(institutionConnector.findByTaxCodeAndSubunitCode(anyString(), anyString()))
@@ -405,7 +403,6 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getAddress()).isEqualTo(dummyUnitaOrganizzativa.getIndirizzo());
         assertThat(actual.getZipCode()).isEqualTo(dummyUnitaOrganizzativa.getCAP());
         assertThat(actual.getTaxCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceFiscaleEnte());
-        assertThat(actual.getTaxCodeInvoicing()).isEqualTo(dummyUnitaOrganizzativa.getCodiceFiscaleSfe());
         assertThat(actual.getSubunitCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniUo());
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.UO.name());
         assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());
@@ -451,7 +448,6 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getAddress()).isEqualTo(dummyUnitaOrganizzativa.getIndirizzo());
         assertThat(actual.getZipCode()).isEqualTo(dummyUnitaOrganizzativa.getCAP());
         assertThat(actual.getTaxCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceFiscaleEnte());
-        assertNull(actual.getTaxCodeInvoicing());
         assertThat(actual.getSubunitCode()).isEqualTo(dummyUnitaOrganizzativa.getCodiceUniUo());
         assertThat(actual.getSubunitType()).isEqualTo(InstitutionPaSubunitType.UO.name());
         assertThat(actual.getParentDescription()).isEqualTo(dummyInstitutionProxyInfo.getDescription());

@@ -75,7 +75,7 @@ public class InstitutionMapperCustom {
         if (institution.getGeographicTaxonomies() != null) {
             var geoCodes = institution.getGeographicTaxonomies().stream()
                     .map(InstitutionGeographicTaxonomies::getCode)
-                    .collect(Collectors.toList());
+                    .toList();
             institutionUpdate.setGeographicTaxonomyCodes(geoCodes);
         }
         institutionUpdate.setRea(institution.getRea());
@@ -143,7 +143,7 @@ public class InstitutionMapperCustom {
         institutionUpdate.setGeographicTaxonomies(Optional.ofNullable(institutionPut.getGeographicTaxonomyCodes())
                         .map(geoTaxonomiesCodes -> geoTaxonomiesCodes.stream()
                                 .map(code -> new InstitutionGeographicTaxonomies(code, null))
-                                .collect(Collectors.toList()))
+                                .toList())
                         .orElse(null)
         );
 
@@ -190,10 +190,12 @@ public class InstitutionMapperCustom {
         BillingResponse billingResponse = new BillingResponse();
         if (billing != null) {
             billingResponse.setVatNumber(billing.getVatNumber());
+            billingResponse.setTaxCodeInvoicing(billing.getTaxCodeInvoicing());
             billingResponse.setRecipientCode(billing.getRecipientCode());
             billingResponse.setPublicServices(billing.isPublicServices());
         } else if (institution.getBilling() != null) {
             billingResponse.setVatNumber(institution.getBilling().getVatNumber());
+            billingResponse.setTaxCodeInvoicing(institution.getBilling().getTaxCodeInvoicing());
             billingResponse.setRecipientCode(institution.getBilling().getRecipientCode());
             billingResponse.setPublicServices(institution.getBilling().isPublicServices());
         }
@@ -204,10 +206,12 @@ public class InstitutionMapperCustom {
         BillingResponse billingResponse = new BillingResponse();
         if (onboarding.getBilling() != null) {
             billingResponse.setVatNumber(onboarding.getBilling().getVatNumber());
+            billingResponse.setTaxCodeInvoicing(onboarding.getBilling().getTaxCodeInvoicing());
             billingResponse.setRecipientCode(onboarding.getBilling().getRecipientCode());
             billingResponse.setPublicServices(onboarding.getBilling().isPublicServices());
         } else if (institution.getBilling() != null) {
             billingResponse.setVatNumber(institution.getBilling().getVatNumber());
+            billingResponse.setTaxCodeInvoicing(institution.getBilling().getTaxCodeInvoicing());
             billingResponse.setRecipientCode(institution.getBilling().getRecipientCode());
             billingResponse.setPublicServices(institution.getBilling().isPublicServices());
         }
@@ -221,6 +225,7 @@ public class InstitutionMapperCustom {
     public static Billing toBilling(BillingRequest billingRequest) {
         Billing billing = new Billing();
         billing.setRecipientCode(billingRequest.getRecipientCode());
+        billing.setTaxCodeInvoicing(billingRequest.getTaxCodeInvoicing());
         billing.setVatNumber(billingRequest.getVatNumber());
         billing.setPublicServices(billing.isPublicServices());
         return billing;
@@ -356,7 +361,7 @@ public class InstitutionMapperCustom {
             product.setId(onboarding.getProductId());
             product.setState(onboarding.getStatus());
             return product;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     public static InstitutionManagementResponse toInstitutionManagementResponse(Institution institution) {
@@ -495,7 +500,7 @@ public class InstitutionMapperCustom {
     public static List<InstitutionToOnboard> toInstitutionToOnboardList(List<ValidInstitution> validInstitutions) {
         return validInstitutions.stream()
                 .map(InstitutionMapperCustom::toInstitutionToOnboard)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static InstitutionToOnboard toInstitutionToOnboard(ValidInstitution validInstitutions) {
@@ -508,17 +513,17 @@ public class InstitutionMapperCustom {
     public static List<ValidInstitution> toValidInstitutions(List<InstitutionToOnboard> institutions) {
         return institutions.stream()
                 .map(institutionToOnboard -> new ValidInstitution(institutionToOnboard.getId(), institutionToOnboard.getDescription()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static BulkInstitutions toBulkInstitutions(List<Institution> institution, List<String> idsRequest) {
         BulkInstitutions bulkInstitutions = new BulkInstitutions();
         bulkInstitutions.setFound(institution.stream()
                 .map(InstitutionMapperCustom::toBulkInstitution)
-                .collect(Collectors.toList()));
+                .toList());
         bulkInstitutions.setNotFound(idsRequest.stream()
                 .filter(s -> institution.stream().noneMatch(inst -> inst.getId().equalsIgnoreCase(s)))
-                .collect(Collectors.toList()));
+                .toList());
         return bulkInstitutions;
     }
 

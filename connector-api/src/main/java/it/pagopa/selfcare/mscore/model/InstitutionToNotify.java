@@ -18,7 +18,6 @@ public class InstitutionToNotify {
     private String digitalAddress;
     private String address;
     private String taxCode;
-    private String taxCodeInvoicing;
     private String origin;
     private String originId;
     private String zipCode;

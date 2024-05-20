@@ -76,7 +76,7 @@ class InstitutionControllerTest {
     @Spy
     private UserMapper userMapper = new UserMapperImpl();
 
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();;
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
 
     private final static Onboarding onboarding;
@@ -88,6 +88,7 @@ class InstitutionControllerTest {
         billing = new Billing();
         billing.setVatNumber("example");
         billing.setRecipientCode("example");
+        billing.setTaxCodeInvoicing("example");
 
         onboarding = new Onboarding();
         onboarding.setProductId("example");
@@ -255,7 +256,7 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
                 .andExpect(MockMvcResultMatchers.content()
                         .string(
-                                "{\"onboardings\":[{\"productId\":\"example\",\"tokenId\":\"tokenId\",\"status\":\"ACTIVE\",\"contract\":\"contract\",\"pricingPlan\":\"setPricingPlan\",\"billing\":{\"vatNumber\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false},\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}]}"));
+                                "{\"onboardings\":[{\"productId\":\"example\",\"tokenId\":\"tokenId\",\"status\":\"ACTIVE\",\"contract\":\"contract\",\"pricingPlan\":\"setPricingPlan\",\"billing\":{\"vatNumber\":\"example\",\"taxCodeInvoicing\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false},\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null}]}"));
     }
 
     @Test
@@ -284,7 +285,7 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"description\":\"description\",\"institutionType\":\"PG\",\"attributes\":[{\"origin\":null,\"code\":\"code\",\"description\":\"description\"}],\"onboarding\":[{\"productId\":\"example\",\"status\":\"ACTIVE\",\"billing\":{\"vatNumber\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false},\"createdAt\":null,\"updatedAt\":null}],\"imported\":false,\"delegation\":false}"));
+                .andExpect(MockMvcResultMatchers.content().string("{\"id\":\"42\",\"description\":\"description\",\"institutionType\":\"PG\",\"attributes\":[{\"origin\":null,\"code\":\"code\",\"description\":\"description\"}],\"onboarding\":[{\"productId\":\"example\",\"status\":\"ACTIVE\",\"billing\":{\"vatNumber\":\"example\",\"taxCodeInvoicing\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false},\"createdAt\":null,\"updatedAt\":null}],\"imported\":false,\"delegation\":false}"));
     }
 
     @Test
