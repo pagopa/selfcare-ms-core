@@ -20,10 +20,12 @@ public class CoreConfig {
     private List<String> destinationMails;
     private String institutionAlternativeEmail;
     private boolean sendEmailToInstitution;
-    private Integer onboardingExpiringDate;
     private boolean infoCamereEnable;
     private boolean enableSendDelegationMail;
     private BlobStorage blobStorage;
+    private String awsSesSecretId;
+    private String awsSesSecretKey;
+    private String awsSesRegion;
 
     @Data
     public static class BlobStorage {

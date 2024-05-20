@@ -41,24 +41,8 @@ app_settings = [
   #    value = "true" //solo prod Selfcare
   #  },
   {
-    name  = "MAIL_TEMPLATE_COMPLETE_PATH"
-    value = "contracts/template/mail/onboarding-complete/1.0.0.json"
-  },
-  {
-    name  = "MAIL_TEMPLATE_PT_COMPLETE_PATH"
-    value = "contracts/template/mail/registration-complete-pt/1.0.0.json"
-  },
-  {
-    name  = "MAIL_TEMPLATE_FD_COMPLETE_NOTIFICATION_PATH"
-    value = "contracts/template/mail/onboarding-complete-fd/1.0.0.json"
-  },
-  {
     name  = "SELFCARE_URL"
     value = "https://selfcare.pagopa.it"
-  },
-  {
-    name  = "MAIL_TEMPLATE_AUTOCOMPLETE_PATH"
-    value = "contracts/template/mail/import-massivo-io/1.0.0.json"
   },
   {
     name  = "MAIL_TEMPLATE_DELEGATION_NOTIFICATION_PATH"
@@ -67,50 +51,6 @@ app_settings = [
   {
     name  = "MAIL_TEMPLATE_DELEGATION_USER_NOTIFICATION_PATH"
     value = "contracts/template/mail/delegation-notification/user-1.0.0.json"
-  },
-  #{
-  #  name  = "MAIL_TEMPLATE_PATH"
-  #  value = "resources/templates/email/onboarding_1.0.0.json"	//pnpg
-  #}, 
-  {
-    name  = "MAIL_TEMPLATE_PATH"
-    value = "contracts/template/mail/1.0.0.json" //selfcare
-  },
-  {
-    name  = "MAIL_ONBOARDING_CONFIRMATION_LINK"
-    value = "https://dev.selfcare.pagopa.it/onboarding/confirm?jwt="
-  },
-
-  {
-    name  = "MAIL_ONBOARDING_REJECTION_LINK"
-    value = "https://dev.selfcare.pagopa.it/onboarding/cancel?jwt="
-  },
-
-  {
-    name  = "SELFCARE_ADMIN_NOTIFICATION_URL"
-    value = "https://dev.selfcare.pagopa.it/dashboard/admin/onboarding/"
-  },
-  {
-    name  = "MAIL_TEMPLATE_NOTIFICATION_PATH"
-    value = "contracts/template/mail/onboarding-notification/1.0.0.json"
-  },
-
-  {
-    name  = "MAIL_TEMPLATE_REGISTRATION_REQUEST_PT_PATH"
-    value = "contracts/template/mail/registration-request-pt/1.0.0.json"
-  },
-
-  {
-    name  = "MAIL_TEMPLATE_REGISTRATION_NOTIFICATION_ADMIN_PATH"
-    value = "contracts/template/mail/registration-notification-admin/1.0.0.json"
-  },
-  {
-    name  = "MAIL_TEMPLATE_REJECT_PATH"
-    value = "contracts/template/mail/onboarding-refused/1.0.0.json"
-  },
-  {
-    name  = "MAIL_ONBOARDING_URL"
-    value = "https://dev.selfcare.pagopa.it/onboarding/"
   },
   {
     name  = "STORAGE_CONTAINER"
@@ -201,14 +141,16 @@ app_settings = [
   {
     name  = "SELFCARE_USER_URL"
     value = "http://selc-d-user-ms-ca"
+  },
+  {
+    name  = "MAIL_SENDER_ADDRESS"
+    value = "noreply@areariservata.pagopa.it"
   }
 ]
 
 secrets_names = {
   "STORAGE_APPLICATION_SECRET"                   = "contracts-storage-access-key"
-  "ADDRESS_EMAIL_NOTIFICATION_ADMIN"             = "portal-admin-operator-email"
   "APPLICATIONINSIGHTS_CONNECTION_STRING"        = "appinsights-connection-string"
-  "MAIL_SENDER_ADDRESS"                          = "smtp-usr"
   "MONGODB_CONNECTION_URI"                       = "mongodb-connection-string"
   "BLOB_STORAGE_CONN_STRING"                     = "blob-storage-contract-connection-string"
   "STORAGE_CREDENTIAL_SECRET"                    = "contracts-storage-access-key"
@@ -220,4 +162,6 @@ secrets_names = {
   "JWT_TOKEN_PUBLIC_KEY"                         = "jwt-public-key"
   "KAFKA_USERS_SELFCARE_WO_SASL_JAAS_CONFIG"     = "eventhub-sc-users-selfcare-wo-connection-string-lc"
   "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"       = "blob-storage-product-connection-string"
+  "AWS-SES-ACCESS-KEY-ID"                        = "aws-ses-access-key-id"
+  "AWS-SES-SECRET-ACCESS-KEY"                    = "aws-ses-secret-access-key"
 }
