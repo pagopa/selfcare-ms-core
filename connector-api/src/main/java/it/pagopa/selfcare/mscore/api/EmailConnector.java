@@ -8,6 +8,4 @@ public interface EmailConnector {
 
     void sendMail(String templateName, List<String> destinationMail, File pdf, String productName, Map<String, String> mailParameters, String nameFile);
 
-    void sendMailPNPG(String templateName, String destinationMail, String businessName);
-
 }
