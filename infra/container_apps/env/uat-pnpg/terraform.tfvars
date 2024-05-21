@@ -136,6 +136,6 @@ secrets_names = {
   "USER_REGISTRY_API_KEY"                    = "user-registry-api-key"
   "JWT_TOKEN_PUBLIC_KEY"                     = "jwt-public-key"
   "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"   = "blob-storage-product-connection-string"
-  "AWS-SES-ACCESS-KEY-ID"                    = "aws-ses-access-key-id"
-  "AWS-SES-SECRET-ACCESS-KEY"                = "aws-ses-secret-access-key"
+  "AWS_SES_ACCESS_KEY_ID"                    = "aws-ses-access-key-id"
+  "AWS_SES_SECRET_ACCESS_KEY"                = "aws-ses-secret-access-key"
 }

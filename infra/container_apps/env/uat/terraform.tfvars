@@ -149,6 +149,6 @@ secrets_names = {
   "JWT_TOKEN_PUBLIC_KEY"                         = "jwt-public-key"
   "KAFKA_USERS_SELFCARE_WO_SASL_JAAS_CONFIG"     = "eventhub-sc-users-selfcare-wo-connection-string-lc"
   "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"       = "blob-storage-product-connection-string"
-  "AWS-SES-ACCESS-KEY-ID"                        = "aws-ses-access-key-id"
-  "AWS-SES-SECRET-ACCESS-KEY"                    = "aws-ses-secret-access-key"
+  "AWS_SES_ACCESS_KEY_ID"                        = "aws-ses-access-key-id"
+  "AWS_SES_SECRET_ACCESS_KEY"                    = "aws-ses-secret-access-key"
 }
