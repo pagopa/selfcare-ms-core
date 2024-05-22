@@ -68,6 +68,9 @@ public class MailNotificationServiceImpl implements MailNotificationService {
 
 
     private List<String> getUsersEmailByInstitutionAndProductV2(String institutionId, String productId){
-     return userApiConnector.getUserEmails(institutionId, productId);
+        if (coreConfig.isSendEmailToInstitution()) {
+            return userApiConnector.getUserEmails(institutionId, productId);
+        }
+        return List.of(coreConfig.getInstitutionAlternativeEmail());
     }
 }
