@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
 
@@ -112,11 +111,6 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public List<Institution> getInstitutions(String taxCode, String subunitCode) {
-        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
-    }
-
-    @Override
     public Institution createInstitutionFromIpa(String taxCode, InstitutionPaSubunitType subunitType, String subunitCode, List<InstitutionGeographicTaxonomies> geographicTaxonomies, InstitutionType institutionType) {
         CreateInstitutionStrategy institutionStrategy = createInstitutionStrategyFactory.createInstitutionStrategyIpa();
         return institutionStrategy.createInstitution(CreateInstitutionStrategyInput.builder()
@@ -126,6 +120,11 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .geographicTaxonomies(geographicTaxonomies)
                 .institutionType(institutionType)
                 .build());
+    }
+
+    @Override
+    public List<Institution> getInstitutions(String taxCode, String subunitCode) {
+        return institutionConnector.findByTaxCodeAndSubunitCode(taxCode, subunitCode);
     }
 
     @Override
@@ -263,7 +262,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             if (states != null && !states.isEmpty()) {
                 onboardingList = institution.getOnboarding().stream()
                         .filter(onboarding -> states.contains(onboarding.getStatus()))
-                        .collect(Collectors.toList());
+                        .toList();
             } else {
                 onboardingList = institution.getOnboarding();
             }
@@ -286,7 +285,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             List<GeographicTaxonomies> geographicTaxonomies = institution.getGeographicTaxonomies().stream()
                     .map(institutionGeoTax -> retrieveGeoTaxonomies(institutionGeoTax.getCode())
                             .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), institutionGeoTax.getCode()), CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getCode())))
-                    .collect(Collectors.toList());
+                    .toList();
             if (!geographicTaxonomies.isEmpty()) {
                 return geographicTaxonomies;
             }
@@ -323,7 +322,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                     .map(geoTaxonomy -> retrieveGeoTaxonomies(geoTaxonomy.getCode())
                             .orElseThrow(() -> new MsCoreException(String.format(CustomError.GEO_TAXONOMY_CODE_NOT_FOUND.getMessage(), geoTaxonomy.getCode()), geoTaxonomy.getCode())))
                     .map(geo -> new InstitutionGeographicTaxonomies(geo.getGeotaxId(), geo.getDescription()))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return Collections.emptyList();
     }

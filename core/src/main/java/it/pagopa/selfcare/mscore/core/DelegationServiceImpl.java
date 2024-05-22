@@ -49,6 +49,8 @@ public class DelegationServiceImpl implements DelegationService {
          */
         if(PROD_PAGOPA.equals(delegation.getProductId())) {
             setPartnerByInstitutionTaxCode(delegation);
+        } else {
+            setTaxCodesByInstitutionIds(delegation);
         }
 
         Delegation savedDelegation = checkIfExistsAndSaveDelegation(delegation);
@@ -88,22 +90,40 @@ public class DelegationServiceImpl implements DelegationService {
             In case the api returns more institutions we always try to take the PT,
             otherwise it is okay to take the first one
          */
-        List<Institution> institutions = institutionService.getInstitutions(delegation.getTo(), null);
-        Institution partner = institutions.stream()
+        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), null);
+        Institution partner = institutionsTo.stream()
                 .filter(institution -> institution.getInstitutionType() == InstitutionType.PT)
                 .findFirst()
-                .orElse(institutions.stream().findFirst()
+                .orElse(institutionsTo.stream().findFirst()
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
                                 INSTITUTION_TAX_CODE_NOT_FOUND.getCode())
                         ));
+        delegation.setToTaxCode(partner.getTaxCode());
         delegation.setTo(partner.getId());
+
+        /*
+            Retrieve delegator's institution to set taxCodeFrom
+         */
+        Institution institutionFrom = institutionService.retrieveInstitutionById(delegation.getFrom());
+        delegation.setFromTaxCode(institutionFrom.getTaxCode());
+    }
+
+    private void setTaxCodesByInstitutionIds(Delegation delegation){
+        /*
+            Retrieve both delegator's and partner's institutions to set taxCodeFrom and taxCodeTo
+         */
+        Institution institutionTo = institutionService.retrieveInstitutionById(delegation.getTo());
+        Institution institutionFrom = institutionService.retrieveInstitutionById(delegation.getFrom());
+
+        delegation.setToTaxCode(institutionTo.getTaxCode());
+        delegation.setFromTaxCode(institutionFrom.getTaxCode());
     }
 
     @Override
     public Delegation createDelegationFromInstitutionsTaxCode(Delegation delegation) {
 
-        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), delegation.getToSubunitCode());
+        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getToTaxCode(), delegation.getToSubunitCode());
         // TODO: remove filter when getInstitutions API will be fixed.
         /*
             If we call getInstitutions by empty subunitCode parameter, we have to filter retrieved list for institution
@@ -122,7 +142,7 @@ public class DelegationServiceImpl implements DelegationService {
             If we call getInstitutions by empty subunitCode parameter, we have to filter retrieved list for institution
             with blank subunitCode field, otherwise we take first element returned by api.
         */
-        List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFrom(), delegation.getFromSubunitCode());
+        List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFromTaxCode(), delegation.getFromSubunitCode());
         String from = institutionsFrom.stream()
                 .filter(institution -> StringUtils.hasText(delegation.getFromSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
                 .findFirst()
