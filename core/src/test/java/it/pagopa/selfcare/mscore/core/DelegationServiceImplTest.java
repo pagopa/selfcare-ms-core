@@ -78,13 +78,13 @@ class DelegationServiceImplTest {
         Institution institutionFrom = new Institution();
         institutionTo.setId("idFrom");
         institutionTo.setTaxCode("taxCodeFrom");
-        when(delegationConnector.save(any())).thenReturn(dummyDelegationProdIo);
+        when(delegationConnector.save(dummyDelegationProdIo)).thenAnswer(arg ->arg.getArguments()[0]);
         when(institutionService.retrieveInstitutionById(dummyDelegationProdIo.getFrom())).thenReturn(institutionFrom);
         when(institutionService.retrieveInstitutionById(dummyDelegationProdIo.getTo())).thenReturn(institutionTo);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         Delegation response = delegationServiceImpl.createDelegation(dummyDelegationProdIo);
-        verify(delegationConnector).save(any());
+        verify(delegationConnector).save(dummyDelegationProdIo);
         assertNotNull(response);
         assertNotNull(response.getId());
         assertEquals(dummyDelegationProdIo.getId(), response.getId());
@@ -104,9 +104,9 @@ class DelegationServiceImplTest {
         Institution institutionFrom = new Institution();
         institutionFrom.setId("id");
         institutionFrom.setTaxCode("taxCodeFrom");
-        when(delegationConnector.save(any())).thenReturn(dummyDelegationProdPagopa);
+        when(delegationConnector.save(dummyDelegationProdPagopa)).thenAnswer(arg ->arg.getArguments()[0]);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
-        when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institutionTo));
+        when(institutionService.getInstitutions(dummyDelegationProdPagopa.getTo(), null)).thenReturn(List.of(institutionTo));
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         when(institutionService.retrieveInstitutionById(dummyDelegationProdPagopa.getFrom())).thenReturn(institutionFrom);
         Delegation response = delegationServiceImpl.createDelegation(dummyDelegationProdPagopa);
@@ -123,20 +123,20 @@ class DelegationServiceImplTest {
     @Test
     void testCreateDelegationForEcWithProductPagopa() {
         Institution institutionTo = new Institution();
-        institutionTo.setId("id");
+        institutionTo.setId("to");
         institutionTo.setInstitutionType(InstitutionType.PT);
         institutionTo.setTaxCode("taxCodeTo");
         Institution institutionFrom = new Institution();
-        institutionFrom.setId("id");
+        institutionFrom.setId("from");
         institutionFrom.setTaxCode("taxCodeFrom");
-        when(delegationConnector.findAndActivate(anyString(), anyString(), anyString())).thenReturn(dummyDelegationProdPagopa);
+        when(delegationConnector.findAndActivate(institutionFrom.getId(), institutionTo.getId(), dummyDelegationProdPagopa.getProductId())).thenReturn(dummyDelegationProdPagopa);;
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
-        when(institutionService.getInstitutions(any(), any())).thenReturn(List.of(institutionTo));
+        when(institutionService.getInstitutions(dummyDelegationProdPagopa.getTo(), null)).thenReturn(List.of(institutionTo));
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
         when(delegationServiceImpl.checkIfExistsWithStatus(dummyDelegationProdPagopa, DelegationState.DELETED)).thenReturn(true);
         when(institutionService.retrieveInstitutionById(dummyDelegationProdPagopa.getFrom())).thenReturn(institutionFrom);
         Delegation response = delegationServiceImpl.createDelegation(dummyDelegationProdPagopa);
-        verify(delegationConnector).findAndActivate(anyString(), anyString(), anyString());
+        verify(delegationConnector).findAndActivate(institutionFrom.getId(), institutionTo.getId(), dummyDelegationProdPagopa.getProductId());
         verify(institutionService).getInstitutions(any(), any());
         assertNotNull(response);
         assertNotNull(response.getId());
