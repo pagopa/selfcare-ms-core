@@ -5,7 +5,6 @@
     import io.swagger.annotations.ApiParam;
     import io.swagger.v3.oas.annotations.tags.Tag;
     import it.pagopa.selfcare.mscore.constant.GenericError;
-    import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
     import it.pagopa.selfcare.mscore.constant.Order;
     import it.pagopa.selfcare.mscore.core.DelegationService;
     import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -64,8 +63,6 @@
                                                                        @RequestParam(name = "search", required = false) String search,
                                                                        @ApiParam("${swagger.mscore.institutions.model.taxCode}")
                                                                        @RequestParam(name = "taxCode", required = false) String taxCode,
-                                                                       @ApiParam("${swagger.mscore.institutions.delegations.mode}")
-                                                                       @RequestParam(name = "mode", required = false) GetDelegationsMode mode,
                                                                        @ApiParam("${swagger.mscore.institutions.delegations.order}")
                                                                        @RequestParam(name = "order", required = false, defaultValue = "NONE") Order order,
                                                                        @RequestParam (name = "page", required = false, defaultValue = "0") @Min(0) Integer page,
@@ -80,7 +77,6 @@
                     .productId(productId)
                     .search(search)
                     .taxCode(taxCode)
-                    .mode(mode)
                     .order(order)
                     .page(page)
                     .size(size)
