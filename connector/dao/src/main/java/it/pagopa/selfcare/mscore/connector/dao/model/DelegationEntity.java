@@ -23,6 +23,8 @@ public class DelegationEntity {
     private String institutionToName;
     private String institutionFromRootName;
     private String to;
+    private String toTaxCode;
+    private String fromTaxCode;
     private String productId;
     private DelegationType type;
     private DelegationState status;
