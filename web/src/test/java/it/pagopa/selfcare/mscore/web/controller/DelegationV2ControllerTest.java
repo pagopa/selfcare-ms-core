@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.web.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
-import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.core.DelegationService;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
@@ -72,7 +71,7 @@ class DelegationV2ControllerTest {
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, Optional, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData() throws Exception {
@@ -83,12 +82,12 @@ class DelegationV2ControllerTest {
         DelegationWithPagination expectedDelegationWithPagination = new DelegationWithPagination(List.of(expectedDelegation), exptectedPageInfo);
 
         when(delegationService.getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.ASC, 0, 10)))
+                expectedDelegation.getProductId(), null, null, Order.ASC, 0, 10)))
                 .thenReturn(expectedDelegationWithPagination);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/v2/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}&mode={mode}&order={order}&page={page}&size={size}",
-                        expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(), GetDelegationsMode.NORMAL,
+                .get("/v2/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}&order={order}&page={page}&size={size}",
+                        expectedDelegation.getFrom(), expectedDelegation.getTo(), expectedDelegation.getProductId(),
                         Order.ASC ,exptectedPageInfo.getPageNo(), exptectedPageInfo.getPageSize());
         MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
                 .build()
@@ -116,7 +115,7 @@ class DelegationV2ControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.ASC,
+                        expectedDelegation.getProductId(), null, null, Order.ASC,
                         0, 10));
 
         verifyNoMoreInteractions(delegationService);
@@ -136,11 +135,11 @@ class DelegationV2ControllerTest {
         DelegationWithPagination expectedDelegationWithPagination = new DelegationWithPagination(expectedDelegations, exptectedPageInfo);
 
         when(delegationService.getDelegationsV2(createDelegationParameters(null, TO1,
-                null, null, null, GetDelegationsMode.FULL, Order.DESC, 0, 10000)))
+                null, null, null, Order.DESC, 0, 10000)))
                 .thenReturn(expectedDelegationWithPagination);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/v2/delegations?brokerId={brokerId}&mode={mode}&order={order}", TO1, GetDelegationsMode.FULL, Order.DESC);
+                .get("/v2/delegations?brokerId={brokerId}&order={order}", TO1, Order.DESC);
         MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
                 .build()
                 .perform(requestBuilder)
@@ -167,13 +166,13 @@ class DelegationV2ControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegationsV2(createDelegationParameters(null, TO1, null,
-                        null, null, GetDelegationsMode.FULL, Order.DESC,
+                        null, null, Order.DESC,
                         0, 10000));
         verifyNoMoreInteractions(delegationService);
     }
 
     /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
+     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, Optional, Optional, Optional)}
      */
     @Test
     void getDelegations_shouldGetData_nullMode() throws Exception {
@@ -184,7 +183,7 @@ class DelegationV2ControllerTest {
         DelegationWithPagination expectedDelegationWithPagination = new DelegationWithPagination(List.of(expectedDelegation), exptectedPageInfo);
 
         when(delegationService.getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, null, null, Order.NONE, 0, 10000)))
+                expectedDelegation.getProductId(), null, null, Order.NONE, 0, 10000)))
                 .thenReturn(expectedDelegationWithPagination);
         // When
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
@@ -216,7 +215,7 @@ class DelegationV2ControllerTest {
 
         verify(delegationService, times(1))
                 .getDelegationsV2(createDelegationParameters(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, null, null, Order.NONE, 0, 10000));
+                        expectedDelegation.getProductId(), null, null, Order.NONE,0, 10000));
         verifyNoMoreInteractions(delegationService);
     }
 
@@ -280,15 +279,14 @@ class DelegationV2ControllerTest {
     }
 
     private GetDelegationParameters createDelegationParameters(String from, String to, String productId,
-                                                               String search, String taxCode, GetDelegationsMode mode,
-                                                               Order order, Integer page, Integer size) {
+                                                               String search, String taxCode, Order order,
+                                                               Integer page, Integer size) {
         return GetDelegationParameters.builder()
                 .from(from)
                 .to(to)
                 .productId(productId)
                 .search(search)
                 .taxCode(taxCode)
-                .mode(mode)
                 .order(order)
                 .page(page)
                 .size(size)

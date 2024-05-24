@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
-import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
@@ -207,19 +206,19 @@ class DelegationServiceImplTest {
     }
 
     /**
-     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
+     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, Optional, Optional, Optional)}
      */
     @Test
     void find_shouldGetData() {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
-        List<Delegation> response = delegationServiceImpl.getDelegations("from", "to", "productId", null, null,
-                GetDelegationsMode.NORMAL, Optional.empty(), Optional.of(0), Optional.of(100));
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", "to", "productId", null,
+                null, Optional.empty(), Optional.of(0), Optional.of(100));
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
@@ -227,19 +226,19 @@ class DelegationServiceImplTest {
     }
 
     /**
-     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
+     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, Optional, Optional, Optional)}
      */
     @Test
     void find_shouldGetData_fullMode() {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
-        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null, null,
-                GetDelegationsMode.FULL, Optional.of(Order.DESC), Optional.of(0), Optional.of(0));
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null,
+                null, Optional.of(Order.DESC), Optional.of(0), Optional.of(0));
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
@@ -247,19 +246,19 @@ class DelegationServiceImplTest {
     }
 
     /**
-     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, GetDelegationsMode, Optional, Optional, Optional)}
+     * Method under test: {@link DelegationServiceImpl#getDelegations(String, String, String, String, String, Optional, Optional, Optional)}
      */
     @Test
     void find_shouldGetData_fullMode_defaultPage() {
         //Given
         Delegation delegation = new Delegation();
         delegation.setId("id");
-        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
+        when(delegationConnector.find(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(List.of(delegation));
         //When
-        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null, null,
-                GetDelegationsMode.FULL, Optional.of(Order.DESC), Optional.empty(), Optional.empty());
+        List<Delegation> response = delegationServiceImpl.getDelegations("from", null, "productId", null,
+                null, Optional.of(Order.DESC), Optional.empty(), Optional.empty());
         //Then
-        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any(), any());
+        verify(delegationConnector).find(any(), any(), any(), any(), any(), any(), any(), any());
 
         assertNotNull(response);
         assertFalse(response.isEmpty());
@@ -276,8 +275,8 @@ class DelegationServiceImplTest {
         delegation.setId("id");
         DelegationWithPagination delegationWithPagination = new DelegationWithPagination(List.of(delegation), new PageInfo(10, 0, 10, 1));
         when(delegationConnector.findAndCount(any())).thenReturn(delegationWithPagination);
-        GetDelegationParameters delegationParameters = createDelegationParameters("from", "to", "productId", null, null,
-                GetDelegationsMode.NORMAL, null, 0, 100);
+        GetDelegationParameters delegationParameters = createDelegationParameters("from", "to", "productId", null,
+                null, null, 0, 100);
 
         //When
         DelegationWithPagination response = delegationServiceImpl.getDelegationsV2(delegationParameters);
@@ -424,15 +423,14 @@ class DelegationServiceImplTest {
 
 
     private GetDelegationParameters createDelegationParameters(String from, String to, String productId,
-                                                               String search, String taxCode, GetDelegationsMode mode,
-                                                               Order order, Integer page, Integer size) {
+                                                               String search, String taxCode, Order order,
+                                                               Integer page, Integer size) {
         return GetDelegationParameters.builder()
                 .from(from)
                 .to(to)
                 .productId(productId)
                 .search(search)
                 .taxCode(taxCode)
-                .mode(mode)
                 .order(order)
                 .page(page)
                 .size(size)

@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.model.delegation;
 
-import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.constant.Order;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +12,6 @@ public class GetDelegationParameters {
     private String productId;
     private String search;
     private String taxCode;
-    private GetDelegationsMode mode;
     private Order order;
     private Integer page;
     private Integer size;

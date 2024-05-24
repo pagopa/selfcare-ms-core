@@ -1,32 +1,30 @@
     package it.pagopa.selfcare.mscore.web.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.tags.Tags;
-import it.pagopa.selfcare.mscore.constant.GenericError;
-import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
-import it.pagopa.selfcare.mscore.constant.Order;
-import it.pagopa.selfcare.mscore.core.DelegationService;
-import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
-import it.pagopa.selfcare.mscore.model.delegation.Delegation;
-import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
-import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequestFromTaxcode;
-import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
-import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapper;
-import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+    import io.swagger.annotations.Api;
+    import io.swagger.annotations.ApiOperation;
+    import io.swagger.annotations.ApiParam;
+    import io.swagger.v3.oas.annotations.tags.Tag;
+    import io.swagger.v3.oas.annotations.tags.Tags;
+    import it.pagopa.selfcare.mscore.constant.GenericError;
+    import it.pagopa.selfcare.mscore.constant.Order;
+    import it.pagopa.selfcare.mscore.core.DelegationService;
+    import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
+    import it.pagopa.selfcare.mscore.model.delegation.Delegation;
+    import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequest;
+    import it.pagopa.selfcare.mscore.web.model.delegation.DelegationRequestFromTaxcode;
+    import it.pagopa.selfcare.mscore.web.model.delegation.DelegationResponse;
+    import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapper;
+    import it.pagopa.selfcare.mscore.web.util.CustomExceptionMessage;
+    import lombok.extern.slf4j.Slf4j;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.http.MediaType;
+    import org.springframework.http.ResponseEntity;
+    import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+    import javax.validation.Valid;
+    import java.util.List;
+    import java.util.Objects;
+    import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/delegations", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -104,8 +102,6 @@ public class DelegationController {
                                                                    @RequestParam(name = "search", required = false) String search,
                                                                    @ApiParam("${swagger.mscore.institutions.model.taxCode}")
                                                                    @RequestParam(name = "taxCode", required = false) String taxCode,
-                                                                   @ApiParam("${swagger.mscore.institutions.delegations.mode}")
-                                                                   @RequestParam(name = "mode", required = false) GetDelegationsMode mode,
                                                                    @ApiParam("${swagger.mscore.institutions.delegations.order}")
                                                                    @RequestParam(name = "order", required = false) Optional<Order> order,
                                                                    @RequestParam(name = "page", required = false) Optional<Integer> page,
@@ -114,9 +110,9 @@ public class DelegationController {
         if(Objects.isNull(institutionId) && Objects.isNull(brokerId))
             throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
-        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, search, taxCode, mode, order, page, size).stream()
-                .map(delegationMapper::toDelegationResponse)
-                .collect(Collectors.toList()));
+        return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, search, taxCode, order, page, size).stream()
+                .map(delegation -> delegationMapper.toDelegationResponseGet(delegation, brokerId))
+                .toList());
     }
 
     /**

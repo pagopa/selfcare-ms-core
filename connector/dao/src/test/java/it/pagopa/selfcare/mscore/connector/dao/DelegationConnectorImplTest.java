@@ -8,7 +8,6 @@ import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutio
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapperImpl;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.DelegationType;
-import it.pagopa.selfcare.mscore.constant.GetDelegationsMode;
 import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.delegation.*;
@@ -25,8 +24,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -115,7 +112,6 @@ class DelegationConnectorImplTest {
 
     @Test
     void find_shouldGetData() {
-
         DelegationEntity delegationEntity = new DelegationEntity();
         delegationEntity.setId("id");
         delegationEntity.setProductId("productId");
@@ -134,7 +130,7 @@ class DelegationConnectorImplTest {
                 .find(any(), any(), any());
 
         List<Delegation> response = delegationConnectorImpl.find(delegationEntity.getFrom(),
-                delegationEntity.getTo(), delegationEntity.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE);
+                delegationEntity.getTo(), delegationEntity.getProductId(), null, null, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE);
 
         //Then
         assertNotNull(response);
@@ -148,66 +144,8 @@ class DelegationConnectorImplTest {
         assertEquals(actual.getFrom(), delegationEntity.getFrom());
         assertEquals(actual.getInstitutionFromName(), delegationEntity.getInstitutionFromName());
         assertEquals(actual.getInstitutionFromRootName(), delegationEntity.getInstitutionFromRootName());
-    }
-
-    @Test
-    void getBrokersFullMode() {
-
-        //Given
-        AggregationResults<Object> results = mock(AggregationResults.class);
-        when(results.getMappedResults()).thenReturn(List.of(dummyDelegationEntity));
-
-        //When
-        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
-                thenReturn(results);
-
-        List<Delegation> response = delegationConnectorImpl.find(dummyDelegationEntity.getFrom(), null,
-                dummyDelegationEntity.getProductId(), null, null, GetDelegationsMode.FULL, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE);
-
-        //Then
-        assertNotNull(response);
-        assertFalse(response.isEmpty());
-        Delegation actual = response.get(0);
-
-        assertEquals(actual.getId(), dummyDelegationEntity.getId());
-        assertEquals(actual.getType(), dummyDelegationEntity.getType());
-        assertEquals(actual.getProductId(), dummyDelegationEntity.getProductId());
-        assertEquals(actual.getTo(), dummyDelegationEntity.getTo());
-        assertEquals(actual.getFrom(), dummyDelegationEntity.getFrom());
-        assertEquals(actual.getInstitutionFromName(), dummyDelegationEntity.getInstitutionFromName());
-        assertEquals(actual.getInstitutionFromRootName(), dummyDelegationEntity.getInstitutionFromRootName());
-        assertEquals(actual.getBrokerTaxCode(), dummyDelegationEntity.getInstitutions().get(0).getTaxCode());
-        assertEquals(actual.getBrokerType(), dummyDelegationEntity.getInstitutions().get(0).getInstitutionType());
-    }
-
-    @Test
-    void getInstitutionsFullMode() {
-
-        //Given
-        AggregationResults<Object> results = mock(AggregationResults.class);
-        when(results.getMappedResults()).thenReturn(List.of(dummyDelegationEntity));
-
-        //When
-        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
-                thenReturn(results);
-
-        List<Delegation> response = delegationConnectorImpl.find(null, dummyDelegationEntity.getTo(),
-                dummyDelegationEntity.getProductId(), null, null, GetDelegationsMode.FULL, Order.ASC, PAGE_SIZE, MAX_PAGE_SIZE);
-
-        //Then
-        assertNotNull(response);
-        assertFalse(response.isEmpty());
-        Delegation actual = response.get(0);
-
-        assertEquals(actual.getId(), dummyDelegationEntity.getId());
-        assertEquals(actual.getType(), dummyDelegationEntity.getType());
-        assertEquals(actual.getProductId(), dummyDelegationEntity.getProductId());
-        assertEquals(actual.getTo(), dummyDelegationEntity.getTo());
-        assertEquals(actual.getFrom(), dummyDelegationEntity.getFrom());
-        assertEquals(actual.getInstitutionFromName(), dummyDelegationEntity.getInstitutionFromName());
-        assertEquals(actual.getInstitutionFromRootName(), dummyDelegationEntity.getInstitutionFromRootName());
-        assertEquals(actual.getTaxCode(), dummyDelegationEntity.getInstitutions().get(0).getTaxCode());
-        assertEquals(actual.getInstitutionType(), dummyDelegationEntity.getInstitutions().get(0).getInstitutionType());
+        assertEquals(actual.getToTaxCode(), delegationEntity.getToTaxCode());
+        assertEquals(actual.getFromTaxCode(), delegationEntity.getFromTaxCode());
     }
 
     @Test
@@ -238,20 +176,25 @@ class DelegationConnectorImplTest {
 
     @Test
     void find_shouldGetDataPaginated() {
+        DelegationEntity delegationEntity = new DelegationEntity();
+        delegationEntity.setId("id");
+        delegationEntity.setProductId("productId");
+        delegationEntity.setType(DelegationType.PT);
+        delegationEntity.setTo("To");
+        delegationEntity.setFrom("From");
+        delegationEntity.setInstitutionFromName("setInstitutionFromName");
+        delegationEntity.setInstitutionFromRootName("setInstitutionFromRootName");
 
-        final String FROM1 = "from1";
-        final String TO1 = "to1";
-
-        //Given
-        AggregationResults<Object> results = mock(AggregationResults.class);
-        when(results.getMappedResults()).thenReturn(List.of(createAggregation("1", FROM1, TO1)));
+        List<DelegationEntity> delegationEntities = List.of(delegationEntity);
+        Page<DelegationEntity> delegationEntityPage = new PageImpl<>(delegationEntities);
 
         //When
-        when(mongoTemplate.aggregate(any(Aggregation.class), anyString(),  any())).
-                thenReturn(results);
+        doReturn(delegationEntityPage)
+                .when(delegationRepository)
+                .find(any(), any(), any());
 
-        List<Delegation> response = delegationConnectorImpl.find(null,
-                TO1, "productId", null, null, GetDelegationsMode.FULL, Order.NONE, 0, 1);
+        List<Delegation> response = delegationConnectorImpl.find(null, delegationEntity.getTo(), "productId",
+                null, null, Order.NONE, 0, 1);
 
         //Then
         assertNotNull(response);
@@ -260,11 +203,13 @@ class DelegationConnectorImplTest {
 
         Delegation actual = response.get(0);
 
-        assertEquals(actual.getId(), "id_1");
-        assertEquals(actual.getType(), DelegationType.PT);
-        assertEquals(actual.getProductId(), "productId");
-        assertEquals(actual.getTo(), TO1);
-        assertEquals(actual.getFrom(), FROM1);
+        assertEquals(actual.getId(), delegationEntity.getId());
+        assertEquals(actual.getType(), delegationEntity.getType());
+        assertEquals(actual.getProductId(), delegationEntity.getProductId());
+        assertEquals(actual.getTo(), delegationEntity.getTo());
+        assertEquals(actual.getFrom(), delegationEntity.getFrom());
+        assertEquals(actual.getFromTaxCode(), delegationEntity.getFromTaxCode());
+        assertEquals(actual.getToTaxCode(), delegationEntity.getToTaxCode());
 
     }
 
@@ -328,7 +273,7 @@ class DelegationConnectorImplTest {
                 .count(any(), eq(DelegationEntity.class));
 
         DelegationWithPagination response = delegationConnectorImpl.findAndCount(createDelegationParameters(delegationEntity.getFrom(),
-                delegationEntity.getTo(), delegationEntity.getProductId(), null, null, GetDelegationsMode.NORMAL, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE));
+                delegationEntity.getTo(), delegationEntity.getProductId(), null, null, Order.NONE, PAGE_SIZE, MAX_PAGE_SIZE));
 
         //Then
         assertNotNull(response);
@@ -348,15 +293,14 @@ class DelegationConnectorImplTest {
         assertEquals(actualPageInfo, expectedPageInfo);
     }
     private GetDelegationParameters createDelegationParameters(String from, String to, String productId,
-                                                               String search, String taxCode, GetDelegationsMode mode,
-                                                               Order order, Integer page, Integer size) {
+                                                               String search, String taxCode, Order order,
+                                                               Integer page, Integer size) {
         return GetDelegationParameters.builder()
                 .from(from)
                 .to(to)
                 .productId(productId)
                 .search(search)
                 .taxCode(taxCode)
-                .mode(mode)
                 .order(order)
                 .page(page)
                 .size(size)
