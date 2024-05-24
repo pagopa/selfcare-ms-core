@@ -89,6 +89,7 @@ public class DelegationServiceImpl implements DelegationService {
         /*
             In case the api returns more institutions we always try to take the PT,
             otherwise it is okay to take the first one
+            It is caused by this issue https://pagopa.atlassian.net/wiki/spaces/SCP/pages/1058832442/RFC+-+Gestione+di+pi+institutionType+su+una+Institution
          */
         List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), null);
         Institution partner = institutionsTo.stream()
