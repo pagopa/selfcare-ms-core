@@ -2,9 +2,7 @@ package it.pagopa.selfcare.mscore.connector.dao;
 
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.connector.dao.model.DelegationEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationEntityMapper;
-import it.pagopa.selfcare.mscore.connector.dao.model.mapper.DelegationInstitutionMapper;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
 import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.model.delegation.Delegation;
@@ -18,9 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -40,17 +35,14 @@ public class DelegationConnectorImpl implements DelegationConnector {
     public static final String DELEGATIONS = "Delegations";
     private final DelegationRepository repository;
     private final DelegationEntityMapper delegationMapper;
-    private final DelegationInstitutionMapper delegationInstitutionMapper;
     private final MongoTemplate mongoTemplate;
 
     public DelegationConnectorImpl(DelegationRepository repository,
                                    DelegationEntityMapper delegationMapper,
-                                   MongoTemplate mongoTemplate,
-                                   DelegationInstitutionMapper delegationInstitutionMapper) {
+                                   MongoTemplate mongoTemplate) {
         this.repository = repository;
         this.delegationMapper = delegationMapper;
         this.mongoTemplate = mongoTemplate;
-        this.delegationInstitutionMapper = delegationInstitutionMapper;
     }
 
     @Override
@@ -78,18 +70,21 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
         if (Objects.nonNull(from)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.from.name()).is(from));
+            if(Objects.nonNull(taxCode)) {
+                criterias.add(Criteria.where(DelegationEntity.Fields.toTaxCode.name()).is(taxCode));
+            }
         }
         if (Objects.nonNull(to)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.to.name()).is(to));
+            if(Objects.nonNull(taxCode)) {
+                criterias.add(Criteria.where(DelegationEntity.Fields.fromTaxCode.name()).is(taxCode));
+            }
         }
         if (Objects.nonNull(productId)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.productId.name()).is(productId));
         }
         if (Objects.nonNull(search)) {
             criterias.add(Criteria.where(DelegationEntity.Fields.institutionFromName.name()).regex("(?i)" + Pattern.quote(search)));
-        }
-        if (Objects.nonNull(taxCode)) {
-            criterias.add(Criteria.where(DelegationEntity.Fields.fromTaxCode.name()).is(taxCode));
         }
         return criterias;
     }
@@ -131,18 +126,6 @@ public class DelegationConnectorImpl implements DelegationConnector {
 
         PageInfo pageInfo = new PageInfo(result.getSize(), result.getNumber(), result.getTotalElements(), result.getTotalPages());
         return new DelegationWithPagination(delegations, pageInfo);
-    }
-
-    private static GraphLookupOperation.GraphLookupOperationBuilder createInstitutionGraphLookupOperationBuilder(String from) {
-        return Aggregation.graphLookup(INSTITUTION)
-                .startWith(Objects.nonNull(from) ? "to" : "from")
-                .connectFrom(Objects.nonNull(from) ? "to" : "from")
-                .connectTo("_id").maxDepth(1);
-    }
-
-    private static MatchOperation getMatchTaxCodeOperation(String taxCode) {
-        Criteria taxCodeCriteria = Criteria.where("institutions." + InstitutionEntity.Fields.taxCode.name()).is(taxCode);
-        return new MatchOperation(new Criteria().andOperator(taxCodeCriteria));
     }
 
     @Override

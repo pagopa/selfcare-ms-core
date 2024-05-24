@@ -25,7 +25,6 @@
     import java.util.List;
     import java.util.Objects;
     import java.util.Optional;
-    import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/delegations", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -112,8 +111,8 @@ public class DelegationController {
             throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
         return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, search, taxCode, order, page, size).stream()
-                .map(delegationMapper::toDelegationResponse)
-                .collect(Collectors.toList()));
+                .map(delegation -> delegationMapper.toDelegationResponseGet(delegation, brokerId))
+                .toList());
     }
 
     /**

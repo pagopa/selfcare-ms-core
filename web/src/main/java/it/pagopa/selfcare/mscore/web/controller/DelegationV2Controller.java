@@ -84,7 +84,10 @@
 
             DelegationWithPagination delegationWithPagination = delegationService.getDelegationsV2(delegationParameters);
 
-            DelegationWithPaginationResponse response = new DelegationWithPaginationResponse(delegationWithPagination.getDelegations().stream().map(delegationMapper::toDelegationResponse).toList(), delegationWithPagination.getPageInfo());
+            DelegationWithPaginationResponse response = new DelegationWithPaginationResponse(
+                    delegationWithPagination.getDelegations().stream().map(
+                            delegation -> delegationMapper.toDelegationResponseGet(delegation, brokerId))
+                            .toList(), delegationWithPagination.getPageInfo());
 
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }
