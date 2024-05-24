@@ -16,6 +16,7 @@ public interface DelegationMapper {
 
     @Mapping(source = "from", target = "institutionId")
     @Mapping(source = "to", target = "brokerId")
+    @Mapping(source = "fromTaxCode", target = "taxCode")
     @Mapping(source = "institutionFromName", target = "institutionName")
     @Mapping(source = "institutionToName", target = "brokerName")
     @Mapping(source = "institutionFromRootName", target = "institutionRootName")
