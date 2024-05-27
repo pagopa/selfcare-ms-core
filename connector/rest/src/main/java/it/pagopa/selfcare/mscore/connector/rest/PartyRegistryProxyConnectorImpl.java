@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.connector.rest;
 
 import feign.FeignException;
+import io.github.resilience4j.retry.annotation.Retry;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
@@ -30,6 +31,7 @@ import static it.pagopa.selfcare.mscore.constant.CustomError.CREATE_INSTITUTION_
 @Service
 public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnector {
 
+    public static final String CODE_IS_REQUIRED = "Code is required";
     private final PartyRegistryProxyRestClient restClient;
     private final AooMapper aooMapper;
     private final UoMapper uoMapper;
@@ -137,9 +139,10 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     }
 
     @Override
+    @Retry(name = "retryTimeout")
     public GeographicTaxonomies getExtByCode(String code) {
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getExtByCode code = {}", code);
-        Assert.hasText(code, "Code is required");
+        Assert.hasText(code, CODE_IS_REQUIRED);
         GeographicTaxonomiesResponse result = restClient.getExtByCode(code);
         log.debug(LogUtils.CONFIDENTIAL_MARKER, "getExtByCode result = {}", result);
         return toGeoTaxonomies(result);
@@ -148,7 +151,7 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     @Override
     public AreaOrganizzativaOmogenea getAooById(String aooId) {
         log.debug("getAooById id = {}", aooId);
-        Assert.hasText(aooId, "Code is required");
+        Assert.hasText(aooId, CODE_IS_REQUIRED);
         AooResponse result = restClient.getAooById(aooId);
         log.debug("getAooById id = {}", aooId);
         return aooMapper.toEntity(result);
@@ -157,7 +160,7 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
     @Override
     public UnitaOrganizzativa getUoById(String uoId) {
         log.debug("getUoById id = {}", uoId);
-        Assert.hasText(uoId, "Code is required");
+        Assert.hasText(uoId, CODE_IS_REQUIRED);
         UoResponse result = restClient.getUoById(uoId);
         log.debug("getUoById id = {}", uoId);
         return uoMapper.toEntity(result);

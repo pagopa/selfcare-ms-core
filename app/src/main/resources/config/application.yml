@@ -49,3 +49,12 @@ core:
     type: ${CORE_USER_EVENT_SERVICE_TYPE:ignore}
   contract-event-service:
     type: ${CORE_CONTRACT_EVENT_SERVICE_TYPE:ignore}
+  resilience4j:
+    retry:
+      retry-aspect-order: 1
+      instances:
+        retryTimeout:
+          max-attempts: 3
+          wait-duration: 5s
+          retry-exceptions:
+            - feign.RetryableException
