@@ -74,9 +74,11 @@ class DelegationServiceImplTest {
         Institution institutionTo = new Institution();
         institutionTo.setId("idTo");
         institutionTo.setTaxCode("taxCodeTo");
+        institutionTo.setInstitutionType(InstitutionType.PA);
         Institution institutionFrom = new Institution();
         institutionTo.setId("idFrom");
         institutionTo.setTaxCode("taxCodeFrom");
+        institutionTo.setInstitutionType(InstitutionType.PT);
         when(delegationConnector.save(dummyDelegationProdIo)).thenAnswer(arg ->arg.getArguments()[0]);
         when(institutionService.retrieveInstitutionById(dummyDelegationProdIo.getFrom())).thenReturn(institutionFrom);
         when(institutionService.retrieveInstitutionById(dummyDelegationProdIo.getTo())).thenReturn(institutionTo);
@@ -89,6 +91,8 @@ class DelegationServiceImplTest {
         assertEquals(dummyDelegationProdIo.getId(), response.getId());
         assertEquals(institutionTo.getTaxCode(), response.getToTaxCode());
         assertEquals(institutionFrom.getTaxCode(), response.getFromTaxCode());
+        assertEquals(institutionTo.getInstitutionType(), response.getBrokerType());
+        assertEquals(institutionFrom.getInstitutionType(), response.getInstitutionType());
     }
 
     /**
@@ -128,7 +132,7 @@ class DelegationServiceImplTest {
         Institution institutionFrom = new Institution();
         institutionFrom.setId("from");
         institutionFrom.setTaxCode("taxCodeFrom");
-        when(delegationConnector.findAndActivate(institutionFrom.getId(), institutionTo.getId(), dummyDelegationProdPagopa.getProductId())).thenReturn(dummyDelegationProdPagopa);;
+        when(delegationConnector.findAndActivate(institutionFrom.getId(), institutionTo.getId(), dummyDelegationProdPagopa.getProductId())).thenReturn(dummyDelegationProdPagopa);
         doNothing().when(mailNotificationService).sendMailForDelegation(any(), any(), any());
         when(institutionService.getInstitutions(dummyDelegationProdPagopa.getTo(), null)).thenReturn(List.of(institutionTo));
         doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
@@ -312,6 +316,8 @@ class DelegationServiceImplTest {
         assertEquals(dummyDelegationTaxCode.getId(), response.getId());
         assertEquals(institutionTo.getTaxCode(), response.getToTaxCode());
         assertEquals(institutionFrom.getTaxCode(), response.getFromTaxCode());
+        assertEquals(institutionTo.getInstitutionType(), response.getInstitutionType());
+        assertEquals(institutionFrom.getInstitutionType(), response.getBrokerType());
     }
 
     @Test
