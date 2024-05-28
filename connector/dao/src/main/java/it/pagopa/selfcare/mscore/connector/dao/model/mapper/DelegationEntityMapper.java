@@ -12,8 +12,12 @@ import java.util.UUID;
 public interface DelegationEntityMapper {
 
     @Mapping(target = "id", defaultExpression = "java(UUID.randomUUID().toString())")
+    @Mapping(target = "toType", source = "brokerType")
+    @Mapping(target = "fromType", source = "institutionType")
     DelegationEntity convertToDelegationEntity(Delegation delegation);
 
+    @Mapping(target = "brokerType", source = "toType")
+    @Mapping(target = "institutionType", source = "fromType")
     Delegation convertToDelegation(DelegationEntity entity);
 
 }

@@ -111,7 +111,7 @@ public class DelegationController {
             throw new InvalidRequestException("institutionId or brokerId must not be null!!", GenericError.GENERIC_ERROR.getCode());
 
         return ResponseEntity.status(HttpStatus.OK).body(delegationService.getDelegations(institutionId, brokerId, productId, search, taxCode, order, page, size).stream()
-                .map(delegation -> delegationMapper.toDelegationResponseGet(delegation, brokerId))
+                .map(delegationMapper::toDelegationResponseGet)
                 .toList());
     }
 
