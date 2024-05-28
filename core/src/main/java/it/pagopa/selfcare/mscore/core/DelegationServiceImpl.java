@@ -100,6 +100,7 @@ public class DelegationServiceImpl implements DelegationService {
                                 INSTITUTION_TAX_CODE_NOT_FOUND.getCode())
                         ));
         delegation.setToTaxCode(partner.getTaxCode());
+        delegation.setBrokerType(partner.getInstitutionType());
         delegation.setTo(partner.getId());
 
         /*
@@ -107,6 +108,7 @@ public class DelegationServiceImpl implements DelegationService {
          */
         Institution institutionFrom = institutionService.retrieveInstitutionById(delegation.getFrom());
         delegation.setFromTaxCode(institutionFrom.getTaxCode());
+        delegation.setInstitutionType(institutionFrom.getInstitutionType());
     }
 
     private void setTaxCodesByInstitutionIds(Delegation delegation){
@@ -117,7 +119,10 @@ public class DelegationServiceImpl implements DelegationService {
         Institution institutionFrom = institutionService.retrieveInstitutionById(delegation.getFrom());
 
         delegation.setToTaxCode(institutionTo.getTaxCode());
+        delegation.setBrokerType(institutionTo.getInstitutionType());
+
         delegation.setFromTaxCode(institutionFrom.getTaxCode());
+        delegation.setInstitutionType(institutionFrom.getInstitutionType());
     }
 
     @Override
@@ -129,13 +134,13 @@ public class DelegationServiceImpl implements DelegationService {
             If we call getInstitutions by empty subunitCode parameter, we have to filter retrieved list for institution
             with blank subunitCode field, otherwise we take first element returned by api.
         */
-        String partnerIdentifier = institutionsTo.stream()
+        Institution partner = institutionsTo.stream()
                 .filter(institution -> StringUtils.hasText(delegation.getToSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
                 .findFirst()
-                .map(Institution::getId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
                         INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
-        delegation.setTo(partnerIdentifier);
+        delegation.setTo(partner.getId());
+        delegation.setBrokerType(partner.getInstitutionType());
 
         // TODO: remove filter when getInstitutions API will be fixed.
         /*
@@ -143,13 +148,13 @@ public class DelegationServiceImpl implements DelegationService {
             with blank subunitCode field, otherwise we take first element returned by api.
         */
         List<Institution> institutionsFrom = institutionService.getInstitutions(delegation.getFromTaxCode(), delegation.getFromSubunitCode());
-        String from = institutionsFrom.stream()
+        Institution from = institutionsFrom.stream()
                 .filter(institution -> StringUtils.hasText(delegation.getFromSubunitCode()) || !StringUtils.hasText(institution.getSubunitCode()))
                 .findFirst()
-                .map(Institution::getId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
                         INSTITUTION_TAX_CODE_NOT_FOUND.getCode()));
-        delegation.setFrom(from);
+        delegation.setFrom(from.getId());
+        delegation.setInstitutionType(from.getInstitutionType());
 
         return checkIfExistsAndSaveDelegation(delegation);
     }

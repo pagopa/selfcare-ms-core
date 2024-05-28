@@ -86,7 +86,7 @@
 
             DelegationWithPaginationResponse response = new DelegationWithPaginationResponse(
                     delegationWithPagination.getDelegations().stream().map(
-                            delegation -> delegationMapper.toDelegationResponseGet(delegation, brokerId))
+                            delegationMapper::toDelegationResponseGet)
                             .toList(), delegationWithPagination.getPageInfo());
 
             return ResponseEntity.status(HttpStatus.OK).body(response);
