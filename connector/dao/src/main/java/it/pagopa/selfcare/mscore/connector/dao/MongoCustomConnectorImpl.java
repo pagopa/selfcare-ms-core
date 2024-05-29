@@ -1,12 +1,16 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.aggregation.*;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.GraphLookupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
@@ -94,5 +98,10 @@ public class MongoCustomConnectorImpl implements MongoCustomConnector {
 
     private void checkIfExternalIdIsPresent(UserInstitutionFilter filter, GraphLookupOperation.GraphLookupOperationBuilder graphLookupOperation) {
         graphLookupOperation.restrict(Criteria.where("externalId").is(filter.getExternalId()));
+    }
+
+    @Override
+    public <O> UpdateResult updateMulti(Query query, UpdateDefinition updateDefinition, Class<O> outputType){
+        return mongoOperations.updateMulti(query, updateDefinition, outputType);
     }
 }

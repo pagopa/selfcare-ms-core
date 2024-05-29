@@ -140,6 +140,7 @@ public class InstitutionMapperCustom {
         InstitutionUpdate institutionUpdate = new InstitutionUpdate();
         institutionUpdate.setDescription(institutionPut.getDescription());
         institutionUpdate.setDigitalAddress(institutionPut.getDigitalAddress());
+        institutionUpdate.setParentDescription(institutionPut.getParentDescription());
         institutionUpdate.setGeographicTaxonomies(Optional.ofNullable(institutionPut.getGeographicTaxonomyCodes())
                         .map(geoTaxonomiesCodes -> geoTaxonomiesCodes.stream()
                                 .map(code -> new InstitutionGeographicTaxonomies(code, null))

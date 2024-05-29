@@ -1,15 +1,19 @@
 package it.pagopa.selfcare.mscore.connector.dao.model.mapper;
 
 import it.pagopa.selfcare.mscore.connector.dao.model.InstitutionEntity;
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.*;
-import it.pagopa.selfcare.mscore.constant.Origin;
-import it.pagopa.selfcare.mscore.model.institution.*;
+import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
+import it.pagopa.selfcare.mscore.model.institution.DataProtectionOfficer;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionGeographicTaxonomies;
+import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
+import it.pagopa.selfcare.mscore.model.institution.PaymentServiceProvider;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.query.Update;
 
-import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.NONE)
@@ -34,6 +38,7 @@ public class InstitutionMapperHelper {
             response.put(InstitutionUpdate.Fields.institutionType.name(), institutionUpdate.getInstitutionType().name());
         }
         response.put(InstitutionUpdate.Fields.description.name(), institutionUpdate.getDescription());
+        response.put(InstitutionUpdate.Fields.parentDescription.name(), institutionUpdate.getParentDescription());
         response.put(InstitutionUpdate.Fields.digitalAddress.name(), institutionUpdate.getDigitalAddress());
         response.put(InstitutionUpdate.Fields.address.name(), institutionUpdate.getAddress());
         response.put(InstitutionUpdate.Fields.taxCode.name(), institutionUpdate.getTaxCode());
@@ -44,7 +49,7 @@ public class InstitutionMapperHelper {
         response.put(InstitutionUpdate.Fields.supportEmail.name(), institutionUpdate.getSupportEmail());
         response.put(InstitutionUpdate.Fields.supportPhone.name(), institutionUpdate.getSupportPhone());
         response.put(InstitutionUpdate.Fields.imported.name(), institutionUpdate.isImported());
-        response.put(InstitutionUpdate.Fields.delegation.name(), institutionUpdate.isDelegation());
+        response.put(InstitutionUpdate.Fields.delegation.name(), institutionUpdate.getDelegation());
 
         if(institutionUpdate.getPaymentServiceProvider() != null) {
             response.put(constructPaymentInnerField(PaymentServiceProvider.Fields.abiCode.name()),

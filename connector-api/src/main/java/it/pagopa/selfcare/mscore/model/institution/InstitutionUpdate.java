@@ -31,5 +31,6 @@ public class InstitutionUpdate {
     private String ivassCode;
     private boolean imported;
     private AdditionalInformations additionalInformations;
-    private boolean delegation;
+    private Boolean delegation;
+    private String parentDescription;
 }
