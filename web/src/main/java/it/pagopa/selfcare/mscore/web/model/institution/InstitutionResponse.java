@@ -29,6 +29,7 @@ public class InstitutionResponse {
     private String city;
     private String county;
     private String country;
+    private String istatCode;
     private List<GeoTaxonomies> geographicTaxonomies;
     private List<AttributesResponse> attributes;
     private List<OnboardedProductResponse> onboarding;
