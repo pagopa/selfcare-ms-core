@@ -158,7 +158,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
     @Override
     public void updateDelegation(Institution institutionUpdate) {
 
-        if(institutionUpdate.isDelegation()) {
+        if (institutionUpdate.isDelegation()) {
             Update updateFrom = new Update();
             Query queryFrom = Query.query(Criteria.where(DelegationEntity.Fields.to.name()).is(institutionUpdate.getId()));
             updateFrom.set(DelegationEntity.Fields.institutionToName.name(), institutionUpdate.getDescription());
@@ -168,7 +168,7 @@ public class DelegationConnectorImpl implements DelegationConnector {
         Update updateTo = new Update();
         Query queryTo = Query.query(Criteria.where(DelegationEntity.Fields.from.name()).is(institutionUpdate.getId()));
         updateTo.set(DelegationEntity.Fields.institutionFromName.name(), institutionUpdate.getDescription());
-        if(Objects.nonNull(institutionUpdate.getParentDescription())) {
+        if (Objects.nonNull(institutionUpdate.getParentDescription())) {
             updateTo.set(DelegationEntity.Fields.institutionFromRootName.name(), institutionUpdate.getParentDescription());
         }
         repository.updateMulti(queryTo, updateTo, DelegationEntity.class);

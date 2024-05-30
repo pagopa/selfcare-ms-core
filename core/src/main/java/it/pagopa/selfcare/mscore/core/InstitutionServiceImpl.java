@@ -332,7 +332,6 @@ public class InstitutionServiceImpl implements InstitutionService {
             }
         }
         return updatedInstitution;
-
     }
 
     private void rollbackInstitution(Institution institution) {
