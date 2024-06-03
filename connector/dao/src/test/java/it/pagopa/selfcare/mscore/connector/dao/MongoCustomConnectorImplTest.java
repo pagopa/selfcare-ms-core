@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.dao;
 
+import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionAggregation;
 import it.pagopa.selfcare.mscore.model.aggregation.UserInstitutionFilter;
 import org.junit.jupiter.api.Assertions;
@@ -123,6 +124,15 @@ class MongoCustomConnectorImplTest {
         filter.setExternalId("externalId");
         Assertions.assertDoesNotThrow(() -> mongoCustomConnector.findUserInstitutionAggregation(filter, UserInstitutionAggregation.class));
 
+    }
+
+    @Test
+    void updateMulti() {
+        UpdateResult updateResult = mock(UpdateResult.class);
+        when(mongoOperations.updateMulti(any(), any(), (Class<Object>) any())).thenReturn(updateResult);
+        Query query = new Query();
+        UpdateDefinition updateDefinition = new Update();
+        assertNotNull(mongoCustomConnector.updateMulti(query, updateDefinition, Object.class));
     }
 
 }

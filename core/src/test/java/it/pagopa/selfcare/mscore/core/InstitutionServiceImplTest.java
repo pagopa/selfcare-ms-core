@@ -3,8 +3,10 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserApiConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
@@ -47,6 +49,12 @@ import static org.mockito.Mockito.*;
 class InstitutionServiceImplTest {
     @Mock
     private InstitutionConnector institutionConnector;
+
+    @Mock
+    private DelegationConnector delegationConnector;
+
+    @Mock
+    private UserApiConnector userApiConnector;
 
     @InjectMocks
     private InstitutionServiceImpl institutionServiceImpl;
@@ -843,8 +851,111 @@ class InstitutionServiceImplTest {
 
     @Test
     void testUpdateInstitutionDescription() {
+        //given
+        final String institutionId = "id";
+
+        Institution updatedInstitution = new Institution();
+        updatedInstitution.setId(institutionId);
+        updatedInstitution.setDescription("newDesc");
+        updatedInstitution.setParentDescription("newRootName");
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription("newDesc");
+        institutionUpdate.setParentDescription("newRootName");
+
+        //when
+        when(institutionConnector.findById(institutionId)).thenReturn(new Institution());
+        when(institutionConnector.findAndUpdate(institutionId, null, Collections.emptyList(), institutionUpdate)).thenReturn(updatedInstitution);
+
+        //then
+        Institution result = institutionServiceImpl.updateInstitution(institutionId, institutionUpdate, "userId");
+        verify(delegationConnector).updateDelegation(updatedInstitution);
+        verify(userApiConnector).updateUserInstitution(institutionId, institutionUpdate);
+        assertEquals(result, updatedInstitution);
+    }
+
+    @Test
+    void testUpdateInstitutionDescription_updateDelegationsFails() {
+        //given
+        final String institutionId = "id";
+
+        Institution outdatedInstitution = new Institution();
+        outdatedInstitution.setId(institutionId);
+        outdatedInstitution.setDescription("oldDesc");
+        outdatedInstitution.setParentDescription("oldRootName");
+
+        Institution updatedInstitution = new Institution();
+        updatedInstitution.setId(institutionId);
+        updatedInstitution.setDescription("newDesc");
+        updatedInstitution.setParentDescription("newRootName");
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription("newDesc");
+        institutionUpdate.setParentDescription("newRootName");
+
+        InstitutionUpdate institutionRollback = new InstitutionUpdate();
+        institutionRollback.setDescription("oldDesc");
+        institutionRollback.setParentDescription("oldRootName");
+
+        //when
+        when(institutionConnector.findById(institutionId)).thenReturn(outdatedInstitution);
+        when(institutionConnector.findAndUpdate(institutionId, null, Collections.emptyList(), institutionUpdate)).thenReturn(updatedInstitution);
+        doThrow(new RuntimeException()).when(delegationConnector).updateDelegation(updatedInstitution);
+
+        Executable executable = () -> institutionServiceImpl.updateInstitution(institutionId, institutionUpdate, "userId");
+        // Then
+        assertThrows(MsCoreException.class, executable);
+        verify(institutionConnector).findAndUpdate(institutionId,null, null, institutionRollback);
+        verifyNoInteractions(userApiConnector);
+    }
+
+    @Test
+    void testUpdateInstitutionDescription_updateUserInstitutionFails() {
+        //given
+        final String institutionId = "id";
+
+        Institution outdatedInstitution = new Institution();
+        outdatedInstitution.setId(institutionId);
+        outdatedInstitution.setDescription("oldDesc");
+        outdatedInstitution.setParentDescription("oldRootName");
+
+        Institution updatedInstitution = new Institution();
+        updatedInstitution.setId(institutionId);
+        updatedInstitution.setDescription("newDesc");
+        updatedInstitution.setParentDescription("newRootName");
+
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription("newDesc");
+        institutionUpdate.setParentDescription("newRootName");
+
+        InstitutionUpdate institutionRollback = new InstitutionUpdate();
+        institutionRollback.setDescription("oldDesc");
+        institutionRollback.setParentDescription("oldRootName");
+
+        //when
+        when(institutionConnector.findById(institutionId)).thenReturn(outdatedInstitution);
+        when(institutionConnector.findAndUpdate(institutionId, null, Collections.emptyList(), institutionUpdate)).thenReturn(updatedInstitution);
+        doThrow(new RuntimeException()).when(userApiConnector).updateUserInstitution(institutionId, institutionUpdate);
+
+        Executable executable = () -> institutionServiceImpl.updateInstitution(institutionId, institutionUpdate, "userId");
+
+        //then
+        assertThrows(MsCoreException.class, executable);
+        verify(institutionConnector).findAndUpdate(institutionId,null, null, institutionRollback);
+        verify(delegationConnector).updateDelegation(outdatedInstitution);
+    }
+
+    @Test
+    void updateInstitution_noDescription(){
+        //when
+        when(institutionConnector.findById(any())).thenReturn(new Institution());
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(new Institution());
-        assertDoesNotThrow(() -> institutionServiceImpl.updateInstitution("42", new InstitutionUpdate(), "userId"));
+
+        institutionServiceImpl.updateInstitution("id", new InstitutionUpdate(), "userId");
+
+        // Then
+        verifyNoInteractions(delegationConnector);
+        verifyNoInteractions(userApiConnector);
     }
 
     @Test

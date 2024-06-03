@@ -13,6 +13,7 @@ public enum GenericError {
     CREATE_DELEGATION_ERROR("001-0027", "Error while creating requested delegation"),
     SEND_MAIL_FOR_DELEGATION_ERROR("002-0027", "Error during send mail for delegation"),
     DELETE_DELEGATION_ERROR("0003-0027", "Error while deleting delegation"),
+    UPDATE_DELEGATION_ERROR("004-0027", "Error while updating delegation"),
     ONBOARDING_VERIFICATION_ERROR("0015", "Error while verifying onboarding"),
     GETTING_ONBOARDING_INFO_ERROR("0016", "Error while getting onboarding info"),
     GET_PRODUCTS_ERROR("0031", "Error while getting products"),
@@ -59,6 +60,7 @@ public enum GenericError {
     GET_INSTITUTIONS_REQUEST_ERROR("0054", "Invalid request parameters sent. Allowed filters combinations taxCode and subunit or origin and originId"),
     VERIFY_USER_ERROR("0000", "Error while searching institutions related to given productId"),
     GET_USER_ERROR("0000", "Error while searching user given UserID"),
+    UPDATE_USER_INSTITUTION_ERROR("0000", "Error while updating InstitutionUser for id %s"),
     GENERIC_ERROR("0000", "Generic Error");
     private final String code;
     private final String detail;

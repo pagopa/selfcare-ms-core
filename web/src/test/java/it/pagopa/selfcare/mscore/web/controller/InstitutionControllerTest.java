@@ -1143,6 +1143,7 @@ class InstitutionControllerTest {
         InstitutionPut pgInstitutionPut = new InstitutionPut();
         pgInstitutionPut.setDescription("desc");
         pgInstitutionPut.setDigitalAddress("digitalAddress");
+        pgInstitutionPut.setParentDescription("parentDesc");
         when(institutionService.updateInstitution(any(), any(), any())).thenReturn(new Institution());
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.put("/institutions/42")
                 .contentType(MediaType.APPLICATION_JSON)

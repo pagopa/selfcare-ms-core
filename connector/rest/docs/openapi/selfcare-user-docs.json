@@ -1,7 +1,7 @@
 {
   "openapi" : "3.0.3",
   "info" : {
-    "title" : "user-ms API",
+    "title" : "User API",
     "version" : "1.0.0"
   },
   "servers" : [ {
@@ -12,16 +12,14 @@
     "description" : "Auto generated value"
   } ],
   "paths" : {
-    "/authorize/{institutionId}" : {
+    "/authorize" : {
       "get" : {
         "tags" : [ "User Permission Controller" ],
         "summary" : "Get permission for a user in an institution",
         "parameters" : [ {
           "name" : "institutionId",
-          "in" : "path",
-          "required" : true,
+          "in" : "query",
           "schema" : {
-            "minLength" : 1,
             "type" : "string"
           }
         }, {
@@ -47,6 +45,46 @@
                   "type" : "boolean"
                 }
               }
+            }
+          },
+          "403" : {
+            "description" : "Not Allowed"
+          },
+          "401" : {
+            "description" : "Not Authorized"
+          }
+        },
+        "security" : [ {
+          "SecurityScheme" : [ ]
+        } ]
+      }
+    },
+    "/institutions/{institutionId}" : {
+      "put" : {
+        "tags" : [ "Institution Controller" ],
+        "summary" : "The API updates the description in all occurrences of userInstitution, given a certain institutionId.",
+        "parameters" : [ {
+          "name" : "institutionId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateDescriptionDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : { }
             }
           },
           "403" : {
@@ -661,6 +699,12 @@
             "type" : "string"
           }
         }, {
+          "name" : "productRole",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
           "name" : "status",
           "in" : "query",
           "required" : true,
@@ -1129,7 +1173,7 @@
         "type" : "string"
       },
       "Product" : {
-        "required" : [ "productId", "role" ],
+        "required" : [ "productId", "role", "productRoles" ],
         "type" : "object",
         "properties" : {
           "productId" : {
@@ -1151,7 +1195,7 @@
         }
       },
       "Product1" : {
-        "required" : [ "productId", "role" ],
+        "required" : [ "productId", "role", "productRoles" ],
         "type" : "object",
         "properties" : {
           "productId" : {
@@ -1185,7 +1229,21 @@
           }
         }
       },
+      "UpdateDescriptionDto" : {
+        "required" : [ "institutionDescription" ],
+        "type" : "object",
+        "properties" : {
+          "institutionDescription" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "institutionRootName" : {
+            "type" : "string"
+          }
+        }
+      },
       "UpdateUserRequest" : {
+        "required" : [ "email" ],
         "type" : "object",
         "properties" : {
           "name" : {

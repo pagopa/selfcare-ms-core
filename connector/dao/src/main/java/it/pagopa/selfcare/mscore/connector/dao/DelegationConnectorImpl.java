@@ -9,6 +9,7 @@ import it.pagopa.selfcare.mscore.model.delegation.Delegation;
 import it.pagopa.selfcare.mscore.model.delegation.DelegationWithPagination;
 import it.pagopa.selfcare.mscore.model.delegation.GetDelegationParameters;
 import it.pagopa.selfcare.mscore.model.delegation.PageInfo;
+import it.pagopa.selfcare.mscore.model.institution.Institution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -153,4 +154,27 @@ public class DelegationConnectorImpl implements DelegationConnector {
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(true);
         return delegationMapper.convertToDelegation(repository.findAndModify(query, update, findAndModifyOptions, DelegationEntity.class));
     }
+
+    @Override
+    public void updateDelegation(Institution institutionUpdate) {
+
+        // If institution own some delegations, we also update "to" reference
+        // isDelegation is true if institution own some delegations
+        if (institutionUpdate.isDelegation()) {
+            Update updateFrom = new Update();
+            Query queryFrom = Query.query(Criteria.where(DelegationEntity.Fields.to.name()).is(institutionUpdate.getId()));
+            updateFrom.set(DelegationEntity.Fields.institutionToName.name(), institutionUpdate.getDescription());
+            repository.updateMulti(queryFrom, updateFrom, DelegationEntity.class);
+        }
+
+        Update updateTo = new Update();
+        Query queryTo = Query.query(Criteria.where(DelegationEntity.Fields.from.name()).is(institutionUpdate.getId()));
+        updateTo.set(DelegationEntity.Fields.institutionFromName.name(), institutionUpdate.getDescription());
+        if (Objects.nonNull(institutionUpdate.getParentDescription())) {
+            updateTo.set(DelegationEntity.Fields.institutionFromRootName.name(), institutionUpdate.getParentDescription());
+        }
+        repository.updateMulti(queryTo, updateTo, DelegationEntity.class);
+
+    }
+
 }

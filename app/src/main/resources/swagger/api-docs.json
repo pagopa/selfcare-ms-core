@@ -3233,6 +3233,9 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "parentDescription" : {
+            "type" : "string"
           }
         }
       },
@@ -3512,6 +3515,9 @@
             "enum" : [ "AS", "CON", "GSP", "PA", "PG", "PSP", "PT", "REC", "SA", "SCP" ]
           },
           "ivassCode" : {
+            "type" : "string"
+          },
+          "parentDescription" : {
             "type" : "string"
           },
           "paymentServiceProvider" : {

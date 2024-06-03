@@ -12,8 +12,10 @@ import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.model.delegation.*;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -305,5 +307,44 @@ class DelegationConnectorImplTest {
                 .page(page)
                 .size(size)
                 .build();
+    }
+
+    @Test
+    void updateDelegation() {
+
+        String description = "description";
+        String rootName = "rootName";
+        String institutionId = "institutionId";
+
+        Institution institutionUpdate = new Institution();
+        institutionUpdate.setId(institutionId);
+        institutionUpdate.setDescription(description);
+        institutionUpdate.setParentDescription(rootName);
+        institutionUpdate.setDelegation(true);
+
+        //when
+        final Executable executable = () -> delegationConnectorImpl.updateDelegation(institutionUpdate);
+
+        Assertions.assertDoesNotThrow(executable);
+        verify(delegationRepository, times(2)).updateMulti(any(), any(), any());
+
+    }
+
+    @Test
+    void updateDelegation_noDelegation() {
+
+        String description = "description";
+        String institutionId = "institutionId";
+
+        Institution institutionUpdate = new Institution();
+        institutionUpdate.setId(institutionId);
+        institutionUpdate.setDescription(description);
+
+        //when
+        final Executable executable = () -> delegationConnectorImpl.updateDelegation(institutionUpdate);
+
+        Assertions.assertDoesNotThrow(executable);
+        verify(delegationRepository, times(1)).updateMulti(any(), any(), any());
+
     }
 }

@@ -2,8 +2,10 @@ package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
+import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
+import it.pagopa.selfcare.mscore.api.UserApiConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
@@ -20,17 +22,15 @@ import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
+import org.owasp.encoder.Encode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.CREATE_INSTITUTION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @Service
@@ -39,6 +39,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
     private final InstitutionConnector institutionConnector;
+    private final UserApiConnector userApiConnector;
+    private final DelegationConnector delegationConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final CoreConfig coreConfig;
     private final ContractEventNotificationService contractService;
@@ -48,6 +50,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
+                                  UserApiConnector userApiConnector, DelegationConnector delegationConnector,
                                   CoreConfig coreConfig,
                                   ContractEventNotificationService contractService,
                                   InstitutionMapper institutionMapper,
@@ -55,6 +58,8 @@ public class InstitutionServiceImpl implements InstitutionService {
                                   TokenMapper tokenMapper) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
+        this.userApiConnector = userApiConnector;
+        this.delegationConnector = delegationConnector;
         this.coreConfig = coreConfig;
         this.contractService = contractService;
         this.institutionMapper = institutionMapper;
@@ -304,9 +309,38 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId) {
+        Institution outdatedInstitution = institutionConnector.findById(institutionId);
+
         List<InstitutionGeographicTaxonomies> geographicTaxonomies = retrieveGeographicTaxonomies(institutionUpdate);
-        return institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
+        Institution updatedInstitution = institutionConnector.findAndUpdate(institutionId, null, geographicTaxonomies, institutionUpdate);
+
+        if(Objects.nonNull(institutionUpdate.getDescription())) {
+            try {
+                delegationConnector.updateDelegation(updatedInstitution);
+            } catch (Exception e) {
+                log.error(UPDATE_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
+                rollbackInstitution(outdatedInstitution);
+                throw new MsCoreException(PUT_INSTITUTION_ERROR.getMessage(), PUT_INSTITUTION_ERROR.getCode());
+            }
+            try {
+                userApiConnector.updateUserInstitution(institutionId, institutionUpdate);
+            } catch (Exception e) {
+                log.error(String.format(UPDATE_USER_INSTITUTION_ERROR.getMessage(), Encode.forJava(institutionId)) + ":", e.getMessage(), e);
+                rollbackInstitution(outdatedInstitution);
+                delegationConnector.updateDelegation(outdatedInstitution);
+                throw new MsCoreException(PUT_INSTITUTION_ERROR.getMessage(), PUT_INSTITUTION_ERROR.getCode());
+            }
+        }
+        return updatedInstitution;
     }
+
+    private void rollbackInstitution(Institution institution) {
+        InstitutionUpdate institutionUpdate = new InstitutionUpdate();
+        institutionUpdate.setDescription(institution.getDescription());
+        institutionUpdate.setParentDescription(institution.getParentDescription());
+        institutionConnector.findAndUpdate(institution.getId(), null, null,  institutionUpdate);
+    }
+
 
     @Override
     public void updateInstitutionDelegation(String institutionId, boolean delegation) {
