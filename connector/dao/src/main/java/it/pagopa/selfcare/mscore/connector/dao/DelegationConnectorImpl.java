@@ -158,6 +158,8 @@ public class DelegationConnectorImpl implements DelegationConnector {
     @Override
     public void updateDelegation(Institution institutionUpdate) {
 
+        // If institution own some delegations, we also update "to" reference
+        // isDelegation is true if institution own some delegations
         if (institutionUpdate.isDelegation()) {
             Update updateFrom = new Update();
             Query queryFrom = Query.query(Criteria.where(DelegationEntity.Fields.to.name()).is(institutionUpdate.getId()));
