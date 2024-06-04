@@ -3569,6 +3569,9 @@
             "type" : "string",
             "format" : "date-time"
           },
+          "isAggregator" : {
+            "type" : "boolean"
+          },
           "productId" : {
             "type" : "string"
           },
@@ -3665,6 +3668,9 @@
           "createdAt" : {
             "type" : "string",
             "format" : "date-time"
+          },
+          "isAggregator" : {
+            "type" : "boolean"
           },
           "pricingPlan" : {
             "type" : "string"

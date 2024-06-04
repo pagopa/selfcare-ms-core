@@ -17,4 +17,5 @@ public class OnboardedProductResponse {
     private BillingResponse billing;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private Boolean isAggregator;
 }
