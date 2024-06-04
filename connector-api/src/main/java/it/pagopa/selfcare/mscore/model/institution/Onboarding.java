@@ -19,4 +19,5 @@ public class Onboarding {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
+    private Boolean isAggregator;
 }
