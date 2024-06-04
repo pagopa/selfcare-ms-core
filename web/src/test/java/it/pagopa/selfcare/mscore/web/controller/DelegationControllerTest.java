@@ -12,6 +12,8 @@ import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -55,8 +57,9 @@ class DelegationControllerTest {
     /**
      * Method under test: {@link DelegationController#createDelegation(DelegationRequest)}
      */
-    @Test
-    void testCreateDelegation() throws Exception {
+    @ParameterizedTest
+    @EnumSource(value = DelegationType.class)
+    void testCreateDelegation(DelegationType delegationType) throws Exception {
 
         Delegation delegation = new Delegation();
         delegation.setId("id");
@@ -69,7 +72,7 @@ class DelegationControllerTest {
         delegationRequest.setInstitutionFromName("Test name");
         delegationRequest.setInstitutionToName("Test to name");
         delegationRequest.setProductId("productId");
-        delegationRequest.setType(DelegationType.PT);
+        delegationRequest.setType(delegationType);
         String content = (new ObjectMapper()).writeValueAsString(delegationRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/delegations")
