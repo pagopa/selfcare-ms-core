@@ -2815,7 +2815,7 @@
           },
           "type" : {
             "type" : "string",
-            "enum" : [ "AOO", "PT" ]
+            "enum" : [ "AOO", "EA", "PT" ]
           }
         }
       },
@@ -2846,7 +2846,7 @@
           },
           "type" : {
             "type" : "string",
-            "enum" : [ "AOO", "PT" ]
+            "enum" : [ "AOO", "EA", "PT" ]
           }
         }
       },
@@ -2898,7 +2898,7 @@
           },
           "type" : {
             "type" : "string",
-            "enum" : [ "AOO", "PT" ]
+            "enum" : [ "AOO", "EA", "PT" ]
           },
           "updatedAt" : {
             "type" : "string",

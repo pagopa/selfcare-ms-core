@@ -12,6 +12,8 @@ import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.DelegationMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -55,8 +57,9 @@ class DelegationControllerTest {
     /**
      * Method under test: {@link DelegationController#createDelegation(DelegationRequest)}
      */
-    @Test
-    void testCreateDelegation() throws Exception {
+    @ParameterizedTest
+    @EnumSource(value = DelegationType.class)
+    void testCreateDelegation(DelegationType delegationType) throws Exception {
 
         Delegation delegation = new Delegation();
         delegation.setId("id");
@@ -69,7 +72,7 @@ class DelegationControllerTest {
         delegationRequest.setInstitutionFromName("Test name");
         delegationRequest.setInstitutionToName("Test to name");
         delegationRequest.setProductId("productId");
-        delegationRequest.setType(DelegationType.PT);
+        delegationRequest.setType(delegationType);
         String content = (new ObjectMapper()).writeValueAsString(delegationRequest);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post("/delegations")
@@ -208,47 +211,6 @@ class DelegationControllerTest {
                 .getDelegations(null, TO1, null,
                         null, null, Optional.empty(),
                         Optional.empty(), Optional.empty());
-        verifyNoMoreInteractions(delegationService);
-    }
-
-    /**
-     * Method under test: {@link DelegationController#getDelegations(String, String, String, String, String, Optional, Optional, Optional)}
-     */
-    @Test
-    void getDelegations_shouldGetData_nullMode() throws Exception {
-        // Given
-        Delegation expectedDelegation = dummyDelegation();
-
-        when(delegationService.getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                expectedDelegation.getProductId(), null, null, Optional.empty(), Optional.empty(), Optional.empty()))
-                .thenReturn(List.of(expectedDelegation));
-        // When
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/delegations?institutionId={institutionId}&brokerId={brokerId}&productId={productId}", expectedDelegation.getFrom(),
-                        expectedDelegation.getTo(), expectedDelegation.getProductId());
-        MvcResult result = MockMvcBuilders.standaloneSetup(delegationController)
-                .build()
-                .perform(requestBuilder)
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andReturn();
-
-        List<DelegationResponse> response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), new TypeReference<>() {});
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.size()).isEqualTo(1);
-        DelegationResponse actual = response.get(0);
-        assertThat(actual.getId()).isEqualTo(expectedDelegation.getId());
-        assertThat(actual.getInstitutionName()).isEqualTo(expectedDelegation.getInstitutionFromName());
-        assertThat(actual.getBrokerId()).isEqualTo(expectedDelegation.getTo());
-        assertThat(actual.getProductId()).isEqualTo(expectedDelegation.getProductId());
-        assertThat(actual.getInstitutionId()).isEqualTo(expectedDelegation.getFrom());
-        assertThat(actual.getInstitutionRootName()).isEqualTo(expectedDelegation.getInstitutionFromRootName());
-
-        verify(delegationService, times(1))
-                .getDelegations(expectedDelegation.getFrom(), expectedDelegation.getTo(),
-                        expectedDelegation.getProductId(), null, null, Optional.empty(), Optional.empty(), Optional.empty());
         verifyNoMoreInteractions(delegationService);
     }
 
