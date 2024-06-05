@@ -20,7 +20,7 @@ public class InstitutionOnboardingRequest {
     private String contractPath;
     private String pricingPlan;
     private BillingRequest billing;
-
     private LocalDateTime activatedAt;
+    private Boolean isAggregator;
 
 }

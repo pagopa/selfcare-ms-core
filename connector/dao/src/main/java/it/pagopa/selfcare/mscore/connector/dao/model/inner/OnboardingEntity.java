@@ -21,4 +21,5 @@ public class OnboardingEntity {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
+    private Boolean isAggregator;
 }

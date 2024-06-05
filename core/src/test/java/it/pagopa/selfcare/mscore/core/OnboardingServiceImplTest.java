@@ -270,6 +270,7 @@ class OnboardingServiceImplTest {
         onboardingToPersist.setPricingPlan(pricingPlan);
         onboardingToPersist.setProductId(productId);
         onboardingToPersist.setBilling(billing);
+        onboardingToPersist.setIsAggregator(true);
 
         Institution institution = new Institution();
         institution.setId("institutionId");

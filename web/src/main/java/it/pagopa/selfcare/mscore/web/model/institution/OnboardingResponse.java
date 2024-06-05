@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.mscore.web.model.institution;
 
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.model.institution.Billing;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
@@ -18,4 +17,5 @@ public class OnboardingResponse {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
     private OffsetDateTime closedAt;
+    private Boolean isAggregator;
 }
