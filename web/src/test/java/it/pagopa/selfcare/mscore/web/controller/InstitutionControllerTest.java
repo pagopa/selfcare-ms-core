@@ -1237,9 +1237,6 @@ class InstitutionControllerTest {
         Integer pageMock = 0;
         Integer sizeMock = 2;
 
-        Institution institution = new Institution();
-        institution.setId("id");
-
         // When
         when(institutionService.getInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(institution));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/products/{productId}", productIdMock)
@@ -1251,7 +1248,9 @@ class InstitutionControllerTest {
                 .perform(requestBuilder);
         actualPerformResult
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
+                .andExpect(MockMvcResultMatchers.content()
+                        .string("{\"items\":[{\"id\":\"42\",\"externalId\":null,\"origin\":null,\"originId\":null,\"description\":\"description\",\"institutionType\":\"PG\",\"digitalAddress\":null,\"address\":null,\"zipCode\":null,\"taxCode\":null,\"onboardings\":{\"example\":{\"productId\":\"example\",\"tokenId\":\"tokenId\",\"status\":\"ACTIVE\",\"contract\":\"contract\",\"pricingPlan\":\"setPricingPlan\",\"billing\":{\"vatNumber\":\"example\",\"taxCodeInvoicing\":\"example\",\"recipientCode\":\"example\",\"publicServices\":false},\"createdAt\":null,\"updatedAt\":null,\"closedAt\":null,\"isAggregator\":true}},\"geographicTaxonomies\":null,\"attributes\":[{\"origin\":null,\"code\":\"code\",\"description\":\"description\"}],\"paymentServiceProvider\":null,\"dataProtectionOfficer\":null,\"rea\":null,\"shareCapital\":null,\"businessRegisterPlace\":null,\"supportEmail\":null,\"supportPhone\":null,\"imported\":false,\"subunitCode\":null,\"subunitType\":null,\"aooParentCode\":null,\"createdAt\":null,\"updatedAt\":null}]}"));;
         // Then
         verify(institutionService, times(1))
                 .getInstitutionsByProductId(productIdMock, pageMock, sizeMock);
