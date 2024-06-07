@@ -22,6 +22,9 @@
     "name" : "Delegation",
     "description" : "Delegation Controller"
   }, {
+    "name" : "Event",
+    "description" : "Queue Notification Controller"
+  }, {
     "name" : "External",
     "description" : "External Controller"
   }, {
@@ -33,9 +36,6 @@
   }, {
     "name" : "Onboarding",
     "description" : "Onboarding Controller"
-  }, {
-    "name" : "kafka",
-    "description" : "Queue Notification Controller"
   } ],
   "paths" : {
     "/delegations" : {
@@ -340,7 +340,7 @@
     },
     "/v2/delegations" : {
       "get" : {
-        "tags" : [ "Delegation", "external-v2", "support" ],
+        "tags" : [ "Delegation" ],
         "summary" : "Retrieve institution's delegations with pagination",
         "description" : "Retrieve institution's delegations with pagination",
         "operationId" : "getDelegationsUsingGET_1",
@@ -2393,7 +2393,7 @@
     },
     "/notification-event/contracts" : {
       "put" : {
-        "tags" : [ "kafka" ],
+        "tags" : [ "Event" ],
         "summary" : "resendContractsByInstitutionIdAndTokenId",
         "description" : "Function to send a specific onboarding using institutionId and tokenId ",
         "operationId" : "resendContractsByInstitutionIdAndTokenIdUsingPUT",
