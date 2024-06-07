@@ -3,7 +3,6 @@
     import io.swagger.annotations.Api;
     import io.swagger.annotations.ApiOperation;
     import io.swagger.annotations.ApiParam;
-    import io.swagger.v3.oas.annotations.tags.Tag;
     import it.pagopa.selfcare.mscore.constant.GenericError;
     import it.pagopa.selfcare.mscore.constant.Order;
     import it.pagopa.selfcare.mscore.core.DelegationService;
@@ -48,9 +47,6 @@
          * * Code: 404, Message: Institution data not found, DataType: Problem
          * * Code: 400, Message: Bad Request, DataType: Problem
          */
-        @Tag(name = "external-v2")
-        @Tag(name = "support")
-        @Tag(name = "Delegation")
         @ApiOperation(value = "${swagger.mscore.institutions.delegationsV2}", notes = "${swagger.mscore.institutions.delegationsv2}")
         @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
         public ResponseEntity<DelegationWithPaginationResponse> getDelegations(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
