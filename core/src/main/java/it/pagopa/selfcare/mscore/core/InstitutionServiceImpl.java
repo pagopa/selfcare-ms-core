@@ -228,6 +228,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
         return institutionConnector.findByExternalId(taxId)
                 .orElseGet(() -> createNewInstitution(taxId, description, existsInRegistry, selfCareUser));
+
     }
 
     private Institution createNewInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
