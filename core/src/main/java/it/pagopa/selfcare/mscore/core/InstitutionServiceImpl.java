@@ -226,16 +226,19 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
-        checkIfAlreadyExists(taxId);
+        return institutionConnector.findByExternalId(taxId)
+                .orElse(createNewInstitution(taxId, description, existsInRegistry, selfCareUser));
+    }
+
+    private Institution createNewInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
         Institution newInstitution = new Institution();
         newInstitution.setExternalId(taxId);
         newInstitution.setDescription(description);
         newInstitution.setInstitutionType(InstitutionType.PG);
         newInstitution.setTaxCode(taxId);
         newInstitution.setCreatedAt(OffsetDateTime.now());
-        newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
+        newInstitution.setOriginId(taxId);
 
-        //TODO: QUANDO SARA' DISPONIBILE IL SERVIZIO PUNTUALE PER CONOSCERE LA RAGIONE SOCIALE DATA LA PIVA SOSTITUIRE LA CHIAMATA
         if (existsInRegistry) {
             if (coreConfig.isInfoCamereEnable()) {
                 List<InstitutionByLegal> institutionByLegal = partyRegistryProxyConnector.getInstitutionsByLegal(selfCareUser.getFiscalCode());
