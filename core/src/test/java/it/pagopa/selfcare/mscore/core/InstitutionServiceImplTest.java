@@ -253,21 +253,42 @@ class InstitutionServiceImplTest {
      * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
      */
     @Test
-    void testCreatePgInstitution() {
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
-        assertThrows(ResourceConflictException.class,
-                () -> institutionServiceImpl.createPgInstitution("42", "42", true, mock(SelfCareUser.class)));
+    void testCreatePgInstitutionNotFoundInstitution() {
+        String taxId = "taxId";
+        Institution institution = new Institution();
+        institution.setTaxCode(taxId);
+        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.empty());
+        InstitutionByLegal institutionByLegal = new InstitutionByLegal();
+        institutionByLegal.setBusinessName("test name");
+        institutionByLegal.setBusinessTaxId(taxId);
+        when(partyRegistryProxyConnector.getInstitutionsByLegal(any())).thenReturn(List.of(institutionByLegal));
+        NationalRegistriesProfessionalAddress professionalAddress = new NationalRegistriesProfessionalAddress();
+        professionalAddress.setAddress("via di prova");
+        professionalAddress.setZipCode("00100");
+        when(partyRegistryProxyConnector.getLegalAddress(taxId)).thenReturn(professionalAddress);
+        when(institutionConnector.save(any())).thenReturn(institution);
+        when(coreConfig.isInfoCamereEnable()).thenReturn(true);
+        Institution response = institutionServiceImpl.createPgInstitution(taxId, "42", true, mock(SelfCareUser.class));
+        assertEquals(response.getTaxCode(), taxId);
         verify(institutionConnector).findByExternalId(any());
+        verify(institutionConnector).save(any());
     }
 
     /**
      * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
      */
     @Test
-    void testCreatePgInstitution3() {
-        when(institutionConnector.findByExternalId(any())).thenReturn(Optional.of(new Institution()));
-        assertThrows(ResourceConflictException.class,
-                () -> institutionServiceImpl.createPgInstitution("42", "42", true, mock(SelfCareUser.class)));
+    void testCreatePgInstitutionFoundedInstitution() {
+        String taxId = "taxId";
+        Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setTaxCode(taxId);
+        institution.setExternalId(taxId);
+        when(institutionConnector.findByExternalId(taxId)).thenReturn(Optional.of(institution));
+        Institution response = institutionServiceImpl.createPgInstitution(taxId, "42", true, mock(SelfCareUser.class));
+        assertEquals(response.getId(), institution.getId());
+        assertEquals(response.getTaxCode(), taxId);
+        assertEquals(response.getExternalId(), taxId);
         verify(institutionConnector).findByExternalId(any());
     }
 
