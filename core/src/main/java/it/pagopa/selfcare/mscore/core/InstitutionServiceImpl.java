@@ -36,8 +36,6 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
 
-
-    private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
     private final InstitutionConnector institutionConnector;
     private final UserApiConnector userApiConnector;
     private final DelegationConnector delegationConnector;

@@ -510,7 +510,6 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testRetrieveInstitutionProducts() {
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.PENDING);
@@ -762,17 +761,6 @@ class InstitutionServiceImplTest {
         assertSame(institutionList, actualRetrieveInstitutionByIdsResult);
         assertTrue(actualRetrieveInstitutionByIdsResult.isEmpty());
         verify(institutionConnector).findAllByIds(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProduct(String, String)}
-     */
-    @Test
-    void testGetInstitutionProduct() {
-        Institution institution = new Institution();
-        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(institution);
-        assertSame(institution, institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
-        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
     }
 
     /**
