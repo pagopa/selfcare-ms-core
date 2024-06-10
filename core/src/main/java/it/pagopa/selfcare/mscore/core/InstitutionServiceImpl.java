@@ -227,7 +227,8 @@ public class InstitutionServiceImpl implements InstitutionService {
     @Override
     public Institution createPgInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {
         return institutionConnector.findByExternalId(taxId)
-                .orElse(createNewInstitution(taxId, description, existsInRegistry, selfCareUser));
+                .orElseGet(() -> createNewInstitution(taxId, description, existsInRegistry, selfCareUser));
+
     }
 
     private Institution createNewInstitution(String taxId, String description, boolean existsInRegistry, SelfCareUser selfCareUser) {

@@ -290,6 +290,7 @@ class InstitutionServiceImplTest {
         assertEquals(response.getTaxCode(), taxId);
         assertEquals(response.getExternalId(), taxId);
         verify(institutionConnector).findByExternalId(any());
+        verify(institutionConnector, never()).save(any());
     }
 
     @Test
@@ -357,7 +358,6 @@ class InstitutionServiceImplTest {
         Institution institution = institutionServiceImpl.createInstitutionFromIvass(new Institution());
         assertNotNull(institution);
     }
-
 
 
     @Test
