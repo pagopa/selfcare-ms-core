@@ -105,7 +105,7 @@ app_settings = [
   },
   {
     name  = "CORE_USER_EVENT_SERVICE_TYPE"
-    value = "send"
+    value = "ignore"
     # //solo selfcare
   },
   {
