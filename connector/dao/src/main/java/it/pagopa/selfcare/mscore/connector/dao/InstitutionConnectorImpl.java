@@ -59,13 +59,6 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
     }
 
     @Override
-    public Institution saveOrRetrievePnPg(Institution institution) {
-        final InstitutionEntity entity = institutionMapper.convertToInstitutionEntity(institution);
-        return findByExternalId(institution.getExternalId())
-                .orElse(institutionMapper.convertToInstitution(repository.save(entity)));
-    }
-
-    @Override
     public List<String> findByExternalIdsAndProductId(List<ValidInstitution> validInstitutionList, String productId) {
         List<String> externalIds = validInstitutionList.stream().map(ValidInstitution::getId).collect(Collectors.toList());
         Query query = Query.query(Criteria.where(constructQuery(Onboarding.Fields.productId.name())).is(productId)

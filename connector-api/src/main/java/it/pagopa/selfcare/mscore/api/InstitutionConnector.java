@@ -46,8 +46,6 @@ public interface InstitutionConnector {
 
     List<Institution> findAllByIds(List<String> ids);
 
-    Institution saveOrRetrievePnPg(Institution newInstitution);
-
     List<String> findByExternalIdsAndProductId(List<ValidInstitution> externalIds, String productId);
 
     Institution updateOnboardedProductCreatedAt(String institutionId, String productId, OffsetDateTime createdAt);

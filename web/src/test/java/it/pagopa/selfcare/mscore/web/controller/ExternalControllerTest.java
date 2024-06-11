@@ -1,11 +1,9 @@
 package it.pagopa.selfcare.mscore.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.web.model.institution.CreatePnPgInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapperImpl;
 import org.junit.jupiter.api.Test;
@@ -14,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -161,28 +158,6 @@ class ExternalControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string("[]"));
     }
 
-
-    /**
-     * Method under test: {@link ExternalController#createPnPgInstitution(CreatePnPgInstitutionRequest)}
-     */
-    @Test
-    void testCreatePnPgInstitution() throws Exception {
-        when(externalService.createPnPgInstitution(any(), any())).thenReturn(new Institution());
-
-        CreatePnPgInstitutionRequest createPnPgInstitutionRequest = new CreatePnPgInstitutionRequest();
-        createPnPgInstitutionRequest.setDescription("The characteristics of someone or something");
-        createPnPgInstitutionRequest.setTaxId("42");
-        String content = (new ObjectMapper()).writeValueAsString(createPnPgInstitutionRequest);
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/external/institutions/pn-pg")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(content);
-        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(externalController)
-                .build()
-                .perform(requestBuilder);
-        actualPerformResult.andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.content().contentType("application/json"))
-                .andExpect(MockMvcResultMatchers.content().string("{}"));
-    }
 
     /**
      * Method under test: {@link ExternalController#getBillingInstitutionByExternalId(String, String)}

@@ -41,11 +41,6 @@ public class ExternalServiceImpl implements ExternalService {
     }
 
     @Override
-    public Institution createPnPgInstitution(String taxId, String description) {
-        return institutionService.createPnPgInstitution(taxId, description);
-    }
-
-    @Override
     public List<GeographicTaxonomies> retrieveInstitutionGeoTaxonomiesByExternalId(String externalId) {
         log.info("Retrieving geographic taxonomies for institution having externalId {}", externalId);
         Institution institution = institutionService.retrieveInstitutionByExternalId(externalId);

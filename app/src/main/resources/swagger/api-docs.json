@@ -514,68 +514,6 @@
         } ]
       }
     },
-    "/external/institutions/pn-pg" : {
-      "post" : {
-        "tags" : [ "External" ],
-        "summary" : "create an institution (PG) using external institution id fetching data from info-camere",
-        "description" : "create an institution (PG) using external institution id fetching data from info-camere",
-        "operationId" : "createPnPgInstitutionUsingPOST",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/CreatePnPgInstitutionRequest"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "201" : {
-            "description" : "Created",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/InstitutionPnPgResponse"
-                }
-              }
-            }
-          },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "404" : {
-            "description" : "Not Found",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "409" : {
-            "description" : "Conflict",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "security" : [ {
-          "bearerAuth" : [ "global" ]
-        } ]
-      }
-    },
     "/external/institutions/{externalId}" : {
       "get" : {
         "tags" : [ "External" ],
@@ -2720,18 +2658,6 @@
           }
         }
       },
-      "CreatePnPgInstitutionRequest" : {
-        "title" : "CreatePnPgInstitutionRequest",
-        "type" : "object",
-        "properties" : {
-          "description" : {
-            "type" : "string"
-          },
-          "taxId" : {
-            "type" : "string"
-          }
-        }
-      },
       "CreatedAtRequest" : {
         "title" : "CreatedAtRequest",
         "type" : "object",
@@ -3195,15 +3121,6 @@
             "format" : "date-time"
           },
           "zipCode" : {
-            "type" : "string"
-          }
-        }
-      },
-      "InstitutionPnPgResponse" : {
-        "title" : "InstitutionPnPgResponse",
-        "type" : "object",
-        "properties" : {
-          "id" : {
             "type" : "string"
           }
         }

@@ -8,9 +8,7 @@ import it.pagopa.selfcare.mscore.core.ExternalService;
 import it.pagopa.selfcare.mscore.model.institution.GeographicTaxonomies;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
-import it.pagopa.selfcare.mscore.web.model.institution.CreatePnPgInstitutionRequest;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionBillingResponse;
-import it.pagopa.selfcare.mscore.web.model.institution.InstitutionPnPgResponse;
 import it.pagopa.selfcare.mscore.web.model.institution.InstitutionResponse;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionMapperCustom;
 import it.pagopa.selfcare.mscore.web.model.mapper.InstitutionResourceMapper;
@@ -22,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -126,24 +123,6 @@ public class ExternalController {
         CustomExceptionMessage.setCustomMessage(RETRIEVE_GEO_TAXONOMIES_ERROR);
         List<GeographicTaxonomies> list = externalService.retrieveInstitutionGeoTaxonomiesByExternalId(externalId);
         return ResponseEntity.ok(list);
-    }
-
-    /**
-     * The function persist PG institution
-     *
-     * @param request CreatePnPgInstitutionRequest
-     * @return InstitutionPnPgResponse
-     *
-     * * Code: 201, Message: successful operation, DataType: InstitutionPnPgResponse
-     * * Code: 400, Message: Bad Request, DataType: Problem
-     */
-    @ResponseStatus(HttpStatus.CREATED)
-    @ApiOperation(value = "${swagger.mscore.institution.PG.create}", notes = "${swagger.mscore.institution.PG.create}")
-    @PostMapping(value = "/pn-pg", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<InstitutionPnPgResponse> createPnPgInstitution(@RequestBody @Valid CreatePnPgInstitutionRequest request) {
-        CustomExceptionMessage.setCustomMessage(CREATE_INSTITUTION_ERROR);
-        Institution saved = externalService.createPnPgInstitution(request.getTaxId(), request.getDescription());
-        return ResponseEntity.status(HttpStatus.CREATED).body(new InstitutionPnPgResponse(saved.getId()));
     }
 
     /**

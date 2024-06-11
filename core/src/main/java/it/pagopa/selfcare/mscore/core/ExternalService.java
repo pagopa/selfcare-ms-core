@@ -18,6 +18,4 @@ public interface ExternalService {
     List<Onboarding> retrieveInstitutionProductsByExternalId(String externalId, List<RelationshipState> states);
 
     List<Institution> retrieveInstitutionByIds(List<String> ids);
-
-    Institution createPnPgInstitution(String taxId, String description);
 }

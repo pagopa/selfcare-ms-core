@@ -55,8 +55,6 @@ public interface InstitutionService {
 
     List<Institution> retrieveInstitutionByIds(List<String> ids);
 
-    Institution createPnPgInstitution(String taxId, String description);
-
     Institution updateInstitution(String institutionId, InstitutionUpdate institutionUpdate, String userId);
 
     void updateInstitutionDelegation(String institutionId, boolean delegation);
