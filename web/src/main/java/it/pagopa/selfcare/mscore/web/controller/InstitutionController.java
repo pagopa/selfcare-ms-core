@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/institutions", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -72,7 +71,10 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
      */
-    @Tags({@Tag(name = "support"), @Tag(name = "support-pnpg"), @Tag(name = "external-v2"), @Tag(name = "Institution")})
+    @Tag(name = "support")
+    @Tag(name = "support-pnpg")
+    @Tag(name = "external-v2")
+    @Tag(name = "Institution")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,7 +98,7 @@ public class InstitutionController {
         InstitutionsResponse institutionsResponse = new InstitutionsResponse();
         institutionsResponse.setInstitutions(institutions.stream()
                 .map(institutionResourceMapper::toInstitutionResponse)
-                .collect(Collectors.toList()));
+                .toList());
         return ResponseEntity.ok(institutionsResponse);
     }
 
@@ -422,7 +424,7 @@ public class InstitutionController {
         OnboardingsResponse onboardingsResponse = new OnboardingsResponse();
         onboardingsResponse.setOnboardings(onboardings.stream()
                 .map(onboardingResourceMapper::toResponse)
-                .collect(Collectors.toList()));
+                .toList());
         return ResponseEntity.ok().body(onboardingsResponse);
     }
 
@@ -494,7 +496,7 @@ public class InstitutionController {
         InstitutionOnboardingListResponse institutionListResponse = new InstitutionOnboardingListResponse(
                 institutions.stream()
                         .map(InstitutionMapperCustom::toInstitutionOnboardingResponse)
-                        .collect(Collectors.toList()));
+                        .toList());
 
         log.trace("findFromProduct end");
         return ResponseEntity.ok().body(institutionListResponse);
