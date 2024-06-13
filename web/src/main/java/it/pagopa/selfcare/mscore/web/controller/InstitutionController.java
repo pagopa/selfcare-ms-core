@@ -72,7 +72,7 @@ public class InstitutionController {
      * * Code: 400, Message: Bad Request, DataType: Problem
      * * Code: 404, Message: Products not found, DataType: Problem
      */
-    @Tags({@Tag(name = "support"), @Tag(name = "external-v2"), @Tag(name = "Institution")})
+    @Tags({@Tag(name = "support"), @Tag(name = "support-pnpg"), @Tag(name = "external-v2"), @Tag(name = "Institution")})
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institutions}", notes = "${swagger.mscore.institutions}")
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
