@@ -152,30 +152,6 @@ class ExternalServiceImplTest {
     }
 
     /**
-     * Method under test: {@link ExternalServiceImpl#createPnPgInstitution(String, String)}
-     */
-    @Test
-    void testCreatePnPgInstitution() {
-        Institution institution = new Institution();
-        when(institutionService.createPnPgInstitution(any(), any())).thenReturn(institution);
-        assertSame(institution,
-                externalServiceImpl.createPnPgInstitution("42", "The characteristics of someone or something"));
-        verify(institutionService).createPnPgInstitution(any(), any());
-    }
-
-    /**
-     * Method under test: {@link ExternalServiceImpl#createPnPgInstitution(String, String)}
-     */
-    @Test
-    void testCreatePnPgInstitution2() {
-        when(institutionService.createPnPgInstitution(any(), any()))
-                .thenThrow(new InvalidRequestException("An error occurred", "Code"));
-        assertThrows(InvalidRequestException.class,
-                () -> externalServiceImpl.createPnPgInstitution("42", "The characteristics of someone or something"));
-        verify(institutionService).createPnPgInstitution(any(), any());
-    }
-
-    /**
      * Method under test: {@link ExternalServiceImpl#retrieveInstitutionGeoTaxonomiesByExternalId(String)}
      */
     @Test

@@ -36,8 +36,6 @@ import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
 
-
-    private static final String REQUIRED_INSTITUTION_MESSAGE = "An institution id is required";
     private final InstitutionConnector institutionConnector;
     private final UserApiConnector userApiConnector;
     private final DelegationConnector delegationConnector;
@@ -209,19 +207,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         } catch (Exception e) {
             throw new MsCoreException(CREATE_INSTITUTION_ERROR.getMessage(), CREATE_INSTITUTION_ERROR.getCode());
         }
-    }
-
-    @Override
-    public Institution createPnPgInstitution(String taxId, String description) {
-        Institution newInstitution = new Institution();
-        newInstitution.setExternalId(taxId);
-        newInstitution.setDescription(description);
-        newInstitution.setInstitutionType(InstitutionType.PG);
-        newInstitution.setTaxCode(taxId);
-        newInstitution.setCreatedAt(OffsetDateTime.now());
-        newInstitution.setOrigin(Origin.INFOCAMERE.getValue());
-        newInstitution.setOriginId(taxId); //TODO: CHE CAMPO USARE
-        return institutionConnector.saveOrRetrievePnPg(newInstitution);
     }
 
     @Override
