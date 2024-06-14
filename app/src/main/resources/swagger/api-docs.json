@@ -813,7 +813,7 @@
     },
     "/institutions" : {
       "get" : {
-        "tags" : [ "Institution", "external-v2", "support" ],
+        "tags" : [ "Institution", "external-v2", "support", "support-pnpg" ],
         "summary" : "Gets institutions filtering by taxCode and/or subunitCode",
         "description" : "Gets institutions filtering by taxCode and/or subunitCode",
         "operationId" : "getInstitutionsUsingGET",
