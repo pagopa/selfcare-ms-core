@@ -110,7 +110,7 @@ app_settings = [
   },
   {
     name  = "CORE_CONTRACT_EVENT_SERVICE_TYPE"
-    value = "send"
+    value = "ignore"
     # //solo selfcare
   },
   {
