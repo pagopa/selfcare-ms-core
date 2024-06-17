@@ -75,18 +75,6 @@ app_settings = [
     value = "https://selcdcheckoutsa.z6.web.core.windows.net"
   },
   {
-    name  = "KAFKA_BROKER"
-    value = "selc-d-eventhub-ns.servicebus.windows.net:9093"
-  },
-  {
-    name  = "KAFKA_CONTRACTS_TOPIC"
-    value = "SC-Contracts"
-  },
-  {
-    name  = "KAFKA_USER_TOPIC"
-    value = "SC-Users"
-  },
-  {
     name  = "APPLICATIONINSIGHTS_ROLE_NAME"
     value = "ms-core"
   },
@@ -102,16 +90,6 @@ app_settings = [
     name  = "EXTERNAL_API_LOG_LEVEL"
     value = "DEBUG"
     # // prod è “INFO"
-  },
-  {
-    name  = "CORE_USER_EVENT_SERVICE_TYPE"
-    value = "send"
-    # //solo selfcare
-  },
-  {
-    name  = "CORE_CONTRACT_EVENT_SERVICE_TYPE"
-    value = "send"
-    # //solo selfcare
   },
   {
     name  = "SMTP_HOST"
@@ -154,13 +132,11 @@ secrets_names = {
   "MONGODB_CONNECTION_URI"                       = "mongodb-connection-string"
   "BLOB_STORAGE_CONN_STRING"                     = "blob-storage-contract-connection-string"
   "STORAGE_CREDENTIAL_SECRET"                    = "contracts-storage-access-key"
-  "KAFKA_CONTRACTS_SELFCARE_WO_SASL_JAAS_CONFIG" = "eventhub-sc-contracts-selfcare-wo-connection-string-lc"
   "SMTP_USR"                                     = "smtp-usr"
   "SMTP_PSW"                                     = "smtp-psw"
   "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL"     = "party-test-institution-email"
   "USER_REGISTRY_API_KEY"                        = "user-registry-api-key"
   "JWT_TOKEN_PUBLIC_KEY"                         = "jwt-public-key"
-  "KAFKA_USERS_SELFCARE_WO_SASL_JAAS_CONFIG"     = "eventhub-sc-users-selfcare-wo-connection-string-lc"
   "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"       = "blob-storage-product-connection-string"
   "AWS_SES_ACCESS_KEY_ID"                        = "aws-ses-access-key-id"
   "AWS_SES_SECRET_ACCESS_KEY"                    = "aws-ses-secret-access-key"

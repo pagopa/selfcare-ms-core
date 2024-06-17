@@ -1352,10 +1352,9 @@ class InstitutionControllerTest {
         final String institutionId = "institutionId";
         InstitutionOnboardingRequest request = new InstitutionOnboardingRequest();
         request.setProductId("id");
-        request.setUsers(List.of(new Person()));
         request.setIsAggregator(true);
 
-        when(onboardingService.persistOnboarding(any(), any(), any(), any()))
+        when(onboardingService.persistOnboarding(any(), any(), any()))
                 .thenReturn(new Institution());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders

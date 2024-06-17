@@ -17,6 +17,4 @@ public class Config {
 
     private int lastPage;
 
-    private boolean enableKafkaScheduler;
-
 }

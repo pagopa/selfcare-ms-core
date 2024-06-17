@@ -352,10 +352,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
                                                                      @PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
-                .map(users -> users.stream().map(userMapper::toUserToOnboard).toList())
-                .orElse(List.of());
-        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), usersToOnboard, onboardingResourceMapper.toOnboarding(request));
+        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), onboardingResourceMapper.toOnboarding(request));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(institutionResourceMapper.toInstitutionResponse(institution));

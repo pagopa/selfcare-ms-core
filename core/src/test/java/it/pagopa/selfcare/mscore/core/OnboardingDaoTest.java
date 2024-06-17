@@ -24,11 +24,6 @@ class OnboardingDaoTest {
     @InjectMocks
     private OnboardingDao onboardingDao;
 
-    UserToOnboard dummyUserToOnboard() {
-        UserToOnboard user = new UserToOnboard();
-        user.setId("id");
-        return user;
-    }
 
     @Test
     void rollbackPersistOnboarding() {
@@ -36,11 +31,8 @@ class OnboardingDaoTest {
         final String institutionId = "institutionId";
         final Onboarding onboarding = new Onboarding();
         onboarding.setProductId("productId");
-        final List<UserToOnboard> users = new ArrayList<>();
-        UserToOnboard user = dummyUserToOnboard();
-        users.add(user);
 
-        onboardingDao.rollbackPersistOnboarding(institutionId, onboarding, users);
+        onboardingDao.rollbackPersistOnboarding(institutionId, onboarding);
 
         verify(institutionConnector, times(1))
                 .findAndRemoveOnboarding(institutionId, onboarding);

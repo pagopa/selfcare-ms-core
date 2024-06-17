@@ -59,18 +59,6 @@ app_settings = [
     value = "https://selcuweupnpgcheckoutsa.z6.web.core.windows.net"
   },
   {
-    name  = "KAFKA_BROKER"
-    value = "selc-u-pnpg-eventhub-ns.servicebus.windows.net:9093"
-  },
-  {
-    name  = "KAFKA_CONTRACTS_TOPIC"
-    value = "SC-Contracts"
-  },
-  {
-    name  = "KAFKA_USER_TOPIC"
-    value = "SC-Users"
-  },
-  {
     name  = "APPLICATIONINSIGHTS_ROLE_NAME"
     value = "ms-core"
   },

@@ -20,8 +20,6 @@ public class MockUtils {
 
     public static Config createConfigMock(boolean enabled, String productFilter) {
         Config configMock = new Config();
-        configMock.setId("KafkaScheduler");
-        configMock.setEnableKafkaScheduler(enabled);
         configMock.setProductFilter(productFilter);
         configMock.setFirstPage(0);
         configMock.setLastPage(10);

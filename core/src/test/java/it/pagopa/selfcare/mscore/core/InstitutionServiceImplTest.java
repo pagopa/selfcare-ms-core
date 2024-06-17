@@ -21,9 +21,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import it.pagopa.selfcare.mscore.model.onboarding.TokenUser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -64,9 +62,6 @@ class InstitutionServiceImplTest {
     
     @Mock
     private CoreConfig coreConfig;
-
-    @Mock
-    private ContractEventNotificationService contractService;
 
     @Mock
     private CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
@@ -1022,8 +1017,6 @@ class InstitutionServiceImplTest {
         tokenUserMock2.setUserId("321e9876-e89b-12d3-a456-426614174000");
         tokenUserMock2.setRole(PartyRole.DELEGATE);
 
-        Token updatedTokenMock = tokenMapper.toToken(onboardingMock2, institutionIdMock, productIdMock);
-
         when(institutionConnector.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock))
                 .thenReturn(updatedInstitutionMock);
 
@@ -1032,9 +1025,7 @@ class InstitutionServiceImplTest {
         // Then
         verify(institutionConnector, times(1))
                 .updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock);
-        verify(contractService, times(1))
-                .sendDataLakeNotification(updatedInstitutionMock, updatedTokenMock, QueueEvent.UPDATE);
-        verifyNoMoreInteractions(institutionConnector, contractService);
+        verifyNoMoreInteractions(institutionConnector);
     }
 
     @Test
@@ -1088,7 +1079,7 @@ class InstitutionServiceImplTest {
         Institution institutionMock = mockInstance(new Institution());
         institutionMock.setOnboarding(Collections.emptyList());
         when(institutionConnector.updateOnboardedProductCreatedAt(institutionIdMock, productIdMock, createdAtMock))
-                .thenReturn(institutionMock);
+                .thenThrow(ResourceNotFoundException.class);
         // When
         Executable executable = () -> institutionServiceImpl.updateCreatedAt(institutionIdMock, productIdMock, createdAtMock, activatedAtMock);
         // Then

@@ -26,8 +26,6 @@ class MockUtilsTest {
         Config result = MockUtils.createConfigMock(enabledMock, productFilterMock);
         // Then
         assertNotNull(result);
-        assertEquals("KafkaScheduler", result.getId());
-        assertEquals(enabledMock, result.isEnableKafkaScheduler());
         assertEquals(productFilterMock, result.getProductFilter());
     }
 

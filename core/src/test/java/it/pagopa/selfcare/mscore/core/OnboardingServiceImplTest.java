@@ -1,25 +1,16 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.commons.base.security.PartyRole;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
-import it.pagopa.selfcare.mscore.constant.Env;
-import it.pagopa.selfcare.mscore.constant.RelationshipState;
-import it.pagopa.selfcare.mscore.constant.TokenType;
 import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.core.mapper.TokenMapperImpl;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.Certification;
-import it.pagopa.selfcare.mscore.model.CertifiedField;
 import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
-import it.pagopa.selfcare.mscore.model.institution.InstitutionUpdate;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
-import it.pagopa.selfcare.mscore.model.user.User;
-import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,8 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,9 +30,6 @@ import static org.mockito.Mockito.*;
 class OnboardingServiceImplTest {
 
     @Mock
-    private ContractEventNotificationService contractEventNotificationService;
-
-    @Mock
     private OnboardingDao onboardingDao;
 
     @InjectMocks
@@ -51,9 +37,6 @@ class OnboardingServiceImplTest {
 
     @Mock
     private InstitutionService institutionService;
-
-    @Mock
-    private UserEventService userEventService;
 
     @Mock
     private InstitutionConnector institutionConnector;
@@ -172,31 +155,6 @@ class OnboardingServiceImplTest {
                 any());
     }
 
-    private Institution dummyInstitution() {
-        Institution institution = new Institution();
-        institution.setId("42");
-
-        Onboarding onboarding = new Onboarding();
-        onboarding.setStatus(RelationshipState.ACTIVE);
-        onboarding.setProductId("42");
-        institution.setOnboarding(List.of(onboarding));
-        return institution;
-    }
-
-    private UserToOnboard createSimpleUserToOnboard() {
-        UserToOnboard userToOnboard = new UserToOnboard();
-        userToOnboard.setEmail("jane.doe@example.org");
-        userToOnboard.setEnv(Env.ROOT);
-        userToOnboard.setId("42");
-        userToOnboard.setName("Name");
-        userToOnboard.setProductRole("");
-        userToOnboard.setRole(PartyRole.MANAGER);
-        userToOnboard.setSurname("Doe");
-        userToOnboard.setTaxCode("Tax Code");
-        return userToOnboard;
-    }
-
-
     @Test
     void persistOnboarding_shouldThrowIfOnboardingExists() {
 
@@ -209,13 +167,13 @@ class OnboardingServiceImplTest {
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
 
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(),
-                onboarding.getProductId(), List.of(), new Onboarding()));
+                onboarding.getProductId(), new Onboarding()));
     }
 
 
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#persistOnboarding(String, String, List, Onboarding)}
+     * Method under test: {@link OnboardingServiceImpl#persistOnboarding(String, String, Onboarding)}
      */
     @Test
     void persistOnboarding_shouldRollback() {
@@ -234,24 +192,18 @@ class OnboardingServiceImplTest {
         institution.setId("institutionId");
         institution.setOnboarding(List.of(onboarding));
 
-        UserToOnboard userToOnboard = createSimpleUserToOnboard();
-        User user = new User();
-        user.setFiscalCode("fiscalCode");
-        user.setId("42");
-        final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
-
 
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenThrow(new RuntimeException());
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist));
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(), productId, onboardingToPersist));
 
         verify(onboardingDao, times(1))
-                .rollbackPersistOnboarding(any(), any(), any());
+                .rollbackPersistOnboarding(any(), any());
     }
 
     /**
-     * Method under test: {@link OnboardingServiceImpl#persistOnboarding(String, String, List, Onboarding)}
+     * Method under test: {@link OnboardingServiceImpl#persistOnboarding(String, String, Onboarding)}
      */
     @Test
     void persistOnboarding_whenUserNotExistsOnRegistry() {
@@ -276,12 +228,6 @@ class OnboardingServiceImplTest {
         institution.setId("institutionId");
         institution.setOnboarding(List.of(onboarding));
 
-        UserToOnboard userToOnboard = createSimpleUserToOnboard();
-        User user = new User();
-        user.setFiscalCode("fiscalCode");
-        user.setId("42");
-        final List<UserToOnboard> userToOnboards = List.of(userToOnboard);
-
 
         Token token = new Token();
         token.setId(onboarding.getTokenId());
@@ -295,7 +241,7 @@ class OnboardingServiceImplTest {
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
 
-        onboardingServiceImpl.persistOnboarding(institution.getId(), productId, userToOnboards, onboardingToPersist);
+        onboardingServiceImpl.persistOnboarding(institution.getId(), productId, onboardingToPersist);
 
 
         ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
@@ -304,76 +250,6 @@ class OnboardingServiceImplTest {
         Onboarding actual = captor.getValue();
         assertEquals(billing, actual.getBilling());
         assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
-    }
-
-    private OnboardedProduct getOnboardedProduct() {
-        OnboardedProduct onboardedProduct = new OnboardedProduct();
-        onboardedProduct.setContract("START - getUser with id: {}");
-        onboardedProduct.setCreatedAt(null);
-        onboardedProduct.setEnv(Env.ROOT);
-        onboardedProduct.setProductId("42");
-        onboardedProduct.setProductRole("");
-        onboardedProduct.setRole(PartyRole.MANAGER);
-        onboardedProduct.setStatus(RelationshipState.PENDING);
-        onboardedProduct.setUpdatedAt(null);
-        return onboardedProduct;
-    }
-
-    private OnboardingRequest getOnboardingRequest() {
-        Contract contract = new Contract();
-        contract.setPath("Contract Template");
-        OnboardingRequest expectedRequest = new OnboardingRequest();
-        expectedRequest.setProductId("42");
-        expectedRequest.setContract(contract);
-        expectedRequest.setPricingPlan("C3");
-        expectedRequest.setProductName("42");
-        expectedRequest.setInstitutionUpdate(new InstitutionUpdate());
-        expectedRequest.setBillingRequest(new Billing());
-        expectedRequest.setSignContract(true);
-        return expectedRequest;
-    }
-
-    private Token getToken(InstitutionUpdate institutionUpdate) {
-        Token token = new Token();
-        token.setChecksum("Checksum");
-        token.setDeletedAt(null);
-        token.setContractSigned("Contract Signed");
-        token.setContractTemplate("Contract Template");
-        token.setCreatedAt(null);
-        token.setExpiringDate(null);
-        token.setId("42");
-        token.setInstitutionId("42");
-        token.setInstitutionUpdate(institutionUpdate);
-        token.setProductId("42");
-        token.setStatus(RelationshipState.PENDING);
-        token.setType(TokenType.INSTITUTION);
-        token.setUpdatedAt(null);
-        token.setUsers(new ArrayList<>());
-        return token;
-    }
-
-
-    private User dummyUser() {
-        CertifiedField certifiedField = new CertifiedField<>();
-        certifiedField.setCertification(Certification.NONE);
-        certifiedField.setValue("42");
-
-        CertifiedField certifiedField1 = new CertifiedField<>();
-        certifiedField1.setCertification(Certification.NONE);
-        certifiedField1.setValue("42");
-
-        CertifiedField certifiedField2 = new CertifiedField<>();
-        certifiedField2.setCertification(Certification.NONE);
-        certifiedField2.setValue("42");
-
-        User user = new User();
-        user.setEmail(certifiedField);
-        user.setFamilyName(certifiedField1);
-        user.setFiscalCode("Fiscal Code");
-        user.setId("42");
-        user.setName(certifiedField2);
-        user.setWorkContacts(new HashMap<>());
-        return user;
     }
 
     private Onboarding dummyOnboarding() {

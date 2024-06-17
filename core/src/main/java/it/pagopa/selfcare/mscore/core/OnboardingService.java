@@ -15,6 +15,6 @@ public interface OnboardingService {
 
     void verifyOnboardingInfoByFilters(VerifyOnboardingFilters filters);
 
-    Institution persistOnboarding(String institutionId, String productId, List<UserToOnboard> users, Onboarding onboarding);
+    Institution persistOnboarding(String institutionId, String productId, Onboarding onboarding);
 
 }

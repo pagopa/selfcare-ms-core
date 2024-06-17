@@ -20,7 +20,7 @@ public class OnboardingDao {
 
 
 
-    public void rollbackPersistOnboarding(String institutionId, Onboarding onboarding, List<UserToOnboard> users) {
+    public void rollbackPersistOnboarding(String institutionId, Onboarding onboarding) {
         institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
         log.debug("rollback persistOnboarding");
     }

@@ -47,17 +47,11 @@ class SwaggerConfigTest {
     @MockBean
     OnboardingService onboardingService;
 
-    @MockBean
-    QueueNotificationService queueNotificationService;
-
     @Autowired
     WebApplicationContext context;
 
     @MockBean
     DelegationService delegationService;
-
-    @MockBean
-    private UserEventService userEventService;
 
     @Autowired
     private ObjectMapper objectMapper;
