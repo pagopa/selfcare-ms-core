@@ -233,18 +233,6 @@ class InstitutionServiceImplTest {
     }
 
     /**
-     * Method under test: {@link InstitutionServiceImpl#createPnPgInstitution(String, String)}
-     */
-    @Test
-    void testCreatePnPgInstitution2() {
-
-        when(institutionConnector.saveOrRetrievePnPg(any())).thenAnswer(answer -> answer.getArguments()[0]);
-
-        institutionServiceImpl.createPnPgInstitution("42", "The characteristics of someone or something");
-        verify(institutionConnector).saveOrRetrievePnPg(any());
-    }
-
-    /**
      * Method under test: {@link InstitutionServiceImpl#createPgInstitution(String, String, boolean, SelfCareUser)}
      */
     @Test
@@ -505,7 +493,6 @@ class InstitutionServiceImplTest {
      */
     @Test
     void testRetrieveInstitutionProducts() {
-        PartyRegistryProxyConnector partyRegistryProxyConnector = mock(PartyRegistryProxyConnector.class);
         Institution institution = new Institution();
         Onboarding onboarding = new Onboarding();
         onboarding.setStatus(RelationshipState.PENDING);
@@ -757,17 +744,6 @@ class InstitutionServiceImplTest {
         assertSame(institutionList, actualRetrieveInstitutionByIdsResult);
         assertTrue(actualRetrieveInstitutionByIdsResult.isEmpty());
         verify(institutionConnector).findAllByIds(any());
-    }
-
-    /**
-     * Method under test: {@link InstitutionServiceImpl#retrieveInstitutionProduct(String, String)}
-     */
-    @Test
-    void testGetInstitutionProduct() {
-        Institution institution = new Institution();
-        when(institutionConnector.findByExternalIdAndProductId(any(), any())).thenReturn(institution);
-        assertSame(institution, institutionServiceImpl.retrieveInstitutionProduct("42", "42"));
-        verify(institutionConnector).findByExternalIdAndProductId(any(), any());
     }
 
     /**
