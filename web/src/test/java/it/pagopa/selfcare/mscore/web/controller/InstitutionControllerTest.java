@@ -13,7 +13,6 @@ import it.pagopa.selfcare.mscore.model.institution.*;
 import it.pagopa.selfcare.mscore.web.TestUtils;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
-import it.pagopa.selfcare.mscore.web.model.user.Person;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -80,20 +79,20 @@ class InstitutionControllerTest {
 
 
     private final static Onboarding onboarding;
-    private final static Billing billing;
+    private final static Billing staticBilling;
 
-    private final static Institution institution;
+    private final static Institution staticInstitution;
 
     static {
-        billing = new Billing();
-        billing.setVatNumber("example");
-        billing.setRecipientCode("example");
-        billing.setTaxCodeInvoicing("example");
+        staticBilling = new Billing();
+        staticBilling.setVatNumber("example");
+        staticBilling.setRecipientCode("example");
+        staticBilling.setTaxCodeInvoicing("example");
 
         onboarding = new Onboarding();
         onboarding.setProductId("example");
         onboarding.setStatus(RelationshipState.ACTIVE);
-        onboarding.setBilling(billing);
+        onboarding.setBilling(staticBilling);
         onboarding.setContract("contract");
         onboarding.setTokenId("tokenId");
         onboarding.setPricingPlan("setPricingPlan");
@@ -103,13 +102,13 @@ class InstitutionControllerTest {
         attribute.setCode("code");
         attribute.setDescription("description");
 
-        institution = new Institution();
-        institution.setId("42");
-        institution.setInstitutionType(InstitutionType.PG);
-        institution.setDescription("description");
-        institution.setOnboarding(List.of(onboarding));
-        institution.setAttributes(List.of(attribute));
-        institution.setIstatCode("istatCode");
+        staticInstitution = new Institution();
+        staticInstitution.setId("42");
+        staticInstitution.setInstitutionType(InstitutionType.PG);
+        staticInstitution.setDescription("description");
+        staticInstitution.setOnboarding(List.of(onboarding));
+        staticInstitution.setAttributes(List.of(attribute));
+        staticInstitution.setIstatCode("istatCode");
 
     }
 
@@ -265,8 +264,8 @@ class InstitutionControllerTest {
     void retrieveInstitutionById() throws Exception {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
-        when(institutionService.retrieveInstitutionById("42")).thenReturn(institution);
-        institution.setId("id");
+        when(institutionService.retrieveInstitutionById("42")).thenReturn(staticInstitution);
+        staticInstitution.setId("id");
         MockHttpServletRequestBuilder requestBuilder = get("/institutions/{id}", "42");
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
@@ -280,7 +279,7 @@ class InstitutionControllerTest {
      */
     @Test
     void testRetrieveInstitutionById() throws Exception {
-        when(institutionService.retrieveInstitutionById(any())).thenReturn(institution);
+        when(institutionService.retrieveInstitutionById(any())).thenReturn(staticInstitution);
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get("/institutions/{id}", "42");
         MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
@@ -1238,7 +1237,7 @@ class InstitutionControllerTest {
         Integer sizeMock = 2;
 
         // When
-        when(institutionService.getInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(institution));
+        when(institutionService.getInstitutionsByProductId(any(), any(), any())).thenReturn(List.of(staticInstitution));
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(BASE_URL + "/products/{productId}", productIdMock)
                 .param("page", pageMock.toString())
                 .param("size", sizeMock.toString());
@@ -1352,10 +1351,9 @@ class InstitutionControllerTest {
         final String institutionId = "institutionId";
         InstitutionOnboardingRequest request = new InstitutionOnboardingRequest();
         request.setProductId("id");
-        request.setUsers(List.of(new Person()));
         request.setIsAggregator(true);
 
-        when(onboardingService.persistOnboarding(any(), any(), any(), any()))
+        when(onboardingService.persistOnboarding(any(), any(), any()))
                 .thenReturn(new Institution());
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders

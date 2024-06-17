@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -44,18 +43,15 @@ public class InstitutionController {
     private final OnboardingResourceMapper onboardingResourceMapper;
     private final InstitutionResourceMapper institutionResourceMapper;
     private final BrokerMapper brokerMapper;
-    private final UserMapper userMapper;
 
     public InstitutionController(InstitutionService institutionService,
                                  OnboardingService onboardingService, OnboardingResourceMapper onboardingResourceMapper,
                                  InstitutionResourceMapper institutionResourceMapper,
-                                 BrokerMapper brokerMapper,
-                                 UserMapper userMapper) {
+                                 BrokerMapper brokerMapper) {
         this.institutionService = institutionService;
         this.onboardingService = onboardingService;
         this.onboardingResourceMapper = onboardingResourceMapper;
         this.institutionResourceMapper = institutionResourceMapper;
-        this.userMapper = userMapper;
         this.brokerMapper = brokerMapper;
     }
 
@@ -354,10 +350,7 @@ public class InstitutionController {
     public ResponseEntity<InstitutionResponse> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
                                                                      @PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        List<UserToOnboard> usersToOnboard = Optional.ofNullable(request.getUsers())
-                .map(users -> users.stream().map(userMapper::toUserToOnboard).toList())
-                .orElse(List.of());
-        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), usersToOnboard, onboardingResourceMapper.toOnboarding(request));
+        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), onboardingResourceMapper.toOnboarding(request));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(institutionResourceMapper.toInstitutionResponse(institution));

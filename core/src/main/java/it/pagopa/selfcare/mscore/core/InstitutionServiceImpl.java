@@ -9,7 +9,6 @@ import it.pagopa.selfcare.mscore.api.UserApiConnector;
 import it.pagopa.selfcare.mscore.config.CoreConfig;
 import it.pagopa.selfcare.mscore.constant.*;
 import it.pagopa.selfcare.mscore.core.mapper.InstitutionMapper;
-import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.core.strategy.CreateInstitutionStrategy;
 import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategyFactory;
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
@@ -18,9 +17,7 @@ import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.mscore.model.QueueEvent;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.onboarding.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.owasp.encoder.Encode;
 import org.springframework.stereotype.Service;
@@ -41,28 +38,22 @@ public class InstitutionServiceImpl implements InstitutionService {
     private final DelegationConnector delegationConnector;
     private final PartyRegistryProxyConnector partyRegistryProxyConnector;
     private final CoreConfig coreConfig;
-    private final ContractEventNotificationService contractService;
     private final InstitutionMapper institutionMapper;
     private final CreateInstitutionStrategyFactory createInstitutionStrategyFactory;
-    private final TokenMapper tokenMapper;
 
     public InstitutionServiceImpl(PartyRegistryProxyConnector partyRegistryProxyConnector,
                                   InstitutionConnector institutionConnector,
                                   UserApiConnector userApiConnector, DelegationConnector delegationConnector,
                                   CoreConfig coreConfig,
-                                  ContractEventNotificationService contractService,
                                   InstitutionMapper institutionMapper,
-                                  CreateInstitutionStrategyFactory createInstitutionStrategyFactory,
-                                  TokenMapper tokenMapper) {
+                                  CreateInstitutionStrategyFactory createInstitutionStrategyFactory) {
         this.partyRegistryProxyConnector = partyRegistryProxyConnector;
         this.institutionConnector = institutionConnector;
         this.userApiConnector = userApiConnector;
         this.delegationConnector = delegationConnector;
         this.coreConfig = coreConfig;
-        this.contractService = contractService;
         this.institutionMapper = institutionMapper;
         this.createInstitutionStrategyFactory = createInstitutionStrategyFactory;
-        this.tokenMapper = tokenMapper;
     }
 
     @Override
@@ -393,14 +384,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         Assert.hasText(productId, "A product ID is required.");
         Assert.notNull(createdAt, "A createdAt date is required.");
 
-        Institution updatedInstitution = institutionConnector.updateOnboardedProductCreatedAt(institutionId, productId, createdAt);
-        Onboarding onboarding = updatedInstitution.getOnboarding().stream()
-                .filter(onboarding1 -> onboarding1.getProductId().equals(productId) && onboarding1.getStatus() == RelationshipState.ACTIVE)
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(CustomError.CONTRACT_NOT_FOUND.getMessage(), institutionId, productId), CustomError.CONTRACT_NOT_FOUND.getCode()));
-        Token updatedToken = tokenMapper.toToken(onboarding, institutionId, productId);
-
-        contractService.sendDataLakeNotification(updatedInstitution, updatedToken, QueueEvent.UPDATE);
+        institutionConnector.updateOnboardedProductCreatedAt(institutionId, productId, createdAt);
 
         log.trace("updateCreatedAt end");
     }
