@@ -12,7 +12,6 @@ import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.InstitutionService;
 import it.pagopa.selfcare.mscore.core.OnboardingService;
 import it.pagopa.selfcare.mscore.model.institution.*;
-import it.pagopa.selfcare.mscore.model.user.UserToOnboard;
 import it.pagopa.selfcare.mscore.web.model.institution.*;
 import it.pagopa.selfcare.mscore.web.model.mapper.*;
 import it.pagopa.selfcare.mscore.web.model.onboarding.OnboardedProducts;
@@ -44,18 +43,15 @@ public class InstitutionController {
     private final OnboardingResourceMapper onboardingResourceMapper;
     private final InstitutionResourceMapper institutionResourceMapper;
     private final BrokerMapper brokerMapper;
-    private final UserMapper userMapper;
 
     public InstitutionController(InstitutionService institutionService,
                                  OnboardingService onboardingService, OnboardingResourceMapper onboardingResourceMapper,
                                  InstitutionResourceMapper institutionResourceMapper,
-                                 BrokerMapper brokerMapper,
-                                 UserMapper userMapper) {
+                                 BrokerMapper brokerMapper) {
         this.institutionService = institutionService;
         this.onboardingService = onboardingService;
         this.onboardingResourceMapper = onboardingResourceMapper;
         this.institutionResourceMapper = institutionResourceMapper;
-        this.userMapper = userMapper;
         this.brokerMapper = brokerMapper;
     }
 

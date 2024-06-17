@@ -111,43 +111,7 @@ class OnboardingServiceImplTest {
      * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
      */
     @Test
-    void testVerifyOnboardingInfo4() {
-        doNothing().when(institutionService)
-                .retrieveInstitutionsWithFilter(any(), any(), any());
-        onboardingServiceImpl.verifyOnboardingInfo("42", "42");
-        verify(institutionService).retrieveInstitutionsWithFilter(any(), any(),
-                any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
-     */
-    @Test
     void testVerifyOnboardingInfo5() {
-        doThrow(new InvalidRequestException("An error occurred", "Code")).when(institutionService)
-                .retrieveInstitutionsWithFilter(any(), any(), any());
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.verifyOnboardingInfo("42", "42"));
-        verify(institutionService).retrieveInstitutionsWithFilter(any(), any(),
-                any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo6() {
-        doNothing().when(institutionService)
-                .retrieveInstitutionsWithFilter(any(), any(), any());
-        onboardingServiceImpl.verifyOnboardingInfo("42", "42");
-        verify(institutionService).retrieveInstitutionsWithFilter(any(), any(),
-                any());
-    }
-
-    /**
-     * Method under test: {@link OnboardingServiceImpl#verifyOnboardingInfo(String, String)}
-     */
-    @Test
-    void testVerifyOnboardingInfo7() {
         doThrow(new InvalidRequestException("An error occurred", "Code")).when(institutionService)
                 .retrieveInstitutionsWithFilter(any(), any(), any());
         assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.verifyOnboardingInfo("42", "42"));
@@ -166,8 +130,13 @@ class OnboardingServiceImplTest {
         institution.setOnboarding(List.of(onboarding, dummyOnboarding()));
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
 
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(),
-                onboarding.getProductId(), new Onboarding()));
+        String institutionId = institution.getId();
+
+        String productId = onboarding.getProductId();
+        Onboarding onb = new Onboarding();
+
+        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institutionId,
+                productId, onb));
     }
 
 
@@ -195,8 +164,9 @@ class OnboardingServiceImplTest {
 
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenThrow(new RuntimeException());
+        String institutionId = institution.getId();
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institution.getId(), productId, onboardingToPersist));
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institutionId, productId, onboardingToPersist));
 
         verify(onboardingDao, times(1))
                 .rollbackPersistOnboarding(any(), any());
