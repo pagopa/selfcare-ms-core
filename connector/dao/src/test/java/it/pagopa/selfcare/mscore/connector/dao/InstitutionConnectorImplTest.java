@@ -790,7 +790,7 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
-    @DisplayName("Should return true when onboarding exists by filters")
+    @DisplayName("Should return true when onboarding exists by filters when subunitCode is null")
     void shouldReturnTrueWhenOnboardingExistsByFiltersAndSubunitCodeIsNull() {
         // Given
         VerifyOnboardingFilters filters = new VerifyOnboardingFilters("productId", "externalId", "taxCode", "origin", "originId", null);
@@ -805,7 +805,7 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
-    @DisplayName("Should return true when onboarding exists by filters")
+    @DisplayName("Should return false when onboarding exists by filters when subunitCode is null")
     void shouldReturnFalseWhenOnboardingExistsByFiltersAndSubunitCodeIsNull() {
         // Given
         VerifyOnboardingFilters filters = new VerifyOnboardingFilters("productId", "externalId", "taxCode", "origin", "originId", null);
