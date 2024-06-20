@@ -301,8 +301,9 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
                 .isIfNotNull(InstitutionEntity.Fields.taxCode.name(), filters.getTaxCode())
                 .isIfNotNull(InstitutionEntity.Fields.origin.name(), filters.getOrigin())
                 .isIfNotNull(InstitutionEntity.Fields.originId.name(), filters.getOriginId())
-                .isIfNotNull(InstitutionEntity.Fields.subunitCode.name(), filters.getSubunitCode())
                 .build();
+
+        criteriaInstitution.and(InstitutionEntity.Fields.subunitCode.name()).is(filters.getSubunitCode());
 
         Criteria criteriaOnboarding = Criteria.where(Onboarding.Fields.status.name()).in(filters.getValidRelationshipStates())
                 .and(Onboarding.Fields.productId.name()).is(filters.getProductId());
