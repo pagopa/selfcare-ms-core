@@ -790,6 +790,36 @@ class InstitutionConnectorImplTest {
     }
 
     @Test
+    @DisplayName("Should return true when onboarding exists by filters when subunitCode is null")
+    void shouldReturnTrueWhenOnboardingExistsByFiltersAndSubunitCodeIsNull() {
+        // Given
+        VerifyOnboardingFilters filters = new VerifyOnboardingFilters("productId", "externalId", "taxCode", "origin", "originId", null);
+        filters.setValidRelationshipStates(List.of(RelationshipState.ACTIVE));
+        when(institutionRepository.exists(any(Query.class), any())).thenReturn(true);
+
+        // When
+        Boolean exists = institutionConnectorImpl.existsOnboardingByFilters(filters);
+
+        // Then
+        assertTrue(exists);
+    }
+
+    @Test
+    @DisplayName("Should return false when onboarding exists by filters when subunitCode is null")
+    void shouldReturnFalseWhenOnboardingExistsByFiltersAndSubunitCodeIsNull() {
+        // Given
+        VerifyOnboardingFilters filters = new VerifyOnboardingFilters("productId", "externalId", "taxCode", "origin", "originId", null);
+        filters.setValidRelationshipStates(List.of(RelationshipState.ACTIVE));
+        when(institutionRepository.exists(any(Query.class), any())).thenReturn(false);
+
+        // When
+        Boolean exists = institutionConnectorImpl.existsOnboardingByFilters(filters);
+
+        // Then
+        assertFalse(exists);
+    }
+
+    @Test
     @DisplayName("Should return false when onboarding does not exist by filters")
     void shouldReturnFalseWhenOnboardingDoesNotExistByFilters() {
         // Given
