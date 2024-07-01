@@ -3,6 +3,8 @@ package it.pagopa.selfcare.mscore.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
@@ -340,19 +342,30 @@ public class InstitutionController {
      *
      * @param request OnboardingInstitutionUsersRequest
      * @return no content
-     * * Code: 204, Message: successful operation
+     * * Code: 200, Message: Ok
+     * * Code: 201, Message: Created
      * * Code: 404, Message: Not found, DataType: Problem
      * * Code: 400, Message: Invalid request, DataType: Problem
      */
+    @ApiResponses(value = {
+    	    @ApiResponse(code = 200, message = "Ok"),
+    	    @ApiResponse(code = 201, message = "Created"),
+    	    @ApiResponse(code = 400, message = "Bad Request"),
+    	    @ApiResponse(code = 404, message = "Not Found")
+    	})
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "${swagger.mscore.onboarding.users}", notes = "${swagger.mscore.onboarding.users}")
     @PostMapping(value = "/{id}/onboarding", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<InstitutionResponse> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
                                                                      @PathVariable("id") String id) {
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
-        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), onboardingResourceMapper.toOnboarding(request));
+        
+        StringBuilder httpStatus = new StringBuilder();
+        
+        Institution institution = onboardingService.persistOnboarding(id, request.getProductId(), onboardingResourceMapper.toOnboarding(request), httpStatus);
+        
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .status(HttpStatus.valueOf(Integer.parseInt(httpStatus.toString())))
                 .body(institutionResourceMapper.toInstitutionResponse(institution));
     }
 

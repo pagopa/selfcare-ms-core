@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -1353,8 +1354,12 @@ class InstitutionControllerTest {
         request.setProductId("id");
         request.setIsAggregator(true);
 
-        when(onboardingService.persistOnboarding(any(), any(), any()))
-                .thenReturn(new Institution());
+        when(onboardingService.persistOnboarding(any(), any(), any(), any()))
+	        .thenAnswer(invocation -> {
+	            StringBuilder status = invocation.getArgument(3);
+	            status.append(HttpStatus.CREATED.value()); 
+	            return new Institution();
+	        });
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
                 .post(BASE_URL + "/{id}/onboarding/", institutionId)

@@ -10,6 +10,8 @@ import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -62,7 +64,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     public Institution persistOnboarding(String institutionId, String
-            productId, Onboarding onboarding) {
+            productId, Onboarding onboarding, StringBuilder httpStatus) {
 
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}", institutionId, productId);
@@ -79,8 +81,9 @@ public class OnboardingServiceImpl implements OnboardingService {
         if (Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
                 .filter(item -> item.getProductId().equals(productId) && UtilEnumList.VALID_RELATIONSHIP_STATES.contains(item.getStatus()))
                 .findAny()).isPresent()) {
-            throw new InvalidRequestException(String.format(CustomError.PRODUCT_ALREADY_ONBOARDED.getMessage(), institution.getTaxCode(), productId),
-                    CustomError.PRODUCT_ALREADY_ONBOARDED.getCode());
+        	
+        	httpStatus.append(HttpStatus.OK.value());
+        	return institution;
         }
 
         try {
@@ -88,7 +91,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             final Institution institutionUpdated = institutionConnector.findAndUpdate(institutionId, onboarding, List.of(), null);
 
             log.trace("persistForUpdate end");
-
+            httpStatus.append(HttpStatus.CREATED.value());
             return institutionUpdated;
         } catch (Exception e) {
             onboardingDao.rollbackPersistOnboarding(institutionId, onboarding);
