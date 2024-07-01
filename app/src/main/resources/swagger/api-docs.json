@@ -1752,7 +1752,7 @@
         },
         "responses" : {
           "200" : {
-            "description" : "Ok",
+            "description" : "User already exists an onboarding in status ACTIVE or SUSPENDED with that productId",
             "content" : {
               "application/json" : {
                 "schema" : {

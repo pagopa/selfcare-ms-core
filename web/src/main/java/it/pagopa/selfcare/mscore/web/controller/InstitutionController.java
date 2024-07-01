@@ -348,7 +348,7 @@ public class InstitutionController {
      * * Code: 400, Message: Invalid request, DataType: Problem
      */
     @ApiResponses(value = {
-    	    @ApiResponse(code = 200, message = "Ok"),
+    	    @ApiResponse(code = 200, message = "User already exists an onboarding in status ACTIVE or SUSPENDED with that productId"),
     	    @ApiResponse(code = 201, message = "Created"),
     	    @ApiResponse(code = 400, message = "Bad Request"),
     	    @ApiResponse(code = 404, message = "Not Found")
