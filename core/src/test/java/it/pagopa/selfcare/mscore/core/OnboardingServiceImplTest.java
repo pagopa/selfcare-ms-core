@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
@@ -120,7 +121,7 @@ class OnboardingServiceImplTest {
     }
 
     @Test
-    void persistOnboarding_shouldThrowIfOnboardingExists() {
+    void persistOnboarding_whenUserExistsOnRegistry() {
 
         Onboarding onboarding = dummyOnboarding();
         onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
@@ -134,9 +135,13 @@ class OnboardingServiceImplTest {
 
         String productId = onboarding.getProductId();
         Onboarding onb = new Onboarding();
+        
+        StringBuilder statusCode = new StringBuilder();
 
-        assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institutionId,
-                productId, onb));
+        onboardingServiceImpl.persistOnboarding(institutionId,
+                productId, onb, statusCode);
+        
+        assertEquals(HttpStatus.OK.value(), Integer.parseInt(statusCode.toString()));
     }
 
 
@@ -166,7 +171,8 @@ class OnboardingServiceImplTest {
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenThrow(new RuntimeException());
         String institutionId = institution.getId();
 
-        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(institutionId, productId, onboardingToPersist));
+        Assertions.assertThrows(InvalidRequestException.class, () -> onboardingServiceImpl.persistOnboarding(
+        		institutionId, productId, onboardingToPersist, new StringBuilder()));
 
         verify(onboardingDao, times(1))
                 .rollbackPersistOnboarding(any(), any());
@@ -210,9 +216,10 @@ class OnboardingServiceImplTest {
 
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
+        
+        StringBuilder statusCode = new StringBuilder();
 
-        onboardingServiceImpl.persistOnboarding(institution.getId(), productId, onboardingToPersist);
-
+        onboardingServiceImpl.persistOnboarding(institution.getId(), productId, onboardingToPersist, statusCode);
 
         ArgumentCaptor<Onboarding> captor = ArgumentCaptor.forClass(Onboarding.class);
         verify(institutionConnector, times(1))
@@ -220,6 +227,8 @@ class OnboardingServiceImplTest {
         Onboarding actual = captor.getValue();
         assertEquals(billing, actual.getBilling());
         assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
+        assertEquals(HttpStatus.CREATED.value(), Integer.parseInt(statusCode.toString()));
+
     }
 
     private Onboarding dummyOnboarding() {
