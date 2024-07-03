@@ -37,7 +37,7 @@ public interface OnboardingResourceMapper {
     }
 
     @Mapping(target = "contract", source = "contractPath")
-    @Mapping(target = "createdAt", source = "activatedAt", qualifiedByName = "toOffsetDateTime")
+    @Mapping(target = "createdAt", source = "activatedAt")
     Onboarding toOnboarding(InstitutionOnboardingRequest onboardingRequest);
 
     @Named("toOffsetDateTime")
