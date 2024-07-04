@@ -61,7 +61,9 @@ public enum GenericError {
     VERIFY_USER_ERROR("0000", "Error while searching institutions related to given productId"),
     GET_USER_ERROR("0000", "Error while searching user given UserID"),
     UPDATE_USER_INSTITUTION_ERROR("0000", "Error while updating InstitutionUser for id %s"),
-    GENERIC_ERROR("0000", "Generic Error");
+    GENERIC_ERROR("0000", "Generic Error"),
+    DELETE_ONBOARDED_OPERATION_ERROR("0000", "Error while deleting Onboarded Institution"),
+    DELETE_NOTIFICATION_OPERATION_ERROR ("0000", "PecNotificationEntity was not deleted because either it does not exist or there are multiple records");
     private final String code;
     private final String detail;
 

@@ -369,6 +369,18 @@ public class InstitutionController {
                 .body(institutionResourceMapper.toInstitutionResponse(institution));
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "${swagger.mscore.onboarding.users.delete}", notes = "${swagger.mscore.onboarding.users.delete}")
+    @DeleteMapping(value = "/{id}/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public void deleteOnboardedInstitution(@PathVariable("productId") String productId,
+                                           @PathVariable("id") String institutionId) {
+
+        CustomExceptionMessage.setCustomMessage(GenericError.DELETE_ONBOARDED_OPERATION_ERROR);
+        onboardingService.deleteOnboardedInstitution(institutionId, productId);
+
+    }
+
+
     /**
      * The function return geographic taxonomies related to institution
      *

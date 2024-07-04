@@ -14,4 +14,5 @@ public interface OnboardingService {
 
     Institution persistOnboarding(String institutionId, String productId, Onboarding onboarding, StringBuilder httpStatus);
 
+    void deleteOnboardedInstitution(String institutionId, String productId);
 }
