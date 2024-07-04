@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface PecNotificationEntityMapper {
 
     @Mapping(target = "id", defaultExpression = "java(UUID.randomUUID().toString())")
+    @Mapping(target = "institutionId", defaultExpression = "java(UUID.randomUUID().toString())")
     PecNotificationEntity convertToPecNotificationEntity(PecNotification institution);
 
     PecNotification convertToPecNotification(PecNotificationEntity entity);

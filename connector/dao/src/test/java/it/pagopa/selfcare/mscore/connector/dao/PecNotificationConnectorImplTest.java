@@ -40,7 +40,7 @@ class PecNotificationConnectorImplTest {
     @BeforeEach
     void setUp() {
         institutionId = UUID.randomUUID().toString();
-        productId = UUID.randomUUID().toString();
+        productId = "prod-io";
         pecNotificationEntity = new PecNotificationEntity();
         pecNotificationEntity.setInstitutionId(institutionId);
         pecNotificationEntity.setProductId(productId);

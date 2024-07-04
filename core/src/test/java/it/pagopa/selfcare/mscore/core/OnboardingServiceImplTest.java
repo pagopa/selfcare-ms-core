@@ -273,7 +273,7 @@ class OnboardingServiceImplTest {
     void deleteOnboardedInstitution_deletePecNotificationFails() {
 
         String institutionId = UUID.randomUUID().toString();
-        String productId = UUID.randomUUID().toString();
+        String productId = "prod-io";
 
         Onboarding onboarding = new Onboarding();
         onboarding.setProductId(productId);

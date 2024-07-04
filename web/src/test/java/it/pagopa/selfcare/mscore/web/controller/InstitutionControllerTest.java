@@ -1376,20 +1376,17 @@ class InstitutionControllerTest {
     @Test
     void deleteOnboardedInstitution_test() throws Exception {
 
-        // Given
         String institutionId = UUID.randomUUID().toString();
-        String productId = UUID.randomUUID().toString();
+        String productId = "prod-io";
 
         doNothing().when(onboardingService).deleteOnboardedInstitution(institutionId, productId);
 
-        // Then
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/institutions/{id}/{productId}", institutionId, productId);
 
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
                 .perform(requestBuilder);
 
-        // Test
         actualPerformResult
                 .andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andExpect(MockMvcResultMatchers.content().string(""));
