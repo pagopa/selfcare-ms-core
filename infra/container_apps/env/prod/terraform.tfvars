@@ -83,8 +83,8 @@ app_settings = [
   },
   {
     name  = "EXTERNAL_API_LOG_LEVEL"
-    value = "“INFO"
-  }
+    value = "INFO"
+  },
   {
     name  = "SMTP_HOST"
     value = "smtps.pec.aruba.it"
