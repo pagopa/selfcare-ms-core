@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.core;
 
-import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
@@ -30,7 +29,6 @@ public class DelegationServiceImpl implements DelegationService {
     private final DelegationConnector delegationConnector;
     private final MailNotificationService notificationService;
     private final InstitutionService institutionService;
-    private static final String PROD_PAGOPA = "prod-pagopa";
 
     public DelegationServiceImpl(DelegationConnector delegationConnector,
                                  MailNotificationService notificationService,
@@ -42,17 +40,11 @@ public class DelegationServiceImpl implements DelegationService {
 
     @Override
     public Delegation createDelegation(Delegation delegation) {
-        /*
-            In case of prod-pagopa product, in the attribute "to" of the delegation object a taxCode is inserted.
-            So we have to retrieve the institutionId from the taxCode and set it in the "to" attribute.
-         */
-        if(PROD_PAGOPA.equals(delegation.getProductId())) {
-            setPartnerByInstitutionTaxCode(delegation);
-        } else {
-            setTaxCodesByInstitutionIds(delegation);
-        }
+
+        setTaxCodesByInstitutionIds(delegation);
 
         Delegation savedDelegation = checkIfExistsAndSaveDelegation(delegation);
+
         try {
             notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
         } catch (Exception e) {
@@ -82,33 +74,6 @@ public class DelegationServiceImpl implements DelegationService {
             throw new MsCoreException(CREATE_DELEGATION_ERROR.getMessage(), CREATE_DELEGATION_ERROR.getCode());
         }
         return savedDelegation;
-    }
-
-    private void setPartnerByInstitutionTaxCode(Delegation delegation) {
-        /*
-            In case the api returns more institutions we always try to take the PT,
-            otherwise it is okay to take the first one
-            It is caused by this issue https://pagopa.atlassian.net/wiki/spaces/SCP/pages/1058832442/RFC+-+Gestione+di+pi+institutionType+su+una+Institution
-         */
-        List<Institution> institutionsTo = institutionService.getInstitutions(delegation.getTo(), null);
-        Institution partner = institutionsTo.stream()
-                .filter(institution -> institution.getInstitutionType() == InstitutionType.PT)
-                .findFirst()
-                .orElse(institutionsTo.stream().findFirst()
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                String.format(INSTITUTION_TAX_CODE_NOT_FOUND.getMessage(), delegation.getTo()),
-                                INSTITUTION_TAX_CODE_NOT_FOUND.getCode())
-                        ));
-        delegation.setToTaxCode(partner.getTaxCode());
-        delegation.setBrokerType(partner.getInstitutionType());
-        delegation.setTo(partner.getId());
-
-        /*
-            Retrieve delegator's institution to set taxCodeFrom
-         */
-        Institution institutionFrom = institutionService.retrieveInstitutionById(delegation.getFrom());
-        delegation.setFromTaxCode(institutionFrom.getTaxCode());
-        delegation.setInstitutionType(institutionFrom.getInstitutionType());
     }
 
     private void setTaxCodesByInstitutionIds(Delegation delegation){
