@@ -63,7 +63,9 @@ public enum GenericError {
     UPDATE_USER_INSTITUTION_ERROR("0000", "Error while updating InstitutionUser for id %s"),
     GENERIC_ERROR("0000", "Generic Error"),
     DELETE_ONBOARDED_OPERATION_ERROR("0000", "Error while deleting Onboarded Institution"),
-    DELETE_NOTIFICATION_OPERATION_ERROR ("0000", "PecNotificationEntity was not deleted because either it does not exist or there are multiple records");
+    DELETE_NOTIFICATION_OPERATION_ERROR ("0000", "PecNotificationEntity was not deleted because either it does not exist or there are multiple records"),
+    INVALID_INSERT_PEC_NOTIFICATION_ERROR ("0001", "PecNotificationEntity was not inserted because either it exist or the data are invalid");
+
     private final String code;
     private final String detail;
 

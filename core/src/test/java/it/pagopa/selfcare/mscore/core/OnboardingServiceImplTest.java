@@ -13,18 +13,19 @@ import it.pagopa.selfcare.mscore.model.institution.Billing;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.*;
+import it.pagopa.selfcare.mscore.model.pecnotification.PecNotification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -134,12 +135,16 @@ class OnboardingServiceImplTest {
     @Test
     void persistOnboarding_whenUserExistsOnRegistry() {
 
+        ReflectionTestUtils.setField(onboardingServiceImpl, "sendingFrequencyPecNotification", 30);
+        ReflectionTestUtils.setField(onboardingServiceImpl, "epochDatePecNotification", "2024-01-01");
+
         Onboarding onboarding = dummyOnboarding();
         onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
-
         Institution institution = new Institution();
         institution.setId("institutionId");
         institution.setOnboarding(List.of(onboarding, dummyOnboarding()));
+
+        when(pecNotificationConnector.insertPecNotification(any(PecNotification.class))).thenReturn(true);
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
 
         String institutionId = institution.getId();
@@ -195,6 +200,9 @@ class OnboardingServiceImplTest {
     @Test
     void persistOnboarding_whenUserNotExistsOnRegistry() {
 
+        ReflectionTestUtils.setField(onboardingServiceImpl, "sendingFrequencyPecNotification", 30);
+        ReflectionTestUtils.setField(onboardingServiceImpl, "epochDatePecNotification", "2024-01-01");
+
         String pricingPlan = "pricingPlan";
         String productId = "productId";
         Billing billing = new Billing();
@@ -215,7 +223,6 @@ class OnboardingServiceImplTest {
         institution.setId("institutionId");
         institution.setOnboarding(List.of(onboarding));
 
-
         Token token = new Token();
         token.setId(onboarding.getTokenId());
         token.setInstitutionId("institutionId");
@@ -225,6 +232,7 @@ class OnboardingServiceImplTest {
         token.setStatus(onboarding.getStatus());
         token.setContractSigned(onboarding.getContract());
 
+        when(pecNotificationConnector.insertPecNotification(any(PecNotification.class))).thenReturn(true);
         when(institutionConnector.findById(institution.getId())).thenReturn(institution);
         when(institutionConnector.findAndUpdate(any(), any(), any(), any())).thenReturn(institution);
         
@@ -290,6 +298,23 @@ class OnboardingServiceImplTest {
 
         verify(institutionConnector, times(1)).findAndDeleteOnboarding(institutionId, productId);
         verify(pecNotificationConnector, times(1)).findAndDeletePecNotification(institutionId, productId);
+    }
+
+    @Test
+    public void testCalculateModuleDayOfTheEpoch() {
+        LocalDate mockCurrentDate = LocalDate.of(2024, 2, 1); // 31 days after epoch
+
+        ReflectionTestUtils.setField(onboardingServiceImpl, "sendingFrequencyPecNotification", 30);
+        ReflectionTestUtils.setField(onboardingServiceImpl, "epochDatePecNotification", "2024-01-01");
+        ReflectionTestUtils.setField(onboardingServiceImpl, "currentDate", mockCurrentDate);
+
+        int result = onboardingServiceImpl.calculateModuleDayOfTheEpoch();
+
+        LocalDate epochStart = LocalDate.parse("2024-01-01");
+        long daysDiff = ChronoUnit.DAYS.between(epochStart, mockCurrentDate);
+        int expected = (int) (daysDiff % 30);
+
+        assertEquals(expected, result);
     }
 }
 

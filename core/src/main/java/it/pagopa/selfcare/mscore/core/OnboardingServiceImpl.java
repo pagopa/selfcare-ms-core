@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PecNotificationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
+import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -10,15 +11,20 @@ import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.institution.Institution;
 import it.pagopa.selfcare.mscore.model.institution.Onboarding;
 import it.pagopa.selfcare.mscore.model.onboarding.VerifyOnboardingFilters;
+import it.pagopa.selfcare.mscore.model.pecnotification.PecNotification;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
@@ -29,16 +35,23 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final InstitutionService institutionService;
     private final InstitutionConnector institutionConnector;
     private final PecNotificationConnector pecNotificationConnector;
+    private Integer sendingFrequencyPecNotification;
+    private String epochDatePecNotification;
+    private LocalDate currentDate = LocalDate.now();
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
                                  InstitutionConnector institutionConnector,
-                                 PecNotificationConnector pecNotificationConnector) {
+                                 PecNotificationConnector pecNotificationConnector,
+                                 @Value("${mscore.sending-frequency-pec-notification}") Integer sendingFrequencyPecNotification,
+                                 @Value("${mscore.epoch-date-pec-notification}") String epochDatePecNotification) {
 
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.institutionConnector = institutionConnector;
         this.pecNotificationConnector = pecNotificationConnector;
+        this.sendingFrequencyPecNotification = sendingFrequencyPecNotification;
+        this.epochDatePecNotification = epochDatePecNotification;
     }
 
     @Override
@@ -67,10 +80,38 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
+    public void insertPecNotification(String institutionId, String productId) {
+
+        PecNotification pecNotification = new PecNotification();
+        pecNotification.setId(UUID.randomUUID().toString());
+        pecNotification.setCreatedAt(OffsetDateTime.now());
+        pecNotification.setProductId(productId);
+        pecNotification.setInstitutionId(institutionId);
+        pecNotification.setModuleDayOfTheEpoch(calculateModuleDayOfTheEpoch());
+
+        if (!pecNotificationConnector.insertPecNotification(pecNotification)){
+            throw new InvalidRequestException(INVALID_INSERT_PEC_NOTIFICATION_ERROR.getMessage(), INVALID_INSERT_PEC_NOTIFICATION_ERROR.getCode());
+        }
+
+    }
+
+    public int calculateModuleDayOfTheEpoch() {
+        LocalDate epochStart = LocalDate.parse(this.epochDatePecNotification);
+        long daysDiff = ChronoUnit.DAYS.between(epochStart, this.currentDate);
+        int moduleDayOfTheEpoch = (int) (daysDiff % this.sendingFrequencyPecNotification);
+        return moduleDayOfTheEpoch;
+    }
+
     @Override
     public Institution persistOnboarding(String institutionId, String
             productId, Onboarding onboarding, StringBuilder httpStatus) {
 
+        Institution institution = persistAndGetInstitution(institutionId, productId, onboarding, httpStatus);
+        this.insertPecNotification(institutionId, productId);
+        return institution;
+    }
+
+    private Institution persistAndGetInstitution(String institutionId, String productId, Onboarding onboarding, StringBuilder httpStatus) {
         log.trace("persistForUpdate start");
         log.debug("persistForUpdate institutionId = {}, productId = {}", institutionId, productId);
         onboarding.setStatus(RelationshipState.ACTIVE);
@@ -86,9 +127,9 @@ public class OnboardingServiceImpl implements OnboardingService {
         if (Optional.ofNullable(institution.getOnboarding()).flatMap(onboardings -> onboardings.stream()
                 .filter(item -> item.getProductId().equals(productId) && UtilEnumList.VALID_RELATIONSHIP_STATES.contains(item.getStatus()))
                 .findAny()).isPresent()) {
-        	
+
         	httpStatus.append(HttpStatus.OK.value());
-        	return institution;
+            return institution;
         }
 
         try {
