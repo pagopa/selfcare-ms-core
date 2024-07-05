@@ -371,7 +371,7 @@ public class InstitutionController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "${swagger.mscore.onboarding.users.delete}", notes = "${swagger.mscore.onboarding.users.delete}")
-    @DeleteMapping(value = "/{id}/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{id}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public void deleteOnboardedInstitution(@PathVariable("productId") String productId,
                                            @PathVariable("id") String institutionId) {
 

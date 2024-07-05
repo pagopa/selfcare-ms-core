@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -31,13 +32,13 @@ public class PecNotificationConnectorImpl implements PecNotificationConnector {
 
         List<PecNotificationEntity> pecNotificationEntityList = repository.find(query, PecNotificationEntity.class);
 
-        if(null != pecNotificationEntityList && pecNotificationEntityList.size() == 1) {
+        if(Objects.nonNull(pecNotificationEntityList) && pecNotificationEntityList.size() == 1) {
             repository.delete(pecNotificationEntityList.get(0));
             log.trace("Deleted PecNotification with institutionId: {} and productId: {}", institutionId, productId);
             return true;
         }
         
-        if (null != pecNotificationEntityList && pecNotificationEntityList.size() > 1) {
+        if (Objects.nonNull(pecNotificationEntityList) && pecNotificationEntityList.size() > 1) {
         	log.trace("Cannot delete PecNotification with institutionId: {} and productId: {}, because there are multiple entries", institutionId, productId);
         	return false;
         }
