@@ -38,6 +38,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1370,6 +1371,25 @@ class InstitutionControllerTest {
                 .build()
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @Test
+    void deleteOnboardedInstitution_test() throws Exception {
+
+        String institutionId = UUID.randomUUID().toString();
+        String productId = "prod-io";
+
+        doNothing().when(onboardingService).deleteOnboardedInstitution(institutionId, productId);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/institutions/{id}/products/{productId}", institutionId, productId);
+
+        ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder);
+
+        actualPerformResult
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andExpect(MockMvcResultMatchers.content().string(""));
     }
 
 }

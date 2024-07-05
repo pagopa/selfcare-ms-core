@@ -28,9 +28,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
@@ -713,5 +711,29 @@ class InstitutionConnectorImplTest {
 
         // Then
         assertFalse(exists);
+    }
+    @Test
+    public void testFindAndDeleteOnboarding() {
+
+        String institutionId = UUID.randomUUID().toString();
+        String productId = "prod-io";
+
+        OnboardingEntity mockOnboarding = new OnboardingEntity();
+        mockOnboarding.setProductId(productId);
+        mockOnboarding.setUpdatedAt(OffsetDateTime.now());
+        mockOnboarding.setStatus(RelationshipState.ACTIVE);
+
+        InstitutionEntity mockEntity = new InstitutionEntity();
+        mockEntity.setId(institutionId);
+        mockEntity.setOnboarding(Collections.singletonList(mockOnboarding));
+
+        when(institutionRepository.findAndModify(any(Query.class), any(Update.class),
+                any(FindAndModifyOptions.class), eq(InstitutionEntity.class)))
+                .thenReturn(mockEntity);
+
+        institutionConnectorImpl.findAndDeleteOnboarding(institutionId, productId);
+
+        verify(institutionRepository, times(1)).findAndModify(any(Query.class), any(Update.class), any(FindAndModifyOptions.class), eq(InstitutionEntity.class));
+        assertNotNull(mockEntity);
     }
 }

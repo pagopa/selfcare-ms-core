@@ -7,6 +7,7 @@ import it.pagopa.selfcare.mscore.connector.dao.model.inner.GeoTaxonomyEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.inner.OnboardingEntity;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionEntityMapper;
 import it.pagopa.selfcare.mscore.connector.dao.model.mapper.InstitutionMapperHelper;
+import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.constant.SearchMode;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -190,6 +191,25 @@ public class InstitutionConnectorImpl implements InstitutionConnector {
         FindAndModifyOptions findAndModifyOptions = FindAndModifyOptions.options().upsert(false).returnNew(false);
         repository.findAndModify(query, update, findAndModifyOptions, InstitutionEntity.class);
     }
+
+    @Override
+    public void findAndDeleteOnboarding(String institutionId, String productId) {
+
+        Query query = Query.query(
+                Criteria.where(InstitutionEntity.Fields.id.name()).is(institutionId));
+
+        Update update = new Update();
+        update.set(InstitutionEntity.Fields.updatedAt.name(), OffsetDateTime.now());
+        update.set("onboarding.$[elem].status", RelationshipState.DELETED.name());
+        update.set("onboarding.$[elem].updatedAt", OffsetDateTime.now());
+
+        update.filterArray(Criteria.where("elem.productId").is(productId)
+                .and("elem.status").is(RelationshipState.ACTIVE.name()));
+
+        FindAndModifyOptions options = FindAndModifyOptions.options().upsert(false).returnNew(false);
+        InstitutionEntity updatedEntity = repository.findAndModify(query, update, options, InstitutionEntity.class);
+    }
+
 
     @Override
     public List<Institution> findByTaxCodeSubunitCodeAndOrigin(String taxCode, String subunitCode, String origin, String originId) {

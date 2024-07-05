@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.PecNotificationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.*;
 
 @Slf4j
 @Service
@@ -27,13 +28,17 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final OnboardingDao onboardingDao;
     private final InstitutionService institutionService;
     private final InstitutionConnector institutionConnector;
+    private final PecNotificationConnector pecNotificationConnector;
 
     public OnboardingServiceImpl(OnboardingDao onboardingDao,
                                  InstitutionService institutionService,
-                                 InstitutionConnector institutionConnector) {
+                                 InstitutionConnector institutionConnector,
+                                 PecNotificationConnector pecNotificationConnector) {
+
         this.onboardingDao = onboardingDao;
         this.institutionService = institutionService;
         this.institutionConnector = institutionConnector;
+        this.pecNotificationConnector = pecNotificationConnector;
     }
 
     @Override
@@ -99,6 +104,23 @@ public class OnboardingServiceImpl implements OnboardingService {
             throw new InvalidRequestException(ONBOARDING_OPERATION_ERROR.getMessage() + " " + e.getMessage(),
                     ONBOARDING_OPERATION_ERROR.getCode());
         }
+    }
+
+    @Override
+    public void deleteOnboardedInstitution(String institutionId, String productId) {
+
+        log.trace("persist logic delete Onboarding - start");
+        institutionConnector.findAndDeleteOnboarding(institutionId, productId);
+        log.trace("persist logic delete Onboarding - end");
+
+        log.trace("persist delete PecNotification - start");
+        boolean isDeleted = pecNotificationConnector.findAndDeletePecNotification(institutionId, productId);
+        if (!isDeleted) {
+            throw new InvalidRequestException(DELETE_NOTIFICATION_OPERATION_ERROR.getMessage(),
+                    ONBOARDING_OPERATION_ERROR.getCode());
+        }
+        log.trace("persist delete PecNotification - end");
+
     }
 
 }

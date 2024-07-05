@@ -1,7 +1,9 @@
 package it.pagopa.selfcare.mscore.core;
 
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
+import it.pagopa.selfcare.mscore.api.PecNotificationConnector;
 import it.pagopa.selfcare.mscore.api.ProductConnector;
+import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.mapper.TokenMapper;
 import it.pagopa.selfcare.mscore.core.mapper.TokenMapperImpl;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
@@ -16,12 +18,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 
+
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
+import static it.pagopa.selfcare.mscore.constant.GenericError.DELETE_NOTIFICATION_OPERATION_ERROR;
+import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -47,6 +55,9 @@ class OnboardingServiceImplTest {
 
     @Mock
     private UserNotificationService userNotificationService;
+
+    @Mock
+    private PecNotificationConnector pecNotificationConnector;
 
     @Spy
     private TokenMapper tokenMapper = new TokenMapperImpl();
@@ -238,6 +249,47 @@ class OnboardingServiceImplTest {
         onboarding.setPricingPlan("C3");
         onboarding.setProductId("42");
         return onboarding;
+    }
+
+    @Test
+    void deleteOnboardedInstitution_success() {
+
+        String institutionId = UUID.randomUUID().toString();
+        String productId = UUID.randomUUID().toString();
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId(productId);
+        onboarding.setStatus(RelationshipState.DELETED);
+
+        when(pecNotificationConnector.findAndDeletePecNotification(institutionId, productId)).thenReturn(true);
+        
+        onboardingServiceImpl.deleteOnboardedInstitution(institutionId, productId);
+
+        verify(institutionConnector, times(1)).findAndDeleteOnboarding(institutionId, productId);
+        verify(pecNotificationConnector, times(1)).findAndDeletePecNotification(institutionId, productId);
+    }
+
+    @Test
+    void deleteOnboardedInstitution_deletePecNotificationFails() {
+
+        String institutionId = UUID.randomUUID().toString();
+        String productId = "prod-io";
+
+        Onboarding onboarding = new Onboarding();
+        onboarding.setProductId(productId);
+        onboarding.setStatus(RelationshipState.DELETED);
+        
+        when(pecNotificationConnector.findAndDeletePecNotification(institutionId, productId)).thenReturn(false);
+
+        InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
+            onboardingServiceImpl.deleteOnboardedInstitution(institutionId, productId);
+        });
+
+        assertEquals(DELETE_NOTIFICATION_OPERATION_ERROR.getMessage(), exception.getMessage());
+        assertEquals(ONBOARDING_OPERATION_ERROR.getCode(), exception.getCode());
+
+        verify(institutionConnector, times(1)).findAndDeleteOnboarding(institutionId, productId);
+        verify(pecNotificationConnector, times(1)).findAndDeletePecNotification(institutionId, productId);
     }
 }
 
