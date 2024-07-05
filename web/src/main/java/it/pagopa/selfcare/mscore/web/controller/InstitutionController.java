@@ -357,6 +357,7 @@ public class InstitutionController {
     @PostMapping(value = "/{id}/onboarding", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<InstitutionResponse> onboardingInstitution(@RequestBody @Valid InstitutionOnboardingRequest request,
                                                                      @PathVariable("id") String id) {
+
         CustomExceptionMessage.setCustomMessage(GenericError.ONBOARDING_OPERATION_ERROR);
         
         StringBuilder httpStatus = new StringBuilder();
