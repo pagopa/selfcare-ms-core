@@ -265,7 +265,7 @@ class OnboardingServiceImplTest {
         
         onboardingServiceImpl.deleteOnboardedInstitution(institutionId, productId);
 
-        verify(institutionConnector, times(1)).findAndRemoveOnboarding(institutionId, onboarding);
+        verify(institutionConnector, times(1)).findAndDeleteOnboarding(institutionId, productId);
         verify(pecNotificationConnector, times(1)).findAndDeletePecNotification(institutionId, productId);
     }
 
@@ -288,7 +288,7 @@ class OnboardingServiceImplTest {
         assertEquals(DELETE_NOTIFICATION_OPERATION_ERROR.getMessage(), exception.getMessage());
         assertEquals(ONBOARDING_OPERATION_ERROR.getCode(), exception.getCode());
 
-        verify(institutionConnector, times(1)).findAndRemoveOnboarding(institutionId, onboarding);
+        verify(institutionConnector, times(1)).findAndDeleteOnboarding(institutionId, productId);
         verify(pecNotificationConnector, times(1)).findAndDeletePecNotification(institutionId, productId);
     }
 }

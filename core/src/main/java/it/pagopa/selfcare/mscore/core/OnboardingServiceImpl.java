@@ -110,10 +110,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     public void deleteOnboardedInstitution(String institutionId, String productId) {
 
         log.trace("persist logic delete Onboarding - start");
-        Onboarding onboarding = new Onboarding();
-        onboarding.setStatus(RelationshipState.DELETED);
-        onboarding.setProductId(productId);
-        institutionConnector.findAndRemoveOnboarding(institutionId, onboarding);
+        institutionConnector.findAndDeleteOnboarding(institutionId, productId);
         log.trace("persist logic delete Onboarding - end");
 
         log.trace("persist delete PecNotification - start");

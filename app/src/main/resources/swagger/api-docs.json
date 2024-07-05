@@ -1871,11 +1871,11 @@
         } ]
       }
     },
-    "/institutions/{id}/{productId}" : {
+    "/institutions/{id}/products/{productId}" : {
       "delete" : {
         "tags" : [ "Institution" ],
-        "summary" : "The service delete the users changing the user status to 'DELETE' and remove from DB the PecNotification record by productId and institutionId",
-        "description" : "The service delete the users changing the user status to 'DELETE' and remove from DB the PecNotification record by productId and institutionId",
+        "summary" : "The service set DELETE status on onboarding association with the product and institutionId",
+        "description" : "The service set DELETE status on onboarding association with the product and institutionId",
         "operationId" : "deleteOnboardedInstitutionUsingDELETE",
         "parameters" : [ {
           "name" : "productId",

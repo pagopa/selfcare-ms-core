@@ -1381,7 +1381,7 @@ class InstitutionControllerTest {
 
         doNothing().when(onboardingService).deleteOnboardedInstitution(institutionId, productId);
 
-        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/institutions/{id}/{productId}", institutionId, productId);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.delete("/institutions/{id}/products/{productId}", institutionId, productId);
 
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(institutionController)
                 .build()
