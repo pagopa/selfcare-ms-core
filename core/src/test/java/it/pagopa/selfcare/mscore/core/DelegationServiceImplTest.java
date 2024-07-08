@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.commons.base.utils.InstitutionType;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
+import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
@@ -52,12 +53,14 @@ class DelegationServiceImplTest {
         dummyDelegationProdIo.setTo("to");
         dummyDelegationProdIo.setFrom("from");
         dummyDelegationProdIo.setProductId("prod-io");
+        dummyDelegationProdIo.setType(DelegationType.PT);
 
         dummyDelegationProdPagopa = new Delegation();
         dummyDelegationProdPagopa.setId("id");
         dummyDelegationProdPagopa.setProductId("prod-pagopa");
         dummyDelegationProdPagopa.setTo("taxCodeTo");
         dummyDelegationProdPagopa.setFrom("from");
+        dummyDelegationProdPagopa.setType(DelegationType.EA);
 
         dummyDelegationTaxCode = new Delegation();
         dummyDelegationTaxCode.setToTaxCode("taxCodeTo");
@@ -99,6 +102,35 @@ class DelegationServiceImplTest {
      * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
      */
     @Test
+    void testCreateDelegationEA() {
+        Institution institutionTo = new Institution();
+        institutionTo.setId("idTo");
+        institutionTo.setTaxCode("taxCodeTo");
+        institutionTo.setInstitutionType(InstitutionType.PA);
+        Institution institutionFrom = new Institution();
+        institutionTo.setId("idFrom");
+        institutionTo.setTaxCode("taxCodeFrom");
+        institutionTo.setInstitutionType(InstitutionType.PT);
+        when(delegationConnector.save(dummyDelegationProdPagopa)).thenAnswer(arg ->arg.getArguments()[0]);
+        when(institutionService.retrieveInstitutionById(dummyDelegationProdPagopa.getFrom())).thenReturn(institutionFrom);
+        when(institutionService.retrieveInstitutionById(dummyDelegationProdPagopa.getTo())).thenReturn(institutionTo);
+        doNothing().when(institutionService).updateInstitutionDelegation(any(),anyBoolean());
+        Delegation response = delegationServiceImpl.createDelegation(dummyDelegationProdPagopa);
+        verify(delegationConnector).save(dummyDelegationProdPagopa);
+        verifyNoInteractions(mailNotificationService);
+        assertNotNull(response);
+        assertNotNull(response.getId());
+        assertEquals(dummyDelegationProdPagopa.getId(), response.getId());
+        assertEquals(institutionTo.getTaxCode(), response.getToTaxCode());
+        assertEquals(institutionFrom.getTaxCode(), response.getFromTaxCode());
+        assertEquals(institutionTo.getInstitutionType(), response.getBrokerType());
+        assertEquals(institutionFrom.getInstitutionType(), response.getInstitutionType());
+    }
+
+    /**
+     * Method under test: {@link DelegationServiceImpl#createDelegation(Delegation)}
+     */
+    @Test
     void testCreateDelegationWithSendMailError() {
         Institution institution = new Institution();
         institution.setId("id");
@@ -106,7 +138,7 @@ class DelegationServiceImplTest {
         doThrow(new MsCoreException(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage(), SEND_MAIL_FOR_DELEGATION_ERROR.getCode()))
                 .when(mailNotificationService)
                 .sendMailForDelegation(any(), any(), any());
-        assertDoesNotThrow(() -> delegationServiceImpl.createDelegation(dummyDelegationProdPagopa));
+        assertDoesNotThrow(() -> delegationServiceImpl.createDelegation(dummyDelegationProdIo));
         verify(mailNotificationService).sendMailForDelegation(any(), any(), any());
     }
 
