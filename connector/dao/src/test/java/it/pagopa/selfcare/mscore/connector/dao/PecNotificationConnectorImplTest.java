@@ -84,7 +84,7 @@ class PecNotificationConnectorImplTest {
     @Test
     void insertPecNotification_success() {
         when(pecNotificationMapper.convertToPecNotificationEntity(pecNotification)).thenReturn(pecNotificationEntity);
-        when(repository.existsById(pecNotificationEntity.getId())).thenReturn(false);
+        when(repository.existsByInstitutionIdAndProductId(any(), any())).thenReturn(false);
 
         boolean result = pecNotificationConnector.insertPecNotification(pecNotification);
 
@@ -95,7 +95,7 @@ class PecNotificationConnectorImplTest {
     @Test
     void insertPecNotification_alreadyExists() {
         when(pecNotificationMapper.convertToPecNotificationEntity(pecNotification)).thenReturn(pecNotificationEntity);
-        when(repository.existsById(pecNotificationEntity.getId())).thenReturn(true);
+        when(repository.existsByInstitutionIdAndProductId(any(), any())).thenReturn(true);
 
         boolean result = pecNotificationConnector.insertPecNotification(pecNotification);
 

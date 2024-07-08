@@ -52,7 +52,7 @@ public class PecNotificationConnectorImpl implements PecNotificationConnector {
 
         PecNotificationEntity pecNotificationEntity = this.pecNotificationMapper.convertToPecNotificationEntity(pecNotification);
 
-        boolean exist = repository.existsById(pecNotificationEntity.getId());
+        boolean exist = repository.existsByInstitutionIdAndProductId(pecNotificationEntity.getInstitutionId(), pecNotificationEntity.getProductId());
 
         if (exist){
         	log.trace("Cannot insert the PecNotification: {}, as it already exists in the collection", pecNotification.toString());

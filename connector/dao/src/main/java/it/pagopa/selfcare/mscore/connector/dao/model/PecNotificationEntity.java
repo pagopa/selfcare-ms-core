@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.mscore.connector.dao.model;
 
-import it.pagopa.selfcare.mscore.connector.dao.model.inner.UserBindingEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
@@ -9,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Sharded;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +21,7 @@ public class PecNotificationEntity {
     private String institutionId;
     private String productId;
     private Integer moduleDayOfTheEpoch;
+    private String digitalAddress;
 
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
