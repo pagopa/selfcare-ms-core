@@ -16,6 +16,7 @@ public class PecNotification {
     private String institutionId;
     private String productId;
     private Integer moduleDayOfTheEpoch;
+    private String digitalAddress;
 
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

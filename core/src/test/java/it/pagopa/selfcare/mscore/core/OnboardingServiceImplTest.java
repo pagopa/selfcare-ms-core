@@ -31,8 +31,7 @@ import java.util.UUID;
 
 import static it.pagopa.selfcare.mscore.constant.GenericError.DELETE_NOTIFICATION_OPERATION_ERROR;
 import static it.pagopa.selfcare.mscore.constant.GenericError.ONBOARDING_OPERATION_ERROR;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {OnboardingServiceImpl.class})
@@ -222,6 +221,7 @@ class OnboardingServiceImplTest {
         Institution institution = new Institution();
         institution.setId("institutionId");
         institution.setOnboarding(List.of(onboarding));
+        institution.setDigitalAddress("test@junit.pagopa");
 
         Token token = new Token();
         token.setId(onboarding.getTokenId());
@@ -252,7 +252,7 @@ class OnboardingServiceImplTest {
         verify(pecNotificationConnector, times(1)). insertPecNotification(argCaptor.capture());
         assertEquals(productId, argCaptor.getValue().getProductId());
         assertEquals("institutionId", argCaptor.getValue().getInstitutionId());
-
+        assertEquals("test@junit.pagopa", argCaptor.getValue().getDigitalAddress());
     }
 
     private Onboarding dummyOnboarding() {

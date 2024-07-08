@@ -3,7 +3,6 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.InstitutionConnector;
 import it.pagopa.selfcare.mscore.api.PecNotificationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
-import it.pagopa.selfcare.mscore.constant.GenericError;
 import it.pagopa.selfcare.mscore.constant.RelationshipState;
 import it.pagopa.selfcare.mscore.core.util.UtilEnumList;
 import it.pagopa.selfcare.mscore.exception.InvalidRequestException;
@@ -80,7 +79,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
     }
 
-    public void insertPecNotification(String institutionId, String productId) {
+    public void insertPecNotification(String institutionId, String productId, String digitalAddress) {
 
         PecNotification pecNotification = new PecNotification();
         pecNotification.setId(UUID.randomUUID().toString());
@@ -88,6 +87,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         pecNotification.setProductId(productId);
         pecNotification.setInstitutionId(institutionId);
         pecNotification.setModuleDayOfTheEpoch(calculateModuleDayOfTheEpoch());
+        pecNotification.setDigitalAddress(digitalAddress);
 
         if (!pecNotificationConnector.insertPecNotification(pecNotification)){
             throw new InvalidRequestException(INVALID_INSERT_PEC_NOTIFICATION_ERROR.getMessage(), INVALID_INSERT_PEC_NOTIFICATION_ERROR.getCode());
@@ -107,7 +107,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             productId, Onboarding onboarding, StringBuilder httpStatus) {
 
         Institution institution = persistAndGetInstitution(institutionId, productId, onboarding, httpStatus);
-        this.insertPecNotification(institutionId, productId);
+        this.insertPecNotification(institutionId, productId, institution.getDigitalAddress());
         return institution;
     }
 
