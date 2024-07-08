@@ -248,6 +248,11 @@ class OnboardingServiceImplTest {
         assertEquals(actual.getCreatedAt().getDayOfYear(), LocalDate.now().getDayOfYear());
         assertEquals(HttpStatus.CREATED.value(), Integer.parseInt(statusCode.toString()));
 
+        ArgumentCaptor< PecNotification > argCaptor = ArgumentCaptor.forClass(PecNotification.class);
+        verify(pecNotificationConnector, times(1)). insertPecNotification(argCaptor.capture());
+        assertEquals(productId, argCaptor.getValue().getProductId());
+        assertEquals("institutionId", argCaptor.getValue().getInstitutionId());
+
     }
 
     private Onboarding dummyOnboarding() {
