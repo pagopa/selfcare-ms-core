@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.core;
 import it.pagopa.selfcare.mscore.api.DelegationConnector;
 import it.pagopa.selfcare.mscore.constant.CustomError;
 import it.pagopa.selfcare.mscore.constant.DelegationState;
+import it.pagopa.selfcare.mscore.constant.DelegationType;
 import it.pagopa.selfcare.mscore.constant.Order;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
@@ -45,10 +46,12 @@ public class DelegationServiceImpl implements DelegationService {
 
         Delegation savedDelegation = checkIfExistsAndSaveDelegation(delegation);
 
-        try {
-            notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
-        } catch (Exception e) {
-            log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
+        if(delegation.getType().equals(DelegationType.PT)) {
+            try {
+                notificationService.sendMailForDelegation(delegation.getInstitutionFromName(), delegation.getProductId(), delegation.getTo());
+            } catch (Exception e) {
+                log.error(SEND_MAIL_FOR_DELEGATION_ERROR.getMessage() + ":", e.getMessage(), e);
+            }
         }
         return savedDelegation;
     }
