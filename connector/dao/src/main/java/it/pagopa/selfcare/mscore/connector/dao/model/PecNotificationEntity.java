@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 public class PecNotificationEntity {
 
     @Id
-    private String id;
+    private Object id;
     private String institutionId;
     private String productId;
     private Integer moduleDayOfTheEpoch;
