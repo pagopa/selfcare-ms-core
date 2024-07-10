@@ -5,14 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
-import java.util.List;
+import org.bson.types.ObjectId;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PecNotification {
 
-    private Object id;
+    private ObjectId id;
     private String institutionId;
     private String productId;
     private Integer moduleDayOfTheEpoch;

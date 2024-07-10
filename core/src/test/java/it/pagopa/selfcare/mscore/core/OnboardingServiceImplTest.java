@@ -136,6 +136,7 @@ class OnboardingServiceImplTest {
 
         ReflectionTestUtils.setField(onboardingServiceImpl, "sendingFrequencyPecNotification", 30);
         ReflectionTestUtils.setField(onboardingServiceImpl, "epochDatePecNotification", "2024-01-01");
+        ReflectionTestUtils.setField(onboardingServiceImpl, "disabledPecNotification", false);
 
         Onboarding onboarding = dummyOnboarding();
         onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
@@ -156,6 +157,36 @@ class OnboardingServiceImplTest {
         onboardingServiceImpl.persistOnboarding(institutionId,
                 productId, onb, statusCode);
         
+        assertEquals(HttpStatus.OK.value(), Integer.parseInt(statusCode.toString()));
+    }
+
+    @Test
+    void persistOnboarding_whenPecNotificationIsDisabled() {
+
+        ReflectionTestUtils.setField(onboardingServiceImpl, "sendingFrequencyPecNotification", 30);
+        ReflectionTestUtils.setField(onboardingServiceImpl, "epochDatePecNotification", "2024-01-01");
+        ReflectionTestUtils.setField(onboardingServiceImpl, "disabledPecNotification", true);
+
+        Onboarding onboarding = dummyOnboarding();
+        onboarding.setStatus(UtilEnumList.VALID_RELATIONSHIP_STATES.get(0));
+        Institution institution = new Institution();
+        institution.setId("institutionId");
+        institution.setOnboarding(List.of(onboarding, dummyOnboarding()));
+
+        when(institutionConnector.findById(institution.getId())).thenReturn(institution);
+
+        String institutionId = institution.getId();
+
+        String productId = onboarding.getProductId();
+        Onboarding onb = new Onboarding();
+
+        StringBuilder statusCode = new StringBuilder();
+
+        onboardingServiceImpl.persistOnboarding(institutionId,
+                productId, onb, statusCode);
+
+        verify(pecNotificationConnector, never()).insertPecNotification(any(PecNotification.class));
+
         assertEquals(HttpStatus.OK.value(), Integer.parseInt(statusCode.toString()));
     }
 
@@ -201,6 +232,7 @@ class OnboardingServiceImplTest {
 
         ReflectionTestUtils.setField(onboardingServiceImpl, "sendingFrequencyPecNotification", 30);
         ReflectionTestUtils.setField(onboardingServiceImpl, "epochDatePecNotification", "2024-01-01");
+        ReflectionTestUtils.setField(onboardingServiceImpl, "disabledPecNotification", false);
 
         String pricingPlan = "pricingPlan";
         String productId = "productId";
