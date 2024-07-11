@@ -27,6 +27,6 @@ public class PecNotificationEntity {
     private String digitalAddress;
 
     private Instant createdAt;
-    private OffsetDateTime updatedAt;
+    private Instant updatedAt;
 
 }
