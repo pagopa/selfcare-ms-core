@@ -10,7 +10,7 @@ import java.util.UUID;
 @Mapper(componentModel = "spring", imports = UUID.class)
 public interface PecNotificationEntityMapper {
 
-    @Mapping(target = "id", defaultExpression = "java(UUID.randomUUID().toString())")
+    @Mapping(target = "id", defaultExpression = "java(org.bson.types.ObjectId.get())")
     PecNotificationEntity convertToPecNotificationEntity(PecNotification institution);
 
     PecNotification convertToPecNotification(PecNotificationEntity entity);

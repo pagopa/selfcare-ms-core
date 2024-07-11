@@ -3,10 +3,13 @@ package it.pagopa.selfcare.mscore.connector.dao.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
+import org.bson.codecs.pojo.annotations.BsonId;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Sharded;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 @Data
@@ -16,14 +19,14 @@ import java.time.OffsetDateTime;
 @FieldNameConstants(asEnum = true)
 public class PecNotificationEntity {
 
-    @Id
-    private Object id;
+    @BsonId
+    private ObjectId id;
     private String institutionId;
     private String productId;
     private Integer moduleDayOfTheEpoch;
     private String digitalAddress;
 
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 
 }

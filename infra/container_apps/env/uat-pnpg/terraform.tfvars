@@ -109,6 +109,10 @@ app_settings = [
   {
     name  = "MAIL_SENDER_ADDRESS"
     value = "noreply@areariservata.pagopa.it"
+  },
+  {
+    name = "PEC_NOTIFICATION_DISABLED"
+    value = "true"
   }
 ]
 
