@@ -126,7 +126,7 @@ app_settings = [
   },
   {
     name = "PEC_NOTIFICATION_DISABLED"
-    value = "true"
+    value = "false"
   }
 ]
 
