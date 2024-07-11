@@ -9,6 +9,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Sharded;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 @Data
@@ -25,7 +26,7 @@ public class PecNotificationEntity {
     private Integer moduleDayOfTheEpoch;
     private String digitalAddress;
 
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
     private OffsetDateTime updatedAt;
 
 }

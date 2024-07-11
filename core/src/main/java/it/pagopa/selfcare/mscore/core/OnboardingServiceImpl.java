@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
@@ -87,7 +88,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         PecNotification pecNotification = new PecNotification();
         pecNotification.setId(ObjectId.get());
-        pecNotification.setCreatedAt(OffsetDateTime.now());
+        pecNotification.setCreatedAt(Instant.now());
         pecNotification.setProductId(productId);
         pecNotification.setInstitutionId(institutionId);
         pecNotification.setModuleDayOfTheEpoch(calculateModuleDayOfTheEpoch());

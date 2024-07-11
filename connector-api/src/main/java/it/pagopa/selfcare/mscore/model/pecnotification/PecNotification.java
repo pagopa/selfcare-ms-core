@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import org.bson.types.ObjectId;
 
@@ -18,7 +19,7 @@ public class PecNotification {
     private Integer moduleDayOfTheEpoch;
     private String digitalAddress;
 
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
     private OffsetDateTime updatedAt;
 
 
