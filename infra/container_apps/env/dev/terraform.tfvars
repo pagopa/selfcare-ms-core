@@ -1,5 +1,7 @@
 env_short = "d"
 env       = "dev"
+suffix_increment = "-002"
+cae_name = "cae-002"
 
 tags = {
   CreatedBy   = "Terraform"

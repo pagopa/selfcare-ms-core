@@ -408,7 +408,10 @@ public class InstitutionController {
      * * Code: 200, Message: successful operation, DataType: InstitutionResponse
      * * Code: 404, Message: GeographicTaxonomies or Institution not found, DataType: Problem
      */
-    @Tags({@Tag(name = "external-v2"), @Tag(name = "Institution")})
+    @Tag(name = "external-v2")
+    @Tag(name = "internal-v1")
+    @Tag(name = "external-pnpg")
+    @Tag(name = "Institution")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "${swagger.mscore.institution}", notes = "${swagger.mscore.institution}")
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -472,6 +475,7 @@ public class InstitutionController {
      * * Code: 404, Message: Institution or Token or UserBinding not found, DataType: Problem
      */
     @ResponseStatus(HttpStatus.OK)
+    @Tag(name = "internal-v1")
     @ApiOperation(value = "${swagger.mscore.institutions.updateCreatedAt}", notes = "${swagger.mscore.institutions.updateCreatedAt}")
     @PutMapping(value = "/{institutionId}/createdAt", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateCreatedAt(@ApiParam("${swagger.mscore.institutions.model.institutionId}")
