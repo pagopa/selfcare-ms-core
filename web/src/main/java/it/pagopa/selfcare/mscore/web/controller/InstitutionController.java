@@ -476,6 +476,7 @@ public class InstitutionController {
      */
     @ResponseStatus(HttpStatus.OK)
     @Tag(name = "internal-v1")
+    @Tag(name = "Institution")
     @ApiOperation(value = "${swagger.mscore.institutions.updateCreatedAt}", notes = "${swagger.mscore.institutions.updateCreatedAt}")
     @PutMapping(value = "/{institutionId}/createdAt", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updateCreatedAt(@ApiParam("${swagger.mscore.institutions.model.institutionId}")

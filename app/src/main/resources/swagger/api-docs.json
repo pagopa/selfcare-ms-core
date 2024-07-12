@@ -1548,7 +1548,7 @@
     },
     "/institutions/{id}" : {
       "get" : {
-        "tags" : [ "Institution", "external-v2" ],
+        "tags" : [ "Institution", "external-pnpg", "external-v2", "internal-v1" ],
         "summary" : "Gets the corresponding institution using internal institution id",
         "description" : "Gets the corresponding institution using internal institution id",
         "operationId" : "retrieveInstitutionByIdUsingGET",
@@ -1938,7 +1938,7 @@
     },
     "/institutions/{institutionId}/createdAt" : {
       "put" : {
-        "tags" : [ "Institution" ],
+        "tags" : [ "Institution", "internal-v1" ],
         "summary" : "The service updates the createdAt field for the institution-product pair",
         "description" : "The service updates the createdAt field for the institution-product pair",
         "operationId" : "updateCreatedAtUsingPUT",
