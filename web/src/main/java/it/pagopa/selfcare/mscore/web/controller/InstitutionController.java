@@ -301,6 +301,10 @@ public class InstitutionController {
     @ApiOperation(value = "${swagger.mscore.institution.create.from-infocamere-pdnd}", notes = "${swagger.mscore.institution.create.from-infocamere-pdnd}")
     @PostMapping(value = "/from-infocamere-pdnd", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<InstitutionResponse> createInstitutionFromInfocamerePdnd(@RequestBody @Valid InstitutionRequest institution) {
+        if(!StringUtils.hasText(institution.getTaxCode())) {
+            throw new ValidationException("taxCode field is required");
+        }
+
         CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
         Institution saved = institutionService.createInstitutionFromInfocamerePdnd(InstitutionMapperCustom.toInstitution(institution, null));
         return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));

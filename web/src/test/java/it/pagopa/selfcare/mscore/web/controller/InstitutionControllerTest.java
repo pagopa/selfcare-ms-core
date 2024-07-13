@@ -1393,7 +1393,7 @@ class InstitutionControllerTest {
     }
 
     /**
-     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
+     * Method under test: {@link InstitutionController#createInstitutionFromInfocamerePdnd(InstitutionRequest)}
      */
     @Test
     void testCreateInstitutionFromInfocamerePdnd() throws Exception {
@@ -1416,6 +1416,18 @@ class InstitutionControllerTest {
                 .perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
+    /**
+     * Method under test: {@link InstitutionController#createInstitutionFromInfocamerePdnd(InstitutionRequest)}
+     */
+    @Test
+    void testCreateInstitutionFromInfocamerePdndThrowErrorWhenTaxCodeIsEmpty() {
+        InstitutionRequest institutionRequest = new InstitutionRequest();
+        institutionRequest.setTaxCode("");
+
+        Assertions.assertThrows(ValidationException.class,
+                () -> institutionController.createInstitutionFromInfocamerePdnd(institutionRequest));
     }
 
 }
