@@ -52,11 +52,11 @@ class PartyRegistryProxyConnectorImplTest {
     @Spy
     private InfocamereMapper infocamereMapper = new InfocamereMapperImpl();
 
-    private final static AooResponse aooResponse;
-    private final static UoResponse uoResponse;
-    private final static PdndResponse pdndResponse;
-    private final static InsuranceCompanyResource asResponse;
-    private final static InfocamerePdndResponse infocamerePdndResponse;
+    private static final AooResponse aooResponse;
+    private static final UoResponse uoResponse;
+    private static final PdndResponse pdndResponse;
+    private static final InsuranceCompanyResource asResponse;
+    private static final InfocamerePdndResponse infocamerePdndResponse;
 
     static {
         aooResponse = new AooResponse();
