@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.mscore.connector.rest.client;
 
+import it.pagopa.selfcare.mscore.connector.rest.model.InfocamerePdndResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.model.institution.NationalRegistriesProfessionalAddress;
@@ -43,5 +44,9 @@ public interface PartyRegistryProxyRestClient extends InsuranceCompaniesApi {
     @GetMapping(value = "${rest-client.party-registry-proxy.sa.getByTaxId.path}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
     PdndResponse getSaByTaxId(@PathVariable(value = "taxId") String taxId);
+
+    @GetMapping(value = "${rest-client.party-registry-proxy.infocamere.pdnd.getInstitutionByTaxCode.path}", consumes = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    InfocamerePdndResponse getInfocamerePdndInstitutionByTaxCode(@PathVariable(value = "taxCode") String taxCode);
 
 }

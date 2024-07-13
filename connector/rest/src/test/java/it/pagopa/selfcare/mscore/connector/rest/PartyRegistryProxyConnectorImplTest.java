@@ -3,6 +3,7 @@ package it.pagopa.selfcare.mscore.connector.rest;
 import feign.FeignException;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
 import it.pagopa.selfcare.mscore.connector.rest.mapper.*;
+import it.pagopa.selfcare.mscore.connector.rest.model.InfocamerePdndResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.constant.Origin;
@@ -48,11 +49,14 @@ class PartyRegistryProxyConnectorImplTest {
     private SaMapper saMapper = new SaMapperImpl();
     @Spy
     private AsMapper asMapper = new AsMapperImpl();
+    @Spy
+    private InfocamereMapper infocamereMapper = new InfocamereMapperImpl();
 
     private final static AooResponse aooResponse;
     private final static UoResponse uoResponse;
     private final static PdndResponse pdndResponse;
     private final static InsuranceCompanyResource asResponse;
+    private final static InfocamerePdndResponse infocamerePdndResponse;
 
     static {
         aooResponse = new AooResponse();
@@ -66,6 +70,7 @@ class PartyRegistryProxyConnectorImplTest {
         uoResponse.setOrigin(Origin.IPA);
         pdndResponse = mockInstance(new PdndResponse());
         asResponse = mockInstance(new InsuranceCompanyResource());
+        infocamerePdndResponse = mockInstance(new InfocamerePdndResponse());
     }
 
     /**
@@ -586,6 +591,44 @@ class PartyRegistryProxyConnectorImplTest {
         when(partyRegistryProxyRestClient._searchByOriginIdUsingGET(ivassCode)).thenReturn(null);
 
         assertThrows(ResourceNotFoundException.class, () -> partyRegistryProxyConnectorImpl.getASFromIvass(ivassCode));
+    }
+
+    @Test
+    void getInfocamerePdndInstitution() {
+        //given
+        String taxCode = "taxCode";
+        when(partyRegistryProxyRestClient.getInfocamerePdndInstitutionByTaxCode(anyString())).thenReturn(infocamerePdndResponse);
+        //when
+        InfocamerePdndInstitution result = partyRegistryProxyConnectorImpl.getInfocamerePdndInstitution(taxCode);
+        //then
+        checkNotNullFields(result);
+        verify(partyRegistryProxyRestClient, times(1)).getInfocamerePdndInstitutionByTaxCode(taxCode);
+    }
+
+    @Test
+    void getInfocamerePdndInstitutionNotFound() {
+        //given
+        String taxCode = "taxCode";
+        when(partyRegistryProxyRestClient.getInfocamerePdndInstitutionByTaxCode(anyString())).thenThrow(ResourceNotFoundException.class);
+
+        //when
+        Executable executable = () -> partyRegistryProxyConnectorImpl.getInfocamerePdndInstitution(taxCode);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        verify(partyRegistryProxyRestClient, times(1)).getInfocamerePdndInstitutionByTaxCode(taxCode);
+    }
+
+    @Test
+    void getInfocamerePdndInstitutionFeignException() {
+        //given
+        String taxCode = "taxCode";
+        when(partyRegistryProxyRestClient.getInfocamerePdndInstitutionByTaxCode(anyString())).thenThrow(FeignException.class);
+
+        //when
+        Executable executable = () -> partyRegistryProxyConnectorImpl.getInfocamerePdndInstitution(taxCode);
+        //then
+        assertThrows(MsCoreException.class, executable);
+        verify(partyRegistryProxyRestClient, times(1)).getInfocamerePdndInstitutionByTaxCode(taxCode);
     }
 }
 

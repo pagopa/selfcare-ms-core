@@ -5,10 +5,8 @@ import io.github.resilience4j.retry.annotation.Retry;
 import it.pagopa.selfcare.commons.base.logging.LogUtils;
 import it.pagopa.selfcare.mscore.api.PartyRegistryProxyConnector;
 import it.pagopa.selfcare.mscore.connector.rest.client.PartyRegistryProxyRestClient;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.AooMapper;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.AsMapper;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.SaMapper;
-import it.pagopa.selfcare.mscore.connector.rest.mapper.UoMapper;
+import it.pagopa.selfcare.mscore.connector.rest.mapper.*;
+import it.pagopa.selfcare.mscore.connector.rest.model.InfocamerePdndResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.geotaxonomy.GeographicTaxonomiesResponse;
 import it.pagopa.selfcare.mscore.connector.rest.model.registryproxy.*;
 import it.pagopa.selfcare.mscore.exception.MsCoreException;
@@ -38,13 +36,15 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
 
     private final SaMapper saMapper;
     private final AsMapper asMapper;
+    private final InfocamereMapper infocamereMapper;
 
-    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper, SaMapper saMapper, AsMapper asMapper) {
+    public PartyRegistryProxyConnectorImpl(PartyRegistryProxyRestClient restClient, AooMapper aooMapper, UoMapper uoMapper, SaMapper saMapper, AsMapper asMapper, InfocamereMapper infocamereMapper) {
         this.restClient = restClient;
         this.aooMapper = aooMapper;
         this.uoMapper = uoMapper;
         this.saMapper = saMapper;
         this.asMapper = asMapper;
+        this.infocamereMapper = infocamereMapper;
     }
 
     @Override
@@ -192,6 +192,22 @@ public class PartyRegistryProxyConnectorImpl implements PartyRegistryProxyConnec
                 return asMapper.toResource(result.getBody());
             }
             throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), ivassCode), CREATE_INSTITUTION_NOT_FOUND.getCode());
+        } catch (FeignException e) {
+            throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
+        }
+    }
+
+    @Override
+    public InfocamerePdndInstitution getInfocamerePdndInstitution(String taxCode) {
+        try {
+            if (taxCode.matches("\\w*")) {
+                log.debug("getInfocamerePdndInstitution = {}", taxCode);
+            }
+            Assert.hasText(taxCode, "taxCode is required");
+            InfocamerePdndResponse result = restClient.getInfocamerePdndInstitutionByTaxCode(taxCode);
+            return infocamereMapper.toInstitution(result);
+        } catch (ResourceNotFoundException e) {
+            throw new ResourceNotFoundException(String.format(CREATE_INSTITUTION_NOT_FOUND.getMessage(), taxCode), CREATE_INSTITUTION_NOT_FOUND.getCode());
         } catch (FeignException e) {
             throw new MsCoreException(e.getMessage(), String.valueOf(e.status()));
         }
