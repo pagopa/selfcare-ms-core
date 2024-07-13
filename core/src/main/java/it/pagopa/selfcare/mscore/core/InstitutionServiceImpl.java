@@ -143,6 +143,14 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
+    public Institution createInstitutionFromInfocamerePdnd(Institution institution) {
+        return createInstitutionStrategyFactory.createInstitutionStrategyInfocamerePdnd(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .build());
+    }
+
+    @Override
     public Institution createInstitutionFromAnac(Institution institution) {
         return createInstitutionStrategyFactory.createInstitutionStrategyAnac(institution)
                 .createInstitution(CreateInstitutionStrategyInput.builder()

@@ -1392,4 +1392,30 @@ class InstitutionControllerTest {
                 .andExpect(MockMvcResultMatchers.content().string(""));
     }
 
+    /**
+     * Method under test: {@link InstitutionController#createInstitution(InstitutionRequest)}
+     */
+    @Test
+    void testCreateInstitutionFromInfocamerePdnd() throws Exception {
+        when(institutionService.createInstitutionFromInfocamerePdnd(any())).thenReturn(new Institution());
+
+        InstitutionRequest institutionRequest = new InstitutionRequest();
+        institutionRequest.setAddress("42 Main St");
+        institutionRequest.setDescription("The characteristics of someone or something");
+        institutionRequest.setDigitalAddress("42 Main St");
+        institutionRequest.setInstitutionType(InstitutionType.SCP);
+        institutionRequest.setTaxCode("Tax Code");
+        institutionRequest.setZipCode("21654");
+        String content = (new ObjectMapper()).writeValueAsString(institutionRequest);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders
+                .post("/institutions/from-infocamere-pdnd")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
+        MockMvcBuilders.standaloneSetup(institutionController)
+                .build()
+                .perform(requestBuilder)
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.content().contentType("application/json"));
+    }
+
 }

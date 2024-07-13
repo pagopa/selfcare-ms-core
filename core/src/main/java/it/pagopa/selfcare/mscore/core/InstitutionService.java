@@ -39,6 +39,8 @@ public interface InstitutionService {
 
     Institution createInstitution(Institution institution);
 
+    Institution createInstitutionFromInfocamerePdnd(Institution institution);
+
     List<Onboarding> retrieveInstitutionProducts(Institution institution, List<RelationshipState> states);
 
     Institution retrieveInstitutionProduct(String externalId, String productId);

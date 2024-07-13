@@ -1098,5 +1098,12 @@ class InstitutionServiceImplTest {
 
     }
 
+    @Test
+    void testCreateInstitutionFromInfocamerePdnd() {
+        when(createInstitutionStrategyFactory.createInstitutionStrategyInfocamerePdnd(any())).thenReturn(createInstitutionStrategy);
+        when(createInstitutionStrategy.createInstitution(any())).thenReturn(new Institution());
+        Institution institution = institutionServiceImpl.createInstitutionFromInfocamerePdnd(new Institution());
+        assertNotNull(institution);
+    }
 }
 

@@ -30,6 +30,8 @@ public class TestUtils {
         return dummyInstitution(InstitutionType.PT);
     }
 
+    public static Institution dummyInstitutionScp() { return dummyInstitution(InstitutionType.SCP); }
+
     public static Institution dummyInstitutionPg() {
         return dummyInstitution(InstitutionType.PG);
     }

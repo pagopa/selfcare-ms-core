@@ -57,4 +57,10 @@ public class CreateInstitutionStrategyFactory {
         return strategy;
     }
 
+    public CreateInstitutionStrategy createInstitutionStrategyInfocamerePdnd(Institution institution) {
+        CreateInstitutionStrategyInfocamerePdnd strategy = new CreateInstitutionStrategyInfocamerePdnd(partyRegistryProxyConnector, institutionConnector);
+        strategy.setInstitution(institution);
+        return strategy;
+    }
+
 }

@@ -11,6 +11,7 @@ import it.pagopa.selfcare.mscore.core.strategy.factory.CreateInstitutionStrategy
 import it.pagopa.selfcare.mscore.core.strategy.input.CreateInstitutionStrategyInput;
 import it.pagopa.selfcare.mscore.core.util.InstitutionPaSubunitType;
 import it.pagopa.selfcare.mscore.core.util.TestUtils;
+import it.pagopa.selfcare.mscore.exception.MsCoreException;
 import it.pagopa.selfcare.mscore.exception.ResourceConflictException;
 import it.pagopa.selfcare.mscore.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.mscore.model.AreaOrganizzativaOmogenea;
@@ -20,9 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +58,7 @@ class CreateInstitutionStrategyTest {
     private static final AreaOrganizzativaOmogenea dummyAreaOrganizzativaOmogenea;
     private static final GeographicTaxonomies dummyGeotaxonomies;
     private static final InstitutionGeographicTaxonomies dummyInstitutionGeotaxonomies;
+    private static final InfocamerePdndInstitution dummyInfocamerePdndInstitution;
 
     static {
         dummyInstitutionProxyInfo = new InstitutionProxyInfo();
@@ -95,6 +99,15 @@ class CreateInstitutionStrategyTest {
         dummyInstitutionGeotaxonomies = new InstitutionGeographicTaxonomies();
         dummyInstitutionGeotaxonomies.setCode("code");
         dummyInstitutionGeotaxonomies.setDesc("desc");
+
+        dummyInfocamerePdndInstitution = new InfocamerePdndInstitution();
+        dummyInfocamerePdndInstitution.setBusinessName("businessName");
+        dummyInfocamerePdndInstitution.setAddress("address");
+        dummyInfocamerePdndInstitution.setCity("city");
+        dummyInfocamerePdndInstitution.setCounty("county");
+        dummyInfocamerePdndInstitution.setZipCode("zipCode");
+        dummyInfocamerePdndInstitution.setNRea("nRea");
+        dummyInfocamerePdndInstitution.setDigitalAddress("digitalAddress");
     }
 
     private UnitaOrganizzativa dummyUnitaOrganizzativa() {
@@ -638,6 +651,80 @@ class CreateInstitutionStrategyTest {
         assertThat(actual.getOriginId()).isEqualTo(institution.getTaxCode());
 
         verify(institutionConnector).save(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void shouldCreateInstitutionWithOriginInfocamereFromPdndWhenInstitutionExistsOnRegistry() {
+        Institution institution = TestUtils.dummyInstitutionScp();
+
+        when(institutionConnector.findByTaxCodeAndSubunitCode(institution.getTaxCode(), null))
+                .thenReturn(new ArrayList<>());
+
+        when(partyRegistryProxyConnector.getInfocamerePdndInstitution(any())).thenReturn(dummyInfocamerePdndInstitution);
+
+        when(institutionConnector.save(any())).thenAnswer(args -> args.getArguments()[0]);
+        //When
+        Institution actual = strategyFactory.createInstitutionStrategyInfocamerePdnd(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .build());
+
+        //Then
+        assertThat(actual.getDescription()).isEqualTo(dummyInfocamerePdndInstitution.getBusinessName());
+        assertThat(actual.getDigitalAddress()).isEqualTo(dummyInfocamerePdndInstitution.getDigitalAddress());
+        assertThat(actual.getAddress()).isEqualTo(dummyInfocamerePdndInstitution.getAddress());
+        assertThat(actual.getZipCode()).isEqualTo(dummyInfocamerePdndInstitution.getZipCode());
+        assertThat(actual.getTaxCode()).isEqualTo(institution.getTaxCode());
+        assertThat(actual.getSubunitCode()).isNull();
+        assertThat(actual.getSubunitType()).isNull();
+        assertThat(actual.getInstitutionType()).isEqualTo(InstitutionType.SCP);
+        assertThat(actual.getOrigin()).isEqualTo(Origin.INFOCAMERE.getValue());
+
+        verify(institutionConnector).save(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void createInstitutionWithOriginInfocamereFromPdndShouldFail_WhenInstitutionExistsInSelc() {
+
+        Institution institution = TestUtils.dummyInstitutionScp();
+
+        when(institutionConnector.findByTaxCodeAndSubunitCode(institution.getTaxCode(), null))
+                .thenReturn(List.of(institution));
+
+        //When
+        assertThrows(ResourceConflictException.class, () -> strategyFactory.createInstitutionStrategyInfocamerePdnd(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .build()));
+
+        verify(institutionConnector, Mockito.times(0)).save(any());
+    }
+
+    /**
+     * Method under test: {@link CreateInstitutionStrategy#createInstitution(CreateInstitutionStrategyInput)}
+     */
+    @Test
+    void createInstitutionWithOriginInfocamereFromPdndShouldFail_WhenSaveThrowsException() {
+        Institution institution = TestUtils.dummyInstitutionScp();
+
+        when(institutionConnector.findByTaxCodeAndSubunitCode(institution.getTaxCode(), null))
+                .thenReturn(new ArrayList<>());
+
+        when(partyRegistryProxyConnector.getInfocamerePdndInstitution(any())).thenReturn(dummyInfocamerePdndInstitution);
+
+        when(institutionConnector.save(any())).thenThrow(new RuntimeException("test"));
+        //When
+        assertThrows(MsCoreException.class, () -> strategyFactory.createInstitutionStrategyInfocamerePdnd(institution)
+                .createInstitution(CreateInstitutionStrategyInput.builder()
+                        .taxCode(institution.getTaxCode())
+                        .build()));
+
     }
 
 }

@@ -289,6 +289,24 @@ public class InstitutionController {
     }
 
     /**
+     * The function persist institution if exists on infocamere pdnd registry
+     *
+     * @param institution InstitutionRequest
+     * @return InstitutionResponse
+     * * Code: 200, Message: successful operation, DataType: InstitutionResponse
+     * * Code: 400, Message: Bad Request, DataType: Problem
+     * * Code: 409, Message: Institution conflict, DataType: Problem
+     */
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "${swagger.mscore.institution.create.from-infocamere-pdnd}", notes = "${swagger.mscore.institution.create.from-infocamere-pdnd}")
+    @PostMapping(value = "/from-infocamere-pdnd", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<InstitutionResponse> createInstitutionFromInfocamerePdnd(@RequestBody @Valid InstitutionRequest institution) {
+        CustomExceptionMessage.setCustomMessage(GenericError.CREATE_INSTITUTION_ERROR);
+        Institution saved = institutionService.createInstitutionFromInfocamerePdnd(InstitutionMapperCustom.toInstitution(institution, null));
+        return ResponseEntity.status(HttpStatus.CREATED).body(institutionResourceMapper.toInstitutionResponse(saved));
+    }
+
+    /**
      * The function return products related to institution
      *
      * @param institutionId String
