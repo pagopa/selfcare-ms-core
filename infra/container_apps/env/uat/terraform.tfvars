@@ -1,6 +1,6 @@
 env_short        = "u"
-suffix_increment = "-001"
-cae_name         = "cae-001"
+suffix_increment = "-002"
+cae_name         = "cae-002"
 
 tags = {
   CreatedBy   = "Terraform"
@@ -114,23 +114,23 @@ app_settings = [
     value = "noreply@areariservata.pagopa.it"
   },
   {
-    name = "PEC_NOTIFICATION_DISABLED"
+    name  = "PEC_NOTIFICATION_DISABLED"
     value = "false"
   }
 ]
 
 secrets_names = {
-  "STORAGE_APPLICATION_SECRET"                   = "contracts-storage-access-key"
-  "APPLICATIONINSIGHTS_CONNECTION_STRING"        = "appinsights-connection-string"
-  "MONGODB_CONNECTION_URI"                       = "mongodb-connection-string"
-  "BLOB_STORAGE_CONN_STRING"                     = "blob-storage-contract-connection-string"
-  "STORAGE_CREDENTIAL_SECRET"                    = "contracts-storage-access-key"
-  "SMTP_USR"                                     = "smtp-usr"
-  "SMTP_PSW"                                     = "smtp-psw"
-  "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL"     = "party-test-institution-email"
-  "USER_REGISTRY_API_KEY"                        = "user-registry-api-key"
-  "JWT_TOKEN_PUBLIC_KEY"                         = "jwt-public-key"
-  "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"       = "blob-storage-product-connection-string"
-  "AWS_SES_ACCESS_KEY_ID"                        = "aws-ses-access-key-id"
-  "AWS_SES_SECRET_ACCESS_KEY"                    = "aws-ses-secret-access-key"
+  "STORAGE_APPLICATION_SECRET"               = "contracts-storage-access-key"
+  "APPLICATIONINSIGHTS_CONNECTION_STRING"    = "appinsights-connection-string"
+  "MONGODB_CONNECTION_URI"                   = "mongodb-connection-string"
+  "BLOB_STORAGE_CONN_STRING"                 = "blob-storage-contract-connection-string"
+  "STORAGE_CREDENTIAL_SECRET"                = "contracts-storage-access-key"
+  "SMTP_USR"                                 = "smtp-usr"
+  "SMTP_PSW"                                 = "smtp-psw"
+  "ONBOARDING_INSTITUTION_ALTERNATIVE_EMAIL" = "party-test-institution-email"
+  "USER_REGISTRY_API_KEY"                    = "user-registry-api-key"
+  "JWT_TOKEN_PUBLIC_KEY"                     = "jwt-public-key"
+  "BLOB_STORAGE_PRODUCT_CONNECTION_STRING"   = "blob-storage-product-connection-string"
+  "AWS_SES_ACCESS_KEY_ID"                    = "aws-ses-access-key-id"
+  "AWS_SES_SECRET_ACCESS_KEY"                = "aws-ses-secret-access-key"
 }
